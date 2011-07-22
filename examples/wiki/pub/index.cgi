@@ -1,0 +1,1 @@
+"/wiki/FrontPage.wiki" | redirect

@@ -1,0 +1,120 @@
+module theme; // -*- coding: utf-8 -*-
+
+type themaName = deferred string;
+type publClassName  = deferred string;
+type entryClassName = deferred string;
+type fileName  = deferred string;
+type email     = deferred string;
+type uri       = deferred string;
+
+type mediaName = deferred;
+//type entryClassName = deferred;
+
+type XDef = @def {
+
+ * : { * : any?}(propNameFormat="name")?,
+
+}(propNameFormat="name");
+
+
+
+type ThemeMetaSummary = {
+
+  /** テーマ名 */
+  "name" : themaName,
+
+  /** UIで使うタイトル文字列 */
+  "title" : string, // 国際化必要
+
+  /** 短い説明 */
+  "description" : string?, // 国際化必要
+
+};
+
+type ThemeMeta = ThemeMetaSummary ++ {
+
+  /** このテーマを適用可能な出版物クラス */
+  "targetPublClasses" : [publClassName, publClassName*],
+
+  /** このテーマがサポートしている媒体 */
+  "targetMedias" : [mediaName, mediaName*],
+
+  /** 全体に共通のスタイルシート（ファイル名） */
+  @[default("common.css")]
+  "commonStylesheet" : fileName?,
+
+
+  /** 一般的な（デフォルトの）スタイルシート（ファイル名） */
+  @[default("generic.css")]
+  "genericStylesheet" : fileName?,
+
+  /** 一般的な（デフォルトの）テンプレート（ファイル名） */
+  "genericTemplate" : fileName?,
+
+
+  /** 固有のスタイルを持つエントリークラス */
+  "specificStyleEntryClasses" : [entryClassName*]?,
+
+  /** 固有のテンプレートを持つエントリークラス */
+  "specificTemplateEntryClasses" : [entryClassName*]?,
+
+};
+
+
+
+type ThemeDesc = ThemeMeta ++ {
+
+  /** テーマのバージョン */
+  "version" : string?,
+
+  /** テーマの作者 */
+  "author" : (string | [string, string*])?,
+
+  /** テーマの作者のメールアドレス */
+  "authorEMail" : (email | [email, email*])?,
+
+  /** テーマのホームページURI */
+  "homeUri" : (uri | [uri*])?,
+
+  /** テーマに関する文書のURI */
+  "documentUri" : (uri | [uri*])?,
+
+  /** ライスセンス記述のURI */
+  "licenseUri" : (uri | [uri*])?,
+  
+  /** ライセンスに関する主張 */
+  "rights" : string?,
+
+};
+
+
+
+/** 使用可能なテーマの一覧 
+ * themes/ のlsコマンド
+ */
+command list {"long" : false?} :: void -> [ThemeMetaSummary*];
+
+/*{{{
+/** 使用可能なテーマの一覧 long形式 
+ * より詳しい情報
+ */
+@[overload]
+command list {"long" : true} :: void -> [ThemeMeta*];
+
+/** テーマのメタ情報 
+ * 特定のテーマの情報
+ */
+command get-meta [themeName] :: void -> ThemaMeta | null;
+
+}}}*/
+
+/*==  適用可能性マトリクスへのアクセス */
+
+command target-publclasses [themeName] :: void -> [publClassName*];
+command applicable-themes [publClassName] :: void -> [themeName*];
+
+
+
+// End of Module
+
+

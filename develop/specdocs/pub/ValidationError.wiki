@@ -1,0 +1,149 @@
+Coding -*- coding: utf-8 -*-
+
+= 妥当性検証エラー報告データ
+
+この文書は、まだ**変更される可能性**がある。
+
+関連する文書：
+
+* [[XJSONValidate.wiki|XJSONValidate ]]
+
+== 概要
+
+[[XJSONValidate.wiki| XJSONの妥当性検証]]の「失敗情報」に基づき、検証エラーを報告するためのデータ構造を定義する。
+エラーの識別コードをタグとして使う方法と、
+識別コードをプロパティ値として使う方法の2種類のデータ構造を定義する。
+
+=== 基本的な定義
+
+{{{
+type XJSONPath = string(remark = "XJSONパス式");
+type TypeName = string(remark ="型名");
+type Tag = string(remark = "'@'から始まるタグ名");
+type scalar = (number | string | boolean | null);
+
+
+type Path = {
+ "path" : XJSONPath, // 当該ノードのXJSONパス
+ "index" : (string | integer(minimum = 0))?, // 配列またはオブジェクトのときはアクセスインデックス
+ * : any?
+};
+}}}
+
+Pathオブジェクトのindexプロパティは、
+当該ノードが配列ノードの項目なら番号、
+オブジェクトノードのプロパティならプロパティ名が入る。
+pathプロパティ値を解析すればindexの値を取り出せるが、
+テンプレート言語のように解析が困難なときでも、indexの値をそのまま利用することができる。
+
+=== タグを使ったデータ構造
+
+
+{{{
+type ValidationErrors = (
+   BAD_TYPE
+ | BAD_TAG
+ | MISSING_TAG
+ | VIOLATED_ATTR
+ | MISSING_ITEM
+ | UNEXPECTED_ITEM
+ | MISSING_PROPERTY
+ | UNEXPECTED_PROPERTY
+);
+
+
+type BAD_TYPE = @BAD_TYPE Path & {
+ "expectedType" : TypeName,
+ "actualType" : TypeName,
+ * : any?
+};
+
+type BAD_TAG = @BAD_TAG Path & {
+ "expectedTag" : Tag,
+ "actualTag" : Tag,
+ * : any?
+};
+
+type MISSING_TAG = @MISSING_TAG Path & {
+ "expectedTag" : Tag,
+ * : any?
+};
+
+
+type VIOLATED_ATTR = @BIOLATED_ATTR Path & {
+ "attrName" : string,
+ "attrValue" : scalar,
+ "attrError" : any?, // スキーマ属性固有のエラー情報を入れる、仕様は属性ごとに異なる
+ * : any?
+};
+
+type MISSING_ITEM = @MISSING_ITEM Path & {
+  "expectedType" : TypeName,
+  * : any?
+};
+
+type UNEXPECTED_ITEM = @UNEXPECTED_ITEM Path & {
+ "actualType" : TypeName,
+ * : any?
+};
+
+type MISSING_PROPERTY = @MISSING_PROPERTY Path & {
+ "expectedType" : TypeName,
+ * : any?
+};
+
+type UNEXPECTED_PROPERTY = @UNEXPECTED_PROPERTY Path & {
+ "actualType" : TypeName,
+ * : any?
+};
+}}}
+
+=== タグを使わないデータ構造
+
+{{{
+type Reason = (
+   "BAD_TYPE" 
+ | "BAD_TAG"
+ | "MISSING_TAG"
+ | "VIOLATED_ATTR"
+ | "MISSING_ITEM"
+ | "UNEXPECTED_ITEM"
+ | "MISSING_PROPERTY"
+ | "UNEXPECTED_PROPERTY"
+);
+
+type ValidationErrorObj = {
+ "reason" : Reason,
+ "path": XJSONPath,
+ "index" : (string | integer(minimum = 1))?,
+ "expected" : string(remark = "型名またはタグ名")?,
+ "actual" : string(remark = "型名またはタグ名")?,
+ "attrName" : string?,
+ "attrValue" : scalar?,
+ "attrError" : any?,
+ *: any?
+};
+}}}
+
+== スキーマ属性ごとのエラー情報
+
+**まだ書いてない TBD**
+
+|=スキーマ属性名 |=適用対象となる型 |= サポート |
+|minimum         |number |済|
+|maximum         |number |済|
+|minimumCanEqual |number |予定|
+|maximumCanEqual |number |予定|
+|maxDecimal      |number |予定|
+|divisibleBy     |number |予定|
+|minLength       |string |済|
+|maxLength       |string |済|
+|format          |string, number, binary|予定|
+|pattern         |string |しない|
+|minItems        |array  |済|
+|maxItems        |array  |済|
+|uniqueItems     |array  |予定|
+|minProperties   |object |済|
+|maxProperties   |object |済|
+
+

@@ -1,0 +1,290 @@
+= strg モジュール
+
+JSON ストレージの操作コマンドを提供する。
+
+== !setup 
+
+=== !schema 
+
+{{{
+module public;
+
+type struct1 =  {
+    "x": string,
+    "y": integer,
+    "z": boolean
+};
+
+type struct2 = {
+    "a": string | null,
+    "b": list<integer>,
+    "c": {
+        "d": integer,
+        "e": @tag integer
+    }
+};
+
+type foo = {
+    "x": string,
+    "y": list <{"z": string}>
+};
+}}}
+
+=== !script 
+
+{{{
+[
+strg:create-collection struct1,
+strg:create-collection struct2,
+]
+}}}
+
+=== !teardown
+
+{{{
+[
+strg:drop-collection struct1,
+strg:drop-collection struct2,
+]
+}}}
+
+
+== create-collection SCHEMA_NAME [TABLE_NAME]
+
+JSON ストレージのテーブルを作成する。テーブルとは JSON ストレージにおけるデータの集合の単位であり、テーブルに対しては必ず一つのスキーマが対応する。
+引数の SCHEMA_NAME でスキーマ名を指定し、 TABLE_NAME でテーブル名を指定する。
+TABLE_NAME が省略された場合、 SCHEMA_NAME がテーブル名にも使用される。
+このコマンドを実行すると、それまでのトランザクションが全てコミットされる。
+
+=== !exec 
+
+|=command|=params|=output|=備考|
+|strg:create-collection|foo|null|foo スキーマを持つ foo テーブル|
+|strg:create-collection|foo bar|null|foo スキーマを持つ bar テーブル|
+
+== drop-collection TABLE_NAME
+
+JSON ストレージのテーブルを削除する。テーブルを削除した場合、そこに保存されていたデータもすべて削除される。
+この操作は取り消しできない。
+
+=== !exec 
+
+|=command|=params|=output|=備考|
+|strg:drop-collection|foo|null|foo スキーマを持つ foo テーブル|
+|strg:drop-collection|bar|null|foo スキーマを持つ bar テーブル|
+
+== insert TABLE_NAME
+
+JSON データをテーブルに挿入する。この時の JSON データは JSON オブジェクトであり、テーブルに対応したスキーマに適合していなければならない。
+一度に挿入できるデータは JSON オブジェクト一つまでであり、複数のデータを挿入したい場合は each を使うこと。
+
+=== !exec 
+
+|=input|=command|=params|=output|=備考|
+|%struct1-1|strg:insert|struct1|@OK null||
+|%struct1-2|strg:insert|struct1|@OK null||
+|%struct1-3|strg:insert|struct1|@OK null||
+|%struct1-1|strg:insert|struct1|@NG null|重複した値は挿入できない|
+
+
+=== !postCond
+
+|=input|=command|=params|=output|
+|{"x": "foo"}|strg:select1|struct1|%struct1-1|
+|{"x": "bar"}|strg:select1|struct1|%struct1-2|
+|{"x": "buz"}|strg:select1|struct1|%struct1-3|
+
+== select TABLE_NAME [JSON_PATH]
+
+入力値をクエリとして扱い、 JSON ストレージより値を検索する。
+
+=== !exec 
+
+テストデータを挿入しておく。
+
+|=input|=command|=params|=output|
+|%struct1-1|strg:insert|struct1|@OK null|
+|%struct1-2|strg:insert|struct1|@OK null|
+|%struct1-3|strg:insert|struct1|@OK null|
+|%struct2-1|strg:insert|struct2|@OK null|
+|%struct2-2|strg:insert|struct2|@OK null|
+|%struct2-3|strg:insert|struct2|@OK null|
+
+
+以下のクエリが全て成功するかどうか確認する。
+
+|=input|=command|=params|=output|=備考|
+|{"z": true}|strg:select|struct1|[ %struct1-1 , %struct1-2 ]| z の値が true |
+|{"x": @_OR["foo", "buz"] }|strg:select|struct1|[ %struct1-1 , %struct1-3 ] | x の値が "foo" あるいは "buz" |
+|{"y": @_GT 1 }|strg:select|struct1|[ %struct1-2 , %struct1-3 ] | y の値が 1 よりも大きい |
+|{"y": @_GE 1 }|strg:select|struct1|[ %struct1-1 , %struct1-2 , %struct1-3 ] | y の値が 1 以上 |
+|{"y": @_LT 1 }|strg:select|struct1|[ ] | y の値が 1 未満 |
+|{"y": @_LE 1 }|strg:select|struct1|[ %struct1-1 ] | y の値が 1 以下 |
+|{"a": null}|strg:select|struct2| [ %struct2-2 ] | a の値が null|
+|{"b": @_CONTAINS 0}|strg:select|struct2| [ %struct2-1 ] | b が 0 を含む|
+|null|strg:select|struct2 "c"| [{"d": 10, "e": @tag 100}, {"d": 10, "e": @tag 0}, {"d": -1, "e": @tag 1}] |オブジェクトの一部を取得|
+|null|strg:select|struct2 "a" "c.d"| [["hoge", 10], [null, 10], ["fuga", -1]] |オブジェクトの一部を取得|
+
+== update TABLE_NAME
+
+JSON ストレージの更新。入力値は JSON オブジェクトのタプルであり、\
+第一要素で検索した結果を第二要素で更新する。
+
+=== !exec 
+
+更新対象のデータを投入しておく。
+
+|=input|=command|=params|=output|
+|%struct1-1|strg:insert|struct1|@OK null|
+|%struct1-2|strg:insert|struct1|@OK null|
+|%struct1-3|strg:insert|struct1|@OK null|
+
+投入したデータを更新する。一つの更新処理で複数件のデータを更新可能である。
+
+|=input|=command|=params|=output|
+|%up1  |strg:update|struct1|null|
+|%up2  |strg:update|struct1|null|
+
+=== !postCond
+
+|=input|=command|=params|=output|
+|{"x":"update"}|strg:select|struct1| [{"x": "update", "y": 1, "z": true} , {"x": "update", "y": 10, "z": true}]|
+|{"y": 0}|strg:select|struct1|[{"x": "buz", "y": 0, "z": false}]|
+
+== delete TABLE_NAME
+
+JSON ストレージより値を削除する。入力値をクエリとして扱い、一致したデータを削除する。
+
+=== !exec 
+
+削除対象のデータを投入する。
+
+|=input|=command|=params|=output|
+|%struct1-1|strg:insert|struct1|@OK null|
+|%struct1-2|strg:insert|struct1|@OK null|
+|%struct1-3|strg:insert|struct1|@OK null|
+
+投入したデータを削除する。
+
+|=input|=command|=params|=output|
+|{"x": "foo"}| strg:delete |struct1|null|
+|{"y": @_GT 1} | strg:delete | struct1|null|
+
+=== !postCond
+
+全てのデータが削除されていることを確認する。
+
+
+|=input|=command|=params|=output|
+|null|strg:select|struct1|[]|
+
+
+=== !name: list
+
+{{{
+[
+    each {pv schema} | list:sort,
+    ["struct1", "struct2"]
+] | eq | when {
+    Same => true,
+    Diff => false
+}
+}}}
+
+=== !name: struct1-1
+
+{{{
+{
+    "x": "foo",
+    "y": 1,
+    "z": true
+}
+}}}
+
+
+=== !name: struct1-2
+
+{{{
+{
+    "x": "bar",
+    "y": 10,
+    "z": true
+}
+}}}
+
+
+=== !name: struct1-3
+
+{{{
+{
+    "x": "buz",
+    "y": 100,
+    "z": false
+}
+}}}
+
+=== !name: up1
+
+{{{
+[
+    {
+        "z": true,
+    },
+    {
+        "x": "update"
+    }
+]
+}}}
+
+=== !name: up2
+
+{{{
+[
+    {
+        "y": 100
+    },
+    {
+        "y": 0
+    }
+]
+}}}
+
+=== !name: struct2-1
+
+{{{
+{
+    "a": "hoge",
+    "b": [0, 1, 2],
+    "c": {
+        "d": 10,
+        "e": @tag 100
+    }
+}
+}}}
+
+=== !name: struct2-2
+
+{{{
+{
+    "a": null,
+    "b": [],
+    "c": {
+        "d": 10,
+        "e": @tag 0
+    }
+}
+}}}
+
+=== !name: struct2-3
+
+{{{
+{
+    "a": "fuga",
+    "b": [1, 2, 3],
+    "c": {
+        "d": -1,
+        "e": @tag 1
+    }
+}
+}}}
+

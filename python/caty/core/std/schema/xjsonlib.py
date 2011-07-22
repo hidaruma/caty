@@ -1,0 +1,70 @@
+#coding: utf-8
+
+name = 'xjson'
+schema = u"""
+type AnyObject = {*:any};
+
+/**
+ * 引数で指定されたファイルを JSON データとして読み込み、値を返す。
+ * JSON でないデータの書き込まれたファイルに対しての動作は保証しない（通常はエラー）。
+ * --with-docオプションが指定された場合、ドキュメンテーション文字列を埋め込んだ形式で読み取る。
+ */
+command read {"with-doc": boolean?} [string] :: void -> any
+    reads [pub, data]
+    refers python:caty.core.std.command.xjsonlib.ReadJson;
+
+/**
+ * 引数で指定されたファイルに JSON データを書き込む。
+ * このコマンドで書き込んだデータはXJSONフォーマットとなる。
+ * json:readで読み出し可能な形式にしたい場合、--encode-jsonオプションを付けること。
+ */
+command write {"encode-json": boolean?} [string] :: any -> void
+    updates [data, pub]
+    refers python:caty.core.std.command.xjsonlib.WriteJson;
+
+/**
+ * 入力値文字列をパースして、JSONオブジェクトを出力する。
+ */
+command parse :: string -> any
+    reads env
+    refers python:caty.core.std.command.jsonlib.Parse;
+
+/**
+ * XJSON->JSONの変換
+ */
+command encode :: any -> any
+    refers python:caty.core.std.command.xjsonlib.Encode;
+
+/**
+ * XJSONパスを用いてXJSONオブジェクトの項目を取り出す。
+ */
+command select {@[default(false)] "strict": boolean?} [string pathexp] :: any -> [any*]
+    refers python:caty.core.std.command.xjsonlib.Select;
+
+command to-xml :: any -> string
+    refers python:caty.core.std.command.xjsonlib.ToXML;
+
+type pathExpr = deferred string; // format="xjson-simple-path"
+
+/** パス式により、データの当該成分を抜き出す */
+command get
+{
+    /** 強制的にsafeパス式とみなす */
+    @[default(false)]
+    "safe" : boolean?,
+    "default": (integer|null|boolean|number|string)?,
+} [pathExpr path_expr] :: any -> (any | undefined)
+throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist ]
+refers python:caty.core.std.command.xjsonlib.Get;
+
+/** パス式により、データの当該成分に値を代入する */
+command put 
+{
+    /** ルーズ配列を許す */
+    @[default(false)]
+    "allow-loose" : boolean?
+} [pathExpr path_expr] :: [any data, any val] -> any
+throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist, ConsistencyViolation ]
+refers python:caty.core.std.command.xjsonlib.Put;
+
+"""

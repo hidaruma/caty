@@ -1,0 +1,18 @@
+<html><!-- -*- coding: utf-8 -*- -->
+<?caty-meta template="smarty"?>
+<?caty-script
+["a", "b", "c"]
+?>
+<html>
+<head>
+ <title>ABC</title>
+</head>
+<body>
+    <h1>ABC</h1>
+    <ol>{foreach from=$_CONTEXT item=name}
+      <li>{$name}</li>{/foreach}
+    </ol>
+  </body>
+</html>
+
+

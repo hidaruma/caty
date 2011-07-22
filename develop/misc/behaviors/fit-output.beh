@@ -1,0 +1,115 @@
+= FIT 出力条件が空の時
+
+== 概要
+
+出力条件 (output, outputCond) が何も書かれてないなら:
+
+# 「無条件＝制約なし」と解釈して、出力の値によらず成功とする。
+# ただし、actual欄を追加してそこに実際の出力値を挿入する。
+# exception欄がないか空白で、コマンドが例外を引き起こした場合は失敗とする。 
+
+出力に制約を課すのではなくて、実際の出力を調べたいときや事例として説明したいときに便利。
+
+== デフォルト値
+
+エクスペクテーション・テーブルにおいて、欄がない（存在しない）ことと、欄が空白であることは同値である。
+どちらも、デフォルト値が採用される。
+
+|= 列見出しキーワード |= デフォルト値 |
+| input               | null |
+| command             | なし（**commandは必須**） |
+| params              | 空（パラメータなし） |
+| output              | 値はなんでもよい（無制約） |
+| outputCond          | true （常に真＝無制約） |
+| exception           | Never（例外が起きない） |
+
+（**テーブルセル内でインラインマークアップが効いてない**）
+
+=== !exec
+
+* params欄
+
+|= input  |= command    |= output |
+| "Hello" |text:toupper | "HELLO" |
+
+|= input  |= command    |= params |= output |
+| "Hello" |text:toupper |         | "HELLO" |
+
+* input欄
+
+エクスペクテーションのinput欄が空なら、デフォルト値nullが補完される。
+
+|= command   |= output |
+|  true      | true    |
+
+|= input    |= command   |= output |
+| null      |  true      | true    |
+|           |  true      | true    |
+
+
+* outputCond欄
+
+何も書いてないcoutputCond欄は真とみなされる。
+真を、trueで明示的に書いてもよい。
+
+|= command |= outputCond |
+| true     |             |
+| true     | true        |
+
+
+|= command |
+| true     |
+
+* exception欄
+
+|= input  |= command    |= output |
+| "Hello" |text:toupper | "HELLO" |
+
+
+|= input  |= command    |= output |= exception |
+| "Hello" |text:toupper | "HELLO" |            |
+
+例外種別Neverを認める予定。Neverは例外が起きないことを示す。
+
+
+== output欄の詳細
+
+output欄には、必ずJSONリテラルを書くが、例外的に空欄はワイルドカードとみなす。
+空白＝ワイルドカードは任意のJSONデータとマッチする。この空白＝ワイルドカードは、値の非存在（ボトム）ともマッチする。
+この結果、空白output欄の評価は常に真となる。
+
+空白output欄、またはoutput欄の不在の副作用として、actual欄に実際の値が書き込まれる。
+
+=== !exec
+
+|= input  |= command     |
+| "Hello" | text:toupper |
+
+|= input  |= command     |= output |
+| "Hello" | text:toupper | "HELLO" |
+| "Hello" | text:tolower |         |
+
+
+ただし、出力値が存在しない（例外が起きた）ときは、
+書きこむべき値がないのだから、actual欄への書き込みは発生しない。
+
+|= input  |= command     |= output |= judge |
+| "Hello" | text:toupper | "HELLO" ||
+| null    | text:tolower |         |ignore |
+
+いずれにしても、output欄が存在しないか空欄の時、
+論理的な評価は、outputCond欄やexception欄により決まる。
+
+|= input  |= command     |= output |= exception |
+| "Hello" | text:toupper | "HELLO" |            |
+| null    | text:tolower |         | Exception  |
+
+== force オプション
+
+exception欄が指定されなかった場合、エクスペクテーション内でエラーは捕捉されず、
+振る舞い記述全体を失敗させる。この動作が好ましくないこともある。
+そのようなときは、--force オプションを指定する。
+
+--force オプションを指定すれば、
+exception欄がない（存在しない、または空白）のときも、
+エクスペクテーション内でエラーは捕捉し、テストを続行する。

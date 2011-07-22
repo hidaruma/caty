@@ -1,0 +1,108 @@
+= 妥当性検証-2 2 トランスレート基本
+
+== !exec; スキーマは下に記述
+
+|=command  |= input                 |= params |= output        |=exception |= 備考 |
+|translate |@form {"i": ["0"]}            | t02:i   | @OK {"i" : 0}  | |
+|translate |@form {"i": ["0"],"s":["s"] } | t02:is  | @OK {"i" : 0, "s":"s"}  | |
+|translate |@form {"i": ["0"]}            | t02:iOpt| @OK {"i" : 0}  | |
+|translate |@form {}                      | t02:iOpt| @OK {}  | | トップレベルで空なオブジェクトは認める |
+|translate |@form {"i":[5], "s":["hi"]}   | t02:isOpt| @OK {"i":5, "s":"hi"}  | |
+|translate |@form {"i":[5]}               | t02:isOpt| @OK {"i":5}  | |
+|translate |@form {"i":[5], "s":[]}       | t02:isOpt|              | Exception | 空列を許してもいいか？ |
+|translate |@form {"i":[5], "s":[""]}     | t02:isOpt| @OK {"i":5, "s":""}  |   | 空文字列を許すか？ 通常空文字は来ないけどね|
+
+== スキーマモジュール
+
+{{{
+// -*- coding: utf-8 -*-
+module t02;
+
+type i = {
+ "i" : integer
+};
+
+type is = {
+ "i" : integer,
+ "s" : string,
+};
+
+type iOpt = {
+ "i" : integer?
+};
+
+type isOpt = {
+ "i" : integer,
+ "s" : string?,
+};
+
+type xy = {
+ "x" : i,
+ "y" : isOpt?, // yはオプショナル、なくてもよい
+};
+
+type xz = {
+ "x" : i,
+ "z" : string?, // ｚはオプショナル、なくてもよい
+};
+
+type xl = {
+  "x" : iOpt,
+  "l" : [integer*], // lは整数配列
+};
+
+}}}
+
+== !exec; 入れ子のオブジェクト
+
+|=command  |= input                 |= params   |= output        |=exception |= 備考 |
+|translate |@form {"x.i": ["0"]}          | t02:xy    | @OK {"x":{"i" : 0}}|       | yはなくてもいいはず|
+|validate --pred|{"x":{"i" : 0}}    | t02:xy    | true   | |バリデーションしてみる |
+|validate --pred|{"i" : 0}          | t02:isOpt | true   | |バリデーションしてみる |
+|validate --pred|{"x" : 0}          | t02:xz    | false   | |参考のために |
+|validate --pred|{"i" : 0}          | t02:isOpt | true   | |参考のために、sは不要 |
+|translate |@form {"x.i": ["0"], "y.i":["2"]}| t02:xy| @OK {"x":{"i" : 0}, "y":{"i":2}}  | | |
+|translate |@form {"x.i": ["0"], "y.i":["2"], "y.s":["s"]}| t02:xy| @OK {"x":{"i" : 0}, "y":{"i":2, "s":"s"}}  | | |
+|translate |@form {"x.i": ["0"], "l":["1", "2"]}| t02:xl   | @OK {"x":{"i" : 0}, "l":[1, 2]}  | | |
+|translate |@form {"x.i": ["0"], "l":["1"]}| t02:xl   | @OK {"x":{"i":0}, "l":[1]}  | | |
+|translate |@form {"l":["1"]}              | t02:xl   | @OK {"x":{}, "l":[1]}  | | 微妙ではある、後述の「問題点」参照 |
+|translate |@form {"x.i":[], "l":["1"]}      | t02:xl   |   |Exception | @OK {"x":{}, "l":[1]} 空列を非存在とすればツジツマはあうが、これは送れない |
+
+
+== 代替のエクスペクテーション
+
+|translate |@form {"i":[5], "s":[]}       | t02:isOpt| @OK {"i":5}  |           | 空列を許す場合 |
+|translate |@form {"i":[5], "s":[""]}     | t02:isOpt| @OK {"i":5}  |           | 空文字列を非存在とするならこうなる|
+
+詳しくは「**問題点**」で。
+
+== 問題点
+
+トランスレートの場合、次が問題：
+
+* 空リスト（リストはプロパティ・マルチバリュー）、空文字をまったく認めないでエラーとするか？
+* それとも、空リスト／空文字列を非存在の表現と解釈するか
+
+空列（空リストと空文字列をまとめてこう呼ぶ）をまったく認めないと、
+「空オブジェクになる可能性があるプロパティ」を表現する手段がなくなる。
+
+{{{
+type MaybeEmptyObj  = {
+ "i":integer?
+};
+
+type NoneEmptyObj = {
+  "x" : MaybeEmptyObj
+};
+
+// {"x": {}} is valid!
+
+}}}
+
+対策としては、
+
+* トップレベル以外では、空リスト、空文字列、空オブジェクトの出現を許さない。
+項目／プロパティとして、これらの空データが出現する可能性がある型はフォームには使えない。
+
+
+----

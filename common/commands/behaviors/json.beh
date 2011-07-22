@@ -1,0 +1,113 @@
+= json モジュール
+
+JSON 処理のコマンドを提供する。
+
+== merge
+
+二つの JSON オブジェクトをマージする。
+--mode オプションではプロパティ名が衝突した場合の解消方法を指定する。
+デフォルトでは pre が選択される。
+
+* "fst": 第一要素のものを用いる
+* "snd": 第二要素のものを用いる
+* "error": エラーとして扱い、 null を返す
+
+=== !exec 
+
+|=input|=command|=params|=output|
+|%in1  |json:merge||%out1|
+|%in2  |json:merge|--mode=fst|%out2|
+|%in2  |json:merge||%out2|
+|%in2  |json:merge|--mode=snd|%out3|
+|%in2  |json:merge|--mode=error|null|
+
+=== !name:in1
+
+{{{
+[{
+    "a": 10,
+    "b": "xxx"
+},
+{
+    "c": true,
+    "d": 1.5
+}]
+}}}
+
+=== !name:out1
+
+{{{
+{
+    "a": 10,
+    "b": "xxx",
+    "c": true,
+    "d": 1.5
+}
+}}}
+
+=== !name:in2
+
+{{{
+[{
+    "a": 10,
+    "b": "xxx"
+},
+{
+    "b": 1.5,
+    "c": true,
+}]
+}}}
+
+=== !name:out2
+
+{{{
+{
+    "a": 10,
+    "b": "xxx",
+    "c": true,
+}
+}}}
+
+
+=== !name:out3
+
+{{{
+{
+    "a": 10,
+    "b": 1.5,
+    "c": true,
+}
+}}}
+
+== read, write
+
+JSON データをファイルに読み書きする。
+
+=== !exec 
+
+JSON データであれば何でも書き込み可能である。
+
+|=input|=command|=params|=output|=exception|=備考|
+| 1    |json:write|/case1.json|null|||
+| true    |json:write|/case2.json|null|||
+| "aaa"    |json:write|/case3.json|null|||
+| [1, 2.5, "xyz"]    |json:write|/case4.json|null|||
+| {"name": "foobar", "date": 1984} | json:write|/case5.json|null|||
+| @TAG "data" | json:write|/case6.json|null|Exception|XJSONは書き込めない|
+| @TAG "data" | xjson:write|/case6.json|null|||
+
+=== !postCond
+
+先に書き込んだデータの読み出しができる。
+
+
+|=command|=params|=output|=exception|=備考|
+|json:read|/case1.json|1||
+|json:read|/case2.json|true||
+|json:read|/case3.json|"aaa"||
+|json:read|/case4.json|  [1, 2.5, "xyz"]||
+|json:read|/case5.json| {"name": "foobar", "date": 1984}||
+|json:read|/case6.json| |Exception|XJSONは読み込めない||
+
+
+

@@ -1,0 +1,128 @@
+= 妥当性検証 列挙と集合
+
+このファイルだけでも処理に相当な時間がカカルなぁー。
+
+== 方針／問題点
+
+=== integer と number
+
+現在、{{{type one = (1 | 1.0);}}} はエラーとなる。1 == 1.0 とすれば、重複した列挙要素を認めないので**正しい動作**である。
+また、{{{type rank = (1 | 2 | 3 | 4 | 5);}}} に対して、1.0 はrank型であると判定している。
+
+JSON仕様を読んでも 1 == 1.0 はハッキリしないが、現状を追認する形で、次の原則に従う。
+
+* 小数部が0である実数は整数とみなす。したがって、**1.0, 1.00 などは整数である。**
+* 整数と実数の比較は、整数を実数とみなして、実数どおしの比較をする。
+
+=== mixed enum
+
+type foobar = (@foo integer | @bar 2); が許容、
+type foobar = (@bar 2 | @foo integer); がエラーとなっている。これは、ユニオンの可換性からいっておかしい。
+
+type foobar = (@foo 1 | @bar 2); も許容すべき -- タグが異なるので直和としてなんら問題がない定義。
+
+{{{type mixed = ("hello" | 123);}}} は、(@string "hello" | @integer 123) と同じなので、
+(@foo 1 | @bar 2) を許すなら、こちらも許容すべき。
+ちなみに、{{{type xinteger = (null | integer | "inf");}}} は許容されている。
+
+下にあるスキーマのコメントも参照のこと。
+
+=== 余談：Wikiパーズ
+
+preマークアップの解釈とレンダリングって、なんか変じゃね。
+インラインでもブロックでも使えるはずだよね、確か。
+
+
+== !setup
+
+=== !schema
+{{{
+// -*- coding: utf-8 -*-
+module enum;
+
+type col = ("r" | "g" | "b"); // color
+
+type rank = (1 | 2 | 3 | 4 | 5);
+
+// type one = (1 | 1.0); // 仕様が曖昧、現状はエラー、エラーで正しいと思う。
+
+type numonly = (321 | 123 | 1.0 ); // 数値だけの列挙型
+type mixed = ("hello" | 123); // mixed enum, NG, 仕様が曖昧だった、許容すべき
+
+type y = {
+ "c" : col
+};
+
+
+type x = {
+ "c" : col?,
+ "r" : rank
+};
+
+type foobar1 = (@foo integer | @bar integer); // OK
+
+type foobar2 = (@foo integer | @bar 2); // OK
+type foobar3 = (@bar 2 | @foo integer); // OK
+
+type foobar4 = (@foo 1 | @bar integer); // OK
+
+type foobar = (@foo 1 | @bar 2); // OK
+
+type card = ("jack" | 11 | "queen" | 12 | "king" | 13); // mixed enum, NG, 仕様が曖昧だった、許容すべき
+
+//type card = ("jack" | "queen" | "king" ); // string enum, OK
+// type card = ( 11 | 12 | 13); // number enum, OK
+
+}}}
+
+
+== !exec
+
+|= command       |= params    |= input    |= output |
+|validate --pred | enum:col    | "r"       | true    |
+|validate --pred | enum:col    | "g"       | true    |
+|validate --pred | enum:col    | "b"       | true    |
+|validate --pred | enum:col    | 0         | false   |
+|validate --pred | enum:col    | 255       | false   |
+|validate --pred | enum:col    | "red"     | false   |
+|validate --pred | enum:col    | "R"       | false   |
+|validate --pred | enum:col    | null      | false   |
+|validate --pred | enum:col    | ["g"]     | false   |
+
+
+|= command       |= params    |= input    |= output |= 備考 |
+|validate --pred | enum:rank   | -1        | false   |
+|validate --pred | enum:rank   | 0         | false   |
+|validate --pred | enum:rank   | 1         | true    |
+|validate --pred | enum:rank   | 2         | true    |
+|validate --pred | enum:rank   | 3         | true    |
+|validate --pred | enum:rank   | 4         | true    |
+|validate --pred | enum:rank   | 5         | true    |
+|validate --pred | enum:rank   | 6         | false   |
+|validate --pred | enum:rank   | 1.0       | true    | 1 == 1.0 とする！ |
+|validate --pred | enum:rank   | 1.2       | false   |
+|validate --pred | enum:rank   | "r"       | false   |
+|validate --pred | enum:rank   | "g"       | false   |
+|validate --pred | enum:rank   | "b"       | false   |
+|validate --pred | enum:rank   | 255       | false   |
+|validate --pred | enum:rank   | "red"     | false   |
+|validate --pred | enum:rank   | "R"       | false   |
+|validate --pred | enum:rank   | null      | false   |
+|validate --pred | enum:rank   | ["g"]     | false   |
+
+
+enum:foobar 現状 foobar の定義 (@foo 1 | @bar 2) がうまくできない。
+
+|= command       |= params    |= input    |= output |
+|validate --pred |enum:foobar  |  null     | false    |
+|validate --pred |enum:foobar  |  1        | false    |
+|validate --pred |enum:foobar  |  2        | false    |
+|validate --pred |enum:foobar  |  @foo 1   | true     |
+|validate --pred |enum:foobar  |  @foo 2   | false    |
+|validate --pred |enum:foobar  |  @bar 2   | true     |
+|validate --pred |enum:foobar  |  @bar 1   | false    |
+|validate --pred |enum:foobar  |  @baz 1   | false    |
+|validate --pred |enum:foobar  |  @baz 2   | false    |
+|validate --pred |enum:foobar  |  "hello"  | false    |
+
+

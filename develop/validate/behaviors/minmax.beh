@@ -1,0 +1,61 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= スキーマ属性 minimum, maximu =
+
+== !setup
+
+== !schema:/mm.casm
+
+{{{
+module mm;
+
+type positive = integer(minimum=1);
+type negative = integer(maximum=-1);
+type nonNegative = integer(minimum=0);
+type nonPositive = integer(maximum=0);
+
+}}}
+
+== !exec
+
+
+|= input|= command                   |= output |
+|  1    | validate --pred mm:positive| true    |
+|  2    | validate --pred mm:positive| true    |
+|  0    | validate --pred mm:positive| false   |
+|  -1   | validate --pred mm:positive| false   |
+|  -1   | validate --pred mm:negative| true    |
+|  -2   | validate --pred mm:negative| true    |
+|  0    | validate --pred mm:negative| false   |
+|  1    | validate --pred mm:negative| false   |
+|  1    | validate --pred mm:nonPositive| false   |
+|  2    | validate --pred mm:nonPositive| false   |
+|  0    | validate --pred mm:nonPositive| true    |
+|  -1   | validate --pred mm:nonPositive| true    |
+|  -1   | validate --pred mm:nonNegative| false   |
+|  -2   | validate --pred mm:nonNegative| false   |
+|  0    | validate --pred mm:nonNegative| true    |
+|  1    | validate --pred mm:nonNegative| true    |
+
+|= command |= output |= 備考 |
+| true     | false   |以下のメッセージ文言がおかしい |
+
+|= input|= command             |= output |= judge |
+|  1    | validate  mm:positive|     |ignore|
+|  2    | validate  mm:positive|     |ignore|
+|  0    | validate  mm:positive|    |ignore|
+|  -1   | validate  mm:positive|    |ignore|
+|  -1   | validate  mm:negative|     |ignore|
+|  -2   | validate  mm:negative|     |ignore|
+|  0    | validate  mm:negative|    |ignore|
+|  1    | validate  mm:negative|    |ignore|
+|  1    | validate  mm:nonPositive|    |ignore|
+|  2    | validate  mm:nonPositive|    |ignore|
+|  0    | validate  mm:nonPositive|     |ignore|
+|  -1   | validate  mm:nonPositive|     |ignore|
+|  -1   | validate  mm:nonNegative|    |ignore|
+|  -2   | validate  mm:nonNegative|    |ignore|
+|  0    | validate  mm:nonNegative|     |ignore|
+|  1    | validate  mm:nonNegative|     |ignore|
+
+

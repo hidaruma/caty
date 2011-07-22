@@ -1,0 +1,20 @@
+module shape; // -*- coding: utf-8 -*-
+
+type Point = @point {"x": integer, "y": integer}; 
+
+type PolyLine = @polyLine [Point*]; 
+
+// Point in XJSON: @point {"x":2, "y":1}
+// Point in XML  : <point x="2", y="1" />
+
+// PolyLine in XJSON: @polyLine [@point {"x":2, "y":1}, @point {"x"=-1, "y":0}]
+// PolyLine in XML  : <polyLine> <point x="2", y="1" /> <point x="-1", y="0" />  </polyLine>
+
+
+/** 書くのが楽な PolyLine */
+type PL = [[integer, integer]*];
+
+
+// End of Module
+
+

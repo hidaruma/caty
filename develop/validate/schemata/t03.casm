@@ -1,0 +1,25 @@
+// -*- coding: utf-8 -*-
+module t03;
+
+type col = ("r" | "g" | "b"); // color
+
+type rank = (1 | 2 | 3 | 4 | 5);
+
+
+type y = {
+ "c" : col
+};
+
+/* uniqItemsが実装されたら使う */
+
+type cols = [col, col*]; // (uniqueItems=true), nonempty set of colors
+// type cols = [col*]; // (uniqueItems=true), nonempty set of colors
+// type cols = [rank*]; // (uniqueItems=true), nonempty set of colors
+
+
+type x = {
+ "c" : col?,
+ "r" : rank
+};
+
+

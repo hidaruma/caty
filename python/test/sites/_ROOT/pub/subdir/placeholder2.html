@@ -1,0 +1,19 @@
+<?caty-meta template="smarty"?>
+<?caty-script
+{
+    "title": "inline",
+    "list": [
+        {"name": "hoge"},
+        {"name": "fuga"},
+        {"name": "fungaaaa!"},
+    ]
+}
+?>
+<html>
+<title>{$title}</title>
+<ul>
+{foreach from=$list item=i}
+<li>name={$i.name}</li>
+{/foreach}
+</ul>
+</html>

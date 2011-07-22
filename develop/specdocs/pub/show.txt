@@ -1,0 +1,4 @@
+<?caty-meta template="smarty" ?>
+------------
+{$_CONTEXT}
+------------

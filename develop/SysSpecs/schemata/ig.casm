@@ -1,0 +1,225 @@
+// -*- coding: utf-8 -*-
+
+/** 情報グラフ (Information Graph; IG)
+ */
+module ig;
+
+/* ============ */
+/*== データ型 ==*/
+/* ============ */
+
+/** ノード名として使える名前文字列 */
+type name = deferred string;
+
+/** ノードのパス文字列 */
+type path = deferred string;
+
+/** コマンドを参照する文字列 
+ * 現状で決まっている構文は、python:<Pythonクラス名> だけ
+ */
+type commandRefString = deferred string;
+
+/** 型名文字列 */
+type typeName = deferred string;
+
+
+/** コマンド実行のための構造体 
+ */
+type Exec = {
+
+ /** コマンドを参照する文字列  */
+ "command" : commandRefString,
+
+ /** コマンドに渡すオプションパラメータ */
+ @[default({})]
+ "opts" : {*: any?}?,
+
+ /** コマンドに渡す _ARGV[0] */
+ @[default("")]
+ "arg0" : string?,
+
+ /** コマンドに渡す _ARGV[1] 以降 */
+ @[default([])]
+ "args" : [any*]?,
+
+ /** コマンドの環境に追加（マージ）するオブジェクト */
+ @[default({})]
+ "additionalEnv" : object?,
+
+};
+
+/** ノードのメタデータを表すオブジェクト
+ */
+type MetaObj = {
+
+ /** ノードリスト内で自身を識別する名前 */
+ "name" : name, // 唯一の必須プロパティ
+
+ /** UI向けの人間可読文字列 */
+ "title" : string?,
+
+ /** 簡単な説明 */
+ "description" : string?,
+
+ /** ノード空間内でユニークな識別子（可能なら） */
+ "uid" : string?,
+
+ /** このノードの情報コンテンツ（info）のCatyデータ型 
+  * シンボリックリンクの場合はリンク先のデータ型
+  */
+ @[default("any")]
+ "infoDatatype" : typeName?,
+
+ /** このノードをキャッシュしてよいか */
+ @[default(true)]
+ "cacheable" : boolean?,
+
+ /** 次のノードへの関係リンクを（1つでも）持つか 
+  * このプロパティが指定されないとき：
+  * * 実際のデータを調べる。
+  * * シンボリックリンクのときは不明とみなす。
+  */
+ @[noDefault]
+ "hasNext" : boolean?,
+
+};
+
+type Meta = @Meta MetaObj;
+
+
+/** シンボリックリンクのオブジェクト
+ */
+type SymLink = @SymLink (MetaObj ++ {
+
+ /** リンクターゲットを指すパス名 */
+ "target" : path,
+
+});
+
+/** 一般的なノード
+ */
+type Node = @Node (MetaObj ++ {
+
+ "info" : any?,
+
+ /** 一般パスを特定構文のパスに変換するコマンド
+  * * 入力 -- 一般パス文字列
+  * * 出力 -- 特定パス文字列またはnull
+  */
+ "convertToSpecific" : Exec?,
+
+ /** 一般パスを特定構文のパスに変換するコマンド
+  * * 入力 -- 特定パス文字列
+  * * 出力 -- 一般パス文字列またはnull
+  */
+ "convertToGeneral" : Exec?,
+
+ @[with("next")]
+ "defaultRel" : string?,
+
+ @[with("defaultRel")]
+ "next" : {
+   * : (List | DynList)?
+  }?,
+});
+
+/** 動的ノード
+ */
+type DynNode = @DynNode (MetaObj ++ {
+
+ /** ノードの実体を得るために実行すべきコマンド */
+ "exec" : Exec,
+
+});
+
+/** ノードリスト
+ */
+type List = [
+ (Node|DynNode|SymLink)*
+];
+
+type DynList = @DynList Exec;
+
+
+/* ============ */
+/*== コマンド ==*/
+/* ============ */
+
+
+/** ルートノードを取得する */
+command root 
+:: void -> Node;
+
+
+
+/** 次のノードを取得する
+ * 次のノードが見つからなかった場合はnullを出力する
+ * 入力ノードにシンボリックリンクと動的ノードは許されない。
+ * シンボリックリンクと動的ノードは前もってresolveしておく。
+ */
+command next 
+{
+  /** 次リンクの関連名 
+   * これが省略された場合は defaultRel が使われる。
+   */
+  "rel":string?,
+
+  /** 解決をしない
+   * true の場合は、シンボリックリンクと動的ノードの解決をしない。
+   */
+  "raw": boolean?,
+} 
+[
+  /** 次ノードの参照名 */
+  name
+] 
+:: Node -> (Node|DnyNode|SymLink|null) ;
+
+
+/** シンボリックリンクと動的ノードを解決する
+ * Nodeには何もしない。
+ * 解決が失敗した場合はnullを出力する。
+ */
+command reslove
+:: (Node|DynNode|SymLink) -> (Node|null) ;
+
+
+
+/*{{{
+
+/** ノードのメタ情報を抜き出す
+ * 入力ノードにシンボリックリンクと動的ノードは許されない。
+ * シンボリックリンクと動的ノードは前もってresolveしておく。
+ */
+command meta 
+:: Node -> Meta
+refers;
+
+/*
+
+command specific gRelPath
+:: Node -> string
+
+command general sPath
+:: Node -> string
+
+
+
+command node {"raw": boolean?} [path] 
+:: void -> Node
+refers;
+
+
+
+command list {"raw": boolean?, "rel":string?} [path] 
+:: void -> List
+refers;
+
+*/
+
+
+
+// End of Module
+
+
+}}}*/

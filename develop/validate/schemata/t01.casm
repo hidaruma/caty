@@ -1,0 +1,14 @@
+module t01;
+
+type ta = @t any;
+type ti = @t integer;
+type ts = @t string;
+// type tti = @t @t integer; // why can not?
+type tti = @t ti;
+
+
+type tl = @t [any*]; // l = list
+type to = @t {*:any};
+
+type lt = [ta*];
+

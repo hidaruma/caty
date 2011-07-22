@@ -1,0 +1,27 @@
+Coding -*- coding: utf-8 -*-
+
+= judge欄の値とベー全体の真偽値
+
+judge欄の値は動詞である。
+デフォルト値はacceptとする。
+
+# accept -- 結果をそのまま採用する。省略時の値はこれ。
+# negate -- 真偽値を反転させる。論理NOTと同じ。
+# ignore -- 結果によらず真（成功）だと判断する。
+# abandon -- 結果によらず未定（判断が不可能、判断保留）だとみなす。
+
+最終的な真偽値は三値論理で、true（OK）, false（NG）, indefinite（長いのでindef, INDEF） のどれかになる。
+
+* エクスペクテーションがすべてtrueである -- 成功, OK
+* ひとつ以上のエクスペクテーションがfalseである -- 失敗, NG
+* falseはないが、ひとつ以上のエクスペクテーションがindefである -- 不定, INDEF
+
+複数のベーがある場合も同じで、三値論理のANDで判断する。
+
+|       |= true |= false |= indef |
+|= true | true  | false  | indef  |
+|= false| false | false  | false  |
+|= indef| indef | false  | indef  |
+
+自動テストの場合は、OKなら何もせず、INDEFなら警告を発し、NGならアテンションを上げる。
+

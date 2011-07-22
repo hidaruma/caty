@@ -1,0 +1,10 @@
+module public in casm;
+
+type NewWiki = {
+    "filename": string,
+};
+
+type WikiFile = {
+    "body": string,
+};
+

@@ -1,0 +1,21 @@
+{
+    /** mafs(最小抽象ファイルシステム)モジュール */
+    "mafsModule":
+        /** 標準mafs */ "caty.mafs.stdfs",
+    /** サーバーモジュール */
+        "serverModule": "caty.front.web.simple",
+    /** セッションの設定 */
+    "session": {
+        /** オンメモリセッション */
+        "type": "memory",
+        /** 有効期限(秒) */
+        "expire": 3600,
+    },
+    
+    /** Catyアプリケーションとして扱わないディレクトリ名のリスト */
+    "ignoreNames": [
+        "CVS", //** CVSは除外
+        "_darcs", //** darcsも除外
+    ],
+}
+

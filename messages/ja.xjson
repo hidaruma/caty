@@ -1,0 +1,257 @@
+/* coding: utf-8 */
+{
+    /*****************************
+     **** システムメッセージ *****
+     *****************************/
+    "Loading system data": "システム情報を読み込んでいます",
+
+    "Application name `$name` is reserved": "アプリケーション名`$name`は予約されています",
+
+    "Application name conflicted: $name": "アプリケーション名が衝突しています: $name",
+
+    "Initializing '$name'": "'$name'を初期化しています",
+
+    "Failed to reload '$name'": "'$name'のリロードに失敗しました",
+
+    "Application gourp '$name' does not exists, auto-generating": "アプリケーショングループ'$name'が存在しません。自動生成します",
+
+    "Root application does not exists, auto-generating": "ルートアプリケーションが存在しません。自動生成します",
+
+    "Loading '$name'": "'$name'を読み込んでいます",
+
+    "'$name' is set not to start": "'$name'は起動しないように設定されています",
+
+    "Running init script of '$name'": "'$name'の起動スクリプトを実行しています",
+
+    "Running $path of $name": "$nameの$pathを実行しています",
+
+    "Failed to load '$name': $error": "'$name'の起動に失敗しました: $error",
+
+    "An error occuered while running init script of '$name'": "'$name'の起動スクリプト実行中にエラーが発生しました",
+
+    "An error occuered while running rc-once.caty of '$name'": "'$name'のrc-once.caty実行中にエラーが発生しました",
+
+    "Application does not exists: '$name'": "存在しないアプリケーション: '$name'",
+
+    "$location does not exists in $app, auto-generating": "$appに$locationが存在しません。自動生成します",
+
+    "Schema for AppSpec is not specified: $app": "$appのアプリケーション固有情報のスキーマが指定されていません",
+
+    "Failed to validate the AppSpec: $app": "$appのアプリケーション固有情報のスキーマ検証に失敗しました",
+
+    "Schema: $path": "スキーマ: $path",
+
+    "Action: $path": "アクション: $path",
+
+    "Loading global commands and schemata": "グローバルコマンド及びスキーマを読み込んでいます",
+
+    "VCS module is not provided by default": "デフォルトではバージョン管理機能は提供されません",
+
+    "Unknown session type: $type": "未知のセッションタイプ: $type",
+
+    "JSON storage is not configured": "JSONストレージが未設定です",
+
+    "Collection does not found: collection name=$colname, defined at $denined, called by $callee": "コレクションが見つかりませんでした: コレクション名=$colname, 定義元=$defined, 呼び出し元=$callee",
+
+    "Unexpected error: $error": "予期せぬエラー: $error",
+
+    "Plain object type is deprecated. Use with @form tag instead": "プレーンなobject型をtranslateの入力に使うのは非推奨です。代わりに@formタグを付けてください。",
+
+    "Duplicated resource name: $name module: $module": "重複したリソース名: $name, モジュール: $module",
+    
+    "Duplicated action name: $name resource: $resource module: $module": "重複したアクション名: $name リソース: $resource モジュール: $module",
+
+    "Duplicated action invoker: $invoker resource=$resource module: $module": "重複したアクションインボーカー: $invoker リソース: $resource モジュール: $module",
+
+    "Unknown checker: $checker": "不明なチェッカー: $checker",
+
+    /*******************************
+     ******* 組み込み例外 *********
+     *******************************/
+    
+    "File does not exists: $path": "ファイルが存在しません: $path",
+
+    "Script does not exists: $path": "スクリプトファイルが存在しません: $path",
+
+    "Can not access to $path": "$pathにアクセスできません",
+
+    "Failed to read file: $path": "ファイルの読み込みに失敗しました: $path",
+
+    "Only GET access is allowed": "GET以外のアクセスは認められていません",
+
+    "Only GET or POST access is allowed": "GET/POST以外のアクセスは認められていません",
+
+    "Not matched to verb dispatch: path=$path, verb=$verb, method=$method": "verb dispatchにマッチしませんでした: path=$path, verb=$verb, method=$method",
+
+    "Not exptected tag: $expected!=$actual": "タグの値が期待値と異なります: $expected!=$actual",
+
+    "Read only faclity": "読み取り専用ファシリティ",
+
+    "Operation not allowed: object=$obj, method=$method, mode=$mode": "許可されていない操作: object=$obj, method=$method, mode=$mode",
+
+    "Can not overwrite environment variable": "環境変数の上書きは不可能です",
+
+    "$path is not file (is directory)": "$pathはファイルではなくディレクトリです",
+
+    "Unexpected method call: $method": "予期せぬメソッド呼び出し",
+
+    "Duplicated path name: $path": "パス名が重複しています: $path",
+    
+    "Failed to parse JSON: $path\n$error": "JSONのパースに失敗しました: $path\n$error",
+
+    "An error occuered while running script: $path": "$pathの実行中にエラーが発生しました",
+
+    "Invalid selection: $cause, $obj": "セレクションに誤りがあります: $cause, $obj",
+
+    /********************************
+     ******* CatyScript/XJSON *******
+     ********************************/
+    "Syntax Error: $failed": "構文エラー: $failed",
+
+    "Invalid transaction mode: $mode": "不正なトランザクションモード: $mode",
+
+    "No $$val or $$no-value that matches to $$tag": "$$tagと対になる$$valueあるいは$$no-valueがありません",
+
+    "This is tagonly object: $tag": "タグのみのオブジェクトです: $tag",
+
+    "$keyword is reserved tag": "$keywordは予約されたタグです",
+
+    "No explicit tag": "明示的なタグが指定されていません",
+
+    "Not a JSON value: $obj": "対応するJSON型がありません: $obj",
+
+    "Not a $type: $obj": "$typeではありません: $obj",
+
+    "Option does not suffice: $opt": "オプションが足りません: $opt",
+
+    "Argument does not suffice: $index": "引数が足りません: $index",
+
+    "$type can not appear at tail of this type": "$typeはこの型の末尾に出現不能です",
+
+    /********************************
+     **** スキーマコンパイラ関連 ****
+     ********************************/
+    "Type '$name' is already defined": "'$name'は既に定義された型です",
+
+    "Comand '$name' is already defined": "'$name'は既に定義されたコマンドです",
+
+    "Uneable to add command at runtime: $name": "実行時のコマンド追加は不可能です: $name",
+
+    "Module name 'builtin' can be used only to Caty builtin module": "'builtin'はCaty組み込みのモジュールに対してのみ使用できます",
+
+    "Module name $name and path name $path are not matched": "モジュール名$nameとパス名$pathがマッチしていません",
+
+    "Cross reference has detected: $mod1, $mod2": "相互参照を検出しました: $mod1, $mod2",
+
+    "Command $name can not use while running mode $mode": "$nameは動作モード$modeでは使用できません",
+
+    "Different format: $format1, $format2": "異なるフォーマット: $format1, $format2",
+
+    "Different profile: $profile1, $profile2": "異なるプロファイル: $profile, $profile2",
+
+    /********************************
+     **** スキーマランタイム関連 ****
+     ********************************/
+    "Type is not exclusive: $type1, $type2": "型が排他ではありません: $type1, $type2",
+
+    "Unsupported operand types for $op: $type1, $type2": "$type1と$type2の$op演算は定義されていません",
+
+    "Tagged value is passed: $tag": "タグ付きの値が渡されました: $tag",
+
+    "Failed to convert to union type": "ユニオン型への変換に失敗しました",
+
+    "Undefined schema property: $name": "未定義のプロパティ: $name",
+
+    "Undeclared type variable at $this: $name": "$nameは$thisで宣言されていない型変数です",
+
+    "Not a null": "値がnullではありません",
+
+    "Unmatched tag: $another, $this": "タグ`$another`が$thisと一致していません",
+
+    "Wildcard tag is not able to used to builtin types: $type": "組み込み型はワイルドカードタグに適用できません: $type",
+
+    "An error occuered while converting to $type": "$typeへの変換中にエラーが発生しました",
+
+    "null is not allowed": "nullは許可されていません",
+
+    "value should be $type": "値は$typeでなければなりません",
+
+    "value should be one of $type": "値は$typeのいずれかでなければなりません",
+
+    "value should be longer than $len": "データ長は$lenよりも長くなければなりません",
+    
+    "value should be shorter than $len": "データ長は$lenよりも短くなければなりません",
+
+    "minLength($min) is longer than maxLength($max)": "minLength($min)がmaxLength($max)よりも長く設定されています",
+
+    "minmum($min) is longer than maxLength($max)": "minmum($min)がmaxLength($max)よりも大きく設定されています",
+
+    "value should be greater than $val": "値は$valよりも大きくなければなりません",
+    
+    "value should be smaller than $val": "値は$val以下でなければなりません",
+
+    "This type can contain only $max elements or less": "この型は最大$maxまでの要素しか含められません",
+
+    "This type can not contain undefined": "この型はundefinedを含むことが出来ません",
+
+    "This type must contain $min elements or more": "この型は$min以上の要素を含めなければなりません",
+
+    "Pseudo tag is not exclusive: $tag1, $tag2": "議事タグが排他になっていません: $tag1, $tag2",
+
+    "Number of property should be smaller than $min": "プロパティの数は$min未満でなければなりません",
+
+    "Number of property should be greater than $max": "プロパティの数は$minより多くなければなりません",
+
+    "Unknown property: $name": "未知のプロパティ: $name",
+
+    "Property not exists: $name": "プロパティが足りません: $name",
+
+    "Not matched to pseudo tag $tag: $value": "議事タグの値$tagに合致していません: $value",
+
+    "Elements of Bag type is not exclusive: $types": "バッグ型の要素が排他になっていません: $types",
+
+    "Failed to validate all the type of this bag type: $value": "このバッグ型全ての型での検証に失敗しました: $value",
+
+    "The occurrence count of the element is too few: type=$type, count=$count": "要素の出現回数が少なすぎます: type=$type, count=$count",
+
+    "The occurrence count of the element is too mutch: type=$type, count=$count": "要素の出現回数が多すぎます: type=$type, count=$count",
+
+    "It is an extra element": "余分な要素です",
+
+    /***************************
+     ****** テンプレート *******
+     ***************************/
+    "Stack is empty": "スタックが空です",
+
+    "Undefained label: $label": "未定義のラベル: $label",
+
+    "Undefined $object: $value": "未定義の$object: $value",
+
+    "Undefined operation: $code": "未定義の操作: $code",
+    
+    "shebang syntax error": "shebang構文エラー",
+
+    /****************************
+     ********** CatyFIT *********
+     ****************************/
+    "Only one title is allowed: Line $line": "タイトルは一つしか設定できません: Line $line",
+
+    "CatyFIT must starts with title element": "CatyFITはタイトル要素から始めなければなりません",
+
+    "Macro '$name' is not defined": "マクロ $name は未定義です",
+
+    "Title line must described as header cell: Line $line": "タイトル行はヘッダセルとして記述してください: Line $line",
+
+    "judge column must be one of negate/ignore/accept/abandon or blank: $actual": "judge欄は negate/ignore/accept/abandon のいずれかあるいは空白でなければなりません: $actual",
+    
+    "$section section appears continuously": "$sectionが連続して出現しています",
+
+    "postCond section before body section": "bodyが出現する前にpostCondが出現しました",
+
+    "$type not belongs to setup section is occured": "setupセクションに属していない$typeが出現しました",
+
+    "Undefined macro: $macro": "未定義のマクロ: $macro",
+
+    "Unexpected errpor while compile $path: $error": "$pathのコンパイル中の予期せぬエラー: $error",
+
+}

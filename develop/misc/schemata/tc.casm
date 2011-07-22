@@ -1,0 +1,68 @@
+module tc; // -*- coding: utf-8 -*-
+
+/** 001 引数なし、オプションなし */
+command t001
+ :: void -> integer
+refers python:testcmd.T001;
+
+
+/** 002 int引数ありかも、オプションなし */
+command t002
+ [integer?] :: void -> integer
+refers python:testcmd.T002;
+ 
+
+/** 003 int引数あり、オプションなし */
+command t003
+ [integer] :: void -> integer
+refers python:testcmd.T003;
+
+/** 004 int, int? 引数、オプションなし */
+command t004
+ [integer, integer?] :: void -> integer
+refers python:testcmd.T004;
+
+/** 005 int, int?, int? 引数、オプションなし */
+command t005
+ [integer, integer?, integer?] :: void -> integer
+refers python:testcmd.T005;
+
+/** 006 int?, int? 引数、オプションなし */
+command t006
+ [integer?, integer?] :: void -> integer
+refers python:testcmd.T006;
+
+/** 007 int, int* 引数、オプションなし
+ * 引数の総和 
+ */
+command t007
+// [integer, integer*] :: void -> integer // これは現状ダメ
+ [integer, integer?] :: void -> integer
+refers python:testcmd.T007;
+
+/** 020 引数なし、intオプションoptありかも */
+command t020
+  {"opt": integer?} [] :: void -> integer
+refers python:testcmd.T020;
+
+
+/** 021 int引数あり、intオプションoptありかも # オプション優先 */
+command t021
+  {"opt": integer?} [integer] :: void -> integer
+refers python:testcmd.T021;
+
+/** 022 int引数ありかも、intオプションoptありかも # オプション優先 */
+command t022
+  {"opt": integer?} [integer?] :: void -> integer
+refers python:testcmd.T022;
+
+/** 023 int引数あり、intオプションoptあり 総和 */
+command t023
+  {"opt": integer} [integer] :: void -> integer
+refers python:testcmd.T023;
+
+/** 024 int引数ありかも、intオプションoptあり # 引数優先 */
+command t024
+  {"opt": integer} [integer?] :: void -> integer
+refers python:testcmd.T024;
+

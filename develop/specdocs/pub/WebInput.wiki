@@ -1,0 +1,53 @@
+Coding -*- coding: utf-8 -*-
+
+= Webからの入力
+
+== フォーム形式
+
+* Content-Type: application/x-www-form-urlencoded
+
+{{{
+type WebFormInput = {
+ // 空オブジェクトも認める
+ * : [FormValue, FormValue*]?
+}; 
+
+type FormValue = (FormScalar | FormObject); // 配列は当面禁止
+
+type FormScalar = string(minLength = 1);
+
+type FormObject = {
+ * : [FormValue, FormValue*]?
+}(minProperties = 1);
+
+}}}
+
+== JSON形式
+
+* Content-Type: application/json
+* Content-Type: application/json; profile=＜プロファイルID＞
+
+{{{
+type WebJsonInput = @json any;
+
+// RFCがまだ不安定
+type WebProfiledJsonInput = @profiledJson {
+ "profile" : string,
+ "body" : any
+};
+}}}
+
+
+== XML形式
+
+* Content-Type: text/xml
+* Content-Type: application/xml
+* Content-Type: */*+xml
+
+未定。当面は「その他」扱い。
+
+== ロー形式
+
+* Content-Type: その他
+
+そのまんまの生データ。

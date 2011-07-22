@@ -1,0 +1,109 @@
+
+
+= 妥当性検証 スキーマ属性（数値、文字列、配列）
+
+== 説明
+
+次のスキーマ属性に関する妥当性を確認。
+
+|= スキーマ属性 |=台となる型 |= エラー理由識別子 |
+| minimum       | number     | VIOLATE_MINIMUM |
+| maximum       | number     | VIOLATE_MAXIMUM |
+| minLength     | string     | VIOLATE_MIN_LENGTH |
+| maxLength     | string     | VIOLATE_MAX_LENGTH |
+| minItems      | array      | VIOLATE_MIN_ITEMS |
+| maxItems      | array      | VIOLATE_MAX_ITEMS |
+
+|=スキーマ属性名 |=適用対象となる型 |= サポート |
+|minimum         |number |済|
+|maximum         |number |済|
+|minimumCanEqual |number |予定|
+|maximumCanEqual |number |予定|
+|maxDecimal      |number |予定|
+|divisibleBy     |number |予定|
+|minLength       |string |済|
+|maxLength       |string |済|
+|format          |string, number, binary|予定|
+|pattern         |string |しない|
+|minItems        |array  |済|
+|maxItems        |array  |済|
+|uniqueItems     |array  |予定|
+|minProperties   |object |済|
+|maxProperties   |object |済|
+
+
+
+== !setup
+
+=== !schema
+
+{{{
+module t01;
+
+/* schema attributes:
+
+ minimum
+ maximum
+ minLength
+ maxLength 
+ minItems
+ maxItems
+
+*/
+
+type min1 = integer(minimum =1);
+type max10 = integer(maximum =10);
+type min1max10 = integer(minimum=1, maximum =10);
+
+type minL5 = string(minLength=5);
+type maxL8 = string(maxLength=8);
+type minL5maxL8 = string(minLength=5, maxLength=8);
+
+type minI2 = [any*](minItems=2);
+type maxI4 = [any*](maxItems=4);
+type minI2maxI4 = [any*](minItems=2, maxItems=4);
+
+type empA = [];
+type singA = [any];
+type aa = [any, any];
+type iis = [integer, integer, string];
+type ssStar = [string, string*];
+type isOpt = [integer?, string?];
+}}}
+
+== !exec;
+
+|= command        |= input  |= params      |= output  |= NG 理由 |
+| validate --pred | 0       |  integer     | true     | |
+| validate --pred | ""      |  integer     | false    |BAD_TYPE string, integer |
+| validate --pred | 0       |  t01:min1    | false    |VIOLATE_ATTR minimum =  1 |
+| validate --pred | 11      |  t01:max10   | false    |VIOLATE_ATTR maximum =  10 |
+| validate --pred | -1      |  t01:min1max10 | false  |VIOLATE_ATTR minimum =  1 |
+| validate --pred | 100     |  t01:min1max10 | false  |VIOLATE_ATTR maximum =  10 |
+
+|= command        |= input  |= params      |= output  |= NG 理由 |
+| validate --pred | "hello" |  string      | true     | |
+| validate --pred | [1, 2]  |  string      | false    |BAD_TYPE array, string |
+| validate --pred | "one"   |  t01:minL5 | false      |VIOLATE_ATTR minLegth = 5 |
+| validate --pred | "hello" |  t01:minL5 | true       | |
+| validate --pred | {}      |  t01:minL5 | false      |BAD_TYPE object, string |
+| validate --pred | "hello,"|  t01:maxL8 | true       | |
+| validate --pred | "hello, world"| t01:maxL8 | false |VIOLATE_ATTR maxlegth =  8 |
+| validate --pred | ""      |  t01:minL5maxL8 | false |VIOLATE_ATTR minLegth = 5 |
+| validate --pred | "longlongword"| t01:minL5maxL8 | false |VIOLATE_ATTR maxLegth = 8 |
+
+
+|= command        |= input  |= params      |= output  |= NG 理由 |
+| validate --pred | []      | array        | true     | |
+| validate --pred | [1,2, ""]| array       | true     | |
+| validate --pred | "a"     | t01:minI2    | false    |BAD_TYPE string, array |
+| validate --pred | [1,2]   | t01:minI2    | true     | |
+| validate --pred | [1]     | t01:minI2    | false    |VIOLATE_ATTR minItems =  2 |
+| validate --pred | []      | t01:minI2    | false    |VIOLATE_ATTR minItems =  2 |
+| validate --pred | [1,2,3] | t01:maxI4    | true     | |
+| validate --pred | [1,2,3,4,5] | t01:maxI4| false    |VIOLATE_ATTR maxItems =  4 |
+| validate --pred | ["a"]   | t01:minI2maxI4| false   |VIOLATE_ATTR minItems =  2 |
+| validate --pred | ["", ""]| t01:minI2maxI4| true    | |
+| validate --pred | [0,1,2,3,4]| t01:minI2maxI4| false|VIOLATE_ATTR maxItems =  4 |
+
+

@@ -1,0 +1,256 @@
+[
+    /*****************************
+     **** System Message *****
+     *****************************/
+    "Loading system data",
+
+    "Application name `$name` is reserved",
+
+    "Application name conflicted: $name",
+
+    "Initializing '$name'",
+
+    "Failed to reload '$name'",
+
+    "Application gourp '$name' does not exists, auto-generating",
+
+    "Root application does not exists, auto-generating",
+
+    "Loading '$name'",
+
+    "'$name' is set not to start",
+
+    "Running init script of '$name'",
+
+    "Running $path of $name",
+
+    "Failed to load '$name': $error",
+
+    "An error occuered while running init script of '$name'",
+
+    "Application does not exists: '$name'",
+
+    "$location does not exists in $app, auto-generating",
+
+    "Schema for AppSpec is not specified: $app",
+
+    "Failed to validate the AppSpec: $app",
+
+    "Reading schema: $path",
+
+    "Reading action: $path",
+
+    "Loading global commands and schemata",
+
+    "VCS module is not provided by default",
+
+    "Unknown session type: $type",
+
+    "JSON storage is not configured",
+
+    "Collection does not found: collection name=$colname, defined at $denined, called by $callee",
+
+    "Unexpected error: $error",
+
+    "Plain object type is deprecated. Use with @form tag instead",
+
+    "Duplicated resource name: $name module: $module",
+    
+    "Duplicated action name: $name resrouce=$resource module: $module",
+
+    "Duplicated action invoker: $invoker resource=$resource module: $module",
+
+    "Unknown checker: $checker",
+
+    /*******************************
+     ******* 組み込み例外 *********
+     *******************************/
+    
+    "File does not exists: $path",
+
+    "Script does not exists: $path",
+
+    "Can not access to $path",
+
+    "Failed to read file: $path",
+
+    "Only GET access is allowed",
+
+    "Only GET or POST access is allowed",
+
+    "Not matched to verb dispatch: path=$path, verb=$verb, method=$method",
+
+    "Not exptected tag: $expected!=$actual",
+
+    "Read only faclity",
+
+    "Operation not allowed: object=$obj, method=$method, mode=$mode",
+
+    "Can not overwrite environment variable",
+
+    "$path is not file (is directory)",
+
+    "Unexpected method call: $method",
+
+    "Duplicated path name: $path",
+    
+    "Failed to parse JSON: $path\n$error",
+
+    "Invalid selection: $cause, $obj",
+
+    /********************************
+     ******* CatyScript/XJSON *******
+     ********************************/
+    "Syntax Error: $failed",
+
+    "Invalid transaction mode: $mode",
+
+    "No $$val or $$no-value that matches to $$tag",
+
+    "This is tagonly object: $tag",
+
+    "$keyword is reserved tag",
+
+    "No explicit tag",
+
+    "Not a JSON value: $obj",
+
+    "Not a $type: $obj",
+
+    "Option does not suffice: $opt",
+
+    "Argument does not suffice: $index",
+
+
+    /********************************
+     **** Caty Schema Compiler   ****
+     ********************************/
+    "Type '$name' is already defined",
+
+    "Comand '$name' is already defined",
+
+    "Uneable to add command at runtime: $name",
+
+    "Module name 'builtin' can be used only to Caty builtin module",
+
+    "Module name $name and path name $path are not matched",
+
+    "Cross reference has detected: $mod1, $mod2",
+
+    "Command $name can not use while running mode $mode",
+
+    "Different format: $format1, $format2",
+
+    "Different profile: $profile1, $profile2",
+
+    /********************************
+     **** Caty Schema Runtime    ****
+     ********************************/
+    "Type is not exclusive: $type1, $type2",
+
+    "Unsupported operand types for $op: $type1, $type2",
+
+    "Tagged value is passed: $tag",
+
+    "Failed to convert to union type",
+
+    "Undefined schema property: $name",
+
+    "Undeclared type variable at $this: $name",
+
+    "Not a null",
+
+    "Unmatched tag: $another, $this",
+
+    "Wildcard tag is not able to used to builtin types: $type",
+
+    "An error occuered while converting to $type",
+
+    "null is not allowed",
+
+    "value should be $type",
+
+    "value should be one of $type",
+
+    "value should be longer than $len",
+    
+    "value should be shorter than $len",
+
+    "minLength($min) is longer than maxLength($max)",
+
+    "minmum($min) is longer than maxLength($max)",
+
+    "value should be greater than $val",
+    
+    "value should be smaller than $val",
+
+    "This type can contain only $max elements or less",
+
+    "This type can not contain undefined",
+    
+    "This type must contain $min elements or more",
+    
+    "$type can not appear at tail of this type",
+    
+    "Pseudo tag is not exclusive: $tag1, $tag2",
+
+    "Number of property should be smaller than $min",
+
+    "Number of property should be greater than $max",
+
+    "Unknown property: $name",
+
+    "Property not exists: $name",
+
+    "Not matched to pseudo tag $tag: $value",
+
+    "Elements of Bag type is not exclusive: $types",
+
+    "Failed to validate all the type of this bag type: $value",
+
+    "The occurrence count of the element is too few: type=$type, count=$count",
+
+    "The occurrence count of the element is too mutch: type=$type, count=$count",
+
+    "It is an extra element",
+
+    /***************************
+     ****** Template *******
+     ***************************/
+    "Stack is empty",
+
+    "Undefained label: $label",
+
+    "Undefined $object: $value",
+
+    "Undefined operation: $code",
+    
+    "shebang syntax error",
+
+    /****************************
+     ********** CatyFIT *********
+     ****************************/
+    "Only one title is allowed: Line $line",
+
+    "CatyFIT must starts with title element",
+
+    "Macro '$name' is not defined",
+
+    "Title line must described as header cell: Line $line",
+
+    "judge column must be one of negate/ignore/accept/abandon or blank: $actual",
+    
+    "$section section appears continuously",
+
+    "postCond section before body section",
+
+    "$type not belongs to setup section is occured",
+
+    "Undefined macro: $macro",
+
+    "Unexpected errpor while compile $path: $error",
+
+]
+
+
+

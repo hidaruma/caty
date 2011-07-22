@@ -1,0 +1,92 @@
+// -*- coding: utf-8 -*-
+
+/** システムで使用するデータ構造 */
+module sys; 
+
+type ScriptText = string(remark = "スクリプト");
+type MIMEMediaType = string(remark = "MIMEメディアタイプ");
+
+/** プレイスとディレクトリとの対応：UNDOCUMENTED */
+type Assignment = {
+    "commands": string?,
+    "include": string?,
+    "pub": string?,
+    "data": string?,
+    "schemata": string?,
+    "scripts": string?,
+    "behaviours": string?,
+};
+
+/** 動詞とアクションの対応 */
+type Assoc = {
+   /** 動詞（プロパティ名）にスクリプトを対応させる */
+   * : ScriptText?
+};
+
+/** ファイルタイプ記述 */
+type FileType = {
+    /** ファイルタイプの短い説明 */
+    "description" : string?,
+    /** ファイル内容のMIMEメディアタイプ */
+    "contentType": MIMEMediaType,
+    /* ファイル内容がテキストであるかどうか */
+    "isText": boolean,
+    /* 動詞と対応するアクションの集まり */
+    "assoc": Assoc?
+};
+
+/** ファイル名パターンとファイルタイプの対応マップ */
+type FileTypes = {
+   * : FileType?
+};
+
+/** アプリケーション・マニフェスト 
+ *
+ */
+type AppManifest = {
+     /* アプリケーションの短い説明 */
+     "description": string?,
+
+    /** 有効かどうか； 廃止予定 */
+    "disabled": boolean?,
+
+    /** 状態； disabledを置き換える予定 
+     * "status" : ("active" | "inactive" | "hidden"),
+     */
+
+    /**  */
+    "assign": Assignment?,
+    /**  */
+    "implLang": string?,
+    /**  */
+    "sessionSpace": string?,
+    /**  */
+    "storage": any?, 
+    /**  */
+    "filetypes": FileTypes?,
+};
+
+/* --- global --- */
+
+/**  */
+type SessionSpec = {
+   /**  */
+   "type" : ("memory"),
+   /**  */
+   "expire" : integer,
+};
+
+
+/** グローバルな設定 
+ *
+ */
+type Global = {
+    "mafs": string,
+    "serverModule": string, 
+    "session": SessionSpec?,
+    "secretKey": string,
+    "encoding": string(remark="EncodingName")?,
+    "hostUrl": string(remark="HostUrl"),
+};
+
+// End of Module

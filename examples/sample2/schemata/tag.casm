@@ -1,0 +1,46 @@
+module tag; // -*- coding: utf-8 -*-
+
+
+
+/** 明示的にタグ付けされたデータ */
+type exp-tagged = (
+ // 特殊型
+ @_undefined undefined
+ // スカラー型
+ | @_number number
+ | @_string string
+ | @_boolean boolean
+ | @_null null
+ | @_binary binary
+ // 複合型
+ | @_array array
+ | @_object object
+ | @tagged @*! any
+);
+
+/** 明示的なタグを付ける
+ * タグ無しのJSONデータには、暗黙タグにアンダスコアを付けた名前のタグを付ける。
+ * タグ付きのデータには、@taggedを前置する。
+ */
+command exp-tagging :: any -> exp-tagged {
+ when {
+  // 特殊型
+  undefined ==> @_undefined pass,
+  // スカラー型
+  number  ==> @_number pass,
+  string  ==> @_string pass,
+  boolean ==> @_boolean pass,
+  null    ==> @_null pass,
+  binary  ==> @_binary pass,
+  // 複合型
+  array   ==> @_array pass,
+  object  ==> @_object pass,
+  // 明示的なタグ
+  *       ==> @tagged pass,
+ }
+};
+
+
+// End of Module
+
+

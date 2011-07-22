@@ -1,0 +1,32 @@
+module public;
+
+type struct1 =  {
+    "x": string,
+    "y": integer,
+    "z": boolean
+};
+
+type struct2 =  {
+    "x": number,
+    "y": list<string>
+};
+
+type struct3 = {
+    "x": string | null,
+    "y": list<integer>,
+    "z": {
+        "a": integer,
+        "b": integer
+    }
+};
+
+type struct4 = {
+    "x": @foo string,
+    "y": integer
+};
+
+type struct5 = {
+    "x": string,
+    "y": list <{"z": string}>
+};
+

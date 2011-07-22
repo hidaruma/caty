@@ -1,0 +1,12 @@
+Coding -*- coding: utf-8 -*-
+
+= XMaton =
+
+**XMaton**は、トランスマトンと発音する。
+新しいXJSONバリデータの心臓部になるツリーオートマトンのこと。
+
+正規表現型をサポートするシステムは、XDuce (trans-duce)、XHaskell (trans-Haskell) のように、
+Xを付ける慣わしなので（ンナことはないが）、Automatonの頭のほうをXに置き換えてみました。
+
+対外的に「トランスマトン」を使うことはたぶん無いでしょう。C4Validator とかかな。
+

@@ -1,0 +1,23 @@
+
+
+= 妥当性検証 スキーマのインライン記述 (FIT機能の確認）
+
+== !setup;
+
+=== !schema;
+
+{{{
+module local; // integer + attributes
+
+type min1 = integer(minimum =1);
+type max10 = integer(maximum =10);
+}}}
+
+
+
+== !exec;
+
+|= command        |= input  |= params   |= output  |= 理由 |
+| validate --pred | 0       |  integer  | true     | |
+| validate --pred | ""      |  integer  | false    |BAD_TYPE, integer |
+| validate --pred | 0       |  local:min1  | false   | VIOLATE_MINIMUM, 1|

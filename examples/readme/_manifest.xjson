@@ -1,0 +1,12 @@
+{
+    "filetypes": {
+        ".txt": {
+            "contentType": "text/plain",
+            "isText": true,
+
+            "assoc": {
+                "/GET": "show-txt.caty %0",
+            }
+        }
+    },
+}

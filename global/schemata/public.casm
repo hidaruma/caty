@@ -1,0 +1,6 @@
+module public; // -*- coding: utf-8 -*-
+
+/** 画面をクリア */
+command cls :: void -> void
+    refers python:cls.Clear;
+

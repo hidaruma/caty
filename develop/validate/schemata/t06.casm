@@ -1,0 +1,18 @@
+module t06; // -*- coding: utf-8 -*-
+
+type Node = Leaf | Branch ;
+
+type Leaf = @leaf any | null; // nullは葉がないことを示す
+
+type Branch = @branch {
+  "left" : Node,
+  "right" : Node,
+};
+
+// null は空ツリーを表すとする（約束）
+
+type Tree = Node;
+
+// End of Module
+
+

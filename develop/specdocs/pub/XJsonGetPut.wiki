@@ -1,0 +1,167 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= XJSONにおけるgetとput
+
+xjson:get, xjson:putは、Web（HTTP）のGET, PUTの類似物である。
+URL／リクエストパスの代わりにシンプルパス式を使う。
+
+シンプルパス式の構文拡張（ブラケットの導入や$の省略）は議論しない。
+
+== XJSONシンプルパス式
+
+**シンプルパス式**とは、シンプルセレクター式のなかでワイルドカードとフィルター式を含まないもの。
+
+具体的には以下の演算子を使う。式内で使う特殊文字は '$', '.', '^', '*', '!', "\"", "'" 。
+クォーティングとエスケープすれば特殊文字も自由に使える。
+
+|= 意味              |= 演算子記号 |= 対応するコマンド |= 例外の原因 |
+| ルートデータ（全体）| $          | pass              |なし |
+| プロパティアクセス | .//Name//     | pv //Name//         |プロパテイィがない |
+| プロパティアクセス | .//XString//   | pv //String//       |プロパテイィがない |
+| インデックスアクセス | .//Index//  | item //Index//      |項目がない|
+| タグの取り除き     | ^*          | untagged          |なし|
+| 明示タグの取り除き | ^*!         | untagged --explicit|明示タグがない|
+| 指定したタグの取り除き | ^//Name// | untagged //Name//    |タグがない|
+| 指定したタグの取り除き | ^//XString// | untagged //String// |タグがない|
+| タグ               | ^~^           | tag              |なし|
+| 明示タグ           | ^~^!          | tag --explicit  |明示タグがない|
+
+* //Name// -- [[NameSyntax.wiki]]
+* //XString// -- JSONストリング、またはシングルクォート版の文字列（CatyBNFでも使っている）。
+* //String// -- JSONストリング
+* //Index// -- 0以上の整数
+
+pvとitemに対応する .//Name//, .//Index// では、「タグがあっても1回だけ無視する」仕様が採用される。
+
+
+* 参考： [[http://d.hatena.ne.jp/m-hiyama/20110104/1294128925|JSON向けのシンプルセレクター]]
+
+== unsafeパス式とsafeパス式
+
+パス式によるアクセスで次の例外が起きる可能性がある。
+
+# オブジェクトに、指定されたプロパティが存在しない。
+# 配列に、指定項目が存在しない（インデックスが範囲外）。
+# 配列に、指定項目が存在しない（値が#'undefined）。
+# 指定したタグが付いてない。（別なタグが付いている。）
+# 明示タグが付いてない。
+
+例外を起こす可能性があるパス式を**unsafeパス式**と呼ぶ。
+
+上記の例外的状況で、例外を起こさず#'undefinedを返す場合、それを**safeパス式**と呼ぶ。
+パス式をsafeにするには末尾に'?'を付ける。
+
+safeパス式の例：
+
+* $.3?
+* $.foo?
+* $^x.y?
+* $.a^~^!?
+
+== xjson:getコマンド
+
+注意：
+
+* コマンド名オーバーロードを使えばより精密に記述できる。
+* (any | undefined) は any? とまったく同義である。
+
+{{{
+module xjson;
+
+type pathExpr = deferred string; // format="xjson-simple-path"
+
+/** パス式により、データの当該成分を抜き出す */
+command get
+ {
+   /** 強制的にsafeパス式とみなす */
+   @[default(false)]
+   "safe" : boolean?
+ } [pathExpr path_expr] :: any -> (any | undefined)
+ throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist ];
+}}}
+
+
+* --safeオプションが付くと、パス式に'?'が付いてなくてもsafeとみなす。
+* 引数の文字列がパス式として不正であるときはBadArg例外
+
+== xjson:putコマンド
+
+xjson:putコマンドの挙動は、Web（HTTP）のPUT/DELETEの望ましい挙動を、XJSONデータに対して実現する。
+
+{{{
+module xjson;
+
+type pathExpr = deferred string; // format="xjson-simple-path"
+
+/** パス式により、データの当該成分に値を代入する */
+command put 
+ {
+   /** ルーズ配列を許す */
+   @[default(false)]
+   "allow-loose" : boolean?
+ } [pathExpr path_expr] :: [any data, any val] -> any
+ throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist, ConsistencyViolation ];
+}}}
+
+xjson:putコマンドにより、データの成分（配列項目、オブジェクトプロパティ）に対して次の操作ができる。
+
+# 既存成分の値の**更新**
+# 存在してない成分の**新規作成**
+# 既存成分の**削除**
+
+--allow-looseの値により挙動が変わるので、xjson:putの仕様は複雑である。
+
+=== 新規作成が可能な成分
+
+パス式で指定される成分が新規作成可能であるためには条件が必要となる。
+
+# その成分が既存であってはならない。既存成分は更新または削除の対象となる。
+# ルーズ配列を許さないときは、新規作成が可能な項目は、最後の項目の次の項目だけである。
+# ルーズ配列を許すときは、最後の項目より後の任意の項目が新規作成可能である。
+# 存在してないプロパティは新規作成が可能である。ただし、親となるオブジェクトは存在しなくてはならない。
+
+xjson:putでは、**中間の階層を自動的には作成しない。** 新規成分の親となる配列／オブジェクトを要求する。
+
+=== ルーズ配列を許さないときの挙動
+
+# 引数の文字列がパス式として不正であるか、safeパス式（putでは意味がない）のときはBadArg例外。
+# パス式が表す成分が存在するとき、入力dataの当該成分を入力val（ただしundefinedでない）により更新する。
+# ス式が表す成分が存在し、入力valがundefinedのときは、当該成分を削除（undefinedにより更新）する。
+  ただし、それによりルーズ配列ができるときはConsistencyViolation例外。
+# パス式が表す成分が、新規作成が可能な項目なら、新規作成する（配列への値のアペンド）。
+  パス式が表す成分が、新規作成可能の範囲外ならIndexOutOfRange例外。
+# パス式が表す成分が、新規作成が可能なプロパティなら、新規作成する（オブジェクトへのプロパティ追加）。
+# 存在するオブジェクトの存在しないプロパティに、#'undefinedを代入しても何も起こらない。
+# 当該のパス式をたどる中間でIndexOutOfRange, PropertyNotExist, Undefined, TagNotExistが発生することがある。
+
+=== ルーズ配列を許すときの挙動
+
+* 存在する配列の、最後の項目より後の項目は任意に新規作成できる。中間は#'undefinedで埋められる。
+  既存配列の長さが一挙に増える可能性がある。
+* 存在する配列の、最後の項目より後に#'undefinedを代入しても何も起こらない。
+* 配列の中間項目でも、自由に#'undefinedで更新できる。ルーズ配列ができる。
+
+=== タグへの代入
+
+[{}, "foo"] | xjson:put $.^~^  のような操作も許容される。
+$.^~^ は与えられたデータのタグを参照する式である。
+したがって、{} のタグ（"object"）を"foo"で更新するので、結果は、@foo {} となる。
+
+=== xjson:delete 
+
+#'undefinedで更新する方法以外に、より直接的なxjson:deleteコマンドを用意したほうがいいかもしれない。
+
+* (d | xjson:delete p) ≡ ([d, undefined] | xjson:put p)
+
+== 整合性の不変条件
+
+pが任意のunsafeパス式として、[d, v] | xjson:put p が成功した（例外が起きなかった）とき、次が成立する。
+
+* ([d, v] | xjson:put p | xjson:get p) ＝ v
+
+特に$に関しては次が成立する。
+
+* ([d, v] | xjson:put $ | xjson:get $) ＝ v
+
+つまり、xjson:put $ はdを無視してvを出力する。
+

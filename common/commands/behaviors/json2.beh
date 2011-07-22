@@ -1,0 +1,304 @@
+= json モジュール その2
+
+
+== fix-on-selection
+
+セレクションの値を決定して出力する。
+
+==== !name:in1
+
+{{{
+{
+ "color" : {
+  "$selection": "array",
+  "$current": 0,
+  "$values":["red", "green", "blue", "pink"]
+ }
+}
+}}}
+
+==== !name:in2
+
+{{{
+{
+ "color" : {
+  "$selection": "array",
+  "$current": 2,
+  "$values":["red", "green", "blue", "pink"]
+ }
+}
+}}}
+
+==== !name:in1o
+
+{{{
+{
+ "color" : {
+  "$selection": "object",
+  "$current": "r",
+  "$values":{ "r": "red", "g":"green", "b":"blue", "p":"pink"}
+ }
+}
+}}}
+
+==== !name:in2o
+
+{{{
+{
+ "color" : {
+  "$selection": "object",
+  "$current": "b",
+  "$values":{ "r": "red", "g":"green", "b":"blue", "p":"pink"}
+ }
+}
+}}}
+
+==== !name:out1
+
+{{{
+{
+ "color" : "red"
+}
+}}}
+
+
+==== !name:out2
+
+{{{
+{
+ "color" : "blue"
+}
+}}}
+
+=== !exec 
+
+|=input |=command             |= output |= exception |
+|%in1   |json:fix-on-selection|%out1    |            |
+|%in2   |json:fix-on-selection|%out2    |            |
+|%in1o  |json:fix-on-selection|%out1    |            |
+|%in2o  |json:fix-on-selection|%out2    |            |
+
+=== エラー
+
+==== !name:bad-in1
+
+$selectionの値が違う。
+
+{{{
+{
+ "color" : {
+  "$selection": "foo",
+  "$current": "b",
+  "$values":{ "r": "red", "g":"green", "b":"blue", "p":"pink"}
+ }
+}
+}}}
+
+==== !name:bad-in2
+
+$currentがない。
+
+{{{
+{
+ "color" : {
+  "$selection": "object",
+  "$values":{ "r": "red", "g":"green", "b":"blue", "p":"pink"}
+ }
+}
+}}}
+
+==== !name:bad-in3
+
+$valuesがない。
+
+{{{
+{
+ "color" : {
+  "$selection": "object",
+  "$current": "b"
+ }
+}
+}}}
+
+==== !name:bad-in4
+
+$currentのデータ型が違う。
+
+{{{
+{
+ "color" : {
+  "$selection": "object",
+  "$current": 1,
+  "$values":{ "r": "red", "g":"green", "b":"blue", "p":"pink"}
+ }
+}
+}}}
+
+
+==== !name:bad-in5
+
+$currentのデータ型が違う。
+
+{{{
+{
+ "color" : {
+  "$selection": "array",
+  "$current": "a",
+  "$values":[0, 1, 2]
+ }
+}
+}}}
+
+
+==== !name:bad-in6
+
+$valuesのデータ型が違う。
+
+{{{
+{
+ "color" : {
+  "$selection": "array",
+  "$current": 1,
+  "$values": { "r": "red", "g":"green", "b":"blue", "p":"pink"}
+ }
+}
+}}}
+
+==== !name:bad-in7
+
+$currentのプロパティが存在しない。
+
+{{{
+{
+ "color" : {
+  "$selection": "object",
+  "$current": "k",
+  "$values":{ "r": "red", "g":"green", "b":"blue", "p":"pink"}
+ }
+}
+}}}
+
+
+==== !name:bad-in8
+
+$currentのインデックスが存在しない。
+
+{{{
+{
+ "color" : {
+  "$selection": "array",
+  "$current": 10,
+  "$values":[0, 1, 2]
+ }
+}
+}}}
+
+==== !name:nest
+
+{{{
+{
+  "$selection": "array",
+  "$current": 0,
+  "$values":[
+    {
+      "color" : {
+      "$selection": "array",
+      "$current": 2,
+      "$values":["red", "green", "blue", "pink"]
+      }
+   },
+
+   {
+    "color" : {
+     "$selection": "object",
+     "$current": "r",
+     "$values":{ "r": "red", "g":"green", "b":"blue", "p":"pink"}
+     }
+   }
+ ]
+}
+}}}
+
+
+=== !exec
+
+
+|=input   |=command             |= output |= exception |
+|%bad-in1 |json:fix-on-selection|         | Exception  |
+|%bad-in2 |json:fix-on-selection|         | Exception  |
+|%bad-in3 |json:fix-on-selection|         | Exception  |
+|%bad-in4 |json:fix-on-selection|         | Exception  |
+|%bad-in5 |json:fix-on-selection|         | Exception  |
+|%bad-in6 |json:fix-on-selection|         | Exception  |
+|%bad-in7 |json:fix-on-selection|         | Exception  |
+|%bad-in8 |json:fix-on-selection|         | Exception  |
+
+|=input   |=command             |= output         |= exception |
+|%nest    |json:fix-on-selection|{"color":"blue"}| |
+
+|=input    |=command             |= output      |= exception |
+|%embed-1in|json:fix-on-selection|%embed-1out   | |
+
+|=input    |=command             |= output      |= exception |
+|%embed-2in|json:fix-on-selection|%embed-2out   | |
+
+
+<<ignore ** データ ** >>
+
+==== !name: embed-1in
+
+{{{
+
+{
+  "positionX" : 0,
+  "$embed" : {
+     "$selection":"array", 
+     "$current":1, 
+     "$values":[
+         {
+           "positionY" : 0,
+           "color" : "black"
+         },
+    
+         {
+           "positionY" : 20,
+           "color" : {"$selection":"array", "$current":0, "$values":["red", "green", "blue"]}
+         }
+     ]
+  }
+}
+
+}}}
+
+==== !name: embed-1out
+
+{{{
+{
+  "positionX" : 0,
+  "positionY" : 20,
+  "color" : "red"
+}
+}}}
+
+=== !name:embed-2in
+
+{{{
+{
+ "$embed" :{
+   "x":1,
+   "y":2
+ },
+ "z":3
+}
+}}}
+
+=== !name:embed-2out
+
+{{{
+{
+ "x":1,
+ "y":2,
+ "z":3
+}
+}}}
+

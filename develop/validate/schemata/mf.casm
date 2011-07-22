@@ -1,0 +1,134 @@
+// -*- coding: utf-8 -*-
+module mf; // microformats
+
+/* import from generic types */
+type Text      = gen:Text;
+type URIString = gen:URIString;
+type ISODate   = gen:ISODate;
+type Duration  = gen:Duration;
+type email     = gen:email;
+
+/* 参考URL：
+
+ - http://microformats.org/wiki/hcard-cheatsheet
+   hCard cheatsheet
+
+ - http://tools.ietf.org/html/rfc2426  
+   vCard MIME Directory Profile
+
+ - http://www.y-adagio.com/public/standards/tr_vcd_2426/tutr.htm
+   vCard電子名刺のMIMEディレクトリプロファィル 解説
+
+*/
+
+/* rfc2426より：
+
+ "dom" to indicate a domestic delivery address; 
+ "intl" to indicate an international delivery address; 
+ "postal" to indicate a postal delivery address; 
+ "parcel" to indicate a parcel delivery address;
+ "home" to indicate a delivery address for a residence; 
+ "work" to indicate delivery address for a place of work; 
+ "pref" to indicate the preferred delivery address when more than one address is specified. 
+
+*/
+
+type adr = {"adr" : adrValue};
+type adrValue = {
+     "type" :  [("work" | "home" | "pref" | "postal" | "dom" | "intl")*], // (uniqueItems=true)
+     "post-office-box" : Text?, // 私書箱
+     "street-address" : [Text*], // 丁目、番地
+     "extended-address" : Text?, // 拡張番地（不明）、マンション名とか？
+     "region" : Text?, // 都道府県（地域）
+     "locality" : Text?, // 市区群町村（地区）
+     "postal-code" : Text?, // 郵便番号
+     "country-name" : Text?
+};
+
+
+type geo = {"geo" : geoValue};
+type geoValue = {
+     "latitude" : number?,
+     "longitude" : number?
+};
+
+type n = {"n" : nValue};
+type nValue = {
+     "honorific-prefix" : [Text*], // 前置の敬称
+     "given-name" : [Text*],
+     "additional-name" : [Text*],
+     "family-name" : [Text*],
+     "honorific-suffix" : [Text*],  // 後置の敬称
+};
+
+
+type org = {"org":orgValue};
+type orgValue = {
+     "organization-name" : Text?,
+     "organization-unit" : [Text*],
+};
+
+type tel = { "tel" : telValue};
+type telValue = {
+     "type" :  [("home" | "work" | "pref" | "fax" | "cell" | "pager")*],// (uniqueItems=true)
+     "value" : Text?,
+};
+
+
+type hCard = {"vcard" : hCardValue};
+type hCardValue =  {
+   "adr" : [adrValue*],
+   "agent" : [Text*],
+   "bdaty" : ISODate?, 
+   "class" : Text?,
+   "category" : Text?,
+   "email" : [email*],
+   "fn" : Text,
+   "geo" : geoValue?,
+   "key" : [Text*],
+   "label" : [Text*],
+   "logo" : [Text*],
+   "mailer" : [Text*],
+   "n" : nValue,
+   "nickname" : [Text*],
+   "note" : [Text*],
+   "org" : [orgValue*],
+   "photo" : [Text*],
+   "rev" : ISODate?, // 通常使わない
+   "role" : [Text*],
+   "sort-string" : Text?,
+   "sound" : [Text*],
+   "tel": [telValue*],
+   "title" : [Text*],
+   "tz" : Text?,
+   "uid" : Text?,
+   "url" : [URIString*],
+};
+   
+
+type hCalendar = {"vevent" : veventValue};
+type veventValue = {
+     "category" : [Text*],
+     "class" : Text?,
+     "description" : Text?,
+     "dtend" : ISODate?,
+     "dtstart" : ISODate,
+     "duration" : Duration?,
+     "geo" : geoValue?,
+     "location" : Text?,
+     "status" : Text?,
+     "summary" : Text,
+     "uid" : Text?,
+     "url" : URIString?,
+     "last-modified" : ISODate,
+
+     // 以下は仕様不明
+     "rdate" : Text?,
+     "rrule" : Text?,
+     "attendee" : Text?,
+     "contact" : Text?,
+     "organiser" : Text?,
+};
+
+
+// end of schema module

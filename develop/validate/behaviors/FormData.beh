@@ -1,0 +1,40 @@
+
+= フォームから入力可能なデータ
+
+== !setup
+
+=== !schema
+
+{{{
+module sys;
+
+type NEString = string(minLength = 1);
+
+type WebInput = {
+ // プロパティ名はドット区切りパス
+ * : [NEString*](minItems = 1), // 値は非空文字列の非空リスト
+};
+
+type NEData = (number | boolean | NEString | NEList | NEObject);
+
+type NEList = [NEData*](minItems = 1);
+
+type NEObject = {
+ * : NEData?,
+}(minProperties = 1);
+
+/** 1つのフォームにより入力可能なデータ */
+type FormData = {* : NEData?}; 
+
+// 便宜上、トップレベルに配列は認めないことにしている、
+// 需要があれば変更するが。
+}}}
+
+== !exec
+
+|= command       |= params     |= input       |= output  |= 備考 |
+| validate --pred |sys:WebInput |{"a":["123"]} | true     | |
+| validate --pred |sys:WebInput |{"a":[]}      | false    |空リストはダメ |
+| validate --pred |sys:WebInput |{"a":[""]}    | false    |空文字列はダメ |
+| validate --pred |sys:WebInput |{"a":123}     | false    |配列じゃない   |
+| validate --pred |sys:WebInput |{}            | true     |空オブジェクトはOK   |

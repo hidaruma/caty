@@ -1,0 +1,32 @@
+<html><!-- -*- coding: utf-8 -*- -->
+<?caty-meta template="smarty" ?>
+<?caty-script
+{ 
+
+  "wikifiles" : lsdir %PATH_INFO .wiki | each {pv name},
+  "subdirs"  : lsdir --kind=dir %PATH_INFO | each {pv name},
+  "title" : %APP_PATH | path:base
+}
+?>
+  <head>
+    <title>{$title}</title>
+  </head>
+  <body>
+    <h1>{$title}</h1>
+
+    <ol>
+      {foreach from=$wikifiles item=name}
+      <li><a href="{$name}">{$name}</a></li>
+      {/foreach}
+    </ol>
+    <hr />
+    <ul>
+      {foreach from=$subdirs item=name}
+      <li><a href="{$name}/">{$name}/</a></li>
+      {/foreach}
+    </ul>
+
+
+  </body>
+</html>
+

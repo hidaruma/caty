@@ -1,0 +1,10 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= トリガー型
+
+** SysSpecs/schemataに移動 **
+
+{{{
+
+
+}}}

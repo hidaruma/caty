@@ -1,0 +1,52 @@
+= user モジュール
+
+ユーザ管理のコマンド群。
+
+== user:add
+
+ユーザを新規に追加する。既にユーザが存在する場合、 false が返る。
+
+=== !exec 
+
+|=input|=command|=output|
+|{"userid": "foo", "password": "qwerty"}|user:add|true|
+|{"userid": "bar", "password": "asdfg"}|user:add|true|
+|{"userid": "foo", "password": "qwerty"}|user:add|false|
+|{"userid": "bar", "password": "asdfg"}|user:add|false|
+
+=== !postCond
+
+|=input|=command|=params|=outputCond|
+|{"userid": @_OR ["foo", "bar"]}|strg:select|user|%userids|
+
+=== !name:userids
+
+{{{
+each {pv userid} | [pass, ["foo", "bar"]] | eq | when {
+    Same => true,
+    Diff => false,
+}
+}}}
+
+== user:delete
+
+ユーザの削除を行う。
+
+=== !exec 
+
+|=input|=command|=output|=備考|
+|{"userid": "foo", "password": "qwerty"}|user:add|true|削除対象のユーザ|
+|"foo"|user:delete|true||
+|"xxx"|user:delete|false|存在しないアカウント|
+|"foo"|user:delete|false|既に削除したアカウント|
+
+== user:exists
+
+ユーザの存在を確認する。
+
+=== !exec 
+
+|=input|=command|=output|
+|"root"|user:exists|true|
+|"xxx" |user:exists|false|
+

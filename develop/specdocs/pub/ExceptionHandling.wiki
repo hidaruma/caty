@@ -1,0 +1,180 @@
+Coding -*- coding: utf-8 -*-
+
+= 例外処理
+
+== Caty例外データ型
+
+@*! は、明示的なタグを意味するワイルドカード。
+
+{{{
+
+// Catyの例外データは次の型のサブタイプでなくてはならない
+// 実装言語の例外を直接投げることも禁止しない（禁止できない）
+
+/** 人間可読なメッセージ 
+ * i15d = internationalized やめた、わかりにくい
+ * 
+*/
+type I18ndMessage = {
+  /** プロパティ名は言語識別子, ja, en など */
+  * : string?
+} (minProperties = 1);
+
+type Exception = @*! {
+ "message" : (string | I18nMessage), 
+
+ // 以下の2つのプロパティは、必要なら分類に使用する
+ /** 例外クラス */
+ "class" : string?,
+ /** 例外ID */
+ "id" : (integer|string)?,
+
+ /** 実装言語のスタックトレースデータ */
+ "stackTrace" : any?,
+ 
+  *: any?
+};
+
+}}}
+
+一般的なCaty例外データ型は次の条件を満たす必要がある。
+
+# Exception型のサブタイプとなるように定義されている。（ダックタイピングの意味でサブタイプ。）
+# 型のローカル名（パッケージとモジュール名を除いた名前）とタグが一致してなくてはならない。
+
+この制約は、exception宣言を使えば簡略に記述できて、
+制約のチェックも行われる。
+
+{{{
+exception MyExcep = {
+  "severity" : integer?, 
+  *: any?
+};
+
+}}}
+
+
+== 例外の分類
+
+コマンドやスクリプトが引き起こす例外は、次の2種に分類される。
+
+# Caty例外
+# その他の例外
+
+Caty例外は、その発生源が「自分がCaty環境下にいることを自覚して意図的に発生させた」例外である。
+実装言語の例外機構に乗って伝搬するが、実装言語の例外からCatyの例外データ（XJSON形式）を取り出すことができる。
+Caty例外データのタグにより、（Catyの立場から）例外の種別を判断することができる。
+
+その他の例外とは、Caty例外以外のすべての例外であり、
+実装言語処理系（ライブラリ含む）やOSによって検出された異常事態を示す。
+その異常事態はCatyの想定内にはなく、理解不能なのでCaty内での合理的な処理はできない。
+
+その他の例外をCaty例外に取り込む必要があるときは、次の例外型を使う。
+
+{{{
+exception
+UnknownError = {
+ "message" : {"en": "unknown error"},
+  *: any?
+};
+}}}
+
+== Caty例外識別子の名前空間
+
+Caty例外の種別は、タグ名によって識別される。
+型システムの型名は例外の分類には一切**使われない**。
+（しかし、型のローカル名とタグは一致している。）
+タグ名の名前空間はフラットなので、例外識別子もフラットになる。
+
+次の名前は例外識別子としての使用が予定されている。
+
+==== データの整合性
+
+* IndexOutOfRange 配列のインデックスが範囲外、または不正である。
+* PropertyNotExist オブジェクトのプロパティが存在しない、またはプロパティ名が不正である。
+* MalformedData データが（事故や不注意で）壊れていると推測される。
+* SyntaxError 構文エラーが存在する。パーシングが失敗した。
+* ValidatatonFailed 型の妥当性検証に失敗した。
+* InvalidInput 入力が（なんらかの意味で）不正である。
+* ConsistencyViolation データの整合性を破壊するので許されない操作である。
+* LooseArray ルーズ配列である
+* Undefined 未定義である
+* TagNotExist タグが存在しない
+* InconsistentCombination データの組み合わせ方はおかしいので新しいデータを作れない
+* TypeNotFound そういう型は存在しない
+* ExceptionNotFound そういう例外型は存在しない
+
+==== IO
+
+* ScriptNotFound 要求されたスクリプトが見つからない、存在しない。
+* FileNotFound 要求されたファイルが見つからない、存在しない。
+* FileIOError ファイルのIOに関連してエラーが生じた。
+* TableNotFound データベースのテーブルが見つからない。
+* CollectionNotFound データベースのコレクションが見つからない。
+* TableAccessError
+* CollectionAccessError
+
+==== コマンドライン
+
+* UnexpectedOption 指定できないオプションが指定された。
+* BadOption オプションの値が不正である。
+* UnexpectedArg 引数が余分にある。
+* MissingArg 引数が不足している。
+* BadArg 引数の値が不正である。
+
+==== セキュリティ
+
+* CertificationFailed
+* IllegalAccess
+* SecurityError
+
+==== 実行時の不具合
+
+* CommandExecutionError
+* Unsupported  （OperationUnsupportedから改名）
+* Timeout
+* ArithmeticError
+* RuntimeError
+* NotImplemented
+
+==== 不明、バグ
+
+* UnknownError
+* ImplementationBug
+
+
+== コマンドライン・シェルにおける例外処理
+
+コマンドラインにおいては、発生した例外に対して特別な処理はされない。
+Caty例外とその他の例外の区別もされない。
+Caty例外であっても、実装言語の例外のひとつとして扱われる。
+（Caty例外であるかそうでないかは判別可能である。）
+
+
+== Webにおける例外処理
+
+Webパイプラインは次の点で一般のパイプラインに制約が課せられている。
+
+# 入力はvoid（入力なし）かWebInput型（WebRequest型）のデータである。
+# 出力はWebOutput型（WebResponse）のデータである。
+# パイプライン実行中に、任意の例外が起きる可能性がある（これは一般のパイプラインと同じ）
+
+Webパイプラインの入力条件はフレームワークが保障するが、次のエラーが起こりうる。
+
+# 最終出力がWebOutput型（WebResponse）ではない。
+# Caty例外が起きた。
+# その他の例外が起きた。
+
+Caty例外でないときは、どちらも Internal Server Error となる。
+
+Caty例外に関しては、将来的には例外マッピングのメカニズムが用意されるが、現時点では次の処理を行う； 
+タグ名が "HTTP_" で始まり。その後に3桁の整数値（の文字列）が続き、その整数値が有効なHTTPステータスコードであれば、
+それをそのままステータスコードに使う。
+それ以外なら、Internal Server Error とする。
+例えば、@HTTP_404 タグはステータスコード 404 Not Found にマップされる。
+
+以上の処理を**HTTP例外マッピング**と呼ぶ。HTTP例外マッピングは、一般的な例外マッピングの特殊ケースとして位置づける。
+例外マッピングは、例外データ（タグ付きのXJSONデータ）を例外処理用のCatyスクリプトに渡すことにより実現される可能性が高い。
+
+
+

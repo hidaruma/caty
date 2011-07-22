@@ -1,0 +1,11 @@
+== This is Caty/Python Public-Preview 1.0.0 ==
+
+* name: caty-python
+* version: pd-0.0.0
+* release: 000
+* release-date: 
+
+* revision: HG r??
+* archive-filename: 
+* archive-prefix: 
+

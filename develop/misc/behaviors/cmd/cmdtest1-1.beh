@@ -1,0 +1,78 @@
+= コマンドのエラーのテスト 1-1
+
+== !setup
+
+=== schema file
+
+実体はファイルシステム内にある。以下はコピー。
+
+{{{
+
+/** 001 引数なし、オプションなし */
+command t001
+ :: void -> integer
+refers python:testcmd.T001;
+
+}}}
+
+=== command file
+
+実体はファイルシステム内にある。以下はコピー。
+
+{{{
+# -*- coding: utf-8 -*- 
+from caty.command import Command
+
+VAL = 123
+
+# 001 引数なし、オプションなし
+class T001(Command):
+    def execute(self):
+        return VAL
+
+}}}
+
+== !exec
+
+|= command |= params |= output |= exception |= 備考  |
+| true    |         | true    |            |お試し |
+| tc:t001 |         | 123     |            | |
+| tc:t001 | 1       |         |Exception   | UnexpectedArg 1 |
+| tc:t001 | --foo   |         |Exception   | UnexpectedOption --foo |
+
+
+== メモ：エラーの候補
+
+このメモは **specdocs:/Exceptins.wiki に転記した。**
+
+* IndexOutOfRange index
+* PropertyNotExist name
+
+* ScriptNotFound fileName
+* FileNotFound fileName
+* FileIOError fileName
+* TableNotFound tableName
+* TableAccessError tableName
+
+* InvalidInput  (IllegalInput) ValidatatonError
+
+* UnexpectedOption option
+* Bad Option option value
+* UnexpectedArg index
+* MissingArg index
+* BadArg index value
+
+* CertificationFailed
+* SecurityError
+* IllegalAccess
+
+* MalformedData data
+* CommandExecutionError
+* SyntaxError fileName lineNo line
+* RuntimeError detail
+* Timeout detail
+
+* ArithmeticError
+* OperationUnsupported operation
+* Unknown
+* ImplementationBug

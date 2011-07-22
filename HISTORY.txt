@@ -1,0 +1,9 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+== 000 pd-0.0.0
+
+* release-date: 2010-10-2?
+* announce-url: ??
+* announce-title: Caty/Python Public-Development 0.0.0 ＠ Bitbucket.org
+* dwonload-url: none
+

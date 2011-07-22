@@ -1,0 +1,2 @@
+<?caty-meta template="smarty" ?>
+{foreach from=$_CONTEXT item=it}{$it}+{/foreach}

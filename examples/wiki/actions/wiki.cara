@@ -1,0 +1,43 @@
+// -*- coding: utf-8 -*- 
+/** Wikiモジュール */
+module wiki in cara on boot;
+
+/** Wikiファイル */
+resource WikiFile(".wiki") {
+    filetype {
+        "contentType": "text/plain",
+         "isText": true,
+    };
+    /** 読み込み */
+    action read("/GET") :: { 
+        file:read %1 | {
+            "body": text:creole, 
+            "title": param %1 | text:rsplit "." | item 0 | text:trim /,
+            "lastModified": file:lastmodified %1
+        } | print include@this:/page.html
+    };
+
+    /** 編集画面呼び出し */
+    action edit("edit/GET")  :: Request -> Response {
+        {
+            "body":file:read %1,
+            "title": param %1 | text:rsplit "." | item 0 | text:trim /
+        } | print include@this:/edit.html
+    };
+
+    /** 書き込み */
+    action write("/POST#exists-parent")  :: Request -> Response {
+        translate WikiFile | when {
+            OK => ["wiki", pv body | file:write %1 | param %1] | text:concat | redirect ,
+            NG => "/wiki/" | redirect 
+        }
+    };
+
+};
+resource PlainWikiFile(".wiki") {
+    /** プレーンテキスト取得 */
+    action plain("plain/GET") :: {
+        print %0
+    };
+};
+

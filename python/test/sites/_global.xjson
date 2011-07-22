@@ -1,0 +1,8 @@
+{
+    "mafs": "caty.mafs.stdfs",
+    "secretKey": "dfgbvhq3475yr2389fryerf23904u",
+    "hostUrl": "http://localhost:8000",
+    "serverModule": "caty.web.simple",
+    "encoding": "utf-8",
+    "commonFilePath": "../../common"
+}

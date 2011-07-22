@@ -1,0 +1,13 @@
+module public;
+type DJSON = @_section {
+        *: DJSONField
+};
+
+type DJSONField = @_doc {
+        "doc": string | null,
+        "value": DJSONField | Value | DJSON
+};
+
+type Value = @_value any;
+
+

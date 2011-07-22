@@ -1,0 +1,67 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= バッグ型 その6 =
+
+== !setup
+
+== !schema:/bag.casm
+
+{{{
+module bag;
+
+type foo = {
+ "a": integer,
+ "b" : integer?
+};
+
+type bar = @bar {
+ "x": string?
+};
+
+type t1 = {[
+   foo{0,}, 
+   integer{0,},
+   bar{0,},
+]};
+
+type t2 = {[
+   foo{0,1}, 
+   integer{0,1},
+   bar{0,1},
+]};
+
+}}}
+
+== !exec
+
+
+|= input       |= command                  |= output |
+|[]            | validate --pred bag:t1    | true    |
+|[1]           | validate --pred bag:t1    | true    |
+|[1,2]         | validate --pred bag:t1    | true    |
+|[0,1,2]       | validate --pred bag:t1    | true    |
+|[{"a":1}]     | validate --pred bag:t1    | true    |
+|[{"a":1},-1]  | validate --pred bag:t1    | true    |
+|[{"a":1},-1,0]| validate --pred bag:t1    | true    |
+|[@bar{"x":""}]| validate --pred bag:t1    | true    |
+|[@bar{"x":""},0]| validate --pred bag:t1  | true    |
+|[@bar{"x":""},{"a":1}]| validate --pred bag:t1  | true    |
+|[@bar{},{"a":1}]| validate --pred bag:t1  | true    |
+|[{"a":1,"b":2}]| validate --pred bag:t1   | true    |
+
+
+|= input       |= command                  |= output |
+|[]            | validate --pred bag:t2    | true    |
+|[1]           | validate --pred bag:t2    | true    |
+|[1,2]         | validate --pred bag:t2    | false   |
+|[0,1,2]       | validate --pred bag:t2    | false   |
+|[{"a":1}]     | validate --pred bag:t2    | true    |
+|[{"a":1},-1]  | validate --pred bag:t2    | true    |
+|[{"a":1},-1,0]| validate --pred bag:t2    | false   |
+|[@bar{"x":""}]| validate --pred bag:t2    | true    |
+|[@bar{"x":""},0]| validate --pred bag:t2  | true    |
+|[@bar{"x":""},{"a":1}]| validate --pred bag:t2  | true    |
+|[@bar{},{"a":1}]| validate --pred bag:t2  | true    |
+|[{"a":1,"b":2}]| validate --pred bag:t2   | true    |
+
+

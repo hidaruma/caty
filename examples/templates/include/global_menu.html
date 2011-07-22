@@ -1,0 +1,15 @@
+<?caty-meta template="smarty"?>
+<?caty-script
+    {
+        "loggedin": secure:loggedin | when {OK=>true, NG=>false},
+    }
+?>
+<div class="caty.global_menu">
+{if $loggedin}
+    <span class="item"><a href="/security/logout.cgi" rel="nofollow">logout</a></span>
+    <span class="item"><a href="/files/" rel="nofollow">uploader</a></span>
+{else}
+    <span class="item"><a href="/security/login.html" rel="nofollow">login</a></span>
+{/if}
+</div>
+

@@ -1,0 +1,162 @@
+// -*- coding: utf-8 -*-
+/** 標準のアノテーション */
+module stdAnnotation;
+
+/** ドキュメンテーションテキスト
+ */
+@[annotation, target("ANY_TARGET")]
+type doc = {
+ "value" : string
+};
+
+/** 無名モジュールへの登録
+ */
+@[annotation, target(["TYPE_DECL", "COMMAND_DECL", "MODULE_DECL"]), affect-management]
+type register-public = {};
+
+/** 型の隠蔽
+ * このアノテーション付きで宣言・定義された型はモジュールからexportされない。
+ * 定義された型名は不可視。
+ */
+@[annotation, target("TYPE_DECL"), affect-management]
+type hidden = {};
+
+/** 非推奨／廃止予定の対象をマークする
+ */
+@[annotation, target(["TYPE_DECL", "COMMAND_DECL", "PROPERTY"]), affect-management]
+type deprecated = {};
+
+/** 将来の懸念となる対象をマークする
+ * 代替となる機能が実装された段階でunquietをdeprecatedに変更する。
+ */
+@[annotation, target(["TYPE_DECL", "COMMAND_DECL", "PROPERTY"])]
+type unquiet = {};
+
+/** open制約
+ * この型の制約はopenと解釈される。再帰的に適用される。
+ */
+@[annotation, target(["OBJECT", "ARRAY"]), affect-parsing]
+type open = {};
+
+/** closed制約
+ * この型の制約はclosedと解釈される。再帰的に適用される。
+ */
+@[annotation, target(["OBJECT", "ARRAY"]), affect-parsing]
+type closed = {};
+
+/** デフォルト値
+ * オブジェクトのプロパティが省略されたときのデフォルト値を指定する。
+ * 省略可能なプロパティにしか意味を持たない。
+ */
+@[annotation, target("PROPERTY")]
+type default = {
+  "value" : any
+};
+
+/** 推奨値
+ * オブジェクトのプロパティの推奨値を指定する。
+ * 省略可能性とは無関係である。
+ */
+@[annotation, target("PROPERTY")]
+type recomended = {
+  "value" : any
+};
+
+/** デフォルト値の非存在
+ * オブジェクトのプロパティが省略されたときに、デフォルト値を仮定したり推定してはならない。
+ * 省略可能なプロパティにしか意味を持たない。
+ */
+@[annotation, target("PROPERTY")]
+type no-default = {
+};
+
+/** 依存性
+ * 指定した名前のプロパティがないときは、ターゲットのプロパティは出現できない。
+ * 複数のプロパティに依存関係があるときに使用する。
+ */
+@[annotation, target("PROPERTY"), affect-validation]
+type with = {
+  @[annotation-value]
+  "name" : string,
+  "val" : any?
+};
+
+/** 排他性
+ * 指定した名前のプロパティがあるときは、ターゲットのプロパティは出現できない。
+ * 複数のプロパティに依存関係があるときに使用する。
+ */
+@[annotation, target("PROPERTY"), affect-validation]
+type without = {
+  @[annotation-value]
+  "name" :  string
+};
+
+/** 暫定的な定義である
+ * 後で変更の可能性がある
+ */
+@[annotation, target(["TYPE_DECL", "COMMAND_DECL", "MODULE_DECL"])]
+type tentative = {};
+
+/** 実験的な定義である
+ */
+@[annotation, target(["TYPE_DECL", "COMMAND_DECL", "MODULE_DECL"])]
+type experimental = {};
+
+
+/** フィルター
+ * テンプレートで使用するフィルターである。
+ */
+@[annotation, target("COMMAND_DECL")]
+type filter = {};
+
+/** 単一インスタンス実行
+ * このアノテーション付きで宣言されたコマンドは、
+ * 一つのプロセスあたり高々一つのインスタンスだけが実行される。
+ */
+@[annotation, target("COMMAND_DECL")]
+type sequential = {};
+
+/* ---- */
+/*== クライアント／サーバー型のシステムで利用するアノテーション  */
+/* ---- */
+
+/** 読み取り専用
+ * このアノテーション付きのプロパティを書き換える操作は出来ない。
+ * クライアント側で仮に書き換えても、それは**無視される**。
+ */
+@[annotation, target("PROPERTY")]
+type readonly = {};
+
+/** 書き換え禁止
+ * このアノテーション付きのプロパティを書き換えをしてはいけない。
+ * readonlyとは違い、クライアント側で書き換えることは可能である。
+ * しかし、書き換えるとその後の動作は**保証されない**。
+ */
+@[annotation, target("PROPERTY")]
+type preserve = {};
+
+/** サーバー側で動的に生成されるプロパティ 
+ * このプロパティは永続的なストレージに保存されていない。
+ * readonly, preserveとは独立である。
+ */
+@[annotation, target("PROPERTY")]
+type generated = {};
+
+/** サーバー側に戻す必要がないプロパティ 
+ * このプロパティを戻すことはトラフィックの無駄使いになる
+ */
+@[annotation, target("PROPERTY")]
+type discardable = {};
+
+/** クライアント側で動的に生成されるべきプロパティ 
+ * クライアントのアプリケーションが利用する。
+ * サーバーは一切関知しないので、サーバーに送ってはならない。
+ */
+@[annotation, target("PROPERTY")]
+type dynamic = {};
+
+
+
+// End of Module
+
+

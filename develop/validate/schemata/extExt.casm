@@ -1,0 +1,9 @@
+module extExt; // -*- coding: utf-8 -*-
+
+/** numberに対する拡張部分 */
+type numberExt = ("inf" | "ninf"); 
+
+
+// End of Module
+
+

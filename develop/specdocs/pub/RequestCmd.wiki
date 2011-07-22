@@ -1,0 +1,33 @@
+Coding -*- coding: utf-8 -*-
+
+= request コマンド
+
+requestコマンドは、Webからの入力処理と出力処理を除いたすべての処理をシミュレートする。
+
+# HTTPリクエストのディスパッチ
+# Catyスクリプト・インタプリタのよる評価（eval）
+# 例外処理（例外をWebOutputとしてラップ）
+
+== content-type オプション
+
+content-type オプションが省略された場合は入力から判定する。
+
+# 入力がvoid（null）のときは、content-typeは未定義のまま。どうせ使用しない。
+# 入力がタグなしJSONオブジェクトなら、application/x-www-form-urlencoded とする。
+# 入力がタグなし@jsonタグ付きJSONオブジェクトなら、application/json とする。
+# その他の場合は、application/octed-stream とする。（この仕様は？？）
+
+content-type オプションが指定されれば、その値をそのまま使う。
+
+
+
+requestは入り口処理と出口処理を除いたすべてをシミュレートする。一方、入
+り口と出口の処理は一切やらない。
+
+このため、requestと実Webの処理が食い違うのは次の2つのいずれかと判断でき
+る。
+
+* 入り口処理か出口処理がバグっている。
+* requestコマンドがバグっている。
+
+

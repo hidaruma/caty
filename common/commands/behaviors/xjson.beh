@@ -1,0 +1,127 @@
+= xjson モジュール
+
+XJSON 処理のコマンドを提供する。
+
+== read, write
+
+JSON データをファイルに読み書きする。
+
+=== !exec 
+
+JSON データであれば何でも書き込み可能である。
+
+|=input|=command|=params|=output|=備考|
+| 1    |xjson:write|/case1.json|null|xjsonモジュールはjsonモジュールの上位互換|
+| true    |xjson:write|/case2.json|null||
+| "aaa"    |xjson:write|/case3.json|null||
+| [1, 2.5, "xyz"]    |xjson:write|/case4.json|null||
+| {"name": "foobar", "date": 1984} | xjson:write|/case5.json|null||
+| @TAG "あああ" | xjson:write|/case6.json|null||
+
+=== !postCond
+
+先に書き込んだデータの読み出しができる。
+
+|=command|=params|=output|
+|xjson:read|/case1.json|1|
+|xjson:read|/case2.json|true|
+|xjson:read|/case3.json|"aaa"|
+|xjson:read|/case4.json|  [1, 2.5, "xyz"]|
+|xjson:read|/case5.json| {"name": "foobar", "date": 1984}|
+|xjson:read|/case6.json| @TAG "あああ"|
+
+
+== to-xml
+
+XJSONデータをXMLにマーシャリングする。
+
+=== !exec 
+
+|=input  |=command     |=output(ignore-space)   |
+| null   |xjson:to-xml |'''<?xml version="1.0" ?><null/>''' |
+| 123    |xjson:to-xml |'''<?xml version="1.0" ?><number>123</number>''' |
+| 3.14   |xjson:to-xml |'''<?xml version="1.0" ?><number>3.14</number>''' |
+|-12.34  |xjson:to-xml |'''<?xml version="1.0" ?><number>-12.34</number>''' |
+|"hello" |xjson:to-xml |'''<?xml version="1.0" ?><string>hello</string>''' |
+|"You&I" |xjson:to-xml |'''<?xml version="1.0" ?><string>You&amp;I</string>''' |
+|"<>"    |xjson:to-xml |'''<?xml version="1.0" ?><string>&lt;&gt;</string>''' |
+|"<&>'\""|xjson:to-xml |"<?xml version=\"1.0\" ?><string>&lt;&amp;&gt;'&quot;</string>"|
+|"-\n-\n-"|xjson:to-xml |"<?xml version=\"1.0\" ?><string>-\n-\n-</string>" |
+|true    |xjson:to-xml |'''<?xml version="1.0" ?><true/>''' |
+|false   |xjson:to-xml |'''<?xml version="1.0" ?><false/>''' |
+
+複合データ
+
+|=input  |=command     |=output(ignore-space)   |
+| []     |xjson:to-xml | '''<?xml version="1.0" ?><array/>''' |
+| [1]    |xjson:to-xml | '''<?xml version="1.0" ?><array><number>1</number></array>''' |
+| [1,2]  |xjson:to-xml | '''<?xml version="1.0" ?><array><number>1</number><number>2</number></array>''' |
+| {}     |xjson:to-xml | '''<?xml version="1.0" ?><object/>''' |
+| {"a":1}|xjson:to-xml | '''<?xml version="1.0" ?><object><property name="a"><number>1</number></property></object>''' |
+
+==== !name:xjson-0
+
+{{{
+{"a":1, "b": 2}
+}}}
+==== !name:xml-0
+
+{{{
+'''<?xml version="1.0" ?><object><property name="a"><number>1</number></property><property name="b"><number>2</number></property></object>'''
+}}}
+
+==== !name:xjson-1
+
+{{{
+{"a":1, "b":[1]}
+}}}
+==== !name:xml-1
+
+{{{
+'''<?xml version="1.0" ?><object><property name="a"><number>1</number></property><property name="b"><array><number>1</number></array></property></object>'''
+}}}
+
+==== !name:xjson-2
+
+{{{
+{"a":1, "b":[1,"hello", false]}
+}}}
+==== !name:xml-2
+
+{{{
+'''<?xml version="1.0" ?><object><property name="a"><number>1</number></property><property name="b"><array><number>1</number><string>hello</string><false/></array></property></object>'''
+}}}
+
+==== !name:xjson-3
+
+{{{
+{"a":{}, "b":[1,"hello", false]}
+}}}
+==== !name:xml-3
+
+{{{
+'''<?xml version="1.0" ?><object><property name="a"><object/></property><property name="b"><array><number>1</number><string>hello</string><false/></array></property></object>'''
+}}}
+
+
+==== !name:xjson-4
+
+{{{
+@foo {"a":{"x":null}, "b":[1,"hello", false]}
+}}}
+==== !name:xml-4
+
+{{{
+'''<?xml version="1.0" ?><tagged tag="foo"><object><property name="a"><object><property name="x"><null/></property></object></property><property name="b"><array><number>1</number><string>hello</string><false/></array></property></object></tagged>'''
+}}}
+
+
+=== !exec もっと複雑なデータ
+
+|=input  |=command     |=output(ignore-space)   |
+|%xjson-0|xjson:to-xml | %xml-0  |
+|%xjson-1|xjson:to-xml | %xml-1  |
+|%xjson-2|xjson:to-xml | %xml-2  |
+|%xjson-3|xjson:to-xml | %xml-3  |
+|%xjson-4|xjson:to-xml | %xml-4  |
+

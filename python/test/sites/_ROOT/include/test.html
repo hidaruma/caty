@@ -1,0 +1,28 @@
+{* COMMENT *}
+{$foo} 
+<p>{$bar.buz}</p>
+{if $cond}
+<p>{$boo}</p>
+{elseif $cond2}
+<p>{$buz}</p>
+{/if}
+<p>\{$xxx}</p>
+{*
+<p>{$abc|filter}</p>
+<p>{$xyz|modifier:80:90}</p>
+<p>{$qwerty|add:1|sub:2}</p>
+*}
+{foreach from=$strings item=i name=o}
+data={$i}
+index={$smarty.foreach.o.index}
+iteration={$smarty.foreach.o.iteration}
+first={$smarty.foreach.o.first}
+last={$smarty.foreach.o.last}
+{/foreach}
+
+{$strings[0]}
+{$nested[0][0]}
+{$nested[1][0]}
+
+{include file="include.html"}
+

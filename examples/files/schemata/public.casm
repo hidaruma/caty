@@ -1,0 +1,23 @@
+module public;
+
+type UploadForm = {
+    "file": UploadFile,
+    "use_auto_gen": boolean?,
+    "filename": string?
+};
+
+type UploadedFileInfo = {
+    "filename": string,
+    "link": string,
+    "updated": string,
+};
+
+command upload :: UploadForm -> string
+    reads user
+    uses pub
+    refers python:uploader.Upload;
+
+command list-files :: void -> list<UploadedFileInfo>
+    reads [user, pub]
+    refers python:uploader.ListFiles;
+

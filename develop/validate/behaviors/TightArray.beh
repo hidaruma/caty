@@ -1,0 +1,98 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= tightな配列
+
+== !setup
+=== !schema:/public.casm
+
+{{{
+module public;
+
+
+type la2 = [integer?, integer?]; // length = 2
+type la3 = [integer?, integer?, integer?]; // length = 3
+type laa = [integer*];  // length = any
+
+type ta2 = [integer?, integer?](tight=true);
+type ta3 = [integer?, integer?, integer?](tight=true);
+type taa = [integer*](tight=true);
+
+}}}
+
+=== !name:vali
+
+{{{
+ validate --pred
+}}}
+
+== !exec
+
+|= command |= params |= input  |= output|
+| %vali    | la2     | []      | true |
+| %vali    | la2     | [1]     | true |
+| %vali    | la2     | [,2]    | true |
+| %vali    | la2     | [1,2]   | true |
+| %vali    | la2     | [1,2,3] | false|
+| %vali    | la3     | []      | true |
+| %vali    | la3     | [1]     | true |
+| %vali    | la3     | [,2]    | true |
+| %vali    | la3     | [1,2]   | true |
+| %vali    | la3     | [1,2,3] | true |
+| %vali    | la3     | [,2,3]  | true |
+| %vali    | la3     | [1,,3]  | true |
+| %vali    | la3     | [,,3]   | true |
+| %vali    | la3     | [1,2,3,4]| false|
+| %vali    | la3     | [,2,3,4]| false|
+| %vali    | la3     | [,,3,4] | false|
+| %vali    | la3     | [,,,4]  | false|
+| %vali    | laa     | []      | true |
+| %vali    | laa     | [1]     | true |
+| %vali    | laa     | [,2]    | true |
+| %vali    | laa     | [1,2]   | true |
+| %vali    | laa     | [1,2,3] | true |
+| %vali    | laa     | [,2,3]  | true |
+| %vali    | laa     | [1,,3]  | true |
+| %vali    | laa     | [,,3]   | true |
+| %vali    | laa     | [1,2,3,4]| true |
+| %vali    | laa     | [,,3,4] | true |
+| %vali    | laa     | [,,,4]  | true |
+| %vali    | laa     | [,,,4,5]| true |
+
+
+
+|= command |= params |= input  |= output |
+| %vali    | ta2     | []      | true |
+| %vali    | ta2     | [1]     | true |
+| %vali    | ta2     | [,2]    | false |
+| %vali    | ta2     | [1,2]   | true |
+| %vali    | ta2     | [1,2,3] | false|
+| %vali    | ta3     | []      | true |
+| %vali    | ta3     | [1]     | true |
+| %vali    | ta3     | [,2]    | false |
+| %vali    | ta3     | [1,2]   | true |
+| %vali    | ta3     | [1,2,3] | true |
+| %vali    | ta3     | [,2,3]  | false |
+| %vali    | ta3     | [1,,3]  | false |
+| %vali    | ta3     | [,,3]   | false |
+| %vali    | ta3     | [1,2,3,4]| false|
+| %vali    | ta3     | [,2,3,4]| false|
+| %vali    | ta3     | [,,3,4] | false|
+| %vali    | ta3     | [,,,4]  | false|
+| %vali    | taa     | []      | true |
+| %vali    | taa     | [1]     | true |
+| %vali    | taa     | [,2]    | false |
+| %vali    | taa     | [1,2]   | true |
+| %vali    | taa     | [1,2,3] | true |
+| %vali    | taa     | [,2,3]  | false |
+| %vali    | taa     | [1,,3]  | false |
+| %vali    | taa     | [,,3]   | false |
+| %vali    | taa     | [1,2,3,4]| true |
+| %vali    | taa     | [,,3,4] | false |
+| %vali    | taa     | [,,,4]  | false |
+| %vali    | taa     | [,,,4,5]| false |
+
+
+
+
+
+

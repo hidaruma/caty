@@ -1,0 +1,185 @@
+ -*- coding: utf-8 -*- 
+
+= リソース＆アクション記述の構文
+
+特に断りがなければ、構文解析において空白類は区切り記号となり、それらの空
+白類は捨てられる。ただし、コメントは捨てられないときがある。
+
+トークン構文では区切り記号はなく、空白類も明示的に記述する。
+
+* [[ResAct-syntax-2.wiki|その2]]
+
+==  リソースクラス宣言
+
+{{{
+
+リソースクラス宣言 ::= 'resource' リソースクラス名 URIパターン指定? '{' リソースクラス定義体 '}' ';'
+
+リソースクラス名 ::= 名前
+
+URIパターン指定 ::= '(' パターン文字列 ')'
+
+リソースクラス定義体 ::= アクション宣言*
+
+}}}
+
+パターン文字列は別に定義する。現状はワイルドカードを使っているが、
+[[>http://tools.ietf.org/html/draft-gregorio-uritemplate-04|URIテンプレート]]
+に移行するかもしれない。
+
+filetypesフォーマットとの移行期間では、暫定的に次の定義を採用する。
+
+{{{
+
+/* リソースクラス名を省略可能とし、URIパターン指定を必須とする */
+
+リソースクラス宣言 ::= 'resource' リソースクラス名? URIパターン指定 '{' リソースクラス定義体 '}' ';'
+
+}}}
+
+
+== アクション宣言
+
+{{{
+
+アクション宣言 ::= 'action' アクション名 インボーカー指定? オプション指定? '::' プロファイル? アクション定義体? ';'
+
+アクション名 ::= 名前
+
+インボーカー指定 ::= '(' インボーカー文字列 ')'
+
+オプション指定 ::= {オブジェクト型の型表現（コマンド宣言のオプションと同じ）}
+
+プロファイル ::= 型表現  '->' 型表現
+
+型表現 ::= {スキーマの型表現と同じ、ただし意味的な制約あり}
+
+アクション定義体 ::= refers節 | スクリプト
+
+refers節 ::= ('refers' 実装指定文字列)+
+
+スクリプト ::= '{' スクリプトコード '}'
+
+実装指定文字列 ::= {コマンド宣言の場合と同じ}
+
+スクリプトコード ::= {CatyScriptのコード}
+
+}}}
+
+インボーカー文字列は別に定義する。現状の verb/METHOD#check 構文をそのまま使うだろう。
+
+filetypesフォーマットとの移行期間では、暫定的に次の定義を採用する。
+
+{{{
+
+/* アクション名を省略可能とし、インボーカー指定とアクション定義体（スクリプト）を必須とする */
+
+アクション宣言 ::= 'action' アクション名? インボーカー指定 オプション指定? '::' プロファイル? アクション定義体 ';'
+
+}}}
+
+== 名前
+
+[[>http://d.hatena.ne.jp/m-hiyama/20110104/1294128925]] と同様。
+
+[[>NameSyntax.wiki]]を参照。
+
+== アノテーションと文書コメント
+
+アノテーションと文書コメントの出現可能位置を明示した構文定義を示す。
+'AD' は「アノテーションと文書」の意味である。
+
+{{{
+
+リソースクラス宣言 ::= クラス宣言のAD* 'resource' リソースクラス名 URIパターン指定? '{' リソースクラス定義体 '}' ';'
+
+リソースクラス名 ::= 名前
+
+URIパターン指定 ::= '(' パターン文字列 ')'
+
+リソースクラス定義体 ::= アクション宣言*
+
+アクション宣言 ::= アクション宣言のAD* 'action' アクション名 インボーカー指定? オプション指定? '::' 
+                   プロファイル? アクション定義体? ';'
+
+アクション名 ::= 名前
+
+インボーカー指定 ::= '(' インボーカー文字列 ')'
+
+オプション指定 ::= {オブジェクト型の型表現（コマンド宣言と同じ）}
+
+プロファイル ::= 入力のAD* 型表現  '->' 出力のAD* 型表現
+
+型表現 ::= {スキーマの型表現と同じ、ただし意味的な制約あり}
+
+アクション定義体 ::= refers節 | スクリプト
+
+refers節 ::= ('refers' 実装指定文字列)+
+
+スクリプト ::= '{' スクリプトコード '}'
+
+実装指定文字列 ::= {コマンド宣言の場合と同じ}
+
+スクリプトコード ::= {CatyScriptのコード}
+
+}}}
+
+== 将来の拡張予定
+
+
+* リソースクラス内ではなくて、トップレベルに出現するアクションを認めるだろう。
+* アノテーションと文書コメントの出現可能位置は変更されるかもしれない。
+* プロファイル以外に reads, updates, uses 宣言が必要になるかもしれない。
+* プロファイルの構文はより複雑化するかもしれない。
+
+== 実例
+
+{{{
+
+/** 
+ * Atomエントリー 
+ */
+
+resource AtomEntry(".ent|.grp") {
+
+  /** エントリーを取得 */
+  action get-entry("/GET") {"rev" : string?} :: WebRequest<Empty> -> WebResponse<edit:EntryByRefDoc>
+  {
+    edit:read-entry %0 %rev? | edit:validate-parent | json:response
+  };
+
+  /** エントリーを編集のために取得 */
+  action edit-entry("edit/GET") {"rev" : string?} :: WebRequest<Empty> -> WebResponse<EntryEmbedDoc> 
+  {
+    edit:edit-entry %0 %rev? |  edit:validate-parent | json:response
+  };
+
+  /** エントリーのメタデータのみ取得 */
+  action get-meta("get-meta/GET") :: WebRequest<Empty> -> WebResponse<resserv:Metadata>
+  {
+    resserv:get-meta %0 |  edit:validate-parent | json:response
+  };
+
+  /** エントリーの削除 */
+  action delete-entry("/DELETE") :: WebRequest<Empty> -> WebResponse<Empty> {
+    edit:delete %0 | json:response
+  };
+
+  /** エントリーの作成または更新 */
+  action put-entry("/PUT#exists-parent") :: WebRequest<any> -> WebResponse<any> 
+  {
+    translate edit:EntryEmbedDoc | 
+    when {
+      OK => edit:put-entry %0 | publclass:validate-entry %0 | 
+            when {
+              NEW => json:response --status=201,
+              EXISTS => json:response,
+            },
+      NG => error_response.caty
+    }
+  };
+
+};
+
+}}}
+

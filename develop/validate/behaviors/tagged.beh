@@ -1,0 +1,73 @@
+= 妥当性検証-2 1 タグ付き値
+
+== !exec; パスについては後述
+
+|= command        |= input  |= params      |= output  |= 理由 |= パス |
+|= validate --pred|@t true  | t01:ta       | true     |
+|= validate --pred|   true  | t01:ta       | false    |MISSING_TAG, tagged, t|
+|= validate --pred|@s true  | t01:ta       | false    |UNEXPECTED_TAG, tagged, t|
+|= validate --pred|@t 2     | t01:ti       | true     |
+|= validate --pred|@t "hi"  | t01:ti       | false    |BAD_TYPE, integer|^t |
+|= validate --pred|@t @t 2  | t01:tti      | true     |
+|= validate --pred|@t 2     | t01:tti      | false    |MISSING_TAG, tagged, t|^t エラーは内側で|
+|= validate --pred|@t @s 2  | t01:tti      | false    |UNEXPECTED_TAG, tagged, t|^t エラーは内側で|
+|= validate --pred| 2       | t01:tti      | false    |MISSING_TAG, tagged, t| エラーは外側で|
+|= validate --pred|@s 2     | t01:tti      | false    |UNEXPECTED_TAG, tagged, t| エラーは外側で|
+|= validate --pred|@t 2     | t01:ts       | false    |BAD_TYPE, string | ^t |
+|= validate --pred|@t []    | t01:tl       | true     |
+|= validate --pred|@t [1, 2, ""]| t01:tl   | true     |
+|= validate --pred|@t "hi"  | t01:tl       | false    |BAD_TYPE, array |^t |
+|= validate --pred|[@t "hi", @t 2] |t01:lt | true     |
+|= validate --pred|[@t "hi", 2] |t01:lt    | false    |MISSING_TAG, tagged, t| 1 |
+|= validate --pred|["hi", @t 2] |t01:lt    | false    |MISSING_TAG, tagged, t| 0 |
+
+== スキーマモジュール
+
+次のスキーマモジュールを使った。
+
+{{{
+module t01;
+
+type ta = @t any;
+type ti = @t integer;
+type ts = @t string;
+// type tti = @t @t integer; // why can not?
+type tti = @t ti;
+
+
+type tl = @t [any*]; // l = list
+type to = @t {*:any};
+
+type lt = [ta*];
+
+}}}
+
+== 検証エラー
+
+ValidatationErrorReportのreason, type, hint は次のよう。
+
+* MISSING_TAG, tagged, //t//
+* UNEXPECTED_TAG, tagged, //s//
+
+
+== タグ付き値のパス
+
+現状のパスは次の2つのアクセス方法を組み合わせている。
+
+# 配列 //x// への項目インデックスアクセス -- //x//[//index//] または //x//.//index//
+# オブジェクト //x// へのプロパティ名アクセス -- //x//["//name//"] または //x//.//name//
+
+タグ付き値は、untagged でタグを取り去った部分を返す。untagged //tag// は、名前が //tag// であるタグを削除し、
+そうでなければ失敗とする。
+untagged操作によるアクセスを次のように書く。
+
+* データ //x// からタグ //tag// を除いた部分 -- //x//^//tag//
+
+アットマークは、JSONPathでもXPathでも他の意味に使われているので別な文字とした。
+
+== 発見したエラー
+
+type tti = @t @t integer; がエラーとなる。これはインスタンスと同じ形だから合法のはず。
+
+
+----

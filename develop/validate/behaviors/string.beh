@@ -1,0 +1,20 @@
+= 妥当性検証 外部で定義された文字列
+
+== !exec
+
+|= input   |= command       |= params    |= output   |= 備考 |
+| "hello" |validate --pred  | htw:Text  | true | |
+| 12      |validate --pred  | htw:Text  | false | number |
+| -5      |validate --pred  | htw:Text  | false | number |
+
+
+== 説明
+
+htw:Text の定義（ただし、定義本体はgen.casm）：
+
+{{{
+
+type Text = string(minLength=1);
+
+}}}
+

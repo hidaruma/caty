@@ -1,0 +1,32 @@
+@_section {
+    "mafsModule": @_doc {
+        "doc": "mafs(最小抽象ファイルシステム)モジュール",
+        "value": @_doc {
+            "doc": "標準mafs",
+            "value": @_value "caty.mafs.stdfs",
+        }
+    },
+    "serverModule": @_doc {
+        "doc": "サーバーモジュール",
+        "value": @_doc {
+            "doc": null,
+            "value": @_value "caty.front.web.simple"
+        }
+    },
+    "session": @_doc {
+        "doc": "セッションの設定",
+        "value": @_doc {
+            "doc": null,
+            "value": @_section {
+                "type": @_doc {
+                    "doc": "オンメモリセッション",
+                    "value": @_value "memory"
+                },
+                "expire": @_doc {
+                    "doc": "有効期限(秒)",
+                    "value": @_value 3600,
+                },
+            },
+        }
+    },
+}

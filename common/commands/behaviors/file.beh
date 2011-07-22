@@ -1,0 +1,94 @@
+= file モジュール
+
+ファイル操作のための各種コマンドを提供する。
+
+== !setup  ファイルの設定
+
+=== !file: /foo.txt
+
+{{{
+foo
+}}}
+
+=== !file: /bar.txt
+
+{{{
+あああ
+}}}
+
+
+== file:read
+
+ファイルの読み込み。
+パス名に関する規則（/から始まる、相対パス負荷）は、他のコマンドでも同様であり、
+file モジュール以外のコマンドも例外ではない。以下、パス名に関するテストはすべて割愛する。
+
+=== !exec 
+
+|= command|= params|= output|= exception|= 備考|
+|file:read|/foo.txt|"foo"| |
+|file:read|/bar.txt|"あああ"| |
+|file:read|/not-exists.txt| |Exception|存在しないファイルへのアクセスはエラー|
+|file:read|foo.txt| |Exception|パス名は常に/で始まる|
+|file:read|/xxx/../foo.txt| |パス名は . や .. で相対パスを指定できない|
+
+== file:write
+
+ファイルの書き込み。既存のファイルの書き換えや、存在しないファイルの作成と書き込みができるか確認。
+
+=== !exec 
+
+|=command|=input|=params|=output|=exception|
+|file:write|"foo!!"|/foo.txt|null||
+|file:write|"aaa"|/boo.txt|null||
+|file:write|"bbb"|/hoge.txt|null||
+
+=== !postCond
+
+|= command|= params|= output|= exception|= 備考|
+|file:read|/foo.txt|"foo!!"| |
+|file:read|/boo.txt|"aaa"| |
+|file:read|/hoge.txt|"bbb"| |
+
+== file:exists
+
+ファイルの存在確認。
+
+=== !exec 
+
+|=command|=params|=output|
+|file:exists|/foo.txt|@OK "/foo.txt"|
+|file:exists|/not-exists.txt|@NG "/not-exists.txt"|
+
+== file:zerofile
+
+空ファイルの作成。
+
+== !exec 
+
+|=command|=params|=output|
+|file:zerofile|/foo.txt|@OK "/foo.txt"|
+|file:zerofile|/created.txt|@OK "/created.txt"|
+
+== !postCond
+
+|=command|=params|=output|
+|file:exists|/created.txt|@OK "/created.txt"|
+
+== file:delete
+
+=== !exec 
+
+|=command|=params|=output|
+|file:delete|/foo.txt|null|
+
+== file:lastmodified
+
+=== !exec 
+
+時刻の関わるテストなので、完全一致は無理。エラーが発生しないことのみを確認する。
+
+|=command|=params|=outputCond|
+|file:lastmodified|/foo.txt|validate --pred string|
+
+

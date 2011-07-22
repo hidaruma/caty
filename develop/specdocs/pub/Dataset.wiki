@@ -1,0 +1,362 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= dataset定義
+
+== 概要
+
+dataset定義は型定義に類似しているが、**目的はまったく違う**。
+dataset定義は、個数が確定した有限集合を具体的に作り出す手順（のヒント）を与える。
+また、dataset定義された有限集合は、自動的に線形順序（列挙順序と呼ぶ）が与えられる。
+
+dataset定義に対応する有限集合（データセット）を作り出す方法については別に述べる。
+
+== 型定義との主たる違い
+
+# binary型とstring型は使えない。が、string型と同等なcharSequence型がある。
+  将来的には、byteSequence型を導入するかもしれない。
+# スキーマ属性が必須となることがある。
+# char型がある。
+# 'string'に代えてキーワード'charSequence'を使う。ただし、**stringとcharSequenceの意味領域は同じである。**
+  型定義構文の整合性の問題から別なキーワードを使うだけで、内容的には stringとcharSequenceは同じ。
+# 型定義では使えない >> という演算子が使える。
+  >> はcharSequence（stringと同じ）の連接を意味する。
+# randomInteger, randomNumber, ramdomChar という擬似的な型（ほんとの型ではない!）がある。
+# 既にあるデータセットから新しいデータセットを作るrandom演算子がある。
+# ランクという概念がある。
+# タグ名のワイルドカードは使えない。@(データセット表現) という形を使う。
+# カインドによる制約は有効である。（が、カインドできてない。）
+
+grade, filterの代わりにランクを使うことにした。
+
+=== データセット定義には使えるが、型定義には使えない構文要素
+
+# 文字（char）リテラル
+# char型
+# charSequence型
+# 連接演算子 '>>'
+# randomInteger, randomNumber, randomChar型（正確には型ではないが）
+# random演算子
+# ランクパラメータ
+
+
+random型とrandom演算子は、カインドを使えば正確に定義できる。（が、カインドできてない。）
+
+二重引用符のストリングリテラルをデータセット定義で使うと、charSequence型のリテラルと解釈される。
+stringとcharSequeceの意味領域は変わらないのでこれで問題はない。
+
+== 型定義との統合の予定
+
+データセット定義は、構文的に型定義と類似しており、まったく別々に定義すると、型定義と内容が重複し、
+記述がコピー＆モディファイ方式になってしまう。このため統合するのが望ましいが、実験段階では別なものとして扱う。
+
+== 列挙順序
+
+基本組み込み型に次のような線形順序を考える。
+
+# bolean型は true < false と考える。
+# number型は数値の大小で順序付ける。
+# char型は、文字のUnicode番号によって順序付ける。
+
+各型のあいだには次の順番を設ける。（複合型の内部順序は後述する。）
+この箇条書きの先にある型（のインスタンス）ほど「早い順番／先の順番」を持つとする。
+
+# undefined = {#'undefined}
+# null = {null}
+# boolean
+# number （integerはnumberの部分集合）
+# char
+# charSequence
+# array
+# object
+# tagged （明示的タグ）
+
+* charSequenceとarray型は辞書式順序を採用する。
+* x と y がobjectのとき、プロパティ名の集合の合併 properties(x)∪properties(y) をソートした並びを作り、
+  プロパティ値（undefinedでもよい）をこの順に並べた配列として順序を比較する。
+* 明示的taggedデータは、最初にタグ名のソート順で比較し、同じなら値の比較をする。
+
+charSequenceをstringとみなすと、binary型を除いたXJSONデータ全体に線形順序を入れたことになる。
+
+
+ちなみに、undfinedを含めたXJSONデータ全体に線形順序を入れるときは、次の順番を使う。
+
+# undefined
+# null
+# boolean
+# number
+# string
+# binary （ここに入れる）
+# array
+# object
+# tagged
+
+
+== 文字リテラル
+
+データセットではchar型が使え、次の記法で1文字を表現できる。
+
+* シングルクォートを使用した長さ1の文字列リテラル
+
+例： 'a', 'あ', '\n', '\u3042'
+
+内部的には、対応するユニコード番号の整数として扱う。
+
+== 列挙データセット
+
+次の型はそのままデータセットとして使える。
+
+# undefined型
+# null型
+# bolean型
+# スカラー（char型を含む）を有限個並べたユニオン型
+
+データセットの列挙順序は、記述の順番ではなくて、
+それぞれの型の線形順序を採用する。("2" | "1") と書かれたユニオン型でも「1は2より前にある」とする。
+
+{{{
+
+dataset score = (1|2|3|4|5);
+
+dataset scoreAlpha = ('A'|'B'|'C'|'D'|'E');
+
+}}}
+
+== 数値データセット
+
+number, integer, char の確定有限部分集合を数値データセットと呼ぶ。charは内部的にUnicode番号の**整数値**として扱う。
+
+数値データセットの定義には、minimum, maximum, divisibleBy 属性を使う。
+
+* integerの制限に、maximumとminimumは必須。divisibleByはオプショナル。
+* numberの制限に、maximum、minimum、divisibleBy のすべて必須。
+* charの制限に、maximumとminimumは必須。divisibleByはオプショナル。
+
+{{{
+
+dataset volume = number(minimum=0, maximum=10, divisibleBy=0.1);
+
+dataset lowerLattin = char(minimum='a', maximum='z');
+
+}}}
+
+
+== シーケンスデータセット
+
+文字シーケンス（charSequecne）型、配列型のデータセットを**シーケンスデータセット**と呼ぶ。
+
+次の条件をいずれかを満たす配列型はシーケンスデータセットとなる。
+
+* 項目型がすべてデータセットであり、最後の項目にスターが付いてない。
+* 項目型がすべてデータセットであり、maxItemsスキーマ属性が指定されている。（minItemsはあってもなくてもよい。）
+
+文字シーケンスデータセットは、パターンによって定義される（次の節）。
+
+{{{
+
+dataset pointInRect = [integer(minimum=0, maximum=50), integer(minimum=0, maximum=50)];
+
+dataset scoreArray = [(1|2|3|4|5)*](minItems=2, maxItems=100);
+
+}}}
+
+== 文字シーケンスのパターン
+
+文字シーケンスデータセットは、次のパターンにより定義する。
+
+* Cをchar型データセットとして、C{n}, C{n, m} を**パターン項目**と呼ぶ。
+ ここで、n, m は非負整数で n≦m。意味は、n個以上m個以内の出現である。
+ バッグ型定義とは違い、出現順序は考慮される。
+* パターン項目を項目とする配列を（文字シーケンスの）**パターン**と呼ぶ。
+* 'charSequence' の後にパータンを続けた形で文字シーケンスデータセットを定義する。
+
+{{{
+
+パターン項目 ::= char型データセット '{' N (',' M)? '}'
+
+N ::= 非負整数
+
+M ::= 非負整数
+
+パターン ::= '[' (パターン項目 (',' パターン項目)*)? ']'
+
+文字シーケンスデータセット ::= 'charSequence' パターン
+
+}}}
+
+例：
+
+{{{
+
+dataset alphaNum = char(minimum='a', maximum='z') || char(minimum='0', maximum='9');
+
+dataset userId = charSeqence [alphaNum{4,8}];
+
+}}}
+
+== 連接演算子 >>
+
+
+2つのデータセットがどちらも文字シーケンス（charSequence）型のとき、中置二項演算子>>によって連接を表現できる。
+
+例：
+
+{{{
+
+dataset givenName = charSeqence [alpha{2,20}];
+dataset familyName = charSeqence [alpha{2,20}];
+
+dataset mailUserId = givenName >> charSequence ['-'] >> familyName;
+
+}}}
+
+== オブジェクトデータセット
+
+次の条件をいずれかを満たすオブジェクト型はオブジェクトデータセットとなる。
+
+* プロパティ型がすべてデータセットであり、ワイルドカードプロパティ名が使われてない。
+* プロパティ型がすべてデータセットであり、propNameDatasetスキーマ属性が指定されている。
+
+propNameDataset属性には、既に定義されている文字シーケンスデータセットの名前を文字列で入れる。
+
+例：
+
+{{{
+
+dataset userPoint = {
+   * : integer(minimum=0, maximum=10)?,
+}(propNameDataset="userId", maxProperties=100);
+
+}}}
+
+== タグ付きデータセット
+
+次の条件を満たすタグ付き型はタグ付きデータセットとなる。
+
+* タグ名（の文字列）がcharSequence型データセットであり、値部分もデータセットである。
+
+例：
+
+{{{
+
+dataset alpha3 = charSequence [alpha{3}];
+
+dataset foo = @(alpah3) integer(minimum=0, maximum=10);
+
+}}}
+
+'@' の後に、データセット表現を丸括弧に入れた形を続けてよい。
+
+== ランダムデータセット
+
+ramdomInteger, randomNumber, randomCharには、
+integer, number, charに必須なスキーマ属性に加えて、スキーマ属性countが必須となる。
+
+数値データセット内からcount個のデータインスタンスを乱数で選んでデータセットを作る。
+
+例：
+
+{{{
+
+dataset selectedId = randomInteger(count=100, minimum=0, maximum=35000);
+
+}}}
+
+== random演算子
+
+randomは、特殊な型構成演算子で、「random(count=//n//) 既存のデータセット」の形で使う。
+
+* randomInteger(count=100, minimum=0, maximum=35000) は、
+ random(count=100) integer(minimum=0, maximum=35000) と同じである。
+ しかし、同じ結果を得るために、いったん integer(minimum=0, maximum=35000) が作られてしまう。
+* //A//を既存のデータセットとして、random(count=//n//)  は、確定有限集合//A//から、
+  //n//個の要素を選択して新しいデータセットを作る。
+
+== その他の演算子 | と ++
+
+型定義で使える次の演算子は使える。
+
+* 排他的なユニオン演算子 |
+* 排他的なオブジェクトマージ演算子 ++
+
+共通部分（ミート）演算子&はデータセットでは使わない（理由は後述）。
+
+== ランク付きデータセット：実例のみ
+
+再帰的なデータ構造からなるデータセットを定義するには
+ランク付きデータセットを使う。ここでは実例のみ述べる。
+ランク付きデータセットの詳細は別文書で述べる。
+
+=== 例1：リスト
+
+{{{
+indeuctive dataset scoreList {
+  base[0] = [];
+  step[n + 1] = (scoreList/[n] >> [score]);
+};
+
+}}}
+
+
+集合として：
+
+* scoreList/[0] = {[]}
+* scoreList/[1] = {[s] | s∈score}
+* scoreList/[2] = {[s1, s2] | s1, s2∈score}
+* scoreList/[3] = {[s1, s2, s3] | s1, s2, s3∈score}
+
+=== 例2：ツリー
+
+{{{
+inductive dataset scoreTree {
+  base[0] = score;
+  step[max(n, m) + 1] = 
+     @tree [scoreTree/[n], scoreTree/[m]];
+};
+
+}}}
+
+集合として：
+
+* scoreTree/[0] = {s | s∈score}
+* scoreTree/[1] = {@tree[s1, s2] | s1, s2∈score}
+* scoreTree/[2] = {@tree[s, t] | s∈score, t∈scoreTree[1]}∪{@tree[t, s] | s∈score, t∈scoreTree[1]}
+* scoreTree/[3] = {@tree[s, t] | s∈score, t∈scoreTree[2]}∪{@tree[t, s] | s∈score, t∈scoreTree[2]}
+  ∪{@tree[t1, t2] | t1, t2∈scoreTree[1]}
+
+== 集合基数の計算
+
+データセットは有限集合である。その基数（要素の数）は確定的に計算可能である。
+データセット（集合）Aに対して、その基数を card(A) と記す。
+
+# シングルトンセットの基数は1である。\\
+  xがインスタンスリテラルなら、card(x) = 1
+# Aに#'undefinedが含まれないとき、card(A?) = card(A) + 1 である。\\
+  Aに#'undefinedが含まれるとき、card(A?) = card(A) である。
+# 列挙型を含む排他的ユニオン型の基数は、成分（選択肢）の基数の和である。\\
+  card(A,,1,, | ... | A,,n,,) =  card(A,,1,,) +  ... + card(A,,n,,) 
+# 配列型 [A,,1,,, ..., A,,n,,] の基数は、項目の基数の積である。\\
+  card([A,,1,,, ..., A,,n,,]) =  card(A,,1,,)×  ... ×card(A,,n,,) 
+# 有界な配列型 [A,,1,,, ..., A,,n,,, B*](maxItems=m) の基数は、長さnからmの配列型基数の和である。\\
+  card([A,,1,,, ..., A,,n,,, B*](maxItems=m)) = 
+  card([A,,1,,, ..., A,,n,,,]) + 
+  card([A,,1,,, ..., A,,n,,, B]) + 
+  card([A,,1,,, ..., A,,n,,, B?, B]) + ... +
+  card([A,,1,,, ..., A,,n,,, B?, ..., B?, B])
+# オブジェクト型 {α,,1,, : A,,1,,, ..., α,,n,, : A,,n,,} の基数は、
+  プロパティの基数の積である。\\
+  card({α,,1,, : A,,1,,, ..., α,,n,, : A,,n,,}) = card(A,,1,,)×  ... ×card(A,,n,,)
+# パターン項目 C{n, m} の基数は C{n} から C{m} の基数の和である。\\
+  card(C{n, m}) = card(C)^^n^^ + card(C)^^n+1^^ + ..., card(C)^^m^^
+# 文字シーケンスのパターン [P,,1,,, ..., P,,n,,] の基数は、項目の基数の積である。\\
+  card(charSequence [P,,1,,, ..., P,,n,,]) =  card(P,,1,,)×  ... ×card(P,,n,,) 
+# 連接の基数は、連接成分の基数の積である。\\
+  card(A,,1,, >> ... >> A,,n,,) = card(A,,1,,)×  ... ×card(A,,n,,) 
+# タグ付き型の基数は、タグの基数と値の基数の積である。\\
+  card(@(T) X) = card(T)×card(X)
+# randomデータセット、random演算子の結果の基数は、countの値で与えられる。
+# 排他的マージ演算の基数はその成分の基数の積である。
+  card(A,,1,, ++ ... ++ A,,n,,) = 
+  card(A,,1,,)× ... ×card(A,,n,,)
+
+共通部分（ミート）演算子を採用してないのは、事前に基数が確定できないからである。
+

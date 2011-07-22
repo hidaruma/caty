@@ -1,0 +1,11 @@
+// -*- coding: utf-8 -*-
+
+module gen; // generic/general types
+
+type Text = string(minLength=1);
+type URIString	= string(minLength=1, remark="URI String");
+type ISODate = string(minLength=1, remark="ISO Date format");
+type Duration = string(remark = "time duration");
+
+type email = string(minLength=1, remark="mail address format");
+

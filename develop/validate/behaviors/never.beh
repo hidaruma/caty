@@ -1,0 +1,25 @@
+= 妥当性検証 never 型
+
+never 型は適合する値が空、即ち妥当性検証に成功する値が存在しない型である。
+
+== !exec
+
+|= input|= command |= params      |= output|= 備考                       |
+| 0     | validate | --pred never | false  |                             |
+| false | validate | --pred never | false  |                             |
+| ""    | validate | --pred never | false  |                             |
+| []    | validate | --pred never | false  |                             |
+| {}    | validate | --pred never | false  |                             |
+| null  | validate | --pred never | false  | null はシングルトン値である |
+
+== 注意
+
+以下の定義は以前は可能であったものの、現在は定義された型がneverになる場合はエラーとなったために不可能となった。
+
+{{{
+module t;
+type e = (); // () で never と同義
+}}}
+
+
+

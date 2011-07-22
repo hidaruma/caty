@@ -1,0 +1,127 @@
+module t0; // -*- coding: utf-8 -*-
+
+
+
+/** 入力に1を足す */
+command inc :: number -> number
+ refers python:arith.Inc;
+
+/** 入力を二乗する */
+command sq :: number -> number
+ refers python:arith.Sq;
+
+
+/*== */
+
+/** クロージャ */
+/* これはダメ
+type Closure = {
+ //** 入力 * /
+ "input" : any,
+ //* オプション * /
+ "opts"  : ScalarObject,
+ //* 引数 * /
+ "argv"  : ScalarArray,
+ //* プログラムコード * /
+ "code"  : Expr | null,
+};
+*/
+
+type Closure = {
+/*
+ "input" : any,
+ "opts"  : ScalarObject,
+ "argv"  : ScalarArray,
+*/
+
+ // 以下のcodeの定義内にExprが出現するのがマズイようだ。
+ "code"  : Expr,
+};
+
+
+
+/** スカラー型 */
+type scalar = (number | string | boolean | null | binary);
+
+/** プロパティがスカラーであるオブジェクト */
+type ScalarObject = {* : scalar?};
+
+/** 項目がスカラーである配列 */
+type ScalarArray = [scalar*];
+
+type Expr = (
+  // スカラーリテラル
+  literal | 
+  // 複合データ
+  arrayEx | objectEx | taggedEx | 
+  // 制御
+  eachEx | whenEx | pipeEx |
+  // 呼び出し
+  callEx | native |
+  // 変数参照
+  varRef | argRef
+);
+
+
+/** 配列のインデックスの型 */
+type index = integer(minimum=0);
+
+/** コマンド呼び出しの情報 */
+type Call = {
+ /** コマンドの名前 */
+ "name" : string,
+ /** オプション */
+ "opts" : ScalarObject,
+ /** 引数 */
+ "argv" : ScalarArray
+};
+
+
+/** スカラーリテラル（定数式） */
+type literal = @literal scalar;
+
+/** 配列式 */
+type arrayEx = @arrayEx [Expr*];
+
+/** オブジェクト式 */
+type objectEx = @objectEx {* : Expr?};
+
+/** タグ付き式 */
+type taggedEx = @taggedEx {
+  "tag" : string,
+  "val" : Expr,
+};
+
+/** each式 */
+type eachEx = @eachEx Expr;
+
+/** when式 */
+type whenEx = @whenEx {* : Expr?};
+
+/** パイプ式 */
+type pipeEx = @pipeEx [Expr*];
+
+/** コマンド呼び出し式 */
+type callEx = @callEx Call;
+
+/** 変数参照 */
+type varRef = @varRef string;
+
+/** 引数参照 */
+type argRef  = @argRef index;
+
+/** ネイティブ呼び出し */
+type native = @native commandReference;
+
+/** コマンド実装への参照 */
+type commandReference = string(format="command-reference");
+
+/** クロージャを評価する */
+command eval-0 :: Closure -> any
+ refers python:dummy.Dummy;
+
+
+
+
+// End of Module
+

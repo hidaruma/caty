@@ -1,0 +1,69 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= バッグ型 その4 =
+
+== !setup
+
+== !schema:/bag.casm
+
+{{{
+module bag;
+
+type t1 = {[integer{2}, string{0,}]};
+
+type t2 = {[
+ object{1,},
+ string,
+ number{2},
+]};
+
+type t3 = {[
+ (1|2|3),
+ ("a"|"b"){0, 2},
+]};
+
+
+}}}
+
+== !exec
+
+
+|= input       |= command                  |= output |
+|[1,2]         | validate --pred bag:t1    | true    |
+|[0,1]         | validate --pred bag:t1    | true    |
+|[1,-1]        | validate --pred bag:t1    | true    |
+|[1,1]         | validate --pred bag:t1    | true    |
+|[1]           | validate --pred bag:t1    | false   |
+|[]            | validate --pred bag:t1    | false   |
+|[0,0,""]      | validate --pred bag:t1    | true    |
+|[0,0,"a","b"] | validate --pred bag:t1    | true    |
+|[1,"a","b"]   | validate --pred bag:t1    | false   |
+|[1,true, "a"] | validate --pred bag:t1    | false   |
+|[1,2.5,"a"]   | validate --pred bag:t1    | false   |
+|[1,2,"a"]     | validate --pred bag:t1    | true    |
+
+
+|= input       |= command                  |= output |
+|[{},"",1,2]   | validate --pred bag:t2    | true    |
+|[{},{},1,2]   | validate --pred bag:t2    | false   |
+|[{},{},1,2,"a"]| validate --pred bag:t2   | true    |
+|[{},0.5,2,""] | validate --pred bag:t2    | true    |
+|[0.5,2,""]    | validate --pred bag:t2    | false   |
+|[0.5,2,"",{}] | validate --pred bag:t2    | true    |
+
+
+|= input       |= command                  |= output |
+|[1,"a"]       | validate --pred bag:t3    | true    |
+|[1,2,"a"]     | validate --pred bag:t3    | false   |
+|[2,"a","b"]   | validate --pred bag:t3    | true    |
+|["a"]         | validate --pred bag:t3    | false   |
+|[4,"b"]       | validate --pred bag:t3    | false   |
+|[3,"b"]       | validate --pred bag:t3    | true    |
+|[3,"b","b"]   | validate --pred bag:t3    | true    |
+|[1]           | validate --pred bag:t3    | true    |
+|[2]           | validate --pred bag:t3    | true    |
+|[2, "b"]      | validate --pred bag:t3    | true    |
+|[1, "b"]      | validate --pred bag:t3    | true    |
+|[]            | validate --pred bag:t3    | false   |
+
+

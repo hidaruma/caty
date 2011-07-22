@@ -1,0 +1,123 @@
+Coding -*- coding: utf-8 -*-
+
+=  トークンとラベル
+
+XMatonは、XJSONツリーのバリデーションを行う。XJSONツリーを深さ優先再帰的に走査する。
+辺やノードを行きがけで通過するときにトークンが発生すると考える。
+このトークン列をpullまたはpush方式で時間順に受けとるクライアントは、
+ストリームからの読み取りと同じようにデータを扱うことができる。
+
+{{tree-traverse.jpg|ツリー・トラバース}}
+
+==  トークン
+
+トークンには次の種類がある。
+
+# <スカラー型名>/<値> （スカラー型名（integerは除く）とスカラー値の組）
+# tagged/@<タグ名>
+# 構造的型名 object, array
+# prop/<プロパティ名文字列>
+# 終端記号 EOD, EOO, EOA
+
+トークン発生のタイミングは：
+
+# <スカラー型名>/<値> -- スカラー値ノードに入ったとき
+# tagged/@<タグ名> -- タグノードとタグ名ラベル付き辺を通過するとき
+# 構造的型名 object, array -- objectノード, arrayノードに入るとき
+# prop/<プロパティ名文字列> -- プロパティの名前ラベル付き辺を通過するとき
+# 終端記号 EOD, EOO, EOA -- それぞれ、データ全体、オブジェクト、配列が終わったとき、
+帰りがけに発生する。
+
+トークンを受け渡すAPIは、（getNextTokenのような）pull API でもイベントハンドラ方式のAPIでもよい。
+
+トークンの例：
+
+# number/3.41
+# string/"hello"
+# boolean/true
+# null/null
+# tagged/@person
+# object
+# array
+# prop/"age"
+# EOD (End Of Data)
+# EOO (End Of Object)
+# EOA (End Of Array)
+
+== ラベル
+
+ラベルはスキーマグラフ（XMatonの本体）の辺に付けられる。
+
+# スカラー型名（integerを除く）
+# tagged/@<タグ名>
+# 構造的型名 object, array
+# prop/<プロパティ名文字列>
+# スカラー値
+# 終端記号 EOD, EOO, EOA
+# 特殊な記号 WARP
+
+== マッチング
+
+|ラベル＼トークン|=type/val|= tagged/@name |= object |= array |= prop/name |= EOD |= EOO |= EOA |
+|= type        |type比較   | -             | -       |  -     |   -        | -    | -    | -    |
+|= tagged/@name| -         | name比較      | -       |  -     |   -        | -    | -    | -    |
+|= object      | -         | -             | O       |  -     |   -        | -    | -    | -    |
+|= array       | -         | -             | -       |  O     |   -        | -    | -    | -    |
+|= prop/name   | -         | -             | -       |  -     | name比較   | -    | -    | -    |
+|= val         | val比較   | -             | -       |  -     |   -        | -    | -    | -    |
+|= EOD         | -         | -             | -       |  -     |   -        | O    | -    | -    |
+|= EOO         | -         | -             | -       |  -     |   -        | -    | O    | -    |
+|= EOA         | -         | -             | -       |  -     |   -        | -    | -    | O    |
+|= WARP        | -         | -             | -       |  -     |   -        | -    | -    | -    |
+
+== ガード
+
+# タグ付きデータのuntagged部分（値部分）はタグ名でガードされる。
+# objectオートマトンはobjectでガードされる。
+# arrayオートマトンはarrayでガードされる。
+# プロパティの値部分はプロパティ名でガードされる。
+# スキーマ属性の述語ノードは台型の名前でガードされる。
+# unionの分岐点はガードされない。
+
+ガードを超えないと、次のノード（状態点）に移れない。
+
+== マッチングのエラー
+
+* BT : BAD_TYPE
+* BV : BAD_VALUE
+* Mx : MISSING_x
+* Ux : UNEXPECTED_x
+* BG : BAD_TAG
+* MG : MISSING_TAG
+* MP : MISSING_PROPERTY
+* UP : UNEXPECTED_PROPERTY
+* MI : MISSING_ITEM
+* UI : UNEXPECTED_ITEM
+
+
+|ラベル＼トークン|=type/val|= tagged/@name |= object |= array |= prop/name |= EOD |= EOO |= EOA |
+|= type        | BT        | BT            | BT      |  BT    |  -         | Mx   | -    | MI   |
+|= tagged/@name| MG        | BG            | MG      |  MG    |  -         | Mx   | -    | MI   |
+|= object      | BT        | BT            | O       |  BT    |  -         | Mx   | -    | MI   |
+|= array       | BT        | BT            | BT      |  O     |  -         | Mx   | -    | MI   |
+|= prop/name   | -         | -             | -       |  -     | UP         | -    | MP   | -    |
+|= val         | BV        | BT            | BT      |  BT    |   -        | Mx   | -    | MI   |
+|= EOD         | Ux        | Ux            | Ux      |  Ux    |   -        | O    | -    | -    |
+|= EOO         | -         | -             | -       |  -     | MP         | -    | O    | -    |
+|= EOA         | UI        | UI            | UI      |  UI    |   -        | -    | -    | O    |
+|= WARP        | -         | -             | -       |  -     |   -        | -    | -    | -    |
+
+
+== カーソル
+
+{{{
+interface Cursor {
+ Token nextToken();
+ Token prevToken();
+ XJSONPath path();
+ String nodeType(); // object, array, tagged, number, boolean, string, null
+ Direction direction();
+ 
+ Token goNext();
+ Token goPrev();
+}}}

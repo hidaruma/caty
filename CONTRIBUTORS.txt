@@ -1,0 +1,7 @@
+-*- coding: utf-8 -*- \\
+This file contains utf-8 encoded Japanese text.
+
+* 清水川 氏 [[http://www.freia.jp/taka]] : rel006- : pyreadlineのパッチを提供していただきました。
+
+ありがとうございます。
+

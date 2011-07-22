@@ -1,0 +1,40 @@
+module common; // -*- coding: utf-8 -*-
+
+/*
+ * 現在、remarkになっているところは、いずれはformatとなる。
+ */
+
+/** 日付型 */
+
+type date = string(remark = "date");
+
+/** 時刻型 */
+
+type time = string(remark = "time");
+
+/** 日付時刻型 */
+type dateTime = string(remark = "date-time");
+
+/** メールアドレス型 */
+type email = string(remark = "email");
+
+/** URI型 */
+type uri = string(remark = "uri");
+
+/** MIMEメディアタイプ型 */
+type mediaType = string(remark = "media-type");
+
+/** メッセージ型 */
+type Message = {
+ // プロパティ名は言語名（ja, enなど）
+ * : string?
+}(minProperties = 1);
+
+/** 型の名前を表す文字列 */
+type typeName = string(remark = "type name");
+
+
+
+// End of Module
+
+

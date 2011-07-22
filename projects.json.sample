@@ -1,0 +1,99 @@
+// -*- coding: utf-8 -*-
+/* 注意：このファイルにはコメントが含まれますが、実際のJSONファイルでは
+ * コメントを入れることができません。そのため、このサンプルはそのままでは使用できないので
+ * ご注意ください。
+ */
+
+// 設定は1つのJSONオブジェクトにより行う
+{
+
+ // プロパティ名がプロジェクト名になる
+ "sample" : {
+   "description" : "ここに簡単な説明", // 省略可能
+   "disabled" : true, // trueに設定していると使えない、
+                      // 通常はfalseに設定するかプロパティを書かない
+   "path" : null, // プロジェクトのディレクトリ
+                  // nullか書かない場合は、コマンドラインから取得する
+   "createStuff" : { 
+       // createの際にコピーするファイルとディレクトリ
+       "files" : [],
+       "dirs" : []
+   },
+
+   "updateStuff" : {
+     // updateの際にコピーするファイルとディレクトリ
+     "files" : [],
+     "dirs"  : []
+   }
+ },
+
+
+
+ "touch" : {
+   "description" : "just touch",
+   "disabled" : false,
+   "path" : null, 
+   "createStuff" : {
+       "files" : [],
+       "dirs" : []
+   },
+
+   "updateStuff" : {
+     "files" : [],
+     "dirs"  : []
+   }
+ },
+
+ "std" : {
+   "description" : "standard",
+   "disabled" : false,
+   "path" : null, 
+   "createStuff" : {
+       "files" : ["_global.xjson", "stdcaty.py"],
+       "dirs" : ["python",  "common", "examples"]
+   },
+
+   "updateStuff" : {
+     "files" : ["stdcaty.py"],
+     "dirs"  : ["python",  "common", "examples"]
+   }
+ },
+
+ "test" : {
+   "description" : "Test",
+   "disabled" : false,
+   "path" : "../TmpWork/test", 
+   "createStuff" : {
+       "files" : ["_global.xjson", "stdcaty.py"],
+       "dirs" : [ "common",  "lib"]
+   },
+
+   "updateStuff" : {
+     "files" : ["stdcaty.py" ],
+     "dirs"  : ["lib", 
+                "common/fit-view/commands",
+                "common/fit-view/include",
+                 "common/fit-view/schemata"]
+   }
+ },
+
+
+ "hmosite" : {
+   "description" : "HMO",
+   "disabled" : false,
+   "path" : "../TmpWork/hmo", 
+   "createStuff" : {
+       "files" : ["_global.xjson", "stdcaty.py"],
+       "dirs" : ["python",  "common",  "lib"]
+   },
+
+   "updateStuff" : {
+     "files" : ["caty.py"],
+     "dirs"  : ["python", "lib", 
+                "common/fit-view/commands",
+                "common/fit-view/include",
+                 "common/fit-view/schemata"]
+   }
+ }
+
+}

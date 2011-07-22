@@ -1,0 +1,104 @@
+// -*- coding: utf-8 -*-
+
+/** 
+ * BNF文法を表現するデータ 
+ *
+ * === 注意点
+ * * ?, *. +, {n,m} のような繰り返し表現はすべて repeat にまとめている。
+ * * groupはなくてもよいが、もとのテキスト形式BNFにおける括弧を保存する目的で導入されている。
+ * * multiset（bag）がある。
+ *
+ */
+module bnf;
+
+
+type bag_ = {[ any{0,} ]};
+
+type name = deferred string(minLength=1);
+type varName = deferred string(minLength=1);
+
+/** BNF形式で記述された文法モジュール
+ */
+type grammer = @grammer {
+  /** モジュール名 */
+  "name": name,
+  /** 簡単な説明 */
+  "description" : string?,
+  /** 提供する構文変数（非終端記号） */
+  "provide" : [varName*]?,
+  /** 要求する構文変数（非終端記号） */
+  "require" : [varName*]?,
+  /** 生成規則 */
+  "rules" : [rule*]?
+};
+
+/** 構文生成規則 */
+type rule = @rule {
+  /** 規則の名前＝定義する構文変数（非終端記号）*/
+  "name" : varName,
+  /** BNFによる式 */
+  "expr" : expr,
+};
+
+/** 構文を表現する式 */
+type expr = literal | var | repeat | group | seq | multiset | union;
+
+/** リテラル文字列（終端記号） */
+type literal = @literal string;
+
+/** 構文変数（非終端記号）*/
+type var = @var varName;
+
+/** 繰り返し 
+ *
+ * 繰り返しの基本構文は {n,} と {n,m} である。
+ *
+ * * {n,} は、"minOccurs" : n, "maxOccurs" : "unbounded" にマップされる。
+ * * {n,m} は、"minOccurs" : n, "maxOccurs" : m にマップされる。
+ *
+ * 一般的に使われる繰り返し記号は基本構文で表現可能である。
+ *
+ * * ? := {0,1}
+ * * + := {1,}
+ * * * := {0,}
+ * * {n} := {n,n}
+ *
+ */
+type repeat = @repeat {
+  /** 最小出現回数 */
+  @[default(0)]
+  "minOccurs" : integer(minimum=0)?,
+  /** 最大出現回数 */
+  @[default("unbounded")]
+  "maxOccurs" : (integer(minimum=1) | "unbounded")?,
+  /** 区切り記号 */
+  "delim" : string(minLength=1)?,
+  /** 繰り返し項目 */
+  "item" : expr
+};
+
+/** グループ化
+ * 括弧によるまとまりを表現する
+ * 単項のグループを許す以外は seq と同じである。
+ * 空なグループは認めない。
+ */
+type group = @group [expr, expr*];
+
+/** 順序付きの並び
+ * 2つ以上の項目が必要である。
+ */
+type seq = @seq [expr, expr, expr*];
+
+/** 順序を持たない並び
+ * 同じ項目の重複出現を許す。
+ * 2つ以上の項目が必要である。
+ */
+type multiset = @multiset [expr, expr, expr*];
+
+/** ユニオン
+ * 2つ以上の項目が必要である。
+ */
+type union = @union [expr, expr, expr*];
+
+
+// End of Module

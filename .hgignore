@@ -1,0 +1,13 @@
+syntax: glob
+*.pyc
+*.ctpl
+*.icaty
+fit-view/*
+*.db
+log.txt*
+
+tmp/
+*.tmp
+
+syntax:re
+\#.*\#$

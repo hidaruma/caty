@@ -1,0 +1,47 @@
+= XJSON関係
+
+== !setup
+
+{{{
+=== !file:/t01.xjson
+{{{
+
+@point {
+  "x" : 1,
+  "y" : 2
+}
+
+}}}
+
+== !name:pt
+
+{{{
+
+@point {
+  "x" : 1,
+  "y" : 2
+}
+
+}}}
+
+
+
+
+== !preCond
+
+|= input |= command   |= params    |= output|
+| %pt    | xjson:write | /t01.xjson | null   |
+
+== !exec
+
+|= command   |= params    |=input |= output   |
+| xjson:read  | /t01.xjson | null  | %pt       |
+
+== 説明
+
+XJSONはjson:readでは読めない、と。ウム。
+
+鍬田コメント： json:read は jaon:write などで書き込まれたファイルしか扱えません。 Caty FIT の !file は入力をすべて文字列として扱うため、常にテキストファイルとして書き込まれます。
+
+json:write で書き込めば、 XJSON 形式でも読み込みは可能です。
+

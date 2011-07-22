@@ -1,0 +1,59 @@
+= ビルトインモジュール
+
+システム全体にわたってトップレベルに存在するコマンド群。
+
+== print
+
+引数で指定されたファイルをテンプレートとして扱い、入力値を適用し、WebOutput型のデータを返す。
+--rawオプションが指定された場合はファイルの内容をそのまま出力する。
+また--resolveオプションが指定された場合、テンプレートの関連スクリプトを実行し、
+その結果を入力として用いる。
+
+=== !exec
+
+|=input         |=command|=params                 |=outputMatch|=備考|
+|{"foo":"Foo!"} |print   |--no-script     /template.txt| {"body": "foo=Foo!\n"}||
+|               |print   |--raw      /template.txt| {"body": "<?caty-meta template=\"smarty\"?>\nfoo={$foo}\n" }|<?caty-meta.. は削除されない|
+|      |print   |--resolve  /template.txt| {"body": "foo=Bar!\n"}||
+|{"foo":"Foo!"} |print   |--resolve  /template.txt| {"body": "foo=Bar!\n"}|入力は一旦関連スクリプトに渡される|
+
+== expand
+
+printとほぼ同様のコマンドである。printとの違いは、printがHTTPヘッダなどを付け加えたWebOuput型のデータを返すのに対して、こちらは単にテンプレートを適用した結果の文字列を返すことである。
+
+=== !exec
+
+|=input         |=command|=params                 |=output|=備考|
+|{"foo":"Foo!"} |expand  |--no-script    /template.txt| "foo=Foo!\n"||
+|               |expand  |--raw      /template.txt| "<?caty-meta template=\"smarty\"?>\nfoo={$foo}\n"|<?caty-meta.. は削除されない|
+|      |expand  |--resolve  /template.txt| "foo=Bar!\n"||
+|{"foo":"Foo!"} |expand  |--resolve  /template.txt| "foo=Bar!\n"|入力は一旦関連スクリプトに渡される|
+
+== response
+
+入力文字列をbodyとしてWebOutput型のデータを返す。
+
+=== !exec
+
+|=input |=command|=params                          |=outputMatch                                                          |=備考|
+| "a"   |response|                                 | {"body": "a", "header": {"content-type": "application/octet-stream"}}|デフォルトではapplication/octet-streamがcontent-type|
+| "a"   |response| --ext=".txt"                    | {"body": "a", "header": {"content-type": "text/plain; charset=utf-8"}}|拡張子の指定でcontent-typeの値は変わる。テキスト系のタイプの場合、utf-8がデフォルトのエンコーディング方式とされる|
+| "a"   |response| --ext=".txt" --encoding="euc-jp"| {"body": "a", "header": {"content-type": "text/plain; charset=euc-jp"}}||
+
+== pass
+
+入力値をそのまま返す。
+
+|= input |= command |=output |= exception|=備考|
+| 1      |pass      | 1      ||
+| "a"      |pass      | "a"      ||
+| [1,2,3]      |pass      | [1,2,3]      ||
+| {"foo":1, "bar": 2}      |pass      | {"foo":1, "bar": 2}      ||
+| 1      |pass<integer>      | 1      ||
+| 1      |pass<string> | | Exception| |
+| [1,2,3]      |pass<array>      | [1,2,3]      ||
+| {"foo":1, "bar": 2}      |pass<object>      | {"foo":1, "bar": 2}      ||
+
+
+
+

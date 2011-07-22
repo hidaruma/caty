@@ -1,0 +1,14 @@
+module extBase; // -*- coding: utf-8 -*-
+
+type numberExt = extExt:numberExt; // 外部定義を、モジュール内部の名前に割り当て
+
+type xnumber = (number | numberExt);
+
+type i = integer(minimum=1, maximum=5);
+
+
+
+
+// End of Module
+
+

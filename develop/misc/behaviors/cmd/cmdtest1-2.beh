@@ -1,0 +1,8 @@
+= コマンドのエラーのテスト 1-2
+
+== !exec
+
+|= command |= params |= output |= exception |= 備考  |
+| tc:t001 | --foo   |         |Exception   | UnexpectedOption --foo |
+| tc:t001 | 1       |         |Exception   | UnexpectedArg 1 |
+

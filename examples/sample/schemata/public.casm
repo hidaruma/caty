@@ -1,0 +1,144 @@
+module public; // -*- coding: utf-8 -*-
+
+type foo = integer(minimum=0, minimum=1, minimum=5);
+type color = "r"|"g"|"b"|integer(minimum=0);
+type xint = integer | "negInf" | "posInf";
+
+
+
+/** 入力に1を足す */
+command inc :: number -> number
+ refers python:arith.Inc;
+
+/** 入力を二乗する */
+command sq :: number -> number
+ refers python:arith.Sq;
+
+
+/* 直積の結合律 */
+command prod-assoc<A,B,C> :: [[A, B], C] -> [A, [B, C]] 
+ refers python:dummy.Dummy;
+
+/** 直和の結合律 */
+command sum-assoc<A,B,C> :: (@1 (@1 A | @2 B) | @2 C) -> (@1 A | @2 (@1 B | @2 C)) 
+ refers python:dummy.Dummy;
+
+/** 直積の単位律 */
+command prod-unit<A> :: [null, A] -> A 
+ refers python:dummy.Dummy;
+
+/** 直和の単位律 */
+command sum-unit<A> :: (never | A) -> A 
+ refers python:dummy.Dummy;
+
+/* ゼロ法則 */
+/* これは定義できない *
+command zero<A> :: [never, A] -> never {
+};
+*/
+
+/** 直和の対称スワップ */
+command sum-swap<A,B> :: (@1 A | @2 B) -> (@1 B | @2 A) 
+ refers python:dummy.Dummy;
+
+/** 直和に対する直積の分配法則 */
+command dist<A,B,C> :: [A, (@1 B | @2 C)] -> (@1 [A, B] | @2 [A, C]) 
+ refers python:dummy.Dummy;
+
+
+/** スカラー型 */
+// type scalar = (number | string | boolean | null | binary);
+
+/** プロパティがスカラーであるオブジェクト */
+type ScalarObject = {* : scalar?}; // エラーするようになった
+
+/** 項目がスカラーである配列 */
+type ScalarArray = [scalar* items];
+
+
+
+/*== */
+
+/** クロージャ */
+type Closure = {
+ /** 入力 */
+ "input" : any,
+ /** オプション */
+ "opts"  : ScalarObject,
+ /** 引数 */
+ "argv"  : ScalarArray,
+ /** プログラムコード */
+ "code"  : Expr | null,
+};
+
+type Expr = (
+  // スカラーリテラル
+  literal | 
+  // 複合データ
+  arrayEx | objectEx | taggedEx | 
+  // 制御
+  eachEx | whenEx | pipeEx |
+  // 呼び出し
+  callEx | native |
+  // 変数参照
+  varRef | argRef
+);
+
+
+/** 配列のインデックスの型 */
+type index = integer(minimum=0);
+
+/** コマンド呼び出しの情報 */
+type Call = {
+ /** コマンドの名前 */
+ "name" : string,
+ /** オプション */
+ "opts" : ScalarObject,
+ /** 引数 */
+ "argv" : ScalarArray
+};
+
+
+/** スカラーリテラル（定数式） */
+type literal = @literal scalar;
+
+/** 配列式 */
+type arrayEx = @arrayEx [Expr*];
+
+/** オブジェクト式 */
+type objectEx = @objectEx {* : Expr?};
+
+/** タグ付き式 */
+type taggedEx = @taggedEx {
+  "tag" : string,
+  "val" : Expr,
+};
+
+/** each式 */
+type eachEx = @eachEx Expr;
+
+/** when式 */
+type whenEx = @whenEx {* : Expr?};
+
+/** パイプ式 */
+type pipeEx = @pipeEx [Expr*];
+
+/** コマンド呼び出し式 */
+type callEx = @callEx Call;
+
+/** 変数参照 */
+type varRef = @varRef string;
+
+/** 引数参照 */
+type argRef  = @argRef index;
+
+/** ネイティブ呼び出し */
+type native = @native commandReference;
+
+/** コマンド実装への参照 */
+type commandReference = string(format="command-reference");
+
+/** クロージャを評価する */
+command eval-0 :: Closure -> any
+ refers python:dummy.Dummy;
+

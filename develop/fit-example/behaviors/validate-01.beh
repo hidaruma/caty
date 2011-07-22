@@ -1,0 +1,55 @@
+= validateコマンド その1
+
+== !setup;
+
+== !schema:/t01.casm
+
+スキーマファイルt01.casmはファイルシステム内にない。
+
+{{{
+module t01;
+
+type strlist1 = [string, string*]; // 空リストはダメ
+
+type person = {
+ "name" : string, // 必須
+ "birth" :  {
+     "y" : integer(minimum=1900, maximum=2010)?,
+     "m" : integer(minimum = 1, maximum=12),
+     "d" : integer(minimum = 1, maximum=31)
+   }?, // 月と日だけでもよいし、省略してもよい
+ "hobbies" : strlist1? // 省略してもいいが、書くときは非空配列で
+};
+}}}
+
+== !exec; テスト実行指示
+
+
+|=command        |= params    |= input  |= output   |= 備考 |
+|validate --pred |t01:strlist1| []      | false     | 空リストは strlist1 ではない |
+|validate --pred |t01:person  |  {"name":"hoge", "hobbies":[]} | false      | hobbies は空だから |
+
+
+== 説明
+
+スキーマのセットがうまくいってない模様。
+
+== !name:person
+
+{{{
+ {"name":"hoge", "hobbies":[]}
+}}}
+
+== 連絡
+
+とりあえず、見出しとマクロの構文を確定する。
+
+{{{
+見出し ::= '!' 名前 引数並び? コメント?
+
+引数並び ::= ':' 引数テキスト (':' テキスト)*
+コメント ::= '//' 任意のテキスト
+}}}
+
+
+

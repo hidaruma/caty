@@ -1,0 +1,7 @@
+<?caty-meta template="smarty" ?><?caty-script
+{
+ "a" : 1,
+ "b" : 2,
+ "c" : { "x":3, "y" : 4},
+}
+?>{$a},{$b},{$c.x}{$c.y}

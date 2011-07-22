@@ -1,0 +1,98 @@
+{
+
+ "touch" : {
+   "description" : "just touch, use as 'create touch path'",
+   "path" : null, 
+   "createStuff" : {
+       "files" : [],
+       "dirs" : []
+   },
+
+   "updateStuff" : {
+     "files" : [],
+     "dirs"  : []
+   }
+ },
+
+ "min" : {
+   "description" : "minimum project",
+   "disabled" : false,
+   "path" : null, 
+
+   "createStuff" : {
+       "files" : ["_global.xjson", "stdcaty.py"],
+       "dirs" : ["python", "main"]
+   },
+
+   "updateStuff" : {
+     "files" : ["stdcaty.py"],
+     "dirs"  : ["python"]
+   },
+
+   "compareStuff" :{
+     "dirs"  : ["python"]
+   }
+ },
+
+ "std" : {
+   "description" : "standard project",
+   "disabled" : false,
+   "path" : null, 
+   "createStuff" : {
+       "files" : ["_global.xjson", "stdcaty.py"],
+       "dirs" : ["python",  "common",  "main"]
+   },
+
+   "updateStuff" : {
+     "files" : ["stdcaty.py", "wsgicaty.py"],
+     "dirs"  : ["python",  "common"]
+   },
+   "compareStuff" :{
+     "dirs"  : ["python",  "common"	]
+   }
+ },
+
+ "full" : {
+   "description" : "full project",
+   "disabled" : false,
+   "path" : null, 
+   "createStuff" : {
+       "files" : ["_global.xjson", "stdcaty.py", "wsgicaty.py"],
+       "dirs" : ["python",  "common", "examples", "lib", "global", "main"]
+   },
+
+   "updateStuff" : {
+     "files" : ["stdcaty.py", "wsgicaty.py"],
+     "dirs"  : ["python",  "common", "examples", "lib", "global", "extra"]
+   },
+
+   "compareStuff" : {
+     "dirs"  : ["python",  "common", "examples", "lib", "global", "extra"]
+   }
+
+ },
+
+
+ "custom" : {
+   "description" : "customize sample",
+   "disabled" : false,
+   "path" : null,
+   "createStuff" : {
+      "files" : ["stdcaty.py", "wsgicaty.py", "proj.py", "_messages.xjson"],
+      "dirs"  : ["python", "lib", "global", 
+                 "common/commands", "common/fit-view",
+                 "messages"
+                 ]
+
+   },
+
+   "updateStuff" : {
+      "files" : ["stdcaty.py", "wsgicaty.py", "proj.py", "_messages.xjson"],
+      "dirs"  :  ["python", "lib", "global", "common/commands", "messages"]
+   },
+   "compareStuff" : {
+     "dirs"  : ["python", "lib"]
+   }
+ }
+
+}

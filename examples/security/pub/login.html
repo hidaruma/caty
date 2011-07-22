@@ -1,0 +1,33 @@
+<?caty-meta template="smarty"?>
+<?caty-script
+    {
+        "message": pass
+    }
+?>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+  PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+  'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Login</title>
+    </head>
+    <body>
+        {include file="templates:/global_menu.html"}
+        <h1>Login</h1>
+        <div class="secure.message">
+        {if $message|empty|not}
+           <p>{$message}</p>
+        {/if}
+        </div>
+        <div class="secure.form">
+            <form method="post" action="/security/login.cgi">
+                <p>User ID: <input type="text" name="userid" size=40/></p>
+                <p>Password: <input type="password" name="password" size=40/></p>
+                <p><input type="submit" value="Login" /></p>
+            </form>
+        </div>
+        {include file="templates:/footer.html"}
+    </body>
+</html>
+

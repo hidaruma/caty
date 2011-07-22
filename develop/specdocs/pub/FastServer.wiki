@@ -1,0 +1,175 @@
+Coding -*- coding: utf-8 -*-
+
+= サーバーの高速化
+
+== 概要
+
+* uwsgi, gunicorn 共に Caty での使用が可能
+* gunicorn は単純に Caty がワーカープロセス分立ち上がる
+* uwsgi は共有メモリでも使ってるのか、 Caty のインスタンスは一個
+* つまり、ワーカープロセス4つの場合……
+ ** gunicorn は Caty の初期化処理が4プロセス分走る
+ ** uwsgi は一つの Caty のインスタンスがメモリ内で共有される 
+* X-User-Handle などのカスタムHTTPヘッダーは使用可能
+  ** ただし、調整が必要
+
+基本的に CPU のコア数までしかパフォーマンスは上昇しないので、
+パフォーマンス向上率は実運用マシンの性能に依存します。
+
+マシンがシングルコア（=1プロセス）の場合、 wsgiref より少し速い程度。
+
+== wsgicaty.py
+
+wsgicaty.pyの使い方は以下の通り。
+
+== gunicorn
+
+* URL [[http://github.com/benoitc/gunicorn]]
+
+{{{
+$ gunicorn -b 127.0.0.1:8080 -w 4 c4module:application
+}}}
+
+* -b オプションでバインドするアドレスを指定
+* -w オプションでワーカーの数を指定
+* 引数は「モジュール名:ハンドラオブジェクト」 
+
+この通りにやれば動くはずです。
+
+== uwsgi
+
+
+* URL [[http://projects.unbit.it/uwsgi]]
+
+こっちはやや面倒です。今回用いた uwsgi は 0.95 ですが、他のバージョンでは試していません。
+また nginx は 0.8.49 を使いましたが、これは uwsgi モジュールが組み込まれているためです。
+過去のバージョンでも uwsgi モジュールが組み込まれていれば同じはずです。
+
+=== uwsgi_params
+
+nginx の設定ファイルと同じディレクトリに、 uwsgi_params という名前のファイルを作り、
+中には以下のような設定を書き込みます。多分、 0.8.49 には同じような設定ファイルがついてきます。
+
+※ファイル名は別に違う名前でもいいはずですが、ディストリビューションの標準ということで。
+
+{{{
+uwsgi_param  QUERY_STRING       $query_string;
+uwsgi_param  REQUEST_METHOD     $request_method;
+uwsgi_param  CONTENT_TYPE       $content_type;
+uwsgi_param  CONTENT_LENGTH     $content_length;
+
+uwsgi_param  REQUEST_URI        $request_uri;
+uwsgi_param  PATH_INFO          $document_uri;
+uwsgi_param  DOCUMENT_ROOT      $document_root;
+uwsgi_param  SERVER_PROTOCOL    $server_protocol;
+
+uwsgi_param  REMOTE_ADDR        $remote_addr;
+uwsgi_param  REMOTE_PORT        $remote_port;
+uwsgi_param  SERVER_PORT        $server_port;
+uwsgi_param  SERVER_NAME        $server_name;
+}}}
+
+=== nginx.conf
+
+nginx.conf の server ディレクティブに以下の記述を追加します。
+
+{{{
+location / {
+    uwsgi_pass   127.0.0.1:3031;
+    include        uwsgi_params;
+}
+}}}
+
+=== 起動
+
+nginx を起動するのとは別に uwsgi を起動する必要があります。
+
+{{{
+$ uwsgi -p 4 -s 127.0.0.1:3031 -w c4module
+}}}
+
+* -p オプションでワーカー数の指定
+* -s オプションでバインドするアドレスの指定
+* -w オプションで Python アプリケーションモジュールの指定 
+
+ちなみに uwsgi だけではブラウザからのアクセスは処理できません。
+
+
+
+パフォーマンスについては、 Core i5 760（2.8GHz, クァッドコア）のマシンで以下の通り。
+
+=== Caty + wsgiref（今までの奴）
+
+{{{
+$ ab -c 10 -n 1000 http://127.0.0.1:8080/wiki/FrontPage.wiki
+（中略）
+Server Software:        WSGIServer/0.1
+Server Hostname:        127.0.0.1
+Server Port:            8080
+
+Document Path:          /wiki/FrontPage.wiki
+Document Length:        1337 bytes
+
+Concurrency Level:      10
+Time taken for tests:   23.196 seconds
+Complete requests:      1000
+Failed requests:        0
+Write errors:           0
+Total transferred:      1492000 bytes
+HTML transferred:       1337000 bytes
+Requests per second:    43.11 [#/sec] (mean)
+Time per request:       231.964 [ms] (mean)
+Time per request:       23.196 [ms] (mean, across all concurrent requests)
+Transfer rate:          62.81 [Kbytes/sec] received
+}}}
+
+=== gunicorn（プロセス数=4）
+
+{{{
+$ ab -c 10 -n 1000 http://127.0.0.1:8080/wiki/FrontPage.wiki
+（中略）
+Server Software:        gunicorn/0.11.1
+Server Hostname:        127.0.0.1
+Server Port:            8080
+
+Document Path:          /wiki/FrontPage.wiki
+Document Length:        1337 bytes
+
+Concurrency Level:      10
+Time taken for tests:   4.994 seconds
+Complete requests:      1000
+Failed requests:        0
+Write errors:           0
+Total transferred:      1499000 bytes
+HTML transferred:       1337000 bytes
+Requests per second:    200.24 [#/sec] (mean)
+Time per request:       49.939 [ms] (mean)
+Time per request:       4.994 [ms] (mean, across all concurrent requests)
+Transfer rate:          293.13 [Kbytes/sec] received
+}}}
+
+=== uwsgi + nginx（プロセス数=4）
+
+{{{
+$ ab -c 10 -n 1000 http://127.0.0.1/wiki/FrontPage.wiki
+（中略）
+Server Software:        nginx/0.8.49
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /wiki/FrontPage.wiki
+Document Length:        1337 bytes
+
+Concurrency Level:      10
+Time taken for tests:   5.068 seconds
+Complete requests:      1000
+Failed requests:        0
+Write errors:           0
+Total transferred:      1496000 bytes
+HTML transferred:       1337000 bytes
+Requests per second:    197.32 [#/sec] (mean)
+Time per request:       50.679 [ms] (mean)
+Time per request:       5.068 [ms] (mean, across all concurrent requests)
+Transfer rate:          288.27 [Kbytes/sec] received
+}}}
+

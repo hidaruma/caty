@@ -1,0 +1,72 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= バッグ型 その2 =
+
+== !setup
+
+== !schema:/bag.casm
+
+{{{
+module bag;
+
+type t1 = {[1, 2, 3]};
+
+type t2 = {[1, 2{0,1}, 3{1,}]};
+
+type t3 = {[1{0,}, 2{0,}, 3{0,}]};
+
+type t4 = {[
+ number{0,},
+ string{0,},
+ object{0,},
+
+]};
+
+}}}
+
+== !exec
+
+|= input |= command                  |= output |
+|[1,2,3] | validate --pred bag:t1    | true    |
+|[2,1,3] | validate --pred bag:t1    | true    |
+|[1,3]   | validate --pred bag:t1    | false   |
+|[2,3]   | validate --pred bag:t1    | false   |
+|[1,2,3,3]| validate --pred bag:t1   | false   |
+
+|= input |= command                  |= output |
+|[1,2,3] | validate --pred bag:t2    | true    |
+|[2,1,3] | validate --pred bag:t2    | true    |
+|[1,3]   | validate --pred bag:t2    | true    |
+|[2,3]   | validate --pred bag:t2    | false   |
+|[1,2,3,3]| validate --pred bag:t2   | true    |
+|[1,3,3,3]| validate --pred bag:t2   | true    |
+
+|= input |= command                  |= output |
+|[1,2,3] | validate --pred bag:t3    | true    |
+|[2,1,3] | validate --pred bag:t3    | true    |
+|[1,3]   | validate --pred bag:t3    | true    |
+|[2,3]   | validate --pred bag:t3    | true    |
+|[1,2,3,3]| validate --pred bag:t3   | true    |
+|[1,3,3,3]| validate --pred bag:t3   | true    |
+|[1,3,3,4]| validate --pred bag:t3   | false   |
+
+number, string, object を好きなだけ。
+
+|= input |= command                  |= output |
+|[1,2,3] | validate --pred bag:t4    | true    |
+|[]      | validate --pred bag:t4    | true    |
+|[{}]    | validate --pred bag:t4    | true    |
+|[{},{}] | validate --pred bag:t4    | true    |
+|[1,{}]  | validate --pred bag:t4    | true    |
+|[1,"a"] | validate --pred bag:t4    | true    |
+|[1,"a","b"]| validate --pred bag:t4 | true    |
+|["a","b"]| validate --pred bag:t4   | true    |
+|["a"]   | validate --pred bag:t4    | true    |
+|[{"a":1}]| validate --pred bag:t4   | true    |
+|[[]]    | validate --pred bag:t4    | false   |
+|[1,[]]  | validate --pred bag:t4    | false   |
+|[1,2,[]]| validate --pred bag:t4    | false   |
+|[true]  | validate --pred bag:t4    | false   |
+|[1,2,false]  | validate --pred bag:t4   | false|
+|[@foo 1]| validate --pred bag:t4    | false |
+

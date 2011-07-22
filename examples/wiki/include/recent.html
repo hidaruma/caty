@@ -1,0 +1,21 @@
+<?caty-meta template="smarty"?>
+<?caty-script 
+lsdir --long / .wiki | each {
+    {
+        "file": pv name,
+        "title": pv name | text:rsplit "." | item 0 | text:trim /,
+        "lastModified": pv lastModified,
+    }
+} | list:sort --key=lastModified --reverse | list:slice 0 5
+?>
+<div class="wiki_sidemenu">
+<div class="wiki_sidemenutitle">Recent Updated</div>
+<ul>
+{foreach from=$_CONTEXT item=t}
+    <li><a href="./{$t.file}">{$t.title}</a></li>
+{foreachelse}
+    <li>No page found.</li>
+{/foreach}
+</ul>
+</div>
+

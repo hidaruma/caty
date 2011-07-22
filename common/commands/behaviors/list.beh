@@ -1,0 +1,98 @@
+= list モジュール
+
+リスト処理のためのコマンドを提供する。
+
+== concat
+
+二つの配列を結合した新しい配列を返す。
+
+=== !exec 
+
+|=input            |=command    |=output      |
+|[[1,2,3], [4,5,6]]| list:concat|[1,2,3,4,5,6]|
+|[[1,2,3], []]| list:concat|[1,2,3]|
+|[[], [4,5,6]]| list:concat|[4,5,6]|
+
+== contains 
+
+入力値の第一要素が、第二要素を含むかどうか返す。
+
+=== !exec 
+
+|=input            |=command    |=output      |
+|[[1,2,3], 1]      | list:contains | @Contains true|
+|[[1,2,3], 5]| list:contains| @Not false|
+
+== cycle
+
+引数が与えられた場合、入力値を引数の回数分だけ繰り返したリストを返す。
+そうでない場合、第二入力値の回数分だけ第一入力値を繰り返したリストを返す。
+
+=== !exec 
+
+|=input |=params |=command    |=output         |
+| "a"   | 3     | list:cycle | ["a", "a", "a"]|
+| "a"   | 0     | list:cycle | []|
+| ["a", 3]   |  | list:cycle | ["a", "a", "a"]|
+
+== enumerate
+
+入力値を添字のリストと zip した値を返す。
+
+=== !exec 
+
+|=input |=command    |=output         |
+|["a", "b", "c"]|list:enumerate|[[0, "a"], [1, "b"], [2, "c"]]|
+
+== length
+
+入力値の長さを返す。
+
+=== !exec 
+
+|=input |=command    |=output         |
+|["a", "b", "c"]|list:length|3|
+|[]|list:length|0|
+
+
+== slice
+
+入力値のスライスを返す。
+第一引数は開始インデックスで、第二引数は終了インデックスとなる。
+第二引数は省略可能で、その場合は配列の最終要素までのスライスが返される。
+
+=== !exec 
+
+|=input|=params|=command|=output|
+|[0,1,2,3,4,5,6]|1|list:slice|[1,2,3,4,5,6]|
+|[0,1,2,3,4,5,6]|1 4|list:slice|[1,2,3]|
+
+== sort
+
+入力値をソートして返す。
+
+=== !exec 
+
+|=input|=command|=output|
+|[0,3,2,1]|list:sort|[0,1,2,3]|
+|[0,1,2,3]|list:sort|[0,1,2,3]|
+|[]|list:sort|[]|
+
+== unzip
+
+2要素のタプルのリストを受け取り、それらを二つのリストのタプルにして返す。
+
+=== !exec 
+
+|=input|=command|=output|
+|[["a","A"], ["b", "B"], ["c", "C"]]|list:unzip|[["a", "b", "c"], ["A", "B", "C"]]|
+
+== zip
+
+二つのリストを入力として受け取り、それらの各要素をタプルにしたもののリストを返す。
+
+=== !exec 
+
+|=input|=command|=output|
+|[["a", "b", "c"], ["A", "B", "C"]]|list:zip|[["a","A"], ["b", "B"], ["c", "C"]]|
+

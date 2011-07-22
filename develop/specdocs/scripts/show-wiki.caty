@@ -1,0 +1,7 @@
+//  -*- coding: utf-8 -*-
+
+cout "hello" 
+// | file:read %1 
+// |  text:creole 
+// |  print --mode=text /show.txt
+

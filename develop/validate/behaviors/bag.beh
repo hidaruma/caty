@@ -1,0 +1,48 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= バッグ型 その1
+
+== !setup
+
+=== !schema
+
+{{{
+module b;
+type i1 = {[integer{1}]}; // 整数1個のみを許容
+type i2 = {[integer{1,}]}; // 1個以上の整数
+type i3 = {[integer{2,5}]}; // 2〜5個の整数
+
+type si = {[integer{1,}, string{0,2}]}; // 1個以上の整数と0〜2個までの文字列
+
+}}}
+
+== !exec
+
+|=input             |=command|=params      |=output|
+|[]                 |validate| --pred b:i1 | false |
+|[1]                |validate| --pred b:i1 | true |
+|[1, 2]             |validate| --pred b:i1 | false |
+
+|=input             |=command|=params      |=output|
+|[]                 |validate| --pred b:i2 | false |
+|[1]                |validate| --pred b:i2 | true |
+|[1, 2]             |validate| --pred b:i2 | true |
+|[1, 2, 3, 4, 5, 6] |validate| --pred b:i2 | true |
+
+|=input             |=command|=params      |=output|
+|[]                 |validate| --pred b:i3 | false |
+|[1]                |validate| --pred b:i3 | false |
+|[1, 2]             |validate| --pred b:i3 | true |
+|[1, 2, 3, 4, 5, 6] |validate| --pred b:i3 | false |
+
+
+
+|=input                 |=command|=params      |=output|
+|[]                     |validate| --pred b:si | false |
+|[1]                    |validate| --pred b:si | true |
+|["s"]                  |validate| --pred b:si | false |
+|[1, 2, "s", 4, 5]      |validate| --pred b:si | true |
+|[1, 2, "s", 4, 5, "t"] |validate| --pred b:si | true |
+|[1, 2, "s", "t", "u"]  |validate| --pred b:si | false |
+
+

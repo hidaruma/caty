@@ -1,0 +1,20 @@
+// -*- coding: utf-8 -*-
+
+{
+
+    "filetypes": {
+        ".data": {
+            "contentType": "application/json",
+            "isText": true,
+            "assoc": {
+//                "" : ''' file:read %0 | print /show-data  ''',
+//                "" : ''' json:read %0 | print /show-data  ''',
+                "/GET" : ''' json:read %0 | print /show-data.html  ''',
+                "view-as-text/GET" : ''' print --raw %0  ''',
+	    }, // empty verb
+
+        }, // .data
+
+    }, //filetypes
+
+}

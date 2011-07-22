@@ -1,0 +1,101 @@
+-*- coding: utf-8 -*- \\
+This file contains utf-8 encoded Japanese text.
+
+
+* 現状のCatyの問題点は、EXCUSE.txt をご覧ください。
+
+
+アーカイブを展開すると、caty-python-pp-<番号>/ というディレクトリ（フォ
+ルダ）ができます。このディレクトリの下に必要なすべてのファイルが収めら
+れています。caty-python-pp-<番号> を別な名前、例えば caty-current に改
+名してもかまいません。以下では、このディレクトリを CATY_HOME として参照
+します。
+
+
+== Pythonの準備と確認
+
+Catyを実行するには、Python 2.5.x または Python 2.6.x が必要です。2.4 あ
+るいはそれより古いバージョン、3.0 以上のバージョンでの動作はまったく保
+証しません。当該バージョンのPython実行環境がインストールされてない場合
+は、http://www.python.org/download/ からダウンロードしてインストールし
+てください。
+
+以下、「>」は、OSシェル（CMD.EXE、bashなど）のプロンプトだとします。パ
+スの区切り記号はWindowsの「\」を使います。Linux/Unix OSの場合は「/」に
+読み替えてください。
+
+> python -c "print 'hello'"
+
+としてみてください。hello と表示されれば、Pythonの準備はできています。
+Pythonのバージョンを確認するときは、python -V としてください。python
+hello.py の代わりに単に hello.py でも実行できるように設定されているかも
+しれません。そのときは、コマンドライン冒頭の python を省略できます。以
+下の記述では、python を省略できるとしています。
+
+
+== Windowsの場合： pyreadline のインストール
+
+CATY_HOME\windows\ ディレクトリにある
+pyreadline-1.5-win32-setup.exe を実行して pyreadline をインストールして
+ください。
+
+pyreadline-1.5-win32-setup.exeは、インストール済みのPythonを調査するた
+めにレジストリを検索します。レジストリ情報と実際のインストール状況が食
+い違っていると、pyreadline-1.5-win32-setup.exeは失敗しますのでご注意く
+ださい。
+
+pyreadline-1.5には、Ctrl-H, Ctrl-Mキーに関するバグが存在します。清水川
+氏のパッチにより修正できます。
+CATY_HOME\windows\README.Patch.txtをご参照ください。
+
+
+== コンソールシェルの起動
+
+CATY_HOME で、コンソール（ターミナル、DOSプロンプト）からstdcaty.py を
+実行します。すると、対話的シェルが起動します。起動には、Pythonコードの
+コンパイルや様々な初期化のため多少時間がかかります。
+
+> stdcaty.py
+...(メッセージ)...
+Caty interactive shell
+
+caty:root>
+
+(メッセージ) の部分は、設定の読み込みやフォルダ（ディレクトリ）の自動生
+成の関するメッセージです。このメッセージは状況により変わります。キーボー
+ドから quit と入力（最後にEnter）すると、stdcaty.py を終了できます。
+
+
+== サーバーの起動
+
+CATY_HOME で、次のように入力して、サーバーを起動します。
+
+> stdcaty.py server
+...(メッセージ)...
+Serving on port 8000...
+
+ブラウザで、http://localhost:8000/ にアクセスしてみてください。トップペー
+ジが表示されれば正常に動作しています。stdcaty.py server を実行した画面
+には、エラーメッセージとログが表示されます。favicon.icoの取得失敗などで、
+頻繁にエラーメッセージとが出力されることがあります。
+
+HTTP待ち受けのポート番号を変えるには、stdcaty.py server --port 8080 の
+ように --portオプションを使ってください。サーバーの終了はOSの割り込み信
+号（[Ctrl]+[C]などによる強制終了）を使ってください。
+
+対話的シェルのなかでも、server start と server stop コマンドが使
+えます。ポート8080でサーバーをスタートさせるには：
+
+caty:root> server start 8080
+
+== READMEファイル群をブラウザから読む
+
+Catyのサーバーが動作するようになったなら、tools\setup-readme.bat または
+tools/setup-readme.sh を実行して、http://localhost:8000/readme/ にアク
+セスすると、READMEファイル群をブラウザから読むことができます。
+
+
+== その他
+
+これ以上の情報は、[[http://d.hatena.ne.jp/m-hiyama/]] などで順次公開します。
+

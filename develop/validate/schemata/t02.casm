@@ -1,0 +1,35 @@
+// -*- coding: utf-8 -*-
+module t02;
+
+type i = {
+ "i" : integer
+};
+
+type is = {
+ "i" : integer,
+ "s" : string,
+};
+
+type iOpt = {
+ "i" : integer?
+};
+
+type isOpt = {
+ "i" : integer,
+ "s" : string?,
+};
+
+type xy = {
+ "x" : i,
+ "y" : isOpt?, // yはオプショナル、なくてもよい
+};
+
+type xz = {
+ "x" : i,
+ "z" : string?, // zはオプショナル、なくてもよい
+};
+
+type xl = {
+  "x" : iOpt,
+  "l" : [integer*], // lは整数配列
+};

@@ -1,0 +1,46 @@
+= validateコマンド その2
+
+== setup;
+
+== schema:/t02.casm
+
+スキーマはファイルシステムに直接書いている。
+
+{{{
+module t02;
+
+type strlist1 = [string, string*]; // 空リストはダメ
+
+type person = {
+ "name" : string, // 必須
+ "birth" :  {
+     "y" : integer(minimum=1900, maximum=2010)?,
+     "m" : integer(minimum = 1, maximum=12),
+     "d" : integer(minimum = 1, maximum=31)
+   }?, // 月と日だけでもよいし、省略してもよい
+ "hobbies" : strlist1? // 省略してもいいが、書くときは非空配列で
+};
+}}}
+
+== !name:person
+
+{{{
+ {"name":"hoge", "hobbies":[]}
+}}}
+
+== !exec; テスト実行指示
+
+|=command        |= params    |= input  |= output   |= 備考 |
+|validate --pred |t02:strlist1| []      | false     | 空リストは strlist1 ではない |
+|validate --pred |t02:person  |  {"name":"hoge", "hobbies":[]} | false      | hobbies は空だから |
+|validate --pred |t02:person  |  %person                       | false      | マクロを使用 |
+|validate --pred |t02:person  |  {"name":"hoge"} | true      | hobbies を書かない |
+|validate --pred |t02:person  |  {"name":"hoge", "hobbies":["a", "b"]} | true      |  |
+|validate --pred |t02:person  |  {"name":"hoge", "hobbies":["a"]} | true      |  |
+
+
+
+
+
+
+

@@ -1,0 +1,29 @@
+<?caty-meta template="smarty"?>
+<?caty-script
+"Hello" |
+{
+  "a" : pass,
+  "b" : text:tolower,
+  "c" : text:toupper,
+}
+?>
+
+<html>
+    <head>
+        <title>Welcome</title>
+    </head>
+    <body>
+    <h2>$_CONTEXT</h2>
+    <pre>{$_CONTEXT}</pre>
+    <h2>$a, $b, $c</h2>
+    <ul>
+      <li>a = {$a}</li>
+      <li>b = {$b}</li>
+      <li>c = {$c}</li>
+    </ul>
+
+    <p><a href="foreach.html">foreach.html</a></p>
+
+    </body>
+</html>
+

@@ -1,0 +1,21 @@
+= FITで仮想的にファイルを作る (動いた)
+
+== !setup
+
+=== !file:/t.txt
+{{{
+Hello, world.
+}}}
+
+== !exec //ファイルを読み出してみる
+
+|= command |= params       |= output  |
+|file:read | /t.txt        |"Hello, world." |
+
+
+== 説明、問題点
+
+現状、なぜか動いてない。なぜだ？
+
+動いたよーー。
+

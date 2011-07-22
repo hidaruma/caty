@@ -1,0 +1,18 @@
+<html><!-- -*- coding: utf-8 -*- -->
+<?caty-meta template="smarty" ?>
+<head>
+ <title>sites</title>
+</head>
+<body>
+<h1>sites</h1>
+<?caty-script 
+sites
+?>
+<ol>
+{foreach item=site from=$_CONTEXT}<li>{$site.name} -- {$site.description}</li>
+{/foreach}
+</ol>
+
+</address>
+</body>
+</html>

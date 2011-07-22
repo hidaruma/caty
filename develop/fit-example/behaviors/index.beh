@@ -1,0 +1,8 @@
+= FIT仕様確認のための事例 (index)
+
+* validate-03.beh はマクロエラーでレポートが生成されない。
+validate-03.beh.BAD とリネームしてます。
+
+
+
+

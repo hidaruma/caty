@@ -1,0 +1,6 @@
+file:read %1 | {
+    "body": text:creole, 
+    "title": param %1 | text:rsplit "." | item 0 | text:trim /,
+    "lastModified": file:lastmodified %1
+} | print include@this:/page.html
+

@@ -1,0 +1,30 @@
+xk= XJSON関係
+
+== !setup
+
+
+== !literal
+=== !exec
+
+|= command |= output |
+| true     | false   |
+
+
+== !literal
+
+|= command   |= params    |=input |= output   |
+| json.read  | /t01.xjson | null  | $pt       |
+
+
+
+== name:pt
+
+{{{
+
+@point {
+  "x" : 1,
+  "y" : 2
+}
+
+}}}
+

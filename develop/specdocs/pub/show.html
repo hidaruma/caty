@@ -1,0 +1,29 @@
+<html><!-- -*- coding: utf-8 -*- -->
+<?caty-meta template="smarty" ?>
+  <head>
+    <title>{$title}</title>
+    <link rel="stylesheet" href="{$_APP_PATH}/style.css" />
+
+    <script type="text/javascript"  src="{$_APP_PATH}/js/jquery.js"></script>
+    <script type="text/javascript"  src="{$_APP_PATH}/js/extoc.js"></script>
+
+{literal}
+    <script>
+jQuery(function($){
+	$('h1').exTOC({
+		headFrom : 2,
+		headTo : 6,
+		insertMethod : 'after',
+		smooth : false // firefoxで動かないのでOFFにする
+	});
+});	
+    </script>
+{/literal}
+
+  </head>
+  <body>
+    {$content|noescape}
+{*    {include file="/footer.html"}*}
+  </body>
+</html>
+

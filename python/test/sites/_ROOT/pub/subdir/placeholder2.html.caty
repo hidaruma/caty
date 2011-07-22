@@ -1,0 +1,9 @@
+{
+    "title": "out of line",
+    "list": [
+        {"name": "abc"},
+        {"name": "def"},
+        {"name": "ghi"},
+    ]
+}
+

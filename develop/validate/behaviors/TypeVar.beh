@@ -1,0 +1,70 @@
+= 型変数
+
+== !setup
+
+=== !schema
+
+{{{
+module t;
+
+type Foo<X> = ("foo" | X);
+type FooBar = Foo<"bar">;
+type FooBarBaz = Foo<"bar"|"baz">;
+
+
+type A<X> = {
+  "a" : X,
+   * : any?
+};
+type AInt = A<integer>;
+type AZero = A<0>;
+type AOne = A<1>;
+
+}}}
+
+
+== !exec
+
+|= command       |= params   |= input   |= output   |= 備考 |
+|validate --pred | t:FooBar  | "foo"    | true      ||
+|validate --pred | t:FooBar  | "bar"    | true      ||
+|validate --pred | t:FooBar  | "baz"    | false     ||
+|validate --pred | t:FooBar  | "zot"    | false     ||
+|validate --pred | t:FooBar  | 1        | false     ||
+|validate --pred | t:FooBar  | 0        | false     ||
+
+|= command       |= params   |= input   |= output   |= 備考 |
+|validate --pred | t:FooBarBaz| "foo"    | true      ||
+|validate --pred | t:FooBarBaz| "bar"    | true      ||
+|validate --pred | t:FooBarBaz| "baz"    | true      ||
+|validate --pred | t:FooBarBaz| "zot"    | false     ||
+|validate --pred | t:FooBarBaz| 1        | false     ||
+|validate --pred | t:FooBarBaz| 0        | false     ||
+
+|= command       |= params   |= input   |= output   |= 備考 |
+|validate --pred | t:AInt     |{"a": 1}  | true     ||
+|validate --pred | t:AInt     |{"a": 2}  | true     ||
+|validate --pred | t:AInt     |{"a": 3}  | true     ||
+|validate --pred | t:AInt     |{"a": 0}  | true     ||
+|validate --pred | t:AInt     |{"a": null}| false   ||
+|validate --pred | t:AInt     |{"a": true}| false   ||
+|validate --pred | t:AInt     |{"a": false }| false   ||
+|validate --pred | t:AInt     |{"a": "" }| false   ||
+|validate --pred | t:AInt     |{"a": [] }| false   ||
+|validate --pred | t:AInt     |{"a": {} }| false   ||
+
+|= command       |= params   |= input   |= output   |= 備考 |
+|validate --pred | t:AZero     |{"a": 1}  | false     ||
+|validate --pred | t:AZero     |{"a": 2}  | false     ||
+|validate --pred | t:AZero     |{"a": 0}  | true      ||
+|validate --pred | t:AZero     |{"a": null}  | false  ||
+|validate --pred | t:AZero     |{"a": false}  | false ||
+
+|= command       |= params   |= input   |= output   |= 備考 |
+|validate --pred | t:AOne     |{"a": 1}  | true    ||
+|validate --pred | t:AOne     |{"a": 2}  | false    ||
+|validate --pred | t:AOne     |{"a": 0}  | false     ||
+|validate --pred | t:AOne     |{"a": null}  | false   ||
+|validate --pred | t:AOne     |{"a": true}  | false   ||
+
+

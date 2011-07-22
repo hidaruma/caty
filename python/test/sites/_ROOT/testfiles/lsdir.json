@@ -1,0 +1,14 @@
+[
+{
+    "command": "lsdir / | list:length",
+    "data": [
+    [null,3],
+    ]
+},
+{
+    "command": "lsdir / .html | list:length",
+    "data": [
+    [null,1],
+    ]
+}
+]

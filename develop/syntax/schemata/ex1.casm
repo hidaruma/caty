@@ -1,0 +1,165 @@
+// -*- coding: utf-8 -*-
+
+/** 構文定義の練習 コマンドの構文
+ */
+module ex1; 
+
+// true, false は許されている。名前として解釈しているのか？
+
+// コマンド別名構文
+
+/** 文書コメント 
+ */
+syntax doc = string; // creole wiki テキスト
+
+/** アノテーション
+ * 複数のアノテーションをまとめて記述可能
+ */
+syntax ann = [(@* object), (@* object)*];
+
+/** 名前 */
+syntax name = deferred string;
+
+/** 型の名前 
+ */
+syntax typeName = deferred string;
+
+/** 型表現 
+ * 任意の型を表す式（expression）
+ */
+syntax typeExpr = deferred @type any;
+
+/** 名前付き型表現 
+ * 引数仕様のときに、配列項目名を付けることがある
+ */
+syntax namedTypeExpr = deferred [typeExpr, name];
+
+/** オプション仕様 */
+syntax opts = {* : typeExpr?};
+
+/** 引数仕様 */
+syntax args = [(typeExpr | namedTypeExpr)*];
+
+/** プロファイル（域と余域の型） */
+syntax profile ::= 
+(: dom:typeExpr '->' cod:typeExpr :)
+:= 
+{
+   "dom": typeExpr, 
+   "cod": typeExpr
+};
+
+/** 型パラメータ 
+ */
+syntax typeParams ::= 
+ '<' typeName{1,}<',', true> '>'
+:= 
+  [ typeName, typeName*];
+
+/** コマンド宣言文 
+ */
+syntax commandDecl ::= 
+@& (: 
+ /* 文書コメントとアノテーションを前置してよい */
+  doc? ann? 
+
+ /* 宣言 */ decl: (: 
+   'command' 
+    name typeParams?
+    opts? args? 
+    '::' 
+    profile
+    exception:throwsCl?
+    demands:(readsCl | updatesCl | usesCl)* 
+    body?
+  :) 
+  /* 文の終端 */  ';'
+:)
+
+:= 
+ @& { 
+   "doc" : doc?, "ann": ann?,
+   "decl": {
+     "name" : name, "typeParams" : typeParams?,
+     "opts" : opts?, "args" : args?,
+     "profile" : profile, 
+     "exception" : throwsCl?,
+     "demands" : [(readsCl | updatesCl | usesCl)*],
+     "body" : body? 
+    }
+};
+
+/** onlyフラグ
+ */
+syntax only ::= 'only'? = boolean;
+
+/** 例外 throws節 
+ */
+syntax throwsCl ::= 
+ @throws (: 'throws' only?  excep:(typeName | '[' typeName*<',', true> ']') :)
+
+:= 
+ @throws {"only": only?, "excep" : (typeName | [typeName*]) };
+
+/** ファシリティ 
+ */ 
+syntax facility ::= 
+(: name param? :) 
+
+:= 
+{"name":name, "param":param?};
+
+/** ファシリティのパラメータ 
+ */
+syntax param ::= '(' string ')' = string;
+
+/** ファシリティ指定 
+ */
+syntax facilitySpec ::=
+ (facility | '[' facility*<',', true> ']')
+:= 
+ (facility | [facility*]);
+
+/** 資源 reads節 
+ */
+syntax readsCl ::= 
+@reads ( 'reads' facilitySpec )
+:= 
+@reads facilitySpec;
+
+/** 資源 updates節 */
+syntax updatesCl ::= 
+@updates ( 'updates' facilitySpec )
+:= 
+@updates facilitySpec;
+
+/** 資源 uses節 */
+syntax usesCl ::= 
+@uses ( 'uses' facilitySpec )
+:= 
+@uses facilitySpec;
+
+
+/** コマンド定義の本体 
+ */
+syntax body ::= refersCl | scriptCode := refersCl | scriptCode ;
+
+syntax refString = deferred string;
+
+/** refers節
+ * 複数のrefString
+ */
+syntax refersCl ::= @refers ('refers' refString) := @refers refString ;
+
+/** CatyScript
+ */
+syntax catyScript = deferred;
+
+/** CatyScriptスクリプトコード
+ */
+syntax scriptCode ::= @script '{' catyScript '}' := @script catyScript;
+
+
+// End of Module
+
+

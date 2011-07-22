@@ -1,0 +1,25 @@
+<<ignore -*- coding: utf-8 -*- >>
+= 例外
+
+
+== make-exception
+
+== !exec
+
+|= command       |= params         |= output                 |= exception |
+| make-exception | BadArg NG       |@BadArg {"message":"NG"} |            |
+| make-exception | FileNotFound NG |@FileNotFound{"message":"NG"}|        |
+| make-exception | GoodArg OK      |                         | Exception  |
+
+
+== throw-if-can
+
+=== !exec
+
+
+|=input                       |= command    |= output  |= exception |
+|@BadArg {"message":"NG"}     |throw-if-can |          |Exception |
+|@FileNotFound{"message":"NG"}|throw-if-can |          |Exception |
+|@GoodArg{"message":"OK"}     |throw-if-can |@GoodArg{"message":"OK"}| |
+|"bad arg"                    |throw-if-can |"bad arg" | |
+

@@ -1,0 +1,12 @@
+// -*- coding: utf-8 -*-
+{
+    "description" : "Wiki サンプルアプリケーション",
+    "implLang" : "python",
+    "assign" : {
+        "pub" : "pub",
+        "include" : "include",
+        "commands" : "commands",
+        "schemata" : "schemata"
+    },
+}
+

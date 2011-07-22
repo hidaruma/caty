@@ -1,0 +1,84 @@
+Coding -*- coding: utf-8 -*-
+
+= undefined型とundefined値
+
+== undefined型
+
+型システムに、組み込み型としての予約語 'undefined' を追加する。
+undefined は never? と**まったく同じ**である。
+この意味で、undefined型は既に使用している。
+
+== undefined値
+
+undefined型はシングルトン型で、その唯一のインスタンスを**undefined値**と呼ぶ。
+undefined値を #undefined と表記する。
+
+undefined値はXJSONに所属するデータではないが、「#undefined」という印字表現を持つ。
+undefined値を受け取って表示するプログラムは文字列表現「#undefined」を使ってよい。
+しかし、表現「#undefined」はXJSONのリテラルではないので、XJSONのパーズ時にはエラーとなる。
+
+== undefined値の実体
+
+undefined値は、Pythonレベルでは、イミュータブルなシングルトンオブジェク
+トとなる。Catyのシステム初期化時にundefinedオブジェクトが生成され、
+Catyと同じ寿命を持つ。したがって、いつでもundefined値を参照できる。
+
+以下では仮に、undefined値の実体を caty.UNDEFINED とする。
+
+== undefined値の扱い方
+
+* undefined値を「値として」扱えない、または「値として」扱うのがふさわしくないプログラムでは、
+  undefined値を検出するとただちに例外を投げてよい。
+* undefined値を表示する場合は、必ず「#undefined」を使う。
+* ほとんどのケースで、JSON, XJSONデータとして #undefined を書き出すべきではない。
+  入力の時点でエラーになる。入力時点でのエラーを意図している／覚悟しているなら、#undefined をデータ内に書いてもよい。
+* undefined値を“値として”扱って差し支えないプログラムは、caty.UNDEFINED を単なるシングルトンオブジェクトとして扱う。
+* 存在しない配列項目にアクセスした場合は、undefined値を返すか、またはIndexOutOfRange例外、またはUndefined例外を投げる。
+  どの挙動を選ぶかはプログラムによりけりである。
+* 存在しないオブジェクトプロパティにアクセスした場合は、undefined値を返すか、PropertyNotExist例外、またはUndefined例外を投げる。
+  どの挙動を選ぶかはプログラムによりけりである。
+* undefined値を、配列の最後に追加することは何もしないことである。
+* undefined値を、配列の範囲外インデックスにより代入することは何もしないことである（許される）。
+* undefined値を、配列の中間に挿入すると、ConsistencyViolation例外となる。
+* undefined値を、オブジェクトの“存在しないプロパティ”に代入することは何もしないことである。
+* undefined値を、オブジェクトの“存在するプロパティ”に代入することは、そのプロパティを削除すること、
+  または削除を予約することである。
+
+== undefinedコマンド
+
+undefined値を出力するには、undefinedコマンドが使える。
+
+{{{
+command undefined :: void -> undefined
+}}}
+
+undefinedはコマンドなので、CatyScriptでは使えるが、JSON, XJSONでは使えない。
+
+== Undefined例外
+
+undefined値を適切に扱えないプログラムが、他に適切な例外がないとき、
+Undefined例外を投げてよい。
+
+== undefined値の利用例
+
+コマンドとフィルターが統合されたと仮定して、
+defaultフィルターとdefinedフィルターは次のように書ける。
+
+{{{
+class DefaultFilter(Command):
+    def setup(self, arg):
+        self.default_value = arg
+
+    def execute(self, input):
+        if input is caty.UNDEFINED:
+            return self.default_value
+        else:
+            return input
+
+class DefinedFilter(Command):
+    def execute(self, input):
+        if input is caty.UNDEFINED:
+            return False
+        else:
+            return True
+}}}

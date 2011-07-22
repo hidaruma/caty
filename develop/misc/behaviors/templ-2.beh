@@ -1,0 +1,10 @@
+= foreach
+
+== 説明
+
+なんでこれが例外投げるかわからん。
+
+== !exec
+
+|= command       |= params           |= outputCond |= exception |
+| request        | /misc/foreach.html| true        |            |

@@ -1,0 +1,39 @@
+= validateコマンド その3
+
+== !setup
+
+=== !schema:/ttt.casm
+
+{{{
+module ttt;
+
+type strlist1 = [string, string*]; // 空リストはダメ
+
+type person = {
+ "name" : string, // 必須
+ "birth" :  {
+     "y" : integer(minimum=1900, maximum=2010)?,
+     "m" : integer(minimum = 1, maximum=12),
+     "d" : integer(minimum = 1, maximum=31)
+   }?, // 月と日だけでもよいし、省略してもよい
+ "hobbies" : strlist1? // 省略してもいいが、書くときは非空配列で
+};
+}}}
+
+== !name:person
+
+{{{
+ {"name":"hoge", "hobbies":[]}
+}}}
+
+== !exec; テスト実行指示
+
+|=command        |= params    |= input  |= output   |= 備考 |
+|validate --pred |ttt:strlist1| []      | false     | 空リストは strlist1 ではない |
+|validate --pred |ttt:person  |  {"name":"hoge", "hobbies":[]} | false      | hobbies は空だから |
+|validate --pred |ttt:person  |  %person                       | false      | マクロ参照、hobbies は空だから |
+
+== 説明
+
+スキーマはファイルシステムに書いてない。マクロpersonを参照してみた。
+

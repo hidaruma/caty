@@ -1,0 +1,2 @@
+<?caty-meta template="smarty"?>
+foo={$foo}

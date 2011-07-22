@@ -1,0 +1,36 @@
+module uiAnnotation; // -*- coding: utf-8 -*-
+
+/** HTMLフォームで使うUIコントロールの種別 */
+type UiControl = (
+  /** テキストフィールド */
+  "text" |
+  /** パスワードフィールド */
+  "password" |
+  /** ラジオボタン */
+  "radio" |
+  /** チェックボックス */
+  "checkbox" |
+  /** テキストエリア */
+  "textarea" |
+  /** 単一セレクトボックス */
+  "single-select" |
+  /** 複数セレクトボックス */
+  "multiple-select" |
+);
+
+/** 使用すべきUIコントロールを指定 */
+@[annotation, target("PROPERTY")]
+type ui = {
+ "value" : UiControl
+};
+
+/** ユーザーインターフェースで使うラベル文字列を指定 */
+@[annotation, target(["OBJECT", "PROPERTY"])]
+type label = {
+ "value" : string
+};
+
+/** 選択肢のなかでチェックされているものを指定 */
+@[annotation, target("CHOICE")]
+type checked = {};
+

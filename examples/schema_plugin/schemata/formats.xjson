@@ -1,0 +1,6 @@
+{
+    "YMD": {
+        "underlying": "string",
+        "refers": "python:ymd.YMDValidator"
+    }
+}

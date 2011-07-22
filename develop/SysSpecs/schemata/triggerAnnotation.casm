@@ -1,0 +1,35 @@
+// -*- coding: utf-8 -*-
+
+/**  @[anchor] と @[form] の仕様 */
+module triggerAnnotation ; 
+
+/** リネームの指定
+ * プロパティ名 -- 新しい名前＝標準の名前
+ * プロパティ値 -- 古い名前＝もとの名前
+ */
+type RemapSpec = {
+ * : string?
+};
+
+/** @[anchor], @[form] に共通の定義 */
+type TriggerAnnotationObj = {
+ /** トリガー名 */
+ @[annotation-value] // 属性名を省略可能
+ "name" : string(format="caty-std-name"),
+
+ /** リネームの指定 */
+ @[default({})]
+ "remap" : RemapSpec?,
+};
+
+/** アンカーであることを示すアノテーション */
+@[annotation, target("PROPERTY")]
+type anchor = TriggerAnnotationObj;
+
+/** フォームであることを示すアノテーション */
+@[annotation, target("PROPERTY")]
+type form = TriggerAnnotationObj;
+
+// End of Module
+
+

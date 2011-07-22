@@ -1,0 +1,15 @@
+// -*- coding: utf-8 -*-
+
+module t02;
+
+type strlist1 = [string, string*]; // 空リストはダメ
+
+type person = {
+ "name" : string, // 必須
+ "birth" :  {
+     "y" : integer(minimum=1900, maximum=2010)?,
+     "m" : integer(minimum = 1, maximum=12),
+     "d" : integer(minimum = 1, maximum=31)
+   }?, // 月と日だけでもよいし、省略してもよい
+ "hobbies" : strlist1? // 省略してもいいが、書くときは非空配列で
+};

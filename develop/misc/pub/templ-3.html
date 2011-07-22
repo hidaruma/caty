@@ -1,0 +1,14 @@
+<html><!-- -*- coding: utf-8 -*- -->
+<?caty-meta template="smarty" ?>
+<?caty-script
+{
+  "name": ([pv familyName, pv givenName] | text:concat),
+}
+?>
+  <body>
+    <h1>templ-3.html</h1>
+    <ul>
+      <li> 名前 : {$name} </li>
+    </ul>
+  </body>
+</html>

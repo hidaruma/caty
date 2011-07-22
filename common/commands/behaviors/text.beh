@@ -1,0 +1,143 @@
+= text モジュール
+
+テキスト処理のコマンドを提供する。
+
+== text:chop
+
+入力値の先頭と末尾より空白と改行を除去して返す。
+
+=== !exec 
+
+|= input    |= command|= output|
+| "  foo  " |text:chop| "foo"|
+| " bar"    |text:chop| "bar"|
+
+== text:concat
+
+入力値を連結して返す。
+
+=== !exec 
+
+|= input         |= command    |= output|
+|["a"]           | text:concat | "a"    |
+|["a", "b"]      |text:concat  |"ab"    |
+|["a", "b", "c"] |text:concat  |"abc"   |
+
+== text:join
+
+引数を区切り文字として入力値を連結して返す。
+
+=== !exec 
+
+|= input         |= command  |= params|= output|
+|["a"]           | text:join | ","    | "a"    |
+|["a", "b"]      | text:join |","     |"a,b"   |
+|["a", "b", "c"] | text:join |"-"     |"a-b-c" |
+
+== text:regmatch 
+
+入力文字列が引数の正規表現パターンに合致するかどうかを返す。
+
+=== !exec 
+
+|= input |=command       |= params   |= output      |
+| "abc"  | text:regmatch | "a"       | %reg1        |
+| "abc"  | text:regmatch |"(a).*"    | %reg2        |
+| "abc"  | text:regmatch |"bcd"      | @fail "abc"  |
+| "abc"  | text:regmatch |"(a)(b).*" | %reg3        |
+
+=== !name: reg1
+
+{{{
+@match {
+    "src": "abc",
+    "groups": [],
+    "group": "a"
+}
+}}}
+
+=== !name: reg2
+
+{{{
+@match {
+    "src": "abc",
+    "groups": ["a"],
+    "group": "abc"
+}
+}}}
+
+
+=== !name: reg3
+
+{{{
+@match {
+    "src": "abc",
+    "groups": ["a", "b"],
+    "group": "abc"
+}
+}}}
+
+== text:rsplit 
+
+入力値を引数の文字列で分割して返す。
+
+=== !exec 
+
+|= input |= command    |= params |= output|
+| "a,b,c"| text:rsplit | ","     | ["a", "b", "c"] |
+| "a,b,c"| text:rsplit |"," 1    | ["a,b", "c"] |
+| "a,b,c"| text:rsplit | "," 2   | ["a", "b", "c"] |
+| "a,b,c"| text:rsplit | "," 3   | ["a", "b", "c"] |
+
+== text:split
+
+入力値を引数の文字列で分割して返す。
+
+=== !exec 
+
+|= input |= command   |= params |= output|
+| "a,b,c"| text:split | ","     | ["a", "b", "c"] |
+| "a,b,c"| text:split | "," 1   | ["a", "b,c"] |
+| "a,b,c"| text:split | "," 2   | ["a", "b", "c"] |
+| "a,b,c"| text:split | "," 3   | ["a", "b", "c"] |
+
+
+== text:tolower
+
+入力値を小文字にして返す。
+
+=== !exec 
+
+|= input |= command       |= output|
+| "ABC"  | text:tolower | "abc"  |
+| "abc"  | text:tolower | "abc"  |
+| "Aあ"  | text:tolower | "aあ"  |
+
+
+== text:toupper
+
+入力値を大文字にして返す。
+
+=== !exec 
+
+|= input |= command     |= output|
+| "abc"  | text:toupper | "ABC"|
+| "ABC"  | text:toupper | "ABC"|
+| "aあ"  | text:toupper | "Aあ"|
+
+== text:trim 
+
+入力値の先頭と末尾から引数の文字を除去して返す。
+
+=== !exec 
+
+|= input  |= command  |= params |= output|
+| "/str/" | text:trim | "/"     | "str"  |
+| "///str"| text:trim | "/"     | "str"  |
+| "str///"| text:trim | "/"     | "str"  |
+| "str"   | text:trim | "/"     | "str"  |
+| "xyzstr"| text:trim | "xyz"   | "str"  |
+
+
+
+

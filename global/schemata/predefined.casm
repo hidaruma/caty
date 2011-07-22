@@ -1,0 +1,21 @@
+module predefined;// -*- coding: utf-8 -*-
+
+@[register-public]
+type list<X> = [X*];
+
+@[register-public]
+type record<X> = {*: X?};
+
+@[register-public]
+type scalar  = null|boolean|number|string|binary;
+
+@[register-public]
+command app-names :: void -> void {
+  // print app names
+  apps | each { pv name | cout } | void
+};
+
+// End of Module
+
+
+

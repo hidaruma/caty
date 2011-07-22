@@ -1,0 +1,20 @@
+// -*- coding: utf-8 */
+
+{
+ "description" : "SpecDoscs Wiki ",
+
+ "filetypes" : {
+   ".wiki" : {
+      "contentType" : "text/x-wiki",
+      "isText" : true,
+      "assoc" : {
+          "/GET" : '''{"content": file:read %0 |  text:creole, "title": %0 | path:trunk } |  print /show.html''' ,
+
+      }, // end assoc
+    }, // end .wiki
+
+ }, // end filetypes
+
+
+
+}

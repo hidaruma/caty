@@ -1,0 +1,13 @@
+module t05; // -*- coding: utf-8 -*-
+
+// NE mesan NonEmpty
+
+type NEData = (NEString | NEList | NEObject);
+
+type NEString = string(minLength = 1);
+type NEList = [NEData*](minItems = 1);
+type NEObject = {
+ * : NEData?
+}(minProperties = 1);
+
+// End of Module

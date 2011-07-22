@@ -1,0 +1,166 @@
+// -*- coding: utf-8 -*-
+
+/** JSON file system
+
+jsonfs(JSON file system)は、単一のJSON（実際はXJSON）データにより
+ファイルシステムを表現するためのデータ型仕様である。
+
+ファイルの内容となる文字列データまたはバイナリデータによりファイルを表現できる。
+ファイルの名前やメタデータが不要なときはこの表現で十分である。
+
+{{{
+"hello"
+}}}
+
+ファイルのメタデータが必要なときは次の形式を利用する。
+
+{{{
+@file {
+ "lastModified" : "2011-07-14T10:53:15",
+ "content" : "hello"
+}
+}}}
+
+ファイルの名前が必要なときは、オブジェクトのプロパティ名としてファイル名を指定する。
+このオブジェクトはディレクトリーエントリーマップの役割を果たす。
+
+{{{
+{
+  "hello.txt" : @file {
+                  "lastModified" : "2011-07-14T10:53:15",
+                   "content" : "hello"
+                 }
+}
+}}}
+
+ファイルの名前と存在だけが問題の時は、存在の目印としてtrueを指定する。
+
+{{{
+{
+  "hello.txt" : true
+}
+}}}
+
+ディレクトリーのメタデータが必要なときは次の形式を利用する。
+
+{{{
+@dir {
+  "lastModified" : "2011-07-14T11:01:29",
+  "entries" : {
+                 "hello.txt" : true
+              }
+}
+}}}
+
+
+*/
+module jsonfs;
+
+
+/* 参考： JSON標準フォーマット
+
+date-time
+
+This should be a date in ISO 8601 format of YYYY-MM-DDThh:mm:ssZ in
+UTC time. This is the recommended form of date/timestamp.
+
+
+date
+
+This should be a date in the format of YYYY-MM-DD. It is recommended
+that you use the "date-time" format instead of "date" unless you need
+to transfer only the date part.
+
+time 
+
+This should be a time in the format of hh:mm:ss. It is recommended
+that you use the "date-time" format instead of "time" unless you need
+to transfer only the time part.
+
+utc-sec	 
+
+This should be the difference, measured in seconds, between the
+specified time and midnight, January 1, 1970 UTC. The value should be
+a number (integer or float)
+
+*/
+
+/** ISO 8601形式の日時文字列 */
+type date-time = string(format="date-time");
+
+/** Unixエポックからの秒数 整数値 */
+type utc-sec-int = integer(remark="utc-sec in integer");
+
+/** タイムスタンプ */
+type TimeStamp = (date-time | utc-sec-int);
+
+
+/** ファイルの内容データ 
+ */
+type Content = (string | binary);
+
+/** メタデータ付きファイル構造
+ */
+type FileStruct = @file {
+ "lastModified" : TimeStamp,
+ "created" : TimeStamp?,
+ "content" : Content,
+};
+
+/** ファイルを表現するデータ 
+ */
+type File = (
+  /** ファイルの存在マーカー
+   * ファイルの存在だけが問題になるとき、
+   * 存在を示す値に true を使う。
+   */
+  true | 
+
+  /** ファイルの内容
+   * テキストデータまたはバイナリデータ
+   */
+  Content | 
+  
+  /** メタデータ付きファイル構造
+   */
+  FileStruct
+);
+
+/** ディレクトリーエントリーマップ
+ */
+type DirObj = {
+ * : (File | Dir)?
+
+} (propNameFormat="file-basename");
+
+/** メタデータ付きディレクトリー構造
+ */
+type DirStruct = @dir {
+ "lastModified" : TimeStamp,
+ "created" : TimeStamp?,
+ "entries" : DirObj,
+
+} (propNameFormat="file-basename");
+
+/** ディレクトリーを表現するデータ
+ */
+type Dir = (
+  /** ディレクトリーエントリーマップのみ */
+  DirObj | 
+
+  /** メタデータ付きディレクトリー構造 */
+  DirStruct
+);
+
+
+/** ファイルを表現するデータ型のカインド
+ */
+kind FILE-TYPE = lower File;
+
+
+/** ディレクトリーを表現するデータ型のカインド
+ */
+kind DIR-TYPE = lower Dir;
+
+
+// End of Module

@@ -1,0 +1,1 @@
+expand /echo.txt | text:chop

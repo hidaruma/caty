@@ -1,0 +1,4 @@
+{
+    "body":file:read %1,
+    "title": param %1 | text:rsplit "." | item 0 | text:trim /
+} | print include@this:/edit.html

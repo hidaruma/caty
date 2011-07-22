@@ -1,0 +1,25 @@
+<html><!-- -*- coding: utf-8 -*- -->
+<?caty-meta template="smarty" ?>
+<?caty-script
+{ 
+  "txtfiles" : lsdir / .txt | each {pv name},
+}
+?>
+  <head>
+    <title>RedMe</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>ReadMe</h1>
+
+    <ol>
+      {foreach from=$txtfiles item=name}
+      <li><a href="{$name}">{$name}</a></li>
+      {/foreach}
+    </ol>
+
+
+  </body>
+</html>
+
+

@@ -1,0 +1,10 @@
+=  foreach
+
+
+== !exec
+
+|= command       |= params      |= outputCond |= exception |
+| print --resolve| /foreach.html| true        |            |
+
+ 
+

@@ -1,0 +1,5 @@
+translate WikiFile | when {
+    OK => ["wiki", pv body | file:write %1 | param %1] | text:concat | redirect ,
+    NG => "/wiki/" | redirect 
+}
+

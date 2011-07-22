@@ -1,0 +1,43 @@
+= コマンドのエラーのテスト 2-2
+
+== !setup
+
+=== schema file
+
+{{{
+/** 002 int引数ありかも、オプションなし */
+command t002
+ [integer?] :: void -> integer
+refers python:testcmd.T002;
+}}}
+
+=== command file
+
+{{{
+# -*- coding: utf-8 -*- 
+from caty.command import Command
+
+VAL = 123
+
+# 002 int引数ありかも、オプションなし
+class T002(Command):
+    def setup(self, arg=None):
+        self.arg = arg
+
+    def execute(self):
+        if self.arg != None:
+            return self.arg
+        else:
+            return VAL
+}}}
+
+
+== !exec
+
+|= command |= params |= output |= exception |= 備考  |
+| true    |         | true    |            |お試し |
+| tc:t002 |         | 123     |            |引数なしはOKのはず |
+| tc:t002 | --foo   |         |Exception   | UnexpectedOption |
+| tc:t002 | 10 20   |         |Exception   | UnexpectedArg |
+| tc:t002 | 10      | 10     |            |1つの引数は認められるはず |
+

@@ -1,0 +1,27 @@
+<html><!-- -*- coding: utf-8 -*- -->
+<?caty-meta template="smarty" ?>
+
+<head>
+ <title>system vars</title>
+</head>
+
+<body>
+<h1>システム変数</h1>
+
+<p>From builtin.py</p>
+
+<ol>
+
+<li> _CATY_VERSION = {$_CATY_VERSION}</li>
+<li> _HOST_URL = {$_HOST_URL}</li>
+<li> _APP_PATH = {$_APP_PATH}</li>
+<li> _FILE_PATH = {$_FILE_PATH}</li>
+</ol>
+
+<p>So, this file is: {$_HOST_URL}{$_APP_PATH}{$_FILE_PATH}</p>
+<p>So, this file is: {$_HOST_URL}/{$_APP_PATH}{$_FILE_PATH}
+</p>
+
+
+</body>
+</html>

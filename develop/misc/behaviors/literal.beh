@@ -1,0 +1,29 @@
+= コメントアウトやFIT自体の説明にliteral (preで代用)
+
+
+=== !exec; これは実行される
+
+|= command |= output |
+| true     | true   |
+
+代わりにpre。
+
+{{{
+== !literal; このセクションのスコープ内は何もしない
+
+=== !exec; これは実行されない
+
+|= command |= output |
+| true     | false   |
+
+}}}
+
+== 説明
+
+literalセクション内はFITの解析が行われない。
+FITに対する指令をコメントアウトしたり、
+FIT自体の説明が実行されないようにする。
+
+
+
+

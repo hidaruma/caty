@@ -1,0 +1,111 @@
+= 妥当性検証 カレンダーの例 Day, Week, Weeks
+
+== !setup
+
+=== !schema
+
+{{{
+
+module Calendar;
+
+type HolidayInfo = {
+  "isHolidy" : boolean,
+  "holidayName" : string?
+};
+
+type Day = {
+  "when" : (-1 | 0 | 1), // -1:先月, 0:今月, 1:来月
+  "dayOfMoth" : integer(minimum = 1, maximum=31), // 月によりけり
+  "dayOfWeek" : (0 | 1 | 2 | 3 | 4 | 5 | 6), // 0が日曜, 6が土曜
+  "isToday" : boolean?, // なければfalse
+  "holiday" : HolidayInfo? // なければ平日
+};
+
+type Week  = [Day,  Day,  Day,  Day,  Day,  Day,  Day]; // 7日
+type Weeks = [Week, Week, Week, Week, Week, Week]; // 6週
+
+type Calendar = {
+  "year" : integer,
+  "month" : (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12),
+  "weeks" : Weeks,
+  "isThisMonth" : boolean?
+};
+}}}
+
+
+== HolidayInfo型
+
+=== !name:h1
+{{{
+ {
+  "isHolidy" : true
+ }
+}}}
+
+=== !name:h2
+{{{
+ {
+  "isHolidy" : true,
+  "holidayName" : "文化の日",
+ }
+}}}
+=== !name:h3
+{{{
+ {
+  "isHolidy" : true,
+  "holidayName" : "文化の日",
+  "additional" : "hello",
+ }
+}}}
+
+=== !exec
+  
+|= input   |= command      |= params              |= output |= exception |= 備考 |
+|= 12      |validate --pred| Calendar:HolidayInfo | false   |  | BAD_TYPE, boolean, $|
+|= %h1     |validate --pred| Calendar:HolidayInfo | true    |  | |
+|= %h2     |validate --pred| Calendar:HolidayInfo | true    |  | |
+|= %h3     |validate --pred| Calendar:HolidayInfo | false   |  | UNEXPECTED_PROPERTY, object, * |
+|= {}     |validate --pred| Calendar:HolidayInfo | false   |  | MISSING_PROPERTY, object, * |
+
+== Day型
+
+=== !name:d1
+{{{
+{
+  "when" :  0,
+  "dayOfMoth" : 12,
+  "dayOfWeek" : 0,
+  "isToday" : true,
+}
+}}}
+
+=== !name:d2
+{{{
+{
+  "when" :  1,
+  "dayOfMoth" : 12,
+  "dayOfWeek" : 1,
+  "isToday" : true,
+  "holiday" : {"isHolidy" : true},
+}
+}}}
+
+=== !name:d3
+{{{
+{
+  "when" :  1,
+  "dayOfMoth" : 12,
+  "dayOfWeek" : 1,
+  "isToday" : true,
+}
+}}}
+
+
+=== !exec
+
+|= input   |= command      |= params      |= output |= exception |= 備考 |
+|= %d1     |validate --pred| Calendar:Day | true    |  | |
+|= %d1     |validate --pred| Calendar:Day | true    |  | |
+|= %d2     |validate --pred| Calendar:Day | true   |  | |
+|= %d3     |validate --pred| Calendar:Day | true   |  |holidayはなくてもよい |
+

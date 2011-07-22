@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?caty-meta template="smarty"?>
+<!DOCTYPE html
+  PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+  'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>{$title}::Wiki</title>
+		<link rel="top" href="/"/>
+		<link rel="index" href="../"/>
+        <link rel="stylesheet" href="wiki.css" />
+	</head>
+
+	<body>
+        <div class="appmenu">
+            <a href="./{$title}.wiki?_verb=edit">Edit</a> |
+            <a href="./{$title}.wiki?_verb=plain">Plain</a> |
+            <a href="./FrontPage.wiki">FrontPage</a> |
+            <a href='./all.html'>All</a> |
+            {include file="/newpage.html"}
+        </div>
+        <div class="wiki_main">
+        <h1>{$title}</h1> 
+        {$body|noescape}
+        </div>
+        <div class="wiki_footer">last modified: {$lastModified}</div>
+    {include file="templates:/footer.html"}
+	</body>
+</html>
+

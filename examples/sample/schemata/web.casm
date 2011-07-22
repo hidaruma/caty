@@ -1,0 +1,197 @@
+module web; // -*- coding: utf-8 -*-
+
+type hoge = string(remark="hoge");
+
+
+/** MIMEメディアタイプ */
+type mediaType = string(remark = "media-type");
+
+/** 文字エンコーディングスキーム */
+type encoding = string(remark = "encoding");
+
+/** パス */
+type path = string(remark = "path");
+
+/** HTTPヘッダのフィールド値 */
+type fieldValue = (number|string); // Caty内では数値を許す
+
+
+/** Webメッセージ。
+ * リクエストとレスポンスに共通な構造。
+ */ 
+type WebMessage = {
+  // 本質的なメタデータはヘッダに頼らないで、
+  // トップレベルに持つ、ヘッダとの重複は厭わない
+  "contentType" : mediaType,
+  "encoding" : encoding?, // textのときだけ
+  "profile" : string?,
+
+  "header" : {*: fieldValue?},
+  "body" : (string | binary)?, 
+
+  * : any?
+};
+
+/** Webリクエスト。
+ * メッセージにリクエストパス、HTTPメソッド、動詞
+ * の情報が加わる。
+ */ 
+type WebRequest = WebMessage & {
+  "path" : path,
+  "method" : ("GET"|"POST"|"PUT"|"DELETE"|"HEAD"),
+  "verb" : string,
+
+  * : any?
+};
+
+/** Webレスポンス。
+ * メッセージにステータスコードの情報が加わる。
+ */ 
+type WebResponse = WebMessage & {
+  "status" : integer,
+
+  * : any?
+};
+
+
+/** WebRequest型データを作る
+ *
+ */ 
+command make-request 
+ {
+  "content-type" : mediaType?,
+  "is-text" : boolean?,
+
+  @[without("content-type"), without("is-text")]
+  "ext" : string(remark="dotはじまり")?,
+
+  @[default("GET")]
+  "method" : ("GET"|"POST"|"PUT"|"DELETE"|"HEAD")?,
+
+  @[default("")]
+  "verb" : string?, 
+ }
+ [path] 
+
+ :: (string|binary) | [(string|binary), {*:fieldValue?}] -> WebRequest
+refers python:dummy.Dummy;
+
+/**
+ *
+ */ 
+command exec-request :: WebRequest -> WebResponse
+//-- { dispatch-request | exec }
+refers python:dummy.Dummy;
+
+/**
+ *
+ */ 
+command request
+ {
+  "content-type" : mediaType?,
+  "is-text" : boolean?,
+
+  @[without("content-type"), without("is-text")]
+  "ext" : string?,
+
+  @[default("GET")]
+  "method" : ("GET"|"POST"|"PUT"|"DELETE"|"HEAD")?,
+
+  @[default("")]
+  "verb" : string?, 
+ }
+ [path] 
+
+ :: (string|binary) -> WebResponse
+//-- { make-request %--* %1: | exec-request }
+refers python:dummy.Dummy;
+
+/**
+ *
+ */ 
+type ScriptSelection  = {
+ "pathPattern" : string,
+ "verbMethod" : string?,
+ "check" : string?,
+ "selected" : (string | ScriptSelection)
+};
+
+/**
+ *
+ */ 
+command select-script 
+{
+ @[default(false)]  // これをコメントアウトするとスタック食いつぶす
+ "explain" : boolean?,
+
+ @[default("GET")]
+ "method" :  ("GET"|"POST"|"PUT"|"DELETE"|"HEAD")?,
+
+ @[default("")]
+ "verb" : string,
+
+} [path] :: void -> (ScriptSelection | string | null)
+refers python:dummy.Dummy;
+
+
+
+
+/**
+ *
+ */ 
+command dispatch-request :: WebRequest ->Closure
+refers python:dummy.Dummy;
+
+/** クロージャ
+ */ 
+type Closure = {
+ /** 入力 */
+ @[default(null)]
+ "input" : any?,
+
+ /** 変数束縛 */
+ @[default({})]
+ "vars" : object?,
+
+ /** オプションパラメータ */
+ @[default({})]
+ "opts" : object?,
+
+ /** 引数パラメータ */
+ @[default([])]
+ "argv" : array?,
+
+ /** 実行すべきスクリプトコード */
+ @[default("")]
+ "code" : (string | binary)?
+};
+
+command exec [string? ]:: Closure -> any throws Exception
+refers python:dummy.Dummy;
+
+
+
+/** WebResponseデータを作る。
+ * 現在の responseコマンドと同じ。
+ */ 
+command make-response 
+{
+ // @[default(200)]
+ "status" : integer?,
+
+ // @[default("application/octed-stream")]
+ "content-type" : string?,
+
+ "encoding" : string?,
+
+ // @[without("content-type")]
+ "ext" : string?,
+}
+:: (string|binary|null) -> WebResponse
+refers python:dummy.Dummy;
+
+
+
+// End of Module
+
+

@@ -1,0 +1,18 @@
+= スクリプトのテスト
+
+thisfile = behaviors@misc:/script.beh
+
+スクリプトのソースは、scripts@this:/*.caty にある。
+
+== !exec
+
+|= command     |= params     |= output  |= 備考 |
+| const.caty   |             | "hello"  | |
+| concat.caty  | a  b        | "ab"     | |
+| echo.caty    | hello       | "hello"  | |
+| cout.caty    |             | null     |画面表示はする |
+
+
+
+== 説明、問題点
+

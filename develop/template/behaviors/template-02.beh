@@ -1,0 +1,69 @@
+= テンプレートのテスト 2 foreach
+
+== !setup
+
+
+
+=== file:/foreach.txt
+{{{
+<?caty-meta template="smarty" ?>
+{foreach from=$_CONTEXT item=it}{$it}+{/foreach}
+}}}
+
+=== file:/foreachelse.txt
+{{{
+<?caty-meta template="smarty" ?>
+{foreach from=$_CONTEXT item=it}{$it}+{foreachelse}*else*{/foreach}
+}}}
+
+=== script:/foreach.caty
+{{{
+expand /foreach.txt | text:chop
+}}}
+
+=== script:/foreachelse.caty
+{{{
+expand /foreachelse.txt | text:chop
+}}}
+
+== 注意
+
+上のsetupは効いてないようだ。ファイルシステムのファイルが使われる。
+
+== !exec
+
+|= command         |=input   |= output |=  備考 |
+|foreach.caty      |[1, 2]   |"1+2+"   | |
+|foreach.caty      |["a", "b"]   |"a+b+"   | |
+|foreach.caty      |["hello", "world"]   |"hello+world+"   | |
+|foreach.caty      |["", "", ""]     |"+++"   | |
+|foreach.caty      |["", null, ""]   |"+++"   | |
+|foreach.caty      |{"a":1, "b":2}   |"1+2+"  |値がitに代入される。 |
+
+
+== !exec
+
+ここが実行されない。
+
+|= command         |=input    |= output |=exception |=  備考 |
+|foreachelse.caty  |[1, 2, 3] |"1+2+3+" |||
+|foreachelse.caty  |[]        |"*else*" |||
+|foreachelse.caty  |null      |         |Exception|nullは空リスト扱いもあるかも  |
+|foreachelse.caty  |0         |         |Exception| |
+|foreachelse.caty  |-100      |         |Exception| |
+|foreachelse.caty  |{}        |"*else*" |         | 空オブジェクトは空リストと同じ扱い | 
+|foreachelse.caty  |false     |         |Exception| |
+|foreachelse.caty  |true      |         |Exception| |
+|foreachelse.caty  |"hello"   |         |Exception| これは例外のほうがいいと思う。 |
+
+
+
+
+== 説明
+
+実際には、テンプレートファイルとスクリプトはファイルシステムに書いてあります。
+
+
+鍬田コメント： 文字列も iterable なので、実は foreach に文字列が渡せてしまいます。問題があれば修正します。
+
+

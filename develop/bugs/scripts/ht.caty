@@ -1,0 +1,7 @@
+// -*- coding: utf-8 -*-
+
+/** Help for Type -- 型のヘルプ
+ */
+
+type %1 | cout
+

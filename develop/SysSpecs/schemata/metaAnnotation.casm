@@ -1,0 +1,99 @@
+// -*- coding: utf-8 -*-
+
+/** アノテーション宣言において使うアノテーション */
+module metaAnnotation;
+
+/** アノテーションのターゲットタイプ 
+ */
+type TargetType = (
+  /** 任意のターゲット */
+  "ANY_TARGET" |
+
+  // == モジュール ==
+
+  /** モジュールの宣言文（module 名前 ） */
+  "MODULE_DECL" |
+
+  // == 型 ==
+
+  /** 型の宣言文 */
+  "TYPE_DECL" | 
+  /** 例外型の宣言文 */
+  "EXCEPTION_DECL" | 
+  /** アノテーションの宣言文 */
+  "ANNOTATION_DECL" |
+  /** アノテーション定義のパラメータ（プロパティ） */
+  "ANNOTATION_PARAM" |
+
+  /** 任意の型（型表現） */
+  "TYPE" |
+  /** スカラー型 */
+  "SCALAR" |
+  /** オブジェクト型 */ 
+  "OBJECT" |
+  /** 配列型 */
+  "ARRAY" |
+  /** ユニオン型 */
+  "UNION" |
+  /** タグ付き型 */
+  "TAGGED" | // TAGGED_TYPE から変更
+  /** オブジェクトのプロパティ */
+  "PROPERTY" |
+  /** 配列の項目 */
+  "ITEM" |
+  /** 列挙型／ユニオン型の選択肢 */
+  "CHOICE" |
+
+  // == コマンド ==
+
+  /** コマンドの宣言文 */
+  "COMMAND_DECL" |
+  /** コマンドのオプション（プロパティ） */
+  "OPTION" |
+  /** コマンドの引数（項目） */
+  "ARGUMENT" |
+  /** コマンドの定義体 */
+  "COMMAND_BODY" |
+
+);
+
+
+/** アノテーションのターゲットを指定
+ * どの構文構成素に対してアノテートするかを指定する。
+ * このアノテーションが指定されないときは、ANY_TARGET となる。
+ */
+@[annotation, target("ANNOTATION_DECL")]
+type target = {
+ "value" : (TargetType | [TargetType, TargetType*])
+};
+
+/** アノテーションパラメータのなかで、名前を省略できるパラメータを指定
+ * このアノテーションは、高々1つのアノテーションパラメータにだけに付けられる。
+ * このアノテーションが指定されないときは、"value" という名前のパラメータ（プロパティ）が
+ * 名前省略可能なパラメータである。
+ */
+@[annotation, target("ANNOTATION_PARAM")]
+type annotation-value = {};
+
+/** このアノテーションはimporの際に削除すべきことを示す
+ */
+@[annotation, target("ANNOTATION_DECL")]
+type strip-off-when-import = {};
+
+/** このアノテーションは型表現のパーシングに影響を与える
+ */
+@[annotation, target("ANNOTATION_DECL")]
+type affect-parsing = {};
+
+/** このアノテーションは妥当性検証に影響を与える
+ */
+@[annotation, target("ANNOTATION_DECL")]
+type affect-validation = {};
+
+/** このアノテーションは型定義の管理に影響を与える
+ */
+@[annotation, target("ANNOTATION_DECL")]
+type affect-management = {};
+
+
+// End of Module

@@ -1,0 +1,142 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= 簡易ハイパー遷移記述の拡張
+
+
+* [[ReducedHypertransitions.wiki]]
+
+
+簡易ハイパー遷移記述の枠組みを拡張して、
+GData方式でJSONエンコードされたAtomエントリーのリンク要素を扱う方法を考える。
+主にアノテーション機能を利用する。
+
+== 全般的な注意
+
+以下に述べることは、アドホックな対応なのであまり望ましい方法とは言えない。
+が、なるべく早く実装して実用に使うには//イタシカタナイ//かもしれない。
+
+== アノテーションの構文に関する注意
+
+基本は、@[アノテーション名(アノテーション属性並び)] である。アノテーション属性は名前・値ペアを区切り記号'='で記述する。
+スキーマ属性と同じ構文である。値は任意のJSONリテラルであり、スカラーでなくてもよい。
+
+アノテーションの場合、value=値 という属性は、単に値だけを書いてもよい。
+@[foo(value = "hello")] は、@[foo("hello")] と略記できる。
+名前の省略が可能なのは1つの属性だけで、2つ以上の無名属性を書くことはできない。
+また、@[foo()] は、@[foo] と書ける。
+
+アノテーションの仕様は、JSONオブジェクト型の型定義式（type expression）で表現できる。
+名前を省略可能な属性（の名前）はvalueだが、アノテーション仕様定義により、
+value以外の属性を名前省略可能と指定することができる。
+
+==  @[anchor] と @[form] の仕様
+
+{{{
+
+/** リネームの指定
+ * プロパティ名 -- 新しい名前＝標準の名前
+ * プロパティ値 -- 古い名前＝もとの名前
+ */
+type RemapSpec = {
+ * : string?
+};
+
+/** @[anchor], @[form] に共通の定義 */
+type TriggerAnnotationObj = {
+ /** トリガー名 */
+ @[annotation-value] // 属性名を省略可能
+ "name" : string(format="caty-std-name"),
+
+ /** リネームの指定 */
+ @[default({})]
+ "remap" : RemapSpec?,
+}
+
+/** アンカーであることを示すアノテーション */
+@[target("PROPERTY")]
+annotation anchor = TriggerAnnotationObj;
+
+/** フォームであることを示すアノテーション */
+@[target("PROPERTY")]
+annotation form = TriggerAnnotationObj;
+
+}}}
+
+#  @[annotation-value]アノテーションは、アノテーション仕様に対するアノテーション（メタアノテーション）で、
+これが指定された属性（プロパティ）の名前を省略可能とする。valueという名前のプロパティは、
+@[annotation-value]を指定しなくても名前が省略可能となる。
+# remapは省略可能でデフォルト値が設定されている。よって、@[anchor(name="foo")] と書いてもよく、
+さらにこれは、@[anchor("foo")] と書けて、その意味は @[anchor(name="foo", remap={})] となる。
+# @[anchor], @[form] のアノテーションターゲット（なんに対してアノテートするか）は、プロパティである。
+# caty-std-nameの仕様は[[NameSyntax.wiki]]にある。
+
+== auto-printコマンドによるアノテーション情報の利用
+
+auto-printコマンドは、引数から型名を受け取り、スキーマから当該型情報を引き出してHTMLの生成に利用する。
+このとき、@[anchor] と @[form] により付与された情報は次のように利用される。
+
+# オブジェクトのプロパティに @[anchor]が付いていれば、プロパティ値はAnchor型であり、
+HTMLのアンカーに変換すべきであることを知る。
+# オブジェクトのプロパティに @[form]が付いていれば、プロパティ値はForm型であり、
+HTMLのフォームに変換すべきであることを知る。
+# remapアノテーション属性があれば、プロパティ値であるAnchor型／Form型データのプロパティ値を得るとき、
+remapによるリネームをしてからアクセスする。例えば、"href" : "url" というリマップ項目があれば、hrefプロパティへの
+アクセスはurlプロパティへのアクセスにリダイレクトされる。
+# プロパティ値であるAnchor型／Form型データのプロパティ値に基づき、HTMLのa要素／form要素を生成する。
+# Form型の場合、inputDatatypeプロパティ値に基づき、対応する型情報をスキーマから引き出して、
+HTML form要素の内容を生成するために利用する。このとき、@[ui], @[lable] などのアノテーション情報が利用されるかもしれない。
+[[>http://d.hatena.ne.jp/m-hiyama/20101213/1292201095]]
+
+== remapアノテーション属性の具体例
+
+名前の対応が次のような場合：
+
+|= 新しい標準的名前 |= 古いもとの名前 |
+| "method"          | "ahax$method"   |
+| "verb"            | "ahax$verb"     |
+| "inputDatatype"   | "ahax$inputType"|
+| "help"            | "ahax$help"     |
+
+remapアノテーション属性の値は、次のJSONオブジェクトになる。
+
+
+{{{
+{
+  "method"          : "ahax$method"   ,
+  "verb"            : "ahax$verb"     ,
+  "inputDatatype"   : "ahax$inputType",
+  "help"            : "ahax$help"     ,
+}
+}}}
+
+実際のアノテーションは例えば次：
+
+{{{
+@[form(
+   name="edit", 
+   rempa= {
+     "method"          : "ahax$method"   ,
+     "verb"            : "ahax$verb"     ,
+     "inputDatatype"   : "ahax$inputType",
+     "help"            : "ahax$help"     ,
+   })
+]
+}}}
+
+
+== fix-linksコマンドによるアノテーション情報の利用
+
+
+fix-linksコマンドは、入力であるハイパーオブジェクト（ハイパーメディア型のデータ）
+
+
+
+//TBD まだ続く。//
+
+
+
+
+
+
+
+

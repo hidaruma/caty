@@ -1,0 +1,49 @@
+= リソースID
+
+== 構文
+
+コマンドごとに決まるデフォルトプレースを表すために、'default' を入れたい。
+
+{{{
+
+mafsVolume ::= (place '@')? application
+place ::= 'pub' | 'data' | 'include' | 'default'
+application ::= 'this' | アプリケーション名 ('this'以外)
+resId ::= (mafsVolume ':')? path
+path ::= '/'から始まる絶対パス
+
+}}}
+
+== テスト方法
+
+file:exists が、不正なリソースID構文で例外を出すことを利用する。
+
+=== !name:not
+
+{{{
+@NOT "/notExist"
+}}}
+
+== !exec
+
+|= command    |= params    |=output             |=exception |= 備考 |= judge |
+| file:exists | notExist   |                    | Exception |  |
+| file:exists | /notExist  |@NG "/notExist"    |           |  |
+| file:exists | //notExist |                    | Exception | コメントになってしまう |
+| file:exists | :/notExist |                    | Exception | コロンだけはダメ |
+| file:exists |this:/notExist|@NG "this:/notExist"|  | |
+| file:exists |this:notExist|                   | Exception| スラッシュがない |
+| file:exists |root:/notExist|@NG "root:/notExist"|  | |
+| file:exists |root:notExist|                   | Exception| スラッシュがない |
+| file:exists |notExist:/notExist|              | Exception| アプリケーションが存在しない |
+| file:exists | pub@this:/notExist|@NG "pub@this:/notExist"| | |
+| file:exists | pub@root:/notExist|@NG "pub@root:/notExist" | | |
+| file:exists | data@this:/notExist|@NG "data@this:/notExist"| | |
+| file:exists | data@root:/notExist|@NG "data@root:/notExist"| | |
+| file:exists | include@this:/notExist|@NG "include@this:/notExist" | | |
+| file:exists | include@root:/notExist|@NG "include@root:/notExist" | | |
+| file:exists | pub@:/notExist|                 | Exception |アプリケーション名がない |
+| file:exists | @this:/notExist|                | Exception |プレース名がない |
+| file:exists | default@this:/notExist|@NG "default@this:/notExist"|   | default | ignore |
+
+

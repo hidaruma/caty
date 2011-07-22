@@ -1,0 +1,16 @@
+= 妥当性検証 外部モジュールによる値領域の拡張
+
+== !exec
+
+
+|= inut   |= command        |= params          |= output   |= 備考 |
+| 1       |validate --pred  | extBase:xnumber  | true      | |
+| 2       |validate --pred  | extBase:xnumber  | true      | |
+| 100     |validate --pred  | extBase:xnumber  | true      | |
+| "inf"   |validate --pred  | extBase:xnumber  | true      | |
+| "hello" |validate --pred  | extBase:xnumber  | false     | |
+| []      |validate --pred  | extBase:xnumber  | false     | |
+
+
+----
+

@@ -1,0 +1,239 @@
+Coding -*- coding: utf-8 -*-
+
+= アノテーション一覧
+
+アノテーションの定義をスキーマで書くことにした (2010-12-14T15:44:40)。
+
+== アノテーションを定義する方法
+
+アノテーションの構文は以下のとおり。
+
+{{{
+
+/* トークンのあいだの空白、改行は許す */
+
+アノテーション ::= '@[' アノテーション指定 (',' アノテーション指定)* ']'
+
+
+}}}
+
+アノテーション指定は、名前とパラメータからなる。
+
+{{{
+
+アノテーション指定 ::= 名前 パラメータリスト?
+パラメータリスト ::= '(' パラメータ+ ')' // 空なパラメータリストは認めないことにする
+パラメータ ::= 名前なしパラメータ | 名前付きパラメータ
+名前なしパラメータ ::= JSONリテラル
+名前付きパラメータ ::= 名前 '=' JSONリテラル
+
+/* 名前なしパラメータは高々1個しか許されない */
+
+名前 ::= スキーマ属性名と同じ
+
+}}}
+
+
+アノテーション指定は、名前をタグ名とするタグ付きオブジェクトで表現できる。
+アノテーション全体はそれらの配列で表現できる。
+例えば、
+@[without("ext"), default("application/octet-stream")] は、次の配列となる。
+なお、"value"パラメータ（プロパティ）の名前を省略できるのはJavaアノテーションと同じ規則である。
+
+{{{
+[
+  @without {
+    "value" : "ext",
+  },
+  @default {
+    "value" : "application/octet-stream"
+  }
+]
+}}}
+
+以上の事情により、アノテーションの定義は、タグ付きオブジェクト型の型定義となるが、例外と同様に、次の
+特殊構文を準備したい。
+
+{{{
+
+@[target("PROPERTY")]
+annotation without = {
+  "value" : (string | [string, string*])
+};
+
+}}}
+
+
+当面は、次の代替構文を使う
+
+{{{
+
+@[annotation, target("PROPERTY")]
+type without = {
+  "value" : (string | [string, string*])
+};
+
+}}}
+
+== アノテーションのターゲットの包含関係
+
+# 任意のターゲット ⊆ ANY_TARGET
+# SCALAR ⊆ TYPE
+# OBJECT ⊆ TYPE
+# ARRAY  ⊆ TYPE
+# UNION  ⊆ TYPE
+# TAGGED ⊆ TYPE
+# OPTION ⊆ PROPERTY
+# ANNOTATION_PARAM ⊆ PROPERTY
+# ARGUMENT ⊆ ITEM
+# EXCEPTION_DECL  ⊆ TYPE_DECL
+# ANNOTATION_DECL ⊆ TYPE_DECL
+
+これ以外は独立（排他的）。
+
+== アノテーション定義に付けるアノテーション
+
+{{{
+
+module meta-annotation;
+
+/** アノテーションのターゲットタイプ 
+ */
+type TargetType = (
+  /** 任意のターゲット */
+  "ANY_TARGET" |
+  /** 型の宣言文 */
+  "TYPE_DECL" | 
+  /** 例外型の宣言文 */
+  "EXCEPTION_DECL" | 
+  /** スカラー型 */
+  "SCALAR" |
+  /** オブジェクト型 */ 
+  "OBJECT" |
+  /** 配列型 */
+  "ARRAY" |
+  /** ユニオン型 */
+  "UNION" |
+  /** タグ付き型 */
+  "TAGGED" | // TAGGED_TYPE から変更
+  /** 任意の型（型表現） */
+  "TYPE" |
+  /** オブジェクトのプロパティ */
+  "PROPERTY" |
+  /** 配列の項目 */
+  "ITEM" |
+  /** 列挙型／ユニオン型の選択肢 */
+  "CHOICE" |
+  /** コマンドの宣言文 */
+  "COMMAND_DECL" |
+  /** コマンドのオプション（プロパティ） */
+  "OPTION" |
+  /** コマンドの引数（項目） */
+  "ARGUMENT" |
+  /** アノテーションの宣言文 */
+  "ANNOTATION_DECL" |
+  /** アノテーションのパラメータ（プロパティ） */
+  "ANNOTATION_PARAM" |
+  /** モジュールの宣言文（module 名前 ;） */
+  "MODULE_DECL"
+);
+
+
+/** アノテーションのターゲットを指定
+ * どの構文構成素に対してアノテートするかを指定する。
+ * このアノテーションが指定されないときは、ANY_TARGET となる。
+ */
+@[annotation, target("ANNOTATION_DECL")]
+type target = {
+ "value" : (TargetType | [TargetType, TargetType*])
+};
+
+/** アノテーションパラメータのなかで、名前を省略できるパラメータを指定
+ * このアノテーションは、高々1つのアノテーションパラメータにだけ付けられる。
+ * このアノテーションが指定されないときは、"value" という名前のパラメータ（プロパティ）が
+ * 名前省略可能なパラメータである。
+ */
+@[annotation, target("ANNOTATION_PARAM")]
+type value = {};
+
+}}}
+
+== 一般のアノテーション
+
+{{{
+
+module std-annotation;
+
+/** ドキュメンテーションテキスト
+ */
+@[annotation, target("ANY_TARGET")]
+type doc = {
+ "value" : string
+};
+
+
+/** 型の隠蔽
+ * このアノテーション付きで宣言・定義された型はモジュールからexportされない。
+ */
+@[annotation, target("TYPE_DECL")]
+type hidden = {};
+
+/** 非推奨、廃止予定
+ */
+@[annotation, target(["TYPE_DECL", "COMMAND_DECL", "PROPERTY"])]
+type deprecated = {};
+
+
+/** open制約
+ * この型の制約はopenと解釈される。再帰的に適用される。
+ */
+@[annotation, target(["OBJECT", "ARRAY"])]
+type open = {};
+
+/** closed制約
+ * この型の制約はclosedと解釈される。再帰的に適用される。
+ */
+@[annotation, target(["OBJECT", "ARRAY"])]
+type closed = {};
+
+/** デフォルト値
+ * オブジェクトのプロパティが省略されたときのデフォルト値を指定する。
+ * 省略可能なプロパティにしか意味を持たない。
+ */
+@[annotation, target("PROPERTY")]
+type default = {
+  "value" : any
+};
+
+/**
+ * 指定した名前のプロパティがないときは、ターゲットのプロパティは出現できない。
+ * 複数のプロパティに依存関係があるときに使用する。
+ */
+@[annotation, target("PROPERTY")]
+type with = {
+  "value" : (string | [string, string*])
+};
+
+/**
+ * 指定した名前のプロパティがあるときは、ターゲットのプロパティは出現できない。
+ * 複数のプロパティに依存関係があるときに使用する。
+ */
+@[annotation, target("PROPERTY")]
+type without = {
+  "value" : (string | [string, string*])
+};
+
+/** 読み取り専用
+ * このアノテーション付きのプロパティを書き換える操作は出来ないか、または無視される。
+ */
+@[annotation, target("PROPERTY")]
+type readonly = {};
+
+/** 単一インスタンス実行
+ * このアノテーション付きで宣言されたコマンドは、
+ * 一つのプロセスあたり高々一つのインスタンスだけが実行される。
+ */
+@[annotation, target("COMMAND_DECL")]
+type sequential = {};
+
+}}}

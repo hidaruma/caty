@@ -1,0 +1,18 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+== changeset:   2293:d5e7b8a05bfa
+
+* cmd:p hello -- OK
+* cmd:ht AppManifest -- NG
+* p.caty hello -- NG
+* ht.caty AppManifest -- OK
+
+
+== changeset:   2296:d7bf20e8d7e4
+
+* cmd:p hello -- OK
+* cmd:ht AppManifest -- NG
+* p.caty hello -- OK
+* ht.caty AppManifest -- OK
+
+宣言がないので、voidを判断できないのは今は致し方ない。

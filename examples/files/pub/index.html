@@ -1,0 +1,39 @@
+<?caty-meta template="smarty"?>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+  PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+  'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>File Uploader</title>
+    </head>
+    <body>
+        {include file="templates:/global_menu.html"}
+        <h1>File Uploader</h1>
+        <div class="files.message">
+            {if $message|empty|not}
+            <p>{$message}</p>
+            {/if}
+        </div>
+        <div class="files.form">
+            <form method="post" enctype="multipart/form-data" action="/files/upload.cgi">
+                <table class="files.form">
+                <tr><td>ファイル: </td><td><input type="file" name="file" /></td></tr>
+                <tr><td>ファイル名（オプション）:</td><td><input type="text" name="filename" />
+                サーバでファイル名を生成する<input type="checkbox" name="use_auto_gen" value="true" /></td></tr>
+                <tr><td><input type="hidden" name="$_catySecureToken" value="{$token}"/><input type="submit" /></td></tr>
+                </table>
+             </form>
+        </div>
+        <div class="files.list">
+            <table>
+                <tr><th>ファイル名</th><th>アップロード日時</th></tr>
+                {foreach from=$files item=item}
+                <tr><td><a href="/files{$item.link}">{$item.filename}</a></td><td>{$item.updated}</td></tr>
+                {/foreach}
+            </table>
+        </div>
+        {include file="templates:/footer.html"}
+    </body>
+</html>
+

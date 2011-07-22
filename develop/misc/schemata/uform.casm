@@ -1,0 +1,71 @@
+module uform; // -*- coding: utf-8 -*-
+
+/* スキーマ処理（&演算）のエラーがある */
+/* 最後にある type UserRegistrationForm_4 の定義を生かすと、
+ エラーになる 
+*/
+
+type uri = string(remark="uri");
+type mediaType = string(remark="media-type");
+type httpMethod = ("GET" | "PUT" | "POST" | "DELETE" | "HEAD");
+type email = string(remark="email");
+
+
+type PostForm<InputType> = {
+ "href" : uri,
+ "method" : "POST",
+ "verb" : string?,
+ "input" : InputType,
+
+  * : any?
+};
+ 
+type UserInfo = {
+ "userId" : string(minLength=3, maxLength=12),
+ "password" : string(minLength=6, maxLength=16),
+ "email" : email
+};
+
+// 型変数の具体化
+type UserRegistrationForm = PostForm<UserInfo>;
+
+// 上の定義とまったく同じハズ
+type UserRegistrationForm_2 = {
+ "href" : uri,
+ "method" : "POST",
+ "verb" : string?,
+ "input" : {
+   "userId" : string(minLength=3, maxLength=12),
+   "password" : string(minLength=6, maxLength=16),
+   "email" : email
+  },
+
+  * : any?
+};
+
+// verb を "register" に固定
+type UserRegistrationForm_3 = {
+ "href" : uri,
+ "method" : "POST",
+ "verb" : "register",
+ "input" : {
+   "userId" : string(minLength=3, maxLength=12),
+   "password" : string(minLength=6, maxLength=16),
+   "email" : email
+  },
+
+  * : any?
+};
+
+// これでもいいはずだが？？
+
+/*
+type UserRegistrationForm_4 = PostForm<UesrInfo> & {
+  // verb を "register" に固定
+  "verb" : "register",
+  * : any?
+};
+*/
+
+
+// End of Module

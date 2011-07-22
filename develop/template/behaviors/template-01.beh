@@ -1,0 +1,49 @@
+= テンプレートのテスト 1 echo
+
+== !setup
+
+=== file:/echo.txt
+{{{
+<?caty-meta template="smarty" ?>{$_CONTEXT}
+}}}
+
+=== script:/echo.caty
+{{{
+expand /echo.txt | text:chop
+}}}
+
+== 注意
+
+上のsetupは効いてないようだ。ファイルシステムのファイルが使われる。
+
+鍬田コメント： script は scripts にファイルを書き込むわけではないです。 script に記述するのは setup 時に動かす Caty スクリプトです。
+
+== !exec;
+
+|= command         |=input   |= output |=exception |=  備考 |
+| echo.caty        | "hello" |"hello" ||
+| echo.caty        | 12      |"12" ||
+| echo.caty        | 0       |"0" ||
+| echo.caty        | 3.14    |"3.14" ||
+| echo.caty        | 0.0     |"0.0" ||
+| echo.caty        | 0.00    |"0.00" || "0", "0.0", "0.00" は違うのか？ |
+| echo.caty        | 0.000   |"0.000" ||
+| echo.caty        | 12     |"12" |||
+| echo.caty        | null    |"" | null は空になる |
+| echo.caty        | true    |"true" |小文字|
+| echo.caty        | false   |"false" |小文字|
+
+|= command         |=input   |= output |=  備考 |
+| echo.caty        |[1, 2]   |"[1,2]" |
+| echo.caty        |{"a":1, "b":2} |'''{"a":1,"b":2}''' |引用符はどう扱う？ |
+| echo.caty        |["a", "b"] |'''["a","b"]''' |引用符はどう扱う？ |
+
+
+
+== 説明と問題点
+
+鍬田コメント： Caty は float ではなく Decimal を使っているので、 0.0 と 0.00 と 0.000 を文字列化すると違った結果になります。
+
+
+----
+

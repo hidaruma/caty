@@ -1,0 +1,113 @@
+Coding -*- coding: utf-8 -*-
+
+=  
+prevError
+
+不思議なレンダリング。
+
+== 検証エラーの一般形 ==
+
+validateコマンドは、将来的に次のようなエラー情報を出力することを想定している。
+
+{{{
+type ValidationResult = @OK any | @NG ValidationErrorReport;
+
+type ValidationErrorReport = @validationErorReport {
+
+// エラーが検出された場所へのJSONパス。このパスにより抽出される値のなかに必ずエラーがある。
+  "path" : string,  
+// エラー理由コード 
+  "reason" : string,
+// 当該文脈で期待されている正しい型
+  "type" : ("integer"|"number"|"string"|"boolean"|"null"|"array"|"object"|"binary"|"tagged"),
+// エラーのヒントとなる値、スキーマ属性値、配列インデックス、オブジェクト・プロパティ名など
+  "hint" : any?,
+// 人間可読なメッセージ
+  "message" : string,
+// 拡張ポイント
+  * : any
+};
+}}}
+
+messageは標準的なメッセージ、他の情報を使ってユーザー側で自由に文言を制御できるようにする。\\
+例：「まことに残念ながら、ご指定のプロパティ %s がございません。」
+「型がチゲーよ： ここは %s だろ」［値が最大値 %d を超えているのはマズイんです。（場所は	%s）」
+
+reason, type, hint は次のようになるだろう。typeとhintには必ず「期待される正しい型／値」が入る。
+
+* BAD_TYPE, //type//
+* VIOLATE_//ATTRIBUTE_NAME//, //type//, //attribute_value//
+* MISSING_ITEM, array, //index//
+* UNEXPECTED_ITEM, array, //index//
+* MISSING_PROPERTY, object, //name//
+* UNEXPECTED_PROPERTY, object, //name//
+
+最初のエラーを見つけて停止する場合は、ValidationErrorReportを出力すれば十分だが、
+エラーが検出された項目／プロパティを無視して、さらに検査をする場合は、
+配列 [ValidationErrorReport*] またはパスをキーとするオブジェクトを出力する必要がある。
+
+
+次のスキーマ属性に関する妥当性を確認。
+
+|= スキーマ属性 |=台となる型 |= エラー理由識別子 |
+| minimum       | number     | VIOLATE_MINIMUM |
+| maximum       | number     | VIOLATE_MAXIMUM |
+| minLength     | string     | VIOLATE_MIN_LENGTH |
+| maxLength     | string     | VIOLATE_MAX_LENGTH |
+| minItems      | array      | VIOLATE_MIN_ITEMS |
+| maxItems      | array      | VIOLATE_MAX_ITEMS |
+
+
+
+
+
+配列のエラー（非妥当性の理由）は次の3種に大別される。
+
+|MISSING_ITEM, array, //k// | //k//番目の項目が必要だが欠けている |
+|UNEXPECTED_ITEM, array, //k// | //k//番目の項目は存在し無いハズだが出現している |
+|項目のエラー //p// | パス//p//の項目にエラーがある |
+
+オブジェクトのエラー（非妥当性の理由）は次の3種に大別される。
+
+|MISSING_PROPERTY, object, //name// | //name//のプロパティが必要だが欠けている |
+|UNEXPECTED_PROPERTY, object, //name// | //name//のプロパティは存在し無いハズだが出現している |
+|プロパティエラー //p// | パス//p//のプロパティにエラーがある |
+
+
+----
+
+
+== 
+== メモ：エラーの候補
+
+* IndexOutOfRange index
+* PropertyNotExist name
+
+* ScriptNotFound fileName
+* FileNotFound fileName
+* FileIOError fileName
+* TableNotFound tableName
+* TableAccessError tableName
+
+* InvalidInput  (IllegalInput) ValidatatonError
+
+* UnexpectedOption option
+* Bad Option option value
+* UnexpectedArg index
+* MissingArg index
+* BadArg index value
+
+* CertificationFailed
+* SecurityError
+* IllegalAccess
+
+* MalformedData data
+* CommandExecutionError
+* SyntaxError fileName lineNo line
+* RuntimeError detail
+* Timeout detail
+
+* ArithmeticError
+* OperationUnsupported operation
+* Unknown
+* ImplementationBug

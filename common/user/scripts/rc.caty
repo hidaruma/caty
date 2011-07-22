@@ -1,0 +1,9 @@
+[strg:create-collection --as-global user:RegistryInfo user,
+ {
+     "userid": "root", 
+     "username": "root ユーザー", 
+     "role": ["root"], 
+     "password": "caty"
+ } | user:add
+]
+

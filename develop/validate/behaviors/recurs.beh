@@ -1,0 +1,92 @@
+= 再帰的型定義に関するテスト =
+
+== スキーマ
+
+See schemata@this:/t05.casm, schemata@this:/t06.casm .
+
+* t04.casm : XHTMLのemとstrong
+* t05.casm : 非空データの定義
+* t06.casm : ツリー構造
+
+=== !name:t01
+
+{{{
+@branch {"left" : @leaf 1, "right": @leaf 2}
+}}}
+
+=== !name:t02
+
+{{{
+@branch {"left" : @leaf 1, "right": null}
+}}}
+
+=== !name:t03
+
+{{{
+@branch {"left" : null, "right": @leaf "hello" }
+}}}
+
+
+=== !name:t04
+{{{
+@branch {
+ "left" : @leaf "hello",
+ "right" : @branch {
+    "left": @leaf "world",
+    "right" : null
+  }
+}
+}}}
+
+=== !name:t05
+{{{
+@branch {"left" : @leaf 1}
+}}}
+
+=== !name:t06
+{{{
+@branch {"left" : 1, "right": "hello" }
+}}}
+
+
+== !exec
+
+|= command        |= params  |=  input   |= output   |= 備考   |
+| validate --pred | t06:Tree | null      | true      | nullは空木を表す |
+| validate --pred | t06:Tree | @leaf 12  | true      | リーフだけでもツリー |
+| validate --pred | t06:Tree | %t01      | true      | |
+| validate --pred | t06:Tree | %t02      | true      | |
+| validate --pred | t06:Tree | %t03      | true      | |
+| validate --pred | t06:Tree | %t04      | true      |ネスト |
+| validate --pred | t06:Tree | %t05      | false     |rightの省略は許されてない |
+| validate --pred | t06:Tree | %t06      | false     | @leafが常に必要 |
+
+
+
+|= command        |= params    |=  input   |= output   |= 備考   |
+| validate --pred | t05:NEData | null      | false     | null は空 |
+| validate --pred | t05:NEData | ""        | false     | "" は空 |
+| validate --pred | t05:NEData | []        | false     | [] は空 |
+| validate --pred | t05:NEData | {}        | false     | {}は空 |
+| validate --pred | t05:NEData | 23        | false     | 整数はお呼びじゃない |
+| validate --pred | t05:NEData | "hello"   | true      | |
+| validate --pred | t05:NEData | ["a"]     | true      | |
+| validate --pred | t05:NEData | [23]      | false     | |
+
+
+|= command        |= params       |=  input      |= output   |= 備考   |
+| validate --pred | t05:NEObject  | {}           | false     | |
+| validate --pred | t05:NEObject  | {"a":"1"}      | true      | |
+| validate --pred | t05:NEObject  | {"a":"1", "b":"2"} | true    | |
+| validate --pred | t05:NEData  | {}           | false     | |
+| validate --pred | t05:NEData  | {"a":"1"}      | true      | |
+| validate --pred | t05:NEData  | {"a":"1", "b":"2"} | true    | |
+
+
+|= command        |= params    |=  input      |= output   |= 備考   |
+| validate --pred | t04:em     | null         | false     | null は要素ではない |
+| validate --pred | t04:em     | @em {"":[]}  | true     | 空内容はOK |
+| validate --pred | t04:em     | @em {"":["hello"]}  | true     | テキスト内容はOK |
+| validate --pred | t04:em     | @en {"":["hello"]}  | false     | タグ名が違う |
+
+

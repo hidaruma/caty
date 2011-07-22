@@ -1,0 +1,44 @@
+[
+{
+    "command": "user:add",
+    "setup": "strg:create-table userInfo user",
+    "teardown": '''
+        "foo" | user:delete
+    ''',
+    "data": [
+        [{"userid": "foo", "password": "pass", "grant": ["member"]},
+         true
+        ],
+        [{"userid": " ", "password": "pass", "grant": ["member"]},
+         false
+        ],
+        [{"userid": "bar", "password": " ", "grant": ["member"]},
+         false
+        ],
+    ]
+},
+{
+    "command": '''
+        capture {user:login} | when {
+            Err => pv header | 
+                   findpv "Set-Cookie" | 
+                   when {EXISTS=>true, NO=>false},
+            OK => false
+        }
+        ''',
+    "setup": '''
+        [
+            {"userid":"u1", "password": "pass1", "grant": ["admin"]}, 
+            {"userid":"u2", "password": "pass2", "grant": ["member"]}, 
+        ] | each {user:add}
+        ''',
+    "teardown":'''["u1", "u2"] | each {user:delete} ''',
+    "data": [
+        [{"userid":"u1", "password": "pass1"}, true],
+        [{"userid":"u2", "password": "pass2"}, true],
+        [{"userid":"u1", "password": "pass2"}, false],
+        [{"userid":"u2", "password": "pass1"}, false],
+    ]
+}
+]
+

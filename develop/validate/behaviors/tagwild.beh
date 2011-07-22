@@ -1,0 +1,34 @@
+= 妥当性検証 タグのワイルドカード
+
+
+== !setup
+
+=== !schema:/tagwild.casm
+
+{{{
+module tagwild; 
+
+type AnyObj = @* {*:any?};
+
+type AnyArr = @* [any*];
+
+type AnyStr = @* string;
+}}}
+
+
+== !exec
+
+
+|= command       |= params        |= input    |= output |=exception |= 備考 |= judge|
+|validate --pred | tagwild:AnyObj | @foo {}   | true    | | | |
+|validate --pred | tagwild:AnyObj | @bar {"a":1} | true    ||| |
+|validate --pred | tagwild:AnyObj | @1 {"a":1,"b":2} | true    ||| |
+|validate --pred | tagwild:AnyObj | @object {} | true    | |これが微妙| ignore |
+|validate --pred | tagwild:AnyObj | @object {} | false   | |これが微妙| ignore |
+|validate --pred | tagwild:AnyObj | @string {} |    |Exception |これも微妙| ignore |
+|validate --pred | tagwild:AnyObj | @_object {} | true   | |XHTMLの範囲ならこれでもOK| |
+|validate --pred | tagwild:AnyObj | @_string {} | true   | |||
+|validate --pred | tagwild:AnyObj | @"$object" {} | true   | |これで名前衝突を避けるか||
+|validate --pred | tagwild:AnyObj | @"$string" {} | true   | |||
+
+

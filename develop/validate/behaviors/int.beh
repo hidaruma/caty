@@ -1,0 +1,48 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= 整数型
+
+integerはnumberのサブタイプであり、integerとは別にfloat的なnumber型があるわけではない。
+このため、integerは独立した型と認めることはできず、
+次のように事前定義（predefine）がされていると解釈する。
+
+{{{
+type integer = number(isInteger = true);
+}}}
+
+ここで、スキーマ属性isIntegerに対応する述語は次のようになる。
+
+{{{
+def is_integer(n):
+    return math.floor(n) == n
+}}}
+
+スキーマ属性で修飾された型に対する妥当性は次の2つを満たすこと：
+
+# インスタンスが台型（underlying type）に属する。
+# インスタンスがスキーマ属性に対応する述語（predicate）の条件を満たす。
+
+
+[[enum.fit|列挙と集合]] も参照。
+
+== !exec
+
+|= command              |= output |= input  |
+|validate --pred integer| true   | 1 |
+|validate --pred integer| true   | 1.0 |
+|validate --pred integer| true   | 1.00 |
+|validate --pred integer| false  | 1.1 |
+|validate --pred integer| false  | 1.01 |
+|validate --pred integer| true   | 0.0 |
+|validate --pred integer| false  | -0.0003 |
+
+
+|= command             |= output |= input  |
+|validate --pred number| true   | 1 |
+|validate --pred number| true   | 1.0 |
+|validate --pred number| true   | 1.00 |
+|validate --pred number| true   | 1.1 |
+|validate --pred number| true   | 1.01 |
+|validate --pred number| true   | 0.0 |
+|validate --pred number| true   | -0.0003 |
+

@@ -1,0 +1,35 @@
+= nth コマンド
+
+== !exec
+
+|=input            |=command |=output |=exception |= 例外クラス |=説明   |
+|["a", "b", "c"]   | nth 1   | "a"    |           |             | 最初の要素の番号は 1 です|
+|["a", "b", "c"]   | nth 0   |        | Exception | IndexOutOfRange| 0 を指定するとエラーです|
+| ["a", "b", "c"]  | nth -1  |        | Exception | IndexOutOfRange| 負の数もエラーです |
+|["a", "b", "c"]   | nth 3   | "c"    |           |                | 当然、こうなります |
+| ["a", "b", "c"]  | nth 4   |        | Exception | IndexOutOfRange     | 引数が範囲外です |
+|{"1":"a", "2":"b"}| nth 1   |        | Exception | IllegalInput   | オブジェクトには使えません|
+|"abc"             | nth 1   |        | Exception | IllegalInput   | 文字列もダメです |
+|["a", "b", "c"]   | nth 0.1 |        | Exception | IllegalArg     | 引数は整数のみ |
+
+
+== 説明
+
+nth コマンドは、配列のn番目の要素を取り出します。
+
+* [[http://bitbucket.org/project_caty/caty_mainline/wiki/SpecDocs/ExampleNth]]
+
+== 連絡
+
+このようなときでも、エクスペテーションの追加ができるように、暫定的に --force が欲しい。
+
+
+
+
+
+
+
+
+
+
+

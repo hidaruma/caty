@@ -1,0 +1,8 @@
+module htwExt; // -*- coding: utf-8 -*-
+
+// type MoreInlines = never;
+type Str = string;
+
+// End of Module
+
+

@@ -1,0 +1,209 @@
+// -*- coding: utf-8 -*-
+
+/** 一般的なチェッカー（インスペクトコマンド）群
+
+チェッカー（インスペクトコマンド）とは、システムに一切の影響を与えずに
+その状態や整合性を問い合わせを行うコマンド。
+
+このモジュールでは、汎用性が高い共通チェッカーを提供する。
+
+*/
+module checker;
+
+
+/** ファイル名パターン 
+ * 次のいずれかの文字列：
+ * # ファイルベース名（拡張子はあってもなくてもよい）のリテラル
+ * # ワイルドカード文字 '*' だけを含むパターン
+ * 
+ * '*'だけがパターンメタ文字であり、正規表現パターンなどは使えない。
+ * '*'の意味は、アクションのリソースパターンにおける'*'と同じである（解釈を揃える）。
+ */
+type fileNamePattern = string(format = "file-name-pattern");
+
+/** ファイルとディレクトリのパス
+ * スラッシュ区切りのパス名、ディレクトリの場合は**最後にスラッシュ**が置かれる。
+ */
+type fileDirPath = string(remark="file-dir-path"  /*format = "file-dir-path" */);
+
+/** ディレクトリ構造を記述するオブジェクト
+ * プロパティ名がファイル名（ワイルドカードを許す）。
+ */
+type DirDesc = {
+ * : (FileExist | SubdirExist)?
+}(propNameFormat = "file-name-pattern");
+
+/** ファイルの存在を記述する値
+ * 必須（required）か許容（optional）を識別する。
+ */
+type FileExist = ("required" | "optional");
+
+/** ディレクトの存在を記述するオブジェクト
+ * プロパティ名がファイル名（ワイルドカードを許す）。
+ */
+type SubdirExist = Required | Optional;
+
+/** 必須サブディレクトリ記述 
+ * タグの後がnullの場合は、サブディレクトリの内部は don't care、
+ * それ以上の検索は不要。
+ * タグの後がオブジェクトなら、サブディレクトリを再帰的に検査。
+ */
+type Required = @required (null | {
+ * : (FileExist | SubdirExist)?
+}(propNameFormat = "file-name-pattern"));
+
+/** オプショナルサブディレクトリ記述 
+ * タグの後がnullの場合は、サブディレクトリの内部は don't care、
+ * それ以上の検索は不要。
+ * タグの後がオブジェクトなら、サブディレクトリを再帰的に検査。
+ */
+type Optional = @optional (null | {
+ * : (FileExist | SubdirExist)?
+}(propNameFormat = "file-name-pattern"));
+
+
+/** サンプル： 簡単なWebリソースディレクトリの記述 */
+@[sample]
+type WebResource = 
+{
+  // meta.jsonファイルは必須
+  "meta.json" : "required",  
+
+  // *.txtファイルはあってもなくてもよい
+  "*.txt" : "optional",
+
+  // html/ サブディレクトリは必須
+  "html" : @required {
+    "index.html" : "required",
+    "*.html" : "optional"
+  },
+
+  // imagesサブディレクトリはあってもなくてもよい
+  "images" : @optional {
+   /* このディレクトリ内に存在していいファイルは *.jpg, *.png, *.gif */
+
+   "*.jpg" : "optional",
+   "*.png" : "optional",
+   "*.gif" : "optional",
+
+  },
+  
+  // scriptsサブディレクトリはあってもなくてもよい
+  // サブディレクトリの内部は見なくてよい
+  "scripts" : @optional null,
+
+};
+
+
+/** ファイルチェックの結果
+ * OK, NG のいずれか
+ */
+type FileCheckResult = @OK FileCheckReport | @NG FileCheckReport;
+
+/** ファイルチェックの報告
+ */
+type FileCheckReport = {
+// ファイル
+
+ /** 実際に存在する必須ファイル */
+ "requiredFiles"  : [fileDirPath*],
+ /** 欠如ファイル（必須なのに存在しない） */
+ "missingFiles"   : [fileDirPath*],
+ /** 実際に存在する許容ファイル */
+ "optionalFiles"  : [fileDirPath*],
+ /** 不要または不明なファイル */
+ "unwantedFiles"  : [fileDirPath*],
+
+// ディレクトリー
+
+ /** 実際に存在する必須ディレクトリー */
+ "requiredDirs"   : [fileDirPath*],
+ /** 欠如ディレクトリー（必須なのに存在しない） */
+ "missingDirs"    : [fileDirPath*],
+ /** 実際に存在する許容ディレクトリー */
+ "optionalDirs"   : [fileDirPath*],
+ /** 不要または不明なディレクトリー */
+ "unwantedDirs"   : [fileDirPath*],
+};
+
+/** ファイルチェッカー
+
+ファイルチェッカーは、指定されたディレクトリ内を（必要があれば再帰的に）検索して、
+基準となるディレクトリ記述XJSONと比較して、
+実際の状況と要求からのズレ（欠如ファイル／ディレクトリ、余分なファイル／ディレクトリ）を報告する。
+
+ディレクトリ記述XJSONの例：
+
+{{{
+{
+  // meta.jsonファイルは必須
+  "meta.json" : "required",  
+
+  // *.txtファイルはあってもなくてもよい
+  "*.txt" : "optional"
+
+  // html/ サブディレクトリは必須
+  "html" : @required {
+    // html/index.htmlファイルは必須
+    "index.html" : "required",
+    // その他の html/*.htmlファイルは任意
+    "*.html" : "optional",
+  },
+
+  // imagesサブディレクトリはあってもなくてもよい
+  "images" : @optional {
+   // このディレクトリ内に存在していいファイルは *.jpg, *.png, *.gif
+
+   "*.jpg" : "optional",
+   "*.png" : "optional",
+   "*.gif" : "optional",
+
+  },
+
+  // scriptsサブディレクトリはあってもなくてもよい
+  // サブディレクトリの内部は見なくてよい
+  "scripts" : @optional null,
+
+}
+}}}
+
+
+*/
+command check-files [string path] ::  DirDesc -> FileCheckResult
+ throws [
+    /** 引数のパスが見つからない */
+    FileNotFound, 
+    /** ディレクトリーオープンのエラーなど */
+    FileIOError  
+ ]
+ reads pub
+ refers python:checker.CheckFiles;
+
+
+type FileTree of jsonfs:DIR-TYPE = {
+ * : (true | FileTree)
+}(propNameFormat="file-basename");
+
+command file-tree [string path] ::  void -> FileTree
+ throws [
+    /** 引数のパスが見つからない */
+    FileNotFound, 
+    /** ディレクトリーオープンのエラーなど */
+    FileIOError  
+ ]
+;
+
+command check-files_2 :: [DirDesc, FileTree] -> FileCheckResult
+;
+
+/*
+
+ * %dirDesc | check-files %path
+ * [%dirDesc, file-tree %path] | check-files_2
+ * [%dirDesc, %fileTree] | check-files_2
+
+*/
+
+
+
+// End of Module

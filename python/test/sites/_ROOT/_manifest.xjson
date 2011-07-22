@@ -1,0 +1,20 @@
+{
+    "description" : "テストデータ",
+    "implLang" : "python",
+    "assign" : {
+        "pub" : "pub",
+        "include" : "include",
+        "commands" : "commands",
+        "schemata" : "schemata",
+        "scripts" : "scripts",
+        "include": "include",
+        "testfiles": "testfiles",
+        "res": "res"
+    },
+    "sessionSpace": "test",
+    "storage": {
+        "type": "sqlite",
+        "path": "res/test.db"
+    }
+}
+

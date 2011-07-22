@@ -1,0 +1,477 @@
+Coding -*- coding: utf-8 -*-
+
+=  XJSONの妥当性検証
+
+関連する文書：
+
+* [[XJSONTree.wiki|XJSONTree ]]
+* [[XJSONPath.wiki|XJSONPath ]]
+* [[ValidationError.wiki|ValidationError]]
+
+== トップダウン処理とツリートラバース
+
+XJSONの妥当性検証はトップダウン方式で行うとする。
+[[XJSONTree.wiki|XJSONツリー]]を、深さ優先再帰的順序でたどる。
+このたどり方（トラバース）を図示すると、木の形状に対して一筆書きで縁取りをすることになる。
+
+{{tree-traverse.jpg|木のトラバース}}
+
+中間ノードには、トラバース過程で降りて行く時と昇りの時の2回訪れることになる。
+降りて行く時を「行きがけ」、昇りの時を「帰りがけ」ともいう。
+
+
+== ツリートラバースに伴なうパス列挙
+
+事例をまず挙げる。
+次のデータを考える。
+
+{{{
+{
+ "name":{
+   "given" : "正幸",
+   "family" : "檜山"
+  },
+  "age" : 54
+}
+}}}
+
+対応するXJSONツリーをトラバースして、訪れるノードのパスを時間順に列挙すると次のようになる。
+ここでは、オブジェクト内のプロパティの順序は書かれたとおりとするが、
+一般的には、プロパティの順序は内部的な都合で決まる。
+
+# $
+# $.name
+# $.name.given
+# $.name.family
+# $.name 
+# $.age
+# $
+
+$ と $.name が2度出現するのは、行きがけと帰りがけを記述したからである。
+
+この事例のように、
+訪れるノードのパスを時間順に列挙したものを、**ツリートラバースに伴なうパス列挙**と呼ぶ。
+
+もう1つ例を挙げておく。
+
+{{{
+@person {
+ "name" : "檜山",
+ "age" : 54,
+ "email" : @email "hiyama@chimaira.org",
+ "hobbies" : ["盆栽", "釣り"],
+}
+}}}
+
+# $
+# $@person
+# $@person.name
+# $@person.age
+# $@person.email
+# $@person.email@email
+# $@person.email
+# $@person.hobbies
+# $@person.hobbies[0]
+# $@person.hobbies[1]
+# $@person.hobbies
+# $@person
+# $
+
+== XJSONトップダウン処理のログ形式
+
+妥当性検証に限らず、変換や解析・集計など、XJSONツリーをトップダウン（深さ優先再帰的順序）でたどりながら処理することは多い。
+この類の処理のログ形式を定めておく。
+
+{{{
+ログ ::= ログ行*
+ログ行 ::= パス 区切り メッセージ 改行
+区切り ::= (SPACE|TAB)+ ':' (SPACE|TAB)+
+}}}
+
+パスはXJSONパス式である。メッセージは処理ごとに異なる。
+パスが示すノードにおいて何もしなかったときは、メッセージを SKIP とするか、あるいはログ行を出力しない。
+
+以上の定義は、ログの核の部分で、必要に応じて追加情報を含めてもよい。
+例えば、ファイルからのXJSON入力を扱う場合に、パスに対応する箇所のファイル名と行番号を行頭に付加してもよい。
+
+== 妥当性検証ログ
+
+トップダウン方式によるXJSON妥当性検証処理のログ形式について述べる。
+
+パスで示されるノードごとに、行った検証処理とその結果をメッセージとして記述する。
+ログの形式は次の原則に従う。
+
+# 検証処理の成功はOK、失敗はNGで表す。
+# 台型（underlying type）のチェックはTYPE、スキーマ属性のチェックはATTRで表す。
+# 失敗の原因識別コードは、BAD_TYPE, BAD_TAG, MISSING_TAG, VAIOLATED_ATTR, MISSING_ITEM, MISSING_PROPERTY,
+UNEXPECTED_ITEM, UNEXPECTED_PROPERTY を使う。
+
+以下に事例を挙げる。
+
+スキーマ：
+
+{{{
+type personName = string(minLength = 1, maxLength = 20);
+type mailAddr = @email mailAddrValue;
+type mailAddrValue = string(format = "mailAddr"); // ほんとは、format名はURLを使うべき
+
+type person = @person {
+ "name" : personName,
+ "gender" : ("M" | "F")?,
+ "age" : integer(minimum = 0, maximum = 150)?,
+ "email" : mailAddr,
+ "hobbies" : [string*]?,
+ * : any?
+}(maxProperties = 10);
+}}}
+
+インスタンス：
+
+
+{{{
+@person {
+ "name" : "檜山",
+ "gender" : "M",
+ "age" : 54,
+ "email" : @email "hiyama@chimaira.org",
+ "hobbies" : ["盆栽", "釣り"],
+ "comment" : "キマイラのオッサン",
+}
+}}}
+
+妥当性検証ログ（成功）：
+
+{{{
+$ : OK TYPE tagged/@person (person)
+$@person : OK TYPE object
+$@person.name : OK TYPE string (personName)
+$@person.name : OK ATTR minLength = 1
+$@person.name : OK ATTR maxLength = 20
+$@person.gender : OK TYPE singleton/"M"
+$@person.age : OK TYPE number
+$@person.age : OK ATTR isInteger = true
+$@person.age : OK ATTR minimum = 0
+$@person.age : OK ATTR maximum = 150
+$@person.email : OK TYPE tagged/@email (mailAddr)
+$@person.email@email : OK TYPE string (mailAddrValue)
+$@person.email@email : OK ATTR format = "mailAddr"
+$@person.email : SKIP
+$@person.hobbies : OK TYPE array
+$@person.hobbies[0] : OK TYPE string
+$@person.hobbies[1] : OK TYPE string
+$@person.hobbies : SKIP
+$@person.comment : OK TYPE any/string
+$@person : OK ATTR maxProperties = 10
+$ : SKIP
+}}}
+
+== 台型のチェック
+
+妥当性検証を行うときは、インスタンスの値が特定の台型（underlying type）に所属するかどうかをまずチェックする。
+
+=== 台型の種別
+
+台型は次のとおり。
+
+==== 基本スカラー型
+
+# number : リテラルは数字またはマイナス記号から始まる。
+# string : リテラルは二重引用符から始まる。
+# boolean : リテラルは true または false
+# null : リテラルは nll
+# binary : Catyによる拡張、詳細割愛。
+
+integerを基本スカラー型にするかどうかは実装により異なってよい。
+ここでは、integerを基本スカラー型に含めていない。numberに制約（小数部がゼロ）が付いたものとみなす。
+
+==== 複合型
+
+# array : 配列型、リテラルはブラケットから始まる。
+# object : オブジェクト型、リテラルはブレイスから始まる。
+
+==== 総称型
+
+# tagged : 明示的なタグを持つインスタンスの型
+# singleton : 単一のスカラーインスタンスだけを含む型
+# any : まったく制約がない。
+
+具体的なインスタンスが与えられていれば、
+総称型を特定（特殊化）することができる。特殊化情報を'/'に続けて記述することで、
+特殊化された総称型を表現する。
+
+# tagged型の特殊化は、tagged/@email のようにタグを付加する。
+# singleton型の特殊化は、sigleton/"M" のようにインスタンスを付加する。
+# any型の特殊化は、any/string のように具体的な型を付加する。
+any/tagged/@email（表記は any/@email でも可）の形も許される。
+
+=== integer型の取り扱い
+
+integer型を基本スカラー型として扱ってもよいが、
+それが困難なときは、number型にスキーマ属性isIntegerが指定された型として扱ってよい。
+つまり、次の定義が事前にされているとして処理する。
+
+{{{
+type integer = number(isInteger = true);
+}}}
+
+isIntegerの条件は次のとおり。
+
+* x の小数部を切り捨てた値を floor(x) として、floor(x) == x 。
+
+
+
+=== 台型のチェックの詳細
+
+ツリートラバースによりXJSONツリーノードを訪れるごとに台型のチェックを行う。
+ノードの種類ごとに次のようにチェックされる。
+
+==== スカラーノード
+
+{{scalar-node.jpg|スカラーノード}}
+
+基本スカラー型、つまり number (integer), string, boolean, null, binary かどうかのチェックが行われる。
+成功すれば、OK TYPE <scalar-type> の形式でログが出力される。
+
+複合型との照合は常に失敗する。
+
+singletonとの照合（比較）も行われる。
+成功すれば、OK TYPE singleton/<value> の形式でログが出力される。<value> はインスタンス値そのものである。
+
+anyとの照合は常に成功して、
+OK TYPE <scalar-type> の形式でログが出力される。<scalar-type> はインスタンス値から判断できる。
+
+==== タグノード
+
+{{tag-node.jpg|タグノード}}
+{{tag-node-2.jpg|タグノード 2}}
+
+
+タグ付き型との照合が行われる。スキーマの @* との照合は常に成功して、
+OK TYPE tagged/@<name> の形式でログが出力される。<name>はタグ名である。
+
+スキーマの @<name> との照合はタグ名が一致するなら成功する。
+そうでなければ失敗。
+
+その他の型との照合は失敗する。
+
+==== 配列ノード
+
+{{array-node.jpg|配列ノード}}
+
+配列型との照合は常に成功して、
+OK TYPE array の形式でログが出力される。
+
+その他の型との照合は失敗する。
+
+==== オブジェクトノード
+
+{{object-node.jpg|オブジェクトノード}}
+
+オブジェクト型との照合は常に成功して、
+OK TYPE object の形式でログが出力される。
+
+その他の型との照合は失敗する。
+
+== スキーマ属性のチェック
+
+台型のチェックが終わると、インスタンスXJSONツリーの当該ノード（サブツリー）は、
+スキーマ属性に対応する述語（predicate）処理系に渡される。
+
+述語処理系は、真偽を返す。指定されているすべてのスキーマ属性に対して真が返ったとき、
+そのノードの妥当性検証は成功する。そうでなければ失敗である。
+
+ノードが中間ノードであるとき、
+スキーマ属性のチェックを行きがけで実行しても帰りがけで実行してもどちらでもよい。
+複数のスキーマ属性指定があるとき、
+行きがけと帰りがけに分けて実行してもよい。
+また、スキーマ属性によっては、子ノードの処理中にチェックを実行する場合もある。
+
+ほとんどのスキーマ属性は行きがけでチェックを実行したほうが効率的に有利であるが、
+配列に関するuniqueItems属性は、子ノードの処理中または帰りがけの実行が有利かもしれない。
+この文書内で使っている事例では、maxPropertiesスキーマ属性のチェックをあえて帰りがけとしている。
+
+スキーマ属性のチェックは、1つの処理が1行のログとして書き出される。
+
+{{{
+$@person.name : OK TYPE string (personName)
+$@person.name : OK ATTR minLength = 1
+$@person.name : OK ATTR maxLength = 20
+}}}
+
+== ログに書き出す補助的情報
+
+デバッグや学習の目的では、次の情報がログに書き出されると便利である。
+
+# ユーザー定義の型名
+# スカラーノードの値
+
+
+=== ユーザー定義の型名
+
+スキーマ内の型定義文（type文）で宣言された型名は、妥当性検証処理に直接必要なわけではない。
+しかし、人間はユーザー定義型名を目安にして考えることが多いので、ログに出力すべきである。
+
+インスタンスのノードの台型をチェックするとき、当該ノードの型がユーザー定義型名を持つときは、
+型名の直後に丸括弧に囲んでユーザー定義型名（パッケージ、モジュールを含むフルネーム）を付ける。
+
+{{{
+$ : OK TYPE tagged/@person (person)
+...
+$@person.name : OK TYPE string (personName)
+...
+$@person.email : OK TYPE tagged/@email (mailAddr)
+$@person.email@email : OK TYPE string (mailAddrValue)
+}}}
+
+===  スカラーノードの値
+
+インスタンスのスカラーノードの値（スカラーリテラル）をログに付けると、
+ログを読むときに便利である。パスがスカラーノードである時は、VALUE という接頭辞に続けて値を記入する。
+これにより、ログからインスタンスを再現できる。
+
+{{{
+$ : OK TYPE tagged/@person (person)
+$@person : OK TYPE object
+$@person.name : VALUE "檜山"
+$@person.name : OK TYPE string (personName)
+$@person.name : OK ATTR minLength = 1
+$@person.name : OK ATTR maxLength = 20
+$@person.gender : VALUE "M"
+$@person.gender : OK TYPE singleton/"M"
+$@person.age : VALUE 54
+$@person.age : OK TYPE number
+$@person.age : OK ATTR isInteger = true
+$@person.age : OK ATTR minimum = 0
+$@person.age : OK ATTR maximum = 150
+$@person.email : OK TYPE tagged/@email (mailAddr)
+$@person.email@email : VALUE "hiyama@chimaira.org"
+$@person.email@email : OK TYPE string (mailAddrValue)
+$@person.email@email : OK ATTR format = "mailAddr"
+$@person.email : SKIP
+$@person.hobbies : OK TYPE array
+$@person.hobbies[0] : VALUE "盆栽" 
+$@person.hobbies[0] : OK TYPE string
+$@person.hobbies[1] : VALUE "釣り"
+$@person.hobbies[1] : OK TYPE string
+$@person.hobbies : SKIP
+$@person.comment : VALUE "キマイラのオッサン"
+$@person.comment : OK TYPE any/string
+$@person : OK ATTR maxProperties = 10
+$ : SKIP
+}}}
+
+== 失敗情報
+
+失敗時のログは、成功時ログより重要である。
+失敗時ログを参照することによりユーザーは、
+どこで何が起きたかを知ることができ、適切にエラーを修正することができる。
+
+
+=== 台型のチェック時のエラー
+
+台型のチェックが失敗したときは、NG BAT_TYPE メッセージを発行する。
+このとき、当該ノードの型と期待される型（スキーマで定義されている型）を付加する。
+
+{{{
+/* objectを期待したが、array だった */
+$@person : NG BAD_TYPE array, object
+
+/* stringを期待したが、number だった */
+$@person.name : NG BAD_TYPE number, string (personName)
+
+/* arrayを期待したが、string だった */
+$@person.hobbies : NG BAD_TYPE string, array
+}}}
+
+tagged型のときも BAD_TYPE と考えてよいが、XJXなどの都合から、tagged型は別に扱うことにする。
+
+# BAD_TYPE tagged/@bad, tagged/@good は、BAD_TAG @bad, @good とする。
+# BAD_TYPE <type>, tagged/@good は、MISSING_TAG @good とする。
+
+これは、タグの書き間違いや書き忘れのミスが多いと思われるので、それへの対処を容易にする目的である。
+
+{{{
+/* 正しいタグは @person だが、@peson と書いている */
+$ : NG BAD_TAG @peson, @person
+
+/* タグ @email が抜けている */
+$@person.email : NG MISSING_TAG @email
+}}}
+
+
+=== スキーマ属性のチェック時のエラー
+
+スキーマ属性のチェックが失敗したときは、NG VAIOLATED_ATTR メッセージを発行する。
+
+{{{
+$@person.name : VALUE ""
+$@person.name : OK TYPE string (personName)
+$@person.name : NG VAIOLATED_ATTR minLength = 1
+}}}
+
+=== 子ノードの出現性に関するエラー
+
+arrayノードとobjectノードの場合、アクセスインデックス（項目番号またはプロパティ名）ごとに、
+子ノードの存在・非存在（出現性という）をチェックする。
+
+子ノードの出現性のエラーは次の形で報告される。
+
+# NG MISSING_ITEM <type> : <type>型の項目が出現すべきだが存在しない。
+# NG MISSING_PROPERTY <type> : <type>型のプロパティが出現すべきだが存在しない。
+# NG UNEXPECTED_ITEM <type> : <type>型の項目が出現しているが、出現は許されてない。
+# NG UNEXPECTED_PROPERTY <type> : <type>型のプロパティが出現しているが、出現は許されてない。
+
+{{{
+/* string (personName) 型である nameプロパティが存在しない */
+$@person.name : NG MISSING_PROPERTY string (personName)
+
+/* tagged/@email (mailAddr) 型である ageプロパティが存在しない */
+$@person.age : NG MISSING_PROPERTY tagged/@email (mailAddr)
+
+/* number型である zプロパティが余分である */
+$@point.z : VALUE 32
+$@point.z : NG UNEXPECTED_PROPERTY number
+}}}
+
+=== エラーが起きた後の処理の続行
+
+妥当性検証では、1つでもエラーがあれば検証は失敗し、処理は終了する。
+しかし、エラーが起きても処理の続行したほうが都合がよいこともある。
+そのときは、IGNORE_ERROR、RECOVER＿ERROR、FIXUP_ERROR などメッセージ接頭辞を付けたログにより報告をして、
+処理を続行してもよい。
+
+{{{
+$ : OK TYPE tagged/@person (person)
+$@person : OK TYPE object
+$@person.name : VALUE ""
+$@person.name : OK TYPE string (personName)
+$@person.name : NG VIOLATED_ATTR minLength = 1
+$@person.name : IGNORE_ERROR
+$@person.name : OK ATTR maxLength = 20
+$@person.gender : VALUE "M"
+$@person.gender : OK TYPE singleton/"M"
+$@person.age : VALUE "54"
+$@person.age : NG BAD_TYPE string, number
+$@person.age : IGNORE_ERROR
+$@person.email : NG MISSING_PROPERTY tagged/@email (mailAddr)
+$@person.email : IGNORE_ERROR
+$@person.hobbies : OK TYPE array
+$@person.hobbies[0] : VALUE "盆栽" 
+$@person.hobbies[0] : OK TYPE string
+$@person.hobbies[1] : VALUE "釣り"
+$@person.hobbies[1] : OK TYPE string
+$@person.hobbies : SKIP
+$@person.comment : VALUE "キマイラのオッサン"
+$@person.comment : OK TYPE any/string
+$@person : OK ATTR maxProperties = 10
+$ : SKIP
+}}}
+
+NG部分だけを取り出すと次のようになる。
+
+{{{
+$@person.name : NG VIOLATED_ATTR minLength = 1
+$@person.age : NG BAD_TYPE string, number
+$@person.email : NG MISSING_PROPERTY tagged/@email (mailAddr)
+}}}
+

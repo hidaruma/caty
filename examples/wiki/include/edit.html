@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?caty-meta template="smarty"?>
+<!DOCTYPE html
+  PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+  'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta name="robots" content="noindex,nofollow" />
+        <title>編集画面</title>
+    </head>
+    <body>
+        <h1>{$title}</h1>
+        <form action="./{$title}.wiki" method="post">
+        <p><textarea rows="20" cols="40" name="body">{$body|noescape}</textarea></p>
+        <p><input type="submit" value="送信"></p>
+        </form>
+    </body>
+</html>
+

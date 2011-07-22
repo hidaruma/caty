@@ -1,0 +1,21 @@
+module t04; // -*- coding: utf-8 -*-
+
+// em, strong の相互ネストを許す
+
+type Text = string(minLength = 1);
+type AttributeValue = string;
+type Inlines = (em | strong);
+
+type em = @em {
+   "" : [(Text | em | strong)*],
+    * : AttributeValue?
+};
+
+type strong = @strong {
+   "" : [(Text | em | strong)*],
+    * : AttributeValue?
+};
+
+// End of Module
+
+

@@ -1,0 +1,144 @@
+// -*- coding: utf-8 -*-
+module htw; // 'HT'ML for 'W'ikiCreole
+
+/* 一般的な型の定義 */
+
+/* gen.casm より */
+type Text      = gen:Text;
+type URIString = gen:URIString;
+
+/* インライン要素 */
+
+// type MoreInlines = never; // ()
+
+// type MoreInlines = htwExt:MoreInlines;
+type Inlines = (strong | em | a | br | img);
+
+// 完全な再帰は今は無理
+
+// Bold **...**
+type strong = @strong {
+     "" : [(Text | a)*]  // 再帰の問題から次は未サポート： **//bold italics//**
+};
+
+// Italic //...//
+type em = @em {
+     "" : [(Text | strong | a)*] // 次はサポート： //This is **also** good.//
+};
+
+// Link [[url|text]]
+type a = @a {
+     "href" : URIString,
+     "" : [Text?]
+};
+
+// Line Break \\
+type  br = @br {
+      "" : []
+};
+
+// Image (inline) {{url|text}}
+type img = @img {
+     "src" : URIString,
+     "alt" : Text?,
+     "" : []
+};
+
+/* 見出し */
+
+type Headings = (h1 | h2 | h3 | h4 | h5 | h6);
+
+// Heading Level 1 =
+type h1 = @h1 {
+     "" : [Text?]
+};
+
+// Heading Level 2 ==
+type h2 = @h2 {
+     "" : [Text?]
+};
+
+// Heading Level 3 ===
+type h3 = @h3 {
+     "" : [Text?]
+};
+
+// Heading Level 4 ====
+type h4 = @h4 {
+     "" : [Text?]
+};
+
+// Heading Level 5 =====
+type h5 = @h5 {
+     "" : [Text?]
+};
+
+// Heading Level 6 ======
+type h6 = @h6 {
+     "" : [Text?]
+};
+
+/* ブロックレベル要素 */
+
+// type MoreBlocks = never;
+type Blocks = (p | ul | ol | hr | pre);
+
+// Paragph 
+type p = @p {
+     "" : [(Text | Inlines)*]
+};
+
+// Unordered List  *
+type ul = @ul {
+     "" : [(li)*]
+};
+
+// Ordered List  #
+type ol = @ul {
+     "" : [(li)*]
+};
+
+// List Item
+type li = @li {
+     "" : [(Text | Inlines)*]
+};
+
+// Horizontal Rule ----
+type hr = @hr {
+     "" : []
+};
+
+// Nowiki (Preformatted) {{{...}}}
+type pre = @pre {
+     "" : [Text?]
+};
+
+
+/* 表 */
+
+type Table = (table);
+
+// Table
+type table = @table {
+     "" : [tr, tr*]
+};
+
+// Table Row 
+type tr = @tr {
+     "" : [(td|th), (td|th)*]
+};
+
+// Table Cell |...|
+type td = @td {
+     "" : [(Text | Inlines)*]
+};
+
+// Table Header Cell |=...|
+type th = @th {
+     "" : [(Text | Inlines)*]
+};
+
+/* コンテンツ */
+
+type BodyContent = [(Text | Inlines | Headings | Blocks | Table)*];
+

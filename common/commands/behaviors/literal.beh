@@ -1,0 +1,211 @@
+= リテラル
+
+JSONリテラル。
+次をテスト。
+
+# 文字列
+# 数値
+# true, false, null
+
+== JSON文字列、Unicode番号によるエスケープ
+
+[[http://json.org/]] より
+
+{{{
+ \" 0x22
+ \\ 0x5c
+ \/ 0x2f
+ \b 0x08 BackSpace
+ \f 0x0c
+ \n 0x0a
+ \r 0x0d
+ \t 0x09
+ \u four-hex-digits
+}}}
+
+=== !exec
+
+|= input   |= command |= output |=exception |= 備考 |
+| "\u0022" | pass     | "\""  |||
+| "\u005c" | pass     | "\\"  |||
+| "\u002f" | pass     | "\/"  |||
+| "\u0008" | pass     | "\b"  |||
+| "\u000c" | pass     | "\f"  |||
+| "\u000a" | pass     | "\n"  |||
+| "\u000d" | pass     | "\r"  |||
+| "\u0009" | pass     | "\t"  |||
+| "\u6a9c\u5c71"| pass| "檜山" |||
+| "\x22"   | pass     |       |Exception | 16進はダメ |
+| "\10"    | pass     |       |Exception | これもダメ |
+| "\o10"   | pass     |       |Exception | 8進？ ダメだよ |
+| "\010"   | pass     |       |Exception | ダメ |
+| "\'"     | pass     |       |Exception | 仕様にない文字をエスケープするのはダメ |
+| %newline | pass     |       |Exception | 生の改行は入れられない（.beh原稿を見よ） |
+
+==== !name:newline
+
+{{{
+"123
+456"
+}}}
+
+
+== 数値
+
+[[http://json.org/]] より
+
+{{{
+number =
+  int
+  int frac
+  int exp
+  int frac exp
+int =
+  digit
+  digit1-9 digits 
+  - digit
+  - digit1-9 digits
+frac =
+  . digits
+exp =
+  e digits
+digits =
+  digit
+  digit digits
+e =
+  e
+  e+
+  e-
+  E
+  E+
+  E-
+}}}
+
+=== !exec
+
+* int
+
+整数の開始文字は '-' か didit である。
+
+|= input   |= command |= output |= exception |= 備考 |
+| 123      | pass     | 123     | ||
+| -123     | pass     | -123    | ||
+| 0        | pass     | 0       | ||
+| -0       | pass     | 0       | | マイナス零は許される |
+| - 1      | pass     |         |Exception | マイナスが離れている |
+| +10      | pass     |         |Exception | +記号は使えない |
+| +0       | pass     |         |Exception | +記号は使えない |
+| 012      | pass     |         |Exception | リーディングゼロはダメ|
+| 0012     | pass     |         |Exception | リーディングゼロはダメ|
+| 01.2     | pass     |         |Exception | リーディングゼロはダメ|
+
+
+* int frac
+
+|= input   |= command |= output |= exception |= 備考 |
+| 1.23     | pass     | 1.23    |||
+| 1.2      | pass     | 1.2     |||
+| 1.       | pass     | 1.      |Exception  | ドットで終わるのはダメ|
+| 1.0      | pass     | 1.0     |  | 小数点以下のゼロはOK|
+| 1.0000   | pass     | 1.0     |  | 小数点以下のゼロはOK|
+
+*  int exp
+
+|= input   |= command |= output |= exception |= 備考 |
+| 23e4     | pass     | 23e4    | ||
+| 23E4     | pass     | 23e4    | ||
+| 23e+4    | pass     | 23e4    | ||
+| 23E+4    | pass     | 23e4    | ||
+| 23e-4    | pass     | 23e-4   | ||
+| 23E-4    | pass     | 23e-4   | ||
+| 23E      | pass     |         |Exception | Eで終わるのはダメ|
+| 23E+     | pass     |         |Exception | E+で終わるのはダメ|
+| 23E-     | pass     |         |Exception | E-で終わるのはダメ|
+| 23f4     | pass     |         |Exception | fじゃない |
+| 23g      | pass     |         |Exception |  |
+
+
+* int frac exp
+
+|= input   |= command |= output |= exception |= 備考 |
+| 1.23e4     | pass     | 1.23e4    | ||
+| 1.23E4     | pass     | 1.23e4    | ||
+| 1.23e+4    | pass     | 1.23e4    | ||
+| 1.23E+4    | pass     | 1.23e4    | ||
+| 1.23e-4    | pass     | 1.23e-4   | ||
+| 1.23E-4    | pass     | 1.23e-4   | ||
+| 1.23E      | pass     |         |Exception | Eで終わるのはダメ|
+| 1.23E+     | pass     |         |Exception | E+で終わるのはダメ|
+| 1.23E-     | pass     |         |Exception | E-で終わるのはダメ|
+| 1.23f4     | pass     |         |Exception | fじゃない |
+| 1.23g      | pass     |         |Exception |  |
+
+* その他
+
+|= input   |= command |= output |= exception |= 備考 |
+| .32      | pass     |         | Exception  | ドットから始まるのはダメ |
+| 0.32     | pass     | 0.32    |  | |
+| 0xff     | pass     |         | Exception  | 16進数はダメ |
+| xff      | pass     |         | Exception  | xffってコマンドと解釈される |
+| 100E10   | pass     | 100e10  |  | デカイ数 |
+| 0.01E10  | pass     | 1e8  |  | |
+
+== トークン
+
+true, false, nullの3つのトークンはリテラル。
+
+=== !exec
+
+|= input   |= command |= output |= exception |= 備考 |
+| true     | pass     | true |||
+| false    | pass     | false |||
+| null     | pass     | null |||
+| True     | pass     |      |Exception | 大文字小文字を区別する |
+| FALSE    | pass     |      |Exception | 大文字小文字を区別する |
+| Null     | pass     |      |Exception | 大文字小文字を区別する |
+| NULL     | pass     |      |Exception | 大文字小文字を区別する |
+| nul      | pass     |      |Exception | typoしがち |
+| nil      | pass     |      |Exception | Lispじゃネーカラ |
+| None     | pass     |      |Exception | 実装言語とは無関係 |
+
+
+== FITの仕様
+
+次のように書きたかった：
+
+{{{
+
+ === !exec
+
+ ==== int
+
+ intのエクスペクテーション・テーブル
+
+ ==== int frac
+
+ int frac のエクスペクテーション・テーブル
+
+}}}
+
+execはレベル3のセクションなんだから、
+その下のレベル4セクション内はexecスコープとして見れくれてもよさそうだが。
+
+
+=== 鍬田コメント
+
+基本的に今の Wiki 文法のパーサ実装は改行文字二つを区切りにしているので、
+以下のような書き方だと問題になっていました。
+
+{{{
+paragraph
+{{{
+    pre
+}}}
+
+一応 CatyFIT の対応はしましたが（creole 本体はまだ）、パーサがやたらバックトラックするようになるのであまり勧められない書き方です。
+
+=== 檜山
+
+書く側が改行を1つ追加すれば済む話だから、対応不要、「改行入れろ」で済ませよう。
+
+僕は空行の存在を意識してなかったが、言われれば入れる。空行を入れる構文のほうが健全な感じがする。

@@ -1,0 +1,429 @@
+/* coding: utf-8 */
+{
+    /*****************************
+     **** システムメッセージ *****
+     *****************************/
+    "Loading system data": {
+        "ja": "システム情報を読み込んでいます"
+    },
+
+    "Application name conflicted: $name": {
+        "ja": "アプリケーション名が衝突しています: $name"
+    },
+
+    "Initializing '$name'": {
+        "ja": "'$name'を初期化しています"
+    },
+
+    "Failed to reload '$name'": {
+        "ja": "'$name'のリロードに失敗しました"
+    },
+
+    "Application gourp '$name' does not exists, auto-generating": {
+        "ja": "アプリケーショングループ'$name'が存在しません。自動生成します"
+    },
+
+    "Root application does not exists, auto-generating": {
+        "ja": "ルートアプリケーションが存在しません。自動生成します"
+    },
+
+    "Loading '$name'": {
+        "ja": "'$name'を読み込んでいます"
+    },
+
+    "'$name' is set not to start": {
+        "ja": "'$name'は起動しないように設定されています"
+    },
+
+    "Running init script of '$name'": {
+        "ja": "'$name'の起動スクリプトを実行しています"
+    },
+
+    "An error occuered while running init script of '$name'": {
+        "ja": "'$name'の起動スクリプト実行中にエラーが発生しました"
+    },
+
+    "Application does not exists: '$name'": {
+        "ja": "存在しないアプリケーション: '$name'"
+    },
+
+    "$location does not exists in $app, auto-generating": {
+        "ja": "$appに$locationが存在しません。自動生成します"
+    },
+
+    "Schema for AppSpec is not specified: $app": {
+        "ja": "$appのアプリケーション固有情報のスキーマが指定されていません"
+    },
+
+    "Failed to validate the AppSpec: $app": {
+        "ja": "$appのアプリケーション固有情報のスキーマ検証に失敗しました"
+    },
+
+    "Schema: $path": {
+        "ja": "スキーマ: $path"
+    },
+
+    "Loading global commands and schemata": {
+        "ja": "グローバルコマンド及びスキーマを読み込んでいます"
+    },
+
+    "VCS module is not provided by default": {
+        "ja": "デフォルトではバージョン管理機能は提供されません"
+    },
+
+    "Unknown session type: $type": {
+        "ja": "未知のセッションタイプ: $type"
+    },
+
+    "JSON storage is not configured": {
+        "ja": "JSONストレージが未設定です"
+    },
+
+    "Collection does not found: collection name=$colname, defined at $denined, called by $callee": {
+        "ja": "コレクションが見つかりませんでした: コレクション名=$colname, 定義元=$defined, 呼び出し元=$callee"
+    },
+
+    "Unexpected error: $error": {
+        "ja": "予期せぬエラー: $error"
+    },
+    
+    "Plain object type is deprecated. Use with @form tag instead": {
+        "ja": "プレーンなobject型をtranslateの入力に使うのは非推奨です。代わりに@formタグを付けてください。"
+    },
+
+    "Plain object type is deprecated. Use with @form tag instead": {
+        "ja": "プレーンなobject型をtranslateの入力に使うのは非推奨です。代わりに@formタグを付けてください。"
+    },
+
+    /*******************************
+     ******* 組み込み例外 *********
+     *******************************/
+    
+    "File does not exists: $path": {
+        "ja": "ファイルが存在しません: $path"
+    },
+
+    "Can not access to $path": {
+        "ja": "$pathにアクセスできません"
+    },
+
+    "Failed to read file: $path": {
+        "ja": "ファイルの読み込みに失敗しました: $path"
+    },
+
+    "Only GET access is allowed": {
+        "ja": "GET以外のアクセスは認められていません"
+    },
+
+    "Only GET or POST access is allowed": {
+        "ja": "GET/POST以外のアクセスは認められていません"
+    },
+
+    "Not matched to verb dispatch: path=$path, verb=$verb, method=$method": {
+        "ja": "verb dispatchにマッチしませんでした: path=$path, verb=$verb, method=$method"
+    },
+
+    "Not exptected tag: $expected!=$actual": {
+        "ja": "タグの値が期待値と異なります: $expected!=$actual"
+    },
+
+    "Read only faclity": {
+        "ja": "読み取り専用ファシリティ"
+    },
+
+    "Operation not allowed: object=$obj, method=$method, mode=$mode": {
+        "ja": "許可されていない操作: object=$obj, method=$method, mode=$mode"
+    },
+
+    "Can not overwrite environment variable": {
+        "ja": "環境変数の上書きは不可能です"
+    },
+
+    "$path is not file (is directory)": {
+        "ja": "$pathはファイルではなくディレクトリです"
+    },
+
+    "Unexpected method call: $method": {
+        "ja": "予期せぬメソッド呼び出し"
+    },
+
+    "Duplicated path name: $path": {
+        "ja": "パス名が重複しています: $path"
+    },
+    
+    "Failed to parse JSON: $path\n$error": {
+        "ja": "JSONのパースに失敗しました: $path\n$error"
+    },
+
+    /********************************
+     ******* CatyScript/XJSON *******
+     ********************************/
+    "Syntax Error: $failed": {
+        "ja": "構文エラー: $failed"
+    },
+
+    "Invalid transaction mode: $mode": {
+        "ja": "不正なトランザクションモード: $mode"
+    },
+
+    "No $$val or $$no-value that matches to $$tag": {
+        "ja": "$$tagと対になる$$valueあるいは$$no-valueがありません"
+    },
+
+    "This is tagonly object: $tag": {
+        "ja": "タグのみのオブジェクトです: $tag"
+    },
+
+    "$keyword is reserved tag": {
+        "ja": "$keywordは予約されたタグです"
+    },
+
+    "No explicit tag": {
+        "ja": "明示的なタグが指定されていません"
+    },
+
+    "Not a JSON value: $obj": {
+        "ja": "対応するJSON型がありません: $obj"
+    },
+
+    "Not a $type: $obj": {
+        "ja": "$typeではありません: $obj"
+    },
+
+    "Option does not suffice: $opt": {
+        "ja": "オプションが足りません: $opt"
+    },
+
+    "Argument does not suffice: $index": {
+        "ja": "引数が足りません: $index"
+    },
+
+
+    /********************************
+     **** スキーマコンパイラ関連 ****
+     ********************************/
+    "Type '$name' is already defined": {
+        "ja": "'$name'は既に定義された型です"
+    },
+
+    "Comand '$name' is already defined": {
+        "ja": "'$name'は既に定義されたコマンドです"
+    },
+
+    "Uneable to add command at runtime: $name": {
+        "ja": "実行時のコマンド追加は不可能です: $name"
+    },
+
+    "Module name 'builtin' can be used only to Caty builtin module": {
+        "ja": "'builtin'はCaty組み込みのモジュールに対してのみ使用できます"
+    },
+
+    "Module name $name and path name $path are not matched": {
+        "ja": "モジュール名$nameとパス名$pathがマッチしていません"
+    },
+
+    "Cross reference has detected: $mod1, $mod2": {
+        "ja": "相互参照を検出しました: $mod1, $mod2"
+    },
+
+    "Command $name can not use while running mode $mode": {
+        "ja": "$nameは動作モード$modeでは使用できません"
+    },
+
+    /********************************
+     **** スキーマランタイム関連 ****
+     ********************************/
+    "Type is not exclusive: $type1, $type2": {
+        "ja": "型が排他ではありません: $type1, $type2"
+    },
+
+    "Unsupported operand types for $op: $type1, $type2": {
+        "ja": "$type1と$type2の$op演算は定義されていません"
+    },
+
+    "Tagged value is passed: $tag": {
+        "ja": "タグ付きの値が渡されました: $tag"
+    },
+
+    "Failed to convert to union type": {
+        "ja": "ユニオン型への変換に失敗しました"
+    },
+
+    "Undefined schema property: $name": {
+        "ja": "未定義のプロパティ: $name"
+    },
+
+    "Undeclared type variable at $this: $name": {
+        "ja": "$nameは$thisで宣言されていない型変数です"
+    },
+
+    "Not a null": {
+        "ja": "値がnullではありません"
+    },
+
+    "Unmatched tag: $another, $this": {
+        "ja": "タグ`$another`が$thisと一致していません"
+    },
+
+    "Wildcard tag is not able to used to builtin types: $type": {
+        "ja": "組み込み型はワイルドカードタグに適用できません: $type"
+    },
+
+    "An error occuered while converting to $type": {
+        "ja": "$typeへの変換中にエラーが発生しました"
+    },
+
+    "null is not allowed": {
+        "ja": "nullは許可されていません"
+    },
+
+    "value should be $type": {
+        "ja": "値は$typeでなければなりません"
+    },
+
+    "value should be one of $type": {
+        "ja": "値は$typeのいずれかでなければなりません"
+    },
+
+    "value should be longer than $len": {
+        "ja": "データ長は$lenよりも長くなければなりません"
+    },
+    
+    "value should be shorter than $len": {
+        "ja": "データ長は$lenよりも短くなければなりません"
+    },
+
+    "minLength($min) is longer than maxLength($max)": {
+        "ja": "minLength($min)がmaxLength($max)よりも長く設定されています"
+    },
+
+    "minmum($min) is longer than maxLength($max)": {
+        "ja": "minmum($min)がmaxLength($max)よりも大きく設定されています"
+    },
+
+    "value should be greater than $val": {
+        "ja": "値は$valよりも大きくなければなりません"
+    },
+    
+    "value should be smaller than $val": {
+        "ja": "値は$val以下でなければなりません"
+    },
+
+    "This type can contain only $max elements or less": {
+        "ja": "この型は最大$maxまでの要素しか含められません"
+    },
+
+    "This type must contain $min elements or more": {
+        "ja": "この型は$min以上の要素を含めなければなりません"
+    },
+
+    "Pseudo tag is not exclusive: $tag1, $tag2": {
+        "ja": "議事タグが排他になっていません: $tag1, $tag2"
+    },
+
+    "Number of property should be smaller than $min": {
+        "ja": "プロパティの数は$min未満でなければなりません"
+    },
+
+    "Number of property should be greater than $max": {
+        "ja": "プロパティの数は$minより多くなければなりません"
+    },
+
+    "Unknown property: $name": {
+        "ja": "未知のプロパティ: $name"
+    },
+
+    "Property not exists: $name": {
+        "ja": "プロパティが足りません: $name"
+    },
+
+    "Not matched to pseudo tag $tag: $value": {
+        "ja": "議事タグの値$tagに合致していません: $value"
+    },
+
+    "Elements of Bag type is not exclusive: $types": {
+        "ja": "バッグ型の要素が排他になっていません: $types"
+    },
+
+    "Failed to validate all the type of this bag type: $value": {
+        "ja": "このバッグ型全ての型での検証に失敗しました: $value"
+    },
+
+    "The occurrence count of the element is too few: type=$type, count=$count": {
+        "ja": "要素の出現回数が少なすぎます: type=$type, count=$count"
+    },
+
+    "The occurrence count of the element is too mutch: type=$type, count=$count": {
+        "ja": "要素の出現回数が多すぎます: type=$type, count=$count"
+    },
+
+
+    /***************************
+     ****** テンプレート *******
+     ***************************/
+    "Stack is empty": {
+        "ja": "スタックが空です"
+    },
+
+    "Undefained label: $label": {
+        "ja": "未定義のラベル: $label"
+    },
+
+    "Undefined $object: $value": {
+        "ja": "未定義の$object: $value"
+    },
+
+    "Undefined operation: $code": {
+        "ja": "未定義の操作: $code"
+    },
+    
+    "shebang syntax error": {
+        "ja": "shebang構文エラー"
+    },
+
+    /****************************
+     ********** CatyFIT *********
+     ****************************/
+    "Only one title is allowed: Line $line": {
+       "ja": "タイトルは一つしか設定できません: Line $line"
+    },
+
+    "CatyFIT must starts with title element": {
+       "ja": "CatyFITはタイトル要素から始めなければなりません"
+    },
+
+    "Macro '$name' is not defined": {
+       "ja": "マクロ $name は未定義です"
+    },
+
+    "Title line must described as header cell: Line $line": {
+       "ja": "タイトル行はヘッダセルとして記述してください: Line $line"
+    },
+
+    "judge column must be one of negate/ignore/accept/abandon or blank: $actual": {
+       "ja": "judge欄は negate/ignore/accept/abandon のいずれかあるいは空白でなければなりません: $actual"
+    },
+    
+    "$section section appears continuously": {
+        "ja": "$sectionが連続して出現しています"
+    },
+
+    "postCond section before body section": {
+        "ja": "bodyが出現する前にpostCondが出現しました"
+    },
+
+    "$type not belongs to setup section is occured": {
+        "ja": "setupセクションに属していない$typeが出現しました"
+    },
+
+    "Undefined macro: $macro": {
+        "ja": "未定義のマクロ: $macro"
+    },
+
+    "Unexpected errpor while compile $path: $error": {
+        "ja": "$pathのコンパイル中の予期せぬエラー: $error"
+    },
+
+}
+
+
