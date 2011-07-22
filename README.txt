@@ -32,14 +32,6 @@ Catyは、以下に挙げるPythonライブラリを使用しています。こ�
  * Webページ    [[http://www.crummy.com/software/BeautifulSoup/]]
  * ダウンロード [[http://www.crummy.com/software/BeautifulSoup/#Download]]
 
-== antlr_python_runtime
-
- * Webページ    [[http://www.antlr.org/]]
- * ダウンロード [[http://www.antlr.org/download/Python]]
-
-現在、古いバージョンである antlr-2.7.5RC1-py2.6 を使用しています。
-将来、antlrに依存しなくなる予定です。
-
 == pyreadline-1.5-win32 (pythonで書かれたreadline, Windows用)
 
  * Webページ    [[http://ipython.scipy.org/moin/PyReadline/Intro]]
