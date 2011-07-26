@@ -117,8 +117,8 @@ class CheckFiles(Command):
             if '.' in p2:
                 return 1
         if p1[0] == '*' and p2[0] != '*':
-            return -1
-        if p2[0] == '*' and p1[0] != '*':
             return 1
+        if p2[0] == '*' and p1[0] != '*':
+            return -1
         return cmp(p1, p2)
 
