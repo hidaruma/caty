@@ -4,8 +4,9 @@ This file contains utf-8 encoded Japanese text.
 
 * 現状のCatyの問題点は、EXCUSE.txt をご覧ください。
 
+// 注意：アーカイブの名前が違う
 
-アーカイブを展開すると、caty-python-pp-<番号>/ というディレクトリ（フォ
+アーカイブを展開すると、caty-python-pd-<番号>/ というディレクトリ（フォ
 ルダ）ができます。このディレクトリの下に必要なすべてのファイルが収めら
 れています。caty-python-pp-<番号> を別な名前、例えば caty-current に改
 名してもかまいません。以下では、このディレクトリを CATY_HOME として参照
