@@ -84,4 +84,33 @@ command correct-html :: string | {*:any} -> string | {*:any}
  */
 command regmatch [string] :: string -> @match RegexpMatch | @fail string
     refers python:caty.core.std.command.text.RegMatch;
+
+/** 不正文字（非文字）の報告
+ */
+type IllegalCharReport = {
+  /** 出現位置 
+   * "Line 8, Col 12" のような形式の文字列
+   */
+ "location" : string,
+
+ /** 不正文字のコード
+  * バイトを0x接頭辞を持つ16進数で表現する（例："0x0b"）
+  * バイトコンビネーションの場合は、その4文字表現を複数個並べる
+  */
+ "code" : string,
+};
+
+/** 不正文字（非文字）を検出して報告する
+ */
+command verify-chars
+{
+  /** 検出する不正文字の最大数
+   * この数を超えた不正文字が発見されると、
+   * そこで処理は中断される。
+   */
+  @[default(100)]
+  "max" : integer(minimum=0)?
+} :: (string|binary) -> (@OK [] | @NG [IllegalCharReport, IllegalCharReport*])
+refers python:caty.core.std.command.text.VerifyChars;
 """
+
