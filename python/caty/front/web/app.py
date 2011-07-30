@@ -76,6 +76,7 @@ class CatyApp(object):
     def _start_proc(self, environ):
         try:
             json = self.main(environ)
+            self._format_linebreak(json)
             headers = list(self.create_header(json['header']))
             if 'Set-Cookie' not in json['header']:
                 cookie = self._extend_cookie(environ) 
@@ -97,16 +98,15 @@ class CatyApp(object):
             b = json['body']
             if isinstance(b, unicode):
                 b = b.encode(json.get('encoding', 'utf-8'))
-            return [self._format_linebreak(b, json)]
+            return [b]
         else:
             return []
 
-    def _format_linebreak(self, s, j):
+    def _format_linebreak(self, j):
         tp = j.get('header', {}).get('content-type', '')
+        s = j.get('body', u'')
         if tp.startswith('text/plain'):
-            return s.replace('\r\n', '\n').replace('\r', '\n').replace('\n', '\r\n')
-        else:
-            return s
+            j['body'] = s.replace('\r\n', '\n').replace('\r', '\n').replace('\n', '\r\n')
 
     def main(self, environ):
         path = environ['PATH_INFO']
