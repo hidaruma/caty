@@ -107,6 +107,7 @@ class CatyApp(object):
         s = j.get('body', u'')
         if tp.startswith('text/plain'):
             j['body'] = s.replace('\r\n', '\n').replace('\r', '\n').replace('\n', '\r\n')
+            j['header']['content-length'] = len(j['body'].encode(j.get('encoding', 'utf-8')))
 
     def main(self, environ):
         path = environ['PATH_INFO']
