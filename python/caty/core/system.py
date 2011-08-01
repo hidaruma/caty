@@ -30,10 +30,10 @@ class System(PbcObject):
         if not encoding:
             encoding = locale.getpreferredencoding()
         self._init_temp()
+        self._init_logger()
         gcfg = xjson.load(open('_global.xjson'))
         self._global_config = GlobalConfig(gcfg, 
                                            self._validate_encoding(encoding))
-        self._init_logger()
         messages = self._load_system_messages()
         self.i18n = I18nMessage(messages, writer=cout, lang=self._global_config.language)
         caty.core.runtimeobject.i18n = self.i18n # 改めて設定
@@ -109,22 +109,10 @@ class System(PbcObject):
         return msg
 
     def _init_logger(self):
-        import logging
-        import logging.handlers
-        alogger = logging.getLogger('Caty.AccessLog')
-        alogger.setLevel(logging.DEBUG)
-        log_file = './access.log'
-        handler = logging.handlers.TimedRotatingFileHandler(
-                  log_file, interval=1, when='D', backupCount=5, encoding=self.sysencoding)
-        alogger.addHandler(handler)
-        elogger = logging.getLogger('Caty.ErrorLog')
-        elogger.setLevel(logging.ERROR)
-        log_file = './error.log'
-        handler = logging.handlers.TimedRotatingFileHandler(
-                  log_file, interval=1, when='D', backupCount=5, encoding=self.sysencoding)
-        elogger.addHandler(handler)
-        self._access_logger = alogger
-        self._error_logger = elogger
+        import caty.util.syslog as syslog
+        self._access_logger = syslog.get_access_log()
+        self._error_logger = syslog.get_error_log()
+        self._start_logger = syslog.get_start_log()
     
     @property
     def access_logger(self):

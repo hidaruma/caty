@@ -8,7 +8,8 @@ from caty.core.schema import VoidSchema, ArraySchema
 from caty.core.exception import CatyException
 from caty.mafs.authorization import AuthoriToken
 from caty.session.value import create_variable
-from caty.util import get_message, init_writer, cout, debug
+from caty.util import get_message, init_writer, cout, debug, error_to_ustr
+from caty.util.syslog import init_log
 import caty
 
 import cmd, glob, os
@@ -371,7 +372,7 @@ def setup_shell(args, cls=CatyShell):
                          'no-app'])
     sitename = 'root'
     wildcat = False
-    system_encoding = None
+    system_encoding = locale.getpreferredencoding()
     script = ''
     quiet = False
     global _encoding
@@ -437,6 +438,7 @@ u"""コンソール出力時の文字エンコーディング
 def main(args):
     global _encoding
     global debug
+    init_log()
     _encoding = get_encoding()
     code = 0
     if sys.platform == 'win32':

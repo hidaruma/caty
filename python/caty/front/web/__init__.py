@@ -8,46 +8,58 @@ from wsgiref.simple_server import make_server
 from caty.core.system import System
 from caty.front.console import CatyShell, get_encoding
 from caty.util import init_writer
+from caty.util.syslog import init_log, get_start_log
 import caty.core.runtimeobject as ro
 
 def main(args):
-    def handle_tb():
-        import traceback
-        from caty.util import cout, ConsoleWriter
-        cw = ConsoleWriter()
-        cw.encoding = cout.encoding
-        cw.stream = open('failed.log', 'wb')
-        cw.write(traceback)
-
-    try:
+    init_log()
+    terminator = Terminator()
+    if hasattr(signal, 'SIGHUP'):
+        signal.signal(signal.SIGHUP, lambda signum, frame: terminator.restart(signum))
+    if hasattr(signal, 'SIGQUIT'):
+        signal.signal(signal.SIGQUIT, lambda signum, frame: terminator.exit(signum))
+    if hasattr(signal, 'SIGTERM'):
+        signal.signal(signal.SIGTERM, lambda signum, frame: terminator.exit(signum))
+    if hasattr(signal, 'SIGINT'):
+        signal.signal(signal.SIGINT, lambda signum, frame: terminator.exit(signum))
+    sl = get_start_log()
+    sl.info(ro.i18n.get('Caty server started'))
+    while terminator.continue_process == Terminator.CONTINUE:
         try:
             system, is_debug, port, shell = setup(args)
         except:
             return 1
         if not system:
             return 1
-        server = build_server(system, is_debug, port)
-        closer = threading.Thread(target=lambda: server.close())
-        if shell is not None:
-            console_thread = ConsoleThread(shell, server)
-            console_thread.start()
-        signal.signal(signal.SIGHUP, lambda signum, frame: closer.start())
-        signal.signal(signal.SIGTERM, lambda signum, frame: closer.start())
-        signal.signal(signal.SIGQUIT, lambda signum, frame: closer.start())
-        signal.signal(signal.SIGINT, lambda signum, frame: closer.start())
-        server.main()
-    except select.error, e:
-        if e.args[0] == 4:
-            pass
-        else:
+        try:
+            server = build_server(system, is_debug, port)
+            terminator.set_server(server)
+            server.main()
+        except select.error, e:
+            if e.args[0] == 4:
+                pass
+            else:
+                handle_tb()
+                terminator.continue_process = Terminator.FAIL
+        except Exception, e:
             handle_tb()
-    except Exception, e:
-        handle_tb()
+            terminator.continue_process = Terminator.FAIL
+        
+    if terminator.continue_process == Terminator.END:
+        sl.info(ro.i18n.get('Caty server ended'))
+    else:
+        sl.error(ro.i18n.get('Caty server ended'))
     return 0
 
 def unlink_pid():
     if os.path.exists(ro.PID_FILE):
         os.unlink(ro.PID_FILE)
+
+def handle_tb():
+    import traceback
+    sl = get_start_log()
+    sl.error(unicode(traceback.format_exc(), 'utf-8'))
+    traceback.print_exc()
 
 def build_server(system, is_debug, port=8000):
     server_module_name = system.server_module_name
@@ -57,9 +69,10 @@ def build_server(system, is_debug, port=8000):
 
 def setup(args):
     from getopt import getopt
+    import locale
     opts, args = getopt(args, 'cs:dp:h', ['with-console', 'system-encoding=', 'debug', 'port=', 'help', 'pid='])
     debug = False
-    system_encoding = None
+    system_encoding = locale.getpreferredencoding()
     use_shell = False
     port = 8000
     _encoding = get_encoding()
@@ -85,8 +98,6 @@ def setup(args):
         help()
         return None, None, None, None
     system = System(system_encoding, debug)
-    if system._global_config.server_port != port:
-        system._global_config.server_port = port
     return system, debug, port, CatyShell(system.get_app('root'), False, debug, system) if use_shell else None
 
 def help():
@@ -117,6 +128,34 @@ class ConsoleThread(threading.Thread):
     def stop(self):
         self.shell.do_quit()
 
+class Terminator(object):
+    CONTINUE = 0
+    END = 1
+    FAIL = 2
+    def __init__(self):
+        self.continue_process = Terminator.CONTINUE
+
+    def set_server(self, server):
+        self.closer = threading.Thread(target=lambda :server.close())
+
+    def exit(self, signum):
+        from caty.util import cout
+        sl = get_start_log()
+        cout.writeln('received signal(' + str(signum) + ')')
+        sl.info('received signal(' + str(signum) + ')')
+        self.continue_process = Terminator.END
+        self.closer.start()
+        self.closer.join()
+
+    def restart(self, signum):
+        from caty.util import cout
+        sl = get_start_log()
+        sl.info('received signal(' + str(signum) + '), restart')
+        cout.writeln('received signal(' + str(signum) + '), restart')
+        self.continue_process = Terminator.CONTINUE
+        self.closer.start()
+        self.closer.join()
+
 class CatyServerFacade(object):
     def __init__(self, server_module, system, is_debug, port):
         self.is_debug = is_debug
@@ -128,7 +167,8 @@ class CatyServerFacade(object):
                                  dispatcher, 
                                  server_class, 
                                  handler_class)
-        print "Serving on port %d..." % port
+        from caty.util import cout
+        cout.writeln("Serving on port %d..." % port)
 
     def main(self):
         import os
@@ -138,11 +178,5 @@ class CatyServerFacade(object):
 
     def close(self):
         self.httpd.server_close()
-        try:
-            os.unlink(ro.PID_FILE)
-        except:
-            pass
-
-if __name__ == '__main__':
-    sys.exit(main())
+        os.unlink(ro.PID_FILE)
 

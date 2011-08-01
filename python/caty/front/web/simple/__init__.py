@@ -22,7 +22,7 @@ class CatyWSGIServer(ThreadingMixIn, WSGIServer):
             WSGIServer.server_close(self)
     else:
         def server_close(self):
-            self.shutdown()
+            WSGIServer.server_close(self)   
 
 class ErrorLogWriter(object):
     def __init__(self, logger):
@@ -45,6 +45,7 @@ class CatyRequestHandler(WSGIRequestHandler):
                          (self.address_string(),
                           self.log_date_time_string(),
                           format%args))
+
     def get_stderr(self):
         return self.__error_log_writer
 
