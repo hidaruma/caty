@@ -853,6 +853,7 @@ command select-action {
     refers python:caty.core.std.command.builtin.SelectAction;
 
 type _trace = [(string|null|boolean)*](minItems=1);
+
 /** リクエストに対してマッチしたリソースクラス名を試行した順番に出力する */
 command trace-dispatch
 {
@@ -866,9 +867,12 @@ command trace-dispatch
 :: void -> @EXISTS _trace | @FAILED _trace
     refers python:caty.core.std.command.builtin.TraceDispatch;
 
+type HelpInfo = deferred @* object;
 
 /**
-* 引数のモジュール/あるいはコマンドのヘルプを表示する。
+* モジュール/コマンド/型のヘルプを表示する。
+* 型のヘルプを出力する時は--typeオプションを、コマンドのヘルプを出力する時は--commandオプションをつける。
+* そのどちらも付けられなかった場合、このヘルプが表示される。
 * 引数のフォーマットは以下の通り。
 * 
 * {{{
@@ -879,12 +883,20 @@ command trace-dispatch
 *     module:command  module:command のヘルプを表示
 * }}}
 * 
-* 引数が省略された場合、このヘルプが出力される。
+* これはコマンドのヘルプのフォーマットであるが、型のヘルプも同様である。
 * オプションの--jsonが指定された場合、JSON形式のヘルプが返る(未実装)。
+*
+* == コマンド特有のオプション
+*
 * --filterオプションはコマンド一覧を出力する際、
 * 出力するコマンドをfilterに限定するために用いる。
-* 
-* 以下はコンソールでのみ有効な特殊コマンドである:
+*
+* == 型特有のオプション
+*
+* --exceptionオプションは型一覧を出力する際、
+* 出力する型を例外型に限定するために用いる。
+*
+* == コンソールでのみ有効な特殊コマンド
 * 
 * change APP_NAME  : アプリケーションをAPP_NAMEに変更する。短縮コマンドはch, cd
 * quit             : Catyシェルを終了する。
@@ -892,20 +904,54 @@ command trace-dispatch
 * server start PORT: PORTでCatyサーバを稼働させる。
 *        stop      : Catyサーバを停止する。
 */
-command help {"json": boolean?, "filter":boolean?} [string] :: void -> any
-             {"json": boolean?} :: void -> any
-    reads interpreter
-    refers python:caty.core.std.command.builtin.Help;
+command help
+{
+  @[default(false), without("type")]
+  "command" : boolean?,
 
-/**
- * 与えられた型のヘルプを出力する。
- * 引数のフォーマットはhelpに準拠する。
- * --exceptionオプションでは、型名一覧を出力する際、
- * 出力する型を例外型に限定するために用いる。
- */
-command type {"exception": boolean?} [string type_name] :: void -> string
-    reads schema
-    refers python:caty.core.std.command.builtin.Type;
+  @[default(false), without("command")]
+  "type" : boolean?,
+
+  // 以下は、既存のhelp, typeのオプション
+  
+  @[default(false), not-implemented]
+  "json": boolean?,
+
+  @[default(false), with("command")]
+  "filter": boolean?,
+
+  @[default(false), with("type")]
+  "exception": boolean?,
+
+} [string? pattern] :: void -> (string | HelpInfo)
+  reads [interpreter, schema]
+  refers python:caty.core.std.command.builtin.Help;
+
+command hc {
+  @[default(false), not-implemented]
+  "json": boolean?,
+
+  @[default(false)]
+  "filter": boolean?,
+
+} [string? pattern] :: void -> (string | HelpInfo) {
+  help --command %--json %--filter %1
+};
+
+command ht {
+  @[default(false), not-implemented]
+  "json": boolean?,
+
+  @[default(false)]
+  "exception": boolean?,
+
+} [string? pattern] :: void -> (string | HelpInfo) {
+  help --type %--json %--exception %1
+};
+
+command h :: void -> (string | HelpInfo) {
+    help
+};
 
 /**
  * 与えられたリソースのヘルプを出力する。

@@ -889,88 +889,29 @@ class Undef(Builtin):
         return caty.UNDEFINED
 
 class Help(Builtin):
-    
     def setup(self, opts, line=''):
-        self.line = line
         self.json = opts['json']
         if 'filter' in opts:
             self.query = opts['filter']
         else:
             self.query = None
-
-    def execute(self):
-        interpreter = self.interpreter
-        line = self.line.strip()
-        if line == '':
-            line = 'help'
-        if line in ('change', 'reload', 'l', 'quit', 'ch', 'cd', 'server'):
-            from caty.front.console import CatyShell
-            h = getattr(CatyShell, 'do_%s' % line)
-            return h.__doc__.strip()
-        module = 'builtin'
-        mode = 'usage' # usage or list or module_usage oe list_modules
-        command = ''
-        chunk = line.split(':')
-        if len(chunk) == 1:
-            if chunk[0] != '*':
-                command = chunk[0]
-                mode = 'usage'
-            else:
-                mode = 'list'
-        elif len(chunk) == 2:
-            if chunk[0] == '*':
-                if chunk[1] == '':
-                    mode = 'list_modules'
-                else:
-                    return (u'引数エラー: %s' % line)
-            else:
-                module = chunk[0]
-                if chunk[1] == '':
-                    return (u'引数エラー: %s' % line)
-                elif chunk[1] == '*':
-                    mode = 'list'
-                else:
-                    command = chunk[1]
-        if mode == 'usage':
-            if interpreter.has_command(module, command):
-                return (interpreter.get_help(module, command))
-            else:
-                return (u'未知のコマンド: %s' % command)
-        elif mode == 'list':
-            r= []
-            l = list(interpreter.get_commands(module))
-            if self.query:
-                query = 'filter'
-            else:
-                query = None
-            commands = [(x.name, x.title) 
-                         for x in l
-                         if not query or query in x.annotations]
-            commands.sort(cmp=lambda x, y:cmp(x[0], y[0]))
-            if commands:
-                max_width = max(map(lambda a:len(a[0]), commands))
-            else:
-                max_width = 0
-            r.append((u'モジュール: %s' % module))
-            for c in commands:
-                r.append( (c[0].ljust(max_width + 1) + c[1]))
-            return '\n'.join(r)
-        elif mode == 'list_modules':
-            r = []
-            for m in interpreter.get_modules():
-                r.append((m.name))
-            r.sort()
-            r.insert(0, (u'モジュール一覧'))
-            return '\n'.join(r)
-        else:
-            return u''
-
-class Type(Builtin):
-    def setup(self, opts, type_name):
-        self.__type_name = type_name
         self.__exception = opts['exception']
-
+        self.__mode = u'command'
+        if opts['type'] and line:
+            self.__type_name = line
+            self.__mode = u'type'
+        elif opts['command']:
+            self.line = line
+        else:
+            self.line = u''
+        
     def execute(self):
+        if self.__mode == u'type':
+            return self._type_help()
+        else:
+            return self._command_help()
+
+    def _type_help(self):
         line = self.__type_name.strip()
         if line == '':
             return u''
@@ -1037,6 +978,74 @@ class Type(Builtin):
         st = self.schema._module.get_syntax_tree(self.__type_name.strip())
         td = TreeDumper()
         return td.visit(st)
+
+    def _command_help(self):
+        interpreter = self.interpreter
+        line = self.line.strip()
+        if line == '':
+            line = 'help'
+        if line in ('change', 'reload', 'l', 'quit', 'ch', 'cd', 'server'):
+            from caty.front.console import CatyShell
+            h = getattr(CatyShell, 'do_%s' % line)
+            return h.__doc__.strip()
+        module = 'builtin'
+        mode = 'usage' # usage or list or module_usage oe list_modules
+        command = ''
+        chunk = line.split(':')
+        if len(chunk) == 1:
+            if chunk[0] != '*':
+                command = chunk[0]
+                mode = 'usage'
+            else:
+                mode = 'list'
+        elif len(chunk) == 2:
+            if chunk[0] == '*':
+                if chunk[1] == '':
+                    mode = 'list_modules'
+                else:
+                    return (u'引数エラー: %s' % line)
+            else:
+                module = chunk[0]
+                if chunk[1] == '':
+                    return (u'引数エラー: %s' % line)
+                elif chunk[1] == '*':
+                    mode = 'list'
+                else:
+                    command = chunk[1]
+        if mode == 'usage':
+            if interpreter.has_command(module, command):
+                return (interpreter.get_help(module, command))
+            else:
+                return (u'未知のコマンド: %s' % command)
+        elif mode == 'list':
+            r= []
+            l = list(interpreter.get_commands(module))
+            if self.query:
+                query = 'filter'
+            else:
+                query = None
+            commands = [(x.name, x.title) 
+                         for x in l
+                         if not query or query in x.annotations]
+            commands.sort(cmp=lambda x, y:cmp(x[0], y[0]))
+            if commands:
+                max_width = max(map(lambda a:len(a[0]), commands))
+            else:
+                max_width = 0
+            r.append((u'モジュール: %s' % module))
+            for c in commands:
+                r.append( (c[0].ljust(max_width + 1) + c[1]))
+            return '\n'.join(r)
+        elif mode == 'list_modules':
+            r = []
+            for m in interpreter.get_modules():
+                r.append((m.name))
+            r.sort()
+            r.insert(0, (u'モジュール一覧'))
+            return '\n'.join(r)
+        else:
+            return u''
+
 
 class Resource(Internal):
     def setup(self, resource_name):
