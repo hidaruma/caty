@@ -206,7 +206,7 @@ class ScriptCommandInterpreter(AbstractCommandInterpreter):
         parser = ScriptParser(self.facilities)
         pipeline = parser.parse(string)
         if not pipeline:
-            raise ScriptError(self.module._app.i18n.get(u'Syntax Error: $name'), failed=string)
+            raise ScriptError(self.module._app.i18n.get(u'Syntax Error: $name', name=string))
         else:
             return pipeline
 

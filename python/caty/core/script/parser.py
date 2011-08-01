@@ -135,12 +135,8 @@ class ScriptParser(Parser):
                 exp = r.pop(-1)
                 r.append(TagBuilder(t, exp))
             elif a == ';':
-                nex = seq.parse(option([self.term, self.group]))
-                if nex:
-                    r.append(Discard(nex))
-                else:
-                    r.append(CommandProxy('void', [], [], []))
-                    break
+                nex = seq.parse([self.term, self.group])
+                r.append(Discard(nex))
             elif a == '>':
                 n = seq.parse(self.name)
                 r.append(VarStore(n))
