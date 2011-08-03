@@ -964,12 +964,17 @@ class Help(Builtin):
                 r.append( (c[0].ljust(max_width + 1) + c[1]))
             return '\n'.join(r)
         elif mode == 'list_modules':
-            r = []
+            r1 = []
+            r2 = []
             for m in self.schema._module.get_modules():
-                r.append((m.name))
-            r.sort()
-            r.insert(0, (u'モジュール一覧'))
-            return '\n'.join(r)
+                if m.application.name not in ('builtin', 'global'):
+                    r2.append((m.application.name + ':' + m.name))
+                else:
+                    r1.append((m.name))
+            r2.sort()
+            r1.sort()
+            r1.insert(0, (u'モジュール一覧'))
+            return '\n'.join(r1+r2)
         else:
             return u''
 
@@ -1037,12 +1042,17 @@ class Help(Builtin):
                 r.append( (c[0].ljust(max_width + 1) + c[1]))
             return '\n'.join(r)
         elif mode == 'list_modules':
-            r = []
+            r1 = []
+            r2 = []
             for m in interpreter.get_modules():
-                r.append((m.name))
-            r.sort()
-            r.insert(0, (u'モジュール一覧'))
-            return '\n'.join(r)
+                if m.application.name not in ('builtin', 'global'):
+                    r2.append((m.application.name + ':' + m.name))
+                else:
+                    r1.append((m.name))
+            r2.sort()
+            r1.sort()
+            r1.insert(0, (u'モジュール一覧'))
+            return '\n'.join(r1+r2)
         else:
             return u''
 
