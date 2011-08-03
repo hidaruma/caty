@@ -58,16 +58,7 @@ class User(Facility):
     
 
 class ExistsUser(Builtin):
-    u"""ユーザの存在の確認。
-    """
-    command_decl = u"""
-        /**
-         * ユーザーが存在するかどうかを返す。
-         */
-        command exists :: string -> boolean
-            reads storage
-            refers python:caty.command.user.ExistsUser;
-    """
+
     def execute(self, input):
         storage = self.storage('user')
         r = list(storage.select({'userid': input}, -1, 0))
@@ -75,14 +66,6 @@ class ExistsUser(Builtin):
 
 from caty.util.collection import merge_dict
 class AddUser(Builtin):
-    command_decl = u"""
-        /**
-         * 新規ユーザの登録を行う。
-         */
-        command add :: RegistryInfo -> boolean
-                       uses storage
-                       refers python:caty.command.user.AddUser;
-    """
 
     def execute(self, input):
         storage = self.storage('user')
@@ -101,14 +84,7 @@ class AddUser(Builtin):
         return True
 
 class DelUser(Builtin):
-    command_decl = u"""
-        /**
-         * ユーザの削除を行う。入力値はユーザのアカウント名である。
-         */
-        command delete :: string -> boolean
-                uses storage
-                refers python:caty.command.user.DelUser;
-    """
+
     def execute(self, input):
         storage = self.storage('user')
         userid = input
@@ -118,14 +94,7 @@ class DelUser(Builtin):
         return True
 
 class ChangePassword(Builtin):
-    command_decl = u"""
-        /**
-         * パスワードの変更を行う。
-         */
-        command password :: RegistryInfo -> boolean
-            uses storage
-            refers python:caty.command.user.ChangePassword;
-    """
+
     def execute(self, input):
         storage = self.storage('user')
         userid = input['userid'].strip()
@@ -135,27 +104,12 @@ class ChangePassword(Builtin):
         return True
 
 class GetUserInfo(Builtin):
-    command_decl = u"""
-        /**
-         * ユーザ情報の取得を行う。
-         **/
-        command info :: void -> UserInfo
-            reads user
-            refers python:caty.command.user.GetUserInfo;
-    """
+
     def execute(self):
         return self.user.to_dict()
 
 class UpdateInfo(Builtin):
-    command_decl = u"""
-    /**
-     * ユーザ情報を最新の情報に更新する。
-     */
-    command update-info :: void -> void
-        reads storage
-        uses user
-        refers python:caty.command.user.UpdateInfo;
-    """
+
     def execute(self):
         info = self.storage('user').select1({'userid':self.user.userid})
         self.user.set_user_info(info)

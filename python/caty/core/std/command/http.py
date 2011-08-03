@@ -4,13 +4,6 @@ from caty.core.exception import *
 name='http'
 schema=''
 class Found(Builtin):
-    command_decl = u"""
-    /**
-     * 与えられたパスに対しての302 Foundレスポンスを出力する。
-     */
-    command found [string] :: void -> Response
-        refers python:caty.command.http.Found;
-    """
 
     def setup(self, path):
         self._path = path
@@ -26,13 +19,7 @@ class Found(Builtin):
         }
 
 class Forbidden(Builtin):
-    command_decl = u"""
-    /**
-     * 与えられたパスに対しての403 Forbiddenを出力する。
-     */
-    command forbidden [string] :: void -> never
-        refers python:caty.command.http.Forbidden;
-    """
+
     def setup(self, path):
         self._path = path
 
@@ -44,13 +31,7 @@ class Forbidden(Builtin):
         )
 
 class NotFound(Builtin):
-    command_decl = u"""
-    /**
-     * 与えられたパスに対しての404 Forbiddenを出力する。
-     */
-    command not-found [string] :: void -> never
-        refers python:caty.command.http.NotFound;
-    """
+
     def setup(self, path):
         self._path = path
 
@@ -63,13 +44,7 @@ class NotFound(Builtin):
 
 
 class BadRequest(Builtin):
-    command_decl = u"""
-    /**
-     * 与えられたパスに対しての400 Bad Requestを出力する。
-     */
-    command bad-request [string path, string method] :: void -> never
-        refers python:caty.command.http.BadRequest;
-    """
+
     def setup(self, path, method):
         self._path = path
         self._method = method
@@ -83,13 +58,7 @@ class BadRequest(Builtin):
             )
 
 class NotAllowed(Builtin):
-    command_decl = u"""
-    /**
-     * 与えられたパスに対しての405 Method Not Allowedを出力する。
-     */
-    command not-allowed [string path, string method] :: void -> never
-        refers python:caty.command.http.NotAllowed;
-    """
+
     def setup(self, path, method):
         self._path = path
 

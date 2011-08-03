@@ -36,21 +36,6 @@ CATY_SECURE_TOKEN_KEY = '$_CATY_SECURE_TOKEN_KEY' # フォーム入力におけ�
 CATY_USER_INFO_KEY = '$_CATY_USER_INFO_KEY' # セッション中にユーザ情報を格納する時のキー
 
 class Login(Builtin):
-    u"""ログイン処理。
-    """
-    
-    command_decl = u"""
-        /**
-         * ログイン処理を行う。
-         * 入力値のうち userid と password は必須である。
-         * succ, fail はそれぞれログイン成功/失敗時に遷移する先のパスである。
-         * ただし、 succ, error の仕様は変更される可能性が高い。
-         */
-        command login :: LoginForm -> Redirect
-                        reads [storage, env]
-                        uses [user, session]
-                        refers python:caty.command.secure.Login;
-    """
 
     def execute(self, input):
         userid = input['userid']
@@ -91,20 +76,7 @@ class Login(Builtin):
         return m.OutputString()
 
 class Loggedin(Builtin):
-    u"""ログイン状態のチェック処理。
-    """
-    command_decl = u"""
-        /**
-         * ログインしているか否かのチェックを行う。
-         * ログインしていれば @OK タグを付けた上で入力をコピーして返す。
-         * 未ログインの場合は @NG タグを付けた上で入力をコピーして返す。
-         * --userid オプションでユーザアカウントを指定することもでき、その場合はアカウント名の照合も行う。
-         *
-         */
-        command loggedin<T> {"userid":string} :: T -> @OK T | @NG T
-                                        reads user
-                                        refers python:caty.command.secure.Loggedin;
-    """
+
     def setup(self, opts):
         self.opts = opts
 
@@ -119,16 +91,6 @@ class Loggedin(Builtin):
 
 
 class Logout(Builtin):
-    command_decl = u"""
-    /**
-     * ログアウト処理。
-     * セッション情報を破棄し、入力されたパスへ遷移する。
-     * 未ログイン時でも同じく遷移する。
-     */
-    command logout :: string -> Redirect
-        uses [user, session]
-        refers python:caty.command.secure.Logout;
-    """
 
     def execute(self, input):
         key = self.session.key
@@ -194,20 +156,7 @@ class TokenGeneratorMixin(object):
         return token
 
 class EmbedToken(Builtin, TokenGeneratorMixin):
-    command_decl = u"""
-    /**
-     * トークンの自動埋め込み。
-     * HTML フォームにトークンを埋め込む。
-     * 主に以下のように print コマンドにつなげる形で実行する。
-     *
-     * {{{
-     * print /form.html | secure:embed-token
-     * }}}
-     */
-    command embed-token :: TargetForm -> TargetForm
-        uses [session, token]
-        refers python:caty.command.secure.EmbedToken;
-    """
+
     def execute(self, input):
         if isinstance(input, unicode):
             return self._embed(input)
@@ -237,32 +186,13 @@ class EmbedToken(Builtin, TokenGeneratorMixin):
         return len(data['body'].encode(e))
 
 class GenerateToken(Builtin, TokenGeneratorMixin):
-    command_decl = u"""
-    /**
-     * リクエストトークンの生成。
-     */
-    command gen-token :: void -> string
-        uses [session, token]
-        refers python:caty.command.secure.GenerateToken;
-    """
+
     def execute(self):
         return self._generate_and_set_token()
 
 
 from caty.jsontools import tag, tagged, untagged
 class CheckToken(Builtin):
-    command_decl = u"""
-    /**
-     * セキュリティトークンチェック。
-     *
-     * 入力に含まれるトークンとサーバ側のトークンを照合し、入力のトークンがサーバ側に含まれていなければエラーとする。
-     *
-     */
-    command check-token :: TokenEmbeded -> TokenCheckResult
-        reads token
-        uses session
-        refers python:caty.command.secure.CheckToken;
-    """
 
     def execute(self, input):
         input, tags = self._detach_tag(input)
@@ -276,7 +206,7 @@ class CheckToken(Builtin):
         # 後続処理で token ファシリティを使うかもしれないので token には手を付けない
         self.session.get(CATY_SECURE_TOKEN_KEY).remove(form_token)
         del input['$_catySecureToken']
-        return tagged(u'OK', self._atach_tag(input, tags))
+        return tagged(u'OK', self._attach_tag(input, tags))
 
     def _detach_tag(self, input):
         tags = []
@@ -289,9 +219,9 @@ class CheckToken(Builtin):
                 break
         return input, tags
 
-    def _atach_tag(self, obj, tags):
+    def _attach_tag(self, obj, tags):
         if tags:
-            return self._atach_tag(tagged(tags.pop(-1), obj), tags)
+            return self._attach_tag(tagged(tags.pop(-1), obj), tags)
         else:
             return obj
 
