@@ -1,5 +1,5 @@
 {
-    "projectName": "org.chimaira.caty.caty_mainline",
+    "projectName": "org.chimaira.caty.dev",
     "mafsModule": "caty.mafs.stdfs",
     "serverModule": "caty.front.web.simple",
     "session": {
