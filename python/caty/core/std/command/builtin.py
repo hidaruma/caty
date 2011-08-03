@@ -980,9 +980,14 @@ class Help(Builtin):
 
     def _get_type(self):
         from caty.core.casm.cursor import TreeDumper
-        st = self.schema._module.get_syntax_tree(self.__type_name.strip())
+        from caty.core.schema import types
+        t = self.__type_name.strip()
+        if t in types:
+            return u'基本型: ' + t
+        st = self.schema._module.get_syntax_tree(t)
         td = TreeDumper()
-        return td.visit(st)
+        r = td.visit(st)
+        return r
 
     def _command_help(self):
         interpreter = self.interpreter
