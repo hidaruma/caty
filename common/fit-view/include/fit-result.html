@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?caty-meta template="smarty"?>
+<!DOCTYPE html
+  PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+  'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>{$title}</title>
+        <link rel="stylesheet" href="/fit-view/fit.css" />
+    </head>
+    <h1>{$title}</h1>
+ 
+    <table class="statics">
+        <tr><th class="OK">OK</th><td>{$succ}</td></tr>
+        <tr><th class="NG">NG</th><td>{$fail}</td></tr>
+        <tr><th class="Indef">Indef</th><td>{$indef}</td></tr>
+        <tr><th class="Error">Error</th><td>{$error}</td></tr>
+        <tr><th class="Inval">Invalid</th><td>{$invalid}</td></tr>
+        <tr><th>Total</th><td>{$total}</td></tr>
+    </table>
+    <div class="result">
+     {if $error_msg|notempty}
+        <pre class="error_msg">{$error_msg}</pre>
+     {/if}
+     <p><a href="/fit-view/">CatyFIT トップ</a></p>
+     {$html|noescape}
+    </div>
+
+    <hr />
+    <div class="index">
+        {include file="fit-view:/test-list.html" context="tests"}
+        <p><a href="/fit-view/">CatyFIT トップ</a></p>
+    </div>
+</html>
+

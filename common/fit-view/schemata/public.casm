@@ -1,0 +1,40 @@
+module public;
+
+type FitResult = {
+    "name": string,
+    "contents": list<FitSummary>
+};
+
+type FitContent = {
+    "app": string?,
+    "title": string,
+    "succ": integer,
+    "fail": integer,
+    "error": integer,
+    "invalid": integer,
+    "indef": integer,
+    "total": integer,
+    "error_msg": string?,
+    "html": string,
+    "tests": list<FitSummary>
+};
+
+type FitSummary = {
+    "subdir": string?,
+    "context": {
+        "path": string,
+        "title": string,
+        "result": string,
+        "app": string?
+    } | null,
+    "child_nodes": list<FitSummary>?
+};
+
+command list-all-result :: void -> list<FitResult>
+    reads pub
+    refers python:fit.ListAllResult;
+
+command read [string] :: void -> FitContent
+    reads pub
+    refers python:fit.Read;
+

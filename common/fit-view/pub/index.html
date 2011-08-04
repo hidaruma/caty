@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?caty-meta template="smarty"?>
+<?caty-script
+
+ list-all-result
+
+?>
+<!DOCTYPE html
+  PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+  'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html>
+    <head>
+        <title>CatyFIT</title>
+        <link rel="stylesheet" href="/fit-view/fit.css" />
+    </head>
+<body>
+    <h1>Caty FIT</h1>
+    <dl>
+    {foreach from=$_CONTEXT item=app}
+        <dt><a href="{$app.name}/">{$app.name}</a><dt>
+        <dd>
+        {include file="fit-view:/test-list-for-index.html" context="app.contents"}
+        </dd>
+    {/foreach}
+    </dl>
+
+</body>
+</html>
+
+
+
+
+
+
+
