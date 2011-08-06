@@ -1,0 +1,13 @@
+{
+    "indexFiles" : ["index.fit", "index.html"],
+    "filetypes": {
+        ".fit": {
+            "contentType": "application/json",
+            "isText": true,
+            "assoc": {
+                "/GET": "read %0 | print include@this:/fit-result.html",
+                "raw/GET": "json:read %0|json:response",
+            }
+        }
+    },
+}

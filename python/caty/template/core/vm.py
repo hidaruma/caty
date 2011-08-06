@@ -405,7 +405,13 @@ class VirtualMachine(object):
 
         def mask_context(ignore):
             self._masked_context.append(self._context)
-            self._context = stack.pop()
+            value = stack.pop()
+            if isinstance(value, dict):
+                self._context = {}
+                self._context['_CONTEXT'] = value
+                self._context.update(value)
+            else:
+                self._context = {'_CONTEXT': value}
         opmap[MASK_CONTEXT] = mask_context
 
         def unmask_context(ignore):

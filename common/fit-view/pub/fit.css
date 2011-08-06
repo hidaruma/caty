@@ -1,0 +1,85 @@
+h1 {
+ border-left : 4px gray solid;
+ border-bottom : 2px gray solid;
+    font-size: 1.4em;
+}
+
+h2 {
+ border-left : 2px gray solid;
+ border-bottom : 1px gray solid;
+ background-color : #CCFFFF;
+    font-size: 1.2em;
+}
+
+h3 {
+ text-decoration: underline;
+}
+
+.OK {
+    color: white;
+    background: #00aa00;
+}
+
+
+.NG {
+    color: white;
+    background: #aa0000;
+}
+
+.Error {
+    color: white;
+    background: #888800;
+}
+
+.Inval {
+    color: white;
+    background: #333333;
+}
+
+.Indef {
+    color: white;
+    background: #a05500;
+}
+
+
+pre.error_msg {
+    background-color: yellow;
+    border:2px solid gray;
+    padding: 4px;
+}
+
+pre {
+    border:1px solid gray;
+    padding: 4px;
+    margin-left: 0.5em;
+}
+
+.succ a {
+    color: white;
+    background: #00aa00;
+}
+
+.fail a {
+    color: white;
+    background: #aa0000;
+}
+
+table {
+ border: 2px solid #000000 /*lightGrey*/;
+ border-collapse: collapse;
+}
+
+td, th {
+ border: 2px solid lightGrey;
+}
+
+.fit_case_header th {
+ border: 2px solid lightGrey;
+ /*background-color : #FFFF99;*/
+ background-color : #CCFFFF; 
+}
+
+th.syntactic_error {
+ background-color : #992222; 
+}
+

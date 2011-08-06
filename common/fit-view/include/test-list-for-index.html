@@ -1,0 +1,14 @@
+<?caty-meta template="smarty"?>
+<ul>
+{foreach from=$_CONTEXT item=fit}
+    {if $fit.context|notempty}
+    <li class="{$fit.context.result}"><a href="/fit-view{$fit.context.path}">{$fit.context.title}</a></li>
+    {/if}
+    {if $fit.child_nodes|notempty}
+        <li><a href=".{$fit.subdir}">{$fit.subdir}</a>
+        {include file="fit-view:/test-list-for-index.html" context="fit.child_nodes"}
+        </li>
+    {/if}
+{/foreach}
+</ul>
+
