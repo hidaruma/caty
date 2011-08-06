@@ -104,7 +104,7 @@ class SmartyParser(Parser):
         return float(s.parse(Regex(r'-?[0-9]+\.[0-9]+')))
 
     def boolean(self, s):
-        return bool(seq.parse(['true', 'false']).toupper())
+        return bool(s.parse(['true', 'false']).toupper())
 
     def string(self, s):
         s.parse('"')
