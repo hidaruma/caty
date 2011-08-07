@@ -1,0 +1,45 @@
+// -*- coding: utf-8 -*-
+
+/** specdocsアプリケーションのリソース＆アクション 
+ */
+module specdocs in cara;
+
+/** ディレクトリへのGETリクエスト 
+ */
+resource Dir("/" | "*/") {
+  action dir-get("/GET") 
+  ::
+  {
+   %APP_PATH  | path:base > app;
+   { 
+     "wikifiles" : lsdir %PATH_INFO .wiki | each {pv name},
+     "subdirs"  : lsdir --kind=dir %PATH_INFO | each {pv name},
+     "path" : %PATH_INFO,
+     "app" : %app,
+     "title" : [%app, " ", %PATH_INFO] | text:concat
+   } // | json:response 
+   | print /list-files.html
+  };
+
+};
+
+
+/** Wikiファイル
+ */
+resource Wiki("*.wiki") {
+  filetype {
+   "contentType" : "text/x-wiki",
+   "isText" : true,
+  };
+
+  action wiki-get("/GET")
+  ::
+  {
+    {
+      "content": file:read %0 | text:creole, 
+      "title"  : %0 | path:trunk 
+    }
+    | print /show-wiki.html
+  };
+};
+
