@@ -116,6 +116,7 @@ class CatyShell(cmd.Cmd):
             self.dribble_file.write(self.prompt)
             self.dribble_file.write(line)
             self.dribble_file.write(os.linesep)
+            self.dribble_file.flush()
         return cmd.Cmd.onecmd(self, line)
 
     def _echo(self, s):
@@ -123,7 +124,8 @@ class CatyShell(cmd.Cmd):
         if self.dribble_file:
             self.dribble_file.write(cout._to_str(s))
             self.dribble_file.write('\n')
-
+            self.dribble_file.flush()
+ 
     @catch
     def do_quit(self, line):
         u"""
@@ -255,7 +257,7 @@ Web サーバの起動・停止を行う
                 r = c(None)
                 if self.not_void_out(c):
                     o = pp(r)
-                    self.stream.write(o + '\n')
+                    self._echo(o)
                 self.set_prompt()
                 self.interpreter = None
             else:
