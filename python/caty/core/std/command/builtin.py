@@ -142,6 +142,9 @@ class Expand(Builtin, MafsMixin, PbcObject):
         execute = Contract(execute)
         execute.ensure += _not_property_changed
 
+class Expand2(Expand):
+    pass
+
 class Response(Builtin):
     
     def setup(self, opts):

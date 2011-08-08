@@ -496,6 +496,15 @@ command expand {"raw": boolean?, "no-script": boolean?, "resolve": boolean?, "mo
     reads [schema]
     refers python:caty.core.std.command.builtin.Expand;
 
+/*{{{
+/** テンプレートをファイルからではなく文字列から取るexpand */
+command expand_2 {"raw": boolean?, "no-script": boolean?, "resolve": boolean?, "mode":string?} :: 
+    [any, string] -> string | binary
+    uses [pub, env, include, interpreter]
+    reads [schema]
+    refers python:caty.core.std.command.builtin.Expand2;
+    }}}*/
+
 /**
  * 入力値を HTTP の応答ボディとし、 HTTP 応答ヘッダを付けて返す。
  * --ext オプションは拡張子の指定であり、このオプションが指定された場合は content-type ヘッダが対応した値となる。

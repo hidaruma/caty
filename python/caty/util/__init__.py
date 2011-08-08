@@ -82,34 +82,34 @@ def escape_html(s):
 import sys, traceback
 class ConsoleWriter(object):
     def __init__(self):
-        self.encoding = 'utf-8' # 端末エンコーディングが指定される
+        self.encoding = None # 端末エンコーディングが指定される
         self.stream = sys.stdout
 
     def set_encoding(self, encoding):
         self.encoding = encoding
 
-    def _write(self, arg):
+    def _to_str(self, arg):
         assert self.encoding is not None
         assert isinstance(arg, (unicode, Exception, str)) or arg is traceback, type(arg)
         if isinstance(arg, unicode):
-            self.stream.write(arg.encode(self.encoding))
+            return arg.encode(self.encoding)
         elif isinstance(arg, Exception):
-            self.stream.write(get_message(arg, self.encoding))
+            return get_message(arg, self.encoding)
         elif isinstance(arg, str):
-            self.stream.write(brutal_encode(arg, self.encoding).encode(self.encoding))
+            return brutal_encode(arg, self.encoding).encode(self.encoding)
         else:
             try:
                 tb = brutal_encode(traceback.format_exc(), self.encoding)
             except:
                 tb = brutal_encode(traceback.format_exc(), 'cp932')
-            self.stream.write(tb.encode(self.encoding))
+            return tb.encode(self.encoding)
 
     def write(self, arg):
-        self._write(arg)
+        self.stream.write(self._to_str(arg))
         self.stream.flush()
 
     def writeln(self, arg):
-        self._write(arg)
+        self.stream.write(self._to_str(arg))
         self.stream.write('\n')
         self.stream.flush()
 
@@ -124,9 +124,14 @@ class DebugWriter(ConsoleWriter):
 cout = ConsoleWriter()
 debug = DebugWriter()
 
-def init_writer(encoding):
+def init_writer(encoding, logfile=None, elogfile=None):
     cout.set_encoding(encoding)
     debug.set_encoding(encoding)
+    if logfile:
+        cout.stream = logfile
+        debug.stream = logfile
+    if elogfile:
+        debug.stream = elogfile
     return cout, debug
 
 def error_wrapper(f):

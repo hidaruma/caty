@@ -46,7 +46,7 @@ def catch(f):
     return _
 
 class CatyShell(cmd.Cmd):
-    def __init__(self, site, wildcat, debug, system):
+    def __init__(self, site, wildcat, debug, system, dribble):
         cmd.Cmd.__init__(self)
         self.debug = debug
         self.intro = """Caty interactive shell
@@ -61,6 +61,10 @@ class CatyShell(cmd.Cmd):
         self.last_session = None
         self.server = None
         self.system = system
+        if dribble:
+            self.dribble_file = open('console-input.log', 'wb')
+        else:
+            self.dribble_file = None
         import string
         self.identchars = set(list(string.ascii_letters + string.digits + '_-'))
 
@@ -91,11 +95,34 @@ class CatyShell(cmd.Cmd):
             self._echo(u'%s というアプリケーションは存在しないか、起動しない設定になっています' % line.strip())
         return False
 
+    def do_dribble(self, line):
+        l = line.strip()
+        if l == 'on':
+            if self.dribble_file:
+                return
+            self.dribble_file = open('console-input.log', 'wb')
+        elif l == 'off':
+            if self.dribble_file:
+                self.dribble_file.close()
+            self.dribble_file = None
+        elif not l:
+            self._echo(u'drrible ' + 'on' if self.dribble_file else 'off')
+
     def do_help(self, line):
         return self.default('help ' + line)
 
+    def onecmd(self, line):
+        if self.dribble_file:
+            self.dribble_file.write(self.prompt)
+            self.dribble_file.write(line)
+            self.dribble_file.write(os.linesep)
+        return cmd.Cmd.onecmd(self, line)
+
     def _echo(self, s):
         cout.writeln(s)
+        if self.dribble_file:
+            self.dribble_file.write(cout._to_str(s))
+            self.dribble_file.write('\n')
 
     @catch
     def do_quit(self, line):
@@ -234,14 +261,14 @@ Web サーバの起動・停止を行う
             else:
                 self.prompt = '> '
         except CatyException, e:
-            cout.writeln(traceback)
+            self._echo(traceback)
             m = e.get_message(self.app.i18n)
-            cout.writeln(m)
+            self._echo(m)
             self.set_prompt()
             self.interpreter = None
         except Exception, e:
-            cout.writeln(traceback)
-            cout.writeln(e)
+            self._echo(traceback)
+            self._echo(e)
             self.set_prompt()
             self.interpreter = None
         finally:
@@ -367,6 +394,7 @@ def setup_shell(args, cls=CatyShell):
                          'debug', 
                          'quiet', 
                          'help', 
+                         'dribble',
                          'file=',
                          'no-ambient',
                          'no-app'])
@@ -383,6 +411,7 @@ def setup_shell(args, cls=CatyShell):
     files = []
     no_ambient = False
     no_app = False
+    dribble = False
     for o, v in opts:
         if o in ('-a', '--app'):
             sitename = v
@@ -406,6 +435,8 @@ def setup_shell(args, cls=CatyShell):
             no_ambient = True
         elif o == '--no-app':
             no_app = True
+        elif o == '--dribble':
+            dribble = True
     if args:
         help(u'不明な引数です: %s' % ', '.join(args))
         return None, None, None
@@ -414,7 +445,7 @@ def setup_shell(args, cls=CatyShell):
         return None, None, None
     system = System(_encoding, debug, quiet, no_ambient, no_app)
     site = system.get_app(sitename)
-    shell = cls(site, wildcat, debug, system)
+    shell = cls(site, wildcat, debug, system, dribble)
     return shell, files, script
 
 def help(msg=None):
