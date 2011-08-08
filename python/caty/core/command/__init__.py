@@ -165,6 +165,10 @@ class Command(object):
             self.__var_storage.opts['_ARGV'] = [u""] + args
         else:
             self.__var_storage.opts['_ARGV'] = [u""]
+        if opts:
+            self.__var_storage.opts['_OPTS'] = opts
+        else:
+            self.__var_storage.opts['_OPTS'] = {}
         if opts is not None and args:
             self.setup(opts, *args)
         elif opts:
@@ -334,6 +338,10 @@ def scriptwrapper(profile, script):
             else:
                 self._var_storage.opts['_ARGV'] = [u""]
                 self._var_storage.args = [u""]
+            if opts:
+                self._var_storage.opts['_OPTS'] = opts
+            else:
+                self._var_storage.opts['_OPTS'] = {}
 
         def set_var_storage(self, storage):
             Command.set_var_storage(self, storage)
