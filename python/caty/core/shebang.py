@@ -1,8 +1,12 @@
 # coding: utf-8
 from topdown import *
+from topdown.util import quoted_string
 from HTMLParser import HTMLParser
 import shlex
 from caty.core.exception import InternalException
+import caty.core.runtimeobject as ro
+from caty.template import compilers
+
 def split_meta(s):
     if not s: return {}
     d = {}
@@ -21,7 +25,7 @@ def find_(s, t):
         return 0, 0, 0, 0
     body_end = s.find('?>', st)
     if body_end == -1:
-        raise InternalException(u'shebang syntax error')
+        raise InternalException(u'')
     body_start = st + len(t)
     end = body_end + 2
     return st, body_start, body_end, end
@@ -30,6 +34,47 @@ def find_(s, t):
 find_meta = lambda s: find_(s, '<?caty-meta')
 find_script = lambda s: find_(s, '<?caty-script')
 
+@as_parser
+def schebang(seq):
+    meta = option(parse_meta, {})(seq)
+    if meta:
+        c = compilers[meta['template']].get_parser()
+        many(c.comment)(seq)
+        script = option(parse_script, u'')(seq)
+    return meta, script, seq.rest
+
+def parse_meta(seq):
+    S(u'<?')(seq)
+    try:
+        keyword(u'caty-meta')(seq)
+        keyword(u'template')(seq)
+        S(u'=')(seq)
+        tmpl = quoted_string(seq)
+        if seq.parse(option(keyword(u'type'))):
+            S(u'=')(seq)
+            tp = quoted_string(seq)
+            r = {
+                u'template': tmpl,
+            }
+        else:
+            r = {
+                u'template': tmpl,
+            }
+        S('?>')(seq)
+    except ParseError, e:
+        raise Exception(ro.i18n.get(u'caty-meta PI syntax error: $message', message=e._message))
+    return r
+
+def parse_script(seq):
+    S(u'<?')(seq)
+    try:
+        keyword(u'caty-script')(seq)
+        r = until('?>')(seq)
+        S('?>')(seq)
+    except ParseError, e:
+        raise Exception(ro.i18n.get(u'caty-script PI syntax error: $message', message=e._message))
+    return r
+
 def parse(s, associate=False):
     u"""shebang の読み取りを行う。
     Caty テンプレートの shebang は
@@ -37,11 +82,6 @@ def parse(s, associate=False):
     どちらも一つのファイルに最大で一回まで出現可能であり、
     二度目以降の shebang は処理されない。
     """
-    meta_st, meta_main, meta_main_end, meta_end = find_meta(s)
-    meta = s[meta_main:meta_main_end]
-    script_st, script_main, script_main_end, script_end = find_script(s)
-    script = s[script_main:script_main_end]
-    a, b, c, d = list(sorted((meta_st, meta_end, script_st, script_end)))
-    content = ''.join((s[:a].rstrip(), s[b:c].lstrip(), s[d:].lstrip()))
-    return split_meta(meta), script if associate else u'', content
+    meta, script, content = schebang.run(s, auto_remove_ws=True)
+    return meta, script if associate else u'', u'\n' + content
 

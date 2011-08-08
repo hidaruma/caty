@@ -16,6 +16,9 @@ def SmartyTemplate(template):
     return t
 
 class SmartyCompiler(Compiler):
+    def get_parser(self):
+        return SmartyParser()
+
     def build_st(self, fo):
         return SmartyParser().run(fo.read())
 

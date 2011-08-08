@@ -9,19 +9,25 @@ class Em(InlineParser):
         InlineParser.__init__(self, factory)
 
     def __call__(self, seq, start):
-        #t = []
-        #while not seq.eof:
-        #    s = seq.parse(until(self.end))
-        #    if s.endswith('http:') or s.endswith('https:'):
-        #        t.append(s)
-        #        t.append(seq.parse(self.end))
-        #    elif s.endswith('~') and seq.peek(option(self.end)):
-        #        t.append(s[:-1])
-        #        t.append(seq.parse(self.end))
-        #    else:
-        #        seq.parse(option(self.end))
-        #        t.append(s)
-        #        break
         text = self._enter(seq)
         return self.create_element('em', None, self.inline.run(text))
 
+    def _enter(self, seq):
+        t = []
+        end = [u'~', self.end]
+        while not seq.eof:
+            s = seq.parse(until(end))
+            t.append(s)
+            if s.endswith('http:') or s.endswith('https:'):
+                t.append(seq.parse(self.end))
+            else:
+                if seq.eof:
+                    break
+                s = seq.parse(end)
+                if s == u'~':
+                    t.append(seq.current)
+                    seq.next()
+                else:
+                    break
+        text = ''.join(t)
+        return text

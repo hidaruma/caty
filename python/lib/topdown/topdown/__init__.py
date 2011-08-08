@@ -78,8 +78,27 @@ class ParserHook(object):
         for h in self.hooks:
             h(parser)
 
+    def __repr__(self):
+        return 'Hook:' + repr(self.hooks)
+
+class Location(object):
+    def __init__(self, location_info, lineno, colno):
+        self._location_info = location_info
+        self._lineno = lineno
+        self._colno = colno
+
+    def __str__(self):
+        if self._location_info is not None:
+            return '%s: Line %d, Col %d' % (str(self._location_info), self._lineno, self._colno)
+        else:
+            return 'Line %d, Col %d' % (self._lineno, self._colno)
+
 class CharSeq(object):
-    def __init__(self, text, auto_remove_ws=False, hook=None, ws_char=[' ', '\t', '\r', '\n'], suppress_eof=False):
+    def __init__(self, text, auto_remove_ws=False, 
+                             hook=None, 
+                             ws_char=[' ', '\t', '\r', '\n'], 
+                             suppress_eof=False,
+                             location_info=None):
         self.text = text
         self.pos = 0
         self.length = len(text)
@@ -98,6 +117,7 @@ class CharSeq(object):
         self._auto_remove_ws = auto_remove_ws
         self._hook = hook
         self._suppress_eof = suppress_eof
+        self._location_info = location_info
 
     def clone(self):
         return CharSeq(
@@ -269,6 +289,10 @@ class CharSeq(object):
             self.next()
             return s
 
+    @property
+    def location(self):
+        return Location(self._location_info, self.line, self.col)
+
 def tolist(f):
     def _join(*args, **kwds):
         return list(f(*args, **kwds))
@@ -322,6 +346,8 @@ class keyword(Parser):
             r = seq.parse(self._token)
             if seq.current in self._chars:
                 raise ParseFailed(seq, self)
+            if not h and seq.parser_hook:
+                seq.parser_hook.hook(seq)
             return r
         finally:
             seq.ignore_hook = h

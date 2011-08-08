@@ -5,8 +5,8 @@ class Anchor(WikiParser):
     def __init__(self, syntax, factory=None):
         wiki_url = syntax.wiki_url
         self.wiki_url = wiki_url if (wiki_url.endswith('/') or wiki_url == '') else wiki_url + '/'
-        self.start = '[['
-        self.end = ']]'
+        self.start = u'[['
+        self.end = u']]'
         WikiParser.__init__(self, factory)
         self.syntax = syntax
 

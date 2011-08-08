@@ -3,7 +3,7 @@ from creole.syntax.base import WikiParser
 
 class Image(WikiParser):
     def __init__(self, factory=None):
-        self.start = '{{'
+        self.start = u'{{'
         self.end = '}}'
         WikiParser.__init__(self, factory)
 
