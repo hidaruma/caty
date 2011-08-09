@@ -62,7 +62,8 @@ class CatyShell(cmd.Cmd):
         self.server = None
         self.system = system
         if dribble:
-            self.dribble_file = open('console-input.log', 'wb')
+            import time
+            self.dribble_file = open(time.strftime('console.%Y%m%d%H%M%S.log'), 'wb')
         else:
             self.dribble_file = None
         import string
