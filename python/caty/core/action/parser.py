@@ -18,15 +18,9 @@ class ResourceActionDescriptorParser(Parser):
         self._module_name = module_name
 
     def __call__(self, seq):
-        try:
-            mn = module_decl(seq, 'cara')
-            name = mn.name
-            ds = mn.docstring
-        except:
-            from caty.util import cout
-            cout.writeln('[WARNING] module is not declared.')
-            name = self._module_name
-            ds = u'Undocumented'
+        mn = module_decl(seq, 'cara')
+        name = mn.name
+        ds = mn.docstring
         if name != self._module_name:
             raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
         r = ResourceModule(name, ds)
