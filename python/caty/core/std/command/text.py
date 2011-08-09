@@ -139,6 +139,8 @@ class VerifyChars(Builtin):
                 else:
                     if n <= 31:
                         r.append(self._report(line, col, n))
+            if len(r) >= self.max:
+                break
             prev = n
         if r:
             return tagged(u'NG', r)
