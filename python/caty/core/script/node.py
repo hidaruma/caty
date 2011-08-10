@@ -4,7 +4,7 @@ Caty では switch, dispatch, object 生成などはすべてコマンドとし�
 """
 
 from caty.jsontools.path import build_query
-from caty.jsontools import TaggedValue, tagged, untagged, TagOnly
+from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly
 from caty.jsontools import jstypes
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Syntax
 import caty
@@ -422,5 +422,33 @@ class Time(Syntax):
         r = self.cmd(input)
         e = time.time()
         print e - s, '[sec]'
+        return r
+
+class Take(Syntax):
+    command_decl = u"""
+    command take-functor<T> :: [T*] -> [T*]
+        refers python:caty.core.script.node.Take;
+    """
+    def __init__(self, cmd, opts_ref):
+        Syntax.__init__(self, opts_ref)
+        self.cmd = cmd
+
+    def set_facility(self, facilities):
+        self.cmd.set_facility(facilities)
+
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        self.cmd.set_var_storage(storage)
+
+    def execute(self, input):
+        r = []
+        for v in input:
+            try:
+                self._var_storage.new_scope()
+                x = self.cmd(v)
+                if x == True or tag(x) == 'True':
+                    r.append(v)
+            finally:
+                self._var_storage.del_scope()
         return r
 

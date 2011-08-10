@@ -16,6 +16,7 @@ from caty.core.script.proxy import CaseProxy as Case
 from caty.core.script.proxy import UntagCaseProxy as UntagCase
 from caty.core.script.proxy import EachProxy as Each
 from caty.core.script.proxy import TimeProxy as Time
+from caty.core.script.proxy import TakeProxy as Take
 from caty.core.script.proxy import CaptureProxy as Capture
 from caty.core.script.proxy import TypeInfoProxy as TypeInfo
 from caty.core.script.proxy import DiscardProxy as Discard
@@ -77,7 +78,7 @@ class ScriptParser(Parser):
         return seq.parse(Regex(r'[a-zA-Z]+[-a-zA-Z0-9:._]*'))
 
     def functor(self, seq):
-        func = seq.parse(['each', 'capture', 'type-info', 'time'])
+        func = seq.parse(['each', 'capture', 'type-info', 'take', 'time'])
         opts = self.options(seq)
         seq.parse('{')
         cmd  = self.make_pipeline(seq)
@@ -88,6 +89,8 @@ class ScriptParser(Parser):
             return TypeInfo(cmd, opts)
         elif func == 'time':
             return Time(cmd, opts)
+        elif func == 'take':
+            return Take(cmd, opts)
         else:
             return Capture(cmd, opts)
 

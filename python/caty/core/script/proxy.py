@@ -172,6 +172,10 @@ class EachProxy(FunctorProxy):
     def _get_class(self):
         return Each
 
+class TakeProxy(FunctorProxy):
+    def _get_class(self):
+        return Take
+
 class TimeProxy(FunctorProxy):
     def _get_class(self):
         return Time
