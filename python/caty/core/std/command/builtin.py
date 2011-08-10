@@ -1271,3 +1271,11 @@ class AutoPrintArrayHandler(AutoPrintHandler):
                 self.buff.append('<span class="value">%s</span>' % json.pp(v))
         self.buff.append('<div class="bracket">]</div>')
 
+class ArrayToObject(Builtin):
+    def execute(self, input):
+        return dict(input)
+
+class ObjectToArray(Builtin):
+    def execute(self, input):
+        return list(input.items())
+

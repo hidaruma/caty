@@ -1004,4 +1004,18 @@ command gen-data [string typename] :: void -> any
 command auto-print [string type_name] :: any -> Response
     reads schema
     refers python:caty.core.std.command.builtin.AutoPrint;
+
+/**
+ * [文字列, データ]のペアの配列からオブジェクトを作る。
+ * 上記のペアの第一要素がオブジェクトのプロパティとなる。
+ */
+command array-to-object :: [[string, any]*] -> object
+    refers python:caty.core.std.command.builtin.ArrayToObject;
+
+/**
+ * オブジェクトから[文字列, データ]のペアの配列を作る。
+ */
+command object-to-array :: object -> [[string, any]*]
+    refers python:caty.core.std.command.builtin.ObjectToArray;
+
 """
