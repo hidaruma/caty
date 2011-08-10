@@ -81,6 +81,8 @@ class ScriptParser(Parser):
         func = seq.parse(['each', 'capture', 'type-info', 'take', 'time'])
         opts = self.options(seq)
         seq.parse('{')
+        if seq.eof:
+            raise EndOfBuffer(seq, self.functor)
         cmd  = self.make_pipeline(seq)
         seq.parse('}')
         if func == 'each':
