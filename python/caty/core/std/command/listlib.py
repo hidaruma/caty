@@ -1,5 +1,6 @@
 # coding: utf-8
 from caty.core.command import Builtin
+from caty import UNDEFINED
 
 name = 'list'
 schema =''
@@ -104,4 +105,7 @@ class Contains(Builtin):
         return tagged(u'Contains' if v else u'Not', v)
 
 
+class Tighten(Builtin):
+    def execute(self, input):
+        return filter(lambda s: s is not UNDEFINED, input)
 

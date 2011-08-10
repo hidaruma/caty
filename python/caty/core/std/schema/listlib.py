@@ -89,4 +89,12 @@ command concat :: [[any*], [any*]] -> [any*]
  */
 command contains :: [[any*], any] -> @Contains boolean | @Not boolean
     refers python:caty.core.std.command.listlib.Contains;
+
+/**
+ * ルーズ配列(undefinedを含んだ配列)をundefinedを含まない配列にして返す。
+ */
+command tighten :: [any*] -> [any*]
+    refers python:caty.core.std.command.listlib.Tighten;
+
 """
+
