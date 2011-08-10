@@ -405,7 +405,7 @@ class Time(Syntax):
         refers python:caty.core.script.node.Time;
     """
     
-    def __init__(self, cmd):
+    def __init__(self, cmd, ignore):
         Syntax.__init__(self)
         self.cmd = cmd
 
