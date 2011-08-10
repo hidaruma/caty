@@ -329,10 +329,20 @@ class UntagCase(Case):pass
 
 class Each(Syntax):
     command_decl = u"""command each-functor-applied<T> {"seq":boolean?} :: [T*] -> [T*]
+                                                       {"seq":boolean?, "prop": boolean} :: object -> object
                         refers python:caty.core.script.node.Each;"""
     def __init__(self, cmd, opts_ref):
         Syntax.__init__(self, opts_ref)
         self.cmd = cmd
+
+    def _init_opts(self):
+        Command._init_opts(self)
+
+    def _prepare(self):
+        Command._prepare(self)
+
+    def setup(self, opts):
+        self.__prop = opts['prop'] if 'prop' in opts else None
 
     def set_facility(self, facilities):
         self.cmd.set_facility(facilities)
@@ -349,6 +359,12 @@ class Each(Syntax):
         self.cmd.set_var_storage(storage)
 
     def execute(self, input):
+        if self.__prop:
+            return self._iter_obj(input)
+        else:
+            return self._iter_array(input)
+
+    def _iter_array(self, input):
         r = []
         for v in input:
             try:
@@ -357,6 +373,10 @@ class Each(Syntax):
             finally:
                 self._var_storage.del_scope()
         return r
+
+    def _iter_obj(self, input):
+        r = self._iter_array(list(input.items()))
+        return dict(r)
 
 from caty.util import error_to_ustr
 class Capture(Syntax):
