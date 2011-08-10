@@ -479,12 +479,14 @@ class VirtualMachine(object):
             t, v = json.split_tag(stack.top())
             if tag_name == '*':
                 stack.list[-1] = v
+                stack.push(t)
                 stack.push(True)
             elif tag_name == '*!':
                 if t in schema.type:
                     stack.push(False)
                 else:
                     stack.list[-1] = v
+                    stack.push(t)
                     stack.push(True)
             else:
                 for name in map(lambda s: s.strip(), tag_name.split('|')):
