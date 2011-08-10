@@ -407,11 +407,12 @@ class VirtualMachine(object):
             self._masked_context.append(self._context)
             value = stack.pop()
             if isinstance(value, dict):
-                self._context = {}
-                self._context['_CONTEXT'] = value
-                self._context.update(value)
+                _context = {}
+                _context['_CONTEXT'] = value
+                _context.update(value)
             else:
-                self._context = {'_CONTEXT': value}
+                _context = {'_CONTEXT': value}
+            self._context = Context(_context, False)
         opmap[MASK_CONTEXT] = mask_context
 
         def unmask_context(ignore):
@@ -486,11 +487,15 @@ class VirtualMachine(object):
                     stack.list[-1] = v
                     stack.push(True)
             else:
-                if t == tag_name:
-                    stack.list[-1] = v
-                    stack.push(True)
+                for name in map(lambda s: s.strip(), tag_name.split('|')):
+                    if t == name:
+                        stack.list[-1] = v
+                        stack.push(t)
+                        stack.push(True)
+                        break
                 else:
                     stack.push(False)
+            return
         opmap[DISPATCH] = dispatch
 
         def def_group(name):
@@ -521,6 +526,14 @@ class VirtualMachine(object):
         def nop(*args):
             pass
         opmap[END_GROUP] = nop
+
+        def swap(ignore):
+            v1 = stack.pop()
+            v2 = stack.pop()
+            stack.push(v1)
+            stack.push(v2)
+            return
+        opmap[SWAP] = swap
 
         while bi.current:
             code = bi.current.opcode

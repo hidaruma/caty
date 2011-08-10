@@ -29,15 +29,16 @@ CDEL = 26 # CDEL <KEY>: コンテキストリストトップの値を削除す�
 SUBCONTEXT = 27 # SUBCONTEXT <NAME>: サブテンプレートに渡すコンテキスト名。これが空のとき、親のコンテキストがすべて渡される
 DISCARD = 28 # DISCARD: スタックトップの値を削除する
 FUNCTION_DEF = 29 # FUNCTION_DEF <NAME>: <NAME>という名前の関数を定義
-VALIDATE = 30 # VALIDATE <TYPE_NAME>: スタックトップの値を<TYPE_NAME>でバリデーションする
+VALIDATE = 30 # VALIDATE <TYPE_NAME>: スタックトップの値を<TYPE_NAME>でバリデーションする。
 MASK_CONTEXT = 31 # CONTEXT_MASK: スタックトップの値をコンテキストとして扱い、実際のコンテキストを保護する
 UNMASK_CONTEXT = 32 # CONTEXT_UNMASK: CONTEXT_MASKの動作を取り消す
 CALL_TEMPLATE = 33 # CALL_TEMPLATE <NAME>: <NAME>テンプレートを呼び出す。テンプレートのコンテキストはスタックトップ
-DISPATCH = 34 # FUNCTION_MATCH <TYPE>: コンテキストが<TYPE>に適合するかをスタックに詰む
+DISPATCH = 34 # FUNCTION_MATCH <TYPE>: コンテキストが<TYPE>に適合するかをスタックに積む。スタックの2番目にはマッチした型の名前が置かれる。
 GROUP_DEF = 35 # GROUP_DEF <NAME>: <GROUP>という名前の関数を定義
 FUNCTION_MATCH = 36 # FUNCTION_MATCH <NAMESPACE>: <NAMESPACE>にパターンマッチを定義する
 CALL_GROUP = 37 # CALL_GROUP <NAME>: <NAME>グループを呼び出す。テンプレートのコンテキストはスタックトップ
 END_GROUP = 38 # END_GROUP: グループ定義の終わり
+SWAP = 39 # スタックトップの二つの値の位置を交換する
 
 def get_name(code):
     d = {}

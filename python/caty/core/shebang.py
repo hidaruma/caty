@@ -39,8 +39,11 @@ def schebang(seq):
     meta = option(parse_meta, {})(seq)
     if meta:
         c = compilers[meta['template']].get_parser()
+        skip_ws(seq)
         many(c.comment)(seq)
         script = option(parse_script, u'')(seq)
+    else:
+        script = u''
     return meta, script, seq.rest
 
 def parse_meta(seq):

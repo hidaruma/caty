@@ -292,10 +292,11 @@ class ObjectCodeGenerator(STVistor):
         yield (FUNCTION_MATCH, '.'.join(self.current_namespace))
         yield (DISPATCH, node.match)
         yield (JMPUNLESS, skip_label)
+        yield (SWAP, None)
         yield (FUNCTION_DEF, '.'.join(self.current_namespace + [node.name]))
         yield (VALIDATE, node.context_type)
-        #yield (JMPUNLESS, skip_label)
         yield (MASK_CONTEXT, None)
+        yield (CPUSH, node.matched)
         for c in node.sub_template.accept(self):
             yield c
         yield (UNMASK_CONTEXT, None)
@@ -308,21 +309,28 @@ class ObjectCodeGenerator(STVistor):
         yield (CALL_TEMPLATE, node.name)
 
     def def_group(self, node):
-        name = '.'.join(self.current_namespace + [node.name])
+        if node.name is not None:
+            name = '.'.join(self.current_namespace + [node.name])
+            yield (GROUP_DEF, '.'.join(self.current_namespace + [node.name]))
+            self.current_namespace.append(node.name)
+        else:
+            name = u''
+            yield (GROUP_DEF, u'')
         if name in self.defined_groups:
             raise Exception('%s is already defined' % name)
-        yield (GROUP_DEF, '.'.join(self.current_namespace + [node.name]))
-        self.current_namespace.append(node.name)
+        else:
+            self.defined_groups.add(name)
         for m in node.member:
             for o in m.accept(self):
                 yield o
-        self.current_namespace.pop(-1)
+        if node.name is not None:
+            self.current_namespace.pop(-1)
         yield (END_GROUP, None)
 
     def call_group(self, node):
         for o in node.context.accept(self):
             yield o
-        yield (CALL_GROUP, node.name)
+        yield (CALL_GROUP, node.name if node.name else u'')
 
 class STDebugger(STVistor):
     def template(self, node):

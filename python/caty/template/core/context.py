@@ -10,8 +10,9 @@ class Context(object):
     複数の辞書に同一のキーが存在する場合、最初に見つかったものを返すこととする。
     これは for-each に類する構文の実現のために用いる。
     """
-    def __init__(self, dictionaly):
+    def __init__(self, dictionaly, default_ctx=True):
         self.dict = [dictionaly]
+        self.default_ctx = default_ctx
 
     def __getitem__(self, key):
         q = build_query('$.' + key)
@@ -45,7 +46,7 @@ class Context(object):
         u"""コンテキストの内包する辞書のリストが1以上でなかった場合エラーとする。
         """
         def _(self, *args, **kwds):
-            if len(self.dict) < 2:
+            if len(self.dict) < 2 and self.default_ctx:
                 raise TemplateRuntimeError('Can not modify default context')
             return f(self, *args, **kwds)
         return _

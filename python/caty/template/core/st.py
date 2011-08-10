@@ -18,7 +18,22 @@ class Null(ST):
 
 class Template(ST):
     def __init__(self, nodes):
-        self.nodes = nodes
+        self.nodes = self._make_default_group(nodes)
+
+    def _make_default_group(self, nodes):
+        r = []
+        default_group_node = []
+        series_of_func_or_group_end = False
+        for n in nodes:
+            if (n.type == 'DefFunc' or n.type == 'DefGroup') and not series_of_func_or_group_end:
+                default_group_node.append(n)
+            else:
+                if default_group_node:
+                    r.append(DefGroup(None, default_group_node))
+                    series_of_func_or_group_end = True
+                    default_group_node = None
+                r.append(n)
+        return r
 
     @property
     def type(self):
@@ -145,11 +160,12 @@ class ExpandMacro(ST):
         return 'ExpandMacro'
 
 class DefFunc(ST):
-    def __init__(self, name, match, context_type, sub_template):
-        self.name = name
+    def __init__(self, name, match, context_type, matched, sub_template):
+        self.name = name if name is not None else str(id(self))
         self.match = match
         self.context_type = context_type
         self.sub_template = sub_template
+        self.matched = matched
 
     @property
     def type(self):

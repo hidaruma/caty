@@ -20,11 +20,19 @@ class SmartyMXParser(SmartyParser):
             raise ParseError(seq, self.def_func)
         context_type = option(self._type, 'any')(seq)
         skip_ws(seq)
+        matched = option(self._matched, 'type')(seq)
         S('}')(seq)
         body = self.smarty_template(seq)
         _ = seq.parse('{/function}')
         skip_ws(seq)
-        return DefFunc(name, match, context_type, body)
+        return DefFunc(name, match, context_type, matched, body)
+
+    def func_name(self, seq):
+        n = keyword('name')(seq)
+        skip_ws(seq)
+        S('=')(seq)
+        skip_ws(seq)
+        return seq.parse([self.name, Regex(r'[a-zA-Z_][a-zA-Z0-9_]*')])
 
     def _func_match(self, seq):
         seq.parse(keyword('match'))
@@ -36,6 +44,13 @@ class SmartyMXParser(SmartyParser):
     
     def _type(self, seq):
         seq.parse('type')
+        skip_ws(seq)
+        S('=')(seq)
+        skip_ws(seq)
+        return self.name(seq)
+
+    def _matched(self, seq):
+        seq.parse('matched')
         skip_ws(seq)
         S('=')(seq)
         skip_ws(seq)
@@ -79,7 +94,7 @@ class SmartyMXParser(SmartyParser):
         return ctx
 
     def match_call(self, seq):
-        keyword('{match_call')(seq)
+        keyword('{apply')(seq)
         skip_ws(seq)
         if option(keyword('group'))(seq):
             skip_ws(seq)
