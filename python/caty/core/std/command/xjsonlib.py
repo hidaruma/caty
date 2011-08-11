@@ -54,11 +54,12 @@ class Encode(Builtin):
         return json.encode(input)
 
 class Select(Builtin):
-    def setup(self, pathexp):
+    def setup(self, opts, pathexp):
         self._pathexp = pathexp
+        self._strict = opts['strict']
 
     def execute(self, input):
-        stm = selector.compile(self._pathexp, True)
+        stm = selector.compile(self._pathexp, not self._strict)
         return list(stm.select(input))
 
 class ToXML(Builtin):
