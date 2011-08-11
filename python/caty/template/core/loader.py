@@ -38,7 +38,7 @@ class TextBytecodePersister(IBytecodePersister):
     将来的にバイナリ形式でのバイトコードの保存も考えられるが、
     人間が手書きできるとなるとテキスト形式にせざるをえない。
     """
-    version = '0.44'
+    version = '0.5'
     def write(self, fo, bytecode_list):
         tmp = StringIO()
         tmp.write('text: version %s\n' % self.version)

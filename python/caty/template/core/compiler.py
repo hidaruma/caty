@@ -295,6 +295,7 @@ class ObjectCodeGenerator(STVistor):
         yield (SWAP, None)
         yield (FUNCTION_DEF, '.'.join(self.current_namespace + [node.name]))
         yield (VALIDATE, node.context_type)
+        yield (SWAP, None)
         yield (MASK_CONTEXT, None)
         yield (CPUSH, node.matched)
         for c in node.sub_template.accept(self):

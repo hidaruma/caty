@@ -472,6 +472,7 @@ class VirtualMachine(object):
             except:
                 raise TemplateRuntimeError('Unkown type: %s' % type_name)
             scm.validate(stack.top())
+            stack.push(type_name)
                 
         opmap[VALIDATE] = validate
 
