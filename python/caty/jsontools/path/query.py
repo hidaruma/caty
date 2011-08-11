@@ -75,6 +75,37 @@ class WildcardIndexAccesor(Accessor):
     def _key(self):
         return '#'
 
+class TagAccessor(Accessor):
+    def find(self, obj):
+        yield tag(obj)
+
+    def _key(self):
+        return 'tag()'
+
+class ExpTagAccessor(Accessor):
+    def find(self, obj):
+        yield tag(obj, True)
+
+    def _key(self):
+        return 'exp-tag()'
+
+class TagContentAccessor(Accessor):
+    def find(self, obj):
+        yield untagged(obj)
+
+    def _key(self):
+        return 'untagged()'
+
+class LengthAccessor(Accessor):
+    def find(self, obj):
+        if isinstance(obj, (list, tuple)):
+            yield len(obj)
+        else:
+            raise JsonQueryError(ro.i18n.get(u'Not a $type: $obj', type=u'array', obj=str(obj)))
+
+    def _key(self):
+        return 'length()'
+
 class AccessorPair(Accessor):
     def __init__(self, a, b):
         self._prev = a
@@ -117,7 +148,7 @@ def accessor(seq):
     r = root(seq)
     _ = seq.parse(option('.'))
     if _:
-        tokens = split([number, name, quoted_name, o_wild, i_wild], '.')(seq)
+        tokens = split([tag_, exp_tag, untagged_, length, number, name, quoted_name, o_wild, i_wild], '.')(seq)
         return [r] + tokens
     else:
         return [r]
@@ -147,4 +178,20 @@ def o_wild(seq):
 def i_wild(seq):
     _ = seq.parse('#')
     return WildcardIndexAccesor()
+
+def tag_(seq):
+    seq.parse('tag()')
+    return TagAccessor()
+
+def exp_tag(seq):
+    seq.parse('exp-tag()')
+    return ExpTagAccessor()
+
+def untagged_(seq):
+    seq.parse(choice('untagged', 'content'))
+    return TagContentAccessor()
+
+def length(seq):
+    seq.parse('length()')
+    return LengthAccessor()
 

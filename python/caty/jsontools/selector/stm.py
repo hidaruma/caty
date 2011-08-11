@@ -186,4 +186,30 @@ class TagReplacer(Selector):
     def replace(self, obj, new, allow_loose):
         return tagged(new, obj, self.explicit)
 
+class TagNameSelector(Selector):
+    def __init__(self, explicit):
+        Selector.__init__(self)
+        self.explicit = explicit
 
+    def run(self, obj):
+        v = tag(obj, self.explicit)
+        yield v
+
+class TagContentSelector(Selector):
+    def __init__(self):
+        Selector.__init__(self)
+
+    def run(self, obj):
+        v = untagged(obj)
+        yield v
+
+class LengthSelector(Selector):
+
+    def __init__(self):
+        Selector.__init__(self)
+
+    def run(self, obj, ignored=False):
+        if isinstance(obj, (list, tuple)):
+            yield len(obj)
+        else:
+            raise Exception('not a array')

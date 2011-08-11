@@ -9,7 +9,17 @@ class JSONPathSelectorParser(Parser):
         self.empty_when_error = empty_when_error
 
     def __call__(self, seq):
-        o = chainl([self.all, self.name, self.index, self.namewildcard, self.itemwildcard, try_(self.tag)], self.comma)(seq)
+        o = chainl([self.all, 
+                    self.tag,
+                    self.exp_tag,
+                    self.untagged,
+                    self.length,
+                    self.name, 
+                    self.index, 
+                    self.namewildcard, 
+                    self.itemwildcard, 
+                    try_(self.oldtag),
+                    ], self.comma)(seq)
         if not seq.eof:
             raise ParseFailed(seq, self)
         return o
@@ -69,7 +79,7 @@ class JSONPathSelectorParser(Parser):
         seq.parse('#')
         return ItemWildcardSelector()
 
-    def tag(self, seq):
+    def oldtag(self, seq):
         seq.parse('^')
         name = seq.parse(option([self.namestr, lambda s:self.quoted(s, '"'), lambda s: self.quoted(s, "'")], None))
         if name is not None:
@@ -82,3 +92,18 @@ class JSONPathSelectorParser(Parser):
             e = seq.parse(option('!', None))
             return TagReplacer(None, bool(e))
 
+    def tag(self, seq):
+        seq.parse('tag()')
+        return TagNameSelector(False)
+
+    def exp_tag(self, seq):
+        seq.parse('exp-tag()')
+        return TagNameSelector(True)
+
+    def untagged(self, seq):
+        seq.parse(choice('untagged()', 'content()'))
+        return TagContentSelector()
+
+    def length(self, seq):
+        seq.parse('length()')
+        return LengthSelector()
