@@ -9,6 +9,7 @@ import types
 import caty.util as util
 from caty.core.exception import InternalException
 from caty.util.collection import OverlayedDict
+from caty import UNDEFINED
 
 __all__ = ['Command', 'Builtin', 'ScriptError', 'PipelineInterruption', 'PipelineErrorExit', 'compile_builtin']
 
@@ -218,6 +219,9 @@ class Command(object):
             if 'commit-point' in self.profile_container.get_annotations():
                 for n in self.__facility_names:
                     getattr(self, n).commit()
+            if isinstance(r, list):
+                while r and r[-1] is UNDEFINED:
+                    r.pop(-1)
             return r
         finally:
             self.__var_storage.del_scope()
