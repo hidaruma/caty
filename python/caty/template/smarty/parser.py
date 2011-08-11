@@ -79,9 +79,12 @@ class SmartyParser(Parser):
         return ''.join(r)
 
     def varname(self, seq):
-        name = seq.parse(Regex(r'[a-zA-Z_][a-zA-Z_0-9]*'))
+        name = seq.parse(choice(self.dynamic_property, Regex(r'[a-zA-Z_][a-zA-Z_0-9]*')))
         idx = seq.parse(many(self.index))
         return name + '.' + ('.'.join(idx)) if idx != [] else name
+
+    def dynamic_property(self, seq):
+        return choice(u'tag()', u'untagged()', u'content()', u'exp-tag()', u'length()')(seq)
 
     def index(self, seq):
         # [] を削除した上で値を戻す
