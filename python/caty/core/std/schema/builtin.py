@@ -868,7 +868,7 @@ command trace-dispatch
 {
   @[default("GET")]
   "method" : ("GET"|"POST"|"PUT"|"DELETE"|"HEAD")?,
-  @[default("")]
+  @[default(true)]
   "fullpath": boolean?,
   "verb"   : string?,
   "check": boolean?,

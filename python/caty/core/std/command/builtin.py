@@ -239,7 +239,7 @@ class Request(RequestTool):
         if opts.verb:
             self._opts['_verb'] = opts.verb
         self._content_type = opts.content_type
-        self._debug = opts.debug
+        self._debug = opts.debug or self._system.debug
 
     def _split_opts(self, params):
         r = {}
