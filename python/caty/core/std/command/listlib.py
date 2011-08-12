@@ -109,3 +109,14 @@ class Tighten(Builtin):
     def execute(self, input):
         return filter(lambda s: s is not UNDEFINED, input)
 
+class Range(Builtin):
+    def setup(self, start, end):
+        self.start = start
+        self.end = end
+
+    def execute(self):
+        return range(self.start, self.end + 1)
+
+
+    
+

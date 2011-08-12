@@ -96,5 +96,11 @@ command contains :: [[any*], any] -> @Contains boolean | @Not boolean
 command tighten :: [any*] -> [any*]
     refers python:caty.core.std.command.listlib.Tighten;
 
+/**
+ * 連続する整数値からなる配列を返す。
+ */
+command range [integer start, integer end] :: void  -> [integer*]
+    refers python:caty.core.std.command.listlib.Range;
+
 """
 
