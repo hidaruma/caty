@@ -188,7 +188,7 @@ def exp_tag(seq):
     return ExpTagAccessor()
 
 def untagged_(seq):
-    seq.parse(choice('untagged', 'content'))
+    seq.parse(choice('untagged()', 'content()'))
     return TagContentAccessor()
 
 def length(seq):
