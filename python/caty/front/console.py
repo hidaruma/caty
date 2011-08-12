@@ -241,7 +241,7 @@ Web サーバの起動・停止を行う
 
     def default(self, line):
         if line == 'EOF':
-            print '\nbye'
+            print 'bye'
             return True
         if line in ('\n', '\r', '\r\n') and self.prompt.startswith('caty'):
             # 単なる空行には何もしない
@@ -351,6 +351,7 @@ Web サーバの起動・停止を行う
 
     def cleanup(self):
         if self.server is not None:
+            self.server.shutdown()
             self.server.stop()
 
 import threading
@@ -362,6 +363,9 @@ class ServerThread(threading.Thread):
 
     def run(self):
         self.server.main()
+
+    def shutdown(self):
+        self.server.httpd.shutdown()
 
     def stop(self):
         self.server.close()
