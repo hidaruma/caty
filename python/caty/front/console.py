@@ -16,6 +16,7 @@ import cmd, glob, os
 import locale
 import traceback
 import sys
+import time
 if sys.platform == 'win32':
     from ctypes import windll
 
@@ -107,7 +108,7 @@ class CatyShell(cmd.Cmd):
                 self.dribble_file.close()
             self.dribble_file = None
         elif not l:
-            self._echo(u'dribble ' + 'on' if self.dribble_file else 'off')
+            self._echo('on' if self.dribble_file else 'off')
 
     def do_help(self, line):
         return self.default('help ' + line)
