@@ -41,7 +41,7 @@ class CompilerAndPreprocessor(object):
     """
     def __init__(self, io):
         self._compilers = {
-            'smarty': smarty.SmartyCompiler(),
+            'smarty': smartymx.SmartyMXCompiler(),
             'smarty-mx': smartymx.SmartyMXCompiler(),
             'genshi': genshi.build_compiler(),
             }
