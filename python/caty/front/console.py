@@ -101,13 +101,13 @@ class CatyShell(cmd.Cmd):
         if l == 'on':
             if self.dribble_file:
                 return
-            self.dribble_file = open('console-input.log', 'wb')
+            self.dribble_file = open(time.strftime('console.%Y%m%d%H%M%S.log'), 'wb')
         elif l == 'off':
             if self.dribble_file:
                 self.dribble_file.close()
             self.dribble_file = None
         elif not l:
-            self._echo(u'drrible ' + 'on' if self.dribble_file else 'off')
+            self._echo(u'dribble ' + 'on' if self.dribble_file else 'off')
 
     def do_help(self, line):
         return self.default('help ' + line)
