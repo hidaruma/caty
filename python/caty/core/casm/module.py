@@ -178,6 +178,8 @@ class Module(object):
                 m, n = name.rsplit(':', 1)
                 if m == 'public':
                     return self.has_schema(n)
+                if m == self.name:
+                    return self.has_schema(n)
                 if m in self.sub_modules and self.sub_modules[m].has_schema(n, t):
                     return True
             if self.parent:
@@ -194,6 +196,8 @@ class Module(object):
         else:
             if ':' in name:
                 m, n = name.rsplit(':', 1)
+                if m == self.name:
+                    return self.has_command(n)
                 if m in self.sub_modules and self.sub_modules[m].has_command(n, t):
                     return True
             if self.parent:
@@ -211,6 +215,8 @@ class Module(object):
             if ':' in name:
                 m, n = name.rsplit(':', 1)
                 if m == 'public':
+                    return self.has_kind(n)
+                if m == self.name:
                     return self.has_kind(n)
                 if m in self.sub_modules and self.sub_modules[m].has_kind(n, t):
                     return True
@@ -230,6 +236,8 @@ class Module(object):
                 m, n = name.rsplit(':', 1)
                 if m == 'public':
                     return self.get_schema(n)
+                if m == self.name:
+                    return self.get_schema(n)
                 if m in self.sub_modules:
                     return self.sub_modules[m].get_schema(n)
         return self.parent.get_schema(name)
@@ -244,6 +252,8 @@ class Module(object):
                 m, n = name.rsplit(':', 1)
                 if m == 'public':
                     return self.get_command_type(n)
+                if m == self.name:
+                    return self.get_command_type(n)
                 if m in self.sub_modules:
                     return self.sub_modules[m].get_command_type(n)
         return self.parent.get_command_type(name)
@@ -257,6 +267,8 @@ class Module(object):
             if ':' in name:
                 m, n = name.rsplit(':', 1)
                 if m == 'public':
+                    return self.get_kind(n)
+                if m == self.name:
                     return self.get_kind(n)
                 if m in self.sub_modules:
                     return self.sub_modules[m].get_kind(n)
