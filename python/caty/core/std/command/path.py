@@ -1,6 +1,7 @@
 #coding: utf-8
 from caty.core.command import Builtin, Internal
 from caty.util.path import join, split, splitext, dirname
+import caty.jsontools as json
 
 class Join(Builtin):
     def execute(self, path_list):
@@ -34,4 +35,21 @@ class ReplaceExt(Builtin):
         base = splitext(path)[0]
         return base + ext
 
+class Matches(Builtin):
+    def setup(self, opts, pattern):
+        self._bool = opts['boolean']
+        self._pattern = pattern
 
+    def execute(self, path):
+        from caty.core.action.selector import PathMatchingAutomaton
+        pma = PathMatchingAutomaton(self._pattern)
+        if pma.match(path):
+            if self._bool:
+                return True
+            else:
+                return json.tagged(u'True', path)
+        else:
+            if self._bool:
+                return False
+            else:
+                return json.tagged(u'False', path)
