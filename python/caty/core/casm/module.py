@@ -471,16 +471,6 @@ class AppModule(Module):
         self._plugin.set_fs(app._command_fs)
         self._core = core
         self._global_module = global_module
-
-    def _path_to_module(self, path):
-        p = path[1:].rsplit('.', 1)[0]
-        return p.replace('/', '.')
-
-    def _module_to_path(self, modname):
-        m = modname.rsplit('.', 1)[0]
-        return '/' + m.replace('.', '/')
-
-    def compile(self):
         if self.is_root:
             if self._core:
                 core = self._core
@@ -502,6 +492,15 @@ class AppModule(Module):
                     self.saved_st[k] = v
                 for k, v in global_module.command_ns.items():
                     self.command_ns[k] = v
+    def _path_to_module(self, path):
+        p = path[1:].rsplit('.', 1)[0]
+        return p.replace('/', '.')
+
+    def _module_to_path(self, modname):
+        m = modname.rsplit('.', 1)[0]
+        return '/' + m.replace('.', '/')
+
+    def compile(self):
         for e in self.find(self.fs.DirectoryObject('/')):
             if self.is_root and e.path == '/public.casm':
                 self.filepath = e.path
