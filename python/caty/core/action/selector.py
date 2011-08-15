@@ -210,6 +210,8 @@ class PathMatchingAutomaton(object):
         self.absolute = pattern.startswith('/')
         pattern = re.sub(r'^\.', r'**.', pattern)
         self.regexp = pattern.replace('**', r'[^/]+').replace('*', r'[^./]+').replace('.', r'\.') + '$'
+        if not self.regexp.startswith('/'):
+            self.regexp = '/' + self.regexp
         if self.absolute:
             self.regexp = '^' + self.regexp
         self.matcher = re.compile(self.regexp)

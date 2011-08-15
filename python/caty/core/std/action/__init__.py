@@ -5,10 +5,10 @@ from caty.core.script.parser import ScriptParser
 from caty.core.schema.base import Annotations
 
 def create_default_resources(facility):
-    yield DefaultResource('*.cgi|*.act|*.do', _script_actions(facility), u'system', u'script', u'スクリプト', Annotations([]))
-    yield DefaultResource('*/|/', _dir_actions(facility), u'system', u'directory', u'ディレクトリ', Annotations([]))
-    yield DefaultResource('*.*', _file_actions(facility), u'system', u'file', u'ファイル', Annotations([]))
-    yield DefaultResource('*.html|*.xhtml|*.xml|*.htm', _template_actions(facility), u'system', u'html', u'テンプレート', Annotations([]))
+    yield DefaultResource('**.cgi|**.act|**.do', _script_actions(facility), u'system', u'script', u'スクリプト', Annotations([]))
+    yield DefaultResource('**/|/', _dir_actions(facility), u'system', u'directory', u'ディレクトリ', Annotations([]))
+    yield DefaultResource('**.*', _file_actions(facility), u'system', u'file', u'ファイル', Annotations([]))
+    yield DefaultResource('**.html|**.xhtml|**.xml|**.htm', _template_actions(facility), u'system', u'html', u'テンプレート', Annotations([]))
 
 def _script_actions(facility):
     parser = ScriptParser(facility)
