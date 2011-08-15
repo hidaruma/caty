@@ -196,6 +196,8 @@ class Module(object):
         else:
             if ':' in name:
                 m, n = name.rsplit(':', 1)
+                if m == 'public' and self.name != 'public':
+                    return self.parent.has_command(n)
                 if m == self.name:
                     return self.has_command(n)
                 if m in self.sub_modules and self.sub_modules[m].has_command(n, t):
@@ -250,8 +252,8 @@ class Module(object):
         else:
             if ':' in name:
                 m, n = name.rsplit(':', 1)
-                if m == 'public':
-                    return self.get_command_type(n)
+                if m == 'public' and self.name != 'public':
+                    return self.parent.get_command_type(n)
                 if m == self.name:
                     return self.get_command_type(n)
                 if m in self.sub_modules:
@@ -467,25 +469,8 @@ class AppModule(Module):
         self.is_root= is_root
         self.is_builtin = False
         self._plugin.set_fs(app._command_fs)
-        if core:
-            for k, v in core.schema_ns.items():
-                self.schema_ns[k] = v
-            for k, v in core.sub_modules.items():
-                self.sub_modules[k] = v
-            for k, v in core.saved_st.items():
-                self.saved_st[k] = v
-            for k, v in core.command_ns.items():
-                self.command_ns[k] = v
-        if global_module:
-            for k, v in global_module.schema_ns.items():
-                self.schema_ns[k] = v
-            for k, v in global_module.sub_modules.items():
-                self.sub_modules[k] = v
-            for k, v in global_module.saved_st.items():
-                self.saved_st[k] = v
-            for k, v in global_module.command_ns.items():
-                self.command_ns[k] = v
-
+        self._core = core
+        self._global_module = global_module
 
     def _path_to_module(self, path):
         p = path[1:].rsplit('.', 1)[0]
@@ -496,10 +481,30 @@ class AppModule(Module):
         return '/' + m.replace('.', '/')
 
     def compile(self):
+        if self.is_root:
+            if self._core:
+                core = self._core
+                for k, v in core.schema_ns.items():
+                    self.schema_ns[k] = v
+                for k, v in core.sub_modules.items():
+                    self.sub_modules[k] = v
+                for k, v in core.saved_st.items():
+                    self.saved_st[k] = v
+                for k, v in core.command_ns.items():
+                    self.command_ns[k] = v
+            if self._global_module:
+                global_module = self._global_module
+                for k, v in global_module.schema_ns.items():
+                    self.schema_ns[k] = v
+                for k, v in global_module.sub_modules.items():
+                    self.sub_modules[k] = v
+                for k, v in global_module.saved_st.items():
+                    self.saved_st[k] = v
+                for k, v in global_module.command_ns.items():
+                    self.command_ns[k] = v
         for e in self.find(self.fs.DirectoryObject('/')):
             if self.is_root and e.path == '/public.casm':
                 self.filepath = e.path
-                self._name = self._path_to_module(self.filepath)
                 self._compile(e.path)
             elif e.path.endswith('.casm') or e.path.endswith('.pcasm'):
                 mod = self.__class__(self._app, self)
@@ -510,6 +515,7 @@ class AppModule(Module):
             elif e.path == '/formats.xjson':
                 o = self.fs.open(e.path)
                 self._plugin.feed(o.read())
+
 
     def _compile(self, path):
         o = self.fs.open(path)
@@ -587,6 +593,8 @@ class GlobalModule(AppModule):
             self.schema_ns[k] = v
         if self.is_root:
             self._app.i18n.write("Loading global commands and schemata")
+        self._core = None
+        self._global_module = None
 
 class GlobalFs(object):
     def __init__(self, target, encoding):
