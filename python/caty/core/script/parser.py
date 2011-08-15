@@ -206,7 +206,7 @@ class ScriptParser(Parser):
     def opt(self, seq):
         seq.ignore_hook = True
         try:
-            o = seq.parse([self.shortopt, self.longopt, self.parameter_opt])
+            o = seq.parse([self.longopt, self.parameter_opt])
             skip_ws(seq)
             return o
         finally:
@@ -223,14 +223,6 @@ class ScriptParser(Parser):
             args = []
         p = CommandProxy(u'exec', [], {}, s + args)
         return p
-
-    def shortopt(self, seq):
-        o = seq.parse(Regex(r'-[a-zA-Z]'))
-        try:
-            v = seq.parse([xjson.number, xjson.integer, self.unquoted, xjson.string])
-            return Option(o, v)
-        except:
-            return Option(o, None)
 
     def longopt(self, seq):
         o = seq.parse(Regex(r'--[a-zA-Z]+[-a-zA-Z0-9_]*'))
