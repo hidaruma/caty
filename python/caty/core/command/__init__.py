@@ -324,11 +324,10 @@ def scriptwrapper(profile, script):
             Command.__init__(self, opts_ref, args_ref, type_args)
 
         def execute(self, input=None):
-            self._var_storage.new_scope()
             try:
                 return script(input)
             finally:
-                self._var_storage.del_scope()
+                self._var_storage.del_masked_scope()
 
         def setup(self, *args, **kwds):
             pass
@@ -337,6 +336,7 @@ def scriptwrapper(profile, script):
             self._init_opts()
             opts = self._opts
             args = self._args
+            self._var_storage.new_maked_scope(opts, args)
             if opts:
                 for k, v in opts.items():
                     self._var_storage.opts[k] = v
@@ -370,6 +370,7 @@ class VarStorage(object):
         self.args = args if args else []
         self.opts['_ARGV'] = args
         self.args_stack = []
+        self.opts_stack = []
 
     def new_scope(self):
         self.opts.new_scope()
@@ -377,6 +378,17 @@ class VarStorage(object):
 
     def del_scope(self):
         self.opts.del_scope()
+        self.args = self.args_stack.pop(-1)
+
+    def new_maked_scope(self, opts, args):
+        self.opts_stack.append(self.opts)
+        self.args_stack.append(self.args)
+        self.opts = OverlayedDict(opts if opts else {})
+        self.args = args if args else []
+        self.opts['_ARGV'] = args
+
+    def del_masked_scope(self):
+        self.opts = self.opts_stack.pop(-1)
         self.args = self.args_stack.pop(-1)
 
     def __repr__(self):
