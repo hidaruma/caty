@@ -119,7 +119,7 @@ class VarStore(Syntax):
         self.__var_storage = storage
 
     def execute(self, input):
-        if self.__var_name not in self.__var_storage.opts:
+        if self.__var_name not in self.__var_storage.opts.current_scope:
             self.__var_storage.opts[self.__var_name] = input
             return input
         else:

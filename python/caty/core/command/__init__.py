@@ -324,7 +324,11 @@ def scriptwrapper(profile, script):
             Command.__init__(self, opts_ref, args_ref, type_args)
 
         def execute(self, input=None):
-            return script(input)
+            self._var_storage.new_scope()
+            try:
+                return script(input)
+            finally:
+                self._var_storage.del_scope()
 
         def setup(self, *args, **kwds):
             pass

@@ -315,3 +315,7 @@ class OverlayedDict(dict):
     def has_key(self, k):
         return any(map(lambda d: k in d, self.scope))
 
+    @property
+    def current_scope(self):
+        return self.scope[0]
+
