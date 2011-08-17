@@ -337,11 +337,12 @@ class Each(Syntax):
 
     def _init_opts(self):
         Command._init_opts(self)
+        self._args = self._var_storage.opts['_ARGV'][1:]
 
     def _prepare(self):
         Command._prepare(self)
 
-    def setup(self, opts):
+    def setup(self, opts, *ignore):
         self.__prop = opts['prop'] if 'prop' in opts else None
 
     def set_facility(self, facilities):

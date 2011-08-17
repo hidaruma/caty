@@ -47,7 +47,7 @@ def catch(f):
     return _
 
 class CatyShell(cmd.Cmd):
-    def __init__(self, site, wildcat, debug, system, dribble):
+    def __init__(self, site, wildcat, debug, system, dribble, cmdline):
         cmd.Cmd.__init__(self)
         self.debug = debug
         self.intro = """Caty interactive shell
@@ -65,6 +65,9 @@ class CatyShell(cmd.Cmd):
         if dribble:
             import time
             self.dribble_file = open(time.strftime('console.%Y%m%d%H%M%S.log'), 'wb')
+            self._set_dribble()
+            self.dribble_file.write(cmdline)
+            self.dribble_file.write(os.linesep)
         else:
             self.dribble_file = None
         import string
@@ -103,12 +106,23 @@ class CatyShell(cmd.Cmd):
             if self.dribble_file:
                 return
             self.dribble_file = open(time.strftime('console.%Y%m%d%H%M%S.log'), 'wb')
+            self._set_dribble()
         elif l == 'off':
             if self.dribble_file:
                 self.dribble_file.close()
+                self._unset_dribble()
             self.dribble_file = None
         elif not l:
             self._echo('on' if self.dribble_file else 'off')
+
+    def _set_dribble(self):
+        cout.streams.append(self.dribble_file)
+        debug.streams.append(self.dribble_file)
+
+    def _unset_dribble(self):
+        for s in [cout, debug]:
+            if self.dribble_file in s.streams:
+                s.remove(self.dribble_file)
 
     def do_help(self, line):
         return self.default('help ' + line)
@@ -123,10 +137,6 @@ class CatyShell(cmd.Cmd):
 
     def _echo(self, s):
         cout.writeln(s)
-        if self.dribble_file:
-            self.dribble_file.write(cout._to_str(s))
-            self.dribble_file.write('\n')
-            self.dribble_file.flush()
  
     @catch
     def do_quit(self, line):
@@ -391,7 +401,6 @@ def exc_wrapper(f):
 
 _encoding = get_encoding()
 from caty.util import OptPrinter
-debug = False
 def setup_shell(args, cls=CatyShell):
     opts, args = getopt(args, 
                         'e:s:dua:qhf:', 
@@ -412,7 +421,7 @@ def setup_shell(args, cls=CatyShell):
     script = ''
     quiet = False
     global _encoding
-    global debug
+    debug = False
     _encoding = get_encoding()
     init_writer(_encoding)
     _help = False
@@ -453,7 +462,7 @@ def setup_shell(args, cls=CatyShell):
         return None, None, None
     system = System(_encoding, debug, quiet, no_ambient, no_app)
     site = system.get_app(sitename)
-    shell = cls(site, wildcat, debug, system, dribble)
+    shell = cls(site, wildcat, debug, system, dribble, ' '.join(args))
     return shell, files, script
 
 def help(msg=None):
@@ -476,7 +485,6 @@ u"""コンソール出力時の文字エンコーディング
 @exc_wrapper
 def main(args):
     global _encoding
-    global debug
     init_log()
     _encoding = get_encoding()
     code = 0

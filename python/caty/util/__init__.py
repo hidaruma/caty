@@ -83,7 +83,11 @@ import sys, traceback
 class ConsoleWriter(object):
     def __init__(self):
         self.encoding = None # 端末エンコーディングが指定される
-        self.stream = sys.stdout
+        self._streams = [sys.stdout]
+
+    @property
+    def streams(self):
+        return self._streams
 
     def set_encoding(self, encoding):
         self.encoding = encoding
@@ -105,21 +109,29 @@ class ConsoleWriter(object):
             return tb.encode(self.encoding)
 
     def write(self, arg):
-        self.stream.write(self._to_str(arg))
-        self.stream.flush()
+        for stream in self.streams:
+            stream.write(self._to_str(arg))
+            stream.flush()
 
     def writeln(self, arg):
-        self.stream.write(self._to_str(arg))
-        self.stream.write('\n')
-        self.stream.flush()
+        for stream in self.streams:
+            stream.write(self._to_str(arg))
+            stream.write('\n')
+            stream.flush()
 
 class DebugWriter(ConsoleWriter):
     def write(self, arg):
-        assert isinstance(arg, (unicode, Exception))
-        self.stream.write('DEBUG: ')
-        ConsoleWriter.write(self, arg)
-        self.stream.write('\n')
-        self.stream.flush()
+        for stream in self.streams:
+            stream.write('DEBUG: ')
+            stream.write(self._to_str(arg))
+            stream.flush()
+
+    def writeln(self, arg):
+        for stream in self.streams:
+            stream.write('DEBUG: ')
+            stream.write(self._to_str(arg))
+            stream.write('\n')
+            stream.flush()
 
 cout = ConsoleWriter()
 debug = DebugWriter()
@@ -128,10 +140,10 @@ def init_writer(encoding, logfile=None, elogfile=None):
     cout.set_encoding(encoding)
     debug.set_encoding(encoding)
     if logfile:
-        cout.stream = logfile
-        debug.stream = logfile
+        cout.streams.append(logfile)
+        debug.streams.append(logfile)
     if elogfile:
-        debug.stream = elogfile
+        debug.streams.append(elogfile)
     return cout, debug
 
 def error_wrapper(f):
