@@ -337,7 +337,10 @@ class Each(Syntax):
 
     def _init_opts(self):
         Command._init_opts(self)
-        self._args = self._var_storage.opts['_ARGV'][1:]
+        o = self._var_storage.opts
+        a = o['_ARGV']
+        v = a[1:] if a else [u'']
+        self._args = v
 
     def _prepare(self):
         Command._prepare(self)
