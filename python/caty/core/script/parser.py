@@ -97,11 +97,15 @@ class ScriptParser(Parser):
             return Capture(cmd, opts)
 
     def command(self, seq):
-        name = self.name(seq)
+        name = choice(self.name, self.xjson_path)(seq)
         type_args = option(self.type_args, [])(seq)
         opts = self.options(seq)
         args = self.arguments(seq)
         return CommandProxy(name, type_args, opts, args)
+
+    def xjson_path(self, seq):
+        seq.parse('$')
+        return u'xjson:get'
 
     def type_args(self, seq):
         seq.parse('<')
@@ -201,7 +205,7 @@ class ScriptParser(Parser):
         return seq.parse(['*!', '*', xjson.string, self.name, Regex(r'[-0-9a-zA-Z_]+')])
 
     def unquoted(self, seq):
-        return seq.parse(Regex(r'[^;\t\r\n <>|%+"(){},\[\]]+'))
+        return seq.parse(Regex(r'[^;\t\r\n <>|%+"(){},\[\]][^;\t\r\n <>|%+"{},\[\]]*'))
 
     def opt(self, seq):
         seq.ignore_hook = True
