@@ -53,7 +53,7 @@ command get
     @[default(false)]
     "safe" : boolean?,
     "default": (integer|null|boolean|number|string)?,
-} [pathExpr path_expr] :: any -> (any | undefined)
+} [pathExpr? path_expr] :: any -> (any | undefined)
 throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist ]
 refers python:caty.core.std.command.xjsonlib.Get;
 

@@ -77,7 +77,7 @@ class Put(Builtin):
         return stm.replace(src, value, self._allow_loose)
 
 class Get(Builtin):
-    def setup(self, opts, pathexp):
+    def setup(self, opts, pathexp=u'$'):
         self._pathexp = pathexp.rstrip('?')
         self._safe = opts.safe or pathexp.endswith('?')
         self._default = opts.default
