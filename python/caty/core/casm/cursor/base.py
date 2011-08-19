@@ -335,6 +335,8 @@ class ProfileBuilder(SchemaBuilder):
             return schema 
 
     def _visit_function(self, node):
+        from caty.core.casm.cursor.resolver import ReferenceResolver
+        from caty.core.exception import CatyException
         if node.profile_container:
             return node
         if node.uri:
@@ -354,8 +356,15 @@ class ProfileBuilder(SchemaBuilder):
                                         node.application, 
                                         node.type_var_names, 
                                         self.module)
+
         for p in node.patterns:
-            p.build(self)
+            rr = ReferenceResolver(self.module)
+            p.build([self, rr])
+            e = p.verify_type_var(node.type_var_names)
+            if e:
+                raise CatyException(u'SCHEMA_COMPILE_ERROR', 
+                                    u'Undeclared type variable at $this: $name',
+                                    this=node.name, name=e)
             pc.add_profile(CommandProfile(p.opt_schema, p.arg_schema, p.decl))
         return pc
 

@@ -243,16 +243,22 @@ class CallPattern(object):
         self.args = args
         self.decl = decl
 
-    def build(self, cursor):
+    def build(self, cursors):
         if self.opts:
-            self.opt_schema = self.opts.accept(cursor)
+            o = self.opts
+            for cursor in cursors:
+                o = o.accept(cursor)
+            self.opt_schema = o
         else:
             self.opt_schema = schemata['null']
         if self.args:
-            self.arg_schema = self.args.accept(cursor)
+            a = self.args
+            for cursor in cursors:
+                a = a.accept(cursor)
+            self.arg_schema = a
         else:
             self.arg_schema = schemata['null']
-        self.decl.build(cursor)
+        self.decl.build(cursors)
 
     def verify_type_var(self, names):
         return self.decl.verify_type_var(names)
@@ -269,6 +275,7 @@ class CommandDecl(object):
         self.profiles = profiles
         self.jump = jump if isinstance(jump, list) else [jump]
         self.resource = resource if isinstance(resource, list) else [resource]
+        self.__initialized = False
 
     def get_all_resources(self):
         for res in self.resource:
@@ -276,11 +283,14 @@ class CommandDecl(object):
             for r in res[1]:
                 yield t, r
 
-    def build(self, cursor):
+    def build(self, cursors):
+        if self.__initialized:
+            return
         p = []
         for i, o in self.profiles:
-            i = i.accept(cursor)
-            o = o.accept(cursor)
+            for cursor in cursors:
+                i = i.accept(cursor)
+                o = o.accept(cursor)
             p.append((i, o))
         self.profiles = p
 
@@ -288,11 +298,12 @@ class CommandDecl(object):
         for t, ls in self.jump:
             l = []
             for node in ls:
-                node = node.accept(cursor)
+                for cursor in cursors:
+                    node = node.accept(cursor)
                 l.append(node)
             j.append(l)
-        self.jump  = j
-
+        self.jump = j
+        self.__initialized = True
 
     def verify_type_var(self, names):
         for p in self.profiles:

@@ -339,7 +339,7 @@ class Module(object):
             self._loop_exec(self.ast_ns, SchemaBuilder(self), lambda k, v:self.add_schema(v))
         for m in self.sub_modules.values():
             m._build_schema_tree()
-    
+
     def _resolve_reference(self):
         if not self.compiled:
             self._loop_exec(self.schema_ns, ReferenceResolver(self), lambda k, v:self.schema_ns.__setitem__(k, v))
