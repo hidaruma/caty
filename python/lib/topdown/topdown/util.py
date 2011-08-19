@@ -56,4 +56,13 @@ def null(seq):
     n = seq.parse('null')
     return None
 
+class line_by_itself(Parser):
+    def __init__(self, token, without_leading_space=True):
+        if without_leading_space:
+            self.__token = Regex(u'[ \t]*' + token + u'[ \t]*(\n|$)')
+        else:
+            self.__token = Regex(token + '(\n|$)')
+
+    def __call__(self, seq):
+        return seq.parse(self.__token)
 
