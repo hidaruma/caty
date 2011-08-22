@@ -41,8 +41,10 @@ class ResourceActionEntry(object):
         return ''.join(buff)
 
 class ActionProfile(object):
-    def __init__(self, input_type=None, output_type=None, inner_profile=None):
-        pass
+    def __init__(self, input_type=None, output_type=None, next_state=None):
+        self._input_type = input_type
+        self._output_type = output_type
+        self._next_state = next_state
 
     def to_str(self):
         return u''

@@ -24,10 +24,11 @@ class ResourceActionDescriptorParser(Parser):
         if name != self._module_name:
             raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
         r = ResourceModule(name, ds)
-        classes = seq.parse(many(self.resourceclass))
+        classes = seq.parse(many([self.resourceclass, self.state]))
         if not seq.eof:
             raise ParseError(seq, self)
         for c in classes:
+            if c is None: continue
             for a in r:
                 if a.name == c.name:
                     throw_caty_exception(
@@ -36,6 +37,11 @@ class ResourceActionDescriptorParser(Parser):
                         name=c.name, module=name)
             r.append(c)
         return r
+
+    def state(self, seq):
+        ds = seq.parse(option(docstring, u''))
+        ann = seq.parse(option(annotation, Annotations([])))
+        return StateBlock()(seq)
 
     def resourceclass(self, seq):
         ds = seq.parse(option(docstring, u''))
@@ -98,35 +104,37 @@ class ActionBlock(Parser):
         opts = option(object_)(seq)
         seq.parse('::')
         prof = option(try_(self.profile))(seq)
-        links = option(self.links)(seq)
-        seq.parse('{')
-        start = seq.pos
-        proxy = self._script_parser(seq)
-        end = seq.pos
-        seq.parse('}')
-        lock = option(self.locks)(seq)
-        if seq.current != ';':
-            raise ParseError(seq, ';')
-        seq.parse(';')
-        source = seq.text[start:end].strip()
-        rae = ResourceActionEntry(
-                                  proxy, 
-                                  source, 
-                                  n, 
-                                  ds, 
-                                  a, 
-                                  self.rcname, 
-                                  self._module_name,
-                                  prof)
-        if lock:
-            rae.set_lock_cmd(lock)
-        generates = option(self.generates)(seq)
-        if invoker in self.actions:
-                throw_caty_exception(
-                    u'CARA_PARSE_ERROR',
-                    u'Duplicated action invoker: $invoker resource:$resource module: $module', 
-                    invoker=invoker, resource=self.rcname, module=self._module_name)
-        self.actions[invoker] = rae
+        c = choice('{', ';')(seq)
+        if c == ';':
+            pass
+        else:
+            start = seq.pos
+            proxy = self._script_parser(seq)
+            end = seq.pos
+            seq.parse('}')
+            lock = option(self.locks)(seq)
+            if seq.current != ';':
+                raise ParseError(seq, ';')
+            seq.parse(';')
+            source = seq.text[start:end].strip()
+            rae = ResourceActionEntry(
+                                      proxy, 
+                                      source, 
+                                      n, 
+                                      ds, 
+                                      a, 
+                                      self.rcname, 
+                                      self._module_name,
+                                      prof)
+            if lock:
+                rae.set_lock_cmd(lock)
+            generates = option(self.generates)(seq)
+            if invoker in self.actions:
+                    throw_caty_exception(
+                        u'CARA_PARSE_ERROR',
+                        u'Duplicated action invoker: $invoker resource:$resource module: $module', 
+                        invoker=invoker, resource=self.rcname, module=self._module_name)
+            self.actions[invoker] = rae
 
     def invoker(self, seq):
         # XXX:verbの構文チェックが必要?
@@ -134,23 +142,6 @@ class ActionBlock(Parser):
         pattern = seq.parse(string)
         seq.parse(')')
         return pattern.strip()
-        
-
-    def links(self, seq):
-        seq.parse(keyword('links'))
-        if seq.current == '[':
-            seq.parse('[')
-            r = split(self.link_item, ',', True)(seq)
-            seq.parse(']')
-            return r
-        else:
-            return [self.link_item(seq)]
-
-    def link_item(self, seq):
-        src = name(seq)
-        seq.parse('-->')
-        dest = name(seq)
-        return src, dest
 
     def name(self, seq):
         return seq.parse(Regex(r'[a-zA-Z_][-a-zA-Z0-9_.:]*'))
@@ -167,25 +158,16 @@ class ActionBlock(Parser):
         return name
 
     def profile(self, seq):
-        oi = option(typedef)(seq)
-        i = option(self.inner_profile)(seq)
-        if not oi and not i:
-            raise ParseError(seq, self.profile)
-        if oi:
-            _ = seq.parse('->')
-            oo = typedef(seq)
-            return ActionProfile(oi, oo)
-        else:
-            return ActionProfile(inner_profile=i)
-
-    def inner_profile(self, seq):
-        seq.parse('-(')
-        is_opt = option('*')(seq)
-        i = typedef(seq)
+        S('#')(seq)
+        fragment = seq.parse(name)
+        in_type = option(typedef)(seq)
         _ = seq.parse('->')
-        o = typedef(seq)
-        seq.parse(')')
-        return (i, o, is_opt)
+        out_type = typedef(seq)
+        if seq.parse(option(keyword('produces'))):
+            next_state = seq.parse(name)
+        else:
+            next_state = None
+        return ActionProfile(in_type, out_type, next_state)
 
     def instance(self, seq):
         seq.parse(keyword('instance'))
@@ -205,6 +187,41 @@ class ActionBlock(Parser):
         proxy = self._script_parser(seq)
         seq.parse('}')
         return proxy
+
+class StateBlock(Parser):
+    def __call__(self, seq):
+        seq.parse(keyword('state'))
+        state_name = seq.parse(name)
+        seq.parse('::')
+        type = typedef(seq)
+        links = option(self.links)(seq)
+        seq.parse(';')
+
+    def links(self, seq):
+        seq.parse(keyword('links'))
+        seq.parse('{')
+        r = many(self.link_item)(seq)
+        seq.parse('}')
+        return r
+
+    def link_item(self, seq):
+        src = self.trigger(seq)
+        seq.parse('-->')
+        dest = split(self.action_name, ',')(seq)
+        S(';')(seq)
+        return src, dest
+
+    def trigger(self, seq):
+        if option(S('+'))(seq):
+            return option(name)(seq)
+        else:
+            return name(seq)
+
+    def action_name(self, seq):
+        module = seq.parse(option(Regex(r'[a-zA-Z_][-a-zA-Z0-9_]*:')))
+        resource = name(seq)
+        S('.')(seq)
+        action = name(seq)
 
 def is_doc_str(seq):
     _ = seq.parse(option(docstring))

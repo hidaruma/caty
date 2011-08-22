@@ -18,7 +18,7 @@ resource WikiFile(".wiki") {
     };
 
     /** 編集画面呼び出し */
-    action edit("edit/GET")  :: Request -> Response {
+    action edit("edit/GET")  :: {
         {
             "body":file:read %1,
             "title": param %1 | text:rsplit "." | item 0 | text:trim /
@@ -26,7 +26,7 @@ resource WikiFile(".wiki") {
     };
 
     /** 書き込み */
-    action write("/POST#exists-parent")  :: Request -> Response {
+    action write("/POST#exists-parent")  :: {
         translate WikiFile | when {
             OK => ["wiki", pv body | file:write %1 | param %1] | text:concat | redirect ,
             NG => "/wiki/" | redirect 
