@@ -7,6 +7,7 @@ import threading
 from wsgiref.simple_server import make_server
 from caty.core.system import System
 from caty.front.console import CatyShell, get_encoding
+from caty.front.web.console import HTTPConsoleThread
 from caty.util import init_writer
 from caty.util.syslog import init_log, get_start_log
 import caty.core.runtimeobject as ro
@@ -26,14 +27,20 @@ def main(args):
     sl.info(ro.i18n.get('Caty server started'))
     while terminator.continue_process == Terminator.CONTINUE:
         try:
-            system, is_debug, port, shell = setup(args)
+            system, is_debug, port, hcon_port = setup(args)
         except:
             return 1
         if not system:
             return 1
         try:
             server = build_server(system, is_debug, port)
+            if hcon_port:
+                http_console = HTTPConsoleThread(system, hcon_port)
+            else:
+                http_console = None
             terminator.set_server(server)
+            if http_console:
+                http_console.start()
             server.main()
         except select.error, e:
             if e.args[0] == 4:
@@ -44,7 +51,8 @@ def main(args):
         except Exception, e:
             handle_tb()
             terminator.continue_process = Terminator.FAIL
-        
+    if http_console:
+        http_console.httpd.shutdown()
     if terminator.continue_process == Terminator.END:
         sl.info(ro.i18n.get('Caty server ended'))
     else:
@@ -70,11 +78,12 @@ def build_server(system, is_debug, port=8000):
 def setup(args):
     from getopt import getopt
     import locale
-    opts, args = getopt(args, 'cs:dp:h', ['with-console', 'system-encoding=', 'debug', 'port=', 'help', 'pid='])
+    opts, args = getopt(args, 's:dp:h', ['system-encoding=', 'debug', 'port=', 'help', 'pid=', 'hcon-port='])
     debug = False
     system_encoding = locale.getpreferredencoding()
     use_shell = False
     port = 8000
+    hcon_port = None
     _encoding = get_encoding()
     init_writer(_encoding)
     _help = False
@@ -84,21 +93,21 @@ def setup(args):
         elif o in ('-s', '--system-encoding'):
             system_encoding = v
             init_writer(system_encoding)
-        elif o in ('-c', '--with-console'):
-            use_shell = True
         elif o in ('-p', '--port'):
             port = int(v)
         elif o in ('-h', '--help'):
             _help = True
         elif o == '--pid':
             ro.PID_FILE = v
+        elif o == '--hcon-port':
+            hcon_port = v
     if os.path.exists(ro.PID_FILE):
         os.unlink(ro.PID_FILE)
     if _help:
         help()
         return None, None, None, None
     system = System(system_encoding, debug)
-    return system, debug, port, CatyShell(system.get_app('root'), False, debug, system) if use_shell else None
+    return system, debug, port, hcon_port
 
 def help():
     from caty.util import OptPrinter
@@ -110,8 +119,8 @@ def help():
 u"""コンソール出力時の文字エンコーディング
 デフォルト値は環境変数から取得する
 取得出来なかった場合はutf-8が使われる""")
-    op.add(u'-c, --with-console', u'サーバ起動と同時にコンソールを起動する')
     op.add(u'-p, --port', u'ポート番号を指定する（デフォルト:8000）')
+    op.add(u'--hocn-port', u'サーバ起動と同時に指定されたポートでHTTPコンソールを起動する。オプション未指定時はHTTPコンソールなし')
     op.show()
     print 
 
@@ -179,4 +188,7 @@ class CatyServerFacade(object):
     def close(self):
         self.httpd.server_close()
         os.unlink(ro.PID_FILE)
+
+
+
 
