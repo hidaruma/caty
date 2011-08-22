@@ -53,10 +53,13 @@ class HTTPConsoleApp(object):
         content_type = environ.get('CONTENT_TYPE', 'text/plain')
         if content_type == 'text/plain':
             app_name = environ['HTTP_X_CATY_TARGET_APP']
-            src = WebStream(environ, self._system.sysencoding).read()
-        elif content_type == 'application/json':
+            input = WebStream(environ, self._system.sysencoding).read()
+        else:
             try:
                 req = json.untagged(WebStream(environ, self._system.sysencoding).read())
+                if content_type != 'application/json':
+                    for k, v in req.items():
+                        req[k] = v[0]
                 app_name = req.get('targetApp', 'root')
                 input = req['script']
             except Exception, e:
