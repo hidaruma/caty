@@ -10,15 +10,23 @@ sys.path.insert(1, './python/lib/creole')
 sys.path.insert(1, './lib/')
 
 import os
+import sys
 from caty.core.system import System
 from caty.front.web import setup
 from caty.front.console import CatyShell, get_encoding
 from caty.util import init_writer
-system, is_debug, port, shell = setup([])
+from caty.front.web.console import HTTPConsoleApp
+import uwsgi
+system, is_debug, port, name = setup(sys.argv[1:])
 server_module_name = system.server_module_name
 exec 'import %s as server_module' % server_module_name
-    #server_class = server_module.get_server(system, is_debug)
-    #handler_class = server_module.get_handler(system, is_debug)
-dispatcher = server_module.get_dispatcher(system, is_debug)
-application = dispatcher
+main_app = server_module.get_dispatcher(system, is_debug)
+uwsgi.applications = {
+    '': main_app,
+}
+if name:
+    if not name.startswith('/'):
+        name = '/'+name
+    http_console = HTTPConsoleApp(system, is_debug)
+    uwsgi.applications[name] = http_console
 

@@ -78,7 +78,7 @@ def build_server(system, is_debug, port=8000):
 def setup(args):
     from getopt import getopt
     import locale
-    opts, args = getopt(args, 's:dp:h', ['system-encoding=', 'debug', 'port=', 'help', 'pid=', 'hcon-port='])
+    opts, args = getopt(args, 's:dp:h', ['system-encoding=', 'debug', 'port=', 'help', 'pid=', 'hcon-port=', 'hcon-name='])
     debug = False
     system_encoding = locale.getpreferredencoding()
     use_shell = False
@@ -99,7 +99,7 @@ def setup(args):
             _help = True
         elif o == '--pid':
             ro.PID_FILE = v
-        elif o == '--hcon-port':
+        elif o == '--hcon-port' or o == '--hcon-name':
             hcon_port = v
     if os.path.exists(ro.PID_FILE):
         os.unlink(ro.PID_FILE)
@@ -120,7 +120,8 @@ u"""コンソール出力時の文字エンコーディング
 デフォルト値は環境変数から取得する
 取得出来なかった場合はutf-8が使われる""")
     op.add(u'-p, --port', u'ポート番号を指定する（デフォルト:8000）')
-    op.add(u'--hocn-port', u'サーバ起動と同時に指定されたポートでHTTPコンソールを起動する。オプション未指定時はHTTPコンソールなし')
+    op.add(u'--hcon-port', u'サーバ起動と同時に指定されたポートでHTTPコンソールを起動する(スタンドアローンでのみ有効)。オプション未指定時はHTTPコンソールなし')
+    op.add(u'--hcon-name', u'サーバ起動と同時に指定された名前のHTTPコンソールアプリケーションを起動する(uWSGIでのみ有効)。オプション未指定時はHTTPコンソールなし')
     op.show()
     print 
 
