@@ -990,20 +990,12 @@ command throw-if-can :: any? -> any?
 /**
  * 与えられた型名から値を自動生成する。
  */
-command gen-data [string typename] :: void -> any
-    reads schemata
-    refers python:caty.core.std.command.builtin.GenData;
-
-/**
- * 入力値のXJSONに対応するHTMLページを生成する。
- * HTMLページは入力値の型に応じたUIを備える。
- * スキーマで@form, @anchorアノテーションがつけられたプロパティがあれば、
- * その部分がフォームあるいはリンクとなる。
- * 入力値はobjectである必要があり、objectでない入力への結果は保証されない。
- */
-command auto-print [string type_name] :: any -> Response
-    reads schema
-    refers python:caty.core.std.command.builtin.AutoPrint;
+command gen-data {
+    @[default("var")] "occur":("var"|"once"|"min")?, 
+    @[default("rand")]"string": ("rand"|"empty"|"implied")?
+  } [string typename] :: void -> any
+  reads schemata
+  refers python:caty.core.std.command.builtin.GenData;
 
 /**
  * [文字列, データ]のペアの配列からオブジェクトを作る。

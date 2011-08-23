@@ -124,7 +124,7 @@ class TreeCursor(object):
     def _visit_intersection(self, node):
         raise NotImplementedError
 
-    def _visit_unionr(self, node):
+    def _visit_union(self, node):
         raise NotImplementedError
 
     def _visit_updator(self, node):

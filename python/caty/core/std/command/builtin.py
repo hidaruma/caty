@@ -1111,165 +1111,191 @@ class Throw(Builtin, TypeCalculator):
 
 class GenData(Builtin):
    
-    def setup(self, type_name):
+    def setup(self, opts, type_name):
         self.__type_name = type_name
+        self._gen_options = opts
 
     def execute(self):
-        return self.schema[self.__type_name].generate()
+        t = self.schema[self.__type_name]
+        return t.accept(DataGenerator(self._gen_options))
 
-class AutoPrint(Internal):
-    
-    def setup(self, type_name):
-        self.__type_name = type_name
+from caty.core.typeinterface import TreeCursor, Union, Tag
+from caty.core.schema import TagSchema, StringSchema, NumberSchema, BoolSchema, BinarySchema
+import random
+class _EMPTY(object): pass # undefinedではない、存在しない事を表すアトム
 
-    def execute(self, input):
-        app = self._facilities.app
-        handler =  AutoPrintHandler(app._associations)
-        s = self.schema[self.__type_name]
-        BoundedTree(s, input, handler)
-        handler.traverse()
-        html = handler.buffer
-        return {
-            'status': 200,
-            'body': u'<html>%s</html>' % html,
-            'header': {
-                'content-type': u'text/html'
-            },
-        }
+class DataGenerator(TreeCursor):
+    def __init__(self, gen_options):
+        self.__gen_str = gen_options['string']
+        self.__occur = gen_options['occur']
+        
+    def _visit_root(self, node):
+        return node.body.accept(self)
 
-class BoundedTree(object):
-    def __init__(self, sample, instance, handler=None):
-        self._sample = sample
-        self._inst = instance
-        self._handler = handler if handler else TraverseHandler()
-        self._handler.callee = self
-
-    def iteritems(self):
-        for k, v in self._sample.iteritems():
-            v2 = self._inst.get(k, None)
-            yield k, v, v2
-
-    def items(self):
-        return list(self.iteritems())
-
-
-class TraverseHandler(object):
-    def __init__(self):
-        self.callee = None
-
-class BoundedArray(object):
-    def __init__(self, sample, instance, handler=None):
-        self._sample = sample
-        self._inst = instance
-        self._handler = handler if handler else TraverseHandler()
-        self._handler.callee = self
-        self._index = -1
-        self._max = len(instance)
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        self._index += 1
-        if self._index >= self._max:
-            raise StopIteration()
-        v = self._inst[self.index]
-        if self._index >= len(self._sample.schema_list):
-            s = self._sample.schema_list[-1]
+    def _visit_scalar(self, node):
+        if isinstance(node, StringSchema):
+            return self.__gen_string(node)
+        elif isinstance(node, BinarySchema):
+            return self.__gen_binary(node)
+        elif isinstance(node, BoolSchema):
+            return random.choice([True, False])
         else:
-            s = self._sample.schema_list[self._index]
-        return s, v
+            if node.is_integer:
+                return self.__rand_int(node)
+            else:
+                return self.__rand_number(node)
+        return None
 
-class AutoPrintHandler(TraverseHandler):
-    def __init__(self, assocs):
-        TraverseHandler.__init__(self)
-        self.assocs = assocs
-        self.buff = []
+    def __rand_int(self, node):
+        import sys
+        min_i = node.minimum or 0
+        max_i = node.maximum or 100
+        return random.randint(min_i, max_i)
 
-    @property
-    def buffer(self):
-        return ''.join(self.buff)
+    def __rand_number(self, node):
+        min_i = node.minimum or 0
+        max_i = node.maximum or 100.0
+        return random.uniform(min_i, max_i)
+    
+    def __gen_string(self, node):
+        import sys
+        if self.__occur == 'rand':
+            min_l = node.minLength or 0
+            max_l = node.maxLength or 100
+            r = []
+            l = random.randint(min_l, max_l)
+            for i in range(l):
+                r.append(unicode(random.choice(printable)))
+            return ''.join(r)
+        elif self.__occur == 'empty':
+            return u''
+        else:
+            if 'typical' in node.annotations:
+                return random.choice(node.annotations['typical'].value)
+            elif 'default' in node.annotations:
+                return node.annotations['default'].value
+            else:
+                return u'string'
 
-    def traverse(self):
-        self.buff.append('<div class="brace">{</div>')
-        for k, s, v in self.callee.items():
-            self.buff.append('<div class="item">')
-            self.buff.append('<span class="key">%s</span>' % k)
-            self.buff.append('<span class="colon">:</span>')
-            if s.type == 'object':
-                if 'anchor' in s.annotations:
-                    self.buff.append(self._to_anchor(s.fill_default(v)))
-                elif 'form' in s.annotations:
-                    self.buff.append(self._to_form(s.fill_default(v)))
+    def __gen_binary(self, node):
+        min_l = node.minLength or 0
+        max_l = node.maxLength or 100
+        r = []
+        l = random.randint(min_l, max_l)
+        for i in range(l):
+            r.append(chr(random.randint(0, 127)))
+        return ''.join(r)
+
+    def _visit_option(self, node):
+        if self.__occur == 'min':
+            return _EMPTY
+        elif self.__occur == 'once':
+            return node.body.accept(self)
+
+    def _visit_enum(self, node):
+        return random.choice(node.enum)
+
+    def _visit_object(self, node):
+        r = {}
+        for k, v in node.items():
+            if v.optional:
+                if self.__occur == 'var':
+                    i = random.randint(0, 1)
+                    if i == 0:
+                        r[k] = v.accept(self)
+                elif self.__occur == 'once':
+                    r[k] = v.accept(self)
                 else:
-                    n = AutoPrintHandler(self.assocs)
-                    t = BoundedTree(s, v, n)
-                    n.traverse()
-                    self.buff.append(n.buffer)
-            elif s.type == 'array' or s.type == 'bag':
-                n = AutoPrintArrayHandler(self.assocs)
-                t = BoundedArray(s, v, n)
-                n.traverse()
-                self.buff.append(n.buffer)
+                    pass
             else:
-                self.buff.append('<span class="value">%s</span>' % json.pp(v))
-            self.buff.append(', ')
-            self.buff.append('</div>')
-        self.buff.pop(-1)
-        self.buff.pop(-1)
-        self.buff.append('<div class="brace">}</div>')
+                r[k] = v.accept(self)
+            if (k in r and r[k] == u'string' 
+                and v.type == 'string' 
+                and self.__gen_str == 'implied'
+                and 'default' not in v.annotations 
+                and 'typical' not in v.annotations):
+                r[k] = k
+        for k, v in r.items():
+            if v is _EMPTY:
+                del r[k]
+        return r
 
-    def _to_anchor(self, v):
-        b = []
-        href = v['href']
-        line = v.get('title', href)
-        title = v.get('help', u'')
-        verb = v.get('verb', u'')
-        cls = v.get('class', u'')
-        params = []
-        if verb:
-            params.append(u'_verb="%s"' % verb)
-        b.append(u'<a href="%s' % href)
-        if params:
-            b.append(u'?')
-            b.append(u'&'.join(params))
-        b.append('"')
-        if title:
-            b.append(' title="%s"' % title)
-        if cls:
-            b.append(' class="%s"' % cls)
-        b.append(u'>')
-        b.append(line)
-        b.append(u'</a>')
-        return ''.join(b)
+    def _visit_array(self, node):
+        r = []
+        min_i = node.minItems or 0
+        max_i = node.maxItems or (len(node.schema_list)+5)
+        l = random.randint(min_i, max_i)
+        num = 0
+        for s in node.schema_list:
+            r.append(self.__imply_array_item(s, num))
+            num += 1
 
-    def _to_form(self, v):
-        b = []
-        action = v['href']
-        method = v['method']
-        cls = v.get('class', u'')
-        verb = v.get('verb', u'')
-        b.append(u'<form action="%s' % href)
-        params = []
+        if self.repeat and len(r) < l:
+            if self.__occur == 'var':
+                if l < len(r):
+                    r.pop(-1)
+                else:
+                    for i in range(l - len(r)):
+                        r.append(self.__imply_array_item(node.schema_list[-1], num))
+                        num += 1
+            elif self.__occur == 'min':
+                pass
+        if node.repeat and (len(r) >= len(node.schema_list)) and self.__occur == 'min':
+            r.pop(-1)
+        return [i for i in r if i is not _EMPTY]
 
-class AutoPrintArrayHandler(AutoPrintHandler):
-    def traverse(self):
-        self.buff.append('<div class="bracket">[</div>')
-        for s, v in self.callee:
-            self.buff.append('<div class="item">')
-            if s.type == 'object':
-                n = AutoPrintHandler(self.assocs)
-                t = BoundedTree(s, v, n)
-                n.traverse()
-                self.buff.append(n.buffer)
-            elif s.type == 'array' or s.type == 'bag':
-                n = AutoPrintArrayHandler(self.assocs)
-                t = BoundedArray(s, v, n)
-                n.traverse()
-                self.buff.append(n.buffer)
+    def __imply_array_item(self, schema, num):
+        value = schema.accept(self)
+        if (value == u'string' 
+            and schema.type == 'string'
+            and self.__gen_str == 'implied'
+            and 'default' not in schema.annotations 
+            and 'typical' not in schema.annotations):
+            if schema.subName:
+                return schema.subName
+            elif schema.name != 'string':
+                return schema.name
             else:
-                self.buff.append('<span class="value">%s</span>' % json.pp(v))
-        self.buff.append('<div class="bracket">]</div>')
+                return u'item %d' % num
+        return value
+
+    def _visit_bag(self, node):
+        r = []
+        for s in self.schema_list:
+            r.append(s.accept(self))
+        random.shuffle(r)
+        return [i for i in r if i is not _EMPTY]
+
+    def _visit_intersection(self, node):
+        assert False, u'This method must not called'
+
+    def _visit_union(self, node):
+        l = self.__flatten_union(node)
+        return random.choice(l).accept(self)
+
+    def __flatten_union(self, s):
+        o = [s.left, s.right]
+        r = []
+        for i in o:
+            if isinstance(i, Union):
+                for j in self.__flatten_union(i):
+                    r.append(j)
+            elif isinstance(i, Tag):
+                for j in self.__flatten_union(i.body):
+                    r.append(TagSchema(i.tag, j))
+            else:
+                r.append(i)
+        return r
+
+    def _visit_updator(self, node):
+        assert False, u'This method must not called'
+
+    def _visit_tag(self, node):
+        r = node.body.accept(self)
+        if r is not _EMPTY:
+            return json.tagged(node.tag, r)
+        else:
+            return _EMPTY
 
 class ArrayToObject(Builtin):
     def execute(self, input):
