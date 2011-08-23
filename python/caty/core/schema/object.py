@@ -194,17 +194,6 @@ class ObjectSchema(SchemaBase, Object):
                 result[k] = value[k]
         return result
 
-    def generate(self):
-        r = {}
-        for k, v in self.schema_obj.items():
-            if v.optional:
-                i = random.randint(0, 1)
-                if i == 0:
-                    r[k] = v.generate()
-            else:
-                r[k] = v.generate()
-        return r
-
     def __iter__(self):
         return iter(self.schema_obj.keys())
 

@@ -54,12 +54,6 @@ class NumberSchema(ScalarSchema):
         except:
             raise JsonSchemaError(ro.i18n.get(u'An error occuered while converting to $type', type=self.type), value, '')
 
-    def generate(self):
-        if self.is_integer:
-            return self._rand_int()
-        else:
-            return self._rand_number()
-
     def _rand_int(self):
         import sys
         min_i = self.minimum or 0

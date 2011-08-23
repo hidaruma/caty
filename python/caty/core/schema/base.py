@@ -145,9 +145,6 @@ class SchemaBase(Resource, PbcObject):
         # object でのみ意味のあるメソッドだが、全スキーマで定義しておく
         return value
 
-    def generate(self):
-        pass
-
     def normalize(self, queue):
         u"""スキーマの正規化。
         正規化処理は
@@ -381,12 +378,6 @@ class UnionSchema(OperatorSchema, Union):
             except JsonSchemaError, e2:
                 raise JsonSchemaError(ro.i18n.get('Failed to convert to union type') + ':' + error_to_ustr(e1) + '/' + error_to_ustr(e2))
 
-    def generate(self):
-        i = random.randint(0, 1)
-        if i == 0:
-            return self._left.generate()
-        else:
-            return self._right.generate()
 
     def dump(self, depth=0, node=[]):
         v = self._left.dump(depth, node) + ' | ' + self._right.dump(depth, node)
@@ -484,12 +475,6 @@ class IntersectionSchema(OperatorSchema, Intersection):
         s._options = self._options
         return s
 
-    def generate(self):
-        if '__variable__' == self._left.type:
-            return self._right.generate()
-        else:
-            return self._left.generate()
-
     @property
     def definition(self):
         return u'%s & %s' % (self._left.definition, self._right.definition)
@@ -528,9 +513,6 @@ class UpdatorSchema(OperatorSchema, Updator):
         s.annotations = self.annotations
         s._options = self.options
         return s
-
-    def generate(self):
-        return self._right.generate()
 
     def set_reference(self, referent):
         self._left.set_reference(referent)
@@ -622,9 +604,6 @@ class TagSchema(SchemaBase, Tag):
 
     def fill_default(self, value):
         return tagged(self.__tag, self.__schema.fill_default(value))
-
-    def generate(self):
-        return tagged(self.__tag, self.__schema.generate())
 
     def dump(self, depth, node=[]):
         return u'@%s %s' % (self.__tag, self.__schema.dump(depth, node))
@@ -885,9 +864,6 @@ class TypeVariable(SchemaBase, Scalar):
     def fill_default(self, value):
         return self._schema.fill_default(value) if self._schema else value
 
-    def generate(self):
-        return self._schema.generate()
-
     def intersect(self, another):
         return NeverSchema()
 
@@ -1130,10 +1106,6 @@ class NamedSchema(SchemaBase, Root):
     def fill_default(self, value):
         return self._schema.fill_default(value)
 
-
-    def generate(self):
-        return self._schema.generate()
-
     def intersect(self, another):
         return self._schema & another
 
@@ -1270,9 +1242,6 @@ class TypeReference(SchemaBase, Scalar):
         b = self.body.clone(checked)
         t.body = b
         return t
-
-    def generate(self):
-        return self.body.generate()
 
     def intersect(self, another):
         return self.body & another

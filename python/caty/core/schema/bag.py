@@ -95,13 +95,6 @@ class BagSchema(SchemaBase, Bag):
             r.append(n)
         return '{[%s]}' % ', '.join(r)
 
-    def generate(self):
-        r = []
-        for s in self.schema_list:
-            r.append(s.generate())
-        random.shuffle(r)
-        return r
-
     @property
     def type(self):
         return 'bag'

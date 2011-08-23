@@ -24,9 +24,6 @@ class BoolSchema(ScalarSchema):
     def dump(self, depth, node=[]):
         return 'boolean'
 
-    def generate(self):
-        return random.choice([True, False])
-
     @property
     def type(self):
         return 'boolean'

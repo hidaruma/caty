@@ -1120,7 +1120,7 @@ class GenData(Builtin):
         return t.accept(DataGenerator(self._gen_options))
 
 from caty.core.typeinterface import TreeCursor, Union, Tag
-from caty.core.schema import TagSchema, StringSchema, NumberSchema, BoolSchema, BinarySchema
+from caty.core.schema import TagSchema, StringSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference
 import random
 class _EMPTY(object): pass # undefinedではない、存在しない事を表すアトム
 
@@ -1139,11 +1139,13 @@ class DataGenerator(TreeCursor):
             return self.__gen_binary(node)
         elif isinstance(node, BoolSchema):
             return random.choice([True, False])
-        else:
+        elif isinstance(node, NumberSchema):
             if node.is_integer:
                 return self.__rand_int(node)
             else:
                 return self.__rand_number(node)
+        elif isinstance(node, TypeReference):
+            return node.body.accept(self)
         return None
 
     def __rand_int(self, node):

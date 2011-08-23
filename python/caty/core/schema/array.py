@@ -154,18 +154,6 @@ class ArraySchema(SchemaBase, Array):
         n = ArraySchema(r, o)
         return n
        
-    def generate(self):
-        r = []
-        min_i = self.minItems or 0
-        max_i = self.maxItems or 10
-        l = random.randint(min_i, max_i) + 1
-        for s in self.schema_list:
-            r.append(s.generate())
-        if self.repeat and len(r) < l:
-            for i in range(l - len(r)):
-                r.append(self.schema_list[-1].generate())
-        return r
-
     @property
     def type(self):
         return 'array'

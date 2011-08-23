@@ -42,15 +42,6 @@ class BinarySchema(ScalarSchema):
         }
         return self.clone(opts, self.module)
  
-    def generate(self):
-        min_l = self.minLength or 0
-        max_l = self.maxLength or 100
-        r = []
-        l = random.randint(min_l, max_l)
-        for i in range(l):
-            r.append(chr(random.randint(0, 127)))
-        return ''.join(r)
-
     def _convert(self, value):
         if isinstance(value, str):
             return value

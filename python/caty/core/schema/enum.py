@@ -88,10 +88,6 @@ class EnumSchema(SchemaBase, Enum):
         if found:
             return self
 
-
-    def generate(self):
-        return random.choice(self.enum)
-
     def _to_str(self):
         r = []
         for e in self.enum:

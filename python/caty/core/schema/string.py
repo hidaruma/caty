@@ -48,16 +48,6 @@ class StringSchema(ScalarSchema):
         }
         return self.clone(opts)
         
-    def generate(self):
-        import sys
-        min_l = self.minLength or 0
-        max_l = self.maxLength or 100
-        r = []
-        l = random.randint(min_l, max_l)
-        for i in range(l):
-            r.append(unicode(random.choice(printable)))
-        return ''.join(r)
-
     def _convert(self, value):
         if value == None or isinstance(value, unicode):
             return value
