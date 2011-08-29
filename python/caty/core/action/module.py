@@ -142,7 +142,7 @@ class ResourceModule(object):
     def _find_links_to(self, state_name):
         for r in self.resources:
             for act in r.entries.values():
-                if act.profile.next_state == state_name:
+                if state_name in act.profile.next_state:
                     yield act.name
 
     def _find_linked_action(self, action_id):

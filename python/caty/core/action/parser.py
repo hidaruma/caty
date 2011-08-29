@@ -174,10 +174,22 @@ class ActionBlock(Parser):
         _ = seq.parse('->')
         out_type = typedef(seq)
         if seq.parse(option(keyword('produces'))):
-            next_state = seq.parse(name)
+            next_state = self.next_state(seq)
         else:
-            next_state = None
+            next_state = []
         return ActionProfile(in_type, out_type, next_state)
+
+    def next_state(self, seq):
+        return choice(self.one_state, self.list_state)(seq)
+
+    def one_state(self, seq):
+        return [self.name(seq)]
+
+    def list_state(self, seq):
+        seq.parse('[')
+        r = split(self.name, ',', allow_last_delim=True)(seq)
+        seq.parse(']')
+        return r
 
     def instance(self, seq):
         seq.parse(keyword('instance'))
