@@ -55,6 +55,7 @@ class System(PbcObject):
                                      oslib, 
                                      xjsonlib, 
                                      path,
+                                     viva,
                                      http])
         #self._casm._core.schema_finder("GlobalConfig").validate(gcfg)
         # アプリケーショングループの順序は rc.caty の実行順序に関わる

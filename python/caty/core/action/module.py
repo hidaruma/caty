@@ -10,10 +10,15 @@ class ResourceModuleContainer(object):
                            ResourceSelector(app),
                            ResourceSelector(app),
                           ]
+        self._modules = {}
+
+    def add_module(self, resource_module):
+        for r in resource_module.resources:
+            self.add_resource(r)
+        self._modules[resource_module.name] = resource_module
     
-    def add(self, resource_classes):
-        for r in resource_classes:
-            self._selectors[r.type].add(r)
+    def add_resource(self, r):
+        self._selectors[r.type].add(r)
 
     def get(self, fs, path, verb, method, no_check=False):
         v = self._verify(fs, path)
@@ -72,9 +77,98 @@ class ResourceModuleContainer(object):
                 return r
         return None
 
-class ResourceModule(list):
-    def __init__(self, name, docstring):
+    def get_module(self, name):
+        return self._modules.get(name)
+
+class ResourceModule(object):
+    def __init__(self, name, docstring, app_name=u'builtin'):
         self.name = name
         self.docstring = docstring
-        list.__init__(self)
+        self._resources = []
+        self._states = []
+        self._app_name = app_name
 
+    @property
+    def resources(self):
+        return self._resources
+
+    @property
+    def states(self):
+        return self._states
+
+    def make_graph(self, graph_type):
+        if graph_type == 'any':
+            return self._make_full_graph()
+        elif graph_type == 'state':
+            return self._make_state_graph()
+        else:
+            return self._make_action_graph()
+    
+    def _make_full_graph(self):
+        root = {
+            u'name': self.name,
+        }
+        subgraphs = self._make_subgraphs()
+        edges = []
+        nodes = []
+        for s in self._states:
+            for f in self._find_links_to(s.name):
+                edges.append({u'from': f, u'to': s.name})
+            for link in s.links:
+                for link_to in link.link_to_list:
+                    to_node_name = self._find_linked_action(link_to)
+                    e = {u'from': s.name, u'to': to_node_name}
+                if link.trigger:
+                    e[u'trigger'] = link.trigger
+                edges.append(e)
+            nodes.append({u'name': s.name, u'type': u'state'})
+        root['nodes'] = nodes
+        root['edges'] = edges
+        root['subgraphs'] = subgraphs
+        return root
+
+    def _make_subgraphs(self):
+        resources = {}
+        for rc in self.resources:
+            if rc.name not in resources:
+                resources[rc.name] = []
+            for act in rc.entries.values():
+                resources[act.resource_name].append({u'name': act.name, u'type': u'action'})
+        r = []
+        for k, v in resources.items():
+            r.append({u'name':k, u'nodes': v, u'edges': [], u'subgraphs': []})
+        return r
+
+    def _find_links_to(self, state_name):
+        for r in self.resources:
+            for act in r.entries.values():
+                if act.profile.next_state == state_name:
+                    yield act.name
+
+    def _find_linked_action(self, action_id):
+        if ':' in action_id:
+            return action_id
+        rcname, aname = action_id.split('.')
+        for r in self.resources:
+            if r.name == rcname:
+                res = r
+                break
+        else:
+            throw_caty_exception(
+                u'ResourNotFound',
+                u'$resrouceName.$moduleType is not defined in $moduleName',
+                resourceName=rcname,
+                moduleType=u'cara',
+                moduleName=self.name
+            )
+        for a in res.entries.values():
+            if a.name == aname:
+                return aname
+        else:
+            throw_caty_exception(
+                u'ActionNotFound',
+                u'$resourceName.$actionName is not defined in $moduleName',
+                resourceName=rcname,
+                actionName=aname,
+                moduleName=self.name
+            )

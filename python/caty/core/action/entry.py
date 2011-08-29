@@ -49,3 +49,17 @@ class ActionProfile(object):
     def to_str(self):
         return u''
 
+    @property
+    def input_type(self):
+        return self._input_type
+
+    @property
+    def output_type(self):
+        return self._output_type
+
+    @property
+    def next_state(self):
+        return self._next_state
+    
+
+

@@ -16,6 +16,7 @@ class ResourceActionDescriptorParser(Parser):
     def __init__(self, module_name, facility):
         self._script_parser = ScriptParser(facility)
         self._module_name = module_name
+        self._app = facility.app
 
     def __call__(self, seq):
         mn = module_decl(seq, 'cara')
@@ -23,20 +24,23 @@ class ResourceActionDescriptorParser(Parser):
         ds = mn.docstring
         if name != self._module_name:
             raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
-        r = ResourceModule(name, ds)
+        rm = ResourceModule(name, ds, self._app.name)
         classes = seq.parse(many([self.resourceclass, self.state]))
         if not seq.eof:
             raise ParseError(seq, self)
         for c in classes:
-            if c is None: continue
-            for a in r:
-                if a.name == c.name:
+            for r in rm.resources:
+                if r.name == c.name:
                     throw_caty_exception(
                         u'CARA_PARSE_ERROR',
                         u'Duplicated resource name: $name module: $module', 
                         name=c.name, module=name)
-            r.append(c)
-        return r
+
+            if isinstance(c, ResourceClass):
+                rm.resources.append(c)
+            else:
+                rm.states.append(c)
+        return rm
 
     def state(self, seq):
         ds = seq.parse(option(docstring, u''))
@@ -106,7 +110,12 @@ class ActionBlock(Parser):
         prof = option(try_(self.profile))(seq)
         c = choice('{', ';')(seq)
         if c == ';':
-            pass
+            if prof:
+                source = u'translate %s | gen:sample %s' % (prof.input_type.name, prof.output_type.name)
+            else:
+                source = u'pass'
+            proxy = self._script_parser.run(source)
+            lock = None
         else:
             start = seq.pos
             proxy = self._script_parser(seq)
@@ -117,24 +126,25 @@ class ActionBlock(Parser):
                 raise ParseError(seq, ';')
             seq.parse(';')
             source = seq.text[start:end].strip()
-            rae = ResourceActionEntry(
-                                      proxy, 
-                                      source, 
-                                      n, 
-                                      ds, 
-                                      a, 
-                                      self.rcname, 
-                                      self._module_name,
-                                      prof)
-            if lock:
-                rae.set_lock_cmd(lock)
-            generates = option(self.generates)(seq)
-            if invoker in self.actions:
-                    throw_caty_exception(
-                        u'CARA_PARSE_ERROR',
-                        u'Duplicated action invoker: $invoker resource:$resource module: $module', 
-                        invoker=invoker, resource=self.rcname, module=self._module_name)
-            self.actions[invoker] = rae
+
+        rae = ResourceActionEntry(
+                                  proxy, 
+                                  source, 
+                                  n, 
+                                  ds, 
+                                  a, 
+                                  self.rcname, 
+                                  self._module_name,
+                                  prof)
+        if lock:
+            rae.set_lock_cmd(lock)
+        generates = option(self.generates)(seq)
+        if invoker in self.actions:
+                throw_caty_exception(
+                    u'CARA_PARSE_ERROR',
+                    u'Duplicated action invoker: $invoker resource:$resource module: $module', 
+                    invoker=invoker, resource=self.rcname, module=self._module_name)
+        self.actions[invoker] = rae
 
     def invoker(self, seq):
         # XXX:verbの構文チェックが必要?
@@ -194,10 +204,13 @@ class StateBlock(Parser):
         state_name = seq.parse(name)
         seq.parse('::')
         type = typedef(seq)
-        links = option(self.links)(seq)
+        links = option(self.link_block, [])(seq)
         seq.parse(';')
+        self.name = state_name
+        self.links = links
+        return self
 
-    def links(self, seq):
+    def link_block(self, seq):
         seq.parse(keyword('links'))
         seq.parse('{')
         r = many(self.link_item)(seq)
@@ -205,11 +218,11 @@ class StateBlock(Parser):
         return r
 
     def link_item(self, seq):
-        src = self.trigger(seq)
+        trigger = self.trigger(seq)
         seq.parse('-->')
         dest = split(self.action_name, ',')(seq)
         S(';')(seq)
-        return src, dest
+        return Link(trigger, dest)
 
     def trigger(self, seq):
         if option(S('+'))(seq):
@@ -218,10 +231,12 @@ class StateBlock(Parser):
             return name(seq)
 
     def action_name(self, seq):
-        module = seq.parse(option(Regex(r'[a-zA-Z_][-a-zA-Z0-9_]*:')))
-        resource = name(seq)
-        S('.')(seq)
-        action = name(seq)
+        return seq.parse(Regex(r'([a-zA-Z_][-a-zA-Z0-9_]*:)?[a-zA-Z_][-a-zA-Z0-9_]*\.[a-zA-Z_][-a-zA-Z0-9_]*'))
+
+class Link(object):
+    def __init__(self, trigger, dest):
+        self.link_to_list = dest
+        self.trigger = trigger
 
 def is_doc_str(seq):
     _ = seq.parse(option(docstring))

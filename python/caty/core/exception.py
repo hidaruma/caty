@@ -17,6 +17,10 @@ class CatyException(Exception):
             o['id'] = error_id
         if stack_trace:
             o['stackTrace'] = stack_trace
+        for k, v in place_holder.items():
+            o[k] = v
+        for k, v in kwds.items():
+            o[k] = v
         self.__json_obj = json.tagged(error_tag, o)
         self.__place_holder = place_holder if place_holder else kwds
         # self.__json_obj.update(place_holder)

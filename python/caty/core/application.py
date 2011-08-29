@@ -22,6 +22,7 @@ from caty.core.std.schema import (builtin,
                                   oslib,
                                   path, 
                                   xjsonlib, 
+                                  viva,
                                   http)
 from caty.core.globalconf import *
 from caty.core.script import node
@@ -442,7 +443,8 @@ class Application(PbcObject):
         facilities = self.create_facilities()
         dispatcher = create_resource_action_dispatcher(self._actions.start().read_mode, facilities, self)
         filetype_classes = resource_class_from_assocs(self._raw_associations, facilities, self)
-        dispatcher.add(filetype_classes)
+        for c in filetype_classes:
+            dispatcher.add_resource(c)
         self._dispatcher = dispatcher
 
     def __exec_callback(self, callback_class_name):
@@ -608,6 +610,10 @@ class Application(PbcObject):
 
     @property
     def verb_dispatcher(self):
+        return self._dispatcher
+
+    @property
+    def resource_module_container(self):
         return self._dispatcher
 
     def __invariant__(self):

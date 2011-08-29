@@ -355,6 +355,20 @@ type Exception = @*! {
 /** 例外型が存在しない。*/
 exception ExceptionNotFound = object;
 
+/** モジュールが存在しない */
+exception ModuleNotFound = {
+  "moduleName": string,
+  "moduleType": "cara" | "casm",
+  "appName": string,
+};
+
+/** アクションが存在しない */
+exception ActionNotFound = {
+  "moduleName": string,
+  "actionName": string,
+  "appName": string,
+};
+
 /** 配列のインデックスが範囲外、または不正である。*/
 exception IndexOutOfRange = object;
 
