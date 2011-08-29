@@ -9,7 +9,7 @@ command p [string arg] :: void -> void {
 /** Help for Type -- 型のヘルプ
  */
 command ht [string type_name] :: void -> void {
-  type %1 | cout
+  ht %1 | cout
 };
 
 // End of Module

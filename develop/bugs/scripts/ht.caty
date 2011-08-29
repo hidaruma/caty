@@ -3,5 +3,5 @@
 /** Help for Type -- 型のヘルプ
  */
 
-type %1 | cout
+ht %1 | cout
 
