@@ -32,9 +32,7 @@ command trunk :: path -> path
 command replace-ext :: [path, ext] -> path
     refers python:caty.core.std.command.path.ReplaceExt;
 
-
-type path = string(format="file-pattern");
-type file-pattern = string(format="file-pattern");
+type path = string(remark="file-path");
 
 /** ファイル名がパターンにマッチするかどうかを返す */
 command matches 
