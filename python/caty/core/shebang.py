@@ -46,10 +46,14 @@ def schebang(seq):
         script = u''
     return meta, script, seq.rest
 
+@try_
 def parse_meta(seq):
     S(u'<?')(seq)
     try:
         keyword(u'caty-meta')(seq)
+    except:
+        raise
+    try:
         keyword(u'template')(seq)
         S(u'=')(seq)
         tmpl = quoted_string(seq)
@@ -68,10 +72,14 @@ def parse_meta(seq):
         raise Exception(ro.i18n.get(u'caty-meta PI syntax error: $message', message=e._message))
     return r
 
+@try_
 def parse_script(seq):
     S(u'<?')(seq)
     try:
         keyword(u'caty-script')(seq)
+    except:
+        raise
+    try:
         r = until('?>')(seq)
         S('?>')(seq)
     except ParseError, e:

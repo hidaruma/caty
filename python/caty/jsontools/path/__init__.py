@@ -6,7 +6,7 @@ from caty.jsontools.path.validator import validator
 from caty.util.cache import memoize
 
 def build_query(q):
-    if not q.startswith('$.'):
+    if not q.startswith('$.') and q != '$':
         if q.startswith('.'):
             q = '$' + q
         else:
