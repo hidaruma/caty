@@ -96,27 +96,21 @@ class ResourceModule(object):
     def states(self):
         return self._states
 
-    def make_graph(self, graph_type):
-        if graph_type == 'any':
-            return self._make_full_graph()
-        elif graph_type == 'state':
-            return self._make_state_graph()
-        else:
-            return self._make_action_graph()
-    
-    def _make_full_graph(self):
+    def make_graph(self):
         root = {
             u'name': self.name,
         }
         subgraphs = self._make_subgraphs()
         edges = []
         nodes = []
+        appered_dest = set([])
         for s in self._states:
             for f in self._find_links_to(s.name):
                 edges.append({u'from': f, u'to': s.name, u'type': u'action'})
             for link in s.links:
                 for link_to in link.link_to_list:
                     to_node_name = self._find_linked_action(link_to)
+                    appered_dest.add(to_node_name)
                     e = {u'from': s.name, u'to': to_node_name, u'type': u'link'}
                 if link.trigger:
                     e[u'trigger'] = link.trigger
@@ -125,7 +119,18 @@ class ResourceModule(object):
                 if link.type == 'additional-link':
                     e[u'trigger'] = ' '.join(['+', e[u'trigger']])
                 edges.append(e)
-            nodes.append({u'name': s.name, u'type': u'state'})
+            nodes.append({u'name': s.name, u'label': s.name, u'type': u'state'})
+        for d in appered_dest:
+            found = False
+            for s in subgraphs:
+                for n in s['nodes']:
+                    if n['name'] == d:
+                        found = True
+                        break
+                if found:
+                    break
+            if not found:
+                nodes.append({u'name': d, u'label': d, u'type': u'external'})
         root['nodes'] = nodes
         root['edges'] = edges
         root['subgraphs'] = subgraphs

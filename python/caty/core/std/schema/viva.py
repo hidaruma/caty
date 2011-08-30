@@ -38,6 +38,7 @@ type GraphStruct = {
 
 type Node = {
     "name": string,
+    "label": string,
     "type": "action" | "state"
 };
 
@@ -47,16 +48,4 @@ type Edge = {
     "to": string?,
     "type": "link" | "action",
 };
-
-/**
- * .caraモジュールのアクション及びステートのグラフ構造のダンプ。
- */
-command dump-struct {
-    @[default("state")] "node": ("state" | "action" | "any")?,
-    @[default("dot")] "format": "dot" | "internal",
-    } [string module] :: void -> void
-     throws [ModuleNotFound]
-    refers python:caty.core.std.command.viva.GraphStruct;
-    
-
 """

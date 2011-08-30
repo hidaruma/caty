@@ -3,70 +3,7 @@ from caty.core.command import Builtin
 from caty.core.exception import *
 import pygraphviz as gv
 
-class GraphCmdBase(object):
-    def make_graph(self):
-        app = self.current_app
-        rmc = app.resource_module_container
-        rm = rmc.get_module(self._module_name)
-        if not rm:
-            throw_caty_exception(
-                u'ModuleNotFound',
-                u'$moduleName.$moduleType is not defined in $appName',
-                moduleName=self._module_name,
-                moduleType=u'cara',
-                appName=app.name
-            )
-        return rm.make_graph(self._node)
-
-    def transform(self, graph_struct, root=True):
-        cfg = {
-            'strict': True,
-            'directed': True
-        }
-        if root:
-            cfg['name'] = graph_struct['name']
-            cfg.update(self._graph_config['graph'])
-        else:
-            cfg.update(self._graph_config['subgraph'])
-            cfg['name'] = 'cluster_' + graph_struct['name']
-        RG = gv.AGraph(**cfg)
-        if root:
-            RG.graph_attr['label'] = 'Module: ' + graph_struct['name']
-
-        else:
-            RG.graph_attr['label'] = graph_struct['name']
-        for sg in graph_struct['subgraphs']:
-            G = self.transform(sg, False)
-            _G = RG.add_subgraph(G.iternodes(), G.name, **G.graph_attr)
-            for n in G.iternodes():
-                _G.add_node(n.name, **n.attr)
-            _G.add_edges_from(G.iteredges())
-        for node in graph_struct['nodes']:
-            name = node['name']
-            RG.add_node(name)
-            N = RG.get_node(name)
-            attrs = self._graph_config[node['type']]
-            N.attr.update(attrs)
-            if 'label' in node:
-                N.attr['label'] = node['label']
-        for edge in graph_struct['edges']:
-            if 'trigger' not in edge:
-                RG.add_edge(edge['from'], 
-                            edge['to'], 
-                            **self._graph_config['edge'][edge['type']])
-            else:
-                if edge['trigger'].startswith('+'):
-                    cfg = {'arrowtail': 'ediamond', 'dir': 'both'}
-                else:
-                    cfg = {'arrowtail': 'diamond', 'dir': 'both'}
-                cfg.update(self._graph_config['edge'][edge['type']])
-                RG.add_edge(edge['from'], 
-                            edge['to'], 
-                            label=edge['trigger'],
-                            **cfg)
-        return RG
-
-class Draw(Builtin, GraphCmdBase):
+class Draw(Builtin):
     def setup(self, opts, module_name):
         self._module_name = module_name
         self._out_file = opts['out']
@@ -108,6 +45,12 @@ class Draw(Builtin, GraphCmdBase):
                 'color': u'black',
                 'fillcolor': u'gold'
             },
+            'external': {
+                'fontsize': 14.0,
+                'style': u'filled',
+                'color': u'black',
+                'fillcolor': u'azure'
+            },
         }
 
     def execute(self):
@@ -128,42 +71,78 @@ class Draw(Builtin, GraphCmdBase):
             else:
                 return o
 
-import caty.jsontools as json
-class GraphStruct(Builtin, GraphCmdBase):
-    def setup(self, opts, module_name):
-        self._module_name = module_name
-        self._node = opts['node']
-        self._format = opts['format']
-        self._graph_config = {
-            'graph': {
-                'bgcolor': 'gainsboro',
-            },
-            'subgraph': {
-                'bgcolor': 'gainsboro',
-                'color': 'black'
-            },
-            'edge': {
-                'arrowhead': 'open',
-                'color': 'crimson'
-            },
-            'action': {
-                'shape': u'box',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'gold'
-            },
-            'state': {
-                'shape': u'',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'gold'
-            },
-        }
+    def make_graph(self):
+        app = self.current_app
+        rmc = app.resource_module_container
+        rm = rmc.get_module(self._module_name)
+        if not rm:
+            throw_caty_exception(
+                u'ModuleNotFound',
+                u'$moduleName.$moduleType is not defined in $appName',
+                moduleName=self._module_name,
+                moduleType=u'cara',
+                appName=app.name
+            )
+        return rm.make_graph()
 
-    def execute(self):
-        src = self.make_graph()
-        if self._format == 'internal':
-            print json.pp(src)
+    def transform(self, graph_struct, root=True):
+        cfg = {
+            'strict': True,
+            'directed': True
+        }
+        if root:
+            cfg['name'] = graph_struct['name']
+            cfg.update(self._graph_config['graph'])
         else:
-            G = self.transform(src)
-            G.write()
+            cfg.update(self._graph_config['subgraph'])
+            cfg['name'] = 'cluster_' + graph_struct['name']
+        RG = gv.AGraph(**cfg)
+        if root:
+            RG.graph_attr['label'] = 'Module: ' + graph_struct['name']
+
+        else:
+            RG.graph_attr['label'] = graph_struct['name']
+        for sg in graph_struct['subgraphs']:
+            G = self.transform(sg, False)
+            if self._node == 'state':
+                for n in G.iternodes():
+                    RG.add_node(n.name, **n.attr)
+            else:
+                _G = RG.add_subgraph(G.iternodes(), G.name, **G.graph_attr)
+                for n in G.iternodes():
+                    _G.add_node(n.name, **n.attr)
+                _G.add_edges_from(G.iteredges())
+        for node in graph_struct['nodes']:
+            name = node['name']
+            RG.add_node(name)
+            N = RG.get_node(name)
+            attr = {}
+            attr.update(self._graph_config[node['type']])
+            if ((self._node == 'state' 
+                and node['type'] != 'state')
+               or (self._node == 'action' 
+                and node['type'] != 'action')):
+               attr['label'] = ''
+               attr['shape'] = 'circle'
+               attr['width'] = '0.2'
+            else:
+               attr['label'] = node['label']
+            N.attr.update(attr)
+        for edge in graph_struct['edges']:
+            if 'trigger' not in edge or self._node == 'action':
+                RG.add_edge(edge['from'], 
+                            edge['to'], 
+                            **self._graph_config['edge'][edge['type']])
+            else:
+                if edge['trigger'].startswith('+'):
+                    cfg = {'arrowtail': 'ediamond', 'dir': 'both'}
+                else:
+                    cfg = {'arrowtail': 'diamond', 'dir': 'both'}
+                cfg.update(self._graph_config['edge'][edge['type']])
+                RG.add_edge(edge['from'], 
+                            edge['to'], 
+                            label=edge['trigger'],
+                            **cfg)
+        return RG
+
+
