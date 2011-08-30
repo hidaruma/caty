@@ -190,7 +190,7 @@ class TreeDumper(TreeCursor):
                 for k, v in items:
                     buff.append(k)
                     buff.append('=')
-                    buff.append(str(v))
+                    buff.append(v if isinstance(v, unicode) else str(v))
                     buff.append(', ')
                 buff.pop(-1)
                 buff.append(')')
@@ -228,6 +228,15 @@ class TreeDumper(TreeCursor):
         buff = ['{\n']
         self.depth += 1
         for k, v in node.items():
+            if v.docstring:
+                buff.append('    ' * self.depth)
+                buff.append(v.docstring.strip())
+                buff.append('\n')
+            if v.annotations:
+                buff.append('    ' * self.depth)
+                buff.append(v.annotations.to_str())
+                buff.append('\n')
+
             buff.append('    ' * self.depth)
             buff.append('"%s": ' % k)
             buff.append(v.accept(self))

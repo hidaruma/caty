@@ -21,7 +21,7 @@ class GraphCmdBase(object):
     def transform(self, graph_struct, root=True):
         cfg = {
             'name': graph_struct['name'],
-            'strict': False,
+            'strict': True,
             'directed': True
         }
         if root:
