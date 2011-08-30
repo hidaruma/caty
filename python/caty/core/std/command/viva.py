@@ -55,10 +55,15 @@ class GraphCmdBase(object):
                             edge['to'], 
                             **self._graph_config['edge'][edge['type']])
             else:
+                if edge['trigger'].startswith('+'):
+                    cfg = {'arrowtail': 'ediamond', 'dir': 'both'}
+                else:
+                    cfg = {'arrowtail': 'diamond', 'dir': 'both'}
+                cfg.update(self._graph_config['edge'][edge['type']])
                 RG.add_edge(edge['from'], 
                             edge['to'], 
                             label=edge['trigger'],
-                            **self._graph_config['edge'][edge['type']])
+                            **cfg)
         return RG
 
 class Draw(Builtin, GraphCmdBase):
