@@ -24,7 +24,7 @@ command draw {
    * 拡張子は含まない
    */
   string module
-] :: void -> void | binary 
+] :: void -> void | binary | string
      throws [ModuleNotFound]
      updates pub
     refers python:caty.core.std.command.viva.Draw;
