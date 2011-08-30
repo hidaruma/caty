@@ -20,14 +20,15 @@ class GraphCmdBase(object):
 
     def transform(self, graph_struct, root=True):
         cfg = {
-            'name': graph_struct['name'],
             'strict': True,
             'directed': True
         }
         if root:
+            cfg['name'] = graph_struct['name']
             cfg.update(self._graph_config['graph'])
         else:
             cfg.update(self._graph_config['subgraph'])
+            cfg['name'] = 'cluster_' + graph_struct['name']
         RG = gv.AGraph(**cfg)
         RG.graph_attr['label'] = graph_struct['name']
         if root:
