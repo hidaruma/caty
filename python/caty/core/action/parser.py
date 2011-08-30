@@ -111,10 +111,18 @@ class ActionBlock(Parser):
         c = choice('{', ';')(seq)
         if c == ';':
             if prof:
-                source = u'translate %s | gen:sample %s' % (prof.input_type.name, prof.output_type.name)
+                if prof.input_type.name == 'void':
+                    source = u'gen:sample %s | json:response' % prof.output_type.name
+                else:
+                    source = u'''translate %s | 
+                    when {
+                        OK => gen:sample %s,
+                        NG => gen:sample %s,
+                    } | json:response
+                    ''' % (prof.input_type.name, prof.output_type.name, prof.output_type.name)
             else:
                 source = u'pass'
-            proxy = self._script_parser.run(source)
+            proxy = self._script_parser.run(source, auto_remove_ws=True)
             lock = None
         else:
             start = seq.pos

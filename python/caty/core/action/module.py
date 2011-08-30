@@ -165,7 +165,7 @@ class ResourceModule(object):
         else:
             throw_caty_exception(
                 u'ResourNotFound',
-                u'$resrouceName.$moduleType is not defined in $moduleName',
+                u'$resourceName.$moduleType is not defined in $moduleName',
                 resourceName=rcname,
                 moduleType=u'cara',
                 moduleName=self.name
