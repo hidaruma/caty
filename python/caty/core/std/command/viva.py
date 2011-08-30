@@ -34,20 +34,21 @@ class Draw(Builtin):
             },
             'action': {
                 'fontsize': 14.0,
-                'shape': u'box',
+                'shape': u'ellipse',
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'darkseagreen2'
             },
             'state': {
                 'fontsize': 14.0,
+                'shape': u'box',
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'gold'
             },
             'external': {
                 'fontsize': 14.0,
-                'shape': u'box',
+                'shape': u'ellipse',
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'azure'
@@ -122,18 +123,17 @@ class Draw(Builtin):
             if (self._node == 'state' 
                   and node['type'] != 'state'):
                 attr['label'] = ''
-                attr['shape'] = 'box'
+                attr['shape'] = 'circle'
                 attr['width'] = '0.2'
-                attr['height'] = '0.2'
             elif (self._node == 'action' 
                 and node['type'] != 'action'):
                 attr['label'] = ''
                 attr['width'] = '0.2'
                 if node['type'] == 'external':
+                    attr['shape'] = 'circle'
+                else:
                     attr['shape'] = 'box'
                     attr['height'] = '0.2'
-                else:
-                    attr['shape'] = 'circle'
             else:
                attr['label'] = node['label']
             N.attr.update(attr)
