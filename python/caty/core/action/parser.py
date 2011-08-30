@@ -230,25 +230,29 @@ class StateBlock(Parser):
         return r
 
     def link_item(self, seq):
-        trigger = self.trigger(seq)
+        isembed, trigger = self.trigger(seq)
         seq.parse('-->')
         dest = split(self.action_name, ',')(seq)
         S(';')(seq)
-        return Link(trigger, dest)
+        return Link(trigger, dest, isembed)
 
     def trigger(self, seq):
         if option(S('+'))(seq):
-            return option(name)(seq)
+            return False, option(name)(seq)
         else:
-            return name(seq)
+            return True, name(seq)
 
     def action_name(self, seq):
         return seq.parse(Regex(r'([a-zA-Z_][-a-zA-Z0-9_]*:)?[a-zA-Z_][-a-zA-Z0-9_]*\.[a-zA-Z_][-a-zA-Z0-9_]*'))
 
 class Link(object):
-    def __init__(self, trigger, dest):
+    def __init__(self, trigger, dest, isembed):
         self.link_to_list = dest
         self.trigger = trigger
+        if isembed:
+            self.type = u'embeded-link'
+        else:
+            self.type = u'additional-link'
 
 def is_doc_str(seq):
     _ = seq.parse(option(docstring))

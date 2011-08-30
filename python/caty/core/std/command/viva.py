@@ -30,13 +30,16 @@ class GraphCmdBase(object):
             cfg.update(self._graph_config['subgraph'])
             cfg['name'] = 'cluster_' + graph_struct['name']
         RG = gv.AGraph(**cfg)
-        RG.graph_attr['label'] = graph_struct['name']
         if root:
-            RG.edge_attr.update(self._graph_config['edge'])
+            RG.graph_attr['label'] = 'Module: ' + graph_struct['name']
+
+        else:
+            RG.graph_attr['label'] = graph_struct['name']
         for sg in graph_struct['subgraphs']:
             G = self.transform(sg, False)
             _G = RG.add_subgraph(G.iternodes(), G.name, **G.graph_attr)
-            _G.add_nodes_from(G.iternodes())
+            for n in G.iternodes():
+                _G.add_node(n.name, **n.attr)
             _G.add_edges_from(G.iteredges())
         for node in graph_struct['nodes']:
             name = node['name']
@@ -44,11 +47,18 @@ class GraphCmdBase(object):
             N = RG.get_node(name)
             attrs = self._graph_config[node['type']]
             N.attr.update(attrs)
+            if 'label' in node:
+                N.attr['label'] = node['label']
         for edge in graph_struct['edges']:
             if 'trigger' not in edge:
-                RG.add_edge(edge['from'], edge['to'])
+                RG.add_edge(edge['from'], 
+                            edge['to'], 
+                            **self._graph_config['edge'][edge['type']])
             else:
-                RG.add_edge(edge['from'], edge['to'], label=edge['trigger'])
+                RG.add_edge(edge['from'], 
+                            edge['to'], 
+                            label=edge['trigger'],
+                            **self._graph_config['edge'][edge['type']])
         return RG
 
 class Draw(Builtin, GraphCmdBase):
@@ -60,23 +70,35 @@ class Draw(Builtin, GraphCmdBase):
         self._graph_config = {
             'graph': {
                 'bgcolor': 'gainsboro',
+                'fontsize': 20.0,
+                'labelloc': 't',
             },
             'subgraph': {
-                'bgcolor': 'gainsboro',
-                'color': 'black'
+                'bgcolor': 'darkolivegreen4',
+                'color': 'black',
+                'fontsize': 14.0,
             },
             'edge': {
-                'arrowhead': 'open',
-                'color': 'crimson'
+                'action': {
+                    'fontsize': 14.0,
+                    'arrowhead': 'open',
+                    'color': 'crimson'
+                },
+                'link': {
+                    'fontsize': 14.0,
+                    'arrowhead': 'open',
+                    'color': 'darkorchid3',
+                },
             },
             'action': {
+                'fontsize': 14.0,
                 'shape': u'box',
                 'style': u'filled',
                 'color': u'black',
-                'fillcolor': u'gold'
+                'fillcolor': u'darkseagreen2'
             },
             'state': {
-                'shape': u'',
+                'fontsize': 14.0,
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'gold'

@@ -44,7 +44,8 @@ type Node = {
 type Edge = {
     "trigger": string?,
     "from": string?,
-    "to": string?
+    "to": string?,
+    "type": "link" | "action",
 };
 
 /**

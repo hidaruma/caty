@@ -113,13 +113,17 @@ class ResourceModule(object):
         nodes = []
         for s in self._states:
             for f in self._find_links_to(s.name):
-                edges.append({u'from': f, u'to': s.name})
+                edges.append({u'from': f, u'to': s.name, u'type': u'action'})
             for link in s.links:
                 for link_to in link.link_to_list:
                     to_node_name = self._find_linked_action(link_to)
-                    e = {u'from': s.name, u'to': to_node_name}
+                    e = {u'from': s.name, u'to': to_node_name, u'type': u'link'}
                 if link.trigger:
                     e[u'trigger'] = link.trigger
+                else:
+                    e[u'trigger'] = u''
+                if link.type == 'additional-link':
+                    e[u'trigger'] = ' '.join(['+', e[u'trigger']])
                 edges.append(e)
             nodes.append({u'name': s.name, u'type': u'state'})
         root['nodes'] = nodes
@@ -133,7 +137,7 @@ class ResourceModule(object):
             if rc.name not in resources:
                 resources[rc.name] = []
             for act in rc.entries.values():
-                resources[act.resource_name].append({u'name': act.name, u'type': u'action'})
+                resources[act.resource_name].append({u'label': act.name, u'name': act.resource_name+'.'+act.name,u'type': u'action'})
         r = []
         for k, v in resources.items():
             r.append({u'name':k, u'nodes': v, u'edges': [], u'subgraphs': []})
@@ -143,7 +147,7 @@ class ResourceModule(object):
         for r in self.resources:
             for act in r.entries.values():
                 if state_name in act.profile.next_state:
-                    yield act.name
+                    yield act.resource_name+'.'+act.name
 
     def _find_linked_action(self, action_id):
         if ':' in action_id:
@@ -163,7 +167,7 @@ class ResourceModule(object):
             )
         for a in res.entries.values():
             if a.name == aname:
-                return aname
+                return action_id
         else:
             throw_caty_exception(
                 u'ActionNotFound',
