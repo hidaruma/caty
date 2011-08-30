@@ -122,7 +122,7 @@ class CatyShell(cmd.Cmd):
     def _unset_dribble(self):
         for s in [cout, debug]:
             if self.dribble_file in s.streams:
-                s.remove(self.dribble_file)
+                s.streams.remove(self.dribble_file)
 
     def do_help(self, line):
         return self.default('help ' + line)
