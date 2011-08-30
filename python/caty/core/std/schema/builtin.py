@@ -1002,16 +1002,6 @@ command throw-if-can :: any? -> any?
     refers python:caty.core.std.command.builtin.Throw;
 
 /**
- * 与えられた型名から値を自動生成する。
- */
-command gen-data {
-    @[default("var")] "occur":("var"|"once"|"min")?, 
-    @[default("rand")]"string": ("rand"|"empty"|"implied")?
-  } [string typename] :: void -> any
-  reads schemata
-  refers python:caty.core.std.command.builtin.GenData;
-
-/**
  * [文字列, データ]のペアの配列からオブジェクトを作る。
  * 上記のペアの第一要素がオブジェクトのプロパティとなる。
  */

@@ -3,12 +3,27 @@ import caty
 from caty.core.application import *
 from caty.core.applicationgroup import *
 from caty.util.path import join
-
+from caty.core.std.schema import (builtin, 
+                                  debug, 
+                                  file, 
+                                  filtercmd, 
+                                  jsonlib, 
+                                  listlib, 
+                                  logginglib,
+                                  secure, 
+                                  strg, 
+                                  test, 
+                                  text, 
+                                  user, 
+                                  fit, 
+                                  gen,
+                                  oslib,
+                                  path, 
+                                  xjsonlib, 
+                                  viva,
+                                  http)
 
 from pbc import PbcObject, Contract
-
-
-
 
 class System(PbcObject):
     u"""Caty のコアシステム。
@@ -52,6 +67,7 @@ class System(PbcObject):
                                      text, 
                                      user, 
                                      fit, 
+                                     gen,
                                      oslib, 
                                      xjsonlib, 
                                      path,

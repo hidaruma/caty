@@ -6,24 +6,6 @@ from caty.util.path import join
 from caty import mafs, storage, session
 from caty.jsontools import xjson
 from caty.util.collection import merge_dict
-from caty.core.std.schema import (builtin, 
-                                  debug, 
-                                  file, 
-                                  filtercmd, 
-                                  jsonlib, 
-                                  listlib, 
-                                  logginglib,
-                                  secure, 
-                                  strg, 
-                                  test, 
-                                  text, 
-                                  user, 
-                                  fit, 
-                                  oslib,
-                                  path, 
-                                  xjsonlib, 
-                                  viva,
-                                  http)
 from caty.core.globalconf import *
 from caty.core.script import node
 from caty.core import script, casm
