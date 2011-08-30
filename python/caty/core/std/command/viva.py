@@ -95,7 +95,10 @@ class Draw(Builtin, GraphCmdBase):
             with self.pub.open('/'+self._out_file, 'wb') as f:
                 f.write(o)
         else:
-            return o
+            if self._format == 'dot':
+                return unicode(o, 'utf-8')
+            else:
+                return o
 
 import caty.jsontools as json
 class GraphStruct(Builtin, GraphCmdBase):
