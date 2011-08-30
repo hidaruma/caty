@@ -4,6 +4,11 @@ type NewWiki = {
     "filename": string,
 };
 
+type WikiSkele = {
+    "title": string,
+    "body": string,
+};
+
 type WikiFile = {
     "body": string,
 };

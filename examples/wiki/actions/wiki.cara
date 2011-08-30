@@ -9,7 +9,7 @@ resource WikiFile(".wiki") {
          "isText": true,
     };
     /** 読み込み */
-    action read("/GET") :: { 
+    action read("/GET") :: #read void -> WikiPage produces page { 
         file:read %1 | {
             "body": text:creole, 
             "title": param %1 | text:rsplit "." | item 0 | text:trim /,
@@ -18,7 +18,7 @@ resource WikiFile(".wiki") {
     };
 
     /** 編集画面呼び出し */
-    action edit("edit/GET")  :: {
+    action edit("edit/GET")  :: #io void -> WikiSkele produces edit {
         {
             "body":file:read %1,
             "title": param %1 | text:rsplit "." | item 0 | text:trim /
@@ -26,18 +26,65 @@ resource WikiFile(".wiki") {
     };
 
     /** 書き込み */
-    action write("/POST#exists-parent")  :: {
+    action write("/POST#exists-parent")  :: #io WikiFile -> void produces page {
         translate WikiFile | when {
-            OK => ["wiki", pv body | file:write %1 | param %1] | text:concat | redirect ,
+            OK => ["/wiki", pv body | file:write %1 | param %1] | text:concat | redirect ,
             NG => "/wiki/" | redirect 
         }
     };
-
-};
-resource PlainWikiFile(".wiki") {
     /** プレーンテキスト取得 */
-    action plain("plain/GET") :: {
+    action plain("plain/GET") :: #io void -> Response produces plain{
         print %0
     };
 };
 
+state page :: WikiPage links {
+    + edit --> WikiFile.edit;
+    + source --> WikiFile.plain;
+    + new --> NewFile.open;
+    + all-pages --> AllPages.get;
+    + root --> Root.get;
+};
+
+resource Root("/") {
+    action get("/GET") :: #io void -> WikiFile produces page {
+        "/wiki/FrontPage.wiki" | redirect
+    };
+};
+
+resource NewFile("/new") {
+    action open("/POST#dont-care") :: #io NewWiki -> WikiSkele produces edit
+    {
+        translate NewWiki | when {
+            OK => pv filename | text:regmatch "[A-Z][a-z0-9]" | when {
+                match => {"title": pv src, "body": ""} | print include@this:/edit.html,
+                fail => redirect /
+            },
+            NG => redirect /
+        }
+
+    };
+};
+
+resource AllPages("/all.html") {
+    action get("/GET") :: #read void -> WikiIndex produces index {
+        lsdir / .wiki | each {
+            {
+                "file": pv name,
+                "title": pv name | text:rsplit "." | item 0 | text:trim /
+            }
+        } | print /all.html
+    };
+};
+
+state index :: WikiIndex links {
+    + new --> NewFile.open;
+    + link --> WikiFile.read;
+};
+
+state edit :: WikiSkele links {
+    submit --> WikiFile.write;
+    + cancel --> WikiFile.read;
+};
+
+state plain :: Response;
