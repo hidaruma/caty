@@ -232,6 +232,7 @@ Web サーバの起動・停止を行う
                 self._echo(u'サーバは既に起動しています')
         elif cmd == 'stop':
             if self.server is not None:
+                self.server.shutdown()
                 self.server.stop()
                 self.server = None
                 if sys.platform == 'win32':
