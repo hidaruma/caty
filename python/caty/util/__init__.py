@@ -34,7 +34,10 @@ def error_to_ustr(e):
     if v <= 2.5:
         return e.message if isinstance(e.message, unicode) else unicode(e.message, 'utf-8')
     else:
-        return unicode(e)
+        try:
+            return unicode(e)
+        except:
+            return unicode(repr(e))
 
 def get_message(e, encoding):
     import sys
