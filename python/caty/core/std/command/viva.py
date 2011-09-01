@@ -3,7 +3,7 @@ from caty.core.command import Builtin
 from caty.core.exception import *
 import pygraphviz as gv
 
-class Draw(Builtin):
+class DrawModule(Builtin):
     def setup(self, opts, module_name):
         self._module_name = module_name
         self._out_file = opts['out']

@@ -929,11 +929,14 @@ type HelpInfo = deferred @* object;
 */
 command help
 {
-  @[default(false), without("type")]
+  @[default(false), without(["type", "resource"])]
   "command" : boolean?,
 
-  @[default(false), without("command")]
+  @[default(false), without(["command", "resource"])]
   "type" : boolean?,
+
+  @[default(false), without(["command", "type"])]
+  "resource" : boolean?,
 
   // 以下は、既存のhelp, typeのオプション
   
@@ -972,15 +975,16 @@ command ht {
   help --type %--json %--exception %1
 };
 
+command hr {
+  @[default(false), not-implemented]
+  "json": boolean?,
+} [string? pattern] :: void -> (string | HelpInfo) {
+  help --resource %--json %1
+};
+
 command h :: void -> (string | HelpInfo) {
     help
 };
-
-/**
- * 与えられたリソースのヘルプを出力する。
- */
-command resource [string action_name] :: void -> string
-    refers python:caty.core.std.command.builtin.Resource;
 
 /** 例外データを作る。
  * tagが既存の例外型に対応してないときは、ExceptionNotFound例外。

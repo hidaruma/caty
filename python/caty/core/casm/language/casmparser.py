@@ -23,7 +23,8 @@ def iparse(t):
 def casm(seq):
     s = []
     #p = option(provides)(seq)
-    remove_comment(seq)
+    rm_cmt = bind2nd(remove_comment, lambda s: seq.parse(keyword('module')))
+    rm_cmt(seq)
     m = module_decl(seq)
     s.append(m)
     #if p:

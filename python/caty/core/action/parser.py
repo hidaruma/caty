@@ -7,7 +7,7 @@ from caty.core.casm.language.util import docstring, annotation
 from caty.jsontools.xjson import obj
 from caty.core.action.resource import ResourceClass
 from caty.core.action.module import ResourceModule
-from caty.core.action.entry import ResourceActionEntry, ActionProfile
+from caty.core.action.entry import ResourceActionEntry, ActionProfiles, ActionProfile
 from caty.core.schema.base import Annotations
 from caty.util import bind2nd
 from caty.core.exception import throw_caty_exception
@@ -21,7 +21,7 @@ class ResourceActionDescriptorParser(Parser):
     def __call__(self, seq):
         mn = module_decl(seq, 'cara')
         name = mn.name
-        ds = mn.docstring
+        ds = mn.docstring or u'undocumented'
         if name != self._module_name:
             raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
         rm = ResourceModule(name, ds, self._app.name)
@@ -107,21 +107,10 @@ class ActionBlock(Parser):
 
         opts = option(object_)(seq)
         seq.parse('::')
-        prof = option(try_(self.profile))(seq)
+        prof = option(try_(self.profiles))(seq)
         c = choice('{', ';')(seq)
         if c == ';':
-            if prof:
-                if prof.input_type.name == 'void':
-                    source = u'gen:sample %s | json:response' % prof.output_type.name
-                else:
-                    source = u'''translate %s | 
-                    when {
-                        OK => gen:sample %s,
-                        NG => gen:sample %s,
-                    } | json:response
-                    ''' % (prof.input_type.name, prof.output_type.name, prof.output_type.name)
-            else:
-                source = u'pass'
+            source = u'pass'
             proxy = self._script_parser.run(source, auto_remove_ws=True)
             lock = None
         else:
@@ -175,17 +164,43 @@ class ActionBlock(Parser):
         seq.parse(';')
         return name
 
+    def profiles(self, seq):
+        profs = split(self.profile, ',', allow_last_delim=True)(seq)
+        return ActionProfiles(profs)
+
     def profile(self, seq):
-        S('#')(seq)
-        fragment = seq.parse(name)
-        in_type = option(typedef)(seq)
-        _ = seq.parse('->')
-        out_type = typedef(seq)
-        if seq.parse(option(keyword('produces'))):
-            next_state = self.next_state(seq)
+        io_type, fragment = seq.parse(self.fragment_name)
+        next_states = []
+        relay_list = []
+        if io_type in ('in', 'io'):
+            in_type = typedef(seq)
         else:
-            next_state = []
-        return ActionProfile(in_type, out_type, next_state)
+            in_type = choice('_', typedef)(seq)
+        seq.parse('->')
+        if io_type in ('out', 'io'):
+            out_type = option(typedef)(seq)
+        else:
+            out_type = choice('_', typedef)(seq)
+
+        if io_type == 'in':
+            if seq.parse(option(keyword('relays'))):
+                relay_list = self.next_state(seq)
+           
+        if io_type in ('io', 'out'):
+            if seq.parse(option(keyword('produces'))):
+                next_states = self.next_state(seq)
+        return ActionProfile(io_type, fragment, in_type, out_type, relay_list, next_states)
+
+    def fragment_name(self, seq):
+        S('#')(seq)
+        name = seq.parse(Regex('(io|in|out)[-0-9_a-zA-Z]*'))
+        if name.startswith('io'):
+            pf = 'io'
+        elif name.startswith('in'):
+            pf = 'in'
+        else:
+            pf = 'out'
+        return pf, name
 
     def next_state(self, seq):
         return choice(self.one_state, self.list_state)(seq)
@@ -240,7 +255,7 @@ class StateBlock(Parser):
     def link_item(self, seq):
         isembed, trigger = self.trigger(seq)
         seq.parse('-->')
-        dest = split(self.action_name, ',')(seq)
+        dest = split(self.action_ref, ',')(seq)
         S(';')(seq)
         return Link(trigger, dest, isembed)
 
@@ -250,8 +265,12 @@ class StateBlock(Parser):
         else:
             return True, name(seq)
 
-    def action_name(self, seq):
-        return seq.parse(Regex(r'([a-zA-Z_][-a-zA-Z0-9_]*:)?[a-zA-Z_][-a-zA-Z0-9_]*\.[a-zA-Z_][-a-zA-Z0-9_]*'))
+    def action_ref(self, seq):
+        ref = seq.parse(Regex(r'([a-zA-Z_][-a-zA-Z0-9_]*:)?[a-zA-Z_][-a-zA-Z0-9_]*\.[a-zA-Z_][-a-zA-Z0-9_]*(#(io|in)[0-9a-zA-Z_-]*)?'))
+        if '#' in ref:
+            return ref.split('#')
+        else:
+            return (ref, None)
 
 class Link(object):
     def __init__(self, trigger, dest, isembed):

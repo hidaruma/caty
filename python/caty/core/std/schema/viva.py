@@ -27,8 +27,39 @@ command draw {
 ] :: void -> void | binary | string
      throws [ModuleNotFound]
      updates pub
-    refers python:caty.core.std.command.viva.Draw;
+    refers python:caty.core.std.command.viva.DrawModule;
 
+/*{{{
+/** 
+ * アクションモジュール（.caraファイル）の個別アクションを視覚化する
+ */
+command draw-action {
+ /** 出力ファイル
+  * 指定がないときは標準出力
+  */
+ "out" : string(remark="Catyのファイルパス")?, 
+
+ /** 出力フォーマット */
+ @[default("gif")]
+ "format" : ("gif"|"png"|"jpeg" | "dot")?,
+} [
+  /** モジュール名
+   * 拡張子は含まない
+   */
+  string module,
+  /**
+   * リソース名
+   */
+  string resource,
+  /**
+   * アクション名
+   */
+  string action_name
+] :: void -> void | binary | string
+     throws [ModuleNotFound]
+     updates pub
+    refers python:caty.core.std.command.viva.DrawAction;
+}}}*/
 type GraphStruct = {
     "name": string,
     "subgraphs": [GraphStruct*],

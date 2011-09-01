@@ -3,13 +3,13 @@
 module wiki in cara on boot;
 
 /** Wikiファイル */
-resource WikiFile(".wiki") {
+resource WikiFile("*.wiki") {
     filetype {
         "contentType": "text/plain",
          "isText": true,
     };
     /** 読み込み */
-    action read("/GET") :: #read void -> WikiPage produces page { 
+    action read("/GET") :: #io void -> WikiPage produces page { 
         file:read %1 | {
             "body": text:creole, 
             "title": param %1 | text:rsplit "." | item 0 | text:trim /,
@@ -67,7 +67,7 @@ resource NewFile("/new") {
 };
 
 resource AllPages("/all.html") {
-    action get("/GET") :: #read void -> WikiIndex produces index {
+    action get("/GET") :: #io void -> WikiIndex produces index {
         lsdir / .wiki | each {
             {
                 "file": pv name,

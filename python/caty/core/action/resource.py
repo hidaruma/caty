@@ -1,7 +1,8 @@
+#coding:utf-8
 from caty.core.schema.base import Annotations
 from caty.core.exception import throw_caty_exception
 from caty.jsontools import prettyprint
-from caty.util import indent_lines
+from caty.util import indent_lines, justify_messages
 ABSOLUTE = 0
 RELATIVE = 1
 DEFAULT = 2
@@ -63,18 +64,16 @@ class ResourceClass(object):
                 r.append(''.join(b))
         return r
 
-    def to_str(self):
+    def usage(self):
         buff = []
-        buff.append(self.docstring + '\n')
-        buff.append(u'resource %s(%s) {\n' % (self.name, self.url_pattern))
-        if self.filetypes:
-            ft = indent_lines(prettyprint(self.filetypes.values()[0])+';', '    ')
-            buff.append(ft)
+        buff.append((u'リソース名: ', self.name+'\n'))
+        buff.append((u'URLパターン: ', self.url_pattern+'\n'))
+        if self.entries:
+            buff.append((u'アクション一覧: ', ''))
+        m = justify_messages(buff)
         for inv, e in self.entries.items():
-            a = e.to_str(inv)
-            buff.append(indent_lines(a, '    '))
-        buff.append('};\n')
-        return ''.join(buff)
+            m += ('\n' + e.usage(inv) + '\n')
+        return self.docstring.strip() + '\n\n' + m
 
 class DefaultResource(ResourceClass):
     def __init__(self, url_pattern, actions, module_name, resource_name, docstring=u'Undocumented', annotations=Annotations([])):

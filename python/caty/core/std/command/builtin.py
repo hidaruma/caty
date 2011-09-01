@@ -905,14 +905,75 @@ class Help(Builtin):
             self.__mode = u'type'
         elif opts['command']:
             self.line = line
+        elif opts['resource']:
+            self.__resource_name = line
+            self.__mode = u'resource'
         else:
             self.line = u''
         
     def execute(self):
         if self.__mode == u'type':
             return self._type_help()
+        elif self.__mode == u'resource':
+            return self._resources_help()
         else:
             return self._command_help()
+
+    def _resources_help(self):
+        line = self.__resource_name.strip()
+        if line == '':
+            return u''
+        mode = 'usage'
+        chunk = line.split(':')
+        if len(chunk) == 1:
+            if chunk[0] != '*':
+                module = chunk[0]
+                #mode = 'module_usage'
+                return (u'引数エラー: %s' % line)
+            else:
+                return (u'引数エラー: %s' % line)
+        else:
+            if chunk[0] != '*':
+                module = chunk[0]
+                if chunk[0] == '':
+                    return (u'引数エラー: %s' % line)
+                elif chunk[1] == '*':
+                    mode = 'resource_list'
+                else:
+                    resource = chunk[1]
+                    mode = 'resource_usage'
+            else:
+                mode = 'module_list'
+        app = self.current_app
+        rmc = app.resource_module_container
+        if mode == 'module_list':
+            mods = []
+            for k, v in rmc._modules.items():
+                mods.append((k+': ', v.docstring.split('\n')[0]))
+            max_width = max(map(lambda x:len(x[0]), mods)) if mods else 0
+            r = []
+            for m in mods:
+                r.append( (m[0].ljust(max_width + 1) + m[1]))
+            return '\n'.join(r)
+        rm = rmc.get_module(module)
+        if mode == 'resource_list':
+            res = []
+            for r in rm.resources:
+                res.append((r.name, r.docstring.split('\n')[0] or u'undocumented'))
+            max_width = max(map(lambda x:len(x[0]), res)) if res else 0
+            r = []
+            for m in res:
+                r.append( (m[0].ljust(max_width + 1) + m[1]))
+            return '\n'.join(r)
+        for r in rm.resources:
+            if r.name == resource:
+                return r.usage()
+        throw_caty_exception(
+            u'ResourNotFound',
+            u'$resourceName is not defined in $moduleName',
+            resourceName=resource,
+            moduleName=module
+        )
 
     def _type_help(self):
         line = self.__type_name.strip()
@@ -1063,18 +1124,6 @@ class Help(Builtin):
             return '\n'.join(r1+r2)
         else:
             return u''
-
-
-class Resource(Internal):
-    def setup(self, resource_name):
-        self._rname = resource_name
-
-    def execute(self):
-        container = self._app.verb_dispatcher
-        res = container.get_resource(self._rname)
-        if not res:
-            return u'Unknown resource: %s' % self._rname
-        return res.to_str()
 
 class MakeException(Builtin):
     def setup(self, name, msg):

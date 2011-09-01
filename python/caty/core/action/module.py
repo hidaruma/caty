@@ -109,7 +109,8 @@ class ResourceModule(object):
                 edges.append({u'from': f, u'to': s.name, u'type': u'action'})
             for link in s.links:
                 for link_to in link.link_to_list:
-                    to_node_name = self._find_linked_action(link_to)
+                    act, fragment = link_to
+                    to_node_name = self._find_linked_action(act)
                     appered_dest.add(to_node_name)
                     e = {u'from': s.name, u'to': to_node_name, u'type': u'link'}
                 if link.trigger:
@@ -151,7 +152,7 @@ class ResourceModule(object):
     def _find_links_to(self, state_name):
         for r in self.resources:
             for act in r.entries.values():
-                if state_name in act.profile.next_state:
+                if state_name in act.profile.next_states:
                     yield act.resource_name+'.'+act.name
 
     def _find_linked_action(self, action_id):
@@ -165,9 +166,8 @@ class ResourceModule(object):
         else:
             throw_caty_exception(
                 u'ResourNotFound',
-                u'$resourceName.$moduleType is not defined in $moduleName',
+                u'$resourceName is not defined in $moduleName',
                 resourceName=rcname,
-                moduleType=u'cara',
                 moduleName=self.name
             )
         for a in res.entries.values():
