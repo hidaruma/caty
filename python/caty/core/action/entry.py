@@ -41,8 +41,10 @@ class ResourceActionEntry(object):
         buff.append((u'  メソッド: ', m))
         if v:
             buff.append((u'  動詞: ', v))
-        buff.append((u'  入力型: ', self.profile.input_type.name if self.profile.input_type else u'入力なし'))
+        if self.profile:
+            buff.append((u'  入力型: ', self.profile.input_type.name if self.profile.input_type else u'入力なし'))
         m = justify_messages(buff)
+        return m
 
 class ActionProfiles(object):
     def __init__(self, profiles):
