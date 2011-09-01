@@ -286,7 +286,7 @@ def is_doc_str(seq):
     if _:
         try:
             seq.parse(skip_ws)
-            seq.parse(['resource', 'action'])
+            seq.parse(['resource', 'action', 'module'])
             return True
         except:
             return False
