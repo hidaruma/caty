@@ -59,15 +59,12 @@ class Draw(Builtin):
         src = self.make_graph()
         G = self.transform(src)
         G.layout()
-        draw_param = {
-            'format': self._format,
-            'prog': 'dot'
-        }
-        o = G.draw(**draw_param)
         if self._out_file:
+            o = G.draw(prog='dot')
             with self.pub.open('/'+self._out_file, 'wb') as f:
                 f.write(o)
         else:
+            o = G.draw(prog='dot', format=self._format)
             if self._format == 'dot':
                 return unicode(o, 'utf-8')
             else:

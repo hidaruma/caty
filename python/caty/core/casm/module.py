@@ -50,7 +50,7 @@ class Module(object):
     def add_ast(self, ref):
         if ref.name in self.ast_ns:
             m, a = self._get_mod_and_app(ref)
-            raise Exception(self.application.i18n.get('Type $name of $this is already defined in $module of $app', 
+            raise Exception(self.application.i18n.get(u'Type $name of $this is already defined in $module of $app', 
                                                       name=ref.name, 
                                                       this=self.name+'.casm',
                                                       module=m,
@@ -88,7 +88,7 @@ class Module(object):
         if name in self.schema_ns:
             t = self.schema_ns[name]
             m, a = self._get_mod_and_app(t)
-            raise Exception(self.application.i18n.get('Type $name of $this is already defined in $module of $app', 
+            raise Exception(self.application.i18n.get(u'Type $name of $this is already defined in $module of $app', 
                                                       name=name, 
                                                       this=self.name+'.casm',
                                                       module=m,
@@ -103,7 +103,7 @@ class Module(object):
         if name in self.kind_ns:
             t = self.kind_ns[name]
             m, a = self._get_mod_and_app(t)
-            raise Exception(self.application.i18n.get('Kind $name of $this is already defined in $module.casm of $app', 
+            raise Exception(self.application.i18n.get(u'Kind $name of $this is already defined in $module.casm of $app', 
                                                       name=name, 
                                                       this=self.name+'.casm',
                                                       module=m,
@@ -119,7 +119,7 @@ class Module(object):
         if name in self.proto_ns:
             t = self.proto_ns[name]
             m, a = self._get_mod_and_app(t)
-            raise Exception(self.application.i18n.get('Command $name of $this is already defined in $module of $app', 
+            raise Exception(self.application.i18n.get(u'Command $name of $this is already defined in $module of $app', 
                                                        name=name, 
                                                        this=self.name+'.casm',
                                                        module=m,
@@ -130,7 +130,7 @@ class Module(object):
         if name in self.command_ns:
             t = self.command_ns[name]
             m, a = self._get_mod_and_app(t)
-            raise Exception(self.application.i18n.get('Command $name of $this is already defined in $module of $app', 
+            raise Exception(self.application.i18n.get(u'Command $name of $this is already defined in $module of $app', 
                                                        name=name, 
                                                        this=self.name+'.casm',
                                                        module=m,

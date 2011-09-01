@@ -12,11 +12,11 @@ command draw {
  "out" : string(remark="Catyのファイルパス")?, 
 
  /** 出力フォーマット */
- @[default("png")]
+ @[default("gif")]
  "format" : ("gif"|"png"|"jpeg" | "dot")?,
 
  /** 図示するノード */
- @[default("state")]
+ @[default("any")]
  "node" : ("state" | "action" | "any")?,
 
 } [
