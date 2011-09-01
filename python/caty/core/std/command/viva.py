@@ -60,7 +60,7 @@ class Draw(Builtin):
         G = self.transform(src)
         G.layout()
         if self._out_file:
-            o = G.draw(prog='dot')
+            o = G.draw(prog='dot', format=self._out_file.split('.')[-1])
             with self.pub.open('/'+self._out_file, 'wb') as f:
                 f.write(o)
         else:
