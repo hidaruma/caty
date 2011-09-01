@@ -78,7 +78,17 @@ class ResourceModuleContainer(object):
         return None
 
     def get_module(self, name):
-        return self._modules.get(name)
+        r = self._modules.get(name)
+        if not r:
+            throw_caty_exception(
+                u'ModuleNotFound',
+                u'$moduleName.$moduleType is not defined in $appName',
+                moduleName=name,
+                moduleType=u'cara',
+                appName=self._app.name
+            )
+        else:
+            return r
 
 class ResourceModule(object):
     def __init__(self, name, docstring, app_name=u'builtin'):
@@ -91,6 +101,17 @@ class ResourceModule(object):
     @property
     def resources(self):
         return self._resources
+
+    def get_resource(self, name):
+        for r in self._resources:
+            if r.name == name:
+                return r
+        throw_caty_exception(
+            u'ResourNotFound',
+            u'$resourceName is not defined in $moduleName',
+            resourceName=name,
+            moduleName=self.name
+        )
 
     @property
     def states(self):
@@ -176,8 +197,7 @@ class ResourceModule(object):
         else:
             throw_caty_exception(
                 u'ActionNotFound',
-                u'$resourceName.$actionName is not defined in $moduleName',
-                resourceName=rcname,
+                u'$actionName is not defined in $moduleName:$resourceName',
                 actionName=aname,
                 moduleName=self.name
             )

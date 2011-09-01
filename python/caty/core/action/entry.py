@@ -3,7 +3,7 @@ from caty.core.schema.base import Annotations
 from caty.util import indent_lines, justify_messages
 
 class ResourceActionEntry(object):
-    def __init__(self, proxy, source, name=u'', docstring=u'Undocumented', annotations=Annotations([]), resource_name=u'system', module_name=u'builtin', profile=None):
+    def __init__(self, proxy, source, name=u'', docstring=u'Undocumented', annotations=Annotations([]), resource_name=u'system', module_name=u'builtin', profile=None, invoker=None):
         self.profile = profile
         self.instance = proxy
         self.source = source
@@ -12,6 +12,7 @@ class ResourceActionEntry(object):
         self.annotations = annotations
         self.resource_name = resource_name
         self.module_name = module_name
+        self.invoker = invoker
         self._lock_cmd = None
 
     def set_lock_cmd(self, lock_cmd):
@@ -33,17 +34,19 @@ class ResourceActionEntry(object):
     def canonical_name(self):
         return u'%s:%s.%s' % (self.module_name, self.resource_name, self.name)
 
-    def usage(self, invoker):
+    def usage(self, with_doc=True, indent=0):
         from caty.core.action.selector import verb_parser
         buff = []
-        buff.append((u'  アクション名: ', self.name))
-        v, m, p = verb_parser.run(invoker)
-        buff.append((u'  メソッド: ', m))
+        buff.append((('  '*indent) + u'アクション名: ', self.name))
+        v, m, p = verb_parser.run(self.invoker)
+        buff.append((('  '*indent) + u'メソッド: ', m))
         if v:
-            buff.append((u'  動詞: ', v))
+            buff.append((('  '*indent) + u'動詞: ', v))
         if self.profile:
-            buff.append((u'  入力型: ', self.profile.input_type.name if self.profile.input_type else u'入力なし'))
+            buff.append((('  '*indent) + u'入力型: ', self.profile.input_type.name if self.profile.input_type else u'入力なし'))
         m = justify_messages(buff)
+        if with_doc:
+            m = self.docstring.strip() + '\n\n' + m
         return m
 
 class ActionProfiles(object):

@@ -132,7 +132,8 @@ class ActionBlock(Parser):
                                   a, 
                                   self.rcname, 
                                   self._module_name,
-                                  prof)
+                                  prof,
+                                  invoker)
         if lock:
             rae.set_lock_cmd(lock)
         generates = option(self.generates)(seq)

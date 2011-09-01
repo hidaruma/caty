@@ -74,14 +74,6 @@ class DrawModule(Builtin):
         app = self.current_app
         rmc = app.resource_module_container
         rm = rmc.get_module(self._module_name)
-        if not rm:
-            throw_caty_exception(
-                u'ModuleNotFound',
-                u'$moduleName.$moduleType is not defined in $appName',
-                moduleName=self._module_name,
-                moduleType=u'cara',
-                appName=app.name
-            )
         return rm.make_graph()
 
     def transform(self, graph_struct, root=True):

@@ -229,6 +229,6 @@ def justify_messages(seq):
     max_width = max(map(lambda x:len(x[0]), seq)) if seq else 0
     r = []
     for s in seq:
-        r.append( (s[0].ljust(max_width-len(s[0]) + 1) + s[1]))
+        r.append( (s[0].ljust(max_width + 1) + s[1]))
     return '\n'.join(r)
 

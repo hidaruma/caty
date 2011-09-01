@@ -941,7 +941,11 @@ class Help(Builtin):
                     mode = 'resource_list'
                 else:
                     resource = chunk[1]
-                    mode = 'resource_usage'
+                    if '.' in resource:
+                        resource, action = resource.split('.', 1)
+                        mode = 'action_usage'
+                    else:
+                        mode = 'resource_usage'
             else:
                 mode = 'module_list'
         app = self.current_app
@@ -965,15 +969,13 @@ class Help(Builtin):
             for m in res:
                 r.append( (m[0].ljust(max_width + 1) + m[1]))
             return '\n'.join(r)
-        for r in rm.resources:
-            if r.name == resource:
-                return r.usage()
-        throw_caty_exception(
-            u'ResourNotFound',
-            u'$resourceName is not defined in $moduleName',
-            resourceName=resource,
-            moduleName=module
-        )
+        r = rm.get_resource(resource)
+        if mode == 'resource_usage':
+            return r.usage()
+        else:
+            a = r.get_action(action)
+            return a.usage()
+
 
     def _type_help(self):
         line = self.__type_name.strip()

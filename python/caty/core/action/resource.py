@@ -72,8 +72,19 @@ class ResourceClass(object):
             buff.append((u'アクション一覧: ', ''))
         m = justify_messages(buff)
         for inv, e in self.entries.items():
-            m += ('\n' + e.usage(inv) + '\n')
+            m += ('\n' + e.usage(indent=1) + '\n')
         return self.docstring.strip() + '\n\n' + m
+
+    def get_action(self, name):
+        for inv, e in self.entries.items():
+            if e.name == name:
+                return e
+        throw_caty_exception(
+            u'ActionNotFound',
+            u'$actionName is not defined in $moduleName:$resourceName',
+            actionName=aname,
+            moduleName=self.name
+        )
 
 class DefaultResource(ResourceClass):
     def __init__(self, url_pattern, actions, module_name, resource_name, docstring=u'Undocumented', annotations=Annotations([])):
