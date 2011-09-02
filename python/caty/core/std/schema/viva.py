@@ -19,6 +19,10 @@ command draw {
  @[default("any")]
  "node" : ("state" | "action" | "any")?,
 
+ /** グラフのサイズ(インチで指定、!を付けるとサイズ強制) */
+ @[default("auto"), typical("6.4!, 4.8")]
+ "size": string?,
+
 } [
   /** モジュール名
    * 拡張子は含まない

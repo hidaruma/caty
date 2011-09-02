@@ -9,6 +9,7 @@ class DrawModule(Builtin):
         self._out_file = opts['out']
         self._format = opts['format']
         self._node = opts['node']
+        self._size = opts['size']
         self._graph_config = {
             'graph': {
                 'bgcolor': 'gainsboro',
@@ -92,6 +93,8 @@ class DrawModule(Builtin):
         else:
             cfg.update(self._graph_config['subgraph'])
             cfg['name'] = 'cluster_' + graph_struct['name']
+        if self._size != 'auto':
+            cfg['size'] = self._size
         RG = gv.AGraph(**cfg)
         if root:
             RG.graph_attr['label'] = 'Module: ' + graph_struct['name']
