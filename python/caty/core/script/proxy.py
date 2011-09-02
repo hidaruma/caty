@@ -246,13 +246,12 @@ class DiscardProxy(Proxy):
         self.target.set_module(module)
 
 class FragmentProxy(Proxy):
-    def __init__(self, c, io_type, fragment_name):
+    def __init__(self, c, fragment_name):
         self.cmdproxy = c
-        self.io_type = io_type
         self.fragment_name = fragment_name
 
     def instantiate(self, builder):
-        r = PipelineFragment(self.cmdproxy.instantiate(builder), self.io_type, self.fragment_name)
+        r = PipelineFragment(self.cmdproxy.instantiate(builder), self.fragment_name)
         builder.set_facility_to(r)
         return r
 

@@ -170,7 +170,7 @@ class ActionBlock(Parser):
         return ActionProfiles(profs)
 
     def profile(self, seq):
-        io_type, fragment = seq.parse(fragment_name)
+        io_type, fragment = seq.parse(self.fragment_name)
         next_states = []
         relay_list = []
         if io_type in ('in', 'io'):
@@ -192,7 +192,17 @@ class ActionBlock(Parser):
                 next_states = self.next_state(seq)
         return ActionProfile(io_type, fragment, in_type, out_type, relay_list, next_states)
 
-
+    def fragment_name(self, seq):
+        name = fragment_name(seq)
+        if name.startswith('io'):
+            pf = 'io'
+        elif name.startswith('in'):
+            pf = 'in'
+        elif name.startswith('out'):
+            pf = 'out'
+        else:
+            raise ParseError(seq, self.fragment_name)
+        return pf, name
 
     def next_state(self, seq):
         return choice(self.one_state, self.list_state)(seq)

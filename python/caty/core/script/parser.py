@@ -159,7 +159,7 @@ class ScriptParser(Parser):
         r = self.pipeline(seq)
         _ = seq.parse(')')
         if fragment:
-            return PipelineFragment(r, fragment[0], fragment[1])
+            return PipelineFragment(r, fragment)
         else:
             return r
 

@@ -481,11 +481,10 @@ class PipelineFragment(Syntax):
     command __pipeline-gragment-functor<S, T> :: S -> T
         refers python:caty.core.script.node.PipelineFragment;
     """
-    def __init__(self, cmd, io_type, fragment_name):
+    def __init__(self, cmd, fragment_name):
         Syntax.__init__(self)
         self.cmd = cmd
         self._name = fragment_name
-        self._io_type = io_type
 
     def set_facility(self, facilities):
         self.cmd.set_facility(facilities)

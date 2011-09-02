@@ -26,14 +26,17 @@ resource WikiFile("*.wiki") {
     };
 
     /** 書き込み */
-    action write("/POST#exists-parent")  :: #io WikiFile -> void produces page {
+    action write("/POST#exists-parent")  :: 
+        #io-ok WikiFile -> string produces redirect,
+        #io-ng any -> string produces redirect {
         translate WikiFile | when {
-            OK => ["/wiki", pv body | file:write %1 | param %1] | text:concat | redirect ,
-            NG => "/wiki/" | redirect 
+            OK => (#io-ok ["/wiki", (#part pv body) | file:write %1 | param %1] | text:concat) | redirect ,
+            NG => (#io-ng "/wiki/") | redirect 
         }
     };
     /** プレーンテキスト取得 */
-    action plain("plain/GET") :: #io void -> Response produces plain{
+    action plain("plain/GET") :: #io void -> Response produces plain
+    {
         print %0
     };
 };
@@ -46,8 +49,12 @@ state page :: WikiPage links {
     + root --> Root.get;
 };
 
+state redirect :: string links {
+    goto --> WikiFile.read;
+};
+
 resource Root("/") {
-    action get("/GET") :: #io void -> WikiFile produces page {
+    action get("/GET") :: #io void -> string produces redirect {
         "/wiki/FrontPage.wiki" | redirect
     };
 };

@@ -178,11 +178,6 @@ class IGNORE: pass
 
 def fragment_name(seq):
     S('#')(seq)
-    name = seq.parse(Regex('(io|in|out)[-0-9_a-zA-Z]*'))
-    if name.startswith('io'):
-        pf = 'io'
-    elif name.startswith('in'):
-        pf = 'in'
-    else:
-        pf = 'out'
-    return pf, name
+    name = seq.parse(Regex('[a-zA-Z_][-0-9_a-zA-Z]*'))
+    return name
+
