@@ -3,7 +3,7 @@ from topdown import *
 from caty.core.script.parser import ScriptParser
 from caty.core.casm.language.casmparser import module_decl
 from caty.core.casm.language.schemaparser import object_, typedef
-from caty.core.casm.language.util import docstring, annotation
+from caty.core.language.util import docstring, annotation, fragment_name
 from caty.jsontools.xjson import obj
 from caty.core.action.resource import ResourceClass
 from caty.core.action.module import ResourceModule
@@ -170,7 +170,7 @@ class ActionBlock(Parser):
         return ActionProfiles(profs)
 
     def profile(self, seq):
-        io_type, fragment = seq.parse(self.fragment_name)
+        io_type, fragment = seq.parse(fragment_name)
         next_states = []
         relay_list = []
         if io_type in ('in', 'io'):
@@ -192,16 +192,7 @@ class ActionBlock(Parser):
                 next_states = self.next_state(seq)
         return ActionProfile(io_type, fragment, in_type, out_type, relay_list, next_states)
 
-    def fragment_name(self, seq):
-        S('#')(seq)
-        name = seq.parse(Regex('(io|in|out)[-0-9_a-zA-Z]*'))
-        if name.startswith('io'):
-            pf = 'io'
-        elif name.startswith('in'):
-            pf = 'in'
-        else:
-            pf = 'out'
-        return pf, name
+
 
     def next_state(self, seq):
         return choice(self.one_state, self.list_state)(seq)

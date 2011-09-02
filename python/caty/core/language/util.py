@@ -176,3 +176,13 @@ def string_array(seq):
 
 class IGNORE: pass
 
+def fragment_name(seq):
+    S('#')(seq)
+    name = seq.parse(Regex('(io|in|out)[-0-9_a-zA-Z]*'))
+    if name.startswith('io'):
+        pf = 'io'
+    elif name.startswith('in'):
+        pf = 'in'
+    else:
+        pf = 'out'
+    return pf, name

@@ -3,7 +3,7 @@ def create_resource_action_dispatcher(action_fs, facility, app):
     from caty.core.action.module import ResourceModuleContainer
     from caty.core.action.parser import ResourceActionDescriptorParser, is_doc_str
     from caty.core.std.action import create_default_resources
-    from caty.core.casm.language.util import remove_comment
+    from caty.core.language.util import remove_comment
     import caty.jsontools.xjson as xjson
     rmc = ResourceModuleContainer(app)
     for r in create_default_resources(facility):

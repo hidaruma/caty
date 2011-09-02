@@ -2,7 +2,7 @@
 import re
 from topdown import *
 from caty.core.casm.language.ast import *
-from caty.core.casm.language.util import *
+from caty.core.language.util import *
 from caty.core.casm.language.schemaparser import term, typedef, object_, array
 from caty.jsontools import xjson
 RESERVED = frozenset([

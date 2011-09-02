@@ -2,7 +2,7 @@
 import re
 from topdown import *
 from caty.core.casm.language.ast import Provide, ModuleName
-from caty.core.casm.language.util import *
+from caty.core.language.util import *
 from caty.core.casm.language.schemaparser import schema
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.commandparser import command

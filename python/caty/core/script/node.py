@@ -288,7 +288,7 @@ class TagBuilder(Syntax):
         Syntax.__init__(self)
         self.command = cmd
         self.tag = tag
-    
+
     def set_facility(self, facilities):
         self.command.set_facility(facilities)
 
@@ -475,4 +475,25 @@ class Take(Syntax):
             finally:
                 self._var_storage.del_scope()
         return r
+
+class PipelineFragment(Syntax):
+    command_decl = u"""
+    command __pipeline-gragment-functor<S, T> :: S -> T
+        refers python:caty.core.script.node.PipelineFragment;
+    """
+    def __init__(self, cmd, io_type, fragment_name):
+        Syntax.__init__(self)
+        self.cmd = cmd
+        self._name = fragment_name
+        self._io_type = io_type
+
+    def set_facility(self, facilities):
+        self.cmd.set_facility(facilities)
+
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        self.cmd.set_var_storage(storage)
+
+    def execute(self, input):
+        return self.cmd(input)
 

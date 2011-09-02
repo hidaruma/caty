@@ -23,11 +23,13 @@ from caty.core.script.proxy import DiscardProxy as Discard
 from caty.core.script.proxy import VarStoreProxy as VarStore
 from caty.core.script.proxy import VarRefProxy as VarRef
 from caty.core.script.proxy import ArgRefProxy as ArgRef
+from caty.core.script.proxy import FragmentProxy as PipelineFragment
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd
 import caty.jsontools.xjson as xjson
 from caty.core.exception import SubCatyException
 from caty.core.command.param import *
+from caty.core.language.util import fragment_name
 
 class NothingTodo(Exception):
     u"""コメントのみの入力など、何もしないときのシグナル
@@ -153,9 +155,13 @@ class ScriptParser(Parser):
 
     def group(self, seq):
         _ = seq.parse('(')
+        fragment = option(fragment_name)(seq)
         r = self.pipeline(seq)
         _ = seq.parse(')')
-        return r
+        if fragment:
+            return PipelineFragment(r, fragment[0], fragment[1])
+        else:
+            return r
 
     def make_pipeline(self, seq):
         return seq.parse([self.pipeline])

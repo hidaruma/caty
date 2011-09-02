@@ -4,7 +4,7 @@ u"""
 from caty import UNDEFINED
 from topdown import *
 from caty.core.casm.language.ast import *
-from caty.core.casm.language.util import *
+from caty.core.language.util import *
 from caty.core.schema import schemata
 
 RESERVED = frozenset(schemata.keys() + ['type'])

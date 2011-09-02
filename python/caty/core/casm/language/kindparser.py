@@ -1,6 +1,6 @@
 from topdown import *
 from caty.core.casm.language.schemaparser import *
-from caty.core.casm.language.util import *
+from caty.core.language.util import *
 
 def kind(seq):
     doc = option(docstring)(seq)

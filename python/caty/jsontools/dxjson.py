@@ -1,6 +1,6 @@
 #coding: utf-8
 from topdown import *
-from caty.core.casm.language.util import docstring, remove_comment
+from caty.core.language.util import docstring, remove_comment
 from caty.jsontools import TaggedValue
 from caty.util import bind2nd
 import caty.jsontools.stdjson as stdjson
