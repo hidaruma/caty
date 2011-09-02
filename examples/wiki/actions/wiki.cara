@@ -27,8 +27,8 @@ resource WikiFile("*.wiki") {
 
     /** 書き込み */
     action write("/POST#exists-parent")  :: 
-        #io-ok WikiFile -> string produces redirect,
-        #io-ng any -> string produces redirect {
+        #io-ok WikiFile -> never redirects WikiFile.read,
+        #io-ng any -> never redirects Root.get {
         translate WikiFile | when {
             OK => (#io-ok ["/wiki", (#part pv body) | file:write %1 | param %1] | text:concat) | redirect ,
             NG => (#io-ng "/wiki/") | redirect 
@@ -49,12 +49,9 @@ state page :: WikiPage links {
     + root --> Root.get;
 };
 
-state redirect :: string links {
-    goto --> WikiFile.read;
-};
 
 resource Root("/") {
-    action get("/GET") :: #io void -> string produces redirect {
+    action get("/GET") :: #io void -> never redirects WikiFile.read {
         "/wiki/FrontPage.wiki" | redirect
     };
 };

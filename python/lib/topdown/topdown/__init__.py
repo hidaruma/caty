@@ -542,6 +542,35 @@ class split(Parser):
                     break
         return r
 
+class unordered(Parser):
+    def __init__(self, *parsers):
+        self.parsers = parsers
+
+    def __call__(self, seq):
+        return self.__parse(seq, list(self.parsers))
+
+    def __parse(self, seq, parsers):
+        error_list = []
+        l = None
+        for p in parsers:
+            try:
+                r = p(seq)
+            except EndOfBuffer, e:
+                raise
+            except ParseFailed, e:
+                error_list.append(e)
+            else:
+                l = p
+                break
+        else:
+            error_list.sort(cmp=lambda a, b:cmp(a.pos, b.pos))
+            raise error_list[-1]
+        parsers.remove(l)
+        if parsers:
+            return [r] + self.__parse(seq, parsers)
+        else:
+            return [r]
+
 alpha = Regex(r'[a-zA-Z_]+')
 number = Regex(r'[0-9]+')
 alphanum = Regex(r'[a-zA-Z_0-9]+')

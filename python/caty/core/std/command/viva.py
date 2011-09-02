@@ -30,6 +30,11 @@ class DrawModule(Builtin):
                     'fontsize': 14.0,
                     'arrowhead': 'open',
                     'color': 'darkorchid3',
+                }, 
+                'redirect': {
+                    'fontsize': 14.0,
+                    'arrowhead': 'open',
+                    'color': 'blue3',
                 },
             },
             'action': {

@@ -54,11 +54,13 @@ class ActionProfiles(object):
         self._profiles = profiles
         self._next_states = []
         self._input_type = None
+        self._redirects = []
         for p in profiles:
             if p.io_type != 'in':
                 self._next_states.extend(p.next_states)
             if p.io_type in ('in', 'io') and self._input_type is None:
                 self._input_type = p.input_type
+            self._redirects.extend(p.redirects)
 
     def to_str(self):
         return ',\n'.join([p.to_str() for p in self._profiles])
@@ -71,14 +73,19 @@ class ActionProfiles(object):
     def next_states(self):
         return self._next_states
 
+    @property
+    def redirects(self):
+        return self._redirects
+
 class ActionProfile(object):
-    def __init__(self, io_type, name, input_type, output_type, relay_list, next_states):
+    def __init__(self, io_type, name, input_type, output_type, relay_list, next_states, redirects):
         self._name = name
         self._io_type = io_type
         self._input_type = input_type
         self._output_type = output_type
         self._relay_list = relay_list
         self._next_states = next_states
+        self._redirects = redirects
 
     def to_str(self):
         if self._io_type == 'in':
@@ -127,3 +134,7 @@ class ActionProfile(object):
     def next_states(self):
         return self._next_states
     
+    @property
+    def redirects(self):
+        return self._redirects
+

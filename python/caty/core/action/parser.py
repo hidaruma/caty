@@ -173,6 +173,8 @@ class ActionBlock(Parser):
         io_type, fragment = seq.parse(self.fragment_name)
         next_states = []
         relay_list = []
+        redirects = []
+        link = []
         if io_type in ('in', 'io'):
             in_type = typedef(seq)
         else:
@@ -182,15 +184,18 @@ class ActionBlock(Parser):
             out_type = option(typedef)(seq)
         else:
             out_type = choice('_', typedef)(seq)
-
         if io_type == 'in':
-            if seq.parse(option(keyword('relays'))):
-                relay_list = self.next_state(seq)
-           
+            link = unordered(self.relays, self.redirects)(seq)
         if io_type in ('io', 'out'):
-            if seq.parse(option(keyword('produces'))):
-                next_states = self.next_state(seq)
-        return ActionProfile(io_type, fragment, in_type, out_type, relay_list, next_states)
+            link = unordered(self.produces, self.redirects)(seq)
+        for t, v in link:
+            if t == 'relays':
+                relay_list = v
+            elif t == 'redirects':
+                redirects = v
+            elif t == 'produces':
+                next_states = v
+        return ActionProfile(io_type, fragment, in_type, out_type, relay_list, next_states, redirects)
 
     def fragment_name(self, seq):
         name = fragment_name(seq)
@@ -204,8 +209,23 @@ class ActionBlock(Parser):
             raise ParseError(seq, self.fragment_name)
         return pf, name
 
-    def next_state(self, seq):
-        return choice(self.one_state, self.list_state)(seq)
+    def relays(self, seq):
+        p = seq.parse(option(keyword('relays')))
+        if p:
+            return p, choice(self.one_state, self.list_state)(seq)
+        return p, []
+
+    def produces(self, seq):
+        p = seq.parse(option(keyword('produces')))
+        if p:
+            return p, choice(self.one_state, self.list_state)(seq)
+        return p, []
+
+    def redirects(self, seq):
+        p = seq.parse(option(keyword('redirects')))
+        if p:
+            return p, choice(self.one_state, self.list_state)(seq)
+        return p, []
 
     def one_state(self, seq):
         return [self.name(seq)]
