@@ -213,6 +213,7 @@ class Dispatch(Syntax):
             types.NoneType: ['null'], 
             types.ListType: ['array'],
             types.DictType: ['object'],
+            types.StringType: ['binary'],
             caty._Undefined: ['undefined'],
         }
     
