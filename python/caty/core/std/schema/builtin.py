@@ -362,11 +362,17 @@ exception ModuleNotFound = {
   "appName": string,
 };
 
+/** リソースが存在しない */
+exception ResourceNotFound = {
+  "moduleName": string,
+  "resourceName": string,
+};
+
 /** アクションが存在しない */
 exception ActionNotFound = {
   "moduleName": string,
   "actionName": string,
-  "appName": string,
+  "resourceName": string,
 };
 
 /** 配列のインデックスが範囲外、または不正である。*/

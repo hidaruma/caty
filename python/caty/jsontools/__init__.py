@@ -164,7 +164,7 @@ def prettyprint(obj, depth=0, encoding=None):
     if isinstance(v, unicode):
         return v
     else:
-        return unicode(v)
+        return str(v)
 
 pp = prettyprint
 

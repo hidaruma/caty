@@ -4,7 +4,7 @@ from caty.util import indent_lines, justify_messages
 
 class ResourceActionEntry(object):
     def __init__(self, proxy, source, name=u'', docstring=u'Undocumented', annotations=Annotations([]), resource_name=u'system', module_name=u'builtin', profile=None, invoker=None):
-        self.profile = profile
+        self.profile = profile if profile else ActionProfile(None, None, None, None, [],  [], [])
         self.instance = proxy
         self.source = source
         self.name = name
@@ -49,6 +49,9 @@ class ResourceActionEntry(object):
             m = self.docstring.strip() + '\n\n' + m
         return m
 
+    def make_graph(self):
+        return self.profile.make_graph()
+
 class ActionProfiles(object):
     def __init__(self, profiles):
         self._profiles = profiles
@@ -76,6 +79,9 @@ class ActionProfiles(object):
     @property
     def redirects(self):
         return self._redirects
+
+    def make_graph(self):
+        pass
 
 class ActionProfile(object):
     def __init__(self, io_type, name, input_type, output_type, relay_list, next_states, redirects):

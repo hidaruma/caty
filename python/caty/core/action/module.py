@@ -205,5 +205,6 @@ class ResourceModule(object):
                 u'ActionNotFound',
                 u'$actionName is not defined in $moduleName:$resourceName',
                 actionName=aname,
-                moduleName=self.name
+                moduleName=self.name,
+                resourceName=rcname
             )

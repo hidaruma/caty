@@ -3,7 +3,7 @@
 name = u'viva'
 schema = u"""
 /** 
- * アクションモジュール（.caraファイル）を視覚化する
+ * アクションモジュール（.caraファイル）を視覚化する。
  */
 command draw {
  /** 出力ファイル
@@ -33,9 +33,8 @@ command draw {
      updates pub
     refers python:caty.core.std.command.viva.DrawModule;
 
-/*{{{
 /** 
- * アクションモジュール（.caraファイル）の個別アクションを視覚化する
+ * アクションモジュール（.caraファイル）の個別アクションを視覚化する。
  */
 command draw-action {
  /** 出力ファイル
@@ -47,23 +46,13 @@ command draw-action {
  @[default("gif")]
  "format" : ("gif"|"png"|"jpeg" | "dot")?,
 } [
-  /** モジュール名
-   * 拡張子は含まない
-   */
-  string module,
-  /**
-   * リソース名
-   */
-  string resource,
-  /**
-   * アクション名
-   */
+  /** モジュール名:リソース名.アクション名 */
   string action_name
 ] :: void -> void | binary | string
-     throws [ModuleNotFound]
+     throws [ModuleNotFound, ResourNotFound, ActionNotFound]
      updates pub
     refers python:caty.core.std.command.viva.DrawAction;
-}}}*/
+
 type GraphStruct = {
     "name": string,
     "subgraphs": [GraphStruct*],

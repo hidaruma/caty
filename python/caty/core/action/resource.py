@@ -72,7 +72,7 @@ class ResourceClass(object):
             buff.append((u'アクション一覧: ', ''))
         m = justify_messages(buff)
         for inv, e in self.entries.items():
-            m += ('\n' + e.usage(indent=1) + '\n')
+            m += ('\n' + e.usage(False, 1) + '\n')
         return self.docstring.strip() + '\n\n' + m
 
     def get_action(self, name):
@@ -83,7 +83,8 @@ class ResourceClass(object):
             u'ActionNotFound',
             u'$actionName is not defined in $moduleName:$resourceName',
             actionName=aname,
-            moduleName=self.name
+            moduleName=self.module,
+            resourceName=self.name
         )
 
 class DefaultResource(ResourceClass):
