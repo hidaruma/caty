@@ -153,8 +153,8 @@ class DrawModule(Builtin):
 
 
 class DrawAction(Builtin):
-    def setup(self, opts, module_name):
-        self._module_name = module_name
+    def setup(self, opts, action_name):
+        self._action_name = action_name
         self._out_file = opts['out']
         self._format = opts['format']
         self._graph_config = {
@@ -171,18 +171,12 @@ class DrawAction(Builtin):
                 'fontsize': 14.0,
             },
             'edge': {
-                'action': {
+                'relay': {
                     'fontsize': 14.0,
                     'arrowhead': 'open',
                     'color': 'crimson',
                     'weight': 0,
                 },
-                'link': {
-                    'fontsize': 14.0,
-                    'arrowhead': 'open',
-                    'weight': 20,
-                    'color': 'darkorchid3',
-                }, 
                 'redirect': {
                     'fontsize': 14.0,
                     'arrowhead': 'open',
@@ -190,26 +184,26 @@ class DrawAction(Builtin):
                     'color': 'blue3',
                 },
             },
-            'action': {
+            'fragment': {
                 'fontsize': 14.0,
                 'shape': u'ellipse',
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'darkseagreen2'
             },
-            'state': {
-                'fontsize': 14.0,
-                'shape': u'box',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'gold'
-            },
-            'external': {
+            'type': {
                 'fontsize': 14.0,
                 'shape': u'ellipse',
                 'style': u'filled',
                 'color': u'black',
-                'fillcolor': u'azure'
+                'fillcolor': u'gold'
+            },
+            'action': {
+                'fontsize': 14.0,
+                'shape': u'box',
+                'style': u'filled',
+                'color': u'black',
+                'fillcolor': u'white'
             },
         }
 
@@ -231,8 +225,16 @@ class DrawAction(Builtin):
     def make_graph(self):
         app = self.current_app
         rmc = app.resource_module_container
-        rm = rmc.get_module(self._module_name)
-        return rm.make_graph()
+        mname, rname, aname = self._split_name()
+        rm = rmc.get_module(mname)
+        res = rm.get_resource(rname)
+        act = res.get_action(aname)
+        return act.make_graph()
+
+    def _split_name(self):
+        mod, rest = self._action_name.split(':')
+        res, act = rest.split('.')
+        return mod, res, act
 
     def transform(self, graph_struct, root=True):
         cfg = {
@@ -245,24 +247,18 @@ class DrawAction(Builtin):
         else:
             cfg.update(self._graph_config['subgraph'])
             cfg['name'] = 'cluster_' + graph_struct['name']
-        if self._size != 'auto':
-            cfg['size'] = self._size
         RG = gv.AGraph(**cfg)
         if root:
-            RG.graph_attr['label'] = 'Module: ' + graph_struct['name']
-
+            RG.graph_attr['label'] = 'Action: ' + graph_struct['name']
         else:
-            RG.graph_attr['label'] = graph_struct['name']
+            RG.graph_attr['label'] = graph_struct['label']
         for sg in graph_struct['subgraphs']:
             G = self.transform(sg, False)
-            if self._node == 'state':
-                for n in G.iternodes():
-                    RG.add_node(n.name, **n.attr)
-            else:
-                _G = RG.add_subgraph(G.iternodes(), G.name, **G.graph_attr)
-                for n in G.iternodes():
-                    _G.add_node(n.name, **n.attr)
-                _G.add_edges_from(G.iteredges())
+            _G = RG.add_subgraph(G.iternodes(), G.name, **G.graph_attr)
+            for n in G.iternodes():
+                _G.add_node(n.name, **n.attr)
+            for e in G.iteredges():
+                _G.add_edge(e[0], e[1], **e.attr)
         names = []
         for node in graph_struct['nodes']:
             name = node['name']
@@ -271,39 +267,11 @@ class DrawAction(Builtin):
             N = RG.get_node(name)
             attr = {}
             attr.update(self._graph_config[node['type']])
-            if (self._node == 'state' 
-                  and node['type'] != 'state'):
-                attr['label'] = ''
-                attr['shape'] = 'circle'
-                attr['width'] = '0.2'
-            elif (self._node == 'action' 
-                and node['type'] != 'action'):
-                attr['label'] = ''
-                attr['width'] = '0.2'
-                if node['type'] == 'external':
-                    attr['shape'] = 'circle'
-                else:
-                    attr['shape'] = 'box'
-                    attr['height'] = '0.2'
-            else:
-               attr['label'] = node['label']
             N.attr.update(attr)
-        RG.graph_attr['rank'] = 'same %s' % (' '.join(names))
         for edge in graph_struct['edges']:
-            if 'trigger' not in edge or self._node == 'action':
-                RG.add_edge(edge['from'], 
-                            edge['to'], 
-                            **self._graph_config['edge'][edge['type']])
-            else:
-                if edge['trigger'].startswith('+'):
-                    cfg = {'arrowtail': 'ediamond', 'dir': 'both'}
-                else:
-                    cfg = {'arrowtail': 'diamond', 'dir': 'both'}
-                cfg.update(self._graph_config['edge'][edge['type']])
-                RG.add_edge(edge['from'], 
-                            edge['to'], 
-                            label=edge['trigger'],
-                            **cfg)
+            RG.add_edge(edge['from'], 
+                        edge['to'], 
+                        **self._graph_config['edge'][edge['type']])
         return RG
 
 

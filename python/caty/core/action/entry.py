@@ -1,6 +1,7 @@
 #coding: utf-8
 from caty.core.schema.base import Annotations
 from caty.util import indent_lines, justify_messages
+from caty.core.exception import *
 
 class ResourceActionEntry(object):
     def __init__(self, proxy, source, name=u'', docstring=u'Undocumented', annotations=Annotations([]), resource_name=u'system', module_name=u'builtin', profile=None, invoker=None):
@@ -50,7 +51,41 @@ class ResourceActionEntry(object):
         return m
 
     def make_graph(self):
-        return self.profile.make_graph()
+        try:
+            G = {
+                u'name': u'%s:%s.%s' % (self.module_name, self.resource_name, self.name), 
+                u'subgraphs': [], 
+                u'nodes': [], 
+                u'edges': []
+            }
+            G['subgraphs'].append(self.profile.make_relay_graph())
+            for input_type, to_node_name in self.profile.list_input_types():
+                G['nodes'].append({u'name': input_type, u'type': 'type'})
+                G['edges'].append({u'from': input_type, u'to': to_node_name, u'type': u'relay'})
+
+            for output_type, from_node_name in self.profile.list_output_types():
+                G['nodes'].append({u'name': output_type, u'type': 'type'})
+                G['edges'].append({u'to': output_type, u'from': from_node_name, u'type': u'relay'})
+
+            for redirect_to, from_node_name in self.profile.list_redirects():
+                G['nodes'].append({u'name': redirect_to, u'type': 'action'})
+                G['edges'].append({u'to': redirect_to, u'from': from_node_name, u'type': u'redirect'})
+            return G
+        except InternalError, e:
+            throw_caty_exception(
+                e.key,
+                e.msg,
+                actionName=self.name,
+                resourceName=self.resource_name,
+                moduleName=self.module_name,
+                **e.placeholder
+            )
+
+class InternalError(Exception):
+    def __init__(self, key, msg, **placeholder):
+        self.key = key
+        self.msg = msg
+        self.placeholder = placeholder
 
 class ActionProfiles(object):
     def __init__(self, profiles):
@@ -80,8 +115,51 @@ class ActionProfiles(object):
     def redirects(self):
         return self._redirects
 
-    def make_graph(self):
-        pass
+    def make_relay_graph(self):
+        G = {u'name': u'cluster_relay', u'label': u'', u'nodes': [], u'edges': [], u'subgraphs': []}
+        for p in self._profiles:
+            G['nodes'].append({u'name': p.name, u'type': u'fragment'})
+            if p.io_type == 'in':
+                for e in self._make_in_to_out_edges(p):
+                    G['edges'].append(e)
+        return G
+
+    def _make_in_to_out_edges(self, p):
+        if not p.relay_list:
+            found = False
+            for _p in self._profiles:
+                if _p.io_type == 'out':
+                    found = True
+                    yield {u'from': p.name, u'to': _p.name, u'type': u'relay'}
+            if not found:
+                raise InternalError(u'MISSING_SCRIPT_FRAGMENT', 
+                                    u'Script fragment relays to nothing: $moduleName:$resourceName.$actionName')
+        else:
+            for rel in p.relay_list:
+                for _p in self._profiles:
+                    if _p.io_type == 'out' and _p.name == rel:
+                        yield {u'from': p.name, u'to': _p.name, u'type': u'relay'}
+                        break
+                else:
+                    raise InternalError(u'MISSING_SCRIPT_FRAGMENT', 
+                                        u'Script fragment $name not exists: $moduleName:$resourceName.$actionName', 
+                                        name=rel)
+
+    def list_input_types(self):
+        for p in self._profiles:
+            if p.io_type in ('in', 'io'):
+                yield p.input_type.name, p.name
+
+    def list_output_types(self):
+        for p in self._profiles:
+            if p.io_type in ('out', 'io'):
+                if p.output_type.name != 'never':
+                    yield p.output_type.name, p.name
+
+    def list_redirects(self):
+        for p in self._profiles:
+            for r in p.redirects:
+                yield r, p.name
 
 class ActionProfile(object):
     def __init__(self, io_type, name, input_type, output_type, relay_list, next_states, redirects):
