@@ -1,0 +1,12 @@
+// -*- coding: utf-8 -*-
+/** console tools */
+module ct;
+
+/** 標準入力の画像データを表示する */
+command show-image :: binary -> void
+refers python:image.ShowImage;
+
+
+// End of Module
+
+
