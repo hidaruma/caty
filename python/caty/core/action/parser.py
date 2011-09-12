@@ -3,7 +3,7 @@ from topdown import *
 from caty.core.script.parser import ScriptParser
 from caty.core.casm.language.casmparser import module_decl
 from caty.core.casm.language.schemaparser import object_, typedef
-from caty.core.language.util import docstring, annotation, fragment_name
+from caty.core.language.util import docstring, annotation, fragment_name, annotation
 from caty.jsontools.xjson import obj
 from caty.core.action.resource import ResourceClass
 from caty.core.action.module import ResourceModule
@@ -198,12 +198,14 @@ class ActionBlock(Parser):
         return ActionProfile(io_type, fragment, in_type, out_type, relay_list, next_states, redirects)
 
     def fragment_name(self, seq):
+        ann = annotation(seq)
         name = fragment_name(seq)
-        if name.startswith('io'):
-            pf = 'io'
-        elif name.startswith('in'):
-            pf = 'in'
-        elif name.startswith('out'):
+        if 'in' in ann:
+            if 'out' in ann:
+                pf = 'io'
+            else:
+                pf = 'in'
+        elif 'out' in ann:
             pf = 'out'
         else:
             raise ParseError(seq, self.fragment_name)

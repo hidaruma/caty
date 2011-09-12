@@ -9,7 +9,7 @@ resource WikiFile("*.wiki") {
          "isText": true,
     };
     /** 読み込み */
-    action read("/GET") :: #io void -> WikiPage produces page { 
+    action read("/GET") :: @[in, out] #io void -> WikiPage produces page { 
         (#io file:read %1 | {
             "body": text:creole, 
             "title": param %1 | text:rsplit "." | item 0 | text:trim /,
@@ -18,7 +18,7 @@ resource WikiFile("*.wiki") {
     };
 
     /** 編集画面呼び出し */
-    action edit("edit/GET")  :: #io void -> WikiSkele produces edit {
+    action edit("edit/GET")  :: @[in, out]#io void -> WikiSkele produces edit {
         {
             "body":file:read %1,
             "title": param %1 | text:rsplit "." | item 0 | text:trim /
@@ -27,16 +27,16 @@ resource WikiFile("*.wiki") {
 
     /** 書き込み */
     action write("/POST#exists-parent")  :: 
-        #in-translate WikiFile -> WikiFile,
-        #out-ok WikiFile -> never redirects WikiFile.read,
-        #out-ng void -> never redirects Root.get {
+        @[in] #translate WikiFile -> WikiFile,
+        @[out] #ok WikiFile -> never redirects WikiFile.read,
+        @[out] #ng void -> never redirects Root.get {
         translate WikiFile | when {
             OK => (#io-ok ["/wiki", (#part pv body) | file:write %1 | param %1] | text:concat | redirect),
             NG => (#io-ng "/wiki/" | redirect)
         }
     };
     /** プレーンテキスト取得 */
-    action plain("plain/GET") :: #io void -> Response produces plain
+    action plain("plain/GET") :: @[in, out] #io void -> Response produces plain
     {
         print %0
     };
@@ -52,13 +52,13 @@ state page :: WikiPage links {
 
 
 resource Root("/") {
-    action get("/GET") :: #io void -> never redirects WikiFile.read {
+    action get("/GET") :: @[in, out] #io void -> never redirects WikiFile.read {
         "/wiki/FrontPage.wiki" | redirect
     };
 };
 
 resource NewFile("/new") {
-    action open("/POST#dont-care") :: #io NewWiki -> WikiSkele produces edit
+    action open("/POST#dont-care") :: @[in, out] #io NewWiki -> WikiSkele produces edit
     {
         translate NewWiki | when {
             OK => pv filename | text:regmatch "[A-Z][a-z0-9]" | when {
@@ -72,7 +72,7 @@ resource NewFile("/new") {
 };
 
 resource AllPages("/all.html") {
-    action get("/GET") :: #io void -> WikiIndex produces index {
+    action get("/GET") :: @[in, out] #io void -> WikiIndex produces index {
         lsdir / .wiki | each {
             {
                 "file": pv name,
