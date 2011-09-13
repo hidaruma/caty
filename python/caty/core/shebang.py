@@ -94,5 +94,5 @@ def parse(s, associate=False):
     二度目以降の shebang は処理されない。
     """
     meta, script, content = schebang.run(s, auto_remove_ws=True)
-    return meta, script if associate else u'', u'\n' + content
+    return meta, script if associate else u'', content
 

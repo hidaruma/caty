@@ -10,6 +10,7 @@ from caty.core.facility import (FakeFacility,
                                 PEND)
 from caty.core.script.parser import ScriptParser, NothingTodo
 from caty.core.script.builder import CommandBuilder, CommandCombinator
+from caty.core.script.interpreter import CommandExecutor
 from caty.core.script import node
 from caty.core.std.command import builtin
 from caty.core.command import Builtin, Syntax, Command, VarStorage, PipelineInterruption, PipelineErrorExit, ScriptError
@@ -53,12 +54,12 @@ class ScriptModule(object):
         return self._finder
 
     def shell_mode(self, facilities):
-        return ShellCommandInterpreter(facilities, self)
+        return ShellCommandCompiler(facilities, self)
 
     def file_mode(self, facilities):
-        return ScriptCommandInterpreter(facilities, self)
+        return ScriptCommandCompiler(facilities, self)
 
-class AbstractCommandInterpreter(FakeFacility):
+class AbstractCommandCompiler(FakeFacility):
     u"""コマンド文字列からコマンドを構築するためのオブジェクト。
     実際の処理は CommandBuilder や parse_command に移譲し、
     このクラスでは対話シェルからの入力の受付や前二者の紐付けなどを行う。
@@ -100,7 +101,7 @@ class AbstractCommandInterpreter(FakeFacility):
         c = pipeline.instantiate(self.filter_builder)
         c.set_facility(self.facilities)
         c.set_var_storage(var_storage)
-        return c
+        return CommandExecutor(c)
 
     def clone(self):
         return self.__class__(self._facilities.clone(), self.module)
@@ -128,6 +129,7 @@ class AbstractCommandInterpreter(FakeFacility):
         c = proxy.instantiate(self.builder)
         c.set_facility(self.facilities)
         c.set_var_storage(var_storage)
+        c = CommandExecutor(c)
         if transaction == COMMIT:
             return TransactionAdaptor(c, self.facilities)
         elif transaction == ROLLBACK:
@@ -168,7 +170,7 @@ class AbstractCommandInterpreter(FakeFacility):
             for k, v in subm.command_ns.items():
                 yield v
 
-class ShellCommandInterpreter(AbstractCommandInterpreter):
+class ShellCommandCompiler(AbstractCommandCompiler):
     def _compile(self, string):
         u"""コマンド文字列を受け取り、中間形式のパイプラインを構築する。
         対話シェルから使われることを想定しているので、入力途中で改行されたりなど
@@ -198,7 +200,7 @@ class ShellCommandInterpreter(AbstractCommandInterpreter):
         self.facilities = facilities
 
 
-class ScriptCommandInterpreter(AbstractCommandInterpreter):
+class ScriptCommandCompiler(AbstractCommandCompiler):
     def _compile(self, string):
         u"""コマンド文字列を受け取り、中間形式のパイプラインを構築する。
         呼び出し可能な状態のオブジェクトが構築できなかった場合、即座にエラーとする。
@@ -212,7 +214,7 @@ class ScriptCommandInterpreter(AbstractCommandInterpreter):
 
 def apply_builder(builder, cmd):
     u"""print コマンドは内部的にアソシエーションを解決する必要があるので、
-    実行前に builder （実体は CommandInterpreter）を注入する。
+    実行前に builder （実体は CommandCompiler）を注入する。
     初期化時に行わないのは、オブジェクトの deepcopy 処理での不具合を回避するため。
     """
     if isinstance(cmd, (builtin.Print, builtin.Expand)):

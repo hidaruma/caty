@@ -13,19 +13,7 @@ from caty import UNDEFINED
 
 __all__ = ['Command', 'Builtin', 'ScriptError', 'PipelineInterruption', 'PipelineErrorExit', 'compile_builtin']
 
-def exception_hook(f):
-    u"""コマンドでのエラー発生時にそのコマンド名を出力し、
-    そのまま例外をスローする。
-    """
-    def wrapped(self, input):
-        try:
-            return f(self, input)
-        except Exception, e:
-            if isinstance(e, PipelineInterruption) or isinstance(e, PipelineErrorExit):
-                raise
-            util.cout.writeln(u"[DEBUG] Error: " + repr(self))
-            raise
-    return wrapped
+
 
 class Command(object):
     u"""コマンド基底クラス。
@@ -59,6 +47,7 @@ class Command(object):
         self.__facility_names = set()
         self._id = '%s(%s)' % (self.profile_container.name, self.profile_container.uri)
         self.__current_application = None
+        self.__facility_names = []
 
     def get_command_id(self):
         return self._id
@@ -152,7 +141,11 @@ class Command(object):
         self.__var_storage = storage
 
     @property
-    def _var_storage(self):
+    def facility_names(self):
+        return self.__facility_names
+
+    @property
+    def var_storage(self):
         return self.__var_storage
 
     def _prepare(self):
@@ -196,7 +189,6 @@ class Command(object):
         """
         return self._out_schema
 
-    @exception_hook
     def __call__(self, input):
         if 'deprecated' in self.annotations:
             util.cout.writeln(u'[DEBUG] Deprecated: %s' % self.name)
@@ -225,6 +217,9 @@ class Command(object):
             return r
         finally:
             self.__var_storage.del_scope()
+
+    def accept(self, visitor):
+        return visitor.visit_command(self)
 
     def execute(self, *args, **kwds):
         raise NotImplementedError

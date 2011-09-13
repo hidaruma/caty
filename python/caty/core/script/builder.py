@@ -35,7 +35,7 @@ class CommandCombinator(Command):
     def __init__(self, bf, af):
         self.bf = bf
         self.af = af
-    
+
     def convert(self, value):
         return self.bf.convert(value)
 
@@ -55,6 +55,9 @@ class CommandCombinator(Command):
     def out_schema(self):
         return self.af.out_schema
 
+    def accept(self, visitor):
+        return visitor.visit_pipe(self)
+
     def __call__(self, input):
         r = self.bf(input)
         return self.af(r)
@@ -66,6 +69,9 @@ class DiscardCombinator(CommandCombinator):
     def __call__(self, input):
         self.bf(input)
         return self.af(None)
+
+    def accept(self, visitor):
+        return visitor.visit_discard_pipe(self)
 
 def combine(chunks):
     return reduce(CommandCombinator, chunks)

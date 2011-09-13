@@ -338,7 +338,7 @@ class Each(Syntax):
 
     def _init_opts(self):
         Command._init_opts(self)
-        o = self._var_storage.opts
+        o = self.var_storage.opts
         a = o['_ARGV']
         v = a[1:] if a else [u'']
         self._args = v
@@ -373,10 +373,10 @@ class Each(Syntax):
         r = []
         for v in input:
             try:
-                self._var_storage.new_scope()
+                self.var_storage.new_scope()
                 r.append(self.cmd(v))
             finally:
-                self._var_storage.del_scope()
+                self.var_storage.del_scope()
         return r
 
     def _iter_obj(self, input):
@@ -469,12 +469,12 @@ class Take(Syntax):
         r = []
         for v in input:
             try:
-                self._var_storage.new_scope()
+                self.var_storage.new_scope()
                 x = self.cmd(v)
                 if x == True or tag(x) == 'True':
                     r.append(v)
             finally:
-                self._var_storage.del_scope()
+                self.var_storage.del_scope()
         return r
 
 class PipelineFragment(Syntax):
