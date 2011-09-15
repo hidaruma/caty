@@ -65,6 +65,9 @@ class MafsFactory(Facility, ResourceFinder, PbcObject):
     def commit(self):
         self._access_manager.commit()
  
+    def cleanup(self):
+        self._access_manager.clear()
+
     def rollback(self):
         self._access_manager.rollback()
 

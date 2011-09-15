@@ -345,9 +345,10 @@ class FileTransactionAccessManager(TransactionalAccessManager):
             self.reader.clear()
             self.updator.clear()
             self.observed.clear()
-            self._module = None
-            if '_mafs_facility' in self.__dict__:
-                del self._mafs_facility
+    def clear(self):
+        self._module = None
+        if '_mafs_facility' in self.__dict__:
+            del self._mafs_facility
 
 def access_manager_factory(module):
     return FileTransactionAccessManager(module)

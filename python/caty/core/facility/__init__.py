@@ -52,6 +52,10 @@ class Facility(PbcObject):
 
     トランザクションの分離レベルは READ COMMITTED であればよい。
 
+    === cleanup()
+
+    一連の処理で利用し、解放していないリソースの解放していないリソースの解放などを行う。
+
     """
 
     __properties__ = ['mode']
@@ -62,6 +66,9 @@ class Facility(PbcObject):
 
     def start(self):
         return self
+
+    def cleanup(self):
+        pass
 
     def commit(self):
         pass
@@ -273,6 +280,7 @@ class TransactionAdaptor(Command):
     def __init__(self, command, facilities):
         self._facilities = facilities
         self._command = command
+        
 
     def __call__(self, input):
         try:
