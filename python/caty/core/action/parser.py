@@ -287,7 +287,10 @@ class StateBlock(Parser):
         if option(S('+'))(seq):
             return False, option(name)(seq)
         else:
-            return True, name(seq)
+            return True, self.embed_trigger(seq)
+
+    def embed_trigger(self, seq):
+        return seq.parse(choice(Regex(ur'(\$\.)?([a-zA-Z_][a-zA-Z0-9_-]*(\(\))?\.)*[a-zA-Z_][a-zA-Z0-9_-]*(\(\))?'), '$'))
 
     def action_ref(self, seq):
         ref = seq.parse(Regex(r'([a-zA-Z_][-a-zA-Z0-9_]*:)?[a-zA-Z_][-a-zA-Z0-9_]*\.[a-zA-Z_][-a-zA-Z0-9_]*(#(io|in)[0-9a-zA-Z_-]*)?'))

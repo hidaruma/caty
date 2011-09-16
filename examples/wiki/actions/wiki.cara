@@ -88,7 +88,7 @@ state index :: WikiIndex links {
 };
 
 state edit :: WikiSkele links {
-    submit --> WikiFile.write;
+    submit() --> WikiFile.write;
     + cancel --> WikiFile.read;
 };
 
