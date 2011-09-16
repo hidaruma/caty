@@ -64,7 +64,7 @@ class DrawModule(Builtin):
     def execute(self):
         src = self.make_graph()
         G = self.transform(src)
-        G.layout()
+        G.layout(prog='circo')
         if self._out_file:
             o = G.draw(prog='dot', format=self._out_file.split('.')[-1])
             with self.pub.open('/'+self._out_file, 'wb') as f:
@@ -140,14 +140,10 @@ class DrawModule(Builtin):
                             edge['to'], 
                             **self._graph_config['edge'][edge['type']])
             else:
-                if edge['trigger'].startswith('+'):
-                    cfg = {'arrowtail': 'ediamond', 'dir': 'both'}
-                else:
-                    cfg = {'arrowtail': 'diamond', 'dir': 'both'}
                 cfg.update(self._graph_config['edge'][edge['type']])
                 RG.add_edge(edge['from'], 
                             edge['to'], 
-                            label=edge['trigger'],
+                            taillabel=edge['trigger'],
                             **cfg)
         return RG
 
@@ -210,7 +206,7 @@ class DrawAction(Builtin):
     def execute(self):
         src = self.make_graph()
         G = self.transform(src)
-        G.layout()
+        G.layout(prog='circo')
         if self._out_file:
             o = G.draw(prog='dot', format=self._out_file.split('.')[-1])
             with self.pub.open('/'+self._out_file, 'wb') as f:
