@@ -48,13 +48,17 @@ class Command(object):
         self._id = '%s(%s)' % (self.profile_container.name, self.profile_container.uri)
         self.__current_application = None
         self.__facility_names = []
+        self.__i18n = None
 
     def get_command_id(self):
         return self._id
 
     @property
     def i18n(self):
-        return self._defined_application.i18n
+        if self.__i18n == None:
+            return self._defined_application.i18n
+        else:
+            return self.__i18n
 
     @property
     def profile(self):
@@ -85,6 +89,7 @@ class Command(object):
         """
         _set = set()
         self.__current_application = facilities.app
+        self.__i18n = I18nMessageWrapper(self._defined_application.i18n, facilities['env'])
         for mode, decl in self.profile.facilities:
             name = decl.name
             key = decl.alias if decl.alias else name
@@ -473,4 +478,18 @@ class JsonableValues(dict):
         dict.__setitem__(self, k, v)
         object.__setattr__(self, k.replace('-', '_').replace(' ', ''), v)
 
+class I18nMessageWrapper(object):
+    def __init__(self, catalog, env):
+        self.catalog = catalog
+        self.env = env
+
+    def get(self, msg, message_dict=None, **kwds):
+        return self.catalog.get(msg, language_code=self.env.get('LANGUAGE'), message_dict=message_dict, **kwds)
+
+    def write(self, *args, **kwds):
+        if 'nobreak' in kwds:
+            del kwds['nobreak']
+            self.catalog._writer.write(self.get(*args, **kwds) + '\n')
+        else:
+            self.catalog._writer.write(self.get(*args, **kwds) + '\n')
 

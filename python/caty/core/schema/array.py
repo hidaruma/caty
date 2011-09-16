@@ -17,22 +17,22 @@ class ArraySchema(SchemaBase, Array):
         SchemaBase.__init__(self, *args, **kwds)
         self.schema_list = schema_list
         if self.tight is not None and not isinstance(self.tight, types.BooleanType):
-            raise JsonSchemaError(ro.i18n.get(u'tight attribute must be boolean type'))
+            raise JsonSchemaError(dict(msg=u'tight attribute must be boolean type'))
 
     def _validate(self, value):
         if not self.optional and value == None:
-            raise JsonSchemaError(ro.i18n.get('null is not allowed'))
+            raise JsonSchemaError(dict(msg='null is not allowed'))
         elif self.optional and value is None:
             return
         if not (isinstance(value, list) or isinstance(value, tuple)):
-            raise JsonSchemaError(ro.i18n.get(u'value should be $type', type='array'))
+            raise JsonSchemaError(dict(msg=u'value should be $type', type='array'))
         import caty
         if self.tight is not None and caty.UNDEFINED in value:
-            raise JsonSchemaError(ro.i18n.get(u'This type can not contain undefined'))
+            raise JsonSchemaError(dict(msg=u'This type can not contain undefined'))
         if self.maxItems is not None and len(value) > self.maxItems:
-            raise JsonSchemaError(ro.i18n.get(u'This type can contain only $max elements or less', max=self.maxItems))
+            raise JsonSchemaError(dict(msg=u'This type can contain only $max elements or less', max=self.maxItems))
         if self.minItems is not None and len(value) < self.minItems:
-            raise JsonSchemaError(ro.i18n.get(u'This type must contain $min elements or more', min=self.minItems))
+            raise JsonSchemaError(dict(msg=u'This type must contain $min elements or more', min=self.minItems))
         mandatory = len(self.schema_list)
         if self.repeat:
             mandatory -= 1
@@ -41,9 +41,9 @@ class ArraySchema(SchemaBase, Array):
                 mandatory -= 1
         l = len(value)
         if l < mandatory:
-            raise JsonSchemaError(ro.i18n.get(u'This type must contain $min elements or more', min=mandatory))
+            raise JsonSchemaError(dict(msg=u'This type must contain $min elements or more', min=mandatory))
         if l > len(self.schema_list) and not self.repeat:
-            raise JsonSchemaError(ro.i18n.get(u'This type can contain only $max elements or less', max=len(self.schema_list)))
+            raise JsonSchemaError(dict(msg=u'This type can contain only $max elements or less', max=len(self.schema_list)))
         errors = []
         is_error = False
         count = 0
@@ -56,10 +56,10 @@ class ArraySchema(SchemaBase, Array):
                 continue
             if s_count >= len(self.schema_list):
                 if not self.repeat:
-                    errors.append(JsonSchemaError(ro.i18n.get(u'$type can not appear at tail of this type', type=type(v))))
+                    errors.append(JsonSchemaError(dict(msg=u'$type can not appear at tail of this type', type=type(v))))
                     is_error = True
                     break
-                    #raise JsonSchemaError(ro.i18n.get(u'This type must contain $min elements or more', min=len(self.schema_list)))
+                    #raise JsonSchemaError(dict(msg=u'This type must contain $min elements or more', min=len(self.schema_list)))
                 elif self.repeat:
                     s_count = len(self.schema_list) - 1
             try:
@@ -81,7 +81,7 @@ class ArraySchema(SchemaBase, Array):
         if not (isinstance(value, list) or isinstance(value, tuple)):
             if value is None and self.schema_list[0].optional:
                 return []
-            raise JsonSchemaError(ro.i18n.get('value should be $type', type='array'))
+            raise JsonSchemaError(dict(msg='value should be $type', type='array'))
         count = 0
         result =[]
         errors = []
@@ -89,7 +89,7 @@ class ArraySchema(SchemaBase, Array):
         for v in value:
             if count >= len(self.schema_list):
                 if not self.repeat:
-                    raise JsonSchemaError(ro.i18n.get(u'This type can contain only $max elements or less', max=len(self.schema_list)))
+                    raise JsonSchemaError(dict(msg=u'This type can contain only $max elements or less', max=len(self.schema_list)))
                 elif self.repeat:
                     count = len(self.schema_list) - 1
             try:

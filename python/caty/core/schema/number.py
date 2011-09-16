@@ -13,24 +13,24 @@ class NumberSchema(ScalarSchema):
     def __init__(self, *args, **kwds):
         ScalarSchema.__init__(self, *args, **kwds)
         if self.minimum > self.maximum and self.maximum is not None:
-            raise JsonSchemaError(i18n.get('minmum($min) is bigger than maximum($max)', min=self.minimum, max=self.maximum))
+            raise JsonSchemaError(dict(msg='minmum($min) is bigger than maximum($max)', min=self.minimum, max=self.maximum))
 
     def _validate(self, value):
         if not self.optional and value == None:
-            raise JsonSchemaError(ro.i18n.get(u'null is not allowed'))
+            raise JsonSchemaError(dict(msg=u'null is not allowed'))
         elif self.optional and value == None:
             return
         if self.is_integer:
             if not (isinstance(value, int) or (isinstance(value, Decimal) and value == int(value)))or isinstance(value, bool):
-                raise JsonSchemaError(ro.i18n.get(u'value should be $type', type='integer'), value, '')
+                raise JsonSchemaError(dict(msg=u'value should be $type', type='integer'), value, '')
         if isinstance(value, bool):
-            raise JsonSchemaError(ro.i18n.get(u'value should be $type', type='number'), value, '')
+            raise JsonSchemaError(dict(msg=u'value should be $type', type='number'), value, '')
         if not isinstance(value, (Decimal, int)):
-            raise JsonSchemaError(ro.i18n.get(u'value should be $type', type='number'), value, '')
+            raise JsonSchemaError(dict(msg=u'value should be $type', type='number'), value, '')
         if self.minimum != None and self.minimum > value:
-            raise JsonSchemaError(ro.i18n.get(u'value should be greater than $val', val=self.minimum), value, '')
+            raise JsonSchemaError(dict(msg=u'value should be greater than $val', val=self.minimum), value, '')
         if self.maximum != None and self.maximum < value:
-            raise JsonSchemaError(ro.i18n.get(u'value should be smaller than $val', val=self.maximum), value, '')
+            raise JsonSchemaError(dict(msg=u'value should be smaller than $val', val=self.maximum), value, '')
 
     def intersect(self, another):
         minimum = max(self.minimum, another.minimum)
@@ -52,7 +52,7 @@ class NumberSchema(ScalarSchema):
                 return int(value)
             return Decimal(value)
         except:
-            raise JsonSchemaError(ro.i18n.get(u'An error occuered while converting to $type', type=self.type), value, '')
+            raise JsonSchemaError(dict(msg=u'An error occuered while converting to $type', type=self.type), value, '')
 
     def _rand_int(self):
         import sys

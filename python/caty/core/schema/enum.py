@@ -13,7 +13,7 @@ class EnumSchema(SchemaBase, Enum):
 
     def _validate(self, value):
         if not self.optional and value is None:
-            raise JsonSchemaError(ro.i18n.get(u'null is not allowed'), value, '')
+            raise JsonSchemaError(dict(msg=u'null is not allowed'), value, '')
         elif self.optional and value is None:
             return
         for e in self.enum:
@@ -30,9 +30,9 @@ class EnumSchema(SchemaBase, Enum):
                         return
         t = self._to_str()
         if len(self.enum) > 1:
-            raise JsonSchemaError(ro.i18n.get(u'value should be one of $type', type=t), value, '')
+            raise JsonSchemaError(dict(msg=u'value should be one of $type', type=t), value, '')
         else:
-            raise JsonSchemaError(ro.i18n.get(u'value should be $type', type=t), value, '')
+            raise JsonSchemaError(dict(msg=u'value should be $type', type=t), value, '')
 
     def union(self, another):
         if another.type == 'enum':
@@ -48,7 +48,7 @@ class EnumSchema(SchemaBase, Enum):
                     en.append(e)
             return EnumSchema(en, self.options)
         else:
-            raise JsonSchemaError(ro.i18n.get(u'Unsupported operand types for $op: $type1, $type2', op='&', type1='enum', type2=another.type))
+            raise JsonSchemaError(dict(msg=u'Unsupported operand types for $op: $type1, $type2', op='&', type1='enum', type2=another.type))
 
     def _deepcopy(self, ignore):
         return EnumSchema(self.enum, self.options)
@@ -69,7 +69,7 @@ class EnumSchema(SchemaBase, Enum):
             t = 'one of ' + self._to_str()
         else:
             t = self._to_str()
-        raise JsonSchemaError(ro.i18n.get(u'value should be $type', type=t), value, '')
+        raise JsonSchemaError(dict(msg=u'value should be $type', type=t), value, '')
 
     def apply(self, vars):
         for s in self.enum:

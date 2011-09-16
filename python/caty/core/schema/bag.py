@@ -31,9 +31,9 @@ class BagItem(object):
 
     def check_condition(self):
         if not self.minCount <= self.count:
-            raise JsonSchemaError(ro.i18n.get(u'The occurrence count of the element is too few: type=$type, minCount=$min, count=$count', type=self.schema.type, min=self.minCount, count=self.count))
+            raise JsonSchemaError(dict(msg=u'The occurrence count of the element is too few: type=$type, minCount=$min, count=$count', type=self.schema.type, min=self.minCount, count=self.count))
         if self.maxCount and not self.count <= self.maxCount:
-            raise JsonSchemaError(ro.i18n.get(u'The occurrence count of the element is too mutch: type=$type, maxCount=$max, count=$count', type=self.schema.type, max=self.maxCount, count=self.count))
+            raise JsonSchemaError(dict(msg=u'The occurrence count of the element is too mutch: type=$type, maxCount=$max, count=$count', type=self.schema.type, max=self.maxCount, count=self.count))
 
 class BagSchema(SchemaBase, Bag):
     
@@ -44,19 +44,19 @@ class BagSchema(SchemaBase, Bag):
             try:
                 reduce(UnionSchema, schema_list)
             except Exception, e:
-                raise JsonSchemaError(ro.i18n.get(u'Elements of Bag type is not exclusive: $types', types=', '.join(map(lambda x:x.type, schema_list))))
+                raise JsonSchemaError(dict(msg=u'Elements of Bag type is not exclusive: $types', types=', '.join(map(lambda x:x.type, schema_list))))
     
     def _validate(self, value):
         if not self.optional and value == None:
-            raise JsonSchemaError(ro.i18n.get('null is not allowed'))
+            raise JsonSchemaError(dict(msg='null is not allowed'))
         elif self.optional and value is None:
             return
         if not (isinstance(value, list) or isinstance(value, tuple)):
-            raise JsonSchemaError(ro.i18n.get(u'value should be $type', type='array'))
+            raise JsonSchemaError(dict(msg=u'value should be $type', type='array'))
         items = map(BagItem, enumerate(self.schema_list))
         for v in value:
             if not any(map(lambda x: x.validate(v), items)):
-                raise JsonSchemaError(ro.i18n.get(
+                raise JsonSchemaError(dict(msg=
                     u'$value does not suit either of $types', 
                     value=json.pp(v), 
                     types=', '.join(map(lambda x: x.name, self.schema_list))))
@@ -67,7 +67,7 @@ class BagSchema(SchemaBase, Bag):
         if not (isinstance(value, list) or isinstance(value, tuple)):
             if value is None and self.schema_list[0].optional:
                 return []
-            raise JsonSchemaError(ro.i18n.get(u'value should be $type', type='array'))
+            raise JsonSchemaError(dict(msg=u'value should be $type', type='array'))
         result = []
         for v in value:
             for i in items:

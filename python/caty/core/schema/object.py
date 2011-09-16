@@ -47,14 +47,14 @@ class ObjectSchema(SchemaBase, Object):
     def union(self, schema):
         if schema.type == 'object':
             if not self.pseudoTag.exclusive(schema.pseudoTag):
-                raise JsonSchemaError(ro.i18n.get('Pseudo tag is not exclusive: $tag1, $tag2', tag1=str(self.pseudoTag), tag2=str(schema.pseudoTag)))
+                raise JsonSchemaError(dict(msg='Pseudo tag is not exclusive: $tag1, $tag2', tag1=str(self.pseudoTag), tag2=str(schema.pseudoTag)))
         return UnionSchema(self, schema)
 
     def intersect(self, another):
         cls = type(another)
         if not (cls in (UnionSchema, IntersectionSchema, UpdatorSchema, TypeVariable, ObjectSchema) 
                 or cls == NamedSchema and another.type == 'object'):
-            raise JsonSchemaError(ro.i18n.get(u'Unsupported operand types for $op: $type1, $type2', op='&', type1='object', type2=another.type))
+            raise JsonSchemaError(dict(msg=u'Unsupported operand types for $op: $type1, $type2', op='&', type1='object', type2=another.type))
 
         if cls == ObjectSchema:
             return self._intersect_obj(another)
@@ -72,7 +72,7 @@ class ObjectSchema(SchemaBase, Object):
         ps2 = self.pseudoTag
         if ps1.defined and ps2.defined:
             if ps1.exclusive(ps2):
-                raise JsonSchemaError(ro.i18n.get(u'Unsupported operand types for $op: $type1, $type2', op='&', type1='@?(%s)object' % str(ps1), type2='@?(%s)object' % str(ps2)))
+                raise JsonSchemaError(dict(msg=u'Unsupported operand types for $op: $type1, $type2', op='&', type1='@?(%s)object' % str(ps1), type2='@?(%s)object' % str(ps2)))
             newobj.pseudoTag = ps1
         elif ps.defined and not ps2.defined:
             newobj.pseudoTag = ps1
@@ -83,7 +83,7 @@ class ObjectSchema(SchemaBase, Object):
     def update(self, another):
         if another.type != 'object' or (isinstance(another.type, tuple) and not all(map(lambda x:x.type == 'object', another.type))):
             t = str(another.type) if another.type != '__variable__' else str(another.name)
-            raise JsonSchemaError(ro.i18n.get(u'Unsupported operand types for $op: $type1, $type2', op='++', type1='object', type2=t))
+            raise JsonSchemaError(dict(msg=u'Unsupported operand types for $op: $type1, $type2', op='++', type1='object', type2=t))
         if not isinstance(another, ObjectSchema):
             return another ** self
         newobj = ObjectSchema()
@@ -95,19 +95,19 @@ class ObjectSchema(SchemaBase, Object):
         errors = {}
         is_error = False
         if not self.optional and value == None:
-            raise JsonSchemaError(ro.i18n.get('null is not allowed'))
+            raise JsonSchemaError(dict(msg='null is not allowed'))
         elif self.optional and value is None:
             return
         if not isinstance(value, dict):
-            raise JsonSchemaError(ro.i18n.get('value should be $type', type='object'))
+            raise JsonSchemaError(dict(msg='value should be $type', type='object'))
         if self.minProperties > -1 and self.minProperties > len(value):
-            raise JsonSchemaError(ro.i18n.get(u"Number of property should be greater than $max", max=self.maxProperties), {})
+            raise JsonSchemaError(dict(msg=u"Number of property should be greater than $max", max=self.maxProperties), {})
         if self.maxProperties > -1 and self.maxProperties < len(value):
-            raise JsonSchemaError(ro.i18n.get(u"Number of property should be smaller than $min", min=self.minProperties), {})
+            raise JsonSchemaError(dict(msg=u"Number of property should be smaller than $min", min=self.minProperties), {})
         for k, v in value.iteritems():
             if k not in self.schema_obj:
                 if self.wildcard is None:
-                    errors[k] = ErrorObj(True, u'', u'', ro.i18n.get(u'Unknown property: $name', name=k))
+                    errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Unknown property: $name', name=k))
                     is_error = True
                 else:
                     try:
@@ -118,7 +118,7 @@ class ObjectSchema(SchemaBase, Object):
             else:
                 if self.pseudoTag.name == k:
                     if self.pseudoTag.value != v:
-                        errors[k] = ErrorObj(True, u'', u'', ro.i18n.get(u'Not matched to pseudo tag $tag: $value', tag=str(self.pseudoTag), value=v))
+                        errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Not matched to pseudo tag $tag: $value', tag=str(self.pseudoTag), value=v))
                         is_error = True
                 else:
                     try:
@@ -129,7 +129,7 @@ class ObjectSchema(SchemaBase, Object):
         # optional でないメンバーで漏れがないかチェック
         for k, v in self.schema_obj.iteritems():
             if not v.optional and k not in value:
-                errors[k] = ErrorObj(True, u'', u'', ro.i18n.get(u'Property not exists: $name', name=k))
+                errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Property not exists: $name', name=k))
                 is_error = True
         if is_error:
             e = JsonSchemaErrorObject(u'Failed to validate object')
@@ -148,11 +148,11 @@ class ObjectSchema(SchemaBase, Object):
         orig_info = {}
         is_error = False
         if not isinstance(value, dict):
-            raise JsonSchemaError(ro.i18n.get('value should be $type', type='object'))
+            raise JsonSchemaError(dict(msg='value should be $type', type='object'))
         for k, v in value.iteritems():
             if k not in self.schema_obj:
                 if self.wildcard is None:
-                    errors[k] = ErrorObj(True, u'', u'', ro.i18n.get(u'Unknown property: $name', name=k))
+                    errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Unknown property: $name', name=k))
                     is_error = True
                 else:
                     try:
@@ -170,7 +170,7 @@ class ObjectSchema(SchemaBase, Object):
             if k not in value:
                 if not v.optional:
                     is_error = True
-                    errors[k] = ErrorObj(True, u'', u'', ro.i18n.get(u'Property not exists: $name', name=k))
+                    errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Property not exists: $name', name=k))
                 elif v.optional and 'default' in v.annotations:
                     result[k] = v.annotations['default'].value
         if is_error:

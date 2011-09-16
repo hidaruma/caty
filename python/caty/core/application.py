@@ -507,6 +507,10 @@ class Application(PbcObject):
             env.put('CONTENT_TYPE', u'text/plain')
         if 'PATH_INFO' in environ:
             env.put('PATH_INFO', unicode(environ['PATH_INFO']))
+        if 'LANGUAGE' in environ:
+            env.put('LANGUAGE', unicode(environ['LANGUAGE']))
+        else:
+            env.put('LANGUAGE', unicode(self._system._global_config.language))
 
     @property
     def cout(self):

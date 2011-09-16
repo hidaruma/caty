@@ -1,4 +1,5 @@
 # coding: utf-8
+from __future__ import absolute_import
 from caty.util import *
 
 # エラーメッセージの分類コード一覧
@@ -21,7 +22,6 @@ class ErrorObj(object):
         self.orig = orig
         self.val = val
         self.error_message = message
-        #self.error_code = error_code
         self._properties = {}
     
     def __setitem__(self, k, v):
@@ -39,16 +39,12 @@ class ErrorObj(object):
     def keys(self):
         return self._properties.keys()
 
-    @property
-    def message(self):
-        return self._message()
-
-    def _message(self, depth=0):
-        m = [self.error_message]
+    def get_message(self, i18n, depth=0):
+        m = [i18n.get(**self.error_message)]
         indent = ' ' * (depth * 4)
         for k, v in self.items():
             if isinstance(v, ErrorObj):
-                m.append('%s%s: %s' % (indent, k, v._message(depth+1)))
+                m.append('%s%s: %s' % (indent, k, v.get_message(i18n, depth+1)))
             else:
                 m.append('%s%s: %s' % (indent, k, error_to_ustr(v)))
         return '\n'.join(m)
@@ -56,19 +52,25 @@ class ErrorObj(object):
     def update(self, o):
         self._properties.update(o)
 
-    def to_dict(self):
+    def to_dict(self, i18n=None):
+        if i18n is None:
+            from string import Template
+            tmpl = Template(self.error_message['msg'])
+            m = tmpl.safe_substitute(self.error_message)
+        else:
+            m = self.get_message(i18n)
         return {
             'isError': self.is_error,
             'orig': self.orig,
             'val': self.val,
-            'message': self.error_message
+            'message': m
         }
 
     def __repr__(self):
         return repr(self.to_dict())
 
     def __unicode__(self):
-        return self._message()
+        return self.get_message()
 
 class JsonSchemaError(ErrorObj, Exception):
     def __init__(self, msg, orig=u'', val=u''):
@@ -86,9 +88,9 @@ class JsonSchemaErrorObject(JsonSchemaError):
         JsonSchemaError.__init__(self, *args, **kwds)
         self.succ = {}
 
-    def to_path(self):
+    def to_path(self, i18n):
         p = {}
-        p.update(list(_flatten(self)))
+        p.update(list(_flatten(self, i18n)))
         #s = obj2path(self.succ)
         #for k, v in s.items():
         #    p[k] = ErrorObj(False, to_unicode(v), to_unicode(v), u'').to_dict()
@@ -101,23 +103,43 @@ class JsonSchemaErrorList(JsonSchemaError):
         for i, v in enumerate(errors):
             self[i] = v
 
-    def to_path(self):
+    def to_path(self, i18n):
         p = {}
-        p.update(list(_flatten(self)))
+        p.update(list(_flatten(self, i18n)))
         return p
 
     def __iter__(self):
         return iter(self.errors)
 
-def _flatten(obj, parent='$'):
+class JsonSchemaUnionError(JsonSchemaError):
+    def __init__(self, e1, e2):
+        self.e1 = e1
+        self.e2 = e2
+
+    def to_path(self, i18n):
+        p = {}
+        p.update(list(_flatten(self, i18n)))
+        return p
+
+def _flatten(obj, i18n, parent='$'):
     if isinstance(obj, JsonSchemaErrorObject):
         for k, v in obj.items():
-            for r in _flatten(v, parent + '.' + k):
+            for r in _flatten(v, i18n, parent + '.' + k):
                 yield r
     elif isinstance(obj, JsonSchemaErrorList):
         for i, v in enumerate(iter(obj)):
-            for r in _flatten(v, parent + '.' + str(i)):
+            for r in _flatten(v, i18n, parent + '.' + str(i)):
                 yield r
+    elif isinstance(obj, JsonSchemaUnionError):
+        t = []
+        for e in _flatten(obj.e1, i18n, parent):
+            t.append(e)
+        for e in _flatten(obj.e2, i18n, parent):
+            t.append(e)
+        r = t[0]
+        for _t in t[1:]:
+            r['message'] = r['message'] + ' / ' + _t['message']
+        yield r
     else:
-        yield parent, obj.to_dict()
+        yield parent, obj.to_dict(i18n)
 

@@ -404,13 +404,13 @@ class TypeCalculator(object):
 
     def error_report(self, e):
         if hasattr(e, 'to_path'):
-            x = e.to_path()
+            x = e.to_path(self.i18n)
             r = {}
             for k, v in x.items():
                 r[unicode(k)] = v['message'] if isinstance(v['message'], unicode) else unicode(str(v['message']))
             return tagged(u'NG', r)
         else:
-            return tagged(u'NG', unicode(e.message, 'utf-8') if isinstance(e.message, str) else e.message)
+            return tagged(u'NG', e.get_message(self.i18n))
 
 class Translate(Builtin, TypeCalculator):
     

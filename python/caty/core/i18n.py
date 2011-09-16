@@ -20,7 +20,8 @@ class I18nMessage(object):
     def _normalize(self, s):
         return replacer.sub('', s.lower())
 
-    def get(self, msg, message_dict=None, **kwds):
+    def get(self, msg, message_dict=None, language_code=None, **kwds):
+        l = language_code or self._lang
         k = self._normalize(msg)
         tmpl = self._messages.get(k, None)
         if not tmpl:
@@ -28,7 +29,7 @@ class I18nMessage(object):
                 return self._parent.get(msg, message_dict, **kwds)
             else:
                 tmpl = {'en':Template(msg)} #フォールバック
-        t = tmpl.get(self._lang, tmpl['en'])
+        t = tmpl.get(l, tmpl['en'])
         if message_dict:
             return t.safe_substitute(message_dict)
         else:

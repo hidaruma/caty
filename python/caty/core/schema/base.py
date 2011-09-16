@@ -90,7 +90,7 @@ class SchemaBase(Resource, PbcObject):
     def _verify_option(self):
         d = set(self._options.keys()) - self.__class__.__options__
         if d:
-            raise JsonSchemaError(ro.i18n.get(u'Undefined schema property: $name', name=(', '.join(d))))
+            raise JsonSchemaError(dict(msg=u'Undefined schema property: $name', name=(', '.join(d))))
 
     @property
     def optional(self):
@@ -203,7 +203,7 @@ class SchemaBase(Resource, PbcObject):
             except JsonSchemaError, e:
                 raise
             except Exception, e:
-                raise JsonSchemaError(ro.i18n.get(u'Unexpected error: $error', error=error_to_ustr(e)))
+                raise JsonSchemaError(dict(msg=u'Unexpected error: $error', error=error_to_ustr(e)))
         else:
             return value
         self.validate(r)
@@ -244,7 +244,7 @@ class SchemaBase(Resource, PbcObject):
         タグ付きの値は基本的に共通でエラーとし、タグを扱う場合はこのメソッドをサブクラスでオーバーライドする。
         """
         if isinstance(value, TaggedValue):
-            raise JsonSchemaError(ro.i18n.get(u'Tagged value is passed: $tag', tag=tag(value)))
+            raise JsonSchemaError(dict(msg=u'Tagged value is passed: $tag', tag=tag(value)))
         if self.optional and (value is caty.UNDEFINED):
             return
         self._validate(value)
@@ -272,7 +272,7 @@ class SchemaBase(Resource, PbcObject):
         try:
             self._check_type_variable([t.name for t in self.type_vars], [])
         except KeyError, e:
-            raise JsonSchemaError(ro.i18n.get(u'Undeclared type variable at $this: $name', name=', '.join(e.args), this=self.name))
+            raise JsonSchemaError(dict(msg=u'Undeclared type variable at $this: $name', name=', '.join(e.args), this=self.name))
         except RuntimeError, e:
             print '[ERROR]', self.name
             raise e
@@ -352,7 +352,7 @@ class UnionSchema(OperatorSchema, Union):
                 elif t == t2:
                     raise e2
                 else:
-                    raise JsonSchemaError(error_to_ustr(e1) + ' / ' + error_to_ustr(e2))
+                    raise JsonSchemaUnionError(e1, e2)
             else:
                 return
         else:
@@ -376,7 +376,7 @@ class UnionSchema(OperatorSchema, Union):
             try:
                 return self._right.convert(value)
             except JsonSchemaError, e2:
-                raise JsonSchemaError(ro.i18n.get('Failed to convert to union type') + ':' + error_to_ustr(e1) + '/' + error_to_ustr(e2))
+                raise JsonSchemaError(dict(msg='Failed to convert to union type') + ':' + error_to_ustr(e1) + '/' + error_to_ustr(e2))
 
 
     def dump(self, depth=0, node=[]):
@@ -571,9 +571,9 @@ class TagSchema(SchemaBase, Tag):
         t = tag(value)
         if t != self.tag:
             if self.tag == '*!' and t in _builtin_tags:
-                raise JsonSchemaError(ro.i18n.get('Wildcard tag is not able to used to builtin types: $type', type=t))
+                raise JsonSchemaError(dict(msg='Wildcard tag is not able to used to builtin types: $type', type=t))
             if self.tag not in ('*', '*!'):
-                raise JsonSchemaError(ro.i18n.get('Unmatched tag: $another, $this', this=self.tag, another=t))
+                raise JsonSchemaError(dict(msg='Unmatched tag: $another, $this', this=self.tag, another=t))
         self.__schema.validate(untagged(value))
 
     def intersect(self, another):
@@ -695,11 +695,11 @@ class NullSchema(SchemaBase, Scalar):
         if self.optional and (value is caty.UNDEFINED):
             return
         if value is not None:
-            raise JsonSchemaError(ro.i18n.get('Not a null'))
+            raise JsonSchemaError(dict(msg='Not a null'))
 
     def intersect(self, another):
         if type(another) != NullSchema:
-            raise JsonSchemaError(ro.i18n.get('Unsupported operand types for $op: $type1, $type2', op='&', type1='null', type2=another.type))
+            raise JsonSchemaError(dict(msg='Unsupported operand types for $op: $type1, $type2', op='&', type1='null', type2=another.type))
         return NullSchema()
 
     def _convert(self, value):
@@ -732,7 +732,7 @@ class VoidSchema(SchemaBase, Scalar):
 
     def intersect(self, another):
         if type(another) != VoidSchema:
-            raise JsonSchemaError(ro.i18n.get('Unsupported operand types for $op: $type1, $type2', op='&', type1='void', type2=another.type))
+            raise JsonSchemaError(dict(msg='Unsupported operand types for $op: $type1, $type2', op='&', type1='void', type2=another.type))
         return VoidSchema()
 
     def _convert(self, value):
