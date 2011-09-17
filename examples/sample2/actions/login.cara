@@ -1,0 +1,41 @@
+// -*- coding: utf-8  -*-
+
+module login in cara;
+
+
+/** トップページ */
+resource Top("/index.htm") {
+  action get("/GET")
+  :: #io void -> void produces start;
+};
+
+/** 開始状態 */
+state start :: void links {
+  + --> Login.login;
+}; 
+
+
+/** ログイン開始アクション */
+resource Login("/login.html") {
+  action login("/GET")
+  :: #io void -> object produces login ;
+  
+};
+
+/** ログイン画面 */
+state login :: object links {
+  /* IDとパスワードを入れてサブミット */
+  submit --> DoLogin.do-login;
+  /* ログインは取りやめ */
+  + cancel --> Top.get;
+};
+
+/** ログイン処理アクション */
+resource DoLogin("/do-login.cgi") {
+  action do-login("/POST")
+  :: #io object -> object produces logged;
+
+};
+
+/** ログイン成功した画面 */
+state logged :: object;
