@@ -158,7 +158,7 @@ class ArgRef(Syntax):
         self.__optional = optional
 
     def execute(self):
-        argv = self._var_storage.opts['_ARGV']
+        argv = self.var_storage.opts['_ARGV']
         try:
             return argv[self.__arg_num]
         except:

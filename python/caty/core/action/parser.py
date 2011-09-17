@@ -166,7 +166,7 @@ class ActionBlock(Parser):
         return name
 
     def profiles(self, seq):
-        profs = split(self.profile, ',', allow_last_delim=True)(seq)
+        profs = [p for p in split(self.profile, ',', allow_last_delim=True)(seq) if p]
         return ActionProfiles(profs)
 
     def profile(self, seq):
@@ -195,6 +195,8 @@ class ActionBlock(Parser):
                 redirects = v
             elif t == 'produces':
                 next_states = v
+        #if not io_type:
+        #    return None
         return ActionProfile(io_type, fragment, in_type, out_type, relay_list, next_states, redirects)
 
     def fragment_name(self, seq):
@@ -208,7 +210,7 @@ class ActionBlock(Parser):
         elif 'out' in ann:
             pf = 'out'
         else:
-            raise ParseError(seq, self.fragment_name)
+            return None, name
         return pf, name
 
     def relays(self, seq):
