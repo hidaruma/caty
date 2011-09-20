@@ -4,13 +4,13 @@ from caty.core.application import *
 from caty.core.applicationgroup import *
 from caty.util.path import join
 from caty.core.std.schema import (builtin, 
+                                  authutil,
                                   debug, 
                                   file, 
                                   filtercmd, 
                                   jsonlib, 
                                   listlib, 
                                   logginglib,
-                                  secure, 
                                   strg, 
                                   test, 
                                   text, 
@@ -55,13 +55,14 @@ class System(PbcObject):
         self.i18n.write('Loading system data')
         self._casm = casm.initialize(self,
                                      [builtin, node],
-                                     [debug, 
+                                     [
+                                     authutil,
+                                     debug, 
                                      file, 
                                      filtercmd, 
                                      jsonlib, 
                                      listlib, 
                                      logginglib,
-                                     secure, 
                                      strg, 
                                      test, 
                                      text, 

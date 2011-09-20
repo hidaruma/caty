@@ -56,4 +56,47 @@ command update-info :: void -> void
     reads storage
     uses user
     refers python:caty.core.std.command.user.UpdateInfo;
-    """
+
+
+type LoginForm = {
+    "userid": string, 
+    "password": string, 
+    "succ": string?,
+};
+
+
+/**
+ * ログイン処理を行う。
+ * 入力値のうちuseridとpasswordは必須である。
+ * succはログイン成功/失敗時に遷移する先のパスである(省略時は/へ)。
+ * ログイン成功/失敗はタグで区別され、成功時は遷移先のパスが、
+ * 失敗時はエラーメッセージがタグ付けされる。
+ */
+command login :: LoginForm -> @OK string | @NG string
+                reads [storage, env]
+                uses [user, session]
+                refers python:caty.core.std.command.user.Login;
+
+/**
+ * ログインしているか否かのチェックを行う。
+ * ログインしていれば @OK タグを付けた上で入力をコピーして返す。
+ * 未ログインの場合は @NG タグを付けた上で入力をコピーして返す。
+ * --userid オプションでユーザアカウントを指定することもでき、その場合はアカウント名の照合も行う。
+ *
+ */
+command loggedin<T> {"userid":string?} :: T -> @OK T | @NG T
+                                reads user
+                                refers python:caty.core.std.command.user.Loggedin;
+
+
+/**
+ * ログアウト処理。
+ * セッション情報を破棄し、入力されたパスへ遷移する。
+ * 未ログイン時でも同じく遷移する。
+ */
+command logout :: string -> Redirect
+    uses [user, session]
+    refers python:caty.core.std.command.user.Logout;
+
+"""
+

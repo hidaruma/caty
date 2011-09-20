@@ -2,6 +2,15 @@
 
 ユーザ管理のコマンド群。
 
+== !setup 
+
+=== !script 
+
+{{{
+{"userid": "boo", "password": "qwerty"} | user:add
+}}}
+
+
 == user:add
 
 ユーザを新規に追加する。既にユーザが存在する場合、 false が返る。
@@ -49,4 +58,47 @@ each {pv userid} | [pass, ["foo", "bar"]] | eq | when {
 |=input|=command|=output|
 |"root"|user:exists|true|
 |"xxx" |user:exists|false|
+
+== user:login
+
+ログイン処理。
+
+=== !exec 
+
+|=env|=input|=command|=output|=備考|
+|%hosturl|{"userid": "boo", "password": "qwerty", "fail": "/login.html"}|%login|"http://localhost/"|Cookie のセッション ID の値は予測不可能なので、オブジェクトの部分一致でチェック|
+|%hosturl|{"userid": "boo", "password": "zxcvb", "fail": "/login.html"}|%login|"http://localhost/login.html"||
+
+== user:logout
+
+ログアウト処理。
+
+=== !exec 
+
+|=env|=input|=command|=output|=備考|
+|%hosturl|{"userid": "boo", "password": "qwerty", "fail": "/login.html"}|%login|"http://localhost/"||
+|%hosturl|"/login.html"|%logout|"http://localhost/login.html"||
+|%hosturl|"/login.html"|%logout|"http://localhost/login.html"|既にログアウトしているが、同様に処理される|
+
+=== !name:hosturl
+
+{{{
+{
+    "HOST_URL": "http://localhost"
+}
+}}}
+
+=== !name:login
+
+{{{
+user:login | pv header | pv Location
+}}}
+
+=== !name: logout
+
+{{{
+user:logout | pv header | pv Location
+}}}
+
+
 

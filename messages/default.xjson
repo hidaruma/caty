@@ -63,7 +63,7 @@
     "Unknown checker: $checker",
 
     /*******************************
-     ******* 組み込み例外 *********
+     ******* Builtin exception *********
      *******************************/
     
     "File does not exists: $path",
@@ -249,6 +249,12 @@
     "Undefined macro: $macro",
 
     "Unexpected errpor while compile $path: $error",
+
+    /***********************
+     *** Standard module ***
+     ***********************/
+
+    "User id or password is incorrect",
 
 ]
 

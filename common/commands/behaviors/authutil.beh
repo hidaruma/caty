@@ -1,0 +1,62 @@
+= authutil モジュール
+
+ログイン機能やリクエストトークン作成機能を提供する。
+
+
+
+
+== authutil:gen-token
+
+リクエストトークンの生成。
+
+=== !exec 
+
+|=command|=outputCond|=備考|
+|authutil:gen-token|%insession|生成した値がセッションに含まれていることの確認|
+|[authutil:gen-token, authutil:gen-token]|%diff|生成した値は毎回異なる|
+
+=== !name: insession
+
+{{{
+[debug:get-session $_CATY_SECURE_TOKEN_KEY, pass] | list:contains | untagged
+}}}
+
+=== !name: diff
+
+{{{
+eq | when {
+    Same => false,
+    Diff => true
+}
+}}}
+
+== authutil:check-token
+
+入力値にリクエストトークンが含まれているかどうか検証する。
+
+=== !preCond 
+
+|=command|=output|=orElse|=備考|
+|debug:get-session --nullable "$_CATY_SECURE_TOKEN_KEY"| [] |null|事前にリクエストトークンが存在するとテストできない|
+
+=== !exec 
+
+|=input|=command|=output|=outputCond|=備考|
+|null|authutil:gen-token||%insession||
+|{"foo": "xxx", "bar":1}|authutil:check-token|@NG null||トークンを含まない入力|
+|{"$_catySecureToken": "x", "foo": "xxx", "bar":1}|authutil:check-token|@NG null||不正なトークン|
+|%validinput|authutil:check-token|@OK {"foo": "xxx", "bar": 1}||正常ケース|
+| null |debug:get-session "$_CATY_SECURE_TOKEN_KEY"| [] ||処理が終わったらトークンから値は削除されている|
+
+
+=== !name: validinput
+
+{{{
+{
+    "$_catySecureToken": debug:get-session "$_CATY_SECURE_TOKEN_KEY" | item 0, 
+    "foo": "xxx",
+    "bar": 1
+}
+}}}
+
+

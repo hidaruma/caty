@@ -1,0 +1,27 @@
+module login in cara;
+
+resource DoLogin("/do-login") {
+    action login("/POST#exists-parent") :: {
+        translate user:LoginForm | when {
+            OK => pass > src;
+                %src | user:login | when {
+                    OK => redirect,
+                    NG => {"message": pass, "before": %src | xjson:get --safe succ} | print /login.html
+                },
+            NG => print /login.html,
+        }
+    };
+};
+
+resource DoLogout("/do-logout") {
+    action logout("/POST#exists-parent") :: {
+        "/" | user:logout
+    };
+};
+
+resource HTML("/*.html") {
+    action get("/GET") :: {
+        { "before": %before? } | print %0
+    };
+};
+

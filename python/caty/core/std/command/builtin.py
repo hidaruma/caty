@@ -356,7 +356,8 @@ class TraceDispatch(RequestTool):
 
 from topdown import *
 from caty.core.schema.base import TagSchema, UnionSchema
-from caty.core.casm.language import util, schemaparser
+from caty.core.casm.language import schemaparser
+from caty.core.language import util
 import operator
 class TypeCalculator(object):
     def set_schema(self, s):

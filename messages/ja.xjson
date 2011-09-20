@@ -254,4 +254,9 @@
 
     "Unexpected errpor while compile $path: $error": "$pathのコンパイル中の予期せぬエラー: $error",
 
+    /**********************
+     *** 標準モジュール ***
+     **********************/
+
+    "User id or password is incorrect": "ユーザーIDもしくはパスワードが間違っています",
 }

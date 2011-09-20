@@ -11,7 +11,7 @@ from caty.core.script import node
 from caty.core import script, casm
 from caty.core.facility import Facility, FakeFacility, FacilitySet, AccessManager
 from caty.core.memory import AppMemory
-from caty.core.std.command.secure import RequestToken, CATY_USER_INFO_KEY
+from caty.core.std.command.authutil import RequestToken, CATY_USER_INFO_KEY
 from caty.core.std.command.user import User
 from caty.core.exception import throw_caty_exception
 from caty.util.collection import ImmutableDict

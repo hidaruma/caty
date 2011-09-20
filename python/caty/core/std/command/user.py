@@ -3,21 +3,10 @@ from caty.core.command import Builtin
 from caty.core.facility import Facility, AccessManager
 from caty.util.path import join
 from caty.jsontools import tagged
+from Cookie import Morsel
+from caty.core.std.command.authutil import CATY_USER_INFO_KEY
 
 name = 'user'
-schema = u"""
-type UserInfo = {
-    "userid": string,    // ID。この値は一意でなければならない。
-    "username": string?, // 名前。必須ではない
-    "role": [string(minLength=1)*]?, // 必要ないなら使わなくてよい
-    *: any, // 他のオプショナルな項目は何でも良い
-};
-
-type RegistryInfo = UserInfo & {
-    "password": string,
-    *: any
-};
-"""
 
 class User(Facility):
     def __init__(self, info=None):
@@ -133,4 +122,71 @@ def authenticate(incoming, password):
     p = password[40:]
     a = sha1(salt + incoming).hexdigest()
     return a == p
+
+class Login(Builtin):
+
+    def execute(self, input):
+        userid = input['userid']
+        password = input['password']
+        storage = self.storage('user')
+        try:
+            user = storage.select1({'userid': userid})
+            succ = authenticate(password, user['password'])
+        except:
+            succ = False
+        if succ:
+            session = self.session.storage.create().dual_mode
+            self.session = session
+            del user['password']
+            self.user.set_user_info(user)
+            session.put(CATY_USER_INFO_KEY, user)
+            redirect = u'/' if not 'succ' in input else input['succ']
+            return tagged(u'OK', redirect)
+        else:
+            msg = self.i18n.get(u'User id or password is incorrect')
+            return tagged(u'NG', msg)
+
+    def _mk_cookie(self, sessionid):
+        m = Morsel()
+        m.set('sessionid', sessionid, sessionid)
+        m['expires'] = self.session.storage.expire
+        m['path'] = '/'
+        return m.OutputString()
+
+class Loggedin(Builtin):
+
+    def setup(self, opts):
+        self.opts = opts
+
+    def execute(self, input):
+        if self.user.loggedin:
+            if self.opts.userid:
+                if self.opts.userid == self.user.userid:
+                    return tagged(u'OK', input)
+            else:
+                return tagged(u'OK', input)
+        return tagged(u'NG', input)
+
+
+class Logout(Builtin):
+
+    def execute(self, input):
+        key = self.session.key
+        if self.user.loggedin:
+            self.session.clear()
+            self.user.clear()
+        return {
+            'header': {
+                'Location': unicode(join(self.env.get('HOST_URL'), input)),
+                'Set-Cookie': unicode(self._mk_cookie(key)),
+            },
+            'status': 302}
+
+    def _mk_cookie(self, sessionid):
+        m = Morsel()
+        m.set('sessionid', sessionid, sessionid)
+        m['expires'] = -1
+        m['path'] = '/'
+        return m.OutputString()
+
 

@@ -1,116 +1,15 @@
 #coding: utf-8
 from caty.core.command import Builtin
 from caty.util.path import join
-from caty.core.std.command.user import authenticate
 from csslib.selector import select, Element
-from Cookie import Morsel
 import sys
 from hashlib import sha1
 import random
 
 name = u'secure'
-schema = u"""
-type TokenProperty = {
-    "$_catySecureToken": string,
-};
 
-type TokenEmbeded = any;
-
-type TokenCheckResult = @OK T | @NG null;
-
-type Token = string;
-
-type TokenSet = [Token*];
-
-type TargetForm = string | Response;
-
-type LoginForm = {
-    "userid": string, 
-    "password": string, 
-    "succ": string?,
-    "fail": string?
-};
-
-"""
 CATY_SECURE_TOKEN_KEY = '$_CATY_SECURE_TOKEN_KEY' # フォーム入力におけるリクエストトークンのキー
 CATY_USER_INFO_KEY = '$_CATY_USER_INFO_KEY' # セッション中にユーザ情報を格納する時のキー
-
-class Login(Builtin):
-
-    def execute(self, input):
-        userid = input['userid']
-        password = input['password']
-        storage = self.storage('user')
-        try:
-            user = storage.select1({'userid': userid})
-            succ = authenticate(password, user['password'])
-        except:
-            succ = False
-        if succ:
-            session = self.session.storage.create().dual_mode
-            self.session = session
-            del user['password']
-            self.user.set_user_info(user)
-            session.put(CATY_USER_INFO_KEY, user)
-            redirect = '/' if not 'succ' in input else input['succ']
-            return {
-                'header': {
-                    'Location': unicode(join(self.env.get('HOST_URL'), redirect)),
-                    'Set-Cookie': unicode(self._mk_cookie(session.key)),
-                },
-                'status': 302}
-        else:
-            redirect = '/' if not 'fail' in input else input['fail']
-            return {
-                'header':{
-                    'Location': unicode(join(self.env.get('HOST_URL'), redirect)),
-                },
-                'status': 302
-            }
-
-    def _mk_cookie(self, sessionid):
-        m = Morsel()
-        m.set('sessionid', sessionid, sessionid)
-        m['expires'] = self.session.storage.expire
-        m['path'] = '/'
-        return m.OutputString()
-
-class Loggedin(Builtin):
-
-    def setup(self, opts):
-        self.opts = opts
-
-    def execute(self, input):
-        if self.user.loggedin:
-            if self.opts.userid:
-                if self.opts.userid == self.user.userid:
-                    return tagged(u'OK', input)
-            else:
-                return tagged(u'OK', input)
-        return tagged(u'NG', input)
-
-
-class Logout(Builtin):
-
-    def execute(self, input):
-        key = self.session.key
-        if self.user.loggedin:
-            self.session.clear()
-            self.user.clear()
-        return {
-            'header': {
-                'Location': unicode(join(self.env.get('HOST_URL'), input)),
-                'Set-Cookie': unicode(self._mk_cookie(key)),
-            },
-            'status': 302}
-
-    def _mk_cookie(self, sessionid):
-        m = Morsel()
-        m.set('sessionid', sessionid, sessionid)
-        m['expires'] = -1
-        m['path'] = '/'
-        return m.OutputString()
-
 
 from caty.core.facility import Facility, AccessManager
 class RequestToken(Facility):

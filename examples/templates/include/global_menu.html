@@ -1,7 +1,7 @@
 <?caty-meta template="smarty"?>
 <?caty-script
     {
-        "loggedin": secure:loggedin | when {OK=>true, NG=>false},
+        "loggedin": user:loggedin | when {OK=>true, NG=>false},
     }
 ?>
 <div class="caty.global_menu">
