@@ -327,7 +327,7 @@ def scriptwrapper(profile, script):
             try:
                 return script(input)
             finally:
-                self._var_storage.del_masked_scope()
+                self.var_storage.del_masked_scope()
 
         def setup(self, *args, **kwds):
             pass
@@ -336,24 +336,24 @@ def scriptwrapper(profile, script):
             self._init_opts()
             opts = self._opts
             args = self._args
-            self._var_storage.new_maked_scope(opts, args)
+            self.var_storage.new_maked_scope(opts, args)
             if opts:
                 for k, v in opts.items():
-                    self._var_storage.opts[k] = v
+                    self.var_storage.opts[k] = v
             if args:
-                self._var_storage.opts['_ARGV'] = [u""] + args
-                self._var_storage.args = [u""] + args
+                self.var_storage.opts['_ARGV'] = [u""] + args
+                self.var_storage.args = [u""] + args
             else:
-                self._var_storage.opts['_ARGV'] = [u""]
-                self._var_storage.args = [u""]
+                self.var_storage.opts['_ARGV'] = [u""]
+                self.var_storage.args = [u""]
             if opts:
-                self._var_storage.opts['_OPTS'] = opts
+                self.var_storage.opts['_OPTS'] = opts
             else:
-                self._var_storage.opts['_OPTS'] = {}
+                self.var_storage.opts['_OPTS'] = {}
 
         def set_var_storage(self, storage):
             Command.set_var_storage(self, storage)
-            script.set_var_storage(self._var_storage)
+            script.set_var_storage(self.var_storage)
 
         def set_facility(self, facilities):
             Command.set_facility(self, facilities)
