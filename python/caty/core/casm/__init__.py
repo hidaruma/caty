@@ -30,14 +30,13 @@ def filter_command(mod):
 def create_builtin_schema(modules):
     u"""ビルトインモジュールのスキーマ定義の生成。
     builtin.py の他、Caty スクリプトの内部で使われるコマンドの宣言、
-    Caty システム全体に関わるスキーマの定義を行う。
+    Catyシステム全体に関わるスキーマの定義を行う。
     """
     yield 'module builtin;'
     yield modules[0].schema
     yield modules[1].schema
     for s in filter_command(modules[1]):
         yield s
-
 
 @join
 @tolist

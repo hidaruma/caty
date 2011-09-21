@@ -7,7 +7,6 @@ from caty import mafs, storage, session
 from caty.jsontools import xjson
 from caty.util.collection import merge_dict
 from caty.core.globalconf import *
-from caty.core.script import node
 from caty.core import script, casm
 from caty.core.facility import Facility, FakeFacility, FacilitySet, AccessManager
 from caty.core.memory import AppMemory

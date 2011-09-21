@@ -2,19 +2,63 @@
 from caty.core.command.exception import *
 import caty.util as util
 from caty import UNDEFINED
+from caty.jsontools.path import build_query
+from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly
+from caty.jsontools import jstypes
+from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command
+from caty.core.script.node import *
+import caty
+import caty.core.schema as schema
+import types
 
 class BaseInterpreter(object):
     def visit(self, node):
         return node.accept(self)
 
     def visit_command(self, node):
-        raise NotImplementedError('%s#visit_command' % self.__class__.__name__)
+        raise NotImplementedError(u'%s#visit_command'.format(self.__class__.__name__))
 
     def visit_pipe(self, node):
-        raise NotImplementedError('%s#visit_pipe' % self.__class__.__name__)
+        raise NotImplementedError(u'%s#visit_pipe'.format(self.__class__.__name__))
 
     def visit_discard_pipe(self, node):
-        raise NotImplementedError('%s#visit_discard_pipe' % self.__class__.__name__)
+        raise NotImplementedError(u'%s#visit_discard_pipe'.format(self.__class__.__name__))
+
+    def visit_scalar(self, node):
+        raise NotImplementedError(u'%s#visit_scalar'.format(self.__class__.__name__))
+
+    def visit_list(self, node):
+        raise NotImplementedError(u'%s#visit_list'.format(self.__class__.__name__))
+
+    def visit_object(self, node):
+        raise NotImplementedError(u'%s#visit_object'.format(self.__class__.__name__))
+
+    def visit_varstore(self, node):
+        raise NotImplementedError(u'%s#visit_varstore'.format(self.__class__.__name__))
+
+    def visit_varref(self, node):
+        raise NotImplementedError(u'%s#visit_varref'.format(self.__class__.__name__))
+
+    def visit_argref(self, node):
+        raise NotImplementedError(u'%s#visit_argref'.format(self.__class__.__name__))
+
+    def visit_when(self, node):
+        raise NotImplementedError(u'%s#visit_when'.format(self.__class__.__name__))
+
+    def visit_binarytag(self, node):
+        raise NotImplementedError(u'%s#visit_binarytag'.format(self.__class__.__name__))
+
+    def visit_unarytag(self, node):
+        raise NotImplementedError(u'%s#visit_unarytag'.format(self.__class__.__name__))
+
+    def visit_each(self, node):
+        raise NotImplementedError(u'%s#visit_each'.format(self.__class__.__name__))
+
+    def visit_time(self, node):
+        raise NotImplementedError(u'%s#visit_time'.format(self.__class__.__name__))
+
+    def visit_take(self, node):
+        raise NotImplementedError(u'%s#visit_take'.format(self.__class__.__name__))
 
 class CommandExecutor(BaseInterpreter):
     def __init__(self, cmd):
@@ -67,6 +111,172 @@ class CommandExecutor(BaseInterpreter):
         node.bf(self.input)
         self.input = None
         return node.af.accept(self)
+
+
+    def visit_scalar(self, node):
+        return node.value
+
+    def visit_list(self, node):
+        r = []
+        for v in node:
+            prev_input = self.input
+            r.append(v.accept(self))
+            self.input = prev_input
+        return r
+
+    def visit_object(self, node):
+        obj = {}
+        for name, node in node.iteritems():
+            prev_input = self.input
+            obj[name] = node.accept(self)
+            self.input = prev_input
+        if '$$tag' in obj:
+            if '$$val' in obj:
+                o = tagged(obj['$$tag'], obj['$$val'])
+            else:
+                t = obj['$$tag']
+                del obj['$$tag']
+                o = tagged(t, obj)
+            return o
+        else:
+            return obj
+
+    def visit_varstore(self, node):
+        if node.var_name not in node.var_storage.opts:
+            node.var_storage.opts[node.var_name] = self.input
+            return self.input
+        else:
+            raise Exception(u'%s is already defined' % node.var_name)
+
+    def visit_varref(self, node):
+        if node.var_name in node.var_storage.opts:
+            r = node.var_storage.opts[node.var_name]
+            if r is UNDEFINED and not node.optional:
+                raise Exception(u'%s is not defined' % node.var_name)
+            return r
+        else:
+            if node.optional:
+                return caty.UNDEFINED
+            raise Exception(u'%s is not defined' % node.var_name)
+
+    def visit_argref(self, node):
+        argv = self.var_storage.opts['_ARGV']
+        try:
+            return argv[node.arg_num]
+        except:
+            if node.optional:
+                return caty.UNDEFINED
+            raise
+
+    def visit_when(self, node):
+        jsobj = self.input
+        target = node.query.find(jsobj).next()
+        if not isinstance(target, TaggedValue) and not (isinstance(target, dict) and '$$tag' in target):
+            return self.__not_tagged_value_case(node, target)
+        else:
+            return self.__tagged_value_case(node, target)
+
+    def __tagged_value_case(self, node, target):
+        tag = target.tag if isinstance(target, TaggedValue) else target['$$tag']
+        if tag not in node.cases:
+            if '*' in node.cases:
+                tag = '*'
+            elif '*!' in node.cases:
+                if tag not in schema.types:
+                    tag = '*!'
+                else:
+                    raise ScriptError(tag)
+            else:
+                raise ScriptError(tag)
+        return self.__exec_cmd(node, tag, target)
+
+    def __not_tagged_value_case(self, node, target):
+        tags = node.scalar_tag_map.get(type(target), None)
+        if tags == None:
+            raise ScriptError()
+        for tag in tags:
+            if tag in node.cases:
+                return self.__exec_cmd(tag, target)
+        if '*' in node.cases:
+            tag = '*'
+        elif '*!' in node.cases:
+            for tag in tags:
+                if tag not in schema.types:
+                    tag = '*!'
+                    break
+            else:
+                raise ScriptError(tag)
+        else:
+            raise ScriptError(tag)
+        return self.__exec_cmd(node, tag, target)
+    
+    def __exec_cmd(self, node, tag, jsobj):
+        childcmd = node.cases[tag].cmd
+        if childcmd.in_schema != jstypes.never:
+            if isinstance(node.cases[tag], UntagCase):
+                self.input = untagged(jsobj)
+            else:
+                self.input = jsobj
+        return childcmd.accept(self)
+
+    def visit_binarytag(self, node):
+        return tagged(node.tag, node.command.accept(self))
+
+    def visit_unarytag(self, node):
+        return TagOnly(node.tag)
+
+    def visit_each(self, node):
+        node._prepare()
+        if node.prop:
+            return self.__iter_obj(node)
+        else:
+            return self.__iter_array(node)
+
+    def __iter_array(self, node):
+        r = []
+        i = self.input
+        for v in i:
+            self.input = v
+            try:
+                node.var_storage.new_scope()
+                r.append(node.cmd.accept(self))
+            finally:
+                node.var_storage.del_scope()
+        return r
+
+    def __iter_obj(self, node):
+        r = []
+        i = self.input.iteritems()
+        for v in i:
+            self.input = v
+            try:
+                node.var_storage.new_scope()
+                r.append(node.cmd.accept(self))
+            finally:
+                node.var_storage.del_scope()
+        return dict(r)
+
+    def visit_time(self, node):
+        import time
+        s = time.time()
+        r = node.cmd.accept(self)
+        e = time.time()
+        print e - s, '[sec]'
+        return r
+
+    def visit_take(self, node):
+        r = []
+        i = self.input
+        for v in i:
+            try:
+                self.input = v
+                self.var_storage.new_scope()
+                x = node.cmd.accept(self)
+                if x == True or tag(x) == 'True':
+                    r.append(v)
+            finally:
+                self.var_storage.del_scope()
+        return r
 
     @property
     def in_schema(self):

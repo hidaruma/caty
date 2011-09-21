@@ -3,6 +3,7 @@ import caty
 from caty.core.application import *
 from caty.core.applicationgroup import *
 from caty.util.path import join
+from caty.core.script import node
 from caty.core.std.schema import (builtin, 
                                   authutil,
                                   debug, 

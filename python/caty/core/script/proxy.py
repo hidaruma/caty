@@ -180,14 +180,6 @@ class TimeProxy(FunctorProxy):
     def _get_class(self):
         return Time
 
-class CaptureProxy(FunctorProxy):
-    def _get_class(self):
-        return Capture
-
-class TypeInfoProxy(FunctorProxy):
-    def _get_class(self):
-        return TypeInfo
-
 class CombinatorProxy(Proxy):
     def __init__(self, a, b):
         self.a = a

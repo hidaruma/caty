@@ -8,10 +8,9 @@ from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly
 from caty.jsontools import jstypes
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Syntax
 import caty
-import caty.core.schema as schema
 import types
 
-schema = ''
+schema = u''
 
 class ScalarBuilder(Syntax):
     command_decl = u"""command scalar-builder<T> :: void -> T
@@ -19,27 +18,22 @@ class ScalarBuilder(Syntax):
                         refers python:caty.core.script.node.ScalarBuilder;
     """
 
-    def __init__(self):
-        Syntax.__init__(self)
-
     def set_value(self, value):
         if isinstance(value, str):
             v = unicode(value)
         else:
             v = value
-        #self.profile.out_schema = jstypes.enum.create({}, [v])
         self.value = v
 
-    def execute(self):
-        return self.value
+    def accept(self, visitor):
+        return visitor.visit_scalar(self)
 
 class ListBuilder(Syntax):
     command_decl = u"""command list-builder<T> :: T -> array
                         refers python:caty.core.script.node.ListBuilder;
     """
-
-    def __init__(self):
-        Syntax.__init__(self)
+    def __init__(self, *args, **kwds):
+        Syntax.__init__(self, *args, **kwds)
         self.values= []
 
     def set_values(self, values):
@@ -54,28 +48,23 @@ class ListBuilder(Syntax):
     def set_facility(self, facilities):
         for v in self.values:
             v.set_facility(facilities)
-        #scms = []
-        #    scms.append(v.out_schema)
-        #self.out_schema.schema_list = scms
    
     def set_var_storage(self, storage):
         for v in self.values:
             v.set_var_storage(storage)
 
-    def execute(self, input):
-        r = []
-        for v in self.values:
-            r.append(v(input))
-        return r
+    def __iter__(self):
+        return iter(self.values)
 
+    def accept(self, visitor):
+        return visitor.visit_list(self)
 
 class ObjectBuilder(Syntax):
     command_decl = u"""command __object-builder<T> :: T -> object
                         refers python:caty.core.script.node.ObjectBuilder;
     """
-
-    def __init__(self):
-        Syntax.__init__(self)
+    def __init__(self, *args, **kwds):
+        Syntax.__init__(self, *args, **kwds)
         self.__nodes = {}
 
     def add_node(self, node):
@@ -92,38 +81,27 @@ class ObjectBuilder(Syntax):
         for v in self.__nodes.values():
             v.set_var_storage(storage)
 
-    def execute(self, input):
-        obj = {}
-        for name, node in self.__nodes.iteritems():
-            obj[name] = node(input)
-        if '$$tag' in obj:
-            if '$$val' in obj:
-                o = tagged(obj['$$tag'], obj['$$val'])
-            else:
-                t = obj['$$tag']
-                del obj['$$tag']
-                o = tagged(t, obj)
-            return o
-        else:
-            return obj
+
+    def accept(self, visitor):
+        return visitor.visit_object(self)
+
+    def iteritems(self):
+        return self.__nodes.iteritems()
 
 class VarStore(Syntax):
     command_decl = u"""command __var-store<T> :: T -> T
                         refers python:caty.core.script.node.VarStore;
     """
-    def __init__(self, name):
-        Syntax.__init__(self)
+    def __init__(self, *args, **kwds):
+        Syntax.__init__(self, *args, **kwds)
         self.__var_name = name
 
-    def set_var_storage(self, storage):
-        self.__var_storage = storage
+    @property
+    def var_name(self):
+        return self.__var_name
 
-    def execute(self, input):
-        if self.__var_name not in self.__var_storage.opts:
-            self.__var_storage.opts[self.__var_name] = input
-            return input
-        else:
-            raise Exception(u'%s is already defined' % self.__var_name)
+    def accept(self, visitor):
+        return visitor.visit_varstore(self)
 
 class VarRef(Syntax):
     command_decl = u"""command __var-ref<T> :: void -> T
@@ -134,19 +112,16 @@ class VarRef(Syntax):
         self.__var_name = name
         self.__optional = optional
 
-    def set_var_storage(self, storage):
-        self.__var_storage = storage
+    def accept(self, visitor):
+        return visitor.visit_varref(self)
 
-    def execute(self):
-        if self.__var_name in self.__var_storage.opts:
-            r = self.__var_storage.opts[self.__var_name]
-            if r is caty.UNDEFINED and not self.__optional:
-                raise Exception(u'%s is not defined' % self.__var_name)
-            return r
-        else:
-            if self.__optional:
-                return caty.UNDEFINED
-            raise Exception(u'%s is not defined' % self.__var_name)
+    @property
+    def var_name(self):
+        return self.__var_name
+
+    @property
+    def optional(self):
+        return self.__optional
 
 class ArgRef(Syntax):
     command_decl = u"""command __arg-ref<T> :: void -> T
@@ -157,14 +132,17 @@ class ArgRef(Syntax):
         self.__arg_num = int(num)
         self.__optional = optional
 
-    def execute(self):
-        argv = self.var_storage.opts['_ARGV']
-        try:
-            return argv[self.__arg_num]
-        except:
-            if self.__optional:
-                return caty.UNDEFINED
-            raise
+
+    def accept(self, visitor):
+        return visitor.visit_argref(self)
+
+    @property
+    def arg_num(self):
+        return self.__arg_num
+
+    @property
+    def optional(self):
+        return self.__optional
 
 class ConstNode(object):
     def __init__(self, name, value):
@@ -178,8 +156,8 @@ class ConstNode(object):
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
 
-    def __call__(self, input):
-        return self.cmd(input)
+    def accept(self, visitor):
+        return self.cmd.accept(visitor)
 
 class CommandNode(object):
     def __init__(self, name, cmd):
@@ -193,8 +171,8 @@ class CommandNode(object):
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
 
-    def __call__(self, input):
-        return self.cmd(input)
+    def accept(self, visitor):
+        return self.cmd.accept(visitor)
 
 class Dispatch(Syntax):
     command_decl = u"""command __dispatch {"seq": boolean?, "multi": boolean?} :: any -> any
@@ -217,6 +195,18 @@ class Dispatch(Syntax):
             caty._Undefined: ['undefined'],
         }
     
+    @property
+    def cases(self):
+        return self.__cases
+
+    @property
+    def query(self):
+        return self.__query
+
+    @property
+    def scalar_tag_map(self):
+        return self.__scalar_tag_map
+
     def add_case(self, case):
         if case.tag in self.__cases:
             raise Exception(case.tag)
@@ -230,6 +220,10 @@ class Dispatch(Syntax):
         for v in self.__cases.values():
             v.set_var_storage(storage)
 
+
+    def accept(self, visitor):
+        return visitor.visit_when(self)
+
     def execute(self, input):
         jsobj = input
         target = self.__query.find(jsobj).next()
@@ -238,48 +232,7 @@ class Dispatch(Syntax):
         else:
             return self.tagged_value_case(target)
 
-    def tagged_value_case(self, target):
-        tag = target.tag if isinstance(target, TaggedValue) else target['$$tag']
-        if tag not in self.__cases:
-            if '*' in self.__cases:
-                tag = '*'
-            elif '*!' in self.__cases:
-                if tag not in schema.types:
-                    tag = '*!'
-                else:
-                    raise ScriptError(tag)
-            else:
-                raise ScriptError(tag)
-        return self.exec_cmd(tag, target)
 
-    def not_tagged_value_case(self, target):
-        tags = self.__scalar_tag_map.get(type(target), None)
-        if tags == None:
-            raise ScriptError()
-        for tag in tags:
-            if tag in self.__cases:
-                return self.exec_cmd(tag, target)
-        if '*' in self.__cases:
-            tag = '*'
-        elif '*!' in self.__cases:
-            for tag in tags:
-                if tag not in schema.types:
-                    tag = '*!'
-                    break
-            else:
-                raise ScriptError(tag)
-        else:
-            raise ScriptError(tag)
-        return self.exec_cmd(tag, target)
-    
-    def exec_cmd(self, tag, jsobj):
-        childcmd = self.__cases[tag].cmd
-        if childcmd.in_schema != jstypes.never:
-            if isinstance(self.__cases[tag], UntagCase):
-                input = untagged(jsobj)
-            else:
-                input = jsobj
-        return childcmd(input)
 
 class TagBuilder(Syntax):
     command_decl = u"""command __add-tag :: any -> any
@@ -296,8 +249,8 @@ class TagBuilder(Syntax):
     def set_var_storage(self, storage):
         self.command.set_var_storage(storage)
 
-    def execute(self, input):
-        return tagged(self.tag, self.command(input))
+    def accept(self, visitor):
+        return visitor.visit_binarytag(self)
 
 class UnaryTagBuilder(Syntax):
     command_decl = u"""command __unary-tag :: any -> any
@@ -310,9 +263,8 @@ class UnaryTagBuilder(Syntax):
     def set_facility(self, facilities):
         pass
 
-    def execute(self, input):
-        return TagOnly(self.tag)
-
+    def accept(self, visitor):
+        return visitor.visit_unarytag(self)
 
 class Case(object):
     def __init__(self, tag, cmd):
@@ -325,6 +277,8 @@ class Case(object):
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
     
+    def accept(self, visitor):
+        return self.cmd.accept(visitor)
 
 class UntagCase(Case):pass
 
@@ -349,87 +303,25 @@ class Each(Syntax):
     def setup(self, opts, *ignore):
         self.__prop = opts['prop'] if 'prop' in opts else None
 
+    @property
+    def prop(self):
+        return self.__prop
+
     def set_facility(self, facilities):
         self.cmd.set_facility(facilities)
-        #ils = facilities['schema']['array']
-        #ils.schemata = [self.cmd.in_schema]
-        #ils.repeat = True
-        #ols = facilities['schema']['array']
-        #ols.schemata = [self.cmd.out_schema]
-        #ols.repeat = True
-        #self.profile.declobj.profiles = [(ils, ols)]
 
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)
         self.cmd.set_var_storage(storage)
 
-    def execute(self, input):
-        if self.__prop:
-            return self._iter_obj(input)
-        else:
-            return self._iter_array(input)
-
-    def _iter_array(self, input):
-        r = []
-        for v in input:
-            try:
-                self.var_storage.new_scope()
-                r.append(self.cmd(v))
-            finally:
-                self.var_storage.del_scope()
-        return r
-
-    def _iter_obj(self, input):
-        r = self._iter_array(list(input.items()))
-        return dict(r)
-
-from caty.util import error_to_ustr
-class Capture(Syntax):
-    command_decl = u"""@[test] command captured-pipeline<S, T, U> :: S -> @OK T | @Err U
-                            reads env
-                        refers python:caty.core.script.node.Capture;"""
-    def __init__(self, cmd):
-        Syntax.__init__(self)
-        self.cmd = cmd
-
-    def set_facility(self, facilities):
-        Syntax.set_facility(self, facilities)
-        self.cmd.set_facility(facilities)
-
-    def set_var_storage(self, storage):
-        self.cmd.set_var_storage(storage)
-
-    def execute(self, input):
-        try:
-            return tagged(u'OK', self.cmd(input))
-        except (PipelineErrorExit, PipelineInterruption), e:
-            return tagged(u'Err', e.json_obj)
-        except Exception, e:
-            return tagged(u'Err', error_to_ustr(e))
-    
-
-class TypeInfo(Syntax):
-    command_decl = u"""@[console] command type-info :: void -> string
-                        reads schema
-                        refers python:caty.core.script.node.TypeInfo;"""
-
-    def __init__(self, cmd):
-        Syntax.__init__(self)
-        self.cmd = cmd
-
-    def set_facility(self, facilities):
-        Syntax.set_facility(self, facilities)
-        self.cmd.set_facility(facilities)
-
-    def execute(self):
-        return unicode('%s -> %s' % (self.cmd.profile.in_schema.canonical_name, self.cmd.profile.out_schema.canonical_name))
+    def accept(self, visitor):
+        return visitor.visit_each(self)
 
 class Time(Syntax):
     command_decl = u"""
     command time-functor<T> :: T -> T
         refers python:caty.core.script.node.Time;
     """
-    
     def __init__(self, cmd, ignore):
         Syntax.__init__(self)
         self.cmd = cmd
@@ -441,13 +333,9 @@ class Time(Syntax):
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
 
-    def execute(self, input):
-        import time
-        s = time.time()
-        r = self.cmd(input)
-        e = time.time()
-        print e - s, '[sec]'
-        return r
+
+    def accept(self, visitor):
+        return visitor.visit_time(self)
 
 class Take(Syntax):
     command_decl = u"""
@@ -465,17 +353,9 @@ class Take(Syntax):
         Syntax.set_var_storage(self, storage)
         self.cmd.set_var_storage(storage)
 
-    def execute(self, input):
-        r = []
-        for v in input:
-            try:
-                self.var_storage.new_scope()
-                x = self.cmd(v)
-                if x == True or tag(x) == 'True':
-                    r.append(v)
-            finally:
-                self.var_storage.del_scope()
-        return r
+    def accept(self, visitor):
+        return visitor.visit_take(self)
+
 
 class PipelineFragment(Syntax):
     command_decl = u"""
@@ -494,6 +374,7 @@ class PipelineFragment(Syntax):
         Syntax.set_var_storage(self, storage)
         self.cmd.set_var_storage(storage)
 
-    def execute(self, input):
-        return self.cmd(input)
+    def accept(self, visitor):
+        return self.cmd.accept(visitor)
+
 
