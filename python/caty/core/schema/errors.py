@@ -70,15 +70,15 @@ class ErrorObj(object):
         return repr(self.to_dict())
 
     def __unicode__(self):
-        return self.get_message()
+        if self.is_error:
+            return self.to_dict()['message']
+        else:
+            return u''
 
 class JsonSchemaError(ErrorObj, Exception):
     def __init__(self, msg, orig=u'', val=u''):
         Exception.__init__(self, msg)
         ErrorObj.__init__(self, True, orig, val, msg)
-
-    def __unicode__(self):
-        return self._message()
 
     def __repr__(self):
         return ErrorObj.__repr__(self)

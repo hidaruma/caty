@@ -132,7 +132,7 @@ class ObjectSchema(SchemaBase, Object):
                 errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Property not exists: $name', name=k))
                 is_error = True
         if is_error:
-            e = JsonSchemaErrorObject(u'Failed to validate object')
+            e = JsonSchemaErrorObject({u'msg': u'Failed to validate object'})
             e.update(errors)
             raise e
 
@@ -174,7 +174,7 @@ class ObjectSchema(SchemaBase, Object):
                 elif v.optional and 'default' in v.annotations:
                     result[k] = v.annotations['default'].value
         if is_error:
-            e = JsonSchemaErrorObject(u'Failed to convert object')
+            e = JsonSchemaErrorObject({u'msg': u'Failed to convert object'})
             e.update(errors)
             e.succ = result
             raise e

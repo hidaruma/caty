@@ -74,7 +74,7 @@ class ArraySchema(SchemaBase, Array):
                 count += 1
                 s_count += 1
         if is_error:
-            e = JsonSchemaErrorList(u'Failed to validate array type:', errors)
+            e = JsonSchemaErrorList({u'msg': u'Failed to validate array type:'}, errors)
             raise e
 
     def _convert(self, value):
@@ -100,7 +100,7 @@ class ArraySchema(SchemaBase, Array):
                 errors.append(e)
             count += 1
         if is_error:
-            e = JsonSchemaErrorList(u'Failed to validate array type:', errors)
+            e = JsonSchemaErrorList({u'msg': u'Failed to validate array type:'}, errors)
             raise e
         return result
 
