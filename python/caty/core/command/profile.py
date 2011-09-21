@@ -64,43 +64,6 @@ class ProfileContainer(object):
     def get_command_class(self):
         return self.command_class
 
-    @property
-    def type_info(self):
-        r = []
-        for p in self.profiles:
-            opts, args, input, output = p.usage
-            type_vars = ', '.join(map(lambda x:'<%s>' % x, self.type_var_names))
-            if opts:
-                r.append('Usage: %s%s OPTION %s' % (self.name, type_vars, args))
-                r.append('Option:\n%s' % self.indent(opts))
-            else:
-                if args == 'null':
-                    r.append('Usage: %s%s' % (self.name, type_vars))
-                else:
-                    r.append('Usage: %s%s %s' % (self.name, type_vars, args))
-            r.append('Input:\n%s' % self.indent(input))
-            r.append('Output:\n%s' % self.indent(output))
-            r.append('\n')
-        return '\n'.join(r)
-
-    def resolve(self, module):
-        for p in self.profiles:
-            p.resolve()
-
-    @property
-    def usage(self):
-        return self.type_info + 'Description:\n' + self.doc
-
-    @property
-    def title(self):
-        return self.doc.splitlines()[0].strip()
-
-    def indent(self, s):
-        r = []
-        for l in s.splitlines():
-            r.append('    ' + l)
-        return '\n'.join(r)
-
     def check_type_variable(self):
         msg = []
         for p in self.profiles:
@@ -110,6 +73,11 @@ class ProfileContainer(object):
                 
         if msg:
             raise JsonSchemaError('\n'.join(msg))
+
+    def resolve(self, module):
+        for p in self.profiles:
+            p.resolve()
+
 
 
 class CommandProfile(object):
@@ -238,11 +206,6 @@ class CommandProfile(object):
             self._in_schema = self._in_schema.apply(type_vars)
             self._out_schema = self._out_schema.apply(type_vars)
 
-    @property
-    def usage(self):
-        from caty.core.casm.cursor import TreeDumper
-        td = TreeDumper()
-        return td.visit(self.opts_schema), td.visit(self.args_schema), self.in_schema.name, self.out_schema.name
 
 def check_enum(t, name, option, opt_str, value, parser):
     from caty.core.casm.cursor import TreeDumper

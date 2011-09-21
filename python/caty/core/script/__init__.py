@@ -149,11 +149,13 @@ class AbstractCommandCompiler(FakeFacility):
             return pkg + ':' + name in self.builder.namespace
 
     def get_help(self, pkg, name):
+        from caty.core.command.usage import CommandUsage
         if pkg == 'builtin':
-            return self.builder.namespace[name].usage
+            p = self.builder.namespace[name]
         else:
-            return self.builder.namespace[pkg + ':' + name].usage
-   
+            p = self.builder.namespace[pkg + ':' + name]
+        return CommandUsage(p).get_usage()
+
     def get_modules(self):
         return self.module._registrar.get_modules()
 

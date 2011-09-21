@@ -1,5 +1,6 @@
 #coding:utf-8
 from caty.core.casm.cursor.base import *
+from caty.core.casm.cursor.dump import TreeDumper
 
 class TypeVarApplier(SchemaBuilder):
     def __init__(self, module):

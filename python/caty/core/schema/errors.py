@@ -115,11 +115,27 @@ class JsonSchemaUnionError(JsonSchemaError):
     def __init__(self, e1, e2):
         self.e1 = e1
         self.e2 = e2
+        self.is_error = True
 
     def to_path(self, i18n):
         p = {}
         p.update(list(_flatten(self, i18n)))
         return p
+
+    @property
+    def error_message(self):
+        return {
+            u'msg': self.e1.error_message['msg'] + u' / ' + self.e2.error_message['msg']
+        }
+
+    @property
+    def orig(self):
+        return self.e1.orig
+
+    @property
+    def val(self):
+        return self.e1.val
+
 
 def _flatten(obj, i18n, parent='$'):
     if isinstance(obj, JsonSchemaErrorObject):
