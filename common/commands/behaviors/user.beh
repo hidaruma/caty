@@ -66,8 +66,8 @@ each {pv userid} | [pass, ["foo", "bar"]] | eq | when {
 === !exec 
 
 |=env|=input|=command|=output|=備考|
-|%hosturl|{"userid": "boo", "password": "qwerty", "fail": "/login.html"}|%login|"http://localhost/"|Cookie のセッション ID の値は予測不可能なので、オブジェクトの部分一致でチェック|
-|%hosturl|{"userid": "boo", "password": "zxcvb", "fail": "/login.html"}|%login|"http://localhost/login.html"||
+|%hosturl|{"userid": "boo", "password": "qwerty"}|%login|@OK "/"|Cookie のセッション ID の値は予測不可能なので、オブジェクトの部分一致でチェック|
+|%hosturl|{"userid": "boo", "password": "zxcvb"}|%login|||
 
 == user:logout
 
@@ -76,7 +76,7 @@ each {pv userid} | [pass, ["foo", "bar"]] | eq | when {
 === !exec 
 
 |=env|=input|=command|=output|=備考|
-|%hosturl|{"userid": "boo", "password": "qwerty", "fail": "/login.html"}|%login|"http://localhost/"||
+|%hosturl|{"userid": "boo", "password": "qwerty"}|%login| @OK "/" ||
 |%hosturl|"/login.html"|%logout|"http://localhost/login.html"||
 |%hosturl|"/login.html"|%logout|"http://localhost/login.html"|既にログアウトしているが、同様に処理される|
 
@@ -91,7 +91,7 @@ each {pv userid} | [pass, ["foo", "bar"]] | eq | when {
 === !name:login
 
 {{{
-user:login | pv header | pv Location
+user:login
 }}}
 
 === !name: logout
