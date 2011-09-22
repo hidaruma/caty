@@ -45,3 +45,18 @@ class I18nMessage(object):
     def extend(self, messages):
         return I18nMessage(messages, self, self._writer, self._lang)
 
+class I18nMessageWrapper(object):
+    def __init__(self, i18n_message, env):
+        self.i18n_message = i18n_message
+        self.env = env
+
+    def get(self, msg, message_dict=None, **kwds):
+        return self.i18n_message.get(msg, language_code=self.env.get('LANGUAGE'), message_dict=message_dict, **kwds)
+
+    def write(self, *args, **kwds):
+        if 'nobreak' in kwds:
+            del kwds['nobreak']
+            self.i18n_message._writer.write(self.get(*args, **kwds) + '\n')
+        else:
+            self.i18n_message._writer.write(self.get(*args, **kwds) + '\n')
+

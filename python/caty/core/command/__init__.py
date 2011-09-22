@@ -5,6 +5,7 @@ from optparse import OptionParser
 from itertools import *
 from functools import partial
 from caty.core.command.exception import *
+from caty.core.i18n import I18nMessageWrapper
 import types
 import caty.util as util
 from caty.core.exception import InternalException
@@ -478,18 +479,5 @@ class JsonableValues(dict):
         dict.__setitem__(self, k, v)
         object.__setattr__(self, k.replace('-', '_').replace(' ', ''), v)
 
-class I18nMessageWrapper(object):
-    def __init__(self, catalog, env):
-        self.catalog = catalog
-        self.env = env
 
-    def get(self, msg, message_dict=None, **kwds):
-        return self.catalog.get(msg, language_code=self.env.get('LANGUAGE'), message_dict=message_dict, **kwds)
-
-    def write(self, *args, **kwds):
-        if 'nobreak' in kwds:
-            del kwds['nobreak']
-            self.catalog._writer.write(self.get(*args, **kwds) + '\n')
-        else:
-            self.catalog._writer.write(self.get(*args, **kwds) + '\n')
 

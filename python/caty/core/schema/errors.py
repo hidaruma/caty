@@ -1,6 +1,8 @@
 # coding: utf-8
 from __future__ import absolute_import
 from caty.util import *
+import caty.core.runtimeobject as ro
+import caty.jsontools as json
 
 # エラーメッセージの分類コード一覧
 NOT_ERROR = -1          # エラーは発生していない
@@ -22,6 +24,8 @@ class ErrorObj(object):
         self.orig = orig
         self.val = val
         self.error_message = message
+        if is_error:
+            assert isinstance(message, dict)
         self._properties = {}
     
     def __setitem__(self, k, v):
@@ -71,7 +75,7 @@ class ErrorObj(object):
 
     def __unicode__(self):
         if self.is_error:
-            return self.to_dict()['message']
+            return self.to_dict(ro.i18n)['message']
         else:
             return u''
 
@@ -96,6 +100,11 @@ class JsonSchemaErrorObject(JsonSchemaError):
         #    p[k] = ErrorObj(False, to_unicode(v), to_unicode(v), u'').to_dict()
         return p
 
+    def __unicode__(self):
+        o = self.to_path(ro.i18n)
+        return json.pp(o)
+
+
 class JsonSchemaErrorList(JsonSchemaError):
     def __init__(self, msg, errors):
         JsonSchemaError.__init__(self, msg)
@@ -111,6 +120,11 @@ class JsonSchemaErrorList(JsonSchemaError):
     def __iter__(self):
         return iter(self.errors)
 
+    def __unicode__(self):
+        o = self.to_path(ro.i18n)
+        return json.pp(o)
+
+
 class JsonSchemaUnionError(JsonSchemaError):
     def __init__(self, e1, e2):
         self.e1 = e1
@@ -121,6 +135,11 @@ class JsonSchemaUnionError(JsonSchemaError):
         p = {}
         p.update(list(_flatten(self, i18n)))
         return p
+
+    def get_message(self, i18n, depth=0):
+        m1 = self.e1.get_message(i18n)
+        m2 = self.e2.get_message(i18n)
+        return m1 + u' / ' + m2
 
     @property
     def error_message(self):

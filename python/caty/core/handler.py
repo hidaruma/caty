@@ -2,6 +2,7 @@
 from caty.util.web import *
 from caty.util import error_to_ustr, brutal_encode
 from caty.core.facility import COMMIT
+from caty.core.i18n import I18nMessageWrapper
 from caty.util.path import splitext, dirname, join
 from caty.core.command.exception import *
 from caty.core.exception import *
@@ -113,7 +114,7 @@ class RequestHandler(object):
                     cmd = self._interpreter.build(proxy.source, opts, [path, path], transaction=transaction)
         except Exception, e:
             return ExceptionAdaptor(e, traceback.format_exc(), self._app, error_logger)
-        return PipelineAdaptor(cmd, self._interpreter.facilities['schema'], self._app, error_logger, lock_file)
+        return PipelineAdaptor(cmd, self._interpreter.facilities['schema'], self, error_logger, lock_file)
     
     def _verify_access(self, path, method):
         if path.endswith('/'): return
@@ -129,13 +130,14 @@ class RequestHandler(object):
 class PipelineAdaptor(object):
     u"""コマンドを実行した後で適切なエラーハンドリングを行う。
     """
-    def __init__(self, cmd, schema, app, error_logger, lock_file=None):
+    def __init__(self, cmd, schema, handler, error_logger, lock_file=None):
         self.__command = cmd
         self.__result = None
         self.__succeed = False
         self.__schema = schema
-        self.i18n = app.i18n
-        self.app = app
+        self.i18n = I18nMessageWrapper(handler._app.i18n, handler._env)
+        self.env = handler._env
+        self.app = handler._app
         self.error_logger = error_logger
         import hashlib
         import os, tempfile
@@ -188,7 +190,7 @@ class PipelineAdaptor(object):
             transaction = False
             result = {
                 'status': 400,
-                'body': error_to_ustr(e),
+                'body': e.get_message(self.i18n),
                 'header': {
                     'content-type': u'text/plain; charset=utf-8'
                 }
@@ -213,9 +215,9 @@ class PipelineAdaptor(object):
         except Exception, e:
             if debug:
                 import traceback
-                t = traceback.format_exc()
-                u = unicode(t, 'unicode-escape')
-                print u.encode('utf-8')
+                import caty.util
+                caty.util.debug.writeln(traceback)
+                caty.util.debug.writeln(e)
             raise
 
     def exec_cmd(self, input, debug=False):
@@ -289,10 +291,10 @@ class PipelineAdaptor(object):
             os.rmdir(lock_dir)
 
 class ExceptionAdaptor(PipelineAdaptor):
-    def __init__(self, error_obj, tb, app, error_logger):
+    def __init__(self, error_obj, tb, handler, error_logger):
         self.__error_obj = error_obj
         self.__tb = tb
-        PipelineAdaptor.__init__(self, None, None, app, error_logger)
+        PipelineAdaptor.__init__(self, None, None, handler, error_logger)
         self.error_logger = error_logger
 
     def _handle_pipeline(self, input, debug=False):
