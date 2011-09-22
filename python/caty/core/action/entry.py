@@ -77,8 +77,10 @@ class ResourceActionEntry(object):
                     if profile.connects_to(state):
                         G['nodes'].append({u'name': state.name, u'type': 'state'})
                         G['edges'].append({u'from': profile.output_type.name, u'to': state.name, u'type': u'link'})
-                    elif self.relates(state):
-                        t, c = profile.connected_from(state)
+                    for link in self.related_link(state):
+                        t, c = profile.connected_from(link)
+                        if link.type == 'additional-link':
+                            t = u'+ ' + t
                         if c:
                             G['nodes'].append({u'name': state.name, u'type': 'state'})
                             G['edges'].append({u'to': profile.input_type.name, u'from': state.name, u'trigger': t, u'type': u'link'})
@@ -102,12 +104,11 @@ class ResourceActionEntry(object):
                 **e.placeholder
             )
 
-    def relates(self, state):
+    def related_link(self, state):
         for link in state.links:
             for name, _ in link.link_to_list:
                 if name == self.resource_name + '.' + self.name:
-                    return True
-        return False
+                    yield link
 
 class InternalError(Exception):
     def __init__(self, key, msg, **placeholder):
@@ -259,13 +260,12 @@ class ActionProfile(object):
             return state.name in self.next_states
         return False
 
-    def connected_from(self, state):
-        for link in state.links:
-            for _, fragment in link.link_to_list:
-                if fragment == self.name:
-                    return link.trigger, True
-                if fragment == None:
-                    return link.trigger, self.io_type in (u'io', u'in')
+    def connected_from(self, link):
+        for _, fragment in link.link_to_list:
+            if fragment == self.name:
+                return link.trigger, True
+            if fragment == None:
+                return link.trigger, self.io_type in (u'io', u'in')
         return u'', False
 
 
