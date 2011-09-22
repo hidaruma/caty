@@ -27,12 +27,12 @@ resource WikiFile("*.wiki") {
 
     /** 書き込み */
     action write("/POST#exists-parent")  :: 
-        @[in] #translate WikiFile -> WikiFile,
-        @[out] #ok WikiFile -> never redirects WikiFile.read,
-        @[out] #ng void -> never redirects Root.get {
-        translate WikiFile | when {
-            OK => (#io-ok ["/wiki", (#part pv body) | file:write %1 | param %1] | text:concat | redirect),
-            NG => (#io-ng "/wiki/" | redirect)
+        @[in] #translate WikiFile -> _,
+        @[out] #ok _ -> never redirects WikiFile.read,
+        @[out] #ng _ -> never redirects Root.get {
+        (#translate translate WikiFile) | when {
+            OK => (#ok ["/wiki", (#part pv body) | file:write %1 | param %1] | text:concat | redirect),
+            NG => (#ng "/wiki/" | redirect)
         }
     };
     /** プレーンテキスト取得 */

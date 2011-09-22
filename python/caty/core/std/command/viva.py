@@ -64,7 +64,7 @@ class DrawModule(Builtin):
     def execute(self):
         src = self.make_graph()
         G = self.transform(src)
-        G.layout(prog='circo')
+        G.layout(prog='dot')
         if self._out_file:
             o = G.draw(prog='dot', format=self._out_file.split('.')[-1])
             with self.pub.open('/'+self._out_file, 'wb') as f:
@@ -158,11 +158,9 @@ class DrawAction(Builtin):
                 'bgcolor': 'gainsboro',
                 'fontsize': 20.0,
                 'labelloc': 't',
-                'rankdir': 'LR',
-                'ranksep': '1.2 equally',
             },
             'subgraph': {
-                'bgcolor': 'darkolivegreen4',
+                'bgcolor': 'darkseagreen2',
                 'color': 'black',
                 'fontsize': 14.0,
             },
@@ -170,13 +168,17 @@ class DrawAction(Builtin):
                 'relay': {
                     'fontsize': 14.0,
                     'arrowhead': 'open',
-                    'color': 'crimson',
-                    'weight': 0,
+                    'color': 'brown4',
+                    'style': 'dotted',
                 },
+                'link': {
+                    'fontsize': 14.0,
+                    'arrowhead': 'open',
+                    'color': 'darkorchid3',
+                }, 
                 'redirect': {
                     'fontsize': 14.0,
                     'arrowhead': 'open',
-                    'weight': 0,
                     'color': 'blue3',
                 },
             },
@@ -185,11 +187,18 @@ class DrawAction(Builtin):
                 'shape': u'ellipse',
                 'style': u'filled',
                 'color': u'black',
-                'fillcolor': u'darkseagreen2'
+                'fillcolor': u'greenyellow'
             },
             'type': {
                 'fontsize': 14.0,
                 'shape': u'ellipse',
+                'style': u'filled',
+                'color': u'black',
+                'fillcolor': u'azure1'
+            },
+            'state': {
+                'fontsize': 14.0,
+                'shape': u'box',
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'gold'
@@ -199,14 +208,14 @@ class DrawAction(Builtin):
                 'shape': u'box',
                 'style': u'filled',
                 'color': u'black',
-                'fillcolor': u'white'
+                'fillcolor': u'darkseagreen2'
             },
         }
 
     def execute(self):
         src = self.make_graph()
         G = self.transform(src)
-        G.layout(prog='circo')
+        G.layout(prog='dot')
         if self._out_file:
             o = G.draw(prog='dot', format=self._out_file.split('.')[-1])
             with self.pub.open('/'+self._out_file, 'wb') as f:
@@ -225,7 +234,7 @@ class DrawAction(Builtin):
         rm = rmc.get_module(mname)
         res = rm.get_resource(rname)
         act = res.get_action(aname)
-        return act.make_graph()
+        return act.make_graph(rm)
 
     def _split_name(self):
         mod, rest = self._action_name.split(':')
@@ -265,9 +274,15 @@ class DrawAction(Builtin):
             attr.update(self._graph_config[node['type']])
             N.attr.update(attr)
         for edge in graph_struct['edges']:
-            RG.add_edge(edge['from'], 
-                        edge['to'], 
-                        **self._graph_config['edge'][edge['type']])
+            if u'trigger' in edge:
+                RG.add_edge(edge['from'], 
+                            edge['to'], 
+                            taillabel=edge['trigger'],
+                            **self._graph_config['edge'][edge['type']])
+            else:
+                RG.add_edge(edge['from'], 
+                            edge['to'], 
+                            **self._graph_config['edge'][edge['type']])
         return RG
 
 

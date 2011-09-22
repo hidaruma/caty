@@ -4,8 +4,8 @@ from caty.util import indent_lines, justify_messages
 from caty.core.exception import *
 
 class ResourceActionEntry(object):
-    def __init__(self, proxy, source, name=u'', docstring=u'Undocumented', annotations=Annotations([]), resource_name=u'system', module_name=u'builtin', profile=None, invoker=None):
-        self.profile = profile if profile else ActionProfile(None, None, None, None, [],  [], [])
+    def __init__(self, proxy, source, name=u'', docstring=u'Undocumented', annotations=Annotations([]), resource_name=u'system', module_name=u'builtin', profiles=None, invoker=None):
+        self.profiles = profiles if profiles else ActionProfiles([ActionProfile(None, None, None, None, [],  [], [])])
         self.instance = proxy
         self.source = source
         self.name = name
@@ -43,14 +43,14 @@ class ResourceActionEntry(object):
         buff.append((('  '*indent) + u'メソッド: ', m))
         if v:
             buff.append((('  '*indent) + u'動詞: ', v))
-        if self.profile:
-            buff.append((('  '*indent) + u'入力型: ', self.profile.input_type.name if self.profile.input_type else u'入力なし'))
+        if self.profiles:
+            buff.append((('  '*indent) + u'入力型: ', self.profiles.input_type.name if self.profiles.input_type else u'入力なし'))
         m = justify_messages(buff)
         if with_doc:
             m = self.docstring.strip() + '\n\n' + m
         return m
 
-    def make_graph(self):
+    def make_graph(self, module):
         try:
             G = {
                 u'name': u'%s:%s.%s' % (self.module_name, self.resource_name, self.name), 
@@ -58,18 +58,39 @@ class ResourceActionEntry(object):
                 u'nodes': [], 
                 u'edges': []
             }
-            G['subgraphs'].append(self.profile.make_relay_graph())
-            for input_type, to_node_name in self.profile.list_input_types():
-                G['nodes'].append({u'name': input_type, u'type': 'type'})
-                G['edges'].append({u'from': input_type, u'to': to_node_name, u'type': u'relay'})
+            G['subgraphs'].append(self.profiles.make_relay_graph())
 
-            for output_type, from_node_name in self.profile.list_output_types():
-                G['nodes'].append({u'name': output_type, u'type': 'type'})
-                G['edges'].append({u'to': output_type, u'from': from_node_name, u'type': u'relay'})
 
-            for redirect_to, from_node_name in self.profile.list_redirects():
-                G['nodes'].append({u'name': redirect_to, u'type': 'action'})
-                G['edges'].append({u'to': redirect_to, u'from': from_node_name, u'type': u'redirect'})
+            for profile in self.profiles:
+                if profile.input_type != u'_':
+                    G['nodes'].append({u'name': profile.input_type.name, u'type': 'type'})
+                    G['edges'].append({u'from': profile.input_type.name, u'to': profile.name, u'type': u'link'})
+                else:
+                    G['edges'].append({u'from': None, u'to': profile.name, u'type': u'relay'})
+                if profile.output_type != u'_':
+                    if profile.output_type.name != u'never':
+                        G['nodes'].append({u'name': profile.output_type.name, u'type': 'type'})
+                        G['edges'].append({u'to': profile.output_type.name, u'from': profile.name, u'type': u'link'})
+                else:
+                    G['edges'].append({u'to': None, u'from': profile.name, u'type': u'relay'})
+                for state in module.states:
+                    if profile.connects_to(state):
+                        G['nodes'].append({u'name': state.name, u'type': 'state'})
+                        G['edges'].append({u'from': profile.output_type.name, u'to': state.name, u'type': u'link'})
+                    elif self.relates(state):
+                        t, c = profile.connected_from(state)
+                        if c:
+                            G['nodes'].append({u'name': state.name, u'type': 'state'})
+                            G['edges'].append({u'to': profile.input_type.name, u'from': state.name, u'trigger': t, u'type': u'link'})
+                for red in profile.redirects:
+                    G['nodes'].append({u'name': red, u'type': u'action'})
+                    G['edges'].append({u'to': red, u'from': profile.name, u'type': u'redirect'})
+            for edge in G['edges']:
+                if edge['to'] == None:
+                    for _edge in G['edges']:
+                        if _edge['from'] == None:
+                            _edge['from'] = edge['from']
+                    G['edges'].remove(edge)
             return G
         except InternalError, e:
             throw_caty_exception(
@@ -80,6 +101,13 @@ class ResourceActionEntry(object):
                 moduleName=self.module_name,
                 **e.placeholder
             )
+
+    def relates(self, state):
+        for link in state.links:
+            for name, _ in link.link_to_list:
+                if name == self.resource_name + '.' + self.name:
+                    return True
+        return False
 
 class InternalError(Exception):
     def __init__(self, key, msg, **placeholder):
@@ -161,6 +189,10 @@ class ActionProfiles(object):
             for r in p.redirects:
                 yield r, p.name
 
+
+    def __iter__(self):
+        return iter(self._profiles)
+
 class ActionProfile(object):
     def __init__(self, io_type, name, input_type, output_type, relay_list, next_states, redirects):
         self._name = name
@@ -221,4 +253,19 @@ class ActionProfile(object):
     @property
     def redirects(self):
         return self._redirects
+
+    def connects_to(self, state):
+        if self.io_type in (u'io', u'out'):
+            return state.name in self.next_states
+        return False
+
+    def connected_from(self, state):
+        for link in state.links:
+            for _, fragment in link.link_to_list:
+                if fragment == self.name:
+                    return link.trigger, True
+                if fragment == None:
+                    return link.trigger, self.io_type in (u'io', u'in')
+        return u'', False
+
 
