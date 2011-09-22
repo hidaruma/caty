@@ -205,7 +205,7 @@ class ScriptParser(Parser):
         return seq.parse(['*!', '*', xjson.string, self.name, Regex(r'[-0-9a-zA-Z_]+')])
 
     def unquoted(self, seq):
-        return seq.parse(Regex(r'[^;\t\r\n <>|%+"(){},\[\]][^;\t\r\n <>|%+"{},\[\]]*'))
+        return seq.parse(Regex(r'[^;\t\r\n <>|%+"(){},\[\]]([^;\t\r\n <>|%+"(){},\[\]]|\(\))*'))
 
     def opt(self, seq):
         seq.ignore_hook = True
