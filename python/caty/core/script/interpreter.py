@@ -196,7 +196,7 @@ class CommandExecutor(BaseInterpreter):
             raise ScriptError()
         for tag in tags:
             if tag in node.cases:
-                return self.__exec_cmd(tag, target)
+                return self.__exec_cmd(node, tag, target)
         if '*' in node.cases:
             tag = '*'
         elif '*!' in node.cases:
