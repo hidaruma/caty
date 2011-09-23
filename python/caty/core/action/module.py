@@ -144,7 +144,7 @@ class ResourceModule(object):
             nodes.append({u'name': s.name, u'label': s.name, u'type': u'state'})
         for rc in self._resources:
             for act in rc.entries.values():
-                for red in act.profile.redirects:
+                for red in act.profiles.redirects:
                     to_name = self._find_linked_action(red)
                     e = {u'from': act.resource_name + '.' + act.name, u'to': to_name, u'type': u'redirect'}
                     edges.append(e)
@@ -179,7 +179,7 @@ class ResourceModule(object):
     def _find_links_to(self, state_name):
         for r in self.resources:
             for act in r.entries.values():
-                if state_name in act.profile.next_states:
+                if state_name in act.profiles.next_states:
                     yield act.resource_name+'.'+act.name
 
     def _find_linked_action(self, action_id):

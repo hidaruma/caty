@@ -24,17 +24,14 @@ class DrawModule(Builtin):
             'edge': {
                 'action': {
                     'fontsize': 14.0,
-                    'arrowhead': 'open',
                     'color': 'crimson'
                 },
                 'link': {
                     'fontsize': 14.0,
-                    'arrowhead': 'open',
                     'color': 'darkorchid3',
-                }, 
+                },
                 'redirect': {
                     'fontsize': 14.0,
-                    'arrowhead': 'open',
                     'color': 'blue3',
                 },
             },
@@ -165,22 +162,33 @@ class DrawAction(Builtin):
                 'fontsize': 14.0,
             },
             'edge': {
+                'action': {
+                    'fontsize': 14.0,
+                    'color': 'crimson'
+                },
                 'relay': {
                     'fontsize': 14.0,
-                    'arrowhead': 'open',
                     'color': 'brown4',
                     'style': 'dotted',
                 },
                 'link': {
                     'fontsize': 14.0,
-                    'arrowhead': 'open',
                     'color': 'darkorchid3',
                 }, 
                 'redirect': {
                     'fontsize': 14.0,
-                    'arrowhead': 'open',
                     'color': 'blue3',
                 },
+                'action-to-type': {
+                    'fontsize': 14.0,
+                    'arrowhead': 'none',
+                    'color': 'crimson'
+                },
+                'link-to-type': {
+                    'fontsize': 14.0,
+                    'arrowhead': 'none',
+                    'color': 'darkorchid3',
+                }, 
             },
             'fragment': {
                 'fontsize': 14.0,
@@ -191,10 +199,11 @@ class DrawAction(Builtin):
             },
             'type': {
                 'fontsize': 14.0,
-                'shape': u'ellipse',
+                'shape': u'plaintext',
+                'height': '0.1',
                 'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'azure1'
+                'color': u'gainsboro',
+                'fillcolor': u'gainsboro'
             },
             'state': {
                 'fontsize': 14.0,
