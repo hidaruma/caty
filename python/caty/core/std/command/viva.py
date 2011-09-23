@@ -157,8 +157,9 @@ class DrawAction(Builtin):
                 'labelloc': 't',
             },
             'subgraph': {
-                'bgcolor': 'darkseagreen2',
+                'fillcolor': 'darkseagreen2',
                 'color': 'black',
+                'style': 'rounded,filled',
                 'fontsize': 14.0,
             },
             'edge': {
@@ -214,7 +215,7 @@ class DrawAction(Builtin):
             },
             'action': {
                 'fontsize': 14.0,
-                'shape': u'box',
+                'shape': u'ellipse',
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'darkseagreen2'
