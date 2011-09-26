@@ -92,8 +92,8 @@ class ResourceActionEntry(object):
                         for prof in act.profiles:
                             for red in prof.redirects:
                                 if red == self.resource_name+'.'+self.name:
-                                    G['nodes'].append({u'name': red, u'type': u'action'})
-                                    G['edges'].append({u'from': red, u'to': profile.name, u'type': u'redirect'})
+                                    G['nodes'].append({u'name': act.resource_name+'.'+act.name, u'type': u'action'})
+                                    G['edges'].append({u'from': act.resource_name+'.'+act.name, u'to': profile.name, u'type': u'redirect'})
             for edge in G['edges']:
                 if edge['to'] == None:
                     for _edge in G['edges']:
