@@ -287,7 +287,7 @@ class DrawAction(Builtin):
             if u'trigger' in edge:
                 RG.add_edge(edge['from'], 
                             edge['to'], 
-                            taillabel=edge['trigger'],
+                            label=edge['trigger'],
                             **self._graph_config['edge'][edge['type']])
             else:
                 RG.add_edge(edge['from'], 

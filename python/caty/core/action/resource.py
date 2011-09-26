@@ -87,6 +87,10 @@ class ResourceClass(object):
             resourceName=self.name
         )
 
+    @property
+    def actions(self):
+        return self.entries.values()
+
 class DefaultResource(ResourceClass):
     def __init__(self, url_pattern, actions, module_name, resource_name, docstring=u'Undocumented', annotations=Annotations([])):
         ResourceClass.__init__(self, url_pattern, actions, {}, module_name, resource_name, docstring, annotations)
