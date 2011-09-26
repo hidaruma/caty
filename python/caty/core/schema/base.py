@@ -187,6 +187,10 @@ class SchemaBase(Resource, PbcObject):
         return []
 
     @property
+    def type_args(self):
+        return []
+
+    @property
     def tag(self):
         raise NotImplementedError(str(self.__class__) + '#tag')
 
@@ -1189,7 +1193,7 @@ class TypeReference(SchemaBase, Scalar):
     def __init__(self, name, type_args, module):
         SchemaBase.__init__(self)
         self._name = name
-        self.type_args = type_args
+        self._type_args = type_args
         self.module = module
         self.annotations = Annotations([])
         self.body = None
@@ -1222,6 +1226,16 @@ class TypeReference(SchemaBase, Scalar):
     @property
     def definition(self):
         return self._name
+
+    def type_args():
+        def get(self):
+            return self._type_args
+
+        def set(self, type_args):
+            self._type_args = type_args
+
+        return get, set
+    type_args = property(*type_args())
 
     def validate(self, value):
         self.body.validate(value)

@@ -959,7 +959,7 @@ class Help(Builtin):
             r = []
             for m in mods:
                 r.append( (m[0].ljust(max_width + 1) + m[1]))
-            return '\n'.join(r)
+            return u'\n'.join(r)
         rm = rmc.get_module(module)
         if mode == 'resource_list':
             res = []
@@ -969,7 +969,7 @@ class Help(Builtin):
             r = []
             for m in res:
                 r.append( (m[0].ljust(max_width + 1) + m[1]))
-            return '\n'.join(r)
+            return u'\n'.join(r)
         r = rm.get_resource(resource)
         if mode == 'resource_usage':
             return r.usage()
