@@ -44,7 +44,7 @@ class DrawModule(Builtin):
             },
             'state': {
                 'fontsize': 14.0,
-                'shape': u'box',
+                'shape': u'note',
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'gold'
@@ -209,7 +209,7 @@ class DrawAction(Builtin):
             },
             'state': {
                 'fontsize': 14.0,
-                'shape': u'box',
+                'shape': u'note',
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'gold'
