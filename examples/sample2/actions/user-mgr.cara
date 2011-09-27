@@ -1,0 +1,93 @@
+// -*- coding: utf-8 -*-
+
+/**
+ユーザー管理業務
+
+[[http://terasoluna.sourceforge.jp/tutorial/server-web/Document/WebTutorial_2.html]]
+の図（[[http://terasoluna.sourceforge.jp/tutorial/server-web/Document/WebTutorialImg/WebTutorial_2.1_01.png]])
+を参照。
+
+ただし、
+メニュー画面をユーザー管理業務（user-mrgモジュール）に移し、
+ログオン業務へのクロスモジュールリンクの代替としてダミーログオン（dummy-logon）画面を置く。
+
+POSTデータ型／状態型の定義は**さぼり**、型はvoidとanyを使う。
+
+*/
+module user-mgr in cara;
+
+
+/** メニュー画面の生成 */
+resource Menu ("/menu.html") {
+ action get("/GET")
+ :: @[in, out] #1 void -> void produces menu;
+};
+
+/** メニュー画面 */
+state menu :: any links {
+ + to-list     --> List.get;
+ + to-register --> Register.get;
+ + logoff      --> DummyLogon.get;
+};
+
+/** ユーザー一覧の生成 */
+resource List ("/list") {
+ action get("/GET")
+ :: @[in, out]#1 void -> any produces list  ;
+
+ action next("next/GET") {"current": integer}
+ :: @[in, out]#1 void -> any produces list ;
+
+ action prev("prev/GET") {"current": integer}
+ :: @[in, out]#1 void -> any produces list ;
+
+ action go-to("go-to/GET") {"current": integer, "target": integer}
+ :: @[in, out]#1 void -> any produces list ;
+
+};
+
+/** ユーザー一覧画面 */
+state list :: any links {
+ + list  --> List.get;
+ + next  --> List.next;
+ + prev  --> List.prev;
+ + go-to --> List.go-to;
+ + menu  --> Menu.get;
+};
+
+/** 登録画面の生成 */
+resource Register("/register.html") {
+ action get("/GET")
+ :: @[in, out]#1 void -> any produces register;
+};
+
+/** 登録画面 */
+state register :: any links {
+ + do-regster --> DoRegister.do;
+ + menu       --> Menu.get;
+};
+
+/** 登録処理実行 */
+resource DoRegister("/do-register") {
+ action do ("/POST")
+ :: @[in]#in any -> _ relays [ok, ng],
+    @[out]#ok _  -> any produces result,
+    @[out]#ng _  -> any produces register ;
+};
+
+/** 結果表示画面 */
+state result :: any links {
+ + menu --> Menu.get;
+};
+
+/** ダミーのログオン画面の生成 */
+resource DummyLogon ("/dumy-logon.html") {
+ action get("/GET")
+ :: @[in, out]#1 void -> void produces dummy-logon ;
+};
+
+
+/** ダミーのログオン画面 */
+state dummy-logon :: any links {
+  + menu --> Menu.get;
+};
