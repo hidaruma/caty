@@ -1,17 +1,20 @@
 // -*- coding: utf-8 -*-
 
-/**
-ユーザー管理業務
+/** ユーザー管理業務
 
 [[http://terasoluna.sourceforge.jp/tutorial/server-web/Document/WebTutorial_2.html]]
-の図（[[http://terasoluna.sourceforge.jp/tutorial/server-web/Document/WebTutorialImg/WebTutorial_2.1_01.png]])
+の図
+（[[http://terasoluna.sourceforge.jp/tutorial/server-web/Document/WebTutorialImg/WebTutorial_2.1_01.png]])
 を参照。
 
 ただし、
 メニュー画面をユーザー管理業務（user-mrgモジュール）に移し、
-ログオン業務へのクロスモジュールリンクの代替としてダミーログオン（dummy-logon）画面を置く。
+ログオン業務へのクロスモジュールリンクの代替として、
+ダミーログオン（dummy-logon）画面を置く。
 
 POSTデータ型／状態型の定義は**さぼり**、型はvoidとanyを使う。
+
+トリガーはすべて追加トリガー（ページデザイナが責任を持つ）とする。
 
 */
 module user-mgr in cara;
@@ -32,16 +35,16 @@ state menu :: any links {
 
 /** ユーザー一覧の生成 */
 resource List ("/list") {
- action get("/GET")
+ action get("/GET#dont-care")
  :: @[in, out]#1 void -> any produces list  ;
 
- action next("next/GET") {"current": integer}
+ action next("next/GET#dont-care") {"current": integer}
  :: @[in, out]#1 void -> any produces list ;
 
- action prev("prev/GET") {"current": integer}
+ action prev("prev/GET#dont-care") {"current": integer}
  :: @[in, out]#1 void -> any produces list ;
 
- action go-to("go-to/GET") {"current": integer, "target": integer}
+ action go-to("go-to/GET#dont-care") {"current": integer, "target": integer}
  :: @[in, out]#1 void -> any produces list ;
 
 };
@@ -69,7 +72,7 @@ state register :: any links {
 
 /** 登録処理実行 */
 resource DoRegister("/do-register") {
- action do ("/POST")
+ action do ("/POST#dont-care")
  :: @[in]#in any -> _ relays [ok, ng],
     @[out]#ok _  -> any produces result,
     @[out]#ng _  -> any produces register ;
