@@ -61,35 +61,37 @@ class ResourceActionEntry(object):
             G['subgraphs'].append(self.profiles.make_relay_graph())
 
             for profile in self.profiles:
-                if profile.input_type != u'_':
-                    G['nodes'].append({
-                        u'label': profile.input_type.name, 
-                        u'name': profile.input_type.name+'/'+profile.name, 
-                        u'type': 'type'})
-                    G['edges'].append({u'from': profile.input_type.name+'/'+profile.name, u'to': profile.name, u'type': u'link'})
-                else:
+                if profile.input_type == u'_':
                     G['edges'].append({u'from': None, u'to': profile.name, u'type': u'relay'})
-                if profile.output_type != u'_':
-                    if profile.output_type.name != u'never':
-                        G['nodes'].append({
-                            u'label': profile.output_type.name, 
-                            u'name': profile.output_type.name+'/'+profile.name, 
-                            u'type': 'type'})
-                        G['edges'].append({u'to': profile.output_type.name+'/'+profile.name, u'from': profile.name, u'type': u'action-to-type'})
-                else:
+                if profile.output_type == u'_':
                     G['edges'].append({u'to': None, u'from': profile.name, u'type': u'relay'})
+
                 if not lone:
                     for state in module.states:
                         if profile.connects_to(state):
+                            out_name = profile.output_type.name+'/'+state.name+'/'+'out'
                             G['nodes'].append({u'name': state.name, u'type': 'state'})
-                            G['edges'].append({u'from': profile.output_type.name+'/'+profile.name, u'to': state.name, u'type': u'action'})
+                            G['edges'].append({u'from': out_name, u'to': state.name, u'type': u'action'})
+                            G['nodes'].append({
+                                u'label': profile.output_type.name, 
+                                u'name': out_name, 
+                                u'type': 'type'})
+                            G['edges'].append({u'to': out_name, u'from': profile.name, u'type': u'action-to-type'})
                         for link in self.related_link(state):
                             t, c = profile.connected_from(link)
                             if link.type == 'additional-link':
                                 t = u'+ ' + t
                             if c:
+                                in_type = profile.input_type.name+'/'+state.name+'in' 
                                 G['nodes'].append({u'name': state.name, u'type': 'state'})
-                                G['edges'].append({u'to': profile.input_type.name+'/'+profile.name, u'from': state.name, u'trigger': t, u'type': u'link-to-type'})
+                                G['edges'].append({u'to': in_type, u'from': state.name, u'trigger': t, u'type': u'link-to-type'})
+                                G['nodes'].append({
+                                    u'label': profile.input_type.name, 
+                                    u'name': in_type, 
+                                    u'type': 'type'})
+                                G['edges'].append({u'from': in_type, u'to': profile.name, u'type': u'link'})
+
+
                     for red in profile.redirects:
                         G['nodes'].append({u'name': red, u'type': u'action'})
                         G['edges'].append({u'to': red, u'from': profile.name, u'type': u'redirect'})
@@ -100,6 +102,20 @@ class ResourceActionEntry(object):
                                     if red == self.resource_name+'.'+self.name:
                                         G['nodes'].append({u'name': act.resource_name+'.'+act.name, u'type': u'action'})
                                         G['edges'].append({u'from': act.resource_name+'.'+act.name, u'to': profile.name, u'type': u'redirect'})
+                else:
+                    if profile.input_type != u'_':
+                        G['nodes'].append({
+                            u'label': profile.input_type.name, 
+                            u'name': profile.input_type.name+'/'+profile.name+'/in', 
+                            u'type': 'type'})
+                        G['edges'].append({u'from': profile.input_type.name+'/'+profile.name+'/in', u'to': profile.name, u'type': u'link'})
+                    if profile.output_type != u'_':
+                        if profile.output_type.name != u'never':
+                            G['nodes'].append({
+                                u'label': profile.output_type.name, 
+                                u'name': profile.output_type.name+'/'+profile.name+'/out', 
+                                u'type': 'type'})
+                            G['edges'].append({u'to': profile.output_type.name+'/'+profile.name+'/out', u'from': profile.name, u'type': u'action-to-type'})
             for edge in G['edges']:
                 if edge['to'] == None:
                     for _edge in G['edges']:
