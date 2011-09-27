@@ -281,7 +281,7 @@ class DrawAction(Builtin):
             names.append(name)
             RG.add_node(name)
             N = RG.get_node(name)
-            attr = {}
+            attr = {'label': node.get('label', node['name'])}
             attr.update(self._graph_config[node['type']])
             N.attr.update(attr)
         for edge in graph_struct['edges']:
