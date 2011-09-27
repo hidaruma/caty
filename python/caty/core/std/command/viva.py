@@ -149,6 +149,7 @@ class DrawAction(Builtin):
     def setup(self, opts, action_name):
         self._action_name = action_name
         self._out_file = opts['out']
+        self._lone = opts['lone']
         self._format = opts['format']
         self._graph_config = {
             'graph': {
@@ -244,7 +245,7 @@ class DrawAction(Builtin):
         rm = rmc.get_module(mname)
         res = rm.get_resource(rname)
         act = res.get_action(aname)
-        return act.make_graph(rm)
+        return act.make_graph(rm, self._lone)
 
     def _split_name(self):
         mod, rest = self._action_name.split(':')

@@ -14,6 +14,8 @@ from caty.core.script.interpreter import CommandExecutor
 from caty.core.script import node
 from caty.core.std.command import builtin
 from caty.core.command import Builtin, Syntax, Command, VarStorage, PipelineInterruption, PipelineErrorExit, ScriptError
+from caty.core.command.profile import CommandUsageError
+from caty.core.command.usage import CommandUsage
 from caty.util.cache import memoize, Cache
 from caty.util import error_to_ustr
 import types
@@ -126,7 +128,12 @@ class AbstractCommandCompiler(FakeFacility):
         env = self._facilities['env']
         for k, v in env.items():
             var_storage.opts[k] = v
-        c = proxy.instantiate(self.builder)
+        try:
+            c = proxy.instantiate(self.builder)
+        except CommandUsageError as e:
+            msg = [e.args[0]]
+            msg.append(CommandUsage(e.args[1]).get_usage())
+            raise Exception(u'\n'.join(msg))
         c.set_facility(self.facilities)
         c.set_var_storage(var_storage)
         c = CommandExecutor(c)
@@ -149,7 +156,6 @@ class AbstractCommandCompiler(FakeFacility):
             return pkg + ':' + name in self.builder.namespace
 
     def get_help(self, pkg, name):
-        from caty.core.command.usage import CommandUsage
         if pkg == 'builtin':
             p = self.builder.namespace[name]
         else:

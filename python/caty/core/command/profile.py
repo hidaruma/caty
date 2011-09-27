@@ -47,19 +47,12 @@ class ProfileContainer(object):
     def determine_profile(self, opts_ref, args_ref):
         lasterror = None
         last_tb = None
-        import traceback
-        msg = []
         for p in self.profiles:
             err_msg = p.conform_opts_and_args(opts_ref, args_ref, self.name)
             if not err_msg:
                 return p.clone()
             else:
-                opts, args, input, output = p.usage
-                msg.append(err_msg)
-                if not (type(self.command_class) == types.TypeType and issubclass(self.command_class, Syntax)):
-                    msg.append('Usage: %s OPTION %s' % (self.name, args))
-                    msg.append('Option:\n%s' % self.indent(opts))
-        raise Exception('\n'.join(msg))
+                raise CommandUsageError(err_msg, self)
     
     def get_command_class(self):
         return self.command_class
@@ -228,4 +221,6 @@ class ScriptProfileContainer(ProfileContainer):
         self.type_var_names = type_var_names
         self.module = module
         self.command_class.set_module(module)
+
+class CommandUsageError(Exception): pass
 
