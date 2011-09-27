@@ -45,6 +45,10 @@ command draw-action {
  /** 出力フォーマット */
  @[default("gif")]
  "format" : ("gif"|"png"|"jpeg" | "dot")?,
+ 
+ /** アクション内のコードフラグメントと入出力型のみを描く */
+ @[default(false)]
+ "lone": boolean?,
 } [
   /** モジュール名:リソース名.アクション名 */
   string action_name
