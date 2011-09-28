@@ -1,0 +1,144 @@
+// -*- coding: utf-8 -*-
+
+/** 共有住所録
+
+[[http://www.xmldb.jp/dev/tutorial_webapplication_1.php]]を参照。
+
+ただし、
+
+# ユーザー画面（水色）だけを扱う
+# ログイン画面を同一モジュールに追加
+
+型定義は、addrbook-data.casm で定義し、register-public している。
+
+トリガーはすべて追加トリガー（ページデザイナが責任を持つ）とする。
+
+*/
+module addrbook in cara;
+
+
+/** アイテム一覧画面の生成 */
+resource AllItems ("/all-items") {
+ action get("/GET")
+ :: @[in, out] #1 void -> void produces all-items;
+
+};
+
+/** アイテム一覧画面 */
+state all-items :: Items links {
+ + view --> ViewItem.get;
+ + edit --> EditItem.get;
+
+ + logout --> DoLogout.do;
+};
+
+/** アイテムの表示画面を生成 */
+resource ViewItem("/view-item") {
+ action get("/GET") {"itemId": integer}
+ :: @[in, out]#1 void -> void produces view-item;
+
+};
+
+/** アイテムの表示画面 */
+state view-item :: any links {
+ + all-items --> AllItems.get;
+ + edit      --> EditItem.get;
+ + delete    --> ConfirmDelete.do;
+
+ + logout --> DoLogout.do;
+};
+
+/** アイテム編集画面を生成 */
+resource EditItem ("/edit") {
+ action get("/GET") {"itemId" : integer}
+ :: @[in, out]#1 void -> any produces edit-item;
+};
+
+
+/** アイテム編集画面 */
+state edit-item :: any links {
+ + confirm-save --> ConfirmSave.do;
+
+ + cancel       --> AllItems.get;
+};
+
+/** 保存の確認画面を生成 */
+resource ConfirmSave ("/confirm-save") {
+ action do ("/POST")
+ :: @[in, out]#1 _ -> _ produces confirm-save;
+
+};
+
+
+/** 削除の確認画面を生成 */
+resource ConfirmDelete ("/confirm-delete") {
+ action do ("/POST")
+ :: @[in, out]#1 _ -> _ produces confirm-delete;
+
+};
+
+/** 保存の確認画面 */
+state confirm-save :: any links {
+  + save --> SaveItem.do ;
+  + cancel --> AllItems.get ;
+};
+
+/** 削除の確認画面 */
+state confirm-delete :: any links {
+  + delete --> DeleteItem.do ;
+  + cancel --> AllItems.get ;
+};
+
+/** アイテムの保存を実行 */
+resource SaveItem("/save-item") {
+ action do ("/POST")
+//:: @[in, out]#1 _ -> _ produces all-items; // OK
+ :: @[in, out]#1 _ -> _ redirects AllItems.get; // 
+};
+
+/** アイテムの削除を実行 */
+resource DeleteItem("/delete-item") {
+ action do ("/POST")
+// :: @[in, out]#1 _ -> _ produces all-items;
+ :: @[in, out]#1 _ -> never redirects AllItems.get;
+};
+
+/** ログイン画面の生成 */
+resource Login ("/login.html") {
+ action get("/GET")
+ :: @[in, out]#1 void -> void produces login ;
+};
+
+
+/** ログイン画面 */
+state login :: any links {
+ + do-login --> DoLogin.do;
+
+};
+
+/** ログイン処理の実行 */
+resource DoLogin ("/do-login.cgi") {
+
+ action do ("/POST") 
+ :: @[in]#in any -> _ relays [ok, ng],
+//    @[out]#ok _ /*LoginInfo*/ -> void produces all-items,
+    @[out]#ok _ /*LoginInfo*/ -> never redirects AllItems.get,
+//    @[out]#ng _  -> void produces /*redirects*/ login ;
+    @[out]#ng _  -> never redirects Login.get ;
+
+};
+
+
+/** スタート画面 */
+state start :: any links {
+ + login --> Login.get;
+
+};
+
+/** ログアウト処理の実行 */
+resource DoLogout ("/do-logout.cgi") {
+ action do ("/POST") 
+ :: @[in, out]#1 void -> void produces start;
+
+};
+
