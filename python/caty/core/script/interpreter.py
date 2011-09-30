@@ -81,11 +81,14 @@ class CommandExecutor(BaseInterpreter):
             return args[0].execute(args[1])
 
     def _do_script(self, *args):
-        if len(args) == 1:
-            return args[0].script.accept(self)
-        else:
-            self.input = args[1]
-            return args[0].script.accept(self)
+        try:
+            if len(args) == 1:
+                return args[0].script.accept(self)
+            else:
+                self.input = args[1]
+                return args[0].script.accept(self)
+        finally:
+            args[0].var_storage.del_masked_scope()
 
     def _exec_command(self, node, exec_func):
         input = self.input
