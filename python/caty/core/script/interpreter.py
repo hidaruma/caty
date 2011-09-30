@@ -69,6 +69,25 @@ class CommandExecutor(BaseInterpreter):
         return self.cmd.accept(self)
 
     def visit_command(self, node):
+        return self._exec_command(node, self._do_command)
+
+    def visit_script(self, node):
+        return self._exec_command(node, self._do_script)
+
+    def _do_command(self, *args):
+        if len(args) == 1:
+            return args[0].execute()
+        else:
+            return args[0].execute(args[1])
+
+    def _do_script(self, *args):
+        if len(args) == 1:
+            return args[0].script.accept(self)
+        else:
+            self.input = args[1]
+            return args[0].script.accept(self)
+
+    def _exec_command(self, node, exec_func):
         input = self.input
         if 'deprecated' in node.annotations:
             util.cout.writeln(u'[DEBUG] Deprecated: %s' % self.name)
@@ -84,9 +103,9 @@ class CommandExecutor(BaseInterpreter):
             node._prepare()
             node.in_schema.validate(input)
             if node.profile.in_schema.type == 'void':
-                r = node.execute()
+                r = exec_func(node)
             else:
-                r = node.execute(input)
+                r = exec_func(node, input)
             node.out_schema.validate(r)
             if 'commit-point' in node.profile_container.get_annotations():
                 for n in node.facility_names:

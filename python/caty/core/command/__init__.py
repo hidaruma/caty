@@ -322,6 +322,7 @@ def scriptwrapper(profile, script):
     class Wrapper(Command):
         def __init__(self, opts_ref, args_ref, type_args=[]):
             self.profile_container = profile
+            self.script = script
             Command.__init__(self, opts_ref, args_ref, type_args)
 
         def execute(self, input=None):
@@ -333,11 +334,14 @@ def scriptwrapper(profile, script):
         def setup(self, *args, **kwds):
             pass
 
+        def accept(self, visitor):
+            return visitor.visit_script(self)
+
         def _prepare(self):
             self._init_opts()
             opts = self._opts
             args = self._args
-            self.var_storage.new_maked_scope(opts, args)
+            self.var_storage.new_masked_scope(opts, args)
             if opts:
                 for k, v in opts.items():
                     self.var_storage.opts[k] = v
@@ -381,7 +385,7 @@ class VarStorage(object):
         self.opts.del_scope()
         self.args = self.args_stack.pop(-1)
 
-    def new_maked_scope(self, opts, args):
+    def new_masked_scope(self, opts, args):
         self.opts_stack.append(self.opts)
         self.args_stack.append(self.args)
         self.opts = OverlayedDict(opts if opts else {})
