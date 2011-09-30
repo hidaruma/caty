@@ -1,0 +1,85 @@
+// -*- coding: utf-8 -*-
+
+/** Atom使用による編集
+ * AtomPubにだいたい従った編集手順
+ */
+module atom in cara;
+
+
+
+/** 初期状態 */
+state start :: any links {
+ + feed --> Collection.feed;
+};
+
+/** エラー状態 */
+/*
+state error :: any links {
+ + feed --> Collection.feed;
+};
+*/
+
+/** Atomフィードの表示状態 */
+state feed :: any links {
+ new-entry()    --> Collection.new-entry;
+ view-entry()   --> Entry.view;
+ edit-entry()   --> Entry.edit;
+ delete-entry() --> Entry.delete;
+};
+
+/** Atomエントリーの表示状態 */
+state view-entry :: any links {
+ feed()      --> Collection.feed;
+ edit-this() --> Entry.edit;
+};
+
+/** Atomエントリーの編集UI */
+state edit-entry :: any links {
+ feed()        --> Collection.feed;
+ update-this() --> Entry.update;
+ put-this()    --> Entry.put;
+ delete-this() --> Entry.delete;
+};
+
+/** Atomエントリーが削除された状態 */
+state entry-deleted :: void links {
+ feed()   --> Collection.feed;
+};
+
+
+/** Atomコレクション */
+resource Collection ("/*/") {
+
+ action feed ("/GET")
+ :: @[in, out]#feed void -> any produces feed ;
+
+ action new-entry("new-entry/POST") 
+ :: @[in, out] #new  any -> any produces edit-entry;
+
+};
+
+/** Atomエントリー */
+resource Entry("/*/*.atom") {
+
+  action view("/GET") 
+  :: @[in, out]#read void -> any  produces view-entry ;
+ 
+  action edit("edit/GET")
+  :: @[in, out]#edit void -> any produces edit-entry ;
+
+  action delete("/DELETE")
+  :: @[in, out] #delete void -> void produces entry-deleted ;
+
+  action put("/PUT#exists-parent")
+  :: @[in]  #in any -> _ relays [ok, ng], // 行き先をチェックしてないが、これでいいような気がする
+     @[out] #ok any -> any produces view-entry,
+  ;
+
+  action update("update-entry/PUT")
+  :: @[in]  #in any -> _ relays [ok, ng],
+     @[out] #ok any -> any produces edit-entry,
+//     @[out] #ng any -> any produces error
+  ;
+
+};
+
