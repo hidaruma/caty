@@ -113,7 +113,7 @@ class RequestHandler(object):
                 else:
                     cmd = self._interpreter.build(proxy.source, opts, [path, path], transaction=transaction)
         except Exception, e:
-            return ExceptionAdaptor(e, traceback.format_exc(), self._app, error_logger)
+            return ExceptionAdaptor(e, traceback.format_exc(), self, error_logger)
         return PipelineAdaptor(cmd, self._interpreter.facilities['schema'], self, error_logger, lock_file)
     
     def _verify_access(self, path, method):
