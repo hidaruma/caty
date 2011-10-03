@@ -76,6 +76,7 @@ class Facility(PbcObject):
     def rollback(self):
         pass
 
+
     def merge_transaction(self, another):
         u"""同一ファシリティの別インスタンスのトランザクション情報をマージする。
         request など、入れ子のトランザクションへの対応が目的である。
@@ -293,6 +294,8 @@ class TransactionAdaptor(Command):
         except:
             self.rollback()
             raise
+        finally:
+            self.cleanup()
     
     def commit(self):
         vcs = None
@@ -307,6 +310,10 @@ class TransactionAdaptor(Command):
     def rollback(self):
         for k, v in self._facilities.items():
             v.rollback()
+
+    def cleanup(self):
+        for k, v in self._facilities.items():
+            v.cleanup()
 
     @property
     def in_schema(self):

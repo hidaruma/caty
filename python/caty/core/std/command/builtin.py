@@ -1101,7 +1101,7 @@ class Help(Builtin):
                 query = 'filter'
             else:
                 query = None
-            commands = [(x.name, x.title) 
+            commands = [(x.name, x.doc.splitlines()[0].strip()) 
                          for x in l
                          if not query or query in x.annotations]
             commands.sort(cmp=lambda x, y:cmp(x[0], y[0]))

@@ -205,10 +205,8 @@ class TypeCalcurator(_SubNormalizer):
             t1 = l.type if l.type != '__variable__' else ro.i18n.get(u'type variable($name)', name=l.name)
             t2 = r.type if r.type != '__variable__' else ro.i18n.get(u'type variable($name)', name=r.name)
             raise Exception(ro.i18n.get(u'unsupported operand types for $op: $type1, $type2', type1=str(t1), type2=t2, op='&'))
-        if l.type == '__merging__':
-            l = l.accept(self)
-        if r.type == '__merging__':
-            r = r.accept(self)
+        l = l.accept(self)
+        r = r.accept(self)
         n = l.update(r)
         return n.accept(self)
 

@@ -185,7 +185,7 @@ class CommandExecutor(BaseInterpreter):
             raise Exception(u'%s is not defined' % node.var_name)
 
     def visit_argref(self, node):
-        argv = self.var_storage.opts['_ARGV']
+        argv = node.var_storage.opts['_ARGV']
         try:
             return argv[node.arg_num]
         except:
