@@ -60,6 +60,9 @@ class BaseInterpreter(object):
     def visit_take(self, node):
         raise NotImplementedError(u'%s#visit_take'.format(self.__class__.__name__))
 
+    def visit_script(self, node):
+        raise NotImplementedError(u'%s#visit_script'.format(self.__class__.__name__))
+
 class CommandExecutor(BaseInterpreter):
     def __init__(self, cmd):
         self.cmd = cmd
@@ -307,3 +310,5 @@ class CommandExecutor(BaseInterpreter):
     @property
     def out_schema(self):
         return self.cmd.out_schema
+
+
