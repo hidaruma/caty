@@ -1,5 +1,5 @@
 # coding:utf-8
-from caty.core.command import Builtin, Command, ScriptWrapper
+from caty.core.command import Builtin, Command, scriptwrapper
 class CommandBuilder(object):
     def __init__(self, facilities, namespace):
         self.facilities = facilities
@@ -15,7 +15,7 @@ class CommandBuilder(object):
             profile = self.namespace[proxy.name]
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
-            cmd = ScriptWrapper(profile, cls.instantiate(self))(opts_ref, args_ref, type_args)
+            cmd = scriptwrapper(profile, cls.instantiate(self))(opts_ref, args_ref, type_args)
         else:
             cmd = cls(opts_ref, args_ref, type_args)
         return cmd

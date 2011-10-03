@@ -65,7 +65,40 @@ from caty.core.schema.array import ArraySchema
 from caty.core.schema.object import ObjectSchema, PseudoTag
 from caty.core.schema.enum import EnumSchema
 from caty.core.schema.bag import BagSchema
-
+__all__ = [
+    "SchemaBase",
+    "OperatorSchema",
+    "UnionSchema",
+    "IntersectionSchema",
+    "UpdatorSchema",
+    "TagSchema",
+    "ScalarSchema",
+    "AnySchema",
+    "NullSchema",
+    "VoidSchema",
+    "NeverSchema",
+    "UndefinedSchema",
+    "TypeVariable",
+    "OptionalSchema",
+    "NamedSchema",
+    "TypeReference",
+    "OverlayedDict",
+    "SchemaAttribute",
+    "Annotations",
+    "Annotation",
+    "NumberSchema",
+    "IntegerSchema",
+    "StringSchema",
+    "BinarySchema",
+    "BoolSchema",
+    "ArraySchema",
+    "ObjectSchema",
+    "PseudoTag",
+    "EnumSchema",
+    "BagSchema",
+    "types",
+    "schemata",
+]
 # 組み込み・デフォルト定義のスキーマ群
 types = {
     'integer': IntegerSchema(),

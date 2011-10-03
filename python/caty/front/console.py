@@ -71,6 +71,7 @@ class CatyShell(cmd.Cmd):
         else:
             self.dribble_file = None
         import string
+        self.type_check = False
         self.identchars = set(list(string.ascii_letters + string.digits + '_-'))
 
     def start_pipeline(self):
@@ -126,6 +127,16 @@ class CatyShell(cmd.Cmd):
 
     def do_help(self, line):
         return self.default('help ' + line)
+
+    def do_type_check(self, line):
+        if line.strip() == u'on':
+            self.type_check = True
+        elif line.strip() == u'off':
+            self.type_check = False
+        elif line.strip() == u'':
+            self._echo('on' if self.type_check else 'off')
+        else:
+            print u'Usage: type_check [on|off]'
 
     def onecmd(self, line):
         if self.dribble_file:
@@ -262,7 +273,7 @@ Web サーバの起動・停止を行う
         try:
             # 一連のパイプラインが入力しきっていない場合、 None が返る
             try:
-                c = self.interpreter.build(unicode(line.strip(), self.app.sysencoding))
+                c = self.interpreter.build(unicode(line.strip(), self.app.sysencoding), type_check=self.type_check)
             except NothingTodo:
                 self.set_prompt()
                 return False

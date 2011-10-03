@@ -3,12 +3,13 @@ from caty.core.schema import *
 from caty.core.script.builder import CommandCombinator
 from caty.core.script.interpreter import BaseInterpreter
 from caty.core.script.node import *
-from caty.core.command import ScriptWrapper
 from caty.core.std.command.builtin import Void
 from caty.core.typeinterface import TreeCursor
+from caty.core.command.usage import MiniDumper
 import caty.jsontools as json
 
-class PipeLineComparator(BaseInterpreter):
+
+class TypeInferer(BaseInterpreter):
     u"""
     コマンドの入出力型を比較し、型の包含関係の判定と型推論を行う。
     a | bというパイプラインにおいて、aの出力型がbの入力型に包含されていない場合、エラーとなる。
@@ -22,7 +23,15 @@ class PipeLineComparator(BaseInterpreter):
     def __init__(self):
         BaseInterpreter.__init__(self)
         self.namespaces = [{}]
-        self.__trace = []
+        self.__messages = []
+
+    @property
+    def message(self):
+        return u'\n    '.join([u'[ERROR] Failed to type check']+self.__messages)
+
+    @property
+    def is_error(self):
+        return self.__messages != []
 
     def find_name(self, name):
         for n in reversed(self.namespaces):
@@ -37,10 +46,12 @@ class PipeLineComparator(BaseInterpreter):
         a = node.bf.accept(self)
         b = node.af.accept(self)
         tc = TypeComparator(a, b)
-        r = tc.compare()
+        tc.compare()
+        if tc.is_error:
+            self.__messages.append(tc.message)
         if isinstance(node.af, VarStore):
             self.namespaces[-1][node.af.var_name] = r.output_type
-        return r
+        return FunctionType(tc.input_type, tc.output_type, [])
 
     def visit_discard_pipe(self, node):
         a = node.bf.accept(self)
@@ -48,7 +59,7 @@ class PipeLineComparator(BaseInterpreter):
         return b
 
     def visit_scalar(self, node):
-        return FunctionType(VoidSchema(), EnumSchema([node.value]), [])
+        return FunctionType(VoidSchema(), EnumSchema([node.value]))
 
     def visit_list(self, node):
         o = []
@@ -85,7 +96,7 @@ class PipeLineComparator(BaseInterpreter):
                 i = UnionSchema(i, t.input_type)
                 try:
                     o = UnionSchema(o, t.output_type)
-                else:
+                except:
                     # XXX:
                     # when分岐の出力はUnionだが、必ずしも排他ではない。
                     # Union型のコンストラクタがエラーを投げても、それは単に無視する。
@@ -129,8 +140,8 @@ class PipeLineComparator(BaseInterpreter):
             v = FunctionType(t.output_type, UnionSchema(BoolSchema(), TagSchema(u'True', AnySchema())))
             tc = TypeComparator(FunctionType(VoidSchema(), t.output_type), v)
             tc.compare()
-            if tc.error:
-                self.__trace.append(tc.message)
+            if tc.is_error:
+                self.__messages.append(tc.message)
             return FunctionType(node.input_type, node.output_type, node.profile_container.type_var_names)
         finally:
             self.namespaces.pop(-1)
@@ -148,8 +159,16 @@ class TypeComparator(TreeCursor):
         self.__stack = []
         self.type1 = t1
         self.type2 = t2
-        self.error = False
+        self.is_error = False
         self.message = u''
+
+    @property
+    def input_type(self):
+        return self.type1.input_type
+
+    @property
+    def output_type(self):
+        return self.type2.output_type
 
     def _focus(self, obj):
         self.__stack.append(obj)
@@ -164,11 +183,11 @@ class TypeComparator(TreeCursor):
         return sefl.__stack[-1]
 
     def compare(self):
-        if self.type1.name != self.type2.name:
-            self.error = True
-            self.message = u'%s != %s' % (self.type1.name, self.type2.name)
-        #lt = self.type1.output_type
-        #rt = self.type2.input_type
+        lt = self.type1.output_type
+        rt = self.type2.input_type
+        if lt.name != rt.name and rt.name != 'void':
+            self.is_error = True
+            self.message = u'%s != %s' % (lt.accept(MiniDumper()), rt.accept(MiniDumper()))
         #self._focus(lt)
         #rt.accept(self)
 
@@ -188,7 +207,7 @@ class FunctionType(object):
     u"""
     型変数、入力型、出力型の三つ組。
     """
-    def __init__(self, input_type, output_type, type_var_names):
+    def __init__(self, input_type, output_type, type_var_names=list()):
         self.type_vars = {}
         for k in type_var_names:
             self.type_vars[k] = AnySchema()

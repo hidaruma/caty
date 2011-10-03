@@ -64,7 +64,7 @@ class TreeDumper(TreeCursor):
 
     def _process_option(self, node, buff):
         if node.options:
-            items = [(k, v) for k, v in node.options.items() if k not in ('subName', 'minCount', 'maxCount')]
+            items = [(k, v) for k, v in node.options.items() if k not in ('subName', 'minCount', 'maxCount', 'repeat')]
             if 'subName' in node.options:
                 buff.append(' ' + node.options['subName'])
             if items:

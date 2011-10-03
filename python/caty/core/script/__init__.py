@@ -10,6 +10,7 @@ from caty.core.facility import (FakeFacility,
                                 PEND)
 from caty.core.script.parser import ScriptParser, NothingTodo
 from caty.core.script.builder import CommandBuilder, CommandCombinator
+from caty.core.script.inferer import TypeInferer
 from caty.core.script.interpreter import CommandExecutor
 from caty.core.script import node
 from caty.core.std.command import builtin
@@ -18,6 +19,7 @@ from caty.core.command.profile import CommandUsageError
 from caty.core.command.usage import CommandUsage
 from caty.util.cache import memoize, Cache
 from caty.util import error_to_ustr
+from caty import util
 import types
 
 def initialize(registrar, app, system):
@@ -108,7 +110,7 @@ class AbstractCommandCompiler(FakeFacility):
     def clone(self):
         return self.__class__(self._facilities.clone(), self.module)
 
-    def build(self, string, opts=None, args=None, transaction=COMMIT):
+    def build(self, string, opts=None, args=None, transaction=COMMIT, type_check=False):
         u"""コマンド文字列とコマンドライン引数リストを受け取り、コマンドオブジェクトを構築する。
         """
         proxy = None
@@ -119,9 +121,9 @@ class AbstractCommandCompiler(FakeFacility):
             proxy = self._compile(string)
             if self.cache_enabled:
                 self._cache.set(key, proxy)
-        return self._instantiate(proxy, opts, args, transaction)
+        return self._instantiate(proxy, opts, args, transaction, type_check)
 
-    def _instantiate(self, proxy, opts=None, args=None, transaction=COMMIT):
+    def _instantiate(self, proxy, opts=None, args=None, transaction=COMMIT, type_check=False):
         if proxy is None:
             return None
         var_storage = VarStorage(opts, args)
@@ -136,6 +138,11 @@ class AbstractCommandCompiler(FakeFacility):
             raise Exception(u'\n'.join(msg))
         c.set_facility(self.facilities)
         c.set_var_storage(var_storage)
+        if type_check:
+            ti = TypeInferer()
+            c.accept(ti)
+            if ti.is_error:
+                util.cout.writeln(ti.message)
         c = CommandExecutor(c)
         if transaction == COMMIT:
             return TransactionAdaptor(c, self.facilities)
