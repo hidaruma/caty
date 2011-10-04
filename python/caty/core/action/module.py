@@ -2,6 +2,10 @@
 from caty.core.action.selector import *
 from caty.core.action.resource import *
 from caty.core.exception import *
+from caty.core.casm.language.ast import CommandNode
+from caty.core.casm.language.commandparser import call_pattern
+from caty.core.casm.module import Module
+from topdown import CharSeq, many1
 
 class ResourceModuleContainer(object):
     def __init__(self, app):
@@ -11,6 +15,9 @@ class ResourceModuleContainer(object):
                            ResourceSelector(app),
                           ]
         self._modules = {}
+
+    def get_modules(self):
+        return self._modules.itervalues()
 
     def add_module(self, resource_module):
         for r in resource_module.resources:
@@ -90,17 +97,31 @@ class ResourceModuleContainer(object):
         else:
             return r
 
-class ResourceModule(object):
-    def __init__(self, name, docstring, app_name=u'builtin'):
-        self.name = name
+class ResourceModule(Module):
+    type = u'.cara'
+    def __init__(self, name, docstring, app):
+        Module.__init__(self, app)
+        self._name = name
         self.docstring = docstring
         self._resources = []
         self._states = []
-        self._app_name = app_name
 
     @property
     def resources(self):
         return self._resources
+
+    def add_resource(self, res):
+        self._resources.append(res)
+        for act in res.actions:
+            script = act.instance
+            ptn = many1(call_pattern)(CharSeq(u'{*: any} [string*]:: WebInput -> Response | Redirect', auto_remove_ws=True))
+            c = CommandNode(u'{0}.{1}'.format(res.name, act.name), 
+                            map(lambda p:p([], []), ptn), 
+                            script, 
+                            act.docstring, 
+                            act.annotations, 
+                            [])
+            c.declare(self)
 
     def get_resource(self, name):
         for r in self._resources:

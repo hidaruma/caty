@@ -384,24 +384,23 @@ class Application(PbcObject):
     def finish_setup(self):
         self.i18n.write("Initializing '$name'", name=self.name)
         if self._disabled: return
-        try:
-            if not self._no_ambient:
-                self._schema_module.resolve()
-        except Exception, e:
-            #msg = error_to_ustr(e)
-            cout.writeln(e)
-            raise 
+
         self._init_interpreter()
         #self._compile_associations()
         c = {}
         c['indexfiles'] = self.indexfiles[:]
         c['script_ext'] = ['.cgi', '.act', '.do']
-        #c['associations'] = {}
-        #for k, v in self.associations.items():
-        #    c['associations'][k] = v
         c['missingSlash'] = self._manifest['missingSlash']
         self._web_config = ImmutableDict(c)
         self._create_dispatcher()
+        self._extract_casm_from_cara() # .caraで定義されたコマンド、スキーマの登録。
+        try:
+            if not self._no_ambient:
+                self._schema_module.resolve() # 型参照は最終的にここで解決される。
+        except Exception, e:
+            #msg = error_to_ustr(e)
+            cout.writeln(e)
+            raise 
         self._init_mafs() # action定義でファイルタイプが加わっている可能性があるので再度初期化。
         if self._no_ambient: return
         if self._app_spec:
@@ -427,6 +426,10 @@ class Application(PbcObject):
         for c in filetype_classes:
             dispatcher.add_resource(c)
         self._dispatcher = dispatcher
+
+    def _extract_casm_from_cara(self):
+        for mod in self._dispatcher.get_modules():
+            self._schema_module.add_sub_module(mod)
 
     def __exec_callback(self, callback_class_name):
         import copy

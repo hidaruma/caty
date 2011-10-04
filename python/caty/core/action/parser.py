@@ -9,6 +9,8 @@ from caty.core.action.resource import ResourceClass
 from caty.core.action.module import ResourceModule
 from caty.core.action.entry import ResourceActionEntry, ActionProfiles, ActionProfile
 from caty.core.schema.base import Annotations
+from caty.core.casm.language import schemaparser, commandparser
+from caty.core.casm.language.ast import ASTRoot, CommandNode
 from caty.util import bind2nd
 from caty.core.exception import throw_caty_exception
 
@@ -24,22 +26,25 @@ class ResourceActionDescriptorParser(Parser):
         ds = mn.docstring or u'undocumented'
         if name != self._module_name:
             raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
-        rm = ResourceModule(name, ds, self._app.name)
-        classes = seq.parse(many([self.resourceclass, self.state]))
+        rm = ResourceModule(name, ds, self._app)
+        classes = seq.parse(many([self.resourceclass, self.state, schemaparser.schema, commandparser.command]))
         if not seq.eof:
             raise ParseError(seq, self)
         for c in classes:
-            for r in rm.resources:
-                if r.name == c.name:
-                    throw_caty_exception(
-                        u'CARA_PARSE_ERROR',
-                        u'Duplicated resource name: $name module: $module', 
-                        name=c.name, module=name)
-
-            if isinstance(c, ResourceClass):
-                rm.resources.append(c)
+            if isinstance(c, (ASTRoot, CommandNode)):
+                c.declare(rm)
             else:
-                rm.states.append(c)
+                for r in rm.resources:
+                    if r.name == c.name:
+                        throw_caty_exception(
+                            u'CARA_PARSE_ERROR',
+                            u'Duplicated resource name: $name module: $module', 
+                            name=c.name, module=name)
+
+                if isinstance(c, ResourceClass):
+                    rm.add_resource(c)
+                else:
+                    rm.states.append(c)
         return rm
 
     def state(self, seq):

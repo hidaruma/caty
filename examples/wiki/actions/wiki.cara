@@ -94,3 +94,9 @@ state edit :: WikiSkele links {
 
 state plain :: Response;
  
+type foobar = 1;
+
+command x [string arg] :: void -> void {
+    %1 | cout
+};
+

@@ -224,6 +224,7 @@ class CommandNode(Function):
         self.type_var_names = type_var_names
 
     def declare(self, module):
+        self.module = module
         module.add_proto_type(self)
         self.application = module.application
 

@@ -18,6 +18,7 @@ from threading import RLock
 from StringIO import StringIO
 
 class Module(object):
+    type = u'.casm'
     def __init__(self, app):
         self.kind_ns = {}
         self.schema_ns = {}
@@ -146,7 +147,10 @@ class Module(object):
 
     def _get_mod_and_app(self, t):
         a = t.module.application.name
-        m = t.module.name + '.casm' if a != 'builtin' else t.module.name + '.py'
+        if a != 'builtin':
+            m = t.module.name + t.module.type
+        else:
+            t.module.name + '.py'
         return m, a
 
     def has_ast(self, name, tracked=()):
@@ -318,6 +322,14 @@ class Module(object):
         for m in self.sub_modules.values():
             for r in m.get_modules():
                 yield m
+
+    def add_sub_module(self, module):
+        if module.name in self.sub_modules:
+            raise Exception(self.application.i18n.get(u'Module $name is already defined in $app', 
+                                                      name=module.name, 
+                                                      app=self.app.name))
+        module.parent = self
+        self.sub_modules[module.name] = module
 
     def resolve(self):
         u"""型参照の解決
