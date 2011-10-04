@@ -133,7 +133,7 @@ class CommandExecutor(BaseInterpreter):
         return node.af.accept(self)
 
     def visit_discard_pipe(self, node):
-        node.bf(self.input)
+        node.bf.accept(self)
         self.input = None
         return node.af.accept(self)
 
