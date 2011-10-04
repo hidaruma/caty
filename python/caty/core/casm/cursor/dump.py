@@ -103,6 +103,8 @@ class TreeDumper(TreeCursor):
     def _to_str(self, e):
         if isinstance(e, unicode):
             return '"%s"' % e
+        elif isinstance(e, bool):
+            return str(e).lower()
         else:
             return str(e)
 

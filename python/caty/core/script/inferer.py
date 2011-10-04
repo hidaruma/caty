@@ -24,6 +24,7 @@ class TypeInferer(BaseInterpreter):
         BaseInterpreter.__init__(self)
         self.namespaces = [{}]
         self.__messages = []
+        self.__cache = {}
 
     @property
     def message(self):
@@ -31,7 +32,7 @@ class TypeInferer(BaseInterpreter):
 
     @property
     def is_error(self):
-        return self.__messages != []
+        return len(self.__messages) > 0
 
     def find_name(self, name):
         for n in reversed(self.namespaces):
@@ -40,6 +41,7 @@ class TypeInferer(BaseInterpreter):
         return TypeVariable(name, [], {}, None)
 
     def visit_command(self, node):
+        if node in self.__cache:
         return FunctionType(node.in_schema, node.out_schema, node.profile_container.type_var_names)
 
     def visit_pipe(self, node):
@@ -48,10 +50,10 @@ class TypeInferer(BaseInterpreter):
         tc = TypeComparator(a, b)
         tc.compare()
         if tc.is_error:
-            self.__messages.append(tc.message)
+            self.__messages.extend(tc.error_messages)
         if isinstance(node.af, VarStore):
             self.namespaces[-1][node.af.var_name] = r.output_type
-        return FunctionType(tc.input_type, tc.output_type, [])
+        return FunctionType(tc.input_type, tc.output_type, tc.type_vars)
 
     def visit_discard_pipe(self, node):
         a = node.bf.accept(self)
@@ -141,7 +143,7 @@ class TypeInferer(BaseInterpreter):
             tc = TypeComparator(FunctionType(VoidSchema(), t.output_type), v)
             tc.compare()
             if tc.is_error:
-                self.__messages.append(tc.message)
+                self.__messages.extend(tc.error_messages)
             return FunctionType(node.input_type, node.output_type, node.profile_container.type_var_names)
         finally:
             self.namespaces.pop(-1)
@@ -154,13 +156,50 @@ class TypeInferer(BaseInterpreter):
         finally:
             self.namespaces = o
 
+OK = 0
+ERROR = 1
+SUSPICIOUS = 2
+
 class TypeComparator(TreeCursor):
     def __init__(self, t1, t2):
         self.__stack = []
         self.type1 = t1
         self.type2 = t2
-        self.is_error = False
-        self.message = u''
+        self.__trace = []
+
+    @property
+    def is_error(self):
+        for t, m in self.__trace:
+            if t == ERROR:
+                return True
+
+    @property
+    def is_suspicious(self):
+        for t, m in self.__trace:
+            if t == SUSPICIOUS:
+                return True
+
+    @property
+    def error_messages(self):
+        r = []
+        for t, m in self.__trace:
+            if t == ERROR:
+                r.append(m)
+        return r
+
+    @property
+    def warning_messages(self):
+        r = []
+        for t, m in self.__trace:
+            if t == SUSPICIOUS:
+                r.append(m)
+        return r
+
+    def messages(self):
+        r = []
+        for _, m in self.__trace:
+            r.append(m)
+        return r
 
     @property
     def input_type(self):
@@ -180,17 +219,89 @@ class TypeComparator(TreeCursor):
     @property
     def primary_focused(self):
         assert len(self.__stack) > 0
-        return sefl.__stack[-1]
+        return self.__dereference(self.__stack[-1])
+
+    def __dereference(self, o):
+        if isinstance(o, (NamedSchema, TypeReference)):
+            return self.__dereference(o.body)
+        else:
+            return o
 
     def compare(self):
         lt = self.type1.output_type
         rt = self.type2.input_type
-        if lt.name != rt.name and rt.name != 'void':
-            self.is_error = True
-            self.message = u'%s != %s' % (lt.accept(MiniDumper()), rt.accept(MiniDumper()))
-        #self._focus(lt)
-        #rt.accept(self)
+        self._focus(lt)
+        rt.accept(self)
 
+    def _visit_root(self, node):
+        return node.body.accept(self)
+
+    def _visit_scalar(self, node):
+        p = self.primary_focused
+        if node.type == u'void' or node.type == u'any':
+            return
+        elif isinstance(node, TypeVariable):
+            res = self.type2.inference_type_var(node.name, p)
+            if res: # 以前に推論した型変数と矛盾が生じた
+                self.__trace.append((ERROR, u'%s can not to assign to %s (infered to %s)' % (p.type, node.name, self.type2.type_vars[node.name])))
+        elif isinstance(p, ScalarSchema):
+            if p.type != node.type and len(set([p.type, node.type]).union(set(['integer', 'number']))) > 2:
+                self.__trace.append((ERROR, u'%s != %s' % (self.__stack[-1].name, node.type)))
+            else:
+                pass
+        elif isinstance(p, UnionSchema):
+            l = p.left
+            r = p.right
+            tc1 = TypeComparator(FunctionType(VoidSchema(), l), FunctionType(node, VoidSchema))
+            tc1.compare()
+            tc2 = TypeComparator(FunctionType(VoidSchema(), r), FunctionType(node, VoidSchema))
+            tc2.compare()
+            if tc1.is_error and tc2.is_error:
+                self.__trace.append((ERROR, u'%s ∈ %s' % (MiniDumper().visit(p), node.type)))
+            else:
+                for m in tc1.messages:
+                    self.__trace.append((SUSPICIOUS, m))
+                for m in tc2.messages:
+                    self.__trace.append((SUSPICIOUS, m))
+        elif isinstance(p, EnumSchema):
+            m = []
+            for v in p.enum:
+                try:
+                    node.validate(v)
+                except:
+                    m.append((SUSPICIOUS, u'%s ∈ %s' % (MiniDumper()._to_str(v), node.type)))
+                else:
+                    return
+            self.__trace.append((ERROR, u'%s ∈ %s' % (MiniDumper().visit(p), node.type)))
+        else:
+            self.__trace.append((ERROR, u'%s != %s' % (self.__stack[-1].name, node.type)))
+
+    def _visit_option(self, node):
+        pass
+
+    def _visit_enum(self, node):
+        pass
+
+    def _visit_object(self, node):
+        pass
+
+    def _visit_array(self, node):
+        pass
+
+    def _visit_bag(self, node):
+        pass
+
+    def _visit_intersection(self, node):
+        pass
+
+    def _visit_union(self, node):
+        pass
+
+    def _visit_updator(self, node):
+        pass
+
+    def _visit_tag(self, node):
+        pass
 
 class Cursor(object):
     def __init__(self, state):
@@ -209,12 +320,23 @@ class FunctionType(object):
     """
     def __init__(self, input_type, output_type, type_var_names=list()):
         self.type_vars = {}
-        for k in type_var_names:
-            self.type_vars[k] = AnySchema()
+        if isinstance(type_var_names, dict):
+            self.type_vars.update(type_var_names)
+        else:
+            for k in type_var_names:
+                self.type_vars[k] = None
         self.input_type = input_type
         self.output_type = output_type
 
-    def inference_type_var(self, varname, type):
-        pass
-
+    def inference_type_var(self, name, type):
+        if self.type_vars[name] is None:
+            self.type_vars[name] = type
+        else:
+            old = self.type_vars[name]
+            tc = TypeComparator(FunctionType(VoidSchema(), old), FunctionType(type, VoidSchema()))
+            tc.compare()
+            if tc.is_error:
+                return tc
+            else:
+                self.type_vars[name] = type
 

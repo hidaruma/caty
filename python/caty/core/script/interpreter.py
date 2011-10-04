@@ -295,12 +295,12 @@ class CommandExecutor(BaseInterpreter):
         for v in i:
             try:
                 self.input = v
-                self.var_storage.new_scope()
+                node.var_storage.new_scope()
                 x = node.cmd.accept(self)
                 if x == True or tag(x) == 'True':
                     r.append(v)
             finally:
-                self.var_storage.del_scope()
+                node.var_storage.del_scope()
         return r
 
     @property
