@@ -41,7 +41,6 @@ class TypeInferer(BaseInterpreter):
         return TypeVariable(name, [], {}, None)
 
     def visit_command(self, node):
-        if node in self.__cache:
         return FunctionType(node.in_schema, node.out_schema, node.profile_container.type_var_names)
 
     def visit_pipe(self, node):
@@ -245,8 +244,8 @@ class TypeComparator(TreeCursor):
             if res: # 以前に推論した型変数と矛盾が生じた
                 self.__trace.append((ERROR, u'%s can not to assign to %s (infered to %s)' % (p.type, node.name, self.type2.type_vars[node.name])))
         elif isinstance(p, ScalarSchema):
-            if p.type != node.type and len(set([p.type, node.type]).union(set(['integer', 'number']))) > 2:
-                self.__trace.append((ERROR, u'%s != %s' % (self.__stack[-1].name, node.type)))
+            if p.type != node.type and (p.type != u'integer' and node.type != u'number'):
+                self.__trace.append((ERROR, u'%s ⊆ %s' % (self.__stack[-1].name, node.type)))
             else:
                 pass
         elif isinstance(p, UnionSchema):
@@ -257,7 +256,7 @@ class TypeComparator(TreeCursor):
             tc2 = TypeComparator(FunctionType(VoidSchema(), r), FunctionType(node, VoidSchema))
             tc2.compare()
             if tc1.is_error and tc2.is_error:
-                self.__trace.append((ERROR, u'%s ∈ %s' % (MiniDumper().visit(p), node.type)))
+                self.__trace.append((ERROR, u'%s ⊆ %s' % (MiniDumper().visit(p), node.type)))
             else:
                 for m in tc1.messages:
                     self.__trace.append((SUSPICIOUS, m))
@@ -269,12 +268,12 @@ class TypeComparator(TreeCursor):
                 try:
                     node.validate(v)
                 except:
-                    m.append((SUSPICIOUS, u'%s ∈ %s' % (MiniDumper()._to_str(v), node.type)))
+                    m.append((SUSPICIOUS, u'%s ⊆ %s' % (MiniDumper()._to_str(v), node.type)))
                 else:
                     return
-            self.__trace.append((ERROR, u'%s ∈ %s' % (MiniDumper().visit(p), node.type)))
+            self.__trace.append((ERROR, u'%s ⊆ %s' % (MiniDumper().visit(p), node.type)))
         else:
-            self.__trace.append((ERROR, u'%s != %s' % (self.__stack[-1].name, node.type)))
+            self.__trace.append((ERROR, u'%s ⊆ %s' % (self.__stack[-1].name, node.type)))
 
     def _visit_option(self, node):
         pass
