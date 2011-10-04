@@ -93,8 +93,8 @@ class VarStore(Syntax):
                         refers python:caty.core.script.node.VarStore;
     """
     def __init__(self, *args, **kwds):
-        Syntax.__init__(self, *args, **kwds)
-        self.__var_name = name
+        Syntax.__init__(self, args[1:], **kwds)
+        self.__var_name = args[0]
 
     @property
     def var_name(self):

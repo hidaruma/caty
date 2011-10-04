@@ -41,7 +41,12 @@ class TypeInferer(BaseInterpreter):
         return TypeVariable(name, [], {}, None)
 
     def visit_command(self, node):
-        return FunctionType(node.in_schema, node.out_schema, node.profile_container.type_var_names)
+        if node in self.__cache:
+            return self.__cache[node]
+        else:
+            c = FunctionType(node.in_schema, node.out_schema, node.profile_container.type_var_names)
+            self.__cache[node] = c
+            return c
 
     def visit_pipe(self, node):
         a = node.bf.accept(self)
