@@ -325,9 +325,9 @@ class Module(object):
 
     def add_sub_module(self, module):
         if module.name in self.sub_modules:
-            raise Exception(self.application.i18n.get(u'Module $name is already defined in $app', 
+            raise Exception(self.application.i18n.get(u'Can not register $name.cara. $name.casm is already defined in $app', 
                                                       name=module.name, 
-                                                      app=self.app.name))
+                                                      app=self._app.name))
         module.parent = self
         self.sub_modules[module.name] = module
 
