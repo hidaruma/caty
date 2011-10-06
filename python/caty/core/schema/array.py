@@ -173,6 +173,11 @@ class ArraySchema(SchemaBase, Array):
                     v.append(t)
         return v
 
+    def __len__(self):
+        return len(self.schema_list)
+
+    def __getitem__(self, n):
+        return self.schema_list[n]
 
     def __iter__(self):
         return iter(self.schema_list)

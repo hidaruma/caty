@@ -221,6 +221,9 @@ class ObjectSchema(SchemaBase, Object):
     def iteritems(self):
         return self.schema_obj.iteritems()
 
+    def __contains__(self, k):
+        return k in self.schema_obj
+
     def dump(self, depth=0, node=[]):
         s = []
         s.append('    ' * depth)
