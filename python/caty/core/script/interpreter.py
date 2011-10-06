@@ -5,7 +5,7 @@ from caty import UNDEFINED
 from caty.jsontools.path import build_query
 from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly
 from caty.jsontools import jstypes
-from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command
+from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, ContinuationSignal, Internal
 from caty.core.script.node import *
 import caty
 import caty.core.schema as schema
@@ -69,7 +69,10 @@ class CommandExecutor(BaseInterpreter):
 
     def __call__(self, input):
         self.input = input
-        return self.cmd.accept(self)
+        try:
+            return self.cmd.accept(self)
+        except ContinuationSignal as e:
+            return e.json_obj
 
     def visit_command(self, node):
         return self._exec_command(node, self._do_command)
@@ -120,7 +123,9 @@ class CommandExecutor(BaseInterpreter):
                 while r and r[-1] is UNDEFINED:
                     r.pop(-1)
             return r
-        except Exception, e:
+        except ContinuationSignal as e:
+            raise
+        except Exception as e:
             if isinstance(e, PipelineInterruption) or isinstance(e, PipelineErrorExit):
                 raise
             util.cout.writeln(u"[DEBUG] Error: " + repr(node))
@@ -310,5 +315,26 @@ class CommandExecutor(BaseInterpreter):
     @property
     def out_schema(self):
         return self.cmd.out_schema
+
+class _CallCommand(object):
+    def setup(self, cmd_name, *args):
+        from caty.core.command.param import Argument
+        self.__cmd_name = cmd_name
+        self.__args = map(Argument, args)
+
+    def _execute(self, input):
+        n = self._facilities['env'].get('CATY_APP')['name']
+        app = self._system.get_app(n)
+        c = app.command_finder[self.__cmd_name].get_command_class()({}, self.__args)
+        c.set_facility(self._facilities)
+        return CommandExecutor(c)(input)
+
+class CallCommand(_CallCommand, Internal):
+    def execute(self, input):
+        return self._execute(input)
+
+class Forward(_CallCommand, Internal):
+    def execute(self, input):
+        raise ContinuationSignal(self._execute(input))
 
 

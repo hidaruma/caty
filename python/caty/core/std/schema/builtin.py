@@ -1024,4 +1024,16 @@ command array-to-object :: [[string, any]*] -> object
 command object-to-array :: object -> [[string, any]*]
     refers python:caty.core.std.command.builtin.ObjectToArray;
 
+/** 
+ * 引数のコマンドを呼び出す。
+ */
+command call<S, T> [string command_name, string*] :: S -> T
+    refers python:caty.core.script.interpreter.CallCommand;
+
+/** 
+ * 引数のコマンドを呼び出し、制御をそちらに移す。
+ */
+command forward<S, T> [string command_name, string*] :: S -> never
+    signals T
+    refers python:caty.core.script.interpreter.Forward;
 """

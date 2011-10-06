@@ -25,7 +25,7 @@ def command(seq):
             raise ParseFailed(seq, command, '%s is reserved.' % n)
         t = seq.parse(option(typenames, []))
         patterns = many1(call_pattern)(seq)
-        j = seq.parse(many(jump))
+        j = seq.parse(jump)
         r = seq.parse(many(resource))
         rf = seq.parse(option([script, refers]))
         _ = seq.parse(';')
@@ -87,15 +87,30 @@ def profile(seq):
     return [(i, o)]
 
 def jump(seq):
-    return seq.parse([throws, breaks])
+    t = None
+    b = None
+    s = None
+    r = unordered(throws, breaks, signals)(seq)
+    for k, v in r:
+        if k == u'throws':
+            t = (k, v)
+        elif k == 'breaks':
+            b = (k, v)
+        else:
+            s = (k, v)
+    return filter(lambda x: x is not None, [t, b, s])
 
 def throws(seq):
-    _ = seq.parse(keyword('throws'))
-    only = seq.parse(option(keyword('only')))
+    _ = seq.parse(keyword(u'throws'))
+    only = seq.parse(option(keyword(u'only')))
     return _, seq.parse([lambda s: [typedef(s)], typelist])
 
 def breaks(seq):
-    _ = seq.parse(keyword('breaks'))
+    _ = seq.parse(keyword(u'breaks'))
+    return _, seq.parse([lambda s: [typedef(s)], typelist])
+
+def signals(seq):
+    _ = seq.parse(keyword(u'signals'))
     return _, seq.parse([lambda s: [typedef(s)], typelist])
 
 def typelist(seq):

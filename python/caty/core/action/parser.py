@@ -219,22 +219,16 @@ class ActionBlock(Parser):
         return pf, name
 
     def relays(self, seq):
-        p = seq.parse(option(keyword('relays')))
-        if p:
-            return p, choice(self.one_state, self.list_state)(seq)
-        return p, []
+        p = seq.parse(keyword('relays'))
+        return p, choice(self.one_state, self.list_state)(seq)
 
     def produces(self, seq):
-        p = seq.parse(option(keyword('produces')))
-        if p:
-            return p, choice(self.one_state, self.list_state)(seq)
-        return p, []
+        p = seq.parse(keyword('produces'))
+        return p, choice(self.one_state, self.list_state)(seq)
 
     def redirects(self, seq):
-        p = seq.parse(option(keyword('redirects')))
-        if p:
-            return p, choice(self.one_state, self.list_state)(seq)
-        return p, []
+        p = seq.parse(keyword('redirects'))
+        return p, choice(self.one_state, self.list_state)(seq)
 
     def one_state(self, seq):
         return [self.name(seq)]

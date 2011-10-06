@@ -558,18 +558,29 @@ class unordered(Parser):
             except EndOfBuffer, e:
                 raise
             except ParseFailed, e:
-                error_list.append(e)
+                if isinstance(p, mandatory):
+                    error_list.append(e)
             else:
                 l = p
                 break
         else:
-            error_list.sort(cmp=lambda a, b:cmp(a.pos, b.pos))
-            raise error_list[-1]
+            if error_list:
+                error_list.sort(cmp=lambda a, b:cmp(a.pos, b.pos))
+                raise error_list[-1]
+            else:
+                return []
         parsers.remove(l)
         if parsers:
             return [r] + self.__parse(seq, parsers)
         else:
             return [r]
+
+class mandatory(Parser):
+    def __init__(self, parser):
+        self.parser = parser
+
+    def __call__(self, seq):
+        return seq.parse(self.parser)
 
 alpha = Regex(r'[a-zA-Z_]+')
 number = Regex(r'[0-9]+')
