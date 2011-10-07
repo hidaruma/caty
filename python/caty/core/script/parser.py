@@ -17,6 +17,7 @@ from caty.core.script.proxy import UntagCaseProxy as UntagCase
 from caty.core.script.proxy import EachProxy as Each
 from caty.core.script.proxy import TimeProxy as Time
 from caty.core.script.proxy import TakeProxy as Take
+from caty.core.script.proxy import StartProxy as Start
 from caty.core.script.proxy import DiscardProxy as Discard
 from caty.core.script.proxy import VarStoreProxy as VarStore
 from caty.core.script.proxy import VarRefProxy as VarRef
@@ -75,22 +76,24 @@ class ScriptParser(Parser):
         return s
 
     def name(self, seq):
-        return seq.parse(Regex(r'[a-zA-Z]+[-a-zA-Z0-9:._]*'))
+        return seq.parse(Regex(ur'[a-zA-Z]+[-a-zA-Z0-9:._]*'))
 
     def functor(self, seq):
-        func = seq.parse(['each', 'take', 'time'])
+        func = seq.parse([u'each', u'take', u'time', u'start'])
         opts = self.options(seq)
-        seq.parse('{')
+        seq.parse(u'{')
         if seq.eof:
             raise EndOfBuffer(seq, self.functor)
         cmd  = self.make_pipeline(seq)
-        seq.parse('}')
-        if func == 'each':
+        seq.parse(u'}')
+        if func == u'each':
             return Each(cmd, opts)
-        elif func == 'time':
+        elif func == u'time':
             return Time(cmd, opts)
-        elif func == 'take':
+        elif func == u'take':
             return Take(cmd, opts)
+        elif func == u'start':
+            return Start(cmd, opts)
 
     def command(self, seq):
         name = choice(self.name, self.xjson_path)(seq)

@@ -356,6 +356,24 @@ class Take(Syntax):
     def accept(self, visitor):
         return visitor.visit_take(self)
 
+class Start(Syntax):
+    command_decl = u"""
+    command start-functor<T> :: T -> never
+        refers python:caty.core.script.node.Start;
+    """
+    def __init__(self, cmd, ignore):
+        Syntax.__init__(self)
+        self.cmd = cmd
+
+    def set_facility(self, facilities):
+        Syntax.set_facility(self, facilities)
+        self.cmd.set_facility(facilities)
+
+    def set_var_storage(self, storage):
+        self.cmd.set_var_storage(storage)
+
+    def accept(self, visitor):
+        return visitor.visit_start(self)
 
 class PipelineFragment(Syntax):
     command_decl = u"""

@@ -29,9 +29,9 @@ class AsyncWorker(object):
         self._func = func
         self._args = args
         self._kwds = kwds
-        f = callee._new_facility()
-        self._obj = callee.clone()
-        self._obj.set_facility(f)
+        #f = callee._new_facility()
+        self._obj = callee
+        #self._obj.set_facility(f)
 
     def run(self):
         try:
@@ -40,7 +40,6 @@ class AsyncWorker(object):
                 self._func.im_func(self._obj, *self._args, **self._kwds)
             else:
                 self._func(self._obj, *self._args, **self._kwds)
-            self._obj._internal_commit()
         finally:
             self._finalize()
 

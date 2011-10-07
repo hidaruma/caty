@@ -281,7 +281,6 @@ class TransactionAdaptor(Command):
     def __init__(self, command, facilities):
         self._facilities = facilities
         self._command = command
-        
 
     def __call__(self, input):
         try:

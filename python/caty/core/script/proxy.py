@@ -180,6 +180,10 @@ class TimeProxy(FunctorProxy):
     def _get_class(self):
         return Time
 
+class StartProxy(FunctorProxy):
+    def _get_class(self):
+        return Start
+
 class CombinatorProxy(Proxy):
     def __init__(self, a, b):
         self.a = a

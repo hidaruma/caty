@@ -143,7 +143,7 @@ class AbstractCommandCompiler(FakeFacility):
             c.accept(ti)
             if ti.is_error:
                 util.cout.writeln(ti.message)
-        c = CommandExecutor(c)
+        c = CommandExecutor(c, self.module._app, self._facilities)
         if transaction == COMMIT:
             return TransactionAdaptor(c, self.facilities)
         elif transaction == ROLLBACK:
