@@ -5,7 +5,7 @@ from caty import UNDEFINED
 from caty.jsontools.path import build_query
 from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly
 from caty.jsontools import jstypes
-from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, ContinuationSignal, Internal
+from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, ContinuationSignal, Internal, scriptwrapper
 from caty.core.script.node import *
 import caty
 import caty.core.schema as schema
@@ -339,11 +339,18 @@ class _CallCommand(object):
         self.__args = map(Argument, args)
 
     def _execute(self, input):
+        from caty.core.script.proxy import Proxy
+        from caty.core.script.builder import CommandBuilder
         n = self._facilities['env'].get('CATY_APP')['name']
         app = self._system.get_app(n)
-        c = app.command_finder[self.__cmd_name].get_command_class()({}, self.__args)
+        profile = app.command_finder[self.__cmd_name]
+        cls = profile.get_command_class()
+        if isinstance(cls, Proxy):
+            c = scriptwrapper(profile, cls.instantiate(CommandBuilder(self._facilities, app.command_finder)))({}, self.__args)
+        else:
+            c = cls({}, self.__args)
         c.set_facility(self._facilities)
-        return CommandExecutor(c)(input)
+        return CommandExecutor(c, app, self._facilities)(input)
 
 class CallCommand(_CallCommand, Internal):
     def execute(self, input):
