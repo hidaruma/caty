@@ -74,10 +74,14 @@ class CommandExecutor(BaseInterpreter):
 
     def __call__(self, input):
         self.input = input
-        try:
-            return self.cmd.accept(self)
-        except ContinuationSignal as e:
-            return e.json_obj
+        while True:
+            try:
+                return self.cmd.accept(self)
+            except ContinuationSignal as e:
+                self.cmd = e.cont
+                if self.cmd is None:
+                    return e.data
+                self.data = e.data
 
     def visit_command(self, node):
         return self._exec_command(node, self._do_command)
@@ -338,7 +342,7 @@ class _CallCommand(object):
         self.__cmd_name = cmd_name
         self.__args = map(Argument, args)
 
-    def _execute(self, input):
+    def _make_cmd(self, input):
         from caty.core.script.proxy import Proxy
         from caty.core.script.builder import CommandBuilder
         n = self._facilities['env'].get('CATY_APP')['name']
@@ -350,14 +354,16 @@ class _CallCommand(object):
         else:
             c = cls({}, self.__args)
         c.set_facility(self._facilities)
-        return CommandExecutor(c, app, self._facilities)(input)
+        return CommandExecutor(c, app, self._facilities)
 
 class CallCommand(_CallCommand, Internal):
     def execute(self, input):
-        return self._execute(input)
+        c = self._make_cmd(input)
+        return c(input)
 
 class Forward(_CallCommand, Internal):
     def execute(self, input):
-        raise ContinuationSignal(self._execute(input))
+        c = self._make_cmd(input)
+        raise ContinuationSignal(input, c.cmd)
 
 
