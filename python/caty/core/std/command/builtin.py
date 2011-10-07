@@ -1,5 +1,6 @@
 # coding: utf-8
 from __future__ import with_statement
+from __future__ import division
 import caty
 import caty.jsontools as json
 from caty.jsontools import xjson
@@ -1170,3 +1171,12 @@ class ObjectToArray(Builtin):
         return list(input.items())
 
 
+import time
+class Sleep(Builtin):
+    def setup(self, millisec = 1000):
+        self.millisec = millisec
+
+    def execute(self):
+        sec = self.millisec / 1000 # __future__ division
+        time.sleep(sec)
+        return None
