@@ -316,9 +316,7 @@ class CommandExecutor(BaseInterpreter):
     def visit_start(self, node):
         from caty.core.facility import TransactionAdaptor
         async_queue = self.app.async_queue
-        new_facility = self._new_facility()
-        node.cmd.set_facility(new_facility)
-        subproc = TransactionAdaptor(CommandExecutor(node.cmd, self.app, new_facility), new_facility)
+        subproc = TransactionAdaptor(CommandExecutor(node.cmd, self.app, self.facility_set), self.facility_set)
         async_queue.push(subproc, subproc.__call__, self.input)
         return self.input
 
@@ -330,8 +328,9 @@ class CommandExecutor(BaseInterpreter):
     def out_schema(self):
         return self.cmd.out_schema
 
-    def _new_facility(self):
-        return self.facility_set.clone()
+    def set_facility(self, f):
+        self.facility_set = f
+        self.cmd.set_facility(f)
 
 class _CallCommand(object):
     def setup(self, cmd_name, *args):

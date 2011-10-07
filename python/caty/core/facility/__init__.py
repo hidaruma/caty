@@ -314,6 +314,11 @@ class TransactionAdaptor(Command):
         for k, v in self._facilities.items():
             v.cleanup()
 
+    def reset_facility(self):
+        n = self._facilities.clone()
+        self._command.set_facility(n)
+        self._facilities = n
+
     @property
     def in_schema(self):
         return self._command.in_schema

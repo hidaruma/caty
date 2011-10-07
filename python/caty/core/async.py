@@ -1,4 +1,5 @@
 from __future__ import with_statement
+from caty.core.facility import TransactionAdaptor
 from threading import Thread, RLock
 try:
     import multiprocessing
@@ -19,9 +20,9 @@ class AsyncQueue(object):
             t = AsyncThread(self, callee, func, *args, **kwds)
         t.start()
 
-    def remove(self, t):
+    def remove(self, name):
         with RLock():
-            del self._queue[t.getName()]
+            del self._queue[name]
     
 class AsyncWorker(object):
     def __init__(self, creator, callee, func, *args, **kwds):
@@ -29,12 +30,15 @@ class AsyncWorker(object):
         self._func = func
         self._args = args
         self._kwds = kwds
-        #f = callee._new_facility()
         self._obj = callee
-        #self._obj.set_facility(f)
+        self._callee = callee
 
     def run(self):
         try:
+            with RLock():
+                self._creator._queue[self.getName()] = self.get_worker_id()
+            if isinstance(self._callee, TransactionAdaptor):
+                self._callee.reset_facility()
             time.sleep(1)
             if isinstance(self._func, types.MethodType) and type(self._func.im_self) == type(self._obj):
                 self._func.im_func(self._obj, *self._args, **self._kwds)
@@ -47,11 +51,12 @@ class AsyncThread(AsyncWorker, Thread):
     def __init__(self, *args, **kwds):
         Thread.__init__(self)
         AsyncWorker.__init__(self, *args, **kwds)
-        with RLock():
-            self._creator._queue[self.getName()] = self
         
+    def get_worker_id(self):
+        return self.ident
+
     def _finalize(self):
-        self._creator.remove(self)
+        self._creator.remove(self.getName())
 
 if multiprocessing:
     class AsyncProcess(AsyncWorker, multiprocessing.Process):
@@ -61,6 +66,9 @@ if multiprocessing:
 
         def getName(self):
             return self.name
+
+        def get_worker_id(self):
+            return self.pid
 
         def _finalize(self):
             pass
