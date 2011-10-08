@@ -1,6 +1,6 @@
 // -*- coding: utf-8 -*-
 
-/** Atom使用による編集
+/** Atom仕様をベースにした編集
  * AtomPubにだいたい従った編集手順
  */
 module atom in cara;

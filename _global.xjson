@@ -15,7 +15,7 @@
      **********************************/
     "enableScriptCache": false, // true にすると Caty スクリプトのコンパイル結果をキャッシュ
     "enableHTTPMethodTunneling": true, // true にすると HTTP メソッドトンネリングが有効になる
-    "useMultiprocessing": true, //マルチスレッドの代わりにマルチプロセスを使うかどうか
+    "useMultiprocessing": false, //マルチスレッドの代わりにマルチプロセスを使うかどうか
                              //マルチプロセス使用不可の環境では、マルチスレッドにフォールバックされる。
     // "ignoreNames": [], //Caty アプリケーションとして扱わないディレクトリ名のリスト。デフォルトは["CVS"]
 
