@@ -332,6 +332,7 @@ class Time(Syntax):
 
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
+        Syntax.set_var_storage(self, storage)
 
 
     def accept(self, visitor):
@@ -371,6 +372,7 @@ class Start(Syntax):
 
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
+        Syntax.set_var_storage(self, storage)
 
     def accept(self, visitor):
         return visitor.visit_start(self)

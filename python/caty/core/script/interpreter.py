@@ -336,6 +336,13 @@ class CommandExecutor(BaseInterpreter):
         self.facility_set = f
         self.cmd.set_facility(f)
 
+    @property
+    def var_storage(self):
+        return self.cmd.var_storage
+
+    def set_var_storage(self, v):
+        self.cmd.set_var_storage(v)
+
 class _CallCommand(object):
     def setup(self, cmd_name, *args):
         from caty.core.command.param import Argument

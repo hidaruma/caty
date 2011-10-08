@@ -38,7 +38,9 @@ class AsyncWorker(object):
             with RLock():
                 self._creator._queue[self.getName()] = self.get_worker_id()
             if isinstance(self._callee, TransactionAdaptor):
-                self._callee.reset_facility()
+                self._callee.isRunningAsync = True
+                self._callee.reset_environment()
+            self.isRunningAsync = True
             time.sleep(1)
             if isinstance(self._func, types.MethodType) and type(self._func.im_self) == type(self._obj):
                 self._func.im_func(self._obj, *self._args, **self._kwds)

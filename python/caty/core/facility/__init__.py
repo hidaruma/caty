@@ -281,6 +281,7 @@ class TransactionAdaptor(Command):
     def __init__(self, command, facilities):
         self._facilities = facilities
         self._command = command
+        self.isRunningAsync = False
 
     def __call__(self, input):
         try:
@@ -314,10 +315,12 @@ class TransactionAdaptor(Command):
         for k, v in self._facilities.items():
             v.cleanup()
 
-    def reset_facility(self):
+    def reset_environment(self):
         n = self._facilities.clone()
         self._command.set_facility(n)
         self._facilities = n
+        s = self._command.var_storage.clone()
+        self._command.set_var_storage(s)
 
     @property
     def in_schema(self):
@@ -334,6 +337,7 @@ class TransactionDiscardAdaptor(TransactionAdaptor):
     def __init__(self, command, facilities):
         self._facilities = facilities
         self._command = command
+        self.isRunningAsync = False
 
     def __call__(self, input):
         try:
@@ -354,6 +358,7 @@ class TransactionPendingAdaptor(TransactionAdaptor):
     def __init__(self, command, facilities):
         self._facilities = facilities
         self._command = command
+        self.isRunningAsync = False
  
     def commit(self):
         pass

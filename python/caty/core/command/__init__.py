@@ -377,6 +377,18 @@ class VarStorage(object):
         self.args_stack = []
         self.opts_stack = []
 
+    def clone(self):
+        from copy import deepcopy
+        n = VarStorage({}, [])
+        n.opts = self.opts.clone()
+        n.args = deepcopy(self.args)
+        n.opts['_ARGV'] = n.args
+        for a in self.args_stack:
+            n.args_stack.append(deepcopy(a))
+        for o in self.opts_stack:
+            n.opts_stack.append(o.clone())
+        return n
+
     def new_scope(self):
         self.opts.new_scope()
         self.args_stack.append(self.args)
@@ -397,7 +409,7 @@ class VarStorage(object):
         self.args = self.args_stack.pop(-1)
 
     def __repr__(self):
-        return repr(self.opts) + repr(self.args)
+        return repr(self.opts) + repr(self.args) + repr(self.opts_stack) + repr(self.args_stack)
 
 def compile_builtin(module, registrar):
     u"""ビルトインのコマンドのプロパティで定義されたコマンド宣言をコンパイルする。

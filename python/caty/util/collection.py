@@ -319,3 +319,13 @@ class OverlayedDict(dict):
     def current_scope(self):
         return self.scope[0]
 
+    def __repr__(self):
+        return repr(self.scope)
+
+    def clone(self):
+        from copy import deepcopy
+        n = OverlayedDict({})
+        n.scope = []
+        for s in self.scope:
+            n.scope.insert(0, deepcopy(s))
+        return n

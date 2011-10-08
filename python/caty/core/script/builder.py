@@ -52,6 +52,10 @@ class CommandCombinator(Command):
     def out_schema(self):
         return self.af.out_schema
 
+    @property
+    def var_storage(self):
+        return self.af.var_storage
+
     def accept(self, visitor):
         return visitor.visit_pipe(self)
 
