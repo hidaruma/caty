@@ -83,6 +83,9 @@ class CommandExecutor(BaseInterpreter):
                 if self.cmd is None:
                     return e.data
                 self.data = e.data
+            except KeyboardInterrupt as e:
+                print e
+                return None
 
     def visit_command(self, node):
         return self._exec_command(node, self._do_command)
