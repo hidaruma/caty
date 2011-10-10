@@ -10,6 +10,7 @@ from caty.core.script.node import *
 import caty
 import caty.core.schema as schema
 import types
+import time
 
 class BaseInterpreter(object):
     def visit(self, node):
@@ -296,7 +297,6 @@ class CommandExecutor(BaseInterpreter):
         return dict(r)
 
     def visit_time(self, node):
-        import time
         s = time.time()
         r = node.cmd.accept(self)
         e = time.time()
@@ -321,7 +321,10 @@ class CommandExecutor(BaseInterpreter):
         from caty.core.facility import TransactionAdaptor
         async_queue = self.app.async_queue
         subproc = TransactionAdaptor(CommandExecutor(node.cmd, self.app, self.facility_set), self.facility_set)
-        async_queue.push(subproc, subproc.__call__, self.input)
+        worker = async_queue.push(subproc, subproc.__call__, self.input)
+        t = time.time()
+        while not worker.isStarted and time.time() - t < 2:
+            pass
         return self.input
 
     @property

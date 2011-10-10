@@ -19,6 +19,7 @@ class AsyncQueue(object):
         else:
             t = AsyncThread(self, callee, func, *args, **kwds)
         t.start()
+        return t
 
     def remove(self, name):
         with RLock():
@@ -32,6 +33,7 @@ class AsyncWorker(object):
         self._kwds = kwds
         self._obj = callee
         self._callee = callee
+        self.isStarted = False
 
     def run(self):
         try:
@@ -40,7 +42,7 @@ class AsyncWorker(object):
             if isinstance(self._callee, TransactionAdaptor):
                 self._callee.isRunningAsync = True
                 self._callee.reset_environment()
-            self.isRunningAsync = True
+            self.isStarted = True
             time.sleep(1)
             if isinstance(self._func, types.MethodType) and type(self._func.im_self) == type(self._obj):
                 self._func.im_func(self._obj, *self._args, **self._kwds)
