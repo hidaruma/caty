@@ -105,7 +105,8 @@ class AbstractCommandCompiler(FakeFacility):
         c = pipeline.instantiate(self.filter_builder)
         c.set_facility(self.facilities)
         c.set_var_storage(var_storage)
-        return CommandExecutor(c)
+        c = CommandExecutor(c, self.module._app, self.facilities)
+        return c
 
     def clone(self):
         return self.__class__(self._facilities.clone(), self.module)
