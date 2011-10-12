@@ -11,4 +11,13 @@ command sample {
   reads schemata
   refers python:caty.core.std.command.gen.Sample;
 
+/**
+ * 与えられたパスパターンからURLを生成する。
+ */
+command url [PathPattern pathPattern] :: void -> string
+    throws BadArg
+    reads env
+    refers python:caty.core.std.command.gen.Url;
+
+
 """

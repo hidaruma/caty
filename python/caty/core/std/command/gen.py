@@ -3,6 +3,7 @@ from caty.core.command import Builtin
 from caty.core.typeinterface import TreeCursor, Union, Tag
 from caty.core.schema import TagSchema, StringSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference
 import random
+from string import printable
 
 class Sample(Builtin):
    
@@ -191,4 +192,39 @@ class DataGenerator(TreeCursor):
         else:
             return _EMPTY
 
+class Url(Builtin):
+    def setup(self, pattern):
+        self._pattern = pattern
+
+    def execute(self):
+        from caty.core.action.parser import url_pattern
+        from topdown import as_parser
+        try:
+            p = as_parser(url_pattern).run(self._pattern)
+        except:
+            throw_caty_exception(u'BadArg', self._pattern)
+        url = []
+        for s in p:
+            if s == u'*':
+                url.append(self.__random_str())
+            elif s == u'**':
+                url.append(self.__random_str(True))
+            else:
+                url.append(s)
+        return u''.join(url)
+
+    def __random_str(self, includes_slash=False):
+        p = [u'']
+        seed = u'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_'
+        if includes_slash:
+            seed += u'///////'
+        for i in range(random.choice(range(3,10))):
+            c = unicode(random.choice(seed))
+            if not (c == u'/' and p[-1] == u'/'):
+                p.append(c)
+        r = u''.join(p).strip(u'/')
+        if not r:
+            return self.__random_str(includes_slash)
+        else:
+            return r
 

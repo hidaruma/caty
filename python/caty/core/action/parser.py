@@ -84,18 +84,20 @@ def url_string(seq):
     finally:
         seq.ignore_hook = ih
     seq.parse(u'"')
-    return u
+    return u''.join(u)
 
 def url_pattern(seq):
     s = seq.pos
     last_seq = u''
+    r = []
     while seq.current != '"' and not seq.eof:
         c = choice(u'**', u'*', u'/', ur'\"', Regex(ur'[^*/\"]+'))(seq)
         if ((c == u'/' and last_seq == u'/') or 
             (c == u'*' and last_seq in (u'**', u'*'))):
             raise ParseError(seq, url_pattern)
         last_seq = c
-    return seq.text[s:seq.pos]
+        r.append(c)
+    return r
 
 class ActionBlock(Parser):
     def __init__(self, rcname, script_parser, module_name):
