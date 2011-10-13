@@ -1,6 +1,6 @@
 // -*- coding: utf-8 -*-
 
-/** ユーザー管理業務
+/*
 
 [[http://terasoluna.sourceforge.jp/tutorial/server-web/Document/WebTutorial_2.html]]
 の図
@@ -17,40 +17,58 @@ POSTデータ型／状態型の定義は**さぼり**、型はvoidとanyを使�
 トリガーはすべて追加トリガー（ページデザイナが責任を持つ）とする。
 
 */
+
+/** ユーザー管理業務モジュール */
 module user-mgr in cara;
 
+/* == 型定義 == */
+
+/** ユーザーリストの型 */
+type UserList = deferred; // 後で定義
+
+/** 登録UIが持つデータの型 */
+type RegisterUI = deferred;
+
+/** 登録されるユーザー情報の型 */
+type UserInfo = deferred;
+
+/** 登録完了時に戻されるデータの型 */
+type Result = deferred;
+
+
+/* == リソースと画面（状態）の定義 == */
 
 /** メニュー画面の生成 */
 resource Menu ("/menu.html") {
  action get("/GET")
- :: @[in, out] #1 void -> void produces menu;
+ :: @[in, out] #1 void -> void produces menu ;
 };
 
 /** メニュー画面 */
-state menu :: any links {
+state menu :: void links {
  + to-list     --> List.get;
  + to-register --> Register.get;
  + logoff      --> DummyLogon.get;
 };
 
 /** ユーザー一覧の生成 */
-resource List ("/list") {
+resource List ("/list.cgi") {
  action get("/GET#dont-care")
- :: @[in, out]#1 void -> any produces list  ;
+ :: @[in, out]#1 void -> UserList produces list  ;
 
  action next("next/GET#dont-care") {"current": integer}
- :: @[in, out]#1 void -> any produces list ;
+ :: @[in, out]#1 void -> UserList produces list ;
 
  action prev("prev/GET#dont-care") {"current": integer}
- :: @[in, out]#1 void -> any produces list ;
+ :: @[in, out]#1 void -> UserList produces list ;
 
  action go-to("go-to/GET#dont-care") {"current": integer, "target": integer}
- :: @[in, out]#1 void -> any produces list ;
+ :: @[in, out]#1 void -> UserList produces list ;
 
 };
 
 /** ユーザー一覧画面 */
-state list :: any links {
+state list :: UserList links {
  + list  --> List.get;
  + next  --> List.next;
  + prev  --> List.prev;
@@ -61,25 +79,26 @@ state list :: any links {
 /** 登録画面の生成 */
 resource Register("/register.html") {
  action get("/GET")
- :: @[in, out]#1 void -> any produces register;
+ :: @[in, out]#1 void -> RegisterUI produces register ;
 };
 
 /** 登録画面 */
-state register :: any links {
+state register :: RegisterUI links {
  + do-regster --> DoRegister.do;
  + menu       --> Menu.get;
 };
 
 /** 登録処理実行 */
-resource DoRegister("/do-register") {
+resource DoRegister("/do-register.cgi") {
  action do ("/POST#dont-care")
- :: @[in]#in any -> _ relays [ok, ng],
-    @[out]#ok _  -> any produces result,
-    @[out]#ng _  -> any produces register ;
+ :: @[in] #in UserInfo -> _          relays [ok, ng],
+    @[out]#ok _        -> Result     produces result,
+    @[out]#ng _        -> RegisterUI produces register
+ ;
 };
 
 /** 結果表示画面 */
-state result :: any links {
+state result :: Result links {
  + menu --> Menu.get;
 };
 
@@ -89,8 +108,7 @@ resource DummyLogon ("/dumy-logon.html") {
  :: @[in, out]#1 void -> void produces dummy-logon ;
 };
 
-
 /** ダミーのログオン画面 */
-state dummy-logon :: any links {
+state dummy-logon :: void links {
   + menu --> Menu.get;
 };
