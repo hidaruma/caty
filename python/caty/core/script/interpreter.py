@@ -165,6 +165,8 @@ class CommandExecutor(BaseInterpreter):
             prev_input = self.input
             r.append(v.accept(self))
             self.input = prev_input
+        while r and r[-1] is UNDEFINED:
+            r.pop(-1)
         return r
 
     def visit_object(self, node):
