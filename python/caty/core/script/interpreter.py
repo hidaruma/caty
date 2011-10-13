@@ -194,15 +194,15 @@ class CommandExecutor(BaseInterpreter):
             raise Exception(u'%s is already defined' % node.var_name)
 
     def visit_varref(self, node):
+        r = caty.UNDEFINED
         if node.var_name in node.var_storage.opts:
             r = node.var_storage.opts[node.var_name]
-            if r is UNDEFINED and not node.optional:
-                raise Exception(u'%s is not defined' % node.var_name)
-            return r
         else:
-            if node.optional:
-                return caty.UNDEFINED
+            if self.facility_set['env'].exists(node.var_name):
+                r = self.facility_set['env'].get(node.var_name)
+        if r is UNDEFINED and not node.optional:
             raise Exception(u'%s is not defined' % node.var_name)
+        return r
 
     def visit_argref(self, node):
         argv = node.var_storage.opts['_ARGV']
