@@ -27,9 +27,22 @@ class NamedArg(Param):
         self.key = key
         self.optional = optional
 
+    def __repr__(self):
+        r = '[narg]' + repr(self.key)
+        if self.optional:
+            return r+'?'
+        else:
+            return r
+
 class IndexArg(Param):
     type = 'iarg'
     def __init__(self, index, optional):
         self.index = index
         self.optional = optional
 
+    def __repr__(self):
+        r = '[iarg]' + repr(self.index)
+        if self.optional:
+            return r+'?'
+        else:
+            return r

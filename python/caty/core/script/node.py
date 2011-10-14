@@ -423,9 +423,10 @@ class VarStorageForAction(VarStorage):
         self.opts = storage.opts
         if len(storage.args) > 1:
             self.args = [storage.args[1]] + storage.args[1:]
+            self.opts[u'PATH_INFO'] = self.args[0]
         else:
             self.args = storage.args
-        self.opts['_ARGV'] = self.args
+        self.opts[u'_ARGV'] = self.args
         self.args_stack = []
         self.opts_stack = []
 
@@ -437,5 +438,5 @@ class VarStorageForAction(VarStorage):
             self.args = [args[0]] + args
         else:
             self.args = args
-        self.opts['_ARGV'] = self.args
+        self.opts[u'_ARGV'] = self.args
 
