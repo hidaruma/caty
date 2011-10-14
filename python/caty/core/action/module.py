@@ -111,13 +111,14 @@ class ResourceModule(Module):
         return self._resources
 
     def add_resource(self, res):
+        from caty.core.script.proxy import EnvelopeProxy as ActionEnvelope
         self._resources.append(res)
         for act in res.actions:
             script = act.instance
-            ptn = many1(call_pattern)(CharSeq(u'{*: any} [string*]:: WebInput -> Response | Redirect', auto_remove_ws=True))
+            ptn = many1(call_pattern)(CharSeq(u'{*: any} [string*]:: WebInput | void -> Response | Redirect', auto_remove_ws=True))
             c = CommandNode(u'{0}.{1}'.format(res.name, act.name), 
                             map(lambda p:p([], []), ptn), 
-                            script, 
+                            ActionEnvelope(script), 
                             act.docstring, 
                             act.annotations, 
                             [])
@@ -229,3 +230,6 @@ class ResourceModule(Module):
                 moduleName=self.name,
                 resourceName=rcname
             )
+
+
+

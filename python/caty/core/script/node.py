@@ -6,7 +6,7 @@ Caty では switch, dispatch, object 生成などはすべてコマンドとし�
 from caty.jsontools.path import build_query
 from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly
 from caty.jsontools import jstypes
-from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Syntax
+from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Syntax, VarStorage
 import caty
 import types
 
@@ -397,4 +397,45 @@ class PipelineFragment(Syntax):
     def accept(self, visitor):
         return self.cmd.accept(visitor)
 
+class ActionEnvelope(Syntax):
+    command_decl = u"""
+    command __action-envelope {*:any} [string*] :: WebInput | void -> Response | Redirect
+        refers python:caty.core.script.node.ActionEnvelope;
+    """
+    def __init__(self, script):
+        Syntax.__init__(self)
+        self.cmd = script
+
+    def set_facility(self, facilities):
+        self.cmd.set_facility(facilities)
+
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        self.cmd.set_var_storage(storage)
+
+    def accept(self, visitor):
+        new_storage = VarStorageForAction(self.var_storage)
+        self.cmd.set_var_storage(new_storage)
+        return self.cmd.accept(visitor)
+
+class VarStorageForAction(VarStorage):
+    def __init__(self, storage):
+        self.opts = storage.opts
+        if len(storage.args) > 1:
+            self.args = [storage.args[1]] + storage.args[1:]
+        else:
+            self.args = storage.args
+        self.opts['_ARGV'] = self.args
+        self.args_stack = []
+        self.opts_stack = []
+
+    def new_masked_scope(self, opts, args):
+        self.opts_stack.append(self.opts)
+        self.args_stack.append(self.args)
+        self.opts = OverlayedDict(opts if opts else {})
+        if len(args) >= 1:
+            self.args = [args[0]] + args
+        else:
+            self.args = args
+        self.opts['_ARGV'] = self.args
 

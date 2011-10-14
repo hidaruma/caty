@@ -62,6 +62,10 @@ class Command(object):
             return self.__i18n
 
     @property
+    def var_loader(self):
+        return self.__var_loader
+
+    @property
     def profile(self):
         u"""コマンドの入出力のスキーマ情報オブジェクト。
         入出力のスキーマは多相型への対応のために不変オブジェクトになっていないが、

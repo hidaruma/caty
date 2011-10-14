@@ -254,6 +254,17 @@ class FragmentProxy(Proxy):
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
+class EnvelopeProxy(Proxy):
+    def __init__(self, c):
+        self.cmdproxy = c
+
+    def instantiate(self, builder):
+        r = ActionEnvelope(self.cmdproxy.instantiate(builder))
+        return r
+
+    def set_module(self, module):
+        self.cmdproxy.set_module(module)
+
 def combine_proxy(args):
     return reduce(CombinatorProxy, args)
 
