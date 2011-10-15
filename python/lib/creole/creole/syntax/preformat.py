@@ -9,11 +9,10 @@ class Preformat(BlockParser):
         t = u''
         while not seq.eof:
             t += until('}}}')(seq)
-            if t.endswith(' '):
-                t = t[:-1]
-                t += seq.parse(option(line_by_itself('}}}')))
+            if not t.endswith('\n'):
+                t += seq.parse('}}}')
             else:
-                seq.parse(option(line_by_itself('}}}')))
+                seq.parse(option(line_by_itself('}}}'), u''))
                 break
         return self.create_element('pre', None, [t])
 
