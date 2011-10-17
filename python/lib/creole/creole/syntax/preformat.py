@@ -10,6 +10,8 @@ class Preformat(BlockParser):
         while not seq.eof:
             t += until('}}}')(seq)
             if not t.endswith('\n'):
+                if t.endswith(' '):
+                    t = t[:-1]
                 t += seq.parse('}}}')
             else:
                 seq.parse(option(line_by_itself('}}}'), u''))
