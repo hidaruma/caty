@@ -6,7 +6,7 @@ class Preformat(BlockParser):
 
     def __call__(self, seq):
         _ = seq.parse(line_by_itself('{{{'))
-        t = u''
+        t = u'\n'
         while not seq.eof:
             t += until('}}}')(seq)
             if not t.endswith('\n'):
