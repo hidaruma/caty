@@ -9,7 +9,7 @@ resource WikiFile("*.wiki") {
          "isText": true,
     };
     /** 読み込み */
-    action read("/GET") :: @[in, out] #io void -> WikiPage produces page { 
+    action read("/GET") :: @[in, out] #io void -> WikiPage produces pag { 
         (#io file:read %1 | {
             "body": text:creole, 
             "title": param %1 | text:rsplit "." | item 0 | text:trim /,
@@ -45,7 +45,7 @@ resource WikiFile("*.wiki") {
 state page :: WikiPage links {
     + edit --> WikiFile.edit;
     + source --> WikiFile.plain;
-    + new --> NewFile.open;
+    + new --> NewFile.opn;
     + all-pages --> AllPages.get;
     + root --> Root.get;
 };

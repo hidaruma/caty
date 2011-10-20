@@ -35,7 +35,8 @@ class DrawModule(Builtin):
                 },
                 'missing': {
                     'fontsize': 14.0,
-                    'color': 'black',
+                    'color': '#333333',
+                    'style': 'dotted',
                 },
             },
             'action': {
@@ -129,16 +130,18 @@ class DrawModule(Builtin):
             N = RG.get_node(name)
             attr = {}
             attr.update(self._graph_config[node['type']])
-            if (self._node == 'state' 
-                  and node['type'] != 'state'):
-                attr['label'] = ''
-                attr['shape'] = 'circle'
-                attr['width'] = '0.2'
-            elif (self._node == 'action' 
-                and node['type'] != 'action'):
+            if (self._node == 'state' and node['type'] != 'state'):
                 attr['label'] = ''
                 attr['width'] = '0.2'
-                if node['type'] == 'external':
+                if node['type'] == 'missing-state':
+                    attr['shape'] = 'box'
+                    attr['height'] = '0.2'
+                else:
+                    attr['shape'] = 'circle'
+            elif (self._node == 'action' and node['type'] != 'action'):
+                attr['label'] = ''
+                attr['width'] = '0.2'
+                if node['type'] == 'external' or node['type'] == 'missing-action':
                     attr['shape'] = 'circle'
                 else:
                     attr['shape'] = 'box'
@@ -208,7 +211,8 @@ class DrawAction(Builtin):
                 }, 
                 'missing': {
                     'fontsize': 14.0,
-                    'color': 'black',
+                    'color': '#333333',
+                    'style': 'dotted',
                 },
             },
             'fragment': {
