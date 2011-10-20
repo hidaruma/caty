@@ -19,9 +19,6 @@ command draw {
  @[default("any")]
  "node" : ("state" | "action" | "any")?,
 
- /** グラフのサイズ(インチで指定、!を付けるとサイズ強制) */
- @[default("auto"), typical("6.4!, 4.8")]
- "size": string?,
 
 } [
   /** モジュール名
@@ -49,6 +46,7 @@ command draw-action {
  /** アクション内のコードフラグメントと入出力型のみを描く */
  @[default(false)]
  "lone": boolean?,
+
 } [
   /** モジュール名:リソース名.アクション名 */
   string action_name

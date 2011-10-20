@@ -9,7 +9,6 @@ class DrawModule(Builtin):
         self._out_file = opts['out']
         self._format = opts['format']
         self._node = opts['node']
-        self._size = opts['size']
         self._graph_config = {
             'graph': {
                 'bgcolor': 'gainsboro',
@@ -34,6 +33,10 @@ class DrawModule(Builtin):
                     'fontsize': 14.0,
                     'color': 'blue3',
                 },
+                'missing': {
+                    'fontsize': 14.0,
+                    'color': 'black',
+                },
             },
             'action': {
                 'fontsize': 14.0,
@@ -48,6 +51,20 @@ class DrawModule(Builtin):
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'gold'
+            },
+            'missing-action': {
+                'fontsize': 14.0,
+                'shape': u'ellipse',
+                'style': u'filled',
+                'color': u'black',
+                'fillcolor': u'gainsboro'
+            },
+            'missing-state': {
+                'fontsize': 14.0,
+                'shape': u'note',
+                'style': u'filled',
+                'color': u'black',
+                'fillcolor': u'gainsboro'
             },
             'external': {
                 'fontsize': 14.0,
@@ -90,8 +107,6 @@ class DrawModule(Builtin):
         else:
             cfg.update(self._graph_config['subgraph'])
             cfg['name'] = 'cluster_' + graph_struct['name']
-        if self._size != 'auto':
-            cfg['size'] = self._size
         RG = gv.AGraph(**cfg)
         if root:
             RG.graph_attr['label'] = 'Module: ' + graph_struct['name']
@@ -191,6 +206,10 @@ class DrawAction(Builtin):
                     'arrowhead': 'none',
                     'color': 'darkorchid3',
                 }, 
+                'missing': {
+                    'fontsize': 14.0,
+                    'color': 'black',
+                },
             },
             'fragment': {
                 'fontsize': 14.0,
@@ -220,6 +239,20 @@ class DrawAction(Builtin):
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'darkseagreen2'
+            },
+            'missing-action': {
+                'fontsize': 14.0,
+                'shape': u'ellipse',
+                'style': u'filled',
+                'color': u'black',
+                'fillcolor': u'gainsboro'
+            },
+            'missing-state': {
+                'fontsize': 14.0,
+                'shape': u'note',
+                'style': u'filled',
+                'color': u'black',
+                'fillcolor': u'gainsboro'
             },
         }
 

@@ -91,10 +91,28 @@ class ResourceActionEntry(object):
                                     u'type': 'type'})
                                 G['edges'].append({u'from': in_type, u'to': profile.name, u'type': u'link'})
 
+                    for st in profile.next_states:
+                        for state in module.states:
+                            if state.name == st:
+                                break
+                        else:
+                            out_name = profile.output_type.name+'/'+state.name+'/'+'out'
+                            G['nodes'].append({
+                                u'label': profile.output_type.name, 
+                                u'name': out_name, 
+                                u'type': 'type'})
+                            G['edges'].append({u'to': out_name, u'from': profile.name, u'type': u'action-to-type'})
+                            G['nodes'].append({u'name': st, u'label': st, u'type': u'missing-state'})
+                            e = {u'to': st, u'from': out_name, u'type': u'missing'}
+                            G['edges'].append(e)
 
                     for red in profile.redirects:
-                        G['nodes'].append({u'name': red, u'type': u'action'})
-                        G['edges'].append({u'to': red, u'from': profile.name, u'type': u'redirect'})
+                        if not module._find_linked_action(red):
+                            G['nodes'].append({u'label': red, u'name': red, u'type': u'missing-action'})
+                            G['edges'].append({u'from': profile.name, u'to': red, u'type': u'missing'})
+                        else:
+                            G['nodes'].append({u'name': red, u'type': u'action'})
+                            G['edges'].append({u'to': red, u'from': profile.name, u'type': u'redirect'})
                     for res in module.resources:
                         for act in res.actions:
                             for prof in act.profiles:

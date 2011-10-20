@@ -154,8 +154,12 @@ class ResourceModule(Module):
                 for link_to in link.link_to_list:
                     act, fragment = link_to
                     to_node_name = self._find_linked_action(act)
-                    appered_dest.add(to_node_name)
-                    e = {u'from': s.name, u'to': to_node_name, u'type': u'link'}
+                    if not to_node_name:
+                        nodes.append({u'label': act, u'name': act, u'type': u'missing-action'})
+                        e = {u'from': s.name, u'to': act, u'type': u'missing'}
+                    else:
+                        appered_dest.add(to_node_name)
+                        e = {u'from': s.name, u'to': to_node_name, u'type': u'link'}
                 if link.trigger:
                     e[u'trigger'] = link.trigger
                 else:
@@ -168,8 +172,20 @@ class ResourceModule(Module):
             for act in rc.entries.values():
                 for red in act.profiles.redirects:
                     to_name = self._find_linked_action(red)
-                    e = {u'from': act.resource_name + '.' + act.name, u'to': to_name, u'type': u'redirect'}
+                    if not to_name:
+                        nodes.append({u'label': red, u'name': red, u'type': u'missing-action'})
+                        e = {u'from': act.resource_name + '.' + act.name, u'to': red, u'type': u'missing'}
+                    else:
+                        e = {u'from': act.resource_name + '.' + act.name, u'to': to_name, u'type': u'redirect'}
                     edges.append(e)
+                for st in act.profiles.next_states:
+                    for s in self._states:
+                        if s.name == st:
+                            break
+                    else:
+                        nodes.append({u'name': st, u'label': st, u'type': u'missing-state'})
+                        e = {u'to': st, u'from': act.resource_name+'.'+act.name, u'type': u'missing'}
+                        edges.append(e)
         for d in appered_dest:
             found = False
             for s in subgraphs:
@@ -213,6 +229,7 @@ class ResourceModule(Module):
                 res = r
                 break
         else:
+            return None
             throw_caty_exception(
                 u'ResourNotFound',
                 u'$resourceName is not defined in $moduleName',
@@ -223,6 +240,7 @@ class ResourceModule(Module):
             if a.name == aname:
                 return action_id
         else:
+            return None
             throw_caty_exception(
                 u'ActionNotFound',
                 u'$actionName is not defined in $moduleName:$resourceName',
