@@ -155,11 +155,10 @@ class DrawModule(Builtin):
                             edge['to'], 
                             **self._graph_config['edge'][edge['type']])
             else:
-                cfg.update(self._graph_config['edge'][edge['type']])
                 RG.add_edge(edge['from'], 
                             edge['to'], 
                             label=edge['trigger'],
-                            **cfg)
+                            **self._graph_config['edge'][edge['type']])
         return RG
 
 
