@@ -384,9 +384,7 @@ class Application(PbcObject):
     def finish_setup(self):
         self.i18n.write("Initializing '$name'", name=self.name)
         if self._disabled: return
-
-        self._init_interpreter()
-        #self._compile_associations()
+        self._init_interpreter() # 一旦インタープリターを初期化してスクリプトコンパイラが動くようにする
         c = {}
         c['indexfiles'] = self.indexfiles[:]
         c['script_ext'] = ['.cgi', '.act', '.do']
@@ -401,6 +399,7 @@ class Application(PbcObject):
             #msg = error_to_ustr(e)
             cout.writeln(e)
             raise 
+        self._init_interpreter() # ユーザ定義コマンドが解決されたので再度初期化
         self._init_mafs() # action定義でファイルタイプが加わっている可能性があるので再度初期化。
         if self._no_ambient: return
         if self._app_spec:
