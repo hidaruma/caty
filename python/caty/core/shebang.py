@@ -36,7 +36,7 @@ find_script = lambda s: find_(s, '<?caty-script')
 
 @as_parser
 def schebang(seq):
-    meta = option(parse_meta, {})(seq)
+    pre, meta = option(parse_meta, {})(seq)
     if meta:
         c = compilers[meta['template']].get_parser()
         skip_ws(seq)
@@ -44,15 +44,21 @@ def schebang(seq):
         script = option(parse_script, u'')(seq)
     else:
         script = u''
-    return meta, script, seq.rest
+    return pre, meta, script, seq.rest
 
 @try_
 def parse_meta(seq):
-    S(u'<?')(seq)
-    try:
-        keyword(u'caty-meta')(seq)
-    except:
-        raise
+    pre = until('<?')(seq)
+    while not seq.eof:
+        S(u'<?')(seq)
+        try:
+            keyword(u'caty-meta')(seq)
+            break
+        except:
+            raise
+        pre += until('<?')(seq)
+    if len(pre) > 200:
+        raise ParseError(seq, parse_meta)
     try:
         keyword(u'template')(seq)
         S(u'=')(seq)
@@ -70,7 +76,7 @@ def parse_meta(seq):
         S('?>')(seq)
     except ParseError, e:
         raise Exception(ro.i18n.get(u'caty-meta PI syntax error: $message', message=e._message))
-    return r
+    return pre, r
 
 @try_
 def parse_script(seq):
@@ -93,6 +99,6 @@ def parse(s, associate=False):
     どちらも一つのファイルに最大で一回まで出現可能であり、
     二度目以降の shebang は処理されない。
     """
-    meta, script, content = schebang.run(s, auto_remove_ws=True)
-    return meta, script if associate else u'', content
+    pre, meta, script, content = schebang.run(s, auto_remove_ws=True)
+    return meta, script if associate else u'', pre+content
 
