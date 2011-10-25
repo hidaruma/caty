@@ -57,7 +57,7 @@ def parse_meta(seq):
         except:
             raise
         pre += until('<?')(seq)
-    if len(pre) > 200:
+    if len(pre.replace('\r\n', '\n').replace('\r', '\n').split('\n')) > 10:
         raise ParseError(seq, parse_meta)
     try:
         keyword(u'template')(seq)
