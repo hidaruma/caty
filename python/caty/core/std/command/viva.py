@@ -3,12 +3,22 @@ from caty.core.command import Builtin
 from caty.core.exception import *
 import pygraphviz as gv
 
-class DrawModule(Builtin):
+class FileCacheMixin(object):
+    def _modified(self, path, modname):
+        import os
+        app_info = self.env.get('CATY_APP')
+        src = os.path.join(self.env.get('CATY_HOME'), app_info['group'], app_info['name'], 'actions', modname + '.cara')
+        dest = self.pub.open('/'+path.lstrip('/'))
+        src_mod = os.stat(src).st_mtime
+        return not dest.is_modifed_since(src_mod)
+
+class DrawModule(Builtin, FileCacheMixin):
     def setup(self, opts, module_name):
         self._module_name = module_name
         self._out_file = opts['out']
         self._format = opts['format']
         self._node = opts['node']
+        self._if_modified = opts['if-modified']
         self._graph_config = {
             'graph': {
                 'bgcolor': 'gainsboro',
@@ -77,6 +87,9 @@ class DrawModule(Builtin):
         }
 
     def execute(self):
+        if self._out_file and self._if_modified:
+            if not self._modified(self._out_file, self._module_name):
+                return
         src = self.make_graph()
         G = self.transform(src)
         G.layout(prog='dot')
@@ -162,12 +175,13 @@ class DrawModule(Builtin):
         return RG
 
 
-class DrawAction(Builtin):
+class DrawAction(Builtin, FileCacheMixin):
     def setup(self, opts, action_name):
         self._action_name = action_name
         self._out_file = opts['out']
         self._lone = opts['lone']
         self._format = opts['format']
+        self._if_modified = opts['if-modified']
         self._graph_config = {
             'graph': {
                 'bgcolor': 'gainsboro',
@@ -260,6 +274,10 @@ class DrawAction(Builtin):
         }
 
     def execute(self):
+        if self._out_file and self._if_modified:
+            mname, rname, aname = self._split_name()
+            if not self._modified(self._out_file, mname):
+                return
         src = self.make_graph()
         G = self.transform(src)
         G.layout(prog='dot')

@@ -19,6 +19,9 @@ command draw {
  @[default("any")]
  "node" : ("state" | "action" | "any")?,
 
+ /** ファイル出力時に.caraの変更がされていない場合は再出力しない */
+ @[with("out"), default(false)]
+ "if-modified": booelan?,
 
 } [
   /** モジュール名
@@ -47,6 +50,9 @@ command draw-action {
  @[default(false)]
  "lone": boolean?,
 
+ /** ファイル出力時に.caraの変更がされていない場合は再出力しない */
+ @[with("out"), default("false")]
+ "if-modified": booelan?,
 } [
   /** モジュール名:リソース名.アクション名 */
   string action_name
