@@ -9,6 +9,8 @@ class FileCacheMixin(object):
         app_info = self.env.get('CATY_APP')
         src = os.path.join(self.env.get('CATY_HOME'), app_info['group'], app_info['name'], 'actions', modname + '.cara')
         dest = self.pub.open('/'+path.lstrip('/'))
+        if not dest.exists:
+            return True
         src_mod = os.stat(src).st_mtime
         return not dest.is_modifed_since(src_mod)
 
