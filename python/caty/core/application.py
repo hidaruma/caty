@@ -531,7 +531,7 @@ class Application(PbcObject):
 
     @property
     def web_path(self):
-        return u'/%s' % self._name if self._name != ROOT else u'/'
+        return u'/%s' % self._name if self._name != ROOT else u''
 
     @property
     def description(self):
