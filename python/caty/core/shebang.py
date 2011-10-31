@@ -49,16 +49,19 @@ def schebang(seq):
 @try_
 def parse_meta(seq):
     pre = until('<?')(seq)
+    k = None
     while not seq.eof:
         S(u'<?')(seq)
         try:
-            keyword(u'caty-meta')(seq)
+            k = keyword(u'caty-meta')(seq)
             break
         except:
             raise
         pre += until('<?')(seq)
-    if len(pre.replace('\r\n', '\n').replace('\r', '\n').split('\n')) > 10:
+    if k and len(pre.replace('\r\n', '\n').replace('\r', '\n').split('\n')) > 10:
         raise ParseError(seq, parse_meta)
+    if not k:
+        return pre, {}
     try:
         keyword(u'template')(seq)
         S(u'=')(seq)
