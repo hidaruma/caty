@@ -814,5 +814,9 @@ default_types = {
         u"isText": True,
         u"contentType": u"text/plain"
     },
+    u".lit": {
+        u"isText": True,
+        u"contentType": u"text/plain"
+    },
 }
 

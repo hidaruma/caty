@@ -523,11 +523,9 @@ class AppModule(Module):
             if self.is_root and e.path == u'/public.casm':
                 self.filepath = e.path
                 self._compile(e.path)
-            elif e.path.endswith(u'.casm') or e.path.endswith(u'.pcasm') or e.path.endswith(u'.l-casm') or e.path.endswith(u'.casm.lit'):
+            elif e.path.endswith(u'.casm') or e.path.endswith(u'.pcasm') or e.path.endswith(u'.casm.lit'):
                 mod = self.__class__(self._app, self)
                 mod.filepath = e.path
-                if e.path.endswith(u'.l-casm'): 
-                    mod._type = 'l-casm'
                 if e.path.endswith(u'.casm.lit'):
                     mod._type = 'casm.lit'
                 mod._name = self._path_to_module(mod.filepath)
