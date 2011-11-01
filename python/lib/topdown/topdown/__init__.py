@@ -582,6 +582,13 @@ class mandatory(Parser):
     def __call__(self, seq):
         return seq.parse(self.parser)
 
+class peek(Parser):
+    def __init__(self, parser):
+        self.parser = parser
+
+    def __call__(self, seq):
+        return seq.peek(self.parser)
+
 alpha = Regex(r'[a-zA-Z_]+')
 number = Regex(r'[0-9]+')
 alphanum = Regex(r'[a-zA-Z_0-9]+')

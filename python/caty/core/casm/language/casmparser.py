@@ -55,6 +55,12 @@ def literate_casm(seq):
     remove_comment(seq)
     m = module_decl(seq)
     s.append(m)
+    while not seq.eof:
+        n = seq.parse([try_(schema), try_(command), try_(syntax), try_(kind), peek(S(u'}>>'))])
+        if n == u'}>>':
+            break
+        if n is not IGNORE:
+            s.append(n)
     until(u'}>>')(seq)
     S(u'}>>')(seq)
     while not seq.eof:
