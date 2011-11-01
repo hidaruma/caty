@@ -3,7 +3,7 @@ from caty.core.command import Builtin
 from caty.core.exception import *
 import pygraphviz as gv
 
-class FileCacheMixin(object):
+class DrawingMixin(object):
     def _modified(self, path, modname):
         import os
         app_info = self.env.get('CATY_APP')
@@ -14,11 +14,24 @@ class FileCacheMixin(object):
         src_mod = os.stat(src).st_mtime
         return not dest.is_modifed_since(src_mod)
 
-class DrawModule(Builtin, FileCacheMixin):
+
+    def _strip(self, o):
+        if not self._strip_xml_decl: return o
+        import xml.dom.minidom as dom
+        doc = dom.parseString(o)
+        for c in doc.childNodes:
+            if c.nodeType == dom.Element.ELEMENT_NODE:
+                return c.toxml()
+
+class DrawModule(Builtin, DrawingMixin):
     def setup(self, opts, module_name):
         self._module_name = module_name
         self._out_file = opts['out']
         self._format = opts['format']
+        self._strip_xml_decl = False
+        if self._format == 'svge':
+            self._format = 'svg'
+            self._strip_xml_decl = True
         self._node = opts['node']
         self._if_modified = opts['if-modified']
         self._graph_config = {
@@ -97,10 +110,12 @@ class DrawModule(Builtin, FileCacheMixin):
         G.layout(prog='dot')
         if self._out_file:
             o = G.draw(prog='dot', format=self._out_file.split('.')[-1])
+            o = self._strip(o)
             with self.pub.open('/'+self._out_file, 'wb') as f:
                 f.write(o)
         else:
             o = G.draw(prog='dot', format=self._format)
+            o = self._strip(o)
             if self._format == 'dot':
                 return unicode(o, 'utf-8')
             else:
@@ -177,12 +192,15 @@ class DrawModule(Builtin, FileCacheMixin):
         return RG
 
 
-class DrawAction(Builtin, FileCacheMixin):
+class DrawAction(Builtin, DrawingMixin):
     def setup(self, opts, action_name):
         self._action_name = action_name
         self._out_file = opts['out']
         self._lone = opts['lone']
         self._format = opts['format']
+        self._strip_xml_decl = False
+        if self._format == 'svge':
+            self._format = 'svg'
         self._if_modified = opts['if-modified']
         self._graph_config = {
             'graph': {
@@ -285,10 +303,12 @@ class DrawAction(Builtin, FileCacheMixin):
         G.layout(prog='dot')
         if self._out_file:
             o = G.draw(prog='dot', format=self._out_file.split('.')[-1])
+            o = self._strip(o)
             with self.pub.open('/'+self._out_file, 'wb') as f:
                 f.write(o)
         else:
             o = G.draw(prog='dot', format=self._format)
+            o = self._strip(o)
             if self._format == 'dot':
                 return unicode(o, 'utf-8')
             else:

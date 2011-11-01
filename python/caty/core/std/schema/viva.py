@@ -13,7 +13,7 @@ command draw {
 
  /** 出力フォーマット */
  @[default("gif")]
- "format" : ("gif" | "png" | "jpeg" | "dot" | "svg")?,
+ "format" : ("gif" | "png" | "jpeg" | "dot" | "svg" | "svge")?,
 
  /** 図示するノード */
  @[default("any")]
@@ -44,7 +44,7 @@ command draw-action {
 
  /** 出力フォーマット */
  @[default("gif")]
- "format" : ("gif" | "png" | "jpeg" | "dot" | "svg")?,
+ "format" : ("gif" | "png" | "jpeg" | "dot" | "svg" | "svge")?,
  
  /** アクション内のコードフラグメントと入出力型のみを描く */
  @[default(false)]
