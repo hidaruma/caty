@@ -173,6 +173,10 @@ class TypeComparator(TreeCursor):
         self.__trace = []
 
     @property
+    def type_vars(self):
+        return self.type2.type_vars
+
+    @property
     def is_error(self):
         for t, m in self.__trace:
             if t == ERROR:
@@ -200,6 +204,7 @@ class TypeComparator(TreeCursor):
                 r.append(m)
         return r
 
+    @property
     def messages(self):
         r = []
         for _, m in self.__trace:
@@ -231,8 +236,9 @@ class TypeComparator(TreeCursor):
         assert len(self.__stack) > 0
         return self.__stack[-1]
 
-    @property
-    def currnent_name(self, node):
+    def current_name(self, node):
+        if len(self.__names) == 0:
+            return  node.name
         return self.__names[-1]
 
     def __dereference(self, o):
@@ -264,10 +270,10 @@ class TypeComparator(TreeCursor):
         elif isinstance(node, TypeVariable):
             res = self.type2.inference_type_var(node.name, p)
             if res: # 以前に推論した型変数と矛盾が生じた
-                self.__trace.append((ERROR, u'{0} can not to assign to {1} (infered to {2})'.format(p.type, self.currnent_name, self.type2.type_vars[node.name])))
+                self.__trace.append((ERROR, u'{0} can not to assign to {1} (infered to {2})'.format(p.type, self.current_name(node), self.type2.type_vars[node.name])))
         elif isinstance(p, ScalarSchema):
             if p.type != node.type and (p.type != u'integer' and node.type != u'number'):
-                self.__trace.append((ERROR, u'{0} ⊈ {1}'.foramt(self.primary_focused.name, self.currnent_name)))
+                self.__trace.append((ERROR, u'{0} ⊈ {1}'.foramt(self.primary_focused.name, self.current_name(node))))
             else:
                 pass
         elif isinstance(p, UnionSchema):
@@ -278,7 +284,7 @@ class TypeComparator(TreeCursor):
             tc2 = TypeComparator(FunctionType(VoidSchema(), r), FunctionType(node, VoidSchema()))
             tc2.compare()
             if tc1.is_error and tc2.is_error:
-                self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.dump(p), self.currnent_name)))
+                self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.dump(p), self.current_name(node))))
             else:
                 for m in tc1.messages:
                     self.__trace.append((SUSPICIOUS, m))
@@ -290,17 +296,17 @@ class TypeComparator(TreeCursor):
                 try:
                     node.validate(v)
                 except:
-                    m.append((SUSPICIOUS, u'{0} ⊈ {1}'.format(self.to_str(v), self.currnent_name)))
+                    m.append((SUSPICIOUS, u'{0} ⊈ {1}'.format(self.to_str(v), self.current_name(node))))
                 else:
                     return
-            self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.dump(p), self.currnent_name)))
+            self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.dump(p), self.current_name(node))))
         else:
-            self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.primary_focused.name, self.currnent_name)))
+            self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.primary_focused.name, self.current_name(node))))
 
     def _visit_option(self, node):
         p = self.primary_focused
         if not p.optional:
-            self.__trace.append((SUSPICIOUS, u'%s ⊆ %s?' % (p.name, self.currnent_name)))
+            self.__trace.append((SUSPICIOUS, u'%s ⊆ %s?' % (p.name, self.current_name(node))))
         node.body.accept(self)
 
     def _visit_enum(self, node):
@@ -319,7 +325,7 @@ class TypeComparator(TreeCursor):
     def _visit_object(self, node):
         p = self.primary_focused_dereference
         if not isinstance(p, ObjectSchema):
-            self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.primary_focused.name, self.currnent_name)))
+            self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.primary_focused.name, self.current_name(node))))
         checked = set()
         for k, v in node.iteritems():
             self.__names.append(v.name)
@@ -337,7 +343,7 @@ class TypeComparator(TreeCursor):
                 tc = self._sub(v, node.wildcard)
                 if tc.is_error:
                     if v.optional:
-                        self.__trace.append((SUSPICIOUS, u'{0} ⊈ {1}'.format(k, self.currnent_name)))
+                        self.__trace.append((SUSPICIOUS, u'{0} ⊈ {1}'.format(k, self.current_name(node.wildcard))))
                     else:
                         self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(k, node.name)))
             else:
@@ -349,25 +355,65 @@ class TypeComparator(TreeCursor):
     def _visit_array(self, node):
         p = self.primary_focused_dereference
         if not isinstance(p, ArraySchema):
-            self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.primary_focused.name, node.name)))
+            self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.primary_focused.name, self.current_name(node))))
         for i, s in enumerate(node):
-            if len(p) < i and not p.repeat:
-                pass
+            self.__names.append(s.name)
+            if len(p) < i:
+                if not p.repeat:
+                    self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.primary_focused.name, self.current_name(node))))
+                else:
+                    with self._focus(p.schema_list[-1]):
+                        s.accept(self)
+            else:
+                with self._focus(p.schema_list[i]):
+                    s.accept(self)
+            self.__names.pop(-1)
+        for i, s in enumerate(p):
+            if len(node) < i:
+                if not p.repeat:
+                    self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.primary_focused.name, self.current_name(node))))
+                else:
+                    with self._focus(s):
+                        node.schema_list[-1].accept(self)
 
     def _visit_bag(self, node):
         pass
 
     def _visit_union(self, node):
-        pass
+        p = self.primary_focused_dereference
+        if isinstance(p, UnionSchema):
+            pass
 
     def _visit_tag(self, node):
-        pass
+        p = self.primary_focused_dereference
+        if node.tag == '*':
+            return
+        elif node.tag == '*!':
+            if p.tag in _builtin_tags:
+                self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.primary_focused.name, self.current_name(node))))
+        elif node.tag != p.tag:
+            self.__trace.append((ERROR, u'{0} ⊈ {1}'.format(self.primary_focused.name, self.current_name(node))))
 
     def dump(self, n):
         return n.accept(MiniDumper())
 
     def to_str(self, n):
         return MiniDumper()._to_str(n)
+
+_builtin_tags = [
+    'integer',
+    'number',
+    'string',
+    'binary',
+    'boolean',
+    'array',
+    'object',
+    'any',
+    'null',
+    'void',
+    'never',
+    'enum',
+    ]
 
 class Cursor(object):
     def __init__(self, state):
