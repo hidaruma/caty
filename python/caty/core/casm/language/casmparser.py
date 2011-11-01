@@ -20,6 +20,12 @@ def iparse(t):
     except ParseFailed, e:
         raise SchemaSyntaxError(e)
 
+def iparse_literate(t):
+    try:
+        return (i for i in as_parser(literate_casm).run(t, hook=remove_comment, auto_remove_ws=True))
+    except ParseFailed, e:
+        raise SchemaSyntaxError(e)
+
 def casm(seq):
     s = []
     #p = option(provides)(seq)
@@ -34,6 +40,41 @@ def casm(seq):
             s.append(n)
     remove_comment(seq)
     return s
+
+def literate_casm(seq):
+    s = []
+    h = seq.ignore_hook
+    seq.ignore_hook = True
+    while True:
+        x = until(u'<<{')(seq)
+        S(u'<<{')(seq)
+        if x.endswith('~'):
+            continue
+        break
+    seq.ignore_hook = h
+    remove_comment(seq)
+    m = module_decl(seq)
+    s.append(m)
+    until(u'}>>')(seq)
+    S(u'}>>')(seq)
+    while not seq.eof:
+        h = seq.ignore_hook
+        seq.ignore_hook = True
+        while True:
+            x = until(u'<<{')(seq)
+            S(u'<<{')(seq)
+            if x.endswith('~'):
+                continue
+            break
+        seq.ignore_hook = h
+        n = seq.parse([try_(schema), try_(command), try_(syntax), try_(kind)])
+        if n is not IGNORE:
+            s.append(n)
+        until(u'}>>')(seq)
+        S(u'}>>')(seq)
+    remove_comment(seq)
+    return s
+
 
 def module_decl(seq, type='casm'):
     doc = seq.parse(option(docstring))

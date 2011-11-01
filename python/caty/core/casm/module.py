@@ -3,7 +3,7 @@ from __future__ import with_statement
 from caty.core.casm.finder import SchemaFinder, CommandFinder
 from caty.core.casm.loader import CommandLoader, BuiltinLoader
 from caty.core.schema import schemata
-from caty.core.casm.language.casmparser import iparse
+from caty.core.casm.language.casmparser import iparse, iparse_literate
 from caty.core.casm.language import xcasmparser as xcasm
 from caty.core.casm.cursor import (SchemaBuilder, 
                                    ReferenceResolver, 
@@ -18,7 +18,6 @@ from threading import RLock
 from StringIO import StringIO
 
 class Module(object):
-    type = u'.casm'
     def __init__(self, app):
         self.kind_ns = {}
         self.schema_ns = {}
@@ -31,11 +30,16 @@ class Module(object):
         self._system = app._system
         self._lazy_resolve = []
         self._plugin = PluginMap()
+        self._type = u'casm'
         self.ast_ns = {}
         self.proto_ns = {}
         self.saved_st = {}
         self.compiled = False
     
+    @property
+    def type(self):
+        return self._type
+
     @property
     def application(self):
         return self._app
@@ -53,7 +57,7 @@ class Module(object):
             m, a = self._get_mod_and_app(ref)
             raise Exception(self.application.i18n.get(u'Type $name of $this is already defined in $module of $app', 
                                                       name=ref.name, 
-                                                      this=self.name+'.casm',
+                                                      this=self.name+self.type,
                                                       module=m,
                                                       app=a))
 
@@ -91,7 +95,7 @@ class Module(object):
             m, a = self._get_mod_and_app(t)
             raise Exception(self.application.i18n.get(u'Type $name of $this is already defined in $module of $app', 
                                                       name=name, 
-                                                      this=self.name+'.casm',
+                                                      this=self.name+self.type,
                                                       module=m,
                                                       app=a))
         #if 'register-public' in annotations:
@@ -106,7 +110,7 @@ class Module(object):
             m, a = self._get_mod_and_app(t)
             raise Exception(self.application.i18n.get(u'Kind $name of $this is already defined in $module.casm of $app', 
                                                       name=name, 
-                                                      this=self.name+'.casm',
+                                                      this=self.name+self.type,
                                                       module=m,
                                                       app=a))
         if 'register-public' in annotations:
@@ -122,7 +126,7 @@ class Module(object):
             m, a = self._get_mod_and_app(t)
             raise Exception(self.application.i18n.get(u'Command $name of $this is already defined in $module of $app', 
                                                        name=name, 
-                                                       this=self.name+'.casm',
+                                                       this=self.name+self.type,
                                                        module=m,
                                                        app=a))
         self.proto_ns[name] = proto
@@ -133,7 +137,7 @@ class Module(object):
             m, a = self._get_mod_and_app(t)
             raise Exception(self.application.i18n.get(u'Command $name of $this is already defined in $module of $app', 
                                                        name=name, 
-                                                       this=self.name+'.casm',
+                                                       this=self.name+self.type,
                                                        module=m,
                                                        app=a))
         if 'register-public' in profile.annotations:
@@ -325,9 +329,11 @@ class Module(object):
 
     def add_sub_module(self, module):
         if module.name in self.sub_modules:
-            raise Exception(self.application.i18n.get(u'Can not register $name.cara. $name.casm is already defined in $app', 
+            raise Exception(self.application.i18n.get(u'Can not register $name.$type1. $name.$type2 is already defined in $app', 
                                                       name=module.name, 
-                                                      app=self._app.name))
+                                                      type1=module.type,
+                                                      app=self._app.name,
+                                                      type2=self.sub_modules[module.name].type))
         module.parent = self
         self.sub_modules[module.name] = module
 
@@ -505,7 +511,7 @@ class AppModule(Module):
                 for k, v in global_module.command_ns.items():
                     self.command_ns[k] = v
     def _path_to_module(self, path):
-        p = path[1:].rsplit('.', 1)[0]
+        p = path[1:].rsplit('.')[0]
         return p.replace('/', '.')
 
     def _module_to_path(self, modname):
@@ -514,16 +520,20 @@ class AppModule(Module):
 
     def compile(self):
         for e in self.find(self.fs.DirectoryObject('/')):
-            if self.is_root and e.path == '/public.casm':
+            if self.is_root and e.path == u'/public.casm':
                 self.filepath = e.path
                 self._compile(e.path)
-            elif e.path.endswith('.casm') or e.path.endswith('.pcasm'):
+            elif e.path.endswith(u'.casm') or e.path.endswith(u'.pcasm') or e.path.endswith(u'.l-casm') or e.path.endswith(u'.casm.lit'):
                 mod = self.__class__(self._app, self)
                 mod.filepath = e.path
+                if e.path.endswith(u'.l-casm'): 
+                    mod._type = 'l-casm'
+                if e.path.endswith(u'.casm.lit'):
+                    mod._type = 'casm.lit'
                 mod._name = self._path_to_module(mod.filepath)
                 mod._compile(e.path)
                 self.sub_modules[mod.name] = mod
-            elif e.path == '/formats.xjson':
+            elif e.path == u'/formats.xjson':
                 o = self.fs.open(e.path)
                 self._plugin.feed(o.read())
 
@@ -547,7 +557,8 @@ class AppModule(Module):
             for t in self.find_or_create_cache(o, 'xcasm'):
                 t.declare(self)
         else:
-            pass
+            for t in self.find_or_create_cache(o, 'lit'):
+                t.declare(self)
 
     def find_or_create_cache(self, fo, type='casm'):
         if not self.parser_cache:
@@ -562,6 +573,15 @@ class AppModule(Module):
                     raise
             elif type == 'xcasm':
                 self.parser_cache = xcasm.iparse(fo.read())
+            elif type == 'lit':
+                try:
+                    self._show_msg(fo)
+                    self._app.cout.write(u'...')
+                    self.parser_cache = iparse_literate(fo.read())
+                    self._app.cout.writeln(u'OK')
+                except:
+                    self._app.cout.writeln(u'NG')
+                    raise
         return self.parser_cache
 
     def find(self, do):
@@ -575,17 +595,6 @@ class AppModule(Module):
     def _show_msg(self, fo, error=False):
         msg = self._app.i18n.get('Schema: $path', path=fo.path.strip('/'))
         self._app.cout.write(u'  * ' + msg)
-
-    #def resolve(self):
-    #    Module.resolve(self)
-    #    if not self.is_root:
-    #        for s in self.schema_ns.values():
-    #            if 'register-public' in s.annotations:
-    #                self.parent.add_schema(s.name, s, s.annotations)
-    #        for c in self.command_ns.values():
-    #            if 'register-public' in c.annotations:
-    #                self.parent.add_command(c.name, c)
-
 
 class GlobalModule(AppModule):
     u"""${CATY_HOME}/global/に存在する、すべてのアプリケーションから参照可能なモジュール。

@@ -98,7 +98,7 @@ class ResourceModuleContainer(object):
             return r
 
 class ResourceModule(Module):
-    type = u'.cara'
+    type = u'cara'
     def __init__(self, name, docstring, app):
         Module.__init__(self, app)
         self._name = name
