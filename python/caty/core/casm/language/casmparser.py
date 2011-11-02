@@ -63,21 +63,23 @@ def literate_casm(seq):
             s.append(n)
     until(u'}>>')(seq)
     S(u'}>>')(seq)
+    literal = True
     while not seq.eof:
         h = seq.ignore_hook
         seq.ignore_hook = True
-        while True:
+        while literal:
             x = until(u'<<{')(seq)
             S(u'<<{')(seq)
             if x.endswith('~'):
                 continue
-            break
+            literal = False
         seq.ignore_hook = h
-        n = seq.parse([try_(schema), try_(command), try_(syntax), try_(kind)])
-        if n is not IGNORE:
+        n = seq.parse([try_(schema), try_(command), try_(syntax), try_(kind), peek(S(u'}>>'))])
+        if n == u'}>>':
+            S(u'}>>')(seq)
+            literal = True
+        elif n is not IGNORE:
             s.append(n)
-        until(u'}>>')(seq)
-        S(u'}>>')(seq)
     remove_comment(seq)
     return s
 
