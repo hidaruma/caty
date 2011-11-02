@@ -39,7 +39,7 @@ type TargetType = (
   "TAGGED" | // TAGGED_TYPE から変更
   /** オブジェクトのプロパティ */
   "PROPERTY" |
-  /** 配列の項目 */
+  /** 配列とバッグの項目 */
   "ITEM" |
   /** 列挙型／ユニオン型の選択肢 */
   "CHOICE" |
