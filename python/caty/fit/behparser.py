@@ -6,7 +6,7 @@ def parser(seq):
     return [e for e in many(elements)(seq) if e is not None]
 
 def elements(seq):
-    return seq.parse([comment, heading, table, code, paragraph])
+    return seq.parse([comment, heading, table, code, code2, paragraph])
 
 def heading(seq):
     _ = skip_ws(seq)
@@ -47,15 +47,37 @@ def cell(seq):
         return DataCell(t.strip(), l)
 
 def code(seq):
-    _ = seq.parse('{{{')
-    t = seq.parse(until('}}}'))
-    _ = seq.parse('}}}')
-    l = seq.line
-    return Code(t.strip('\n'), l)
+    _ = seq.parse(line_by_itself('{{{'))
+    t = u'\n'
+    while not seq.eof:
+        t += until('}}}')(seq)
+        if not t.endswith('\n'):
+            if t.endswith(' '):
+                t = t[:-1]
+            t += seq.parse('}}}')
+        else:
+            seq.parse(option(line_by_itself('}}}'), u''))
+            break
+    return Code(t.strip('\n'), t)
+
+def code2(seq):
+    _ = seq.parse(line_by_itself('<<{'))
+    t = u'\n'
+    while not seq.eof:
+        t += until('}>>')(seq)
+        if not t.endswith('\n'):
+            if t.endswith(' '):
+                t = t[:-1]
+            t += seq.parse('}>>')
+        else:
+            seq.parse(option(line_by_itself('}>>'), u''))
+            break
+    return Code(t.strip('\n'), t)
+
 
 def paragraph(seq):
     t = seq.parse(until(['\n\n', 
-                         '\n{{{', 
+                         '\n<<{', 
                          '\n= ', 
                          '\n== ', 
                          '\n=== ',
