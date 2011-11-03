@@ -1,0 +1,50 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= Catyスキーマ言語／スクリプト言語の構文ハイライト（カラーリング）
+
+== 実例
+
+* [[>instant.casm.lit.html]]
+
+== JavaScript
+
+次のJavaScriptライブラリを使用。
+
+* [[>http://shjs.sourceforge.net/]]
+
+ファイル：
+
+# sh_main.js
+# sh_style.css （現在未使用）
+# lang/*.js -- 言語ごとの構文定義群
+# lang/sh_caty.js -- Caty用の構文定義
+# css/*.css -- ハイライトのテーマ群
+
+== HTMLファイル
+
+=== head
+
+{{{
+    <link rel="stylesheet" href="css/sh_emacs.css">
+
+    <script type="text/javascript" src="sh_main.js"></script>
+    <script type="text/javascript" src="lang/sh_caty.js"></script>
+}}}
+
+=== body
+
+{{{
+
+<body onload="sh_highlightDocument();">
+
+}}}
+
+=== pre
+
+{{{
+
+ <pre class="sh_caty" >
+
+}}}
+
+

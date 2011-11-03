@@ -1,0 +1,332 @@
+<!-- -*- coding: utf-8 -*- -->
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>instant.casm</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/sh_emacs.css">
+
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/extoc.js"></script>
+    <script type="text/javascript" src="sh_main.js"></script>
+    <script type="text/javascript" src="lang/sh_caty.js"></script>
+
+<script>
+jQuery(function($){
+	$('h1').exTOC({
+		headFrom : 2,
+		headTo : 6,
+		insertMethod : 'after',
+		smooth : false // firefoxで動かないのでOFFにする
+	});
+});	
+    </script>
+</head>
+  <body onload="sh_highlightDocument();">
+    
+
+<h1>インスタントモックアップに関連するデータ型とコマンド</h1>
+
+<pre class="sh_caty" >/** インスタントモックアップに関連するデータ型とコマンド
+ */
+module instant; 
+
+</pre>
+
+<h2 id="ex-toc-uid1000"><span class="ex-toc-1"></span>補助的な型の定義</h2>
+
+<h3 id="ex-toc-uid1001"><span class="ex-toc-2"></span>メタオブジェクトの型</h3>
+
+<p>これらは、将来的には組み込み／publicな型となる予定。</p>
+
+<pre class="sh_caty" >/** 型の名前を表す文字列
+ * 組み込み型になる予定
+ */
+type typeName = string(remark="型の名前");
+
+/** 型表現のXJSONシリアライゼーション 
+ * public型になる予定
+ */
+type typeExpr = deferred string;
+//type typeExpr = typeExpr-0:typeExpr; // これがエラーの原因になる
+
+</pre>
+
+<h3 id="ex-toc-uid1002"><span class="ex-toc-2"></span>共通のスカラー型</h3>
+
+<pre class="sh_caty" >
+type uri = string(format="uri");
+type hostUrl = uri;
+type absPath = string(format="uri-abs-path");
+type mediaType = string(format="media-type");
+type langTag = string(format="language-tag");
+type httpMethod = ("GET"|"POST"|"PUT"|"DELETE");
+
+</pre>
+
+<h2 id="ex-toc-uid1003"><span class="ex-toc-1"></span>インスタントスクリプトで生成されるページ</h2>
+
+<p>ユーザー定義のアクション本体がないとき、インスタントスクリプトが実行される。インスタントスクリプトは、次のWebベージ用コンテキストを生成する。</p>
+
+<pre class="sh_caty" >/** インスタントスクリプトで生成されるページのデータ 
+ * 出力ページをレンダリングするテンプレートに渡される。
+ */
+type OutputPage = @page {
+ /** この出力を生成したアクションに関する情報 */
+ "action" : ActionInfo,
+
+ /** アクションが起動されたときの入力
+  * 入力されたまま、未加工のJSONデータ
+  */
+ "inputData" : any,
+
+ /** アクションと入力データにより生成される可能性のある全ての状態  */
+ "states" : [State*],
+};
+
+</pre>
+
+<p>以下は、出力ページ（のコンテキス）内で使われるデータ。</p>
+
+<pre class="sh_caty" >/** アクションに関するスキーマ情報 
+ */
+type ActionInfo = {
+  /* アクションを識別する名前群 */
+  "applicationName" : string,
+  "moduleName" : string,
+  "resourceName" : string,
+  "actionName" : string,
+
+  /* インボーカー */
+  "method" : httpMethod,
+  "verb" : string?,
+
+  /** アクションのdocコメントの最初の1行 */
+  "description" : string?,
+  /** アクションのdocコメント内容の全体、wikiテキスト 
+   * wikiプロセッサを通せばHTMLテキストとなる。
+   */
+  "documentation" : string?,
+};
+
+
+/** リンクターゲットに関するスキーマ情報 
+ */
+type TargetInfo = ActionInfo ++ {
+  /* フラグメントID */
+  "fragmentId" : string,
+
+  "queryType" : typeExpr?,
+  "bodyType" : typeExpr?,
+};
+
+</pre>
+
+<h2 id="ex-toc-uid1004"><span class="ex-toc-1"></span>状態</h2>
+
+<p>インスタントスクリプトが出力するページには、いくつかの（0個かも知れない）状態（＝クライアント画面）が含まれる。</p>
+
+<pre class="sh_caty" >
+/** 状態を表すデータ 
+ */
+type State = @state {
+  /* 状態を識別する名前群 */
+  "applicationName" : string,
+  "moduleName" : string,
+  "stateName" : string,
+
+  /** 状態のdocコメントの最初の1行 */
+  "description" : string?,
+
+  /** 状態のdocコメント内容の全体、wikiテキスト 
+   * wikiプロセッサを通せばHTMLテキストとなる。
+   */
+  "documentation" : string?,
+   
+  /** 状態データの型 */
+  "dataType" : typeExpr,
+
+  /** アクションで生成された状態データ */
+  "data" : any,
+
+  /** ハイパートリガーに対応するウィジェット群 */
+  "links" : [TriggerWidget*]
+};
+
+</pre>
+
+<h2 id="ex-toc-uid1005"><span class="ex-toc-1"></span>トリガーの一般的な定義</h2>
+
+<pre class="sh_caty" >type Href = (uri | HrefStruct);
+
+type HrefStruct = @href {
+ "hostUrl"  : hostUrl,
+ "appPath"  : string,
+ "pathInfo" : absPath,
+ "query" : {*:string}(propNameFormat="simple-name"),
+};
+
+type InputWidget = deferred;
+
+</pre>
+
+<pre class="sh_caty" >/**  トリガーウィジェットの一般的な定義 
+ */
+type TriggerWidgetObj = {
+ // 個々のトリガーを識別するプロパティ
+ "id" : string?,
+ "name" : string?,
+ "class" : string | [string*] ?,
+
+ // リンクを記述するプロパティ
+ /** 短い説明、
+  * Atom仕様ではリンクのtitleが規定されている。
+  */
+ "title" : string?,
+ /** ヘルプ文字列 */
+ "help" : string?,
+
+ // ハイパーリンクの記述
+ "href" : Href, // 必須
+ "rel" : string?,
+ "rev" : string?,
+ "method" : httpMethod?,
+ @[default("")]
+ "verb" : string?,
+ "queryType" : typeExpr?,
+ "bodyType" : typeExpr?,
+
+ // レスポンスの記述
+ "responseLang" : langTag?,
+ "responseType" : mediaType?,
+
+ // 入力ウィジェット
+ "input" : InputWidget?
+};
+
+</pre>
+
+<h2 id="ex-toc-uid1006"><span class="ex-toc-1"></span>トリガーウィジェット</h2>
+
+<p>4種類のトリガーウィジェットを定義する。</p>
+
+<ol>
+<li>アンカーウィジェット</li>
+
+<li>クエリーウィジェット</li>
+
+<li>フォームウィジェット</li>
+
+<li>アップロードウィジェット</li>
+
+<li>ボタンウィジェット</li>
+</ol>
+
+<pre class="sh_caty" >/** ハイパートリガーに対応するウィジェットデータ 
+ */
+type TriggerWidget = (
+   AnchorWidget
+ | QueryWidget
+ | FormWidget
+ | UploadWidget
+ | ButtonWidget
+);
+</pre>
+
+<h3 id="ex-toc-uid1007"><span class="ex-toc-2"></span>アンカーウィジェット</h3>
+
+<pre class="sh_caty" >/** アンカーウィジェット
+ * GETによりサーバーに（クエリーなしで）リソース要求するときにに使う
+ */
+type AnchorWidget = @anchor (TriggerWidgetObj &amp; {
+  @[default("GET")]
+  "method" : "GET"?,
+  @[default("void")]
+  "queryType" : "void"?,
+  @[default("void")]
+  "bodyType" : "void"?,
+  "input" : undefined, // inputは指定できない
+
+   * : any,
+});
+</pre>
+
+<h3 id="ex-toc-uid1008"><span class="ex-toc-2"></span>クエリーウィジェット</h3>
+
+<pre class="sh_caty" >/** クエリーウィジェット
+ * GETによりサーバーにクエリーパラメータを送る場合に使う
+ */
+type QueryWidget = @query (TriggerWidgetObj &amp; {
+  @[default("GET")]
+  "method" : "GET"?,
+  "queryType" : typeExpr,
+  @[default("void")]
+  "bodyType" : "void"?,
+  "input" : InputWidget,
+
+   * : any,
+});
+</pre>
+
+<h3 id="ex-toc-uid1009"><span class="ex-toc-2"></span>フォームウィジェット</h3>
+
+<pre class="sh_caty" >/** フォームウィジェット
+ * 一般的なフォーム入力と送信に使う
+ */
+type FormWidget = @form (TriggerWidgetObj &amp; {
+  @[default("POST")]
+  "method" : ("POST" | "PUT")?,
+  @[default("void")]
+  "queryType" : "void"?,
+  "bodyType" : typeExpr,
+  "input" : InputWidget,
+
+   * : any,
+});
+</pre>
+
+<h3 id="ex-toc-uid1010"><span class="ex-toc-2"></span>アップロードウィジェット</h3>
+
+<pre class="sh_caty" >/** アップロードウィジェット
+ * ファイルのアップロードに使う
+ */
+type UploadWidget =  @upload (TriggerWidgetObj &amp; {
+  @[default("PUT")]
+  "method" : "PUT"?,
+  @[default("void")]
+  "queryTypeo" : "void"?,
+  "bodyType" : typeExpr,
+  "input" : InputWidget,
+
+   * : any,
+});
+</pre>
+
+<h3 id="ex-toc-uid1011"><span class="ex-toc-2"></span>ボタンウィジェット</h3>
+
+<pre class="sh_caty" >/** ボタンウィジェット
+ * リソースの削除に使う
+ */
+type ButtonWidget = @button (TriggerWidgetObj &amp; {
+  @[default("DELETE")]
+  "method" : "DELETE"?,
+  @[default("void")]
+  "queryType" : "void",
+  @[default("void")]
+  "bodyType" : "void"?,
+  "input" : undefined,
+
+   * : any,
+});
+</pre>
+
+<p>Plugin Not Found: ignore
+
+/*{{{
+
+/*</p>
+
+
+  
+
+
+</body></html>

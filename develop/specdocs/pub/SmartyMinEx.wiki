@@ -72,7 +72,7 @@ number, object などは型の判定として使える。
 
 この属性は省略可能だが、nameとmatchの両方を省略することはできない。
 
-=== context_type=TYPE
+=== type=TYPE
 
 テンプレートのコンテキストとして許される型を指定する。
 TYPEの値は、Catyの型名である。
@@ -175,13 +175,13 @@ name属性は必須である。
 
 context_typeを指定すると、**テンプレートの型安全性**を高めることができる。
 
-== マッチング呼び出し match_call
+== マッチング呼び出し apply (旧match_call)
 
 パターンマッチによりテンプレート関数を呼び出す。
 
 {{{
 
-{match_call library=QNAME context=EXPR}
+{apply library=QNAME context=EXPR}
 
 }}}
 
@@ -266,5 +266,5 @@ Smarty Minimumは次の制御構造を持っている。
   Smartyでは許される「勝手な属性を使ってデータを受け渡すこと」はできない。
   属性名は前もって規定されているものだけが使える。
 # library, match_callはSmartyには存在しない。
-# match属性、context_type属性はSmartyには存在しない。
+# match属性、type属性はSmartyには存在しない。
 
