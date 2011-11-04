@@ -44,6 +44,7 @@ class InlineParser(WikiParser):
                 break
             s = seq.parse(end)
             if s == u'~':
+                t.append(u'~')
                 t.append(seq.current)
                 seq.next()
             else:
