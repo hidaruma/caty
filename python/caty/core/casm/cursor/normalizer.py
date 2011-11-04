@@ -154,20 +154,22 @@ class TypeCalcurator(_SubNormalizer):
                 res = l
             else:
                 if lt == '__union__' and rt == '__union__':
-                    xl = (l.left & r).accept(self)
-                    xr = (l.right & r).accept(self)
-                    yl = (l & r.left).accept(self)
-                    yr = (l & r.right).accept(self)
+                    l = self._dereference(l)
+                    r = self._dereference(r)
+                    xl = self.__intersect(l.left, r.left)
+                    xr = self.__intersect(l.right, r.right)
+                    yl = self.__intersect(l.left, r.left)
+                    yr = self.__intersect(l.right, r.right)
                     comb = filter(lambda x: x.type != 'never', [xl, xr, yl, yr])
-                    l = len(comb)
-                    if l == 0:
+                    length = len(comb)
+                    if length == 0:
                         res = NeverSchema()
-                    elif l == 1:
+                    elif length == 1:
                         res = comb[0]
                     else:
                         import operator
-                        res = reduce(operator.or_, comb).accept(self)
-                if lt == rt or (lt in ('number', 'integer') and rt in ('number', 'integer')):
+                        res = reduce(operator.or_, comb)
+                elif lt == rt or (lt in ('number', 'integer') and rt in ('number', 'integer')):
                     # 同じ型であればそのまま計算(numberとintegerも)
                     res = l.intersect(r).accept(self)
                 elif lt == 'enum' and isinstance(r, Scalar):
@@ -179,6 +181,11 @@ class TypeCalcurator(_SubNormalizer):
         if node.left.optional or node.right.optional:
             res = OptionalSchema(res)
         return res
+
+    def __intersect(self, l, r):
+        if l == r:
+            return l
+        return (l & r).accept(self)
 
     def _intersect_enum_and_scalar(self, enum, scalar):
         r = []
