@@ -4,18 +4,23 @@ import types
 import caty.jsontools as json
 
 def creole2html(text, language='jp'):
-    processor = CreoleExProcessor(language=language)
+    processor = CreoleExProcessor(element_handler=creole.BasicHandler(), 
+                                  language=language,
+                                  plugins=creole.plugin.PluginContainer([CommentPlugin()]))
     return processor.process(text)
 
 def creole2xjx(text, language='jp'):
-    processor = CreoleExProcessor(element_handler=XJXHandler(), language=language)
+    processor = CreoleExProcessor(element_handler=XJXHandler(), 
+                                  language=language,
+                                  plugins=creole.plugin.PluginContainer([CommentPlugin()]))
     return processor.process(text)
 
 class CreoleExProcessor(creole.Processor):
     def __init__(self, wiki_url='', 
                        element_handler=None, 
-                       language='en'):
-        self.parser = CreoleExSyntax(wiki_url, language)
+                       language='en',
+                       plugins=None):
+        self.parser = CreoleExSyntax(wiki_url, language, plugins=plugins)
         self.element_handler = element_handler if element_handler else creole.BasicHandler()
 
 from creole.syntax.heading import Heading
@@ -64,6 +69,14 @@ class Literate(BlockParser):
                 break
         return self.create_element('pre', ['class', 'sh_caty'], [t])
 
+
+from creole.plugin import Plugin
+class CommentPlugin(Plugin):
+    def __init__(self):
+        self.name = u'ignore'
+
+    def execute(self, arg):
+        return creole.tree.Comment(arg)
 
 class XJXHandler(creole.BasicHandler):
     def feed(self, root):
