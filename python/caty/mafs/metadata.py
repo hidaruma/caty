@@ -707,7 +707,10 @@ default_types = {
         u"contentType": u"image/png"
     }, 
     u".svg": {
-         
+        u"isText": False, 
+        u"contentType": u"image/svg+xml"
+    },
+    u".svge": {
         u"isText": False, 
         u"contentType": u"image/svg+xml"
     },

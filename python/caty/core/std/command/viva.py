@@ -32,6 +32,11 @@ class DrawModule(Builtin, DrawingMixin):
         if self._format == 'svge':
             self._format = 'svg'
             self._strip_xml_decl = True
+        if self._out_file:
+            self._format = self._out_file.split('.')[-1]
+        if self._out_file.endswith('.svge'):
+            self._strip_xml_decl = True
+            self._format = u'svg'
         self._node = opts['node']
         self._if_modified = opts['if-modified']
         self._graph_config = {
@@ -109,7 +114,7 @@ class DrawModule(Builtin, DrawingMixin):
         G = self.transform(src)
         G.layout(prog='dot')
         if self._out_file:
-            o = G.draw(prog='dot', format=self._out_file.split('.')[-1])
+            o = G.draw(prog='dot', format=self._format)
             o = self._strip(o)
             with self.pub.open('/'+self._out_file, 'wb') as f:
                 f.write(o)
@@ -201,6 +206,12 @@ class DrawAction(Builtin, DrawingMixin):
         self._strip_xml_decl = False
         if self._format == 'svge':
             self._format = 'svg'
+            self._strip_xml_decl = True
+        if self._out_file:
+            self._format = self._out_file.split('.')[-1]
+        if self._out_file.endswith('.svge'):
+            self._strip_xml_decl = True
+            self._format = u'svg'
         self._if_modified = opts['if-modified']
         self._graph_config = {
             'graph': {
@@ -302,7 +313,7 @@ class DrawAction(Builtin, DrawingMixin):
         G = self.transform(src)
         G.layout(prog='dot')
         if self._out_file:
-            o = G.draw(prog='dot', format=self._out_file.split('.')[-1])
+            o = G.draw(prog='dot', format=self._format)
             o = self._strip(o)
             with self.pub.open('/'+self._out_file, 'wb') as f:
                 f.write(o)
