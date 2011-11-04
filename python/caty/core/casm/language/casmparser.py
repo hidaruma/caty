@@ -69,10 +69,14 @@ def literate_casm(seq):
         seq.ignore_hook = True
         while literal:
             x = until(u'<<{')(seq)
+            if seq.eof:
+                break
             S(u'<<{')(seq)
             if x.endswith('~'):
                 continue
             literal = False
+        if seq.eof:
+            break
         seq.ignore_hook = h
         n = seq.parse([try_(schema), try_(command), try_(syntax), try_(kind), peek(S(u'}>>'))])
         if n == u'}>>':
