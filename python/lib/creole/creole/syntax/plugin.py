@@ -5,16 +5,13 @@ from creole.syntax.base import WikiParser, BlockParser
 class BlockPlugin(BlockParser):
     def __call__(self, seq):
         _ = seq.parse(Regex(' *<<'))
-        content = until(u'>>')(seq)
+        skip_ws(seq)
+        name = seq.parse(Regex('[a-zA-Z][a-zA-Z0-9_-]*'))
+        skip_ws(seq)
+        raw_arg = until(u'>>')(seq)
         S('>>')(seq)
         skip_ws(seq)
-        if ' ' in content:
-            name, raw_arg = content.split(' ', 1)
-        elif '\n' in content:
-            name, raw_arg = content.split('\n', 1)
-        else:
-            return self.syntax.call_plugin(content.strip())
-        return self.syntax.call_plugin(name.strip(), raw_arg)
+        return self.syntax.call_plugin(name, raw_arg)
 
 class InlinePlugin(WikiParser):
     
@@ -32,6 +29,6 @@ class InlinePlugin(WikiParser):
         if ' ' not in content:
             return self.__syntax.call_plugin(content)
         name, raw_args = content.split(' ', 1)
-        return self.__syntax.call_plugin(name, raw_args)
+        return self.__syntax.call_plugin(name.strip(), raw_args)
 
 

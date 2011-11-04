@@ -67,7 +67,7 @@ class Literate(BlockParser):
             else:
                 seq.parse(option(line_by_itself('}>>'), u''))
                 break
-        return self.create_element('pre', ['class', 'sh_caty'], [t])
+        return self.create_element('pre', [('class', 'sh_caty')], [t])
 
 
 from creole.plugin import Plugin
