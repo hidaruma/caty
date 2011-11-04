@@ -8,10 +8,13 @@ class BlockPlugin(BlockParser):
         content = until(u'>>')(seq)
         S('>>')(seq)
         skip_ws(seq)
-        if ' ' not in content:
-            return self.syntax.call_plugin(content)
-        name, raw_arg = content.split(' ', 1)
-        return self.syntax.call_plugin(name, raw_arg)
+        if ' ' in content:
+            name, raw_arg = content.split(' ', 1)
+        elif '\n' in content:
+            name, raw_arg = content.split('\n', 1)
+        else:
+            return self.syntax.call_plugin(content.strip())
+        return self.syntax.call_plugin(name.strip(), raw_arg)
 
 class InlinePlugin(WikiParser):
     
