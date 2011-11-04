@@ -34,9 +34,9 @@ class DrawModule(Builtin, DrawingMixin):
             self._strip_xml_decl = True
         if self._out_file:
             self._format = self._out_file.split('.')[-1]
-        if self._out_file.endswith('.svge'):
-            self._strip_xml_decl = True
-            self._format = u'svg'
+            if self._out_file.endswith('.svge'):
+                self._strip_xml_decl = True
+                self._format = u'svg'
         self._node = opts['node']
         self._if_modified = opts['if-modified']
         self._graph_config = {
@@ -209,9 +209,9 @@ class DrawAction(Builtin, DrawingMixin):
             self._strip_xml_decl = True
         if self._out_file:
             self._format = self._out_file.split('.')[-1]
-        if self._out_file.endswith('.svge'):
-            self._strip_xml_decl = True
-            self._format = u'svg'
+            if self._out_file.endswith('.svge'):
+                self._strip_xml_decl = True
+                self._format = u'svg'
         self._if_modified = opts['if-modified']
         self._graph_config = {
             'graph': {
