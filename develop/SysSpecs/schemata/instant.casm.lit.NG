@@ -1,5 +1,7 @@
 <<ignore -*- coding: utf-8 -*- >>
 
+<<ignore literate style casm module >>
+
 = インスタントモックアップに関連するデータ型とコマンド
 
 <<{
@@ -153,18 +155,18 @@ type HrefStruct = @href {
  "query" : {*:string}(propNameFormat="simple-name"),
 };
 
-type InputWidget = deferred;
+type InputWidget = (Control | ControlSet);
 
 }>>
 
 <<{
 /**  トリガーウィジェットの一般的な定義 
  */
-type TriggerWidgetObj = {
+type AbstractWidgetObj = {
  // 個々のトリガーを識別するプロパティ
  "id" : string?,
  "name" : string?,
- "class" : string | [string*] ?,
+ "class" : (string | [string*]) ?,
 
  // リンクを記述するプロパティ
  /** 短い説明、
@@ -222,7 +224,7 @@ type TriggerWidget = (
 /** アンカーウィジェット
  * GETによりサーバーに（クエリーなしで）リソース要求するときにに使う
  */
-type AnchorWidget = @anchor (TriggerWidgetObj & {
+type AnchorWidget = @anchor (AbstractWidgetObj & {
   @[default("GET")]
   "method" : "GET"?,
   @[default("void")]
@@ -241,7 +243,7 @@ type AnchorWidget = @anchor (TriggerWidgetObj & {
 /** クエリーウィジェット
  * GETによりサーバーにクエリーパラメータを送る場合に使う
  */
-type QueryWidget = @query (TriggerWidgetObj & {
+type QueryWidget = @query (AbstractWidgetObj & {
   @[default("GET")]
   "method" : "GET"?,
   "queryType" : typeExpr,
@@ -259,7 +261,7 @@ type QueryWidget = @query (TriggerWidgetObj & {
 /** フォームウィジェット
  * 一般的なフォーム入力と送信に使う
  */
-type FormWidget = @form (TriggerWidgetObj & {
+type FormWidget = @form (AbstractWidgetObj & {
   @[default("POST")]
   "method" : ("POST" | "PUT")?,
   @[default("void")]
@@ -277,11 +279,11 @@ type FormWidget = @form (TriggerWidgetObj & {
 /** アップロードウィジェット
  * ファイルのアップロードに使う
  */
-type UploadWidget =  @upload (TriggerWidgetObj & {
+type UploadWidget =  @upload (AbstractWidgetObj & {
   @[default("PUT")]
   "method" : "PUT"?,
   @[default("void")]
-  "queryTypeo" : "void"?,
+  "queryType" : "void"?,
   "bodyType" : typeExpr,
   "input" : InputWidget,
 
@@ -295,7 +297,7 @@ type UploadWidget =  @upload (TriggerWidgetObj & {
 /** ボタンウィジェット
  * リソースの削除に使う
  */
-type ButtonWidget = @button (TriggerWidgetObj & {
+type ButtonWidget = @button (AbstractWidgetObj & {
   @[default("DELETE")]
   "method" : "DELETE"?,
   @[default("void")]
@@ -312,7 +314,7 @@ type ButtonWidget = @button (TriggerWidgetObj & {
 
 入力ウィジェット（input widget）は、UIコントロールから構成される。
 
-<<{
+<<ignore
 type ControlType = (
  /** テキストフィールド */
    "text" | 
@@ -321,7 +323,7 @@ type ControlType = (
  /** ラジオボタン */
    "radio-group" |
  /** チェックボックス */
-   "chickbox-group" |
+   "checkbox-group" |
  /** テキストエリア */
    "textarea"  |
  /** 単一の選択メニュー */
@@ -332,7 +334,154 @@ type ControlType = (
    "file" |
 );
 
+>>
+
+<<{
+type Control = (
+ /** テキストフィールド */
+   TextControl | 
+ /** パスワードフィールド */
+   PasswordControl |
+ /** ラジオボタン */
+   RadioGroupControl |
+ /** チェックボックス */
+   Checkbox-GroupControl |
+ /** テキストエリア */
+   TextareaControl  |
+ /** 単一の選択メニュー */
+   SingleSelectControl |
+ /** 複数の選択メニュー */
+   MultipleSelectControl | 
+ /** ファイルアップロード */
+   FileUploadControl |
+);
+
 }>>
+
+コントロールの一般的な定義。
+
+<<{
+type Option = deferred;
+
+
+type AbstractControlObj = {
+ "label" : string?,
+ "help" : string?,
+ /** 値の選択肢 */
+ "options" : [Option*]?,
+ /** デフォルト値 */
+ "default" : any?,
+ /** データ型 */
+ "dataType" : typeName,
+ /** XJSONパス */
+ "path" : string,
+};
+
+}>>
+
+コントロールセットは、コントロールをグループ化したもの。
+
+<<{
+type ControlSet = {
+ "id" : string?,
+ "class" : string?,
+ "label" :  string?,
+ "help" : string?,
+ /** データ型 */
+ "dataType" : typeName,
+ "controls" : [(ControlSet|Control)*]
+};
+
+}>>
+
+=== テキストフィールド
+
+<<{
+type TextControl = @text (AbstractControlObj & {
+  @[default("string")]
+  "dataType" : "string"?,
+
+  "options" : undefined,
+ 
+
+  * : any?   
+});
+
+}>>
+
+=== パスワードフィールド 
+
+<<{
+type PasswordControl = @password (AbstractControlObj & {
+  @[default("string")]
+  "dataType" : "string"?,
+
+  "options" : undefined,
+
+  * : any?   
+});
+}>>
+
+===  ラジオボタン 
+
+<<{
+type RadioGroupControl = @radio-grpou (AbstractControlObj & {
+
+
+  * : any?   
+});
+}>>
+
+=== チェックボックス
+
+<<{
+type Checkbox-GroupControl = @checkbox-group (AbstractControlObj & {
+
+  * : any?   
+});
+}>>
+
+=== テキストエリア
+
+<<{
+type TextareaControl = @textarea (AbstractControlObj & {
+  @[default("string")]
+  "dataType" : "string"?,
+
+  "options" : undefined,
+
+  * : any?   
+});
+}>>
+
+=== 単一の選択メニュー
+
+<<{
+type SingleSelectControl = @sigle-select (AbstractControlObj & {
+
+  * : any?   
+});
+}>>
+
+=== 複数の選択メニュー 
+
+<<{
+type MultipleSelectControl  = @multiple-select (AbstractControlObj & {
+
+  * : any?   
+});
+}>>
+
+=== ファイルアップロード 
+
+<<{
+type FileUploadControl = @ (AbstractControlObj & {
+  "options" : undefined,
+
+  * : any?   
+});
+}>>
+
 
 <<ignore
 
@@ -344,25 +493,6 @@ type ControlType = (
 type Context = object;
 
 
-type ControlSet = {
- "id",
- "class"
- "label" : 
- "help" : 
- "dataType" : 
- controls : [(ControlSet|Control)*]
-};
-
-
-type Control = @control {
- "controlType" : ControlType,
- "label" : string,
- "help" : 
- /** 値の選択肢 */
- "options" : [Option*],
- /** デフォルト値 */
- "default" : any?,
-};
 
 }}}*/
 
