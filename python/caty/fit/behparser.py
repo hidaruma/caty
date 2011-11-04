@@ -58,7 +58,7 @@ def code(seq):
         else:
             seq.parse(option(line_by_itself('}}}'), u''))
             break
-    return Code(t.strip('\n'), t)
+    return Code(t.strip('\n'), seq.line)
 
 def code2(seq):
     _ = seq.parse(line_by_itself('<<{'))
@@ -72,8 +72,9 @@ def code2(seq):
         else:
             seq.parse(option(line_by_itself('}>>'), u''))
             break
-    return Code(t.strip('\n'), t)
-
+    r = Code(t.strip('\n'), seq.line)
+    r.cls = 'sh_caty'
+    return r
 
 def paragraph(seq):
     t = seq.parse(until(['\n\n', 
@@ -109,6 +110,7 @@ class Text(object):
     def __init__(self, text, lineno):
         self.text = text
         self.lineno = lineno
+        self.cls = None
 
     def __eq__(self, another):
         return self.text == another.text

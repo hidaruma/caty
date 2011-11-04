@@ -19,12 +19,16 @@ class FitParagraph(FitNode):
 class FitCode(FitNode):
     def _build(self, node):
         self.text = node.text
+        self.cls = node.cls
 
     def accept(self, test_runner):
         test_runner.add(self)
         
     def to_html(self):
-        return u'<pre>%s</pre>' % escape_html(self.text)
+        if not self.cls:
+            return u'<pre>%s</pre>' % escape_html(self.text)
+        else:
+            return u'<pre class="%s">%s</pre>' % (self.cls, escape_html(self.text))
 
     type = 'code'
 
