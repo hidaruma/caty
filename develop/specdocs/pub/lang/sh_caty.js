@@ -13,7 +13,7 @@ sh_languages['caty'] = [
     ],
     [
       /\/\*\*/g,
-      'sh_comment',
+      'sh_doccomment',
       8 // in_doc_comment
     ],
     [
@@ -52,7 +52,7 @@ sh_languages['caty'] = [
       10 // in_string
     ],
     [
-      /~|!|%|\^|\*|\(|\)|-|\+|=|\[|\]|\\|:|;|,|\.|\/|\?|&|<|>|\|/g,
+      /~|!|@|%|\^|\*|\(|\)|-|\+|=|\[|\]|\\|:|;|,|\.|\/|\?|&|<|>|\|/g,
       'sh_symbol',
       -1
     ],
@@ -228,7 +228,7 @@ sh_languages['caty'] = [
   [
     [
       /\*\//g,
-      'sh_comment',
+      'sh_doccomment',
       -2
     ],
     [

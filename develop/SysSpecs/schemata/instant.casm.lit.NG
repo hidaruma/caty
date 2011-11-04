@@ -1,76 +1,23 @@
-<!-- -*- coding: utf-8 -*- -->
-<html><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>instant.casm</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="css/sh_caty.css">
+<<ignore -*- coding: utf-8 -*- >>
 
-<!--
-sh_acid.css -- 記号類が強調されるのはよいが、少し目立ちすぎ
-文字列はよい。キーワードが弱すぎ。
-コメントは読めない
+= インスタントモックアップに関連するデータ型とコマンド
 
-sh_berries-light.css -- 記号類はこれでいいかも。
-pre.sh_sourceCode .sh_symbol {
-  color: #d2073b;
-  font-weight: normal;
-  font-style: normal;
-}
-
-
-sh_blacknblue.css -- 鍬田くん好み。
-
-sh_ide-codewarrior.css -- コメントはこれがいい。
-pre.sh_sourceCode .sh_comment {
-  color: #b30000;
-  font-weight: normal;
-  font-style: normal;
-}
-
-sh_typical.css -- 記号類がいい。
-pre.sh_sourceCode .sh_symbol {
-  color: #ff0000;
-  font-weight: normal;
-  font-style: normal;
-}
-
-
--->
-
-    <script type="text/javascript" src="js/jquery.js"></script>
-    <script type="text/javascript" src="js/extoc.js"></script>
-    <script type="text/javascript" src="sh_main.js"></script>
-    <script type="text/javascript" src="lang/sh_caty.js"></script>
-
-<script>
-jQuery(function($){
-	$('h1').exTOC({
-		headFrom : 2,
-		headTo : 6,
-		insertMethod : 'after',
-		smooth : false // firefoxで動かないのでOFFにする
-	});
-});	
-    </script>
-</head>
-  <body onload="sh_highlightDocument();">
-    
-
-<h1>インスタントモックアップに関連するデータ型とコマンド</h1>
-
-<pre class="sh_caty" >/** インスタントモックアップに関連するデータ型とコマンド
+<<{
+/** インスタントモックアップに関連するデータ型とコマンド
  */
 module instant; 
 
-</pre>
+}>>
 
-<h2 id="ex-toc-uid1000"><span class="ex-toc-1"></span>補助的な型の定義</h2>
 
-<h3 id="ex-toc-uid1001"><span class="ex-toc-2"></span>メタオブジェクトの型</h3>
+== 補助的な型の定義
 
-<p>これらは、将来的には組み込み／publicな型となる予定。</p>
+=== メタオブジェクトの型
 
-<pre class="sh_caty" >/** 型の名前を表す文字列
+これらは、将来的には組み込み／publicな型となる予定。
+
+<<{
+/** 型の名前を表す文字列
  * 組み込み型になる予定
  */
 type typeName = string(remark="型の名前");
@@ -81,25 +28,29 @@ type typeName = string(remark="型の名前");
 type typeExpr = deferred string;
 //type typeExpr = typeExpr-0:typeExpr; // これがエラーの原因になる
 
-</pre>
+}>>
 
-<h3 id="ex-toc-uid1002"><span class="ex-toc-2"></span>共通のスカラー型</h3>
+=== 共通のスカラー型
 
-<pre class="sh_caty" >
+<<{
+
 type uri = string(format="uri");
 type hostUrl = uri;
 type absPath = string(format="uri-abs-path");
 type mediaType = string(format="media-type");
 type langTag = string(format="language-tag");
 type httpMethod = ("GET"|"POST"|"PUT"|"DELETE");
+type stateName = string(remark="状態の名前");
 
-</pre>
+}>>
 
-<h2 id="ex-toc-uid1003"><span class="ex-toc-1"></span>インスタントスクリプトで生成されるページ</h2>
+== インスタントスクリプトで生成されるページ
 
-<p>ユーザー定義のアクション本体がないとき、インスタントスクリプトが実行される。インスタントスクリプトは、次のWebベージ用コンテキストを生成する。</p>
+ユーザー定義のアクション本体がないとき、インスタントスクリプトが実行される。
+インスタントスクリプトは、次のWebベージ用コンテキストを生成する。
 
-<pre class="sh_caty" >/** インスタントスクリプトで生成されるページのデータ 
+<<{
+/** インスタントスクリプトで生成されるページのデータ 
  * 出力ページをレンダリングするテンプレートに渡される。
  */
 type OutputPage = @page {
@@ -115,11 +66,13 @@ type OutputPage = @page {
  "states" : [State*],
 };
 
-</pre>
+}>>
 
-<p>以下は、出力ページ（のコンテキス）内で使われるデータ。</p>
+以下は、出力ページ（のコンテキス）内で使われるデータ。
 
-<pre class="sh_caty" >/** アクションに関するスキーマ情報 
+
+<<{
+/** アクションに関するスキーマ情報 
  */
 type ActionInfo = {
   /* アクションを識別する名前群 */
@@ -151,13 +104,15 @@ type TargetInfo = ActionInfo ++ {
   "bodyType" : typeExpr?,
 };
 
-</pre>
+}>>
 
-<h2 id="ex-toc-uid1004"><span class="ex-toc-1"></span>状態</h2>
+== 状態
 
-<p>インスタントスクリプトが出力するページには、いくつかの（0個かも知れない）状態（＝クライアント画面）が含まれる。</p>
+インスタントスクリプトが出力するページには、
+いくつかの（0個かも知れない）状態（＝クライアント画面）が含まれる。
 
-<pre class="sh_caty" >
+<<{
+
 /** 状態を表すデータ 
  */
 type State = @state {
@@ -184,11 +139,12 @@ type State = @state {
   "links" : [TriggerWidget*]
 };
 
-</pre>
+}>>
 
-<h2 id="ex-toc-uid1005"><span class="ex-toc-1"></span>トリガーの一般的な定義</h2>
+== トリガーの一般的な定義
 
-<pre class="sh_caty" >type Href = (uri | HrefStruct);
+<<{
+type Href = (uri | HrefStruct);
 
 type HrefStruct = @href {
  "hostUrl"  : hostUrl,
@@ -199,9 +155,10 @@ type HrefStruct = @href {
 
 type InputWidget = deferred;
 
-</pre>
+}>>
 
-<pre class="sh_caty" >/**  トリガーウィジェットの一般的な定義 
+<<{
+/**  トリガーウィジェットの一般的な定義 
  */
 type TriggerWidgetObj = {
  // 個々のトリガーを識別するプロパティ
@@ -235,25 +192,20 @@ type TriggerWidgetObj = {
  "input" : InputWidget?
 };
 
-</pre>
+}>>
 
-<h2 id="ex-toc-uid1006"><span class="ex-toc-1"></span>トリガーウィジェット</h2>
+== トリガーウィジェット
 
-<p>4種類のトリガーウィジェットを定義する。</p>
+4種類のトリガーウィジェットを定義する。
 
-<ol>
-<li>アンカーウィジェット</li>
+# アンカーウィジェット
+# クエリーウィジェット
+# フォームウィジェット
+# アップロードウィジェット
+# ボタンウィジェット
 
-<li>クエリーウィジェット</li>
-
-<li>フォームウィジェット</li>
-
-<li>アップロードウィジェット</li>
-
-<li>ボタンウィジェット</li>
-</ol>
-
-<pre class="sh_caty" >/** ハイパートリガーに対応するウィジェットデータ 
+<<{
+/** ハイパートリガーに対応するウィジェットデータ 
  */
 type TriggerWidget = (
    AnchorWidget
@@ -262,14 +214,15 @@ type TriggerWidget = (
  | UploadWidget
  | ButtonWidget
 );
-</pre>
+}>>
 
-<h3 id="ex-toc-uid1007"><span class="ex-toc-2"></span>アンカーウィジェット</h3>
+=== アンカーウィジェット
 
-<pre class="sh_caty" >/** アンカーウィジェット
+<<{
+/** アンカーウィジェット
  * GETによりサーバーに（クエリーなしで）リソース要求するときにに使う
  */
-type AnchorWidget = @anchor (TriggerWidgetObj &amp; {
+type AnchorWidget = @anchor (TriggerWidgetObj & {
   @[default("GET")]
   "method" : "GET"?,
   @[default("void")]
@@ -280,14 +233,15 @@ type AnchorWidget = @anchor (TriggerWidgetObj &amp; {
 
    * : any,
 });
-</pre>
+}>>
 
-<h3 id="ex-toc-uid1008"><span class="ex-toc-2"></span>クエリーウィジェット</h3>
+=== クエリーウィジェット
 
-<pre class="sh_caty" >/** クエリーウィジェット
+<<{
+/** クエリーウィジェット
  * GETによりサーバーにクエリーパラメータを送る場合に使う
  */
-type QueryWidget = @query (TriggerWidgetObj &amp; {
+type QueryWidget = @query (TriggerWidgetObj & {
   @[default("GET")]
   "method" : "GET"?,
   "queryType" : typeExpr,
@@ -297,14 +251,15 @@ type QueryWidget = @query (TriggerWidgetObj &amp; {
 
    * : any,
 });
-</pre>
+}>>
 
-<h3 id="ex-toc-uid1009"><span class="ex-toc-2"></span>フォームウィジェット</h3>
+=== フォームウィジェット
 
-<pre class="sh_caty" >/** フォームウィジェット
+<<{
+/** フォームウィジェット
  * 一般的なフォーム入力と送信に使う
  */
-type FormWidget = @form (TriggerWidgetObj &amp; {
+type FormWidget = @form (TriggerWidgetObj & {
   @[default("POST")]
   "method" : ("POST" | "PUT")?,
   @[default("void")]
@@ -314,14 +269,15 @@ type FormWidget = @form (TriggerWidgetObj &amp; {
 
    * : any,
 });
-</pre>
+}>>
 
-<h3 id="ex-toc-uid1010"><span class="ex-toc-2"></span>アップロードウィジェット</h3>
+=== アップロードウィジェット
 
-<pre class="sh_caty" >/** アップロードウィジェット
+<<{
+/** アップロードウィジェット
  * ファイルのアップロードに使う
  */
-type UploadWidget =  @upload (TriggerWidgetObj &amp; {
+type UploadWidget =  @upload (TriggerWidgetObj & {
   @[default("PUT")]
   "method" : "PUT"?,
   @[default("void")]
@@ -331,14 +287,15 @@ type UploadWidget =  @upload (TriggerWidgetObj &amp; {
 
    * : any,
 });
-</pre>
+}>>
 
-<h3 id="ex-toc-uid1011"><span class="ex-toc-2"></span>ボタンウィジェット</h3>
+=== ボタンウィジェット
 
-<pre class="sh_caty" >/** ボタンウィジェット
+<<{
+/** ボタンウィジェット
  * リソースの削除に使う
  */
-type ButtonWidget = @button (TriggerWidgetObj &amp; {
+type ButtonWidget = @button (TriggerWidgetObj & {
   @[default("DELETE")]
   "method" : "DELETE"?,
   @[default("void")]
@@ -349,16 +306,109 @@ type ButtonWidget = @button (TriggerWidgetObj &amp; {
 
    * : any,
 });
-</pre>
+}>>
 
-<p>Plugin Not Found: ignore
+== UIコントロール
+
+入力ウィジェット（input widget）は、UIコントロールから構成される。
+
+<<{
+type ControlType = (
+ /** テキストフィールド */
+   "text" | 
+ /** パスワードフィールド */
+   "password"  |
+ /** ラジオボタン */
+   "radio-group" |
+ /** チェックボックス */
+   "chickbox-group" |
+ /** テキストエリア */
+   "textarea"  |
+ /** 単一の選択メニュー */
+   "single-select" |
+ /** 複数の選択メニュー */
+   "multiple-select" | 
+ /** ファイルアップロード */
+   "file" |
+);
+
+}>>
+
+<<ignore
 
 /*{{{
 
-/*</p>
+/* このコメント内はメモやゴミ */
 
 
-  
+type Context = object;
 
 
-</body></html>
+type ControlSet = {
+ "id",
+ "class"
+ "label" : 
+ "help" : 
+ "dataType" : 
+ controls : [(ControlSet|Control)*]
+};
+
+
+type Control = @control {
+ "controlType" : ControlType,
+ "label" : string,
+ "help" : 
+ /** 値の選択肢 */
+ "options" : [Option*],
+ /** デフォルト値 */
+ "default" : any?,
+};
+
+}}}*/
+
+/*{{{
+
+command eval-print [typeName InnerOutputType, stateName State]
+ :: any -> Context 
+{
+ pass > input;
+ %1 > InnerOutputTypes;
+ %2 > State;
+
+ gen:sample %InnerOutputType |
+ do {
+      %input           >: "input" ,
+      pass             >: "data"  ,
+      gen-links %State >: "links" ,
+  }
+};
+
+command doGet [typeName InnerOutputType, stateName State]
+ :: (null | object) -> Context 
+{
+  eval-print %1 %2
+};
+
+
+command doPOST [typeName InnerOutputType, stateName State]
+ :: [(null | object) query-opts, any input] -> Context
+{
+
+ %1 > InnerOutputTypes;
+ %2 > State;
+ pass | do {item 0 >: "query", item 1 >: "body"} > input;
+
+ translate %InnerOutputType | 
+ when {
+   NG => error-print, 
+   OK => eval-print %1 %2
+ }
+}
+
+}}}*/
+
+
+// End of Module
+
+
+>>

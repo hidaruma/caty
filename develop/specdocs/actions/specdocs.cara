@@ -4,42 +4,40 @@
  */
 module specdocs in cara;
 
-/** ディレクトリへのGETリクエスト 
+/** ディレクトリ・リソース
  */
 resource Dir("/" | "*/") {
+  /** ディレクトリへのGETリクエスト */
   action dir-get("/GET") 
   ::
   {
-   %APP_PATH  | path:base > app;
+   %CATY_APP  | $.name > app;
    { 
-     "wikifiles" : lsdir %PATH_INFO .wiki | each {pv name},
+     "wikifiles" : [lsdir %PATH_INFO .wiki, lsdir %PATH_INFO .lit]|list:concat | each {pv name},
      "subdirs"  : lsdir --kind=dir %PATH_INFO | each {pv name},
      "path" : %PATH_INFO,
      "app" : %app,
      "title" : [%app, " ", %PATH_INFO] | text:concat
-   } // | json:response 
-   | print /list-files.html
+   } | print /list-files.html
   };
-
 };
 
 
-/** Wikiファイル
+/** Wikiファイル・リソース
  */
-resource Wiki("*.wiki") {
+resource Wiki("*.wiki|*.casm.lit") {
   filetype {
    "contentType" : "text/x-wiki",
    "isText" : true,
   };
 
+  /** WikiファイルへのGETリクエスト */
   action wiki-get("/GET")
   ::
   {
     {
       "content": file:read %0 | text:creole, 
       "title"  : %0 | path:trunk 
-    }
-    | print /show-wiki.html
+    } | print /show-wiki.html
   };
 };
-
