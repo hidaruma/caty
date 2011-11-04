@@ -19,7 +19,7 @@ class BoolSchema(ScalarSchema):
         raise JsonSchemaError(dict(msg=u'An error occuered while converting to $type', type='boolean'), value, '')
 
     def intersect(self, another):
-        return self.clone()
+        return BoolSchema(self.options)
 
     def dump(self, depth, node=[]):
         return 'boolean'
