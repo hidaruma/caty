@@ -22,7 +22,7 @@ sh_languages['caty'] = [
       9 // in_comment
     ],
     [
-      /\b(?:module|type|command|deferred|null|string|binary|number|undefined|integer|any|void)\b/g,
+      /\b(?:module|type|command|deferred|null|boolean|string|binary|number|integer|undefined|any|void)\b/g,
       'sh_keyword',
       -1
     ],

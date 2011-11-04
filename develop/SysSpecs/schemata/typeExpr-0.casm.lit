@@ -1,0 +1,248 @@
+<<ignore // -*- coding: utf-8 -*- >>
+
+= 型表現のXJSONシリアライゼーションの案 叩き台
+
+** ~*~* 作業中 ~*~* ** /~/ あれっ? Wikiのバグ？
+
+<<{
+/** 型表現のXJSONシリアライゼーションの案 叩き台
+ */
+module typeExpr-0;
+
+}>>
+
+== 共通の型
+
+<<{
+type typeName = string(format="type-name"); // 組み込み型になる予定
+type scalar = (
+   null
+ | boolean
+ | number
+ | string
+ | binary
+);
+
+/** バッグ型の出現性カウント */
+type count = (integer(minimum=0) | "unbounded");
+
+/** アノテーション */
+type Annotation = deferred;
+/** ドキュメンテーションコメント */
+type Doc = deferred string;
+/** スキーマ属性 */
+type Attribute = deferred;
+/** with構文で導入されるスキーマ添加 */
+type Augmentation = deferred;
+
+/** アノテーションとドキュメンテーションコメントを追加するmixin */
+type AnnoDocMixin = {
+ "doc" : Doc?,
+ "annotations" : [Annotation*]?,
+
+ * : any?
+};
+
+}>>
+
+== 型表現を表す型
+
+<<{
+/** すべての型表現のユニオン */
+type typeExpr = (
+// 基本型
+   typeVar
+ | NamedType // attr
+ | SingletonType // attr?
+// 複合型
+ | ArrayType // attr
+ | ObjectType // attr
+ | TaggedType 
+ | BagType // attr
+// 型演算で構成される型
+ | OptionType
+ | UnionType
+ | IntersectionType
+ | MergedType
+// 属性と添加
+ | AttributedType // ?? 
+ | AugmentedType
+// 総称型
+ | GenericType
+ | AppliedType
+
+);
+
+}>>
+
+== 基本型
+
+# 型変数
+# 名前で参照される型
+# シングルトン型
+
+基本組み込み型もユーザー定義で名付けられた型も、どちらもNamedTypeとして扱う。
+
+<<{
+/** 型変数 */
+type typeVar = @_var string(format="simple-name");
+
+/** 名前で参照される型 */
+type NamedType = (typeName | @_named typeName);
+
+/** シングルトン型 */
+type SingletonType = @_singleton scalar;
+
+}>>
+
+== 複合型
+
+=== 配列型
+
+<<{
+type ArrayItem = @_arrayItem (AnnoDocMixin & {
+ "type" : typeExpr,
+ "name" : string?
+});
+ 
+type ArrayType = @_array (AnnoDocMixin & {
+ "specified"  : [ArrayItem*],
+ "additional" :  ArrayItem,
+});
+
+}>>
+
+=== オブジェクト型
+
+<<{
+type ObjectProperty = @_objectProperty (AnnoDocMixin & {
+ "type" : typeExpr,
+ "name" : string,
+});
+
+type ObjectType = @_object (AnnoDocMixin & {
+ "specified"  : [ObjectProperty*],
+ "additional" :  ObjectProperty,
+});
+
+}>>
+
+=== タグ付き型
+
+<<{
+type TaggedType = @_tagged (AnnoDocMixin & {
+ "tag" : typeExpr,
+ "content" : typeExpr
+});
+
+}>>
+
+=== バッグ型
+
+<<{
+type BagItem = @_bagItem (AnnoDocMixin & {
+ "type" : typeExpr,
+ "minOccur" : count,
+ "maxOccur" : count
+});
+ 
+type BagType =  @_bag (AnnoDocMixin & {
+  "specified"  : [BagItem*],
+});
+
+}>>
+
+
+== 型演算で構成される型
+
+=== オプション型
+
+<<{
+type OptionType = @_option typeExpr;
+
+}>>
+
+=== ユニオン型
+
+<<{
+type UnionChoice = @_unionChoice (AnnoDocMixin & {
+ "type" : typeExpr,
+});
+
+type UnionType = @_union (AnnoDocMixin & {
+ "specified"  : [UnionChoice*],
+ "additional" :  UnionChoice,
+});
+
+}>>
+
+=== インターセクション型
+
+<<{
+type IntersectionType = @_intersection [typeExpr*];
+
+}>>
+
+=== マージ型
+
+<<{
+type MergedType = @_merged [typeExpr*];
+
+}>>
+
+== 属性と添加
+
+=== 属性付き型
+
+<<{
+type AttributedType = @_attributed {
+ "type" : typeExpr,
+ /** スキーマ属性 */
+ "attributes" : [Attribute, Attribute*]
+};
+
+}>>
+
+=== 添加付き型
+
+添加（増強）は、with構文により導入される。
+
+<<{
+type AugmentedType = {
+ "type" : typeExpr,
+ /** スキーマ増強 */
+ "augmentations" : [Augmentation, Augmentation*],
+};
+
+}>>
+
+== 総称型
+
+<<{
+type GenericType = @_generic {
+ "vars" : [string, string*],
+ "type" : typeExpr,
+};
+
+type AppliedType = @_applied {
+ "type" : GenericType,
+ "arguments" : [typeExpr, typeExpr*]
+};
+
+}>>
+
+== 擬似タグ付き型
+
+<<{
+
+type PseudTaggedType = deferred;
+
+/*
+プロパティ名 ::= 文字列 | 名前
+擬似タグ :=  '@?' '(' JSONパス ':' 型 ')' 
+*/
+
+// End of Module
+
+
+}>>

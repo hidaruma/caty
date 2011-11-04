@@ -27,8 +27,7 @@ type typeName = string(remark="型の名前");
 /** 型表現のXJSONシリアライゼーション 
  * public型になる予定
  */
-type typeExpr = deferred string;
-//type typeExpr = typeExpr-0:typeExpr; // これがエラーの原因になる
+type typeExpr = typeExpr-0:typeExpr;
 
 }>>
 
