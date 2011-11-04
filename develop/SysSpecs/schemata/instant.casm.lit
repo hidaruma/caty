@@ -1,0 +1,552 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+<<ignore literate style casm module >>
+
+= インスタントモックアップに関連するデータ型とコマンド
+
+<<{
+/** インスタントモックアップに関連するデータ型とコマンド
+ */
+module instant; 
+
+}>>
+
+
+== 補助的な型の定義
+
+=== メタオブジェクトの型
+
+これらは、将来的には組み込み型／publicな型となる予定。
+
+<<{
+/** 型の名前を表す文字列
+ * 組み込み型になる予定
+ */
+type typeName = string(remark="型の名前");
+
+/** 型表現のXJSONシリアライゼーション 
+ * public型になる予定
+ */
+type typeExpr = deferred string;
+//type typeExpr = typeExpr-0:typeExpr; // これがエラーの原因になる
+
+}>>
+
+=== 共通のスカラー型
+
+<<{
+type uri = string(format="uri");
+type hostUrl = uri;
+type absPath = string(format="uri-abs-path");
+type mediaType = string(format="media-type");
+type langTag = string(format="language-tag");
+type httpMethod = ("GET"|"POST"|"PUT"|"DELETE");
+type stateName = string(remark="状態の名前");
+
+}>>
+
+== インスタントスクリプトで生成されるページ
+
+ユーザー定義のアクション本体がないとき、インスタントスクリプトが実行される。
+インスタントスクリプトは、次のWebベージ用コンテキストを生成する。
+
+<<{
+/** インスタントスクリプトで生成されるページのデータ 
+ * 出力ページをレンダリングするテンプレートに渡される。
+ */
+type OutputPage = @page {
+ /** この出力を生成したアクションに関する情報 */
+ "action" : ActionInfo,
+
+ /** アクションが起動されたときの入力
+  * 入力されたまま、未加工のJSONデータ
+  */
+ "inputData" : any,
+
+ /** アクションと入力データにより生成される可能性のある全ての状態  */
+ "states" : [State*],
+};
+
+}>>
+
+以下は、出力ページ（のコンテキス）内で使われるデータ。
+
+
+<<{
+/** アクションに関するスキーマ情報 
+ */
+type ActionInfo = {
+  /* アクションを識別する名前群 */
+  "applicationName" : string,
+  "moduleName" : string,
+  "resourceName" : string,
+  "actionName" : string,
+
+  /* インボーカー */
+  "method" : httpMethod,
+  "verb" : string?,
+
+  /** アクションのdocコメントの最初の1行 */
+  "description" : string?,
+  /** アクションのdocコメント内容の全体、wikiテキスト 
+   * wikiプロセッサを通せばHTMLテキストとなる。
+   */
+  "documentation" : string?,
+};
+
+/** リンクターゲットに関するスキーマ情報 
+ */
+type TargetInfo = ActionInfo ++ {
+  /** フラグメントID */
+  "fragmentId" : string,
+  /** リクエストクエリーの型 */
+  "queryType" : typeExpr?,
+  /** リクエストボディの型 */
+  "bodyType" : typeExpr?,
+};
+
+}>>
+
+== 状態
+
+インスタントスクリプトが出力するページには、
+いくつかの（0個かも知れない）状態（＝クライアント画面）が含まれる。
+
+<<{
+
+/** 状態を表すデータ 
+ */
+type State = @state {
+  /* 状態を識別する名前群 */
+  "applicationName" : string,
+  "moduleName" : string,
+  "stateName" : string,
+
+  /** 状態のdocコメントの最初の1行 */
+  "description" : string?,
+
+  /** 状態のdocコメント内容の全体、wikiテキスト 
+   * wikiプロセッサを通せばHTMLテキストとなる。
+   */
+  "documentation" : string?,
+   
+  /** 状態データの型 */
+  "dataType" : typeExpr,
+
+  /** アクションで生成された状態データ */
+  "data" : any,
+
+  /** ハイパートリガーに対応するウィジェット群 */
+  "links" : [TriggerWidget*]
+};
+
+}>>
+
+== トリガーの一般的な定義
+
+<<{
+type Href = (uri | HrefStruct);
+
+type HrefStruct = @href {
+ "hostUrl"  : hostUrl,
+ "appPath"  : string,
+ "pathInfo" : absPath,
+ "query" : {*:string}(propNameFormat="simple-name"),
+};
+
+type InputWidget = (Control | ControlSet);
+
+}>>
+
+<<{
+/**  トリガーウィジェットの一般的な定義 
+ */
+type AbstractWidgetObj = {
+ // 個々のトリガーを識別するプロパティ
+ "id" : string?,
+ "name" : string?,
+ "class" : (string | [string*]) ?,
+
+ // リンクを記述するプロパティ
+ /** 短い説明、
+  * Atom仕様ではリンクのtitleが規定されている。
+  */
+ "title" : string?,
+ /** ヘルプ文字列 */
+ "help" : string?,
+
+ // ハイパーリンクの記述
+ "href" : Href, // 必須
+ "rel" : string?,
+ "rev" : string?,
+ "method" : httpMethod?,
+ @[default("")]
+ "verb" : string?,
+ "queryType" : typeExpr?,
+ "bodyType" : typeExpr?,
+
+ // レスポンスの記述
+ "responseLang" : langTag?,
+ "responseType" : mediaType?,
+
+ // 入力ウィジェット
+ "input" : InputWidget?
+};
+
+}>>
+
+== トリガーウィジェット
+
+5種類のトリガーウィジェットを定義する。
+
+# アンカーウィジェット
+# クエリーウィジェット
+# フォームウィジェット
+# アップロードウィジェット
+# ボタンウィジェット
+
+<<{
+/** ハイパートリガーに対応するウィジェットデータ 
+ */
+type TriggerWidget = (
+   AnchorWidget
+ | QueryWidget
+ | FormWidget
+ | UploadWidget
+ | ButtonWidget
+);
+}>>
+
+=== アンカーウィジェット
+
+<<{
+/** アンカーウィジェット
+ * GETによりサーバーに（クエリーなしで）リソース要求するときにに使う
+ */
+type AnchorWidget = @anchor (AbstractWidgetObj & {
+  @[default("GET")]
+  "method" : "GET"?,
+  @[default("void")]
+  "queryType" : "void"?,
+  @[default("void")]
+  "bodyType" : "void"?,
+  "input" : undefined, // inputは指定できない
+
+   * : any,
+});
+}>>
+
+=== クエリーウィジェット
+
+<<{
+/** クエリーウィジェット
+ * GETによりサーバーにクエリーパラメータを送る場合に使う
+ */
+type QueryWidget = @query (AbstractWidgetObj & {
+  @[default("GET")]
+  "method" : "GET"?,
+  "queryType" : typeExpr,
+  @[default("void")]
+  "bodyType" : "void"?,
+  "input" : InputWidget,
+
+   * : any,
+});
+}>>
+
+=== フォームウィジェット
+
+<<{
+/** フォームウィジェット
+ * 一般的なフォーム入力と送信に使う
+ */
+type FormWidget = @form (AbstractWidgetObj & {
+  @[default("POST")]
+  "method" : ("POST" | "PUT")?,
+  @[default("void")]
+  "queryType" : "void"?,
+  "bodyType" : typeExpr,
+  "input" : InputWidget,
+
+   * : any,
+});
+}>>
+
+=== アップロードウィジェット
+
+<<{
+/** アップロードウィジェット
+ * ファイルのアップロードに使う
+ */
+type UploadWidget =  @upload (AbstractWidgetObj & {
+  @[default("PUT")]
+  "method" : "PUT"?,
+  @[default("void")]
+  "queryType" : "void"?,
+  "bodyType" : typeExpr,
+  "input" : InputWidget,
+
+   * : any,
+});
+}>>
+
+=== ボタンウィジェット
+
+<<{
+/** ボタンウィジェット
+ * リソースの削除に使う
+ */
+type ButtonWidget = @button (AbstractWidgetObj & {
+  @[default("DELETE")]
+  "method" : "DELETE"?,
+  @[default("void")]
+  "queryType" : "void",
+  @[default("void")]
+  "bodyType" : "void"?,
+  "input" : undefined,
+
+   * : any,
+});
+}>>
+
+== UIコントロール
+
+入力ウィジェット（input widget）は、UIコントロールから構成される。
+
+<<ignore
+type ControlType = (
+ /** テキストフィールド */
+   "text" | 
+ /** パスワードフィールド */
+   "password"  |
+ /** ラジオボタン */
+   "radio-group" |
+ /** チェックボックス */
+   "checkbox-group" |
+ /** テキストエリア */
+   "textarea"  |
+ /** 単一の選択メニュー */
+   "single-select" |
+ /** 複数の選択メニュー */
+   "multiple-select" | 
+ /** ファイルアップロード */
+   "file" |
+);
+
+>>
+
+<<{
+type Control = (
+ /** テキストフィールド */
+   TextControl | 
+ /** パスワードフィールド */
+   PasswordControl |
+ /** ラジオボタン */
+   RadioGroupControl |
+ /** チェックボックス */
+   Checkbox-GroupControl |
+ /** テキストエリア */
+   TextareaControl  |
+ /** 単一の選択メニュー */
+   SingleSelectControl |
+ /** 複数の選択メニュー */
+   MultipleSelectControl | 
+ /** ファイルアップロード */
+   FileUploadControl |
+);
+
+}>>
+
+コントロールの一般的な定義。
+
+<<{
+type Option = @option {
+ "value" : any,
+ "label" : string?,
+ @[default(false)]
+ "selected" : boolean?,
+};
+
+}>>
+
+
+<<{
+type AbstractControlObj = {
+ "label" : string?,
+ "help" : string?,
+ /** 値の選択肢 */
+ "options" : [Option*]?,
+ /** デフォルト値 */
+ "default" : any?,
+ /** データ型 */
+ "dataType" : typeName,
+ /** XJSONパス */
+ "path" : string,
+};
+
+}>>
+
+コントロールセットは、コントロールをグループ化したもの。
+
+<<{
+type ControlSet = {
+ "id" : string?,
+ "class" : string?,
+ "label" :  string?,
+ "help" : string?,
+ /** データ型 */
+ "dataType" : typeName,
+ "controls" : [(ControlSet|Control)*]
+};
+
+}>>
+
+=== テキストフィールド
+
+<<{
+type TextControl = @text (AbstractControlObj & {
+  @[default("string")]
+  "dataType" : "string"?,
+
+  "options" : undefined,
+ 
+
+  * : any?   
+});
+
+}>>
+
+=== パスワードフィールド 
+
+<<{
+type PasswordControl = @password (AbstractControlObj & {
+  @[default("string")]
+  "dataType" : "string"?,
+
+  "options" : undefined,
+
+  * : any?   
+});
+}>>
+
+===  ラジオボタン 
+
+<<{
+type RadioGroupControl = @radio-grpou (AbstractControlObj & {
+ "options" : [Option*],
+
+  * : any?   
+});
+}>>
+
+=== チェックボックス
+
+<<{
+type Checkbox-GroupControl = @checkbox-group (AbstractControlObj & {
+ "options" : [Option*],
+
+  * : any?   
+});
+}>>
+
+=== テキストエリア
+
+<<{
+type TextareaControl = @textarea (AbstractControlObj & {
+  @[default("string")]
+  "dataType" : "string"?,
+
+  "options" : undefined,
+
+  * : any?   
+});
+}>>
+
+=== 単一の選択メニュー
+
+<<{
+type SingleSelectControl = @sigle-select (AbstractControlObj & {
+ "options" : [Option*],
+  * : any?   
+});
+}>>
+
+=== 複数の選択メニュー 
+
+<<{
+type MultipleSelectControl  = @multiple-select (AbstractControlObj & {
+ "options" : [Option*],
+  * : any?   
+});
+}>>
+
+=== ファイルアップロード 
+
+<<{
+type FileUploadControl = @ (AbstractControlObj & {
+  "options" : undefined,
+
+  * : any?   
+});
+}>>
+
+
+<<ignore
+
+/*{{{
+
+/* このコメント内はメモやゴミ */
+
+
+type Context = object;
+
+
+
+}}}*/
+
+/*{{{
+
+command eval-print [typeName InnerOutputType, stateName State]
+ :: any -> Context 
+{
+ pass > input;
+ %1 > InnerOutputTypes;
+ %2 > State;
+
+ gen:sample %InnerOutputType |
+ do {
+      %input           >: "input" ,
+      pass             >: "data"  ,
+      gen-links %State >: "links" ,
+  }
+};
+
+command doGet [typeName InnerOutputType, stateName State]
+ :: (null | object) -> Context 
+{
+  eval-print %1 %2
+};
+
+
+command doPOST [typeName InnerOutputType, stateName State]
+ :: [(null | object) query-opts, any input] -> Context
+{
+
+ %1 > InnerOutputTypes;
+ %2 > State;
+ pass | do {item 0 >: "query", item 1 >: "body"} > input;
+
+ translate %InnerOutputType | 
+ when {
+   NG => error-print, 
+   OK => eval-print %1 %2
+ }
+}
+
+}}}*/
+
+
+// End of Module
+
+
+>>
