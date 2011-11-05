@@ -397,7 +397,7 @@ class Application(PbcObject):
                 self._schema_module.resolve() # 型参照は最終的にここで解決される。
         except Exception, e:
             #msg = error_to_ustr(e)
-            cout.writeln(e)
+            #cout.writeln(e)
             raise 
         self._init_interpreter() # ユーザ定義コマンドが解決されたので再度初期化
         self._init_mafs() # action定義でファイルタイプが加わっている可能性があるので再度初期化。
