@@ -25,7 +25,7 @@ class CatyException(Exception):
         self.__place_holder = place_holder if place_holder else kwds
         # self.__json_obj.update(place_holder)
         self.__message = message
-        Exception.__init__(self, self.tag + ': ' + ro.i18n.get(message, place_holder, **kwds))
+        Exception.__init__(self, self.tag + ': ' + ro.i18n.get(message, place_holder, language_code='en', **kwds))
 
     @property
     def tag(self):
@@ -40,10 +40,6 @@ class CatyException(Exception):
 
     def get_message(self, i18n):
         return i18n.get(self.__message, self.__place_holder)
-
-    def __unicode__(self):
-        return self.__message.safe_substitute(self.__place_holder)
-    message = property(__unicode__)
 
 def throw_caty_exception(tag, message, error_class=None, error_id=None, stack_trace=None, **kwds):
     raise CatyException(tag, message, error_class, error_id, stack_trace, **kwds)
