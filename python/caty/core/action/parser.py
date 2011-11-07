@@ -15,10 +15,11 @@ from caty.util import bind2nd
 from caty.core.exception import throw_caty_exception
 
 class ResourceActionDescriptorParser(Parser):
-    def __init__(self, module_name, facility):
+    def __init__(self, module_name, facility, lit=False):
         self._script_parser = ScriptParser(facility)
         self._module_name = module_name
         self._app = facility.app
+        self._lit = lit
 
     def __call__(self, seq):
         mn = module_decl(seq, 'cara')
@@ -357,4 +358,73 @@ def string(seq):
         return s
     finally:
         seq.ignore_hook = h
+
+class LiterateRADParser(ResourceActionDescriptorParser):
+    def __call__(self, seq):
+        h = seq.ignore_hook
+        seq.ignore_hook = True
+        while True:
+            x = until(u'<<{')(seq)
+            S(u'<<{')(seq)
+            if x.endswith('~'):
+                continue
+            break
+        seq.ignore_hook = h
+        mn = module_decl(seq, 'cara')
+        name = mn.name
+        ds = mn.docstring or u'undocumented'
+        if name != self._module_name:
+            raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
+        rm = ResourceModule(name, ds, self._app)
+        classes = self._parse_top_level(seq)
+        if not seq.eof:
+            raise ParseError(seq, self)
+        for c in classes:
+            if isinstance(c, (ASTRoot, CommandNode)):
+                c.declare(rm)
+            else:
+                for r in rm.resources:
+                    if r.name == c.name:
+                        throw_caty_exception(
+                            u'CARA_PARSE_ERROR',
+                            u'Duplicated resource name: $name module: $module', 
+                            name=c.name, module=name)
+
+                if isinstance(c, ResourceClass):
+                    rm.add_resource(c)
+                else:
+                    rm.states.append(c)
+        return rm
+
+    def _parse_top_level(self, seq):
+        s = []
+        while not seq.eof:
+            n = seq.parse([self.resourceclass, self.state, schemaparser.schema, commandparser.command, peek(S(u'}>>'))])
+            if n == u'}>>':
+                break
+            s.append(n)
+        until(u'}>>')(seq)
+        S(u'}>>')(seq)
+        literal = True
+        while not seq.eof:
+            h = seq.ignore_hook
+            seq.ignore_hook = True
+            while literal:
+                x = until(u'<<{')(seq)
+                if seq.eof:
+                    break
+                S(u'<<{')(seq)
+                if x.endswith('~'):
+                    continue
+                literal = False
+            if seq.eof:
+                break
+            seq.ignore_hook = h
+            n = seq.parse([self.resourceclass, self.state, schemaparser.schema, commandparser.command, peek(S(u'}>>'))])
+            if n == u'}>>':
+                S(u'}>>')(seq)
+                literal = True
+            else:
+                s.append(n)
+        return s
 
