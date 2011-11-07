@@ -31,6 +31,9 @@ def schema(seq):
         definition = IntersectionNode(TaggedNode(name_of_type, definition), ScalarNode(u'Exception'))
         annotations.add(Annotation('__exception'))
         annotations.add(Annotation('register-public'))
+    else:
+        if isinstance(definition, NamedTaggedNode):
+            definition._tag = name_of_type
     c = seq.parse(';')
     return ASTRoot(name_of_type, type_args, definition, annotations, doc)
 
