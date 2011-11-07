@@ -36,7 +36,7 @@ find_script = lambda s: find_(s, '<?caty-script')
 
 @as_parser
 def schebang(seq):
-    pre, meta = option(parse_meta, {})(seq)
+    pre, meta = option(parse_meta, [u'', {}])(seq)
     if meta:
         c = compilers[meta['template']].get_parser()
         skip_ws(seq)

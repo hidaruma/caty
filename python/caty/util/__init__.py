@@ -13,7 +13,7 @@ def try_parse(type, s, fallback=None):
     try:
         return type(str(s))
     except:
-        return None
+        return fallback
 
 def bind1st(f, a):
     def bound(b):

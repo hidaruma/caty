@@ -24,7 +24,7 @@ from caty.core.script.proxy import VarRefProxy as VarRef
 from caty.core.script.proxy import ArgRefProxy as ArgRef
 from caty.core.script.proxy import FragmentProxy as PipelineFragment
 from caty.core.script.proxy import combine_proxy
-from caty.util import bind2nd
+from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
 from caty.core.exception import SubCatyException
 from caty.core.command.param import *
@@ -235,7 +235,8 @@ class ScriptParser(Parser):
         o = seq.parse(Regex(r'--[a-zA-Z]+[-a-zA-Z0-9_]*'))
         try:
             seq.parse('=')
-            v = seq.parse([xjson.number, xjson.integer, self.unquoted, xjson.string, self.named_arg, self.indexed_arg])
+            v = seq.parse([self.unquoted, xjson.string, self.named_arg, self.indexed_arg])
+            v = try_parse(int, v, try_parse(Decimal, v, v))
             if v is None: return (None, None)
             return Option(o, v)
         except:
@@ -258,7 +259,9 @@ class ScriptParser(Parser):
         return NamedArg(name, optional)
 
     def arg(self, seq):
-        r = seq.parse([xjson.number, xjson.integer, xjson.boolean, self.unquoted, xjson.string, self.named_arg, self.indexed_arg])
+        r = seq.parse([xjson.boolean, self.unquoted, xjson.string, self.named_arg, self.indexed_arg])
+        if not isinstance(r, bool):
+            r = try_parse(int, r, try_parse(Decimal, r, r))
         return Argument(r) if not isinstance(r, Param) else r
 
     def indexed_arg(self, seq):
