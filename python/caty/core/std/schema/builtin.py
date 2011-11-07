@@ -960,36 +960,30 @@ command help
   refers python:caty.core.std.command.builtin.Help;
 
 command hc {
-  @[default(false), not-implemented]
-  "json": boolean?,
 
   @[default(false)]
   "filter": boolean?,
 
-} [string? pattern] :: void -> (string | HelpInfo) {
-  help --command %--json %--filter %1
+} [string? pattern] :: void -> void {
+  help --command %--filter %1 | cout
 };
 
 command ht {
-  @[default(false), not-implemented]
-  "json": boolean?,
 
   @[default(false)]
   "exception": boolean?,
 
-} [string? pattern] :: void -> (string | HelpInfo) {
-  help --type %--json %--exception %1
+} [string? pattern] :: void -> void {
+  help --type %--exception %1 | cout
 };
 
 command hr {
-  @[default(false), not-implemented]
-  "json": boolean?,
 } [string? pattern] :: void -> (string | HelpInfo) {
-  help --resource %--json %1
+  help --resource %1 | cout
 };
 
-command h :: void -> (string | HelpInfo) {
-    help
+command h :: void -> void {
+    help | cout
 };
 
 /** 例外データを作る。
