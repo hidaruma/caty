@@ -22,7 +22,7 @@ sh_languages['caty'] = [
       9 // in_comment
     ],
     [
-      /\b(?:module|type|command|deferred|null|boolean|string|binary|number|integer|undefined|any|void)\b/g,
+      /\b(?:module|type|exception|annotation|command|resource|action|state|links|produces|relays|syntax|kind|lower|upper|of|in|refers|reads|updates|uses|throws|deferred|null|boolean|string|binary|number|integer|object|array|undefined|any|void)\b/g,
       'sh_keyword',
       -1
     ],
@@ -37,7 +37,7 @@ sh_languages['caty'] = [
       -1
     ],
     [
-      /([A-Za-z$_][A-Za-z0-9$_]*\s*)(\/=?(?![*\/]))/g,
+      /([A-Za-z_][-A-Za-z0-9_]*\s*)(\/=?(?![*\/]))/g,
       ['sh_normal', 'sh_symbol'],
       -1
     ],
@@ -52,7 +52,12 @@ sh_languages['caty'] = [
       10 // in_string
     ],
     [
-      /~|!|@|%|\^|\*|\(|\)|-|\+|=|\[|\]|\\|:|;|,|\.|\/|\?|&|<|>|\|/g,
+      /'/g,
+      'sh_string',
+      11 // in_string_sq
+    ],
+    [
+      /~|!|@|%|\^|\*|\(|\)|\+|=|\[|\]|\\|:|;|,|\.|\/|\?|&|<|>|\|/g,
       'sh_symbol',
       -1
     ],
@@ -60,7 +65,7 @@ sh_languages['caty'] = [
       /\{|\}/g,
       'sh_cbracket',
       -1
-    ],
+    ]
 /*
     [
       /\b(?:)\b/g,
@@ -321,6 +326,20 @@ sh_languages['caty'] = [
       'sh_specialchar',
       -1
     ]
+  ],
+/* 11 */ // in_string_sq
+  [
+    [
+      /'/g,
+      'sh_string',
+      -2
+    ],
+    [
+      /\\./g,
+      'sh_specialchar',
+      -1
+    ]
   ]
+
 
 ];
