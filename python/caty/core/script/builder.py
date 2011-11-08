@@ -10,7 +10,11 @@ class CommandBuilder(object):
         """
         from caty.core.script.proxy import Proxy
         if proxy.module:
-            profile = proxy.module.get_command_type(proxy.name)
+            try:
+                profile = proxy.module.get_command_type(proxy.name)
+            except:
+                print proxy.module.name, proxy.module.parent
+                raise
         else:
             profile = self.namespace[proxy.name]
         cls = profile.get_command_class()

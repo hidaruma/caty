@@ -679,6 +679,7 @@ class IntegratedModule(object):
         if not self._global_compiled:
             self._global.compile()
             self._global.resolve()
+            self._global.parent = self._core
             self._global_compiled = True
     
     def make_blank_module(self, app):
@@ -696,6 +697,7 @@ class IntegratedModule(object):
         self._global = GlobalModule(gapp, None, True)
         self._global.compile()
         self._global.resolve()
+        self._global.parent = self._core
         self._global_compiled = True
 
 
