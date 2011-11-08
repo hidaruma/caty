@@ -174,14 +174,20 @@ type AbstractWidgetObj = {
  /** ヘルプ文字列 */
  "help" : string?,
 
+ // 関係性
+ /** ソースから見ての、ターゲットとの関係 */
+ "rel" : string?,
+ /** ターゲットから見ての、ソースとの関係 */
+ "rev" : string?,
+
  // ハイパーリンクの記述
  "href" : Href, // 必須
- "rel" : string?,
- "rev" : string?,
  "method" : httpMethod?,
  @[default("")]
  "verb" : string?,
+ /** リクエストのクエリーの型 */
  "queryType" : typeExpr?,
+ /** リクエストのエンティティボディの型 */
  "bodyType" : typeExpr?,
 
  // レスポンスの記述

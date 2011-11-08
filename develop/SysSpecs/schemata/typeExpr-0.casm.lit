@@ -2,7 +2,7 @@
 
 = 型表現のXJSONシリアライゼーションの案 叩き台
 
-** ~*~* 作業中 ~*~* ** /~/ あれっ? Wikiのバグ？
+** ~*~* 作業中 ~*~* **
 
 <<{
 /** 型表現のXJSONシリアライゼーションの案 叩き台
@@ -13,8 +13,13 @@ module typeExpr-0;
 
 == 共通の型
 
+* typeName型は、string型のサブタイプだが、特別な意味論（メタオブジェクトへの参照）を持つので、
+組み込み型にすべきである。
+
 <<{
 type typeName = string(format="type-name"); // 組み込み型になる予定
+
+/** スカラー型 */
 type scalar = (
    null
  | boolean
@@ -23,8 +28,6 @@ type scalar = (
  | binary
 );
 
-/** バッグ型の出現性カウント */
-type count = (integer(minimum=0) | "unbounded");
 
 /** アノテーション */
 type Annotation = deferred;
@@ -100,11 +103,13 @@ type SingletonType = @_singleton scalar;
 === 配列型
 
 <<{
+/** 配列の項目 */
 type ArrayItem = @_arrayItem (AnnoDocMixin & {
  "type" : typeExpr,
  "name" : string?
 });
- 
+
+/** 配列型 */
 type ArrayType = @_array (AnnoDocMixin & {
  "specified"  : [ArrayItem*],
  "additional" :  ArrayItem,
@@ -115,11 +120,14 @@ type ArrayType = @_array (AnnoDocMixin & {
 === オブジェクト型
 
 <<{
+/** オブジェクトのプロパティ */
 type ObjectProperty = @_objectProperty (AnnoDocMixin & {
  "type" : typeExpr,
  "name" : string,
 });
 
+
+/** オブジェクト型 */
 type ObjectType = @_object (AnnoDocMixin & {
  "specified"  : [ObjectProperty*],
  "additional" :  ObjectProperty,
@@ -129,7 +137,10 @@ type ObjectType = @_object (AnnoDocMixin & {
 
 === タグ付き型
 
+* タグ付きデータの構成部分は、今後、**タグ（tag）**と**内容（content）**と呼ぶ。
+
 <<{
+/** タグ付き型 */
 type TaggedType = @_tagged (AnnoDocMixin & {
  "tag" : typeExpr,
  "content" : typeExpr
@@ -140,12 +151,18 @@ type TaggedType = @_tagged (AnnoDocMixin & {
 === バッグ型
 
 <<{
+/** バッグ型の出現性カウント */
+@[hidden]
+type count = (integer(minimum=0) | "unbounded");
+
+/** バッグの項目 */
 type BagItem = @_bagItem (AnnoDocMixin & {
  "type" : typeExpr,
  "minOccur" : count,
  "maxOccur" : count
 });
  
+/** バッグ型 */
 type BagType =  @_bag (AnnoDocMixin & {
   "specified"  : [BagItem*],
 });
@@ -246,3 +263,25 @@ type PseudTaggedType = deferred;
 
 
 }>>
+
+== フォーリン型
+
+<<{
+/** フォーリントークン型
+ * 印字表現は #'NAME
+ */
+type ForeignToken = @foreignToken string(format="token");
+
+/** フォーリンオブジェクト型
+ * 印字表現は #<NAME DESCRIPTOR>
+ */
+type ForeignObject = @foreignObject {
+  "name" : string(format="simple-name"),
+  "descriptor" : any,
+};
+
+}>>
+
+
+例：{{{ @foreignToken "undefined" }}}
+

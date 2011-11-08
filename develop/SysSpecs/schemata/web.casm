@@ -1,22 +1,16 @@
-// -*- coding: utf-8 -*-
+module web; // -*- coding: utf-8 -*-
 
+type hoge = string(remark="hoge");
 
-/** 
- * * 参考：[[http://d.hatena.ne.jp/m-hiyama/20101201/1291165175|CatyScriptで記述するCatyのリクエスト処理]]
- */
-module web;
 
 /** MIMEメディアタイプ */
-type mediaType = string(format = "media-type");
+type mediaType = string(remark = "media-type");
 
 /** 文字エンコーディングスキーム */
-type encoding = string(format = "encoding");
+type encoding = string(remark = "encoding");
 
-/** URI */
-type uri = string(format = "uri");
-
-/** パス形式 */
-type path = string(format = "path");
+/** パス */
+type path = string(remark = "path");
 
 /** HTTPヘッダのフィールド値 */
 type fieldValue = (number|string); // Caty内では数値を許す
@@ -39,26 +33,23 @@ type WebMessage = {
 };
 
 /** Webリクエスト。
- * メッセージに、リクエストパス、HTTPメソッド、動詞
+ * メッセージにリクエストパス、HTTPメソッド、動詞
  * の情報が加わる。
  */ 
-type WebRequest = WebMessage ++ {
-  /** HTTPリクエストのリクエストラインそのままのURI */
-  "requestUri" : uri,
-  /** HTTPリクエスト */
+type WebRequest = WebMessage & {
+  "path" : path,
   "method" : ("GET"|"POST"|"PUT"|"DELETE"|"HEAD"),
-  /** 動詞 */
-  "verb" : string?, // Caty特有
+  "verb" : string,
+
+  * : any?
 };
 
 /** Webレスポンス。
- * メッセージに、ステータスコードの情報が加わる。
+ * メッセージにステータスコードの情報が加わる。
  */ 
-type WebResponse = WebMessage ++ {
+type WebResponse = WebMessage & {
   "status" : integer,
+
+  * : any?
 };
-
-
-// End of Module
-
 
