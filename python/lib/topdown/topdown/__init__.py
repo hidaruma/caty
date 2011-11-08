@@ -24,7 +24,7 @@ class ParseError(Exception):
         t = self.cs.text[start:self.cs.pos]
         spaces = ' ' * (col - 1) + '^'
         text = t + '\n' + spaces
-        r = u'\nLine %d, Col %d:%s \nCaused by:%s' % (line, col, text, self._to_str(self.cause))
+        r = u'\nLine %d, Col %d:\n%s \nCaused by:%s' % (line, col, text, self._to_str(self.cause))
         if self._error_message:
             r = self._error_message + '\n' + r
         return r

@@ -80,20 +80,23 @@ class ScriptParser(Parser):
 
     def functor(self, seq):
         func = seq.parse([u'each', u'take', u'time', u'start'])
-        opts = self.options(seq)
-        seq.parse(u'{')
-        if seq.eof:
-            raise EndOfBuffer(seq, self.functor)
-        cmd  = self.make_pipeline(seq)
-        seq.parse(u'}')
-        if func == u'each':
-            return Each(cmd, opts)
-        elif func == u'time':
-            return Time(cmd, opts)
-        elif func == u'take':
-            return Take(cmd, opts)
-        elif func == u'start':
-            return Start(cmd, opts)
+        try:
+            opts = self.options(seq)
+            seq.parse(u'{')
+            if seq.eof:
+                raise EndOfBuffer(seq, self.functor)
+            cmd  = self.make_pipeline(seq)
+            seq.parse(u'}')
+            if func == u'each':
+                return Each(cmd, opts)
+            elif func == u'time':
+                return Time(cmd, opts)
+            elif func == u'take':
+                return Take(cmd, opts)
+            elif func == u'start':
+                return Start(cmd, opts)
+        except ParseFailed as e:
+            raise ParseError(e.cs, self.functor)
 
     def command(self, seq):
         name = choice(self.name, self.xjson_path)(seq)
@@ -161,7 +164,7 @@ class ScriptParser(Parser):
             return r
 
     def make_pipeline(self, seq):
-        return seq.parse([self.pipeline])
+        return self.pipeline(seq)
 
     def term(self, seq):
         parsers = map(try_, [
