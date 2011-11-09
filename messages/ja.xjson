@@ -131,6 +131,8 @@
     /********************************
      **** スキーマコンパイラ関連 ****
      ********************************/
+    "Module $name is already defined": "$nameは既に定義されたモジュールです",
+
     "Type '$name' is already defined": "'$name'は既に定義された型です",
 
     "Comand '$name' is already defined": "'$name'は既に定義されたコマンドです",

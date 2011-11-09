@@ -529,6 +529,9 @@ class AppModule(Module):
                 if e.path.endswith(u'.casm.lit'):
                     mod._type = 'casm.lit'
                 mod._name = self._path_to_module(mod.filepath)
+                if mod._name in self.sub_modules:
+                    raise Exception(self._app.i18n.get(u'Module $name is already defined', 
+                                               name=mod._name))
                 mod._compile(e.path)
                 self.sub_modules[mod.name] = mod
             elif e.path == u'/formats.xjson':

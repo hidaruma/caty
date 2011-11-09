@@ -125,6 +125,8 @@
     /********************************
      **** Caty Schema Compiler   ****
      ********************************/
+    "Module $name is already defined",
+
     "Type '$name' is already defined",
 
     "Comand '$name' is already defined",
