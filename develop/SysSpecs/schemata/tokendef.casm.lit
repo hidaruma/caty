@@ -1,0 +1,135 @@
+<<ignore // -*- coding: utf-8 -*- >>
+
+= トークンの構文定義
+
+
+<<{
+/** トークンの構文定義
+ * レキシカル表現の導入
+ */
+module tokendef in casm;
+
+}>>
+
+CatyBNFによる構文定義において、トークンを定義できるようにする。
+
+== レキシカル表現
+
+レキシカル表現（トークン表現）は次のものである。
+
+# 文字列型 string
+# 属性を持つ文字列型 例： string(format="simple-name", maxLength=10)
+# 特にパターン属性を許す。例： string(pattern="[1-9][0-9]*")
+# 文字列シングルトン型
+# レキシカル表現のオプション
+# レキシカル表現の配列（末尾のクリーネスターが許される）
+# レキシカル表現のユニオン
+
+型変数と型の名前も許すが、それらが文字列の制限型であることが保証されている必要がある。
+
+レキシカル表現は、Catyの型表現の部分集合になるが、制約と解釈は異なる。
+
+# 配列表現は、配列構築ではなくて文字列の連接（カンマ）と繰り返し（末尾スター）と解釈される。
+# ユニオン型の排他性チェックは行われない。
+
+
+== CatyBNFによる定義
+
+以下の構文定義は暫定的・実験的なもので、
+「型表現のXJSONシリアライゼーション」との整合性は取れてない。
+
+
+<<{
+/** 文字列の部分集合制限型（の表現）
+ * その意味は：
+ * * 属性を持つかもしれないstring型
+ * * 文字列シングルトン型
+ */
+syntax StringSubtypeExpr = deferred "stringSub"; // ダミー定義
+
+/** レキシカル表現 */
+syntax LexicalExpr ::= StringSubtypeExpr | LexicalOption | LexicalUnion | LexicalArray
+                    := StringSubtypeExpr | LexicalOption | LexicalUnion | LexicalArray ;
+
+/** レキシカルなオプション
+ * 通常のオプション型と同じ
+ */
+syntax LexicalOption ::= @_option (LexicalExpr '?')
+                      := @_option LexicalExpr ;
+
+/** レキシカルなユニオン
+ * 排他性チェックはされない
+ */
+syntax LexicalUnion ::= @_lexicalUnion ( LexicalExpr*<'|', true> )
+                     := @_lexicalUnion [ LexicalExpr* ] ;
+
+/** レキシカルな配列
+ * 意味は文字列連接
+ */
+syntax LexicalArray ::= @_lexicalArray ( LexicalExpr* )
+                     := @_lexicalArray [ LexicalExpr* ] ;
+
+}>>
+
+== lexicalキーワード
+
+レキシカル表現は、通常の型表現とまったく同じ構文を持つ。このため、
+その表現がレキシカルであることを指定するキーワードが必要になる。
+'lexical'を使う。
+
+当初、'token'を考えていたが、
+tokenはユーザーが使用する可能性が高いのでlexicalとした。
+
+# lexicalキーワードはsyntax宣言においてだけ使える。一般の型宣言では使えない。
+# BNF表現でもlexicalキーワードを使う。
+# lexicalキーワードの出現可能位置は、
+  syntax宣言の '::='、':='、'=' の直後である。
+  出現性は、//deferredに類似//している。
+# lexicalを付けても付けなくても解釈が変わらない場合があるが、
+  その場合でもlexicalを付けておくほうが可読性の助けになる。
+# lexicalキーワードの効果は//伝搬//する。伝搬規則は以下に述べる。
+
+lexicalキーワードの伝搬規則：
+
+# '::=' の直後にlexicalが付くと、後続する ':=' と '=' には自動的に付与される。
+# '::=' がlexicalでないときに、':=' や '=' にlexicalを付けるとエラーとなる。
+# 伝搬による指定と明示的な指定が重複して（二重に指定されて）もよい。
+
+== 事例
+
+整数を表すトークンの定義：
+
+{{{
+
+syntax digit = lexical string(pattern="[0-9]");
+
+syntax nonzeroDigit = lexical string(pattern="[1-9]");
+
+syntax posInt ::= lexical nonzeroDigit digit*
+               := [nonzeroDigit, digit*] ;
+
+syntax uInt ::= lexical ('0' | posInt)
+             := ("0" | posInt) ;
+
+syntax sign ::= lexical ('+' | '-')
+             := ("+" | "-");
+
+syntax int ::= lexical sign? posInt
+            := [sign?, posInt];
+
+}}}
+
+
+== 問題点と対処
+
+通常の型表現構文をそのままレキシカル表現に流用しているが、意味論はかなり異なる。
+混乱が生じる可能性がある。
+
+レキシカル表現に特有の構文を導入する方法もあるが、
+記憶負担が増えるから、当面はこのままとする。
+
+
+
+
+
+
