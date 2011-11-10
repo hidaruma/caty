@@ -1,6 +1,6 @@
 #coding: utf-8
 from caty.core.async import AsyncQueue
-from caty.core.facility import Facility, AccessManager, FakeFacility
+from caty.core.facility import Facility, AccessManager, FakeFacility, ReadOnlyFacility
 from caty.util import cout, error_to_ustr, brutal_error_printer
 from caty.util.path import join
 from caty import mafs, storage, session
@@ -473,6 +473,7 @@ class Application(PbcObject):
             'config': self._app_spec,
             'memory': self._memory.start(),
             'logger': logger.Logger(self).start(),
+            'sysfiles': self._create_sysfiles(),
         }
         facilities['token'] = RequestToken(facilities['session'])
         if facilities['session'].exists(CATY_USER_INFO_KEY):
@@ -482,6 +483,12 @@ class Application(PbcObject):
         fset = FacilitySet(facilities, self)
         facilities['interpreter'] = self._interpreter.file_mode(fset)
         return fset
+
+    def _create_sysfiles(self):
+        return SysFiles(
+            actions = self._actions.start().read_mode,
+            schemata = self._schema_fs.start().read_mode,
+        )
 
     def init_env(self, facilities, is_debug, modes, system, environ={}):
         env = facilities['env']
@@ -678,5 +685,10 @@ class AppConfig(dict, FakeFacility):
         for k, v in self.items():
             n[k] = deepcopy(v)
         return n
+
+class SysFiles(ReadOnlyFacility):
+    def __init__(self, **kwds):
+        for k, v in kwds.items():
+            setattr(self, k, v)
 
 

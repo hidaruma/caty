@@ -22,7 +22,7 @@ type selection = {
  * JSON でないデータの書き込まれたファイルに対しての動作は保証しない（通常はエラー）。
  */
 command read [string] :: void -> any
-    reads [pub, data]
+    reads [pub, data, sysfiles]
     refers python:caty.core.std.command.jsonlib.ReadJson;
 
 /**

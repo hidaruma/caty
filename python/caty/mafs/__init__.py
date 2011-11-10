@@ -186,6 +186,8 @@ class MafsFactory(Facility, ResourceFinder, PbcObject):
             mafs = app.behaviors
         elif self._type == 'schemata':
             mafs = app._schema_fs
+        elif self._type == 'actions':
+            mafs = app._actions
         mf = MafsFactory(mafs._mod, 
                            self._root, 
                            self._access_manager_factory, 

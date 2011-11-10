@@ -10,7 +10,7 @@ type AnyObject = {*:any};
  * --with-docオプションが指定された場合、ドキュメンテーション文字列を埋め込んだ形式で読み取る。
  */
 command read {"with-doc": boolean?} [string] :: void -> any
-    reads [pub, data]
+    reads [pub, data, sysfiles]
     refers python:caty.core.std.command.xjsonlib.ReadJson;
 
 /**
