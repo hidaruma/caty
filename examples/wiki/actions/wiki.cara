@@ -2,67 +2,65 @@
 /** Wikiモジュール */
 module wiki in cara on boot;
 
-/** Wikiファイル */
-resource WikiFile("*.wiki") {
+resource Wikiファイル("*.wiki") {
     filetype {
-        "contentType": "text/plain",
+        "contentType": "text/原稿",
          "isText": true,
     };
     /** 読み込み */
-    action read("/GET") :: @[in, out] #io void -> WikiPage produces pag { 
-        (#io file:read %1 | {
+    action 読み出し("/GET") :: @[in, out] #io void -> WikiPage produces HTMLページ { 
+        (#io file.読み出し %1 | {
             "body": text:creole, 
             "title": param %1 | text:rsplit "." | item 0 | text:trim /,
             "lastModified": file:lastmodified %1
-        }) | print include@this:/page.html
+        }) | print include@this:/HTMLページ.html
     };
 
     /** 編集画面呼び出し */
-    action edit("edit/GET")  :: @[in, out]#io void -> WikiSkele produces edit {
+    action 編集("edit/GET")  :: @[in, out]#io void -> WikiSkele produces 編集 {
         {
-            "body":file:read %1,
+            "body":file.読み出し %1,
             "title": param %1 | text:rsplit "." | item 0 | text:trim /
-        } | print include@this:/edit.html
+        } | print include@this:/編集.html
     };
 
-    /** 書き込み */
-    action write("/POST#exists-parent")  :: 
-        @[in] #translate WikiFile -> _,
-        @[out] #ok _ -> never redirects WikiFile.read,
+    action 書き込み("/POST#exists-parent")  :: 
+        @[in] #translate Wikiファイル -> _,
+        @[out] #ok _ -> never redirects Wikiファイル.読み出し,
         @[out] #ng _ -> never redirects Root.get {
-        (#translate translate WikiFile) | when {
-            OK => (#ok ["/wiki", (#part pv body) | file:write %1 | param %1] | text:concat | redirect),
+        (#translate translate Wikiファイル) | when {
+            OK => (#ok ["/wiki", (#part pv body) | file:書き込み %1 | param %1] | text:concat | redirect),
             NG => (#ng "/wiki/" | redirect)
         }
     };
     /** プレーンテキスト取得 */
-    action plain("plain/GET") :: @[in, out] #io void -> Response produces plain
+    action 原稿("plain/GET") :: @[in, out] #io void -> Response produces 原稿
     {
         print %0
     };
 };
 
-state page :: WikiPage links {
-    + edit --> WikiFile.edit;
-    + source --> WikiFile.plain;
-    + new --> NewFile.opn;
-    + all-pages --> AllPages.get;
+state HTMLページ :: WikiPage links {
+    + 編集 --> Wikiファイル.編集;
+    + ソース --> Wikiファイル.原稿;
+    + 新規 --> 新規ファイル.雛形;
+    + 一覧 --> AllPages.get;
     + root --> Root.get;
 };
 
 
 resource Root("/") {
-    action get("/GET") :: @[in, out] #io void -> never redirects WikiFile.read {
+    action get("/GET") :: @[in, out] #io void -> never redirects Wikiファイル.読み出し {
         "/wiki/FrontPage.wiki" | redirect
     };
 };
 
-resource NewFile("/new") {
-    action open("/POST#dont-care") :: @[in, out] #io NewWiki -> WikiSkele produces edit
+resource 新規ファイル("/new") {
+    action 雛形("/POST#dont-care") :: @[in, out] #io NewWiki -> WikiSkele produces 編集
     {
         translate NewWiki | when {
             OK => pv filename | text:regmatch "[A-Z][a-z0-9]" | when {
-                match => {"title": pv src, "body": ""} | print include@this:/edit.html,
+                match => {"title": pv src, "body": ""} | print include@this:/編集.html,
                 fail => redirect /
             },
             NG => redirect /
@@ -72,7 +70,7 @@ resource NewFile("/new") {
 };
 
 resource AllPages("/all.html") {
-    action get("/GET") :: @[in, out] #io void -> WikiIndex produces index {
+    action get("/GET") :: @[in, out] #io void -> WikiIndex produces 索引 {
         lsdir / .wiki | each {
             {
                 "file": pv name,
@@ -82,17 +80,17 @@ resource AllPages("/all.html") {
     };
 };
 
-state index :: WikiIndex links {
-    + new --> NewFile.open;
-    + link --> WikiFile.read;
+state 索引 :: WikiIndex links {
+    + new --> 新規ファイル.雛形;
+    + link --> Wikiファイル.読み出し;
 };
 
-state edit :: WikiSkele links {
-    submit() --> WikiFile.write;
-    + cancel --> WikiFile.rea;
+state 編集 :: WikiSkele links {
+    submit() --> Wikiファイル.書き込み;
+    + cancel --> Wikiファイル.読み出し;
 };
 
-state plain :: Response;
+state 原稿 :: Response;
  
 type foobar = 1;
 

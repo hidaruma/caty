@@ -3,7 +3,7 @@ from topdown import *
 from caty.core.script.parser import ScriptParser
 from caty.core.casm.language.casmparser import module_decl
 from caty.core.casm.language.schemaparser import object_, typedef
-from caty.core.language.util import docstring, annotation, fragment_name, annotation
+from caty.core.language.util import docstring, annotation, fragment_name, annotation, identifier_token, identifier_token_m, name_token
 from caty.jsontools.xjson import obj
 from caty.core.action.resource import ResourceClass
 from caty.core.action.module import ResourceModule
@@ -58,7 +58,7 @@ class ResourceActionDescriptorParser(Parser):
         ann = seq.parse(option(annotation, Annotations([])))
         seq.parse(keyword('resource'))
         try:
-            rcname = name(seq)
+            rcname = name_token(seq)
             url_pattern = self.url_pattern(seq)
             seq.parse('{')
             block = seq.parse(ActionBlock(rcname, self._script_parser, self._module_name))
@@ -181,7 +181,7 @@ class ActionBlock(Parser):
         return pattern.strip()
 
     def name(self, seq):
-        return seq.parse(Regex(r'[a-zA-Z_][-a-zA-Z0-9_.:]*'))
+        return identifier_token_m(seq)
 
     def generates(self, seq):
         seq.parse(keyword('generates'))
@@ -318,11 +318,12 @@ class StateBlock(Parser):
         return seq.parse(choice(Regex(ur'(\$\.)?([a-zA-Z_][a-zA-Z0-9_-]*(\(\))?\.)*[a-zA-Z_][a-zA-Z0-9_-]*(\(\))?'), '$'))
 
     def action_ref(self, seq):
-        ref = seq.parse(Regex(r'([a-zA-Z_][-a-zA-Z0-9_]*:)?[a-zA-Z_][-a-zA-Z0-9_]*\.[a-zA-Z_][-a-zA-Z0-9_]*(#(io|in)[0-9a-zA-Z_-]*)?'))
-        if '#' in ref:
-            return ref.split('#')
+        actname = identifier_token_m(seq)
+        ref = seq.parse(option(Regex(r'(#(io|in)[0-9a-zA-Z_-]*)?')))
+        if ref:
+            return actname, ref
         else:
-            return (ref, None)
+            return (actname, None)
 
 class Link(object):
     def __init__(self, trigger, dest, isembed):
@@ -346,7 +347,7 @@ def is_doc_str(seq):
 
 
 def name(seq):
-    return seq.parse(Regex(r'[a-zA-Z_][-a-zA-Z0-9_]*'))
+    return name_token(seq)
 
 def string(seq):
     h = seq.ignore_hook

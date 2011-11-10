@@ -13,7 +13,7 @@ def schema(seq):
     doc = option(docstring)(seq)
     annotations = seq.parse(annotation)
     t = seq.parse([keyword('type'), keyword('exception')])
-    name_of_type = seq.parse(name)
+    name_of_type = seq.parse(name_token)
     if name_of_type in RESERVED:
         raise ParseFailed(seq, schema, '%s is reserved.' % n)
     type_args = seq.parse(option(type_arg))
@@ -118,7 +118,7 @@ def type_arg(seq):
     return vars
 
 def type_paramater(seq):
-    name = typename(seq)
+    name = name_token(seq)
     kind = option(kind_of)(seq)
     return TypeParam(name, kind)
 
@@ -141,10 +141,7 @@ def scalar(seq):
     return node
 
 def typename(seq):
-    app = seq.parse(option(Regex(r'[a-zA-Z_][-a-zA-Z0-9_]*:'), ''))
-    module = seq.parse(option(Regex(r'(([a-zA-Z_][-a-zA-Z0-9_]*\.)*([a-zA-Z][-a-zA-Z0-9]*:))?'), ''))
-    name = seq.parse(Regex(u'(([a-zA-Z_][-a-zA-Z0-9_]*)|\$)'))
-    return ''.join([app, module, name])
+    return identifier_token_a(seq)
     #return seq.parse(Regex(r'(([a-zA-Z_][a-zA-Z0-9_]*#)?(\.[_a-zA-Z][_a-zA-Z0-9]*)*\:)?(([_a-zA-Z][_a-zA-Z0-9]*)|(\$))'))
 
 def options(seq):

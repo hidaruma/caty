@@ -181,3 +181,28 @@ def fragment_name(seq):
     name = seq.parse(Regex('[a-zA-Z_0-9][-0-9_a-zA-Z]*'))
     return name
 
+_name_start_base = u'[a-zA-Z_]'
+_extend_name_start = unicode("""[\u00C0-\u00D6] | [\u00D8-\u00F6] | [\u00F8-\u02FF] | [\u0370-\u037D] | 
+   [\u037F-\u1FFF] | [\u200C-\u200D] | [\u2070-\u218F] | 
+   [\u2C00-\u2FEF] | [\u3001-\uD7FF] | [\uF900-\uFDCF] | 
+   [\uFDF0-\uFFFD] | [\U00010000-\U000EFFFF]""", 'unicode-escape')
+_name_start = _name_start_base + u'|' + _extend_name_start
+_ext_name = unicode('\u00B7 | [\u0300-\u036F] | [\u203F-\u2040]', 'unicode-escape')
+_name_char = u'|'.join([_name_start, '-', '[0-9]', _ext_name])
+_name_token_ptn = u'({0})({1})*'.format(_name_start, _name_char)
+_identifier_ptn = _name_token_ptn + u'(\\.{0})*'.format(_name_token_ptn)
+_mod_identifier_ptn = u'({0}:)?{1}'.format(_identifier_ptn, _identifier_ptn)
+_app_identifier_ptn = u'({n}:({i}|:{n}))|({i})'.format(n=_name_token_ptn, i=_mod_identifier_ptn)
+import re
+def name_token(seq):
+    return seq.parse(Regex(_name_token_ptn, re.X))
+
+def identifier_token(seq):
+    return seq.parse(Regex(_identifier_ptn, re.X))
+
+def identifier_token_m(seq):
+    return seq.parse(Regex(_mod_identifier_ptn, re.X))
+
+def identifier_token_a(seq):
+    return seq.parse(Regex(_app_identifier_ptn, re.X))
+

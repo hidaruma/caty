@@ -6,7 +6,7 @@ def syntax(seq):
     doc = option(docstring)(seq)
     a = seq.parse(annotation)
     t = seq.parse(keyword('syntax'))
-    n = seq.parse(name)
+    n = seq.parse(name_token)
     if n in RESERVED:
         raise ParseFailed(seq, schema, '%s is reserved.' % n)
     v = seq.parse(option(type_arg))

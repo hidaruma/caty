@@ -47,11 +47,11 @@ def is_doc_str(seq):
     return False
 
 def cmdname(seq):
-    return seq.parse(Regex(r'[a-zA-Z_](-?[a-zA-Z0-9_]*)*'))
+    return name_token(seq)
 
 def typenames(seq):
     seq.parse('<')
-    names = seq.parse(split(name, ','))
+    names = seq.parse(split(name_token, ','))
     seq.parse('>')
     return names
 

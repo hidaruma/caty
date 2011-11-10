@@ -28,7 +28,7 @@ from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
 from caty.core.exception import SubCatyException
 from caty.core.command.param import *
-from caty.core.language.util import fragment_name
+from caty.core.language.util import fragment_name, identifier_token_a
 
 class NothingTodo(Exception):
     u"""コメントのみの入力など、何もしないときのシグナル
@@ -76,7 +76,7 @@ class ScriptParser(Parser):
         return s
 
     def name(self, seq):
-        return seq.parse(Regex(ur'[a-zA-Z]+[-a-zA-Z0-9:._]*'))
+        return identifier_token_a(seq)
 
     def functor(self, seq):
         func = seq.parse([u'each', u'take', u'time', u'start'])

@@ -6,7 +6,7 @@ def kind(seq):
     doc = option(docstring)(seq)
     annotations = seq.parse(annotation)
     seq.parse(keyword('kind'))
-    name_of_kind = seq.parse(name)
+    name_of_kind = seq.parse(name_token)
     seq.parse('=')
     seq.parse(expr)
     seq.parse(';')
