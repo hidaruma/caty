@@ -8,7 +8,7 @@ command sample {
     @[default("var")] "occur":("var"|"once"|"min")?, 
     @[default("rand")]"string": ("rand"|"empty"|"implied")?
   } [string typename] :: void -> any
-  reads schemata
+  reads schema
   refers python:caty.core.std.command.gen.Sample;
 
 /**

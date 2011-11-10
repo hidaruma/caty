@@ -991,7 +991,7 @@ command h :: void -> void {
  */
 command make-exception [string tag, string message] :: void -> Exception
     throws ExceptionNotFound
-    reads schemata
+    reads schema
     refers python:caty.core.std.command.builtin.MakeException;
 
 
@@ -1002,7 +1002,7 @@ command make-exception [string tag, string message] :: void -> Exception
  */
 command throw-if-can :: any? -> any?
     throws Exception
-    reads schemata
+    reads schema
     refers python:caty.core.std.command.builtin.Throw;
 
 /**

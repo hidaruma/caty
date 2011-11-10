@@ -469,7 +469,6 @@ class Application(PbcObject):
             'storage': self._storage.set_finder(finder).start(),
             'behaviors': self._behaviors.start(),
             'vcs': self._vcs.start(),
-            'schemata': self._schema_fs,
             'config': self._app_spec,
             'memory': self._memory.start(),
             'logger': logger.Logger(self).start(),
