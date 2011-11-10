@@ -1,6 +1,6 @@
 // -*- coding: utf-8 -*-
 
-module gen; // generic/general types
+module general; // generic/general types
 
 type Text = string(minLength=1);
 type URIString	= string(minLength=1, remark="URI String");

@@ -2,11 +2,11 @@
 module mf; // microformats
 
 /* import from generic types */
-type Text      = gen:Text;
-type URIString = gen:URIString;
-type ISODate   = gen:ISODate;
-type Duration  = gen:Duration;
-type email     = gen:email;
+type Text      = general:Text;
+type URIString = general:URIString;
+type ISODate   = general:ISODate;
+type Duration  = general:Duration;
+type email     = general:email;
 
 /* 参考URL：
 

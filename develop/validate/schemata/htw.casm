@@ -4,8 +4,8 @@ module htw; // 'HT'ML for 'W'ikiCreole
 /* 一般的な型の定義 */
 
 /* gen.casm より */
-type Text      = gen:Text;
-type URIString = gen:URIString;
+type Text      = general:Text;
+type URIString = general:URIString;
 
 /* インライン要素 */
 
