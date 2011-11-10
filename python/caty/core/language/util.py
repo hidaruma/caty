@@ -185,7 +185,7 @@ _name_start_base = u'[a-zA-Z_]'
 _extend_name_start = unicode("""[\u00C0-\u00D6] | [\u00D8-\u00F6] | [\u00F8-\u02FF] | [\u0370-\u037D] | 
    [\u037F-\u1FFF] | [\u200C-\u200D] | [\u2070-\u218F] | 
    [\u2C00-\u2FEF] | [\u3001-\uD7FF] | [\uF900-\uFDCF] | 
-   [\uFDF0-\uFFFD] | [\U00010000-\U000EFFFF]""", 'unicode-escape')
+   [\uFDF0-\uFFFD] """, 'unicode-escape')
 _name_start = _name_start_base + u'|' + _extend_name_start
 _ext_name = unicode('\u00B7 | [\u0300-\u036F] | [\u203F-\u2040]', 'unicode-escape')
 _name_char = u'|'.join([_name_start, '-', '[0-9]', _ext_name])
