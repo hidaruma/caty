@@ -153,6 +153,8 @@ class DrawModule(Builtin, DrawingMixin):
 
         else:
             RG.graph_attr['label'] = graph_struct['name']
+        if self._font:
+            RG.graph_attr.update(fontname=self._font)
         for sg in graph_struct['subgraphs']:
             G = self.transform(sg, False)
             if self._node == 'state':
