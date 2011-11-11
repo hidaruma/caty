@@ -145,6 +145,8 @@
 
     "Different profile: $profile1, $profile2",
 
+    "Different pattern: $pattern1, $pattern2",
+
     /********************************
      **** Caty Schema Runtime    ****
      ********************************/
@@ -177,6 +179,8 @@
     "value should be longer than $len",
     
     "value should be shorter than $len",
+
+    "value does not matched to $pattern",
 
     "minLength($min) is longer than maxLength($max)",
 

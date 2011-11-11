@@ -151,6 +151,8 @@
 
     "Different profile: $profile1, $profile2": "異なるプロファイル: $profile, $profile2",
 
+    "Different pattern: $pattern1, $pattern2": "異なるパターン: $pattern1, $pattern2",
+
     /********************************
      **** スキーマランタイム関連 ****
      ********************************/
@@ -183,6 +185,8 @@
     "value should be longer than $len": "データ長は$lenよりも長くなければなりません",
     
     "value should be shorter than $len": "データ長は$lenよりも短くなければなりません",
+
+    "value does not matched to $pattern": "$patternにマッチしませんでした",
 
     "minLength($min) is longer than maxLength($max)": "minLength($min)がmaxLength($max)よりも長く設定されています",
 

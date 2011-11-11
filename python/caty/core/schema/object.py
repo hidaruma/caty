@@ -52,8 +52,8 @@ class ObjectSchema(SchemaBase, Object):
 
     def intersect(self, another):
         cls = type(another)
-        if not (cls in (UnionSchema, IntersectionSchema, UpdatorSchema, TypeVariable, ObjectSchema) 
-                or cls == NamedSchema and another.type == 'object'):
+        if not (cls in (UnionSchema, IntersectionSchema, UpdatorSchema, TypeVariable, ObjectSchema)
+                or (cls in(TypeReference, NamedSchema) and another.type == 'object')):
             raise JsonSchemaError(dict(msg=u'Unsupported operand types for $op: $type1, $type2', op='&', type1='object', type2=another.type))
 
         if cls == ObjectSchema:

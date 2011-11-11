@@ -10,8 +10,9 @@ class StringSchema(ScalarSchema):
     maxLength = attribute('maxLength')
     format = attribute('format', None)
     profile = attribute('profile')
+    pattern = attribute('pattern', None)
 
-    __options__ = SchemaBase.__options__ | set(['maxLength', 'minLength', 'format', 'profile'])
+    __options__ = SchemaBase.__options__ | set(['maxLength', 'minLength', 'format', 'profile', 'pattern'])
     
     def __init__(self, *args, **kwds):
         ScalarSchema.__init__(self, *args, **kwds)
@@ -29,6 +30,11 @@ class StringSchema(ScalarSchema):
             raise JsonSchemaError(dict(msg=u'value should longer than $len', len=self.minLength))
         if self.maxLength != None and self.maxLength < len(value):
             raise JsonSchemaError(dict(msg=u'value should shorter than $len', len=self.maxLength))
+        if self.pattern is not None:
+            import re
+            c = re.compile('^' + self.pattern + '$')
+            if not c.match(value):
+                raise JsonSchemaError(dict(msg=u'value does not matched to $pattern', pattern=self.pattern))
 
     def intersect(self, another):
         if another.type != self.type:
@@ -39,12 +45,15 @@ class StringSchema(ScalarSchema):
             raise JsonSchemaError(dict(msg=u'Different format: $format1, $format2', format1=self.format, format2=another.format))
         if self.profile is not None and another.profile is not None and self.profile != another.profile:
             raise JsonSchemaError(dict(msg=u'Different profile: $profile1, $profile2', profile1=self.profile, profile2=another.profile))
-
+        if self.pattern is not None and another.pattern is not None and self.pattern != another.pattern:
+            raise JsonSchemaError(dict(msg=u'Different pattern: $pattern1, $pattern2', pattern1=self.pattern, pattern2=another.pattern))
+        
         opts = {
             'minLength': minLength,
             'maxLength': maxLength,
             'format': self.format or another.format,
             'profile': self.profile or another.profile,
+            'pattern': self.pattern or another.pattern,
         }
         return self.clone(opts)
         
