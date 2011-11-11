@@ -1,0 +1,105 @@
+// -*- coding: utf-8 -*-
+/** ユーザー管理業務モジュール */
+module user-mgr-j in cara;
+
+
+/* == 型定義 == */
+
+/** ユーザーリストの型 */
+type UserList = deferred; // 後で定義
+
+/** 登録UIが持つデータの型 */
+type RegisterUI = deferred;
+
+/** 登録されるユーザー情報の型 */
+type UserInfo = deferred;
+
+/** 登録完了時に戻されるデータの型 */
+type Result = deferred;
+
+
+/* == 画面 == */
+
+state 開始 for 全員 :: void links {
+  + ログオン --> ログオン画面生成.取得;
+};
+
+state システム管理 for 管理者 :: void links {
+ + ログオフ  --> ログオン画面生成.取得;
+};
+
+state メニュー for ユーザー :: void links {
+ + 一覧へ    --> 一覧画面生成.取得;
+ + 登録へ    --> 登録画面生成.取得;
+ + ログオフ  --> ログオン画面生成.取得;
+};
+
+state 一覧 for ユーザー :: UserList links {
+ + 一覧      --> 一覧画面生成.取得;
+ + 次        --> 一覧画面生成.次;
+ + 前        --> 一覧画面生成.前;
+ + 指定ページへ --> 一覧画面生成.指定ページへ;
+ + メニュー  --> メニュー画面生成.取得;
+};
+
+state 登録 for ユーザー :: RegisterUI links {
+ + 登録実行  --> 登録処理実行.実行;
+ + メニュー  --> メニュー画面生成.取得;
+};
+
+state 結果 for ユーザー :: Result links {
+ + メニュー  --> メニュー画面生成.取得;
+};
+
+state ログオン-dummy for 全員 :: void links {
+  + 管理者ログオン --> システム管理画面生成.取得;
+  + ユーザーログオン --> メニュー画面生成.取得;
+};
+
+
+/* == リソースとアクション == */
+
+resource メニュー画面生成 ("/menu.html") {
+ action 取得("/GET")
+ :: @[in, out] #1 void -> void produces メニュー ;
+};
+
+resource 一覧画面生成 ("/list.cgi") {
+ action 取得("/GET#dont-care")
+ :: @[in, out]#1 void -> UserList produces 一覧  ;
+
+ action 次("next/GET#dont-care") {"current": integer}
+ :: @[in, out]#1 void -> UserList produces 一覧 ;
+
+ action 前("prev/GET#dont-care") {"current": integer}
+ :: @[in, out]#1 void -> UserList produces 一覧 ;
+
+ action 指定ページへ("go-to/GET#dont-care") {"current": integer, "target": integer}
+ :: @[in, out]#1 void -> UserList produces 一覧 ;
+
+};
+
+resource 登録画面生成 ("/register.html") {
+ action 取得("/GET")
+ :: @[in, out]#1 void -> RegisterUI produces 登録 ;
+};
+
+resource 登録処理実行 ("/do-register.cgi") {
+ action 実行 ("/POST#dont-care")
+ :: @[in] #in UserInfo -> _          relays [ok, ng],
+    @[out]#ok _        -> Result     produces 結果,
+    @[out]#ng _        -> RegisterUI produces 登録
+ ;
+};
+
+resource システム管理画面生成 ("/admin.html") {
+ action 取得("/GET")
+ :: @[in, out]#1 void -> void produces システム管理 ;
+};
+
+resource ログオン画面生成 ("/dumy-logon.html") {
+ action 取得("/GET")
+ :: @[in, out]#1 void -> void produces ログオン-dummy ;
+};
+
+// End of module
