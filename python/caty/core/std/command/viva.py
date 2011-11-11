@@ -28,6 +28,7 @@ class DrawModule(Builtin, DrawingMixin):
         self._module_name = module_name
         self._out_file = opts['out']
         self._format = opts['format']
+        self._font = opts['font']
         self._strip_xml_decl = False
         if self._format == 'svge':
             self._format = 'svg'
@@ -146,6 +147,9 @@ class DrawModule(Builtin, DrawingMixin):
         RG = gv.AGraph(**cfg)
         if root:
             RG.graph_attr['label'] = 'Module: ' + graph_struct['name']
+            if self._font:
+                RG.node_attr.update(fontname=self._font)
+                RG.edge_attr.update(fontname=self._font)
 
         else:
             RG.graph_attr['label'] = graph_struct['name']
@@ -203,6 +207,7 @@ class DrawAction(Builtin, DrawingMixin):
         self._out_file = opts['out']
         self._lone = opts['lone']
         self._format = opts['format']
+        self._font = opts['font']
         self._strip_xml_decl = False
         if self._format == 'svge':
             self._format = 'svg'
@@ -353,6 +358,9 @@ class DrawAction(Builtin, DrawingMixin):
         RG = gv.AGraph(**cfg)
         if root:
             RG.graph_attr['label'] = 'Action: ' + graph_struct['name']
+            if self._font:
+                RG.node_attr.update(fontname=self._font)
+                RG.edge_attr.update(fontname=self._font)
         else:
             RG.graph_attr['label'] = graph_struct['label']
         for sg in graph_struct['subgraphs']:
