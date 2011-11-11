@@ -170,7 +170,7 @@ class ResourceModule(Module):
                 if link.type == 'additional-link':
                     e[u'trigger'] = ' '.join(['+', e[u'trigger']])
                 edges.append(e)
-            nodes.append({u'name': s.name, u'label': s.name, u'type': u'state'})
+            nodes.append({u'name': s.name, u'label': s.label, u'type': u'state'})
         for rc in self._resources:
             for act in rc.entries.values():
                 for red in act.profiles.redirects:

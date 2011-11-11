@@ -40,7 +40,7 @@ resource Wikiファイル("*.wiki") {
     };
 };
 
-state HTMLページ :: WikiPage links {
+state HTMLページ for 読者 :: WikiPage links {
     + 編集 --> Wikiファイル.編集;
     + ソース --> Wikiファイル.原稿;
     + 新規 --> 新規ファイル.雛形;
@@ -80,17 +80,17 @@ resource AllPages("/all.html") {
     };
 };
 
-state 索引 :: WikiIndex links {
+state 索引 for 読者 :: WikiIndex links {
     + new --> 新規ファイル.雛形;
     + link --> Wikiファイル.読み出し;
 };
 
-state 編集 :: WikiSkele links {
+state 編集 for 執筆者 :: WikiSkele links {
     submit() --> Wikiファイル.書き込み;
     + cancel --> Wikiファイル.読み出し;
 };
 
-state 原稿 :: Response;
+state 原稿 for 読者 :: Response;
  
 type foobar = 1;
 

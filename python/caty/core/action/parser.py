@@ -286,6 +286,10 @@ class StateBlock(Parser):
     def __call__(self, seq):
         seq.parse(keyword('state'))
         state_name = seq.parse(name)
+        if option(keyword('for'))(seq):
+            self.actor_name = seq.parse(name)
+        else:
+            self.actor_name = u''
         seq.parse('::')
         type = typedef(seq)
         links = option(self.link_block, [])(seq)
@@ -324,6 +328,13 @@ class StateBlock(Parser):
             return actname, ref
         else:
             return (actname, None)
+
+    @property
+    def label(self):
+        if self.actor_name:
+            return u'{0}\\n[{1}]'.format(self.name, self.actor_name)
+        else:
+            return self.name
 
 class Link(object):
     def __init__(self, trigger, dest, isembed):
