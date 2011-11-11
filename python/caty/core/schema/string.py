@@ -32,7 +32,7 @@ class StringSchema(ScalarSchema):
             raise JsonSchemaError(dict(msg=u'value should shorter than $len', len=self.maxLength))
         if self.pattern is not None:
             import re
-            c = re.compile('^' + self.pattern + '$')
+            c = re.compile('^(' + self.pattern + ')$')
             if not c.match(value):
                 raise JsonSchemaError(dict(msg=u'value does not matched to $pattern', pattern=self.pattern))
 
