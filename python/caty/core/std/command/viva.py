@@ -148,6 +148,7 @@ class DrawModule(Builtin, DrawingMixin):
         if root:
             RG.graph_attr['label'] = 'Module: ' + graph_struct['name']
             if self._font:
+                RG.graph_attr.update(fontname=self._font)
                 RG.node_attr.update(fontname=self._font)
                 RG.edge_attr.update(fontname=self._font)
 
@@ -361,6 +362,7 @@ class DrawAction(Builtin, DrawingMixin):
         if root:
             RG.graph_attr['label'] = 'Action: ' + graph_struct['name']
             if self._font:
+                RG.graph_attr.update(fontname=self._font)
                 RG.node_attr.update(fontname=self._font)
                 RG.edge_attr.update(fontname=self._font)
         else:
