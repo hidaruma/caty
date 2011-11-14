@@ -28,7 +28,7 @@ class ResourceActionDescriptorParser(Parser):
         if name != self._module_name:
             raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
         rm = ResourceModule(name, ds, self._app)
-        classes = seq.parse(many([self.resourceclass, self.state, schemaparser.schema, commandparser.command]))
+        classes = seq.parse(many(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, self.userrole])))
         if not seq.eof:
             raise ParseError(seq, self)
         for c in classes:
@@ -44,14 +44,21 @@ class ResourceActionDescriptorParser(Parser):
 
                 if isinstance(c, ResourceClass):
                     rm.add_resource(c)
-                else:
+                elif isinstance(c, StateBlock):
                     rm.states.append(c)
+                elif isinstance(c, UserRole):
+                    rm.userroles.append(c)
         return rm
 
     def state(self, seq):
         ds = seq.parse(option(docstring, u''))
         ann = seq.parse(option(annotation, Annotations([])))
         return StateBlock()(seq)
+
+    def userrole(self, seq):
+        ds = seq.parse(option(docstring, u''))
+        ann = seq.parse(option(annotation, Annotations([])))
+        return UserRole()(seq)
 
     def resourceclass(self, seq):
         ds = seq.parse(option(docstring, u''))
@@ -287,9 +294,14 @@ class StateBlock(Parser):
         seq.parse(keyword('state'))
         state_name = seq.parse(name)
         if option(keyword('for'))(seq):
-            self.actor_name = seq.parse(name)
+            if option(peek(S('[')))(seq):
+                S('[')(seq)
+                self.actor_names = split(name, u',', allow_last_delim=True)(seq)
+                S(']')(seq)
+            else:
+                self.actor_names = [seq.parse(name)]
         else:
-            self.actor_name = u''
+            self.actor_names = [u'']
         seq.parse('::')
         type = typedef(seq)
         links = option(self.link_block, [])(seq)
@@ -335,6 +347,17 @@ class StateBlock(Parser):
             return u'{0}\\n[{1}]'.format(self.name, self.actor_name)
         else:
             return self.name
+
+    @property
+    def actor_name(self):
+        return u', '.join(self.actor_names)
+
+class UserRole(Parser):
+    def __call__(self, seq):
+        keyword('userrole')(seq)
+        self.name = name(seq)
+        S(';')(seq)
+        return self
 
 class Link(object):
     def __init__(self, trigger, dest, isembed):

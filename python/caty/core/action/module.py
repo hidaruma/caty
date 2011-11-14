@@ -108,6 +108,7 @@ class ResourceModule(Module):
         self.docstring = docstring
         self._resources = []
         self._states = []
+        self._userroles = []
 
     @property
     def resources(self):
@@ -141,6 +142,10 @@ class ResourceModule(Module):
     @property
     def states(self):
         return self._states
+
+    @property
+    def userroles(self):
+        return self._userroles
 
     def make_graph(self):
         root = {

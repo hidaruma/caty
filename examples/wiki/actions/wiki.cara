@@ -2,6 +2,9 @@
 /** Wikiモジュール */
 module wiki in cara on boot;
 
+userrole 読者;
+userrole 筆者;
+
 resource Wikiファイル("*.wiki") {
     filetype {
         "contentType": "text/原稿",
@@ -40,7 +43,7 @@ resource Wikiファイル("*.wiki") {
     };
 };
 
-state HTMLページ for 読者 :: WikiPage links {
+state HTMLページ for [読者, 筆者] :: WikiPage links {
     + 編集 --> Wikiファイル.編集;
     + ソース --> Wikiファイル.原稿;
     + 新規 --> 新規ファイル.雛形;
