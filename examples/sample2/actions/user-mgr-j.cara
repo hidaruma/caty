@@ -26,6 +26,7 @@ state 開始 for 全員 :: void links {
 
 state システム管理 for 管理者 :: void links {
  + ログオフ  --> ログオン画面生成.取得;
+ + システム管理色々 --> システム管理処理実行.色々; // 未定義のアクション入れてみました。
 };
 
 state メニュー for ユーザー :: void links {
@@ -52,7 +53,7 @@ state 結果 for ユーザー :: Result links {
 };
 
 state ログオン-dummy for 全員 :: void links {
-  + 管理者ログオン --> システム管理画面生成.取得;
+  + 管理者ログオン   --> システム管理画面生成.取得;
   + ユーザーログオン --> メニュー画面生成.取得;
 };
 
@@ -97,7 +98,7 @@ resource システム管理画面生成 ("/admin.html") {
  :: @[in, out]#1 void -> void produces システム管理 ;
 };
 
-resource ログオン画面生成 ("/dumy-logon.html") {
+resource ログオン画面生成 ("/dummy-logon.html") {
  action 取得("/GET")
  :: @[in, out]#1 void -> void produces ログオン-dummy ;
 };
