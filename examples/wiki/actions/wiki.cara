@@ -88,7 +88,7 @@ state 索引 for 読者 :: WikiIndex links {
     + link --> Wikiファイル.読み出し;
 };
 
-state 編集 for 執筆者 :: WikiSkele links {
+state 編集 for 不明なユーザー :: WikiSkele links {
     submit() --> Wikiファイル.書き込み;
     + cancel --> Wikiファイル.読み出し;
 };

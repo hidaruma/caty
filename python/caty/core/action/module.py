@@ -303,9 +303,11 @@ class ResourceModule(Module):
                         e = {u'to': s.name, u'from':u.name , u'type': u'usecase'}
                         break
                 else:
-                    e = {u'to': s.name, u'from': n, u'type': 'missing-usecase'}
-                    nodes.append({u'name': n, u'label': n, u'type': u'missing-userrole'})
-                edges.append(e)
+                    if n:
+                        e = {u'to': s.name, u'from': n, u'type': 'missing-usecase'}
+                        nodes.append({u'name': n, u'label': n, u'type': u'missing-userrole'})
+                if e:
+                    edges.append(e)
 
         root['nodes'] = nodes
         root['edges'] = edges
