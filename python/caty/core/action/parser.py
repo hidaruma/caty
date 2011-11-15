@@ -35,19 +35,12 @@ class ResourceActionDescriptorParser(Parser):
             if isinstance(c, (ASTRoot, CommandNode)):
                 c.declare(rm)
             else:
-                for r in rm.resources:
-                    if r.name == c.name:
-                        throw_caty_exception(
-                            u'CARA_PARSE_ERROR',
-                            u'Duplicated resource name: $name module: $module', 
-                            name=c.name, module=name)
-
                 if isinstance(c, ResourceClass):
                     rm.add_resource(c)
                 elif isinstance(c, StateBlock):
-                    rm.states.append(c)
+                    rm.add_state(c)
                 elif isinstance(c, UserRole):
-                    rm.userroles.append(c)
+                    rm.add_userrole(c)
         return rm
 
     def state(self, seq):
@@ -347,6 +340,19 @@ class StateBlock(Parser):
             return u'{0}\\n[{1}]'.format(self.name, self.actor_name)
         else:
             return self.name
+
+    def make_label(self, module):
+        if not self.actor_name:
+            return self.name
+        l = []
+        for a in self.actor_names:
+            for u in module.userroles:
+                if a == u.name:
+                    l.append(a)
+                    break
+            else:
+                l.append(a+'?')
+        return u'{0}\\n[{1}]'.format(self.name, u', '.join(l))
 
     @property
     def actor_name(self):

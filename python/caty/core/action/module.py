@@ -116,6 +116,14 @@ class ResourceModule(Module):
 
     def add_resource(self, res):
         from caty.core.script.proxy import EnvelopeProxy as ActionEnvelope
+        for r in self.resources:
+            if r.name == res.name:
+                throw_caty_exception(
+                    u'CARA_COMPILE_ERROR',
+                    u'Duplicated resource name: $name module: $module', 
+                    name=res.name, module=self._name)
+
+
         self._resources.append(res)
         for act in res.actions:
             script = act.instance
@@ -127,6 +135,24 @@ class ResourceModule(Module):
                             act.annotations, 
                             [])
             c.declare(self)
+
+    def add_state(self, st):
+        for r in self.states:
+            if r.name == st.name:
+                throw_caty_exception(
+                    u'CARA_COMPILE_ERROR',
+                    u'Duplicated state name: $name module: $module', 
+                    name=st.name, module=self._name)
+        self._states.append(st)
+
+    def add_userrole(self, ur):
+        for u in self.userroles:
+            if u.name == ur.name:
+                throw_caty_exception(
+                    u'CARA_COMPILE_ERROR',
+                    u'Duplicated userrole name: $name module: $module', 
+                    name=ur.name, module=self._name)
+        self._userroles.append(ur)
 
     def get_resource(self, name):
         for r in self._resources:
@@ -175,7 +201,7 @@ class ResourceModule(Module):
                 if link.type == 'additional-link':
                     e[u'trigger'] = ' '.join(['+', e[u'trigger']])
                 edges.append(e)
-            nodes.append({u'name': s.name, u'label': s.label, u'type': u'state'})
+            nodes.append({u'name': s.name, u'label': s.make_label(self), u'type': u'state'})
         for rc in self._resources:
             for act in rc.entries.values():
                 for red in act.profiles.redirects:
