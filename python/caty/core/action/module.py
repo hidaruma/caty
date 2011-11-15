@@ -245,7 +245,7 @@ class ResourceModule(Module):
                 resources[act.resource_name].append({u'label': act.name, u'name': act.resource_name+'.'+act.name,u'type': u'action'})
         r = []
         for k, v in resources.items():
-            r.append({u'name':k, u'nodes': v, u'edges': [], u'subgraphs': []})
+            r.append({u'name':k, u'nodes': v, u'edges': [], u'subgraphs': [], u'type': u'resource_subgraph'})
         return r
 
     def _find_links_to(self, state_name):
@@ -283,5 +283,31 @@ class ResourceModule(Module):
                 resourceName=rcname
             )
 
+    def make_userrole_graph(self):
+        root = {
+            u'name': self.name,
+        }
+        nodes = []
+        edges = []
+        states = []
+        subgraphs = [{u'name': u'states', u'nodes': states, u'edges': [], u'subgraphs': [], u'type': u'state_subgraph'}]
+        for u in self.userroles:
+            nodes.append({u'name': u.name, u'label': u.name, u'type': u'userrole'})
+        
+        for s in self.states:
+            states.append({u'name': s.name, u'label': s.make_label(self), u'type': u'state'})
+            e = None
+            for n in s.actor_names:
+                for u in self.userroles:
+                    if u.name == n:
+                        e = {u'to': s.name, u'from':u.name , u'type': u'usecase'}
+                        break
+                else:
+                    e = {u'to': s.name, u'from': n, u'type': 'missing-usecase'}
+                    nodes.append({u'name': n, u'label': n, u'type': u'missing-userrole'})
+                edges.append(e)
 
-
+        root['nodes'] = nodes
+        root['edges'] = edges
+        root['subgraphs'] = subgraphs
+        return root

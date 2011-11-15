@@ -17,7 +17,7 @@ command draw {
 
  /** 図示するノード */
  @[default("any")]
- "node" : ("state" | "action" | "any")?,
+ "node" : ("state" | "action" | "userrole" | "any")?,
 
  /** ファイル出力時に.caraの変更がされていない場合は再出力しない */
  @[with("out"), default(false)]

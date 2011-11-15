@@ -46,9 +46,15 @@ class DrawModule(Builtin, DrawingMixin):
                 'fontsize': 20.0,
                 'labelloc': 't',
             },
-            'subgraph': {
+            'resource_subgraph': {
                 'bgcolor': 'darkolivegreen4',
                 'color': 'black',
+                'fontsize': 14.0,
+            },
+            'state_subgraph': {
+                'fillcolor': '#ffff99',
+                'color': 'black',
+                'style': 'rounded,filled',
                 'fontsize': 14.0,
             },
             'edge': {
@@ -64,10 +70,21 @@ class DrawModule(Builtin, DrawingMixin):
                     'fontsize': 14.0,
                     'color': 'blue3',
                 },
+                'usecase': {
+                    'fontsize': 14.0,
+                    'color': 'black',
+                    'arrowhead': 'none',
+                },
                 'missing': {
                     'fontsize': 14.0,
                     'color': '#333333',
                     'style': 'dotted',
+                },
+                'missing-usecase': {
+                    'fontsize': 14.0,
+                    'color': '#333333',
+                    'style': 'dotted',
+                    'arrowhead': 'none',
                 },
             },
             'action': {
@@ -84,6 +101,13 @@ class DrawModule(Builtin, DrawingMixin):
                 'color': u'black',
                 'fillcolor': u'gold'
             },
+            'userrole': {
+                'fontsize': 14.0,
+                'shape': u'octagon',
+                'style': u'filled',
+                'color': u'black',
+                'fillcolor': u'white'
+            },
             'missing-action': {
                 'fontsize': 14.0,
                 'shape': u'ellipse',
@@ -95,6 +119,13 @@ class DrawModule(Builtin, DrawingMixin):
                 'fontsize': 14.0,
                 'shape': u'note',
                 'style': u'filled',
+                'color': u'black',
+                'fillcolor': u'gainsboro'
+            },
+            'missing-userrole': {
+                'fontsize': 14.0,
+                'shape': u'octagon',
+                'style': u'dotted',
                 'color': u'black',
                 'fillcolor': u'gainsboro'
             },
@@ -131,7 +162,10 @@ class DrawModule(Builtin, DrawingMixin):
         app = self.current_app
         rmc = app.resource_module_container
         rm = rmc.get_module(self._module_name)
-        return rm.make_graph()
+        if self._node == 'userrole':
+            return rm.make_userrole_graph()
+        else:
+            return rm.make_graph()
 
     def transform(self, graph_struct, root=True):
         cfg = {
@@ -142,7 +176,7 @@ class DrawModule(Builtin, DrawingMixin):
             cfg['name'] = graph_struct['name']
             cfg.update(self._graph_config['graph'])
         else:
-            cfg.update(self._graph_config['subgraph'])
+            cfg.update(self._graph_config[graph_struct['type']])
             cfg['name'] = 'cluster_' + graph_struct['name']
         RG = gv.AGraph(**cfg)
         if root:
@@ -153,7 +187,10 @@ class DrawModule(Builtin, DrawingMixin):
                 RG.edge_attr.update(fontname=self._font)
 
         else:
-            RG.graph_attr['label'] = graph_struct['name']
+            if self._node != 'userrole':
+                RG.graph_attr['label'] = graph_struct['name']
+            else:
+                RG.graph_attr['label'] = u''
         if self._font:
             RG.graph_attr.update(fontname=self._font)
         for sg in graph_struct['subgraphs']:
