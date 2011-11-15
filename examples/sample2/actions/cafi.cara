@@ -1,0 +1,113 @@
+// -*- coding: utf-8 -*-
+/** cafi (Caty Facility IDL) が想定する状態遷移
+*/
+module cafi in cara;
+
+/** Catyの起動直後の状態 */
+state SYSTEM-BOOT :: void links {
+  +initialize --> StaticFacilityMgr.initialize;
+};
+
+/** Catyの終了直前の状態 */
+state SYSTEM-QUIT :: void;
+
+/**ファシリティマネージャの静的なAPI */
+resource StaticFacilityMgr ("/StaticFacilityMgr/") {
+  action initialize("initialize/POST") 
+  :: @[out]#1 void -> void produces FacilityReady ;
+ 
+  action finalize("finalize/POST") 
+  :: @[out]#1 void -> void produces SYSTEM-QUIT ;
+};
+
+/** ファシリティが利用可能となった状態 */
+state FacilityReady :: void links {
+  +create-and-reading --> InstanceMgr.create-and-reading;
+  +create-and-updating --> InstanceMgr.create-and-updating;
+  +create-and-using --> InstanceMgr.create-and-using;
+  +finalize --> StaticFacilityMgr.finalize;
+};
+
+/** ファシリティインスタンス（リクエスターオブジェクト）マネージャのAPI */
+resource InstanceMgr("/InstanceMgr/") {
+  action create-and-reading("create-and-reading/POST") 
+  :: @[out]#1 void -> void produces reading ;
+
+  action create-and-updating("create-and-updating/POST") 
+  :: @[out]#1 void -> void produces updating ;
+
+  action create-and-using("create-and-using/POST") 
+  :: @[out]#1 void -> void produces using ;
+
+  action dispose("dispose/POST") 
+  :: @[out]#1 void -> void produces FacilityReady ;
+};
+
+/** クライアントがファシリティインスタンスをreadモードで使っている状態 */
+state reading :: void links {
+  +read --> Read.read;
+  +refresh --> Read.refresh;
+  +strict-read --> Read.strict-read;
+  +dispose --> InstanceMgr.dispose;
+};
+
+resource Read("/Read/") {
+  /** 一般的なリーダーを代表している */
+  action read("read/POST")
+  :: @[out]#1 void -> void produces reading ;
+
+  /** 一般的な厳密リーダーを代表している */
+  action strict-read("strict-read/POST")
+  :: @[out]#1 void -> void produces reading ;
+
+  action refresh("refresh/POST")
+  :: @[out]#1 void -> void produces reading ;
+
+};
+ 
+/** クライアントがファシリティインスタンスをupdateモードで使っている状態 */
+state updating :: void links {
+  +strict-update --> Update.strict-update;
+  +begin --> Update.begin;
+  +dispose --> InstanceMgr.dispose;
+};
+
+/** トランザクションスコープに入っている状態 */
+state transact-updating :: void links {
+  +update --> Update.update;
+  +commit --> Update.commit;
+  +cancel --> Update.cancel;
+};
+
+/** アップデートのAPI */
+resource Update("/Update/") {
+  /** 一般的なアップデーターを代表している */
+  action update("update/POST")
+  :: @[out]#1 void -> void produces transact-updating ;
+
+  /** 一般的な厳密アップデーターを代表している */
+  action strict-update("strict-update/POST")
+  :: @[out]#1 void -> void produces updating ;
+
+  action begin("begin/POST")
+  :: @[out]#1 void -> void produces transact-updating ;
+
+  action commit("commit/POST")
+  :: @[out]#1 void -> void produces updating;
+
+  action cancel("cancel/POST")
+  :: @[out]#1 void -> void produces updating;
+
+};
+
+/** クライアントがファシリティインスタンスをuseモードで使っている状態 
+ * read + update なので省略
+ */
+state using :: void links {
+  /*
+   * ...
+   */
+
+  +dispose --> InstanceMgr.dispose;
+};
+

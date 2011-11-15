@@ -1,0 +1,130 @@
+// -*- coding: utf-8 -*-
+
+/** ランチの予約＆注文のシステム
+ */
+module lunch-reserve in cara;
+
+
+/* 
+ * == 型の定義 == 
+ */
+
+/** 
+ * ランチの注文データ
+ * http://d.hatena.ne.jp/m-hiyama/20101213/1292201095  
+ */
+type LunchOrder = {
+  /** 会員識別情報 */
+  @[label("ランチ会員情報")]
+  "ident" : {
+    @[label("お名前")]
+    "name" : string,
+    @[label("会員番号")]
+    "memberNum" : integer
+  },
+  /** 今日の注文 */
+  @[label("本日のご注文")] 
+  "order" : {
+    @[label("メイン")]
+    // (注意) 現状、ユニオン型の選択肢にはアノテーションが付けられない
+    "mainDish" : (
+                 // @[label("日替わり")]
+                 "special"|
+                 // @[label("魚")]
+                 "fish"|
+                 // @[label("肉")]
+                 "meat"
+                 ),
+    @[label("お飲み物")]
+    "drink" : (
+               // @[label("紅茶 (ホット)")]
+               "teaHot"|
+               // @[label("紅茶 (アイス)")]
+               "teaIce"|
+               // @[label("コーヒー (ホット)")]
+               "coffeeHot"|
+               // @[label("コーヒー (アイス)")] 
+               "coffeeIce"
+               ),
+    @[label("デザート")]
+    "dessert" : (
+                // @[label("プリン")]
+                "pudding"|
+                // @[label("苺ショートケーキ")]
+                "strawberryShortcake"|
+                // @[label("ババロア")]
+                "bavarianCream"|
+                // @[label("ガトーショコラ")]
+                "gateauChocolat"
+                )
+  }
+};
+
+
+/* 
+ * == ユーザーロール == 
+ */
+
+userrole 顧客;
+userrole スタッフ;
+userrole 店長; // 店長は特に出番なし
+
+
+/* 
+ * == 画面（クライアント状態） == 
+ */
+
+state 開始 :: void links {
+ + 予約開始 --> 予約ページ.取得;
+ + 登録開始 --> メニュー登録ページ.取得;
+};
+
+state 終了 :: void;
+
+/* === 顧客用 === */
+
+state 予約注文画面 for 顧客 :: defered links {
+ + 予約 --> 予約処理.予約;
+};
+
+state 確認画面 for 顧客 :: LunchOrder links {
+ + 確定     --> 予約処理.確定;
+ + やり直し --> 予約ページ.取得;
+};
+
+/* === スタッフ用 === */
+
+state メニュー登録画面 for スタッフ :: deferred links {
+ + 登録 --> 予約処理.メニュー登録;
+};
+
+
+/* 
+ * == リソースとアクション 
+ */
+
+resource 予約ページ  ("/reserve.html") {
+   action 取得("/GET")
+   :: @[in, out] #0 void -> void produces 予約注文画面 ;
+};
+
+resource メニュー登録ページ ("/register.html") {
+   action 取得("/GET")
+   :: @[in, out] #0 void -> void produces メニュー登録画面 ;
+};
+
+resource 予約処理 ("/process.cgi") {
+  action 予約("reserve/POST")
+  :: @[in]  #in LunchOrder -> _        relays [ng, ok],
+     @[out] #ng _          -> void     redirects 予約ページ.取得,
+     @[out] #ok _          -> LunchOrder produces 確認画面
+  ;
+
+  action 確定 ("commit/POST")
+  :: @[in, out] #0 void -> void produces 終了 ;
+
+  action メニュー登録 ("register/POST")
+  :: @[in, out] #0 void -> deferred produces 終了 ;
+};
+
+// End of module
