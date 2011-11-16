@@ -125,7 +125,6 @@ class DrawModule(Builtin, DrawingMixin):
             'missing-userrole': {
                 'fontsize': 14.0,
                 'shape': u'octagon',
-                'style': u'dotted',
                 'color': u'black',
                 'fillcolor': u'gainsboro'
             },
@@ -218,11 +217,12 @@ class DrawModule(Builtin, DrawingMixin):
                 else:
                     attr['shape'] = 'circle'
             elif (self._node == 'action' and node['type'] != 'action'):
-                attr['label'] = ''
-                attr['width'] = '0.2'
                 if node['type'] == 'external' or node['type'] == 'missing-action':
-                    attr['shape'] = 'circle'
+                    pass
+                    #attr['shape'] = 'circle'
                 else:
+                    attr['label'] = ''
+                    attr['width'] = '0.2'
                     attr['shape'] = 'box'
                     attr['height'] = '0.2'
             else:
