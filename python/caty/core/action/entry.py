@@ -70,7 +70,7 @@ class ResourceActionEntry(object):
                     for state in module.states:
                         if profile.connects_to(state):
                             out_name = profile.output_type.name+'/'+state.name+'/'+'out'
-                            G['nodes'].append({u'name': state.make_label(module), u'type': 'state'})
+                            G['nodes'].append({u'name': state.name, u'label': state.make_label(module), u'type': 'state'})
                             G['edges'].append({u'from': out_name, u'to': state.name, u'type': u'action'})
                             G['nodes'].append({
                                 u'label': profile.output_type.name, 
