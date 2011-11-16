@@ -28,3 +28,8 @@ ExtNameChar ::= #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
 
 * [[>http://www.w3.org/TR/2008/REC-xml-20081126/#NT-Name]]
 * [[>http://d.hatena.ne.jp/m-hiyama/20110104/1294128925]]
+
+
+Windows Pythonでは、[#x10000-#xEFFFF] が使えない。
+
+Unicode U+10000-U+EFFFF はサロゲートペア領域
