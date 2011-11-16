@@ -1,0 +1,55 @@
+// -*- coding: utf-8  -*-
+
+module tips in cara;
+
+userrole 全員;
+userrole 閲覧者;
+userrole 編集者;
+userrole 管理者;
+
+
+state 開始 for 全員 :: any links {
+ + ログイン --> ログイン.取得;
+ + トップ   --> トップ.一覧;
+
+};
+
+resource ログイン ("/login.cgi") {
+  action 取得 ("/GET")
+  :: @[in, out]#0 void -> void produces ログイン
+  ;
+};
+
+state ログイン for [編集者, 管理者] :: void links {
+  + 編集者トップ --> 編集.取得;
+  + 管理者トップ   --> 管理.取得;
+};
+
+
+resource トップ ("/") {
+ action 一覧 ("/GET")
+ :: @[in, out] #0 void -> void produces Tips一覧
+ ;
+};
+
+state Tips一覧 for 閲覧者 :: void links {
+ + ログイン --> ログイン.取得;
+ + 検索 --> 検索.実行;
+ + 詳細 --> Tips.一覧;
+ + カテゴリ --> カテゴリ.取得;
+ + 次       --> Tips.一覧;
+};
+
+state 管理 for 管理者 :: void ;
+
+state 編集 for 編集者 :: void ;
+
+resource 管理 ("/admin/") {
+  action 取得("/GET")
+  :: @[in, out]#0 void -> void produces 管理;
+};
+
+resource 編集 ("/edit/") {
+  action 取得("/GET")
+  :: @[in, out]#0 void -> void produces 編集;
+};
