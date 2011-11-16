@@ -4,7 +4,7 @@ module tips in cara;
 
 userrole 全員;
 userrole 閲覧者;
-userrole 編集者;
+//userrole 編集者;
 userrole 管理者;
 
 
@@ -14,11 +14,13 @@ state 開始 for 全員 :: any links {
 
 };
 
+/*
 resource ログイン ("/login.cgi") {
   action 取得 ("/GET")
   :: @[in, out]#0 void -> void produces ログイン
   ;
 };
+*/
 
 state ログイン for [編集者, 管理者] :: void links {
   + 編集者トップ --> 編集.取得;
@@ -40,7 +42,7 @@ state Tips一覧 for 閲覧者 :: void links {
  + 次       --> Tips.一覧;
 };
 
-state 管理 for 管理者 :: void ;
+// state 管理 for 管理者 :: void ;
 
 state 編集 for 編集者 :: void ;
 
