@@ -295,7 +295,7 @@ class ResourceModule(Module):
             nodes.append({u'name': u.name, u'label': u.name, u'type': u'userrole'})
         
         for s in self.states:
-            states.append({u'name': s.name, u'label': s.make_label(self), u'type': u'state'})
+            states.append({u'name': s.name, u'label': s.name, u'type': u'state'})
             e = None
             for n in s.actor_names:
                 for u in self.userroles:
