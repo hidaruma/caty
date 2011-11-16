@@ -1,30 +1,26 @@
 // -*- coding: utf-8 -*-
 /* 
  * http://www.atmarkit.co.jp/im/carc/serial/renew_uml08/renew_uml08.html
- * の図1
+ * の図1をベースに修正したもの
  */
 
 module shop-system in cara;
 
 
-
 userrole 管理者;
-userrole Webユーザー;
 userrole 店員;
+userrole オンライン顧客;
 userrole オフライン顧客;
 
 
-
-state 商品購入     for [Webユーザー, 店員] :: deferred links {
+state 商品購入     for オンライン顧客  :: deferred links {
   + 購入 --> 購入処理.実行;
   + キャンセル --> ホーム.取得;
 };
 
-state 購入商品確認 for Webユーザー :: deferred links {
-
+state 購入商品確認 for オンライン顧客  :: deferred links {
+  // まだ定義してない
 };
 
-state 商品登録     for 管理者      :: deferred;
-state 売り上げ集計 for 管理者      :: deferred;
-
-
+state 商品登録     for [店員, 管理者]  :: deferred;
+state 売り上げ集計 for 管理者          :: deferred;
