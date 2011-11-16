@@ -68,7 +68,7 @@ type OutputPage = @page {
 
 }>>
 
-以下は、出力ページ（のコンテキス）内で使われるデータ。
+以下は、出力ページ（のコンテキス）内で使われるデータ。このページを生成したソースアクションの関する情報。
 
 
 <<{
@@ -93,6 +93,11 @@ type ActionInfo = {
   "documentation" : string?,
 };
 
+}>>
+
+ターゲットアクションを記述するときは次のデータを使う。
+
+<<{
 /** リンクターゲットに関するスキーマ情報 
  */
 type TargetInfo = ActionInfo ++ {
@@ -141,19 +146,40 @@ type State = @state {
 
 }>>
 
-== トリガーの一般的な定義
+== ウィジェット
+
+**ウィジェット**とは、
+HTMLページをGUIウィンドウとみなしてのGUI部品のこと。
+ウィジェットは入れ子にできるのでツリー構造になり、ツリーの
+末端が**UIコントロール**となる。
+
+特に、**トリガーウィジェット**は、ターゲットアクションを発火させるためのウィジェットである。
+トリガーウィジェットには、ターゲットアクションを識別する情報と、
+必要に応じて、入力ウィジェットが含まれる。
+
+
+== トリガーウィジェットの一般的な定義
 
 <<{
-type Href = (uri | HrefStruct);
+// type Href = (uri | HrefStruct);
 
-type HrefStruct = @href {
+type Href = @href {
  "hostUrl"  : hostUrl,
  "appPath"  : string,
  "pathInfo" : absPath,
- "query" : {*:string}(propNameFormat="simple-name"),
+ @[with("params")]
+ "query" : string?,
+
+ @[with("query")]
+ "params" : {*:string}(propNameFormat="simple-name"),
 };
 
 type InputWidget = (Control | ControlSet);
+
+type classValue = deferred (string | [string*]);
+
+// 知名度じゃなくて、名前に使える値の型
+type nameValue = deferred string;
 
 }>>
 
@@ -163,8 +189,8 @@ type InputWidget = (Control | ControlSet);
 type AbstractWidgetObj = {
  // 個々のトリガーを識別するプロパティ
  "id" : string?,
- "name" : string?,
- "class" : (string | [string*]) ?,
+ "name" : nameValue?,
+ "class" :  classValue?,
 
  // リンクを記述するプロパティ
  /** 短い説明、
@@ -182,7 +208,10 @@ type AbstractWidgetObj = {
 
  // ハイパーリンクの記述
  "href" : Href, // 必須
+
+ /** HTTPメソッド */
  "method" : httpMethod?,
+ /** リクエスト動詞 */
  @[default("")]
  "verb" : string?,
  /** リクエストのクエリーの型 */
@@ -318,30 +347,10 @@ type ButtonWidget = @button (AbstractWidgetObj & {
 
 入力ウィジェット（input widget）は、UIコントロールから構成される。
 
-<<ignore
-type ControlType = (
- /** テキストフィールド */
-   "text" | 
- /** パスワードフィールド */
-   "password"  |
- /** ラジオボタン */
-   "radio-group" |
- /** チェックボックス */
-   "checkbox-group" |
- /** テキストエリア */
-   "textarea"  |
- /** 単一の選択メニュー */
-   "single-select" |
- /** 複数の選択メニュー */
-   "multiple-select" | 
- /** ファイルアップロード */
-   "file" |
-);
-
->>
-
 <<{
 type Control = (
+ /** 固定値 */
+   FixedControl |
  /** テキストフィールド */
    TextControl | 
  /** パスワードフィールド */
@@ -349,7 +358,7 @@ type Control = (
  /** ラジオボタン */
    RadioGroupControl |
  /** チェックボックス */
-   Checkbox-GroupControl |
+   CheckboxGroupControl |
  /** テキストエリア */
    TextareaControl  |
  /** 単一の選択メニュー */
@@ -365,9 +374,21 @@ type Control = (
 コントロールの一般的な定義。
 
 <<{
-type Option = @option {
- "value" : any,
+/** UIコントロールに入力可能な値 */
+type webScalar = deferred scalar;
+
+type Option = (SingleOption | MultipleOption);
+
+type SingleOption = @singleOption {
+ "value" : webScalar,
  "label" : string?,
+ "help" : string?,
+};
+
+type MultipleOption = @multipleOption {
+ "value" : webScalar,
+ "label" : string?,
+ "help" : string?,
  @[default(false)]
  "selected" : boolean?,
 };
@@ -377,16 +398,24 @@ type Option = @option {
 
 <<{
 type AbstractControlObj = {
+ "id" : string?,
+ "class" : classValue?,
+
  "label" : string?,
  "help" : string?,
+ /** 固定値 */
+ @[without("options"), without("default")]
+ "value" : webScalar?,
  /** 値の選択肢 */
+ @[without("value")]
  "options" : [Option*]?,
  /** デフォルト値 */
- "default" : any?,
+ @[without("value")]
+ "default" : webScalar?,
  /** データ型 */
- "dataType" : typeName,
+ "dataType" : typeName?,
  /** XJSONパス */
- "path" : string,
+ "name" : nameValue,
 };
 
 }>>
@@ -396,14 +425,32 @@ type AbstractControlObj = {
 <<{
 type ControlSet = {
  "id" : string?,
- "class" : string?,
+ "class" : classValue?,
+
  "label" :  string?,
  "help" : string?,
  /** データ型 */
- "dataType" : typeName,
+ "dataType" : typeName?,
+ /** XJSONパス */
+ "name" : nameValue,
+ /** コントールの配列 */
  "controls" : [(ControlSet|Control)*]
 };
 
+}>>
+
+=== 固定値
+
+<<{
+/** ユーザー入力ではない固定値を保持する
+ */
+type FixedControl = @fixed (AbstractControlObj & {
+  "value" : webScalar, // 必須
+  "default" : undefined,
+  "options" : undefined,
+
+  * : any?
+});
 }>>
 
 === テキストフィールド
@@ -413,6 +460,7 @@ type TextControl = @text (AbstractControlObj & {
   @[default("string")]
   "dataType" : "string"?,
 
+  "value" : undefined,
   "options" : undefined,
  
 
@@ -428,6 +476,7 @@ type PasswordControl = @password (AbstractControlObj & {
   @[default("string")]
   "dataType" : "string"?,
 
+  "value" : undefined,
   "options" : undefined,
 
   * : any?   
@@ -437,8 +486,9 @@ type PasswordControl = @password (AbstractControlObj & {
 ===  ラジオボタン 
 
 <<{
-type RadioGroupControl = @radio-grpou (AbstractControlObj & {
- "options" : [Option*],
+type RadioGroupControl = @radioGroup (AbstractControlObj & {
+ "value" : undefined,
+ "options" : [SingleOption*],
 
   * : any?   
 });
@@ -447,8 +497,10 @@ type RadioGroupControl = @radio-grpou (AbstractControlObj & {
 === チェックボックス
 
 <<{
-type Checkbox-GroupControl = @checkbox-group (AbstractControlObj & {
- "options" : [Option*],
+type CheckboxGroupControl = @checkboxGroup (AbstractControlObj & {
+  "default" : undefined, // selectedを使う
+  "value" : undefined,
+  "options" : [MultipleOption*],
 
   * : any?   
 });
@@ -461,6 +513,7 @@ type TextareaControl = @textarea (AbstractControlObj & {
   @[default("string")]
   "dataType" : "string"?,
 
+  "value" : undefined,
   "options" : undefined,
 
   * : any?   
@@ -470,8 +523,9 @@ type TextareaControl = @textarea (AbstractControlObj & {
 === 単一の選択メニュー
 
 <<{
-type SingleSelectControl = @sigle-select (AbstractControlObj & {
- "options" : [Option*],
+type SingleSelectControl = @singleSelect (AbstractControlObj & {
+  "value" : undefined,
+ "options" : [SingleOption*],
   * : any?   
 });
 }>>
@@ -479,16 +533,23 @@ type SingleSelectControl = @sigle-select (AbstractControlObj & {
 === 複数の選択メニュー 
 
 <<{
-type MultipleSelectControl  = @multiple-select (AbstractControlObj & {
- "options" : [Option*],
+type MultipleSelectControl  = @multipleSelect (AbstractControlObj & {
+  "default" : undefined, // selectedを使う
+  "value" : undefined,
+
+ "options" : [MultipleOption*],
   * : any?   
 });
 }>>
 
 === ファイルアップロード 
 
+**これ、エラーするはずが、バグだ。**
+
 <<{
 type FileUploadControl = @ (AbstractControlObj & {
+
+  "value" : undefined,
   "options" : undefined,
 
   * : any?   
@@ -553,5 +614,306 @@ command doPOST [typeName InnerOutputType, stateName State]
 
 // End of Module
 
+
+>>
+
+== インスタントモックアップのコマンド
+
+=== 当面の制限
+
+当面は、次の制限を課す。
+
+# クライアントは、「人間＋ブラウザ」と仮定する。
+# したがって、HTTPメソッドはGET, POSTのみ。HTTPメソッドトンネリングも使わない。
+# クライアント側JavaScriptを使ってもよいが、それに依存はしない。JavaScriptなくても大丈夫に。
+# ファイルアップロードはサポートしない（enctype="multipart/form-data" の処理が必要だから）。 
+# 使用できるデータ型は伝統的Webデータ型（すぐ後を参照）に限定する。
+
+=== 伝統的Webデータ型（Traditional Web Datatypes）
+
+URIクエリー文字列と（HTML4相当の）HTMLフォームによって入力と送信ができるデータからなるデータ型を、
+伝統的Webデータ型（Traditional Web Datatypes）と呼ぶ。
+
+伝統的Webデータ型は、twdtモジュールでカインドとして定義されている。
+
+* twdt:SimpleType カインド
+* twdt:MultipleType カインド
+* twdt:FlatRecordType カインド
+* twdt:RecordType カインド
+
+ただし、現状ではカインドの機能が出来てないので、非形式的な定義のみ。
+
+=== state-fixedアノテーション
+
+アクションの入力（内部入力の意味）となるデータ型では、それぞれの項目（プロパティ）が、
+ユーザー（ユースケース図のアクター）起原か、そうでないかの区別がある。
+
+* user-inputな項目 -- クライアント側ユーザー（アクター）の入力行為で生成される。
+* state-fixedな項目 -- それ以外。
+
+user-inputな項目が多いので、state-fixedな項目にアノテーションで目印を付けてもらう。
+（バランスのためにuser-inputアノテーションも入れる。）
+トリガーウィジェットを生成するコマンドは、state-fixedアノテーションを認識する必要がある。
+
+
+stete-fixedアノテーションは、オブジェクト型定義のプロパティ部分に付けられるが、
+type宣言文によるデータ定義のなかだけでなくて、アクション宣言のオプション定義でも使われる。
+
+state-fixedアノテーションをアクションのオプション（クエリー）で使う**例**：
+
+{{{
+/** Web API の呼び出しポイント */
+resource Api("/api/") {
+
+ action process-foo-api-call("foo/GET") 
+ {
+   /** 事前に取得したAPIキーが必須 */
+   @[state-fixed]
+   "apiKey" : string,
+
+   /** 引数データ */
+   @[user-input]
+   "arg" : string?
+ }
+ :: void -> ApiResult ;
+ 
+ // ...
+
+};
+}}}
+
+呼び出し側UI（HTML）**例**：
+
+{{{
+<form method="GET" action="/api/">
+ <input type="hidden" name="_verb" value="foo" />
+ <input type="hidden" name="apiKey" value="API_KEY1234" />
+ <p>引数：<input type="text" name="arg" /></p>
+ <input type="submit" value="送信" />
+</form>
+}}}
+
+=== コマンドの種類
+
+インスタントモックアップ機能の中心は、
+ウィジェット（の元データ）を生成するコマンド群である。
+
+# 指定された**ターゲットアクションに対して**、
+  トリガーウィジェット（のデータ）を生成するコマンド。
+# 指定された**状態に対して**、
+  リンク先ターゲットアクションに対するトリガーウィジェット配列を生成するコマンド。
+# 指定された**ソースアクションに対して**、
+ （状態を経由しての）起動先ターゲットアクションに対するトリガーウィジェット配列を生成するコマンド。
+
+== trigger-widget コマンド
+
+
+「//ターゲットアクションに対してトリガーウィジェットを生成するコマンド//」について述べる。
+
+<<{
+/** アクションを識別する文字列 */
+type actionName = string(remark="アクションを識別する文字列");
+
+/** アクションに対するトリガーウィジェットを生成する
+ * 引数で指定されたターゲットアクションに対して、
+ * そのアクションを発火させるためのトリガーウィジェットを生成する。
+ */
+command trigger-widget
+ [actionName target-act]
+ :: void -> TriggerWidget
+   throws ActionNotFound
+   // このコマンドはスキーマ情報をreadする
+ ;
+
+}>>
+
+次の図は、いろいろ書き込み過ぎだが、trigger-widgetコマンドの概念を示している。
+
+{{http://www.chimaira.org/img2/trigger-widget.gif|trigger-widget}}
+
+* state宣言で定義される状態に対するブラウザのビューエリア＝**状態ビュー**がある。
+* その状態ビューの一部に**トリガーウィジェット**が埋め込まれている。
+* トリガーウィジェットに**ユーザー入力**がなされ、**リクエスト**が発行される。
+* そのリクエストにより**ターゲットアクション**が発火する。（モノが"trigger"なので、動詞は"fire"を使う。）
+
+（参考：[[>http://d.hatena.ne.jp/m-hiyama/20100729/1280376048|Webサービスを設計するための単純明快な方法]]
+ -- 発想のエッセンスはだいたいこの記事に書いてある。）
+
+以上の概念を前提にして：
+
+* ターゲットアクションは、関連するメタ情報と共にCatyスキーマシステム（.casm, .caraの集まり）のなかで定義されている。
+* trigger-widgetコマンドは、スキーマシステムからターゲットアクションに関するメタ情報を引き出す。
+* trigger-widgetコマンドは、メタ情報をもとにしてターゲットアクションに対するトリガーウィジェット
+（のためのコンテキストデータ）を生成する。
+* トリガーウィジェットの最終的な見た目（プレゼンテーション）は、//テンプレートとスタイルシートで決定される//。
+* trigger-widgetが生成したトリガーウィジェット（画面の一部）により、
+  ユーザー（人間）は、ターゲットアクションを起動する（発火させる）ことができる。
+
+
+次は画面内の状態ビューの模式図である（https://bitbucket.org/project_caty/caty_wiki/wiki/Meetings/2011-10-05 も参照）。
+
+{{http://www.chimaira.org/img2/state-view.gif|state-view}}
+
+=== トリガーウィジェット種別の選択
+
+ターゲットアクションにより、どの種類のトリガーウィジェットを使うかを決める。
+以下の表が基準となる。
+
+表の見方：
+
+# fixed-query欄はクエリーパラメータ（アクションのオプションと同じ）に、state-fixedなパラメータがあるかどうか。リクエスト動詞（_verbパラメータ）はfixed-queryの1つに勘定する。
+# input-query欄はクエリーパラメータに、user-inputなパラメータがあるかどうか。
+# エンティティボディ欄はリクエストのエンティティボディがあるかどうか。
+# NGはエラー。
+
+
+|= メソッド|= fixed-query |= input-query |= エンティティボディ |= ウィジェット種 |
+| GET      | ×         | ×          |  -                 | Anchor      |
+| GET      | ○         | ×          |  -                 | Anchor      |
+| GET      | ×         | ○          |  -                 | Query       |
+| GET      | ○         | ○          |  -                 | Query       |
+| POST     | ×         | ×          |  ○                | Form        |
+| POST     | ○         | ×          |  ○                | Form        |
+| POST     | ×         | ○          |  ○                | NG          |
+| POST     | ○         | ○          |  ○                | NG          |
+
+エンティティボディとuser-inputなクエリーパラメータを同時には使用できない。
+フォームで入力してPOSTで送信するときに、user-inputなクエリーパラメータを併用する必然性は**まったくない**ので、
+この制限は問題にならない。
+
+
+=== ターゲットの説明の作り方
+
+{{{
+  /** 短い説明、
+  * Atom仕様ではリンクのtitleが規定されている。
+  */
+ "title" : string?,
+ /** ヘルプ文字列 */
+ "help" : string?,
+}}}
+
+==== title
+
+titleは、ターゲットアクションのフルネーム（以下に定義）を使う。（長すぎるか？）
+
+{{{
+
+アクションのフルネーム ::= アプリケーション名 ':' モジュール名 ':' リソース名 '.' アクション名
+
+/* モジュール名は、パッケージパスで修飾されてもよい */
+
+}}}
+
+==== help
+
+helpには、ターゲットアクションのdocコメントの内容テキストを使う。
+内容テキストはWiki記法で書かれているが、Wiki変換処理はしないでそのまま。
+
+=== ターゲットのインボーカーの作り方
+
+{{{
+ "href" : Href, // 必須
+ "method" : httpMethod?,
+ @[default("")]
+ "verb" : string?,
+ /** リクエストのクエリーの型 */
+ "queryType" : typeExpr?,
+ /** リクエストのエンティティボディの型 */
+ "bodyType" : typeExpr?,
+}}}
+
+methodとverbは、ターゲットアクションから取れる。
+queryTypeとbodyTypeもアクション宣言から取れるが、ウィジェットデータには出力しない。
+
+ターゲットアクションのURLは、リソースのURLパターンのワイルドカードを埋めて生成する。
+ここは乱数生成を使う。state-fixedなクエリーパラメータも生成しておく。（要検討）
+
+=== 入力ウィジェットの作り方
+
+QueryウィジェットとFormウィジェットは、サブウィジェットとして入力ウィジェットを持つ。
+入力ウィジェットの作り方は複雑なので、別なコマンド instant:input-widget を下請けに使う。
+
+instant:input-widget によって出力された入力ウィジェット（のデータ）を入れ子にする。
+
+=== 参考
+
+* [[>http://d.hatena.ne.jp/m-hiyama/20101213/1292201095|2010年末に再び考える、Catyスキーマとユーザーインターフェース(20101213)]]
+* [[>http://d.hatena.ne.jp/m-hiyama/20100408/1270703293|HTMLフォームで使うデータ型のJSONスキーマ(20100408)]]
+* [[>http://d.hatena.ne.jp/m-hiyama/20090615/1245027091|JSONスキーマとユーザーインターフェース(20090615)]]
+
+=== 下請けコマンド
+
+* _anchor-widget コマンド
+* _query-widget コマンド
+* _form-widget コマンド
+* _query-input コマンド
+* _form-input コマンド
+
+== _anchor-widget コマンド
+
+* method
+* href -- アクションのリソースをもとに生成
+* hrefParams -- アクション宣言のオプション（すべてstate-fixed）。
+* hrefQuery -- hrefParamsとverbから作成。
+* verb -- アクション宣言から取得。hrefQueryにもコピー。
+* input -- 常にundefined（存在しない）
+
+== _query-widget コマンド
+
+* method
+* href
+* hrefParams -- 常にundefined（存在しない）。verbも含めて、アクションのオプションは全てinputにより発生させる。
+* hrefQuery -- 常にundefined（存在しない）。
+* verb  -- アクション宣言から取得。
+* input -- _query-inputコマンドで生成。生成時に、verbとアクションのオプション仕様も使用する。
+
+== _form-widget コマンド
+
+* method
+* href
+* hrefParams -- アクション宣言のオプション（すべてstate-fixed）。
+* hrefQuery -- hrefParamsとverbから作る。
+* verb
+* input -- _form-inputコマンドで生成。生成時に、アクションの入力仕様のみを使う。
+
+
+== _query-input コマンド
+
+verbとアクションのオプション仕様も使用する。
+
+typeExpr
+
+== _form-input コマンド
+
+アクションの入力仕様のみを使う。
+
+typeExpr
+
+
+
+
+
+<<ignore
+
+hiddenかreadonlyか？
+
+<input type="text" readonly="readonly" name="info" value="読みとり専用です" />
+
+
+
+コマンドの所属モジュールとコマンド名で悩むのだが：
+
+genモジュールも考えたが、インスタントモックアップの一機能ということで、instantモジュールにする。
+コマンド名に、get- や gen- を付けると長くなるので、
+副作用なしコマンドではそのテの動詞は省略して（形容詞付きかもの）名詞を使う。
+
+それで：
+
+* instant:trigger-widget ターゲットアクション名
+
+例： instant:trigger-widget user-mgr:DoRegister.do
+
+けっこう長いコマンドラインになって、キーボードからはちと面倒だけど。
 
 >>
