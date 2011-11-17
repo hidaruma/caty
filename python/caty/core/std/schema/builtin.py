@@ -615,7 +615,7 @@ command version :: void -> string
 command lsdir {"long":boolean?, "kind":string?} [string, string?] :: 
     void -> [DirectoryEntry*]
     reads pub
-    refers python:caty.core.std.command.builtin.LsDir;
+    refers python:caty.core.std.command.file.LsDir;
 
 /**
  * 入力をそのまま出力にコピーする。

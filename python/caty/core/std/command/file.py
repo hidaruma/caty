@@ -95,4 +95,49 @@ class MakeDir(FileUtilMixin, Builtin):
     def execute(self):
         self.opendir().create()
 
+def namecmp(a, b):
+    u"""FileObjectのソート用の比較関数。
+    パス名を比較に用いる。
+    """
+    return cmp(a.path, b.path)
 
+def fo_to_json(fo, long_format):
+    if not long_format:
+        return {u'name': fo.basename, u'isDir': fo.is_dir}
+    else:
+        return {
+            u'name': fo.basename, 
+            u'abspath': fo.path,
+            u'isDir': fo.is_dir,
+            u'lastModified': unicode(fo.last_modified) if not fo.is_dir else u''
+            }
+
+
+
+def has_ext(fo, ext):
+    return fo.path.endswith(ext)
+
+def kind_of(ent, kind):
+    if kind == "file":
+        return not ent.is_dir
+    elif kind == "dir":
+        return ent.is_dir
+    else:
+        return True
+class LsDir(FileUtilMixin, Builtin):
+    
+    def setup(self, opts, path, ext=''):
+        self.path = path
+        self.ext = ext
+        self.long_format = opts.long
+        kind = opts.kind
+        self.kind = "file" if kind == "file" else ("dir" if kind == "dir"  else "any")
+
+    def execute(self):
+        from caty.util import bind2nd
+        dirobj = self.opendir()
+        files = list(sorted([ent for ent in dirobj.read() 
+                             if has_ext(ent, self.ext) and kind_of(ent, self.kind)],
+                            cmp=namecmp))
+        r = map(bind2nd(fo_to_json, self.long_format), files)
+        return r

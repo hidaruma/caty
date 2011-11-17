@@ -2,6 +2,8 @@
 
 name = 'file'
 schema = u"""
+type DirectoryEntry = {"name":string, "isDir":boolean, *:any};
+
 /**
  * 引数で指定したファイル名で空のファイルを作成する。
  */
@@ -65,4 +67,18 @@ command realpath [string] :: void -> string
 command mkdir [string] :: void -> void
     updates [pub, include, data, behaviors, scripts]
     refers python:caty.core.std.command.file.MakeDir;
+
+/**
+ * ディレクトリ一覧の表示。
+ *
+ * 第一引数で指定されたディレクトリを読み込み、配下のファイルとディレクトリ一覧を返す。
+ * 第二引数は拡張子の指定であり、例えば .html が指定された場合 .html 拡張子のファイル一覧だけが返される。
+ * 通常はファイル名とファイルかディレクトリの種別のみが返されるが、
+ * --long オプションが指定された場合は最終更新時刻なども返される。
+ */
+command lsdir {"long":boolean?, "kind":string?} [string, string?] :: 
+    void -> [DirectoryEntry*]
+    reads [pub, data, scripts, include, sysfiles]
+    refers python:caty.core.std.command.file.LsDir;
+
 """
