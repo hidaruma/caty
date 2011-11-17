@@ -41,3 +41,42 @@ resource Wiki("*.wiki|*.casm.lit|*.cara.lit") {
     } | print /show-wiki.html
   };
 };
+
+
+/** SysSpecs 
+ */
+
+resource SysSpecsLit ("/SysSpecs/*.casm.lit") {
+
+  /** LiterateファイルへのGETリクエスト */
+  action get("/GET#exists-parent")
+  ::
+  {
+    %0 | path:base > base;
+    ["schemata@SysSpecs:/", %base] | text:concat > lit-file;
+    {
+      "content": file:read %lit-file | text:creole, 
+      "title"  : %0 | path:trunk 
+    } | print /show-wiki.html
+  };
+
+};
+
+/** global
+ */
+
+resource GlobalLit ("/global/*.casm.lit") {
+
+  /** LiterateファイルへのGETリクエスト */
+  action get("/GET#exists-parent")
+  ::
+  {
+    %0 | path:base > base;
+    ["schemata@global:/", %base] | text:concat > lit-file;
+    {
+      "content": file:read %lit-file | text:creole, 
+      "title"  : %0 | path:trunk 
+    } | print /show-wiki.html
+  };
+
+};
