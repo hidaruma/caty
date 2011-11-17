@@ -209,12 +209,12 @@ class DrawModule(Builtin, DrawingMixin):
             attr = {}
             attr.update(self._graph_config[node['type']])
             if (self._node == 'state' and node['type'] != 'state'):
-                attr['label'] = ''
-                attr['width'] = '0.2'
                 if node['type'] == 'missing-state':
-                    attr['shape'] = 'box'
-                    attr['height'] = '0.2'
+                    attr['shape'] = 'note'
+                    #attr['height'] = '0.2'
                 else:
+                    attr['label'] = ''
+                    attr['width'] = '0.2'
                     attr['shape'] = 'circle'
             elif (self._node == 'action' and node['type'] != 'action'):
                 if node['type'] == 'external' or node['type'] == 'missing-action':
