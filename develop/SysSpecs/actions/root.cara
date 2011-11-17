@@ -2,7 +2,7 @@ module root in cara;
 
 resource Root("/") {
     action get("/GET") :: {
-        lsdir schemata@this:/ .lit | each {
+        file:list schemata@this:/ .lit | each {
             [pv name | text:split "." | item 0, pv name]
         } > schemata;
         {

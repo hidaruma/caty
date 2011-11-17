@@ -76,7 +76,7 @@ command mkdir [string] :: void -> void
  * 通常はファイル名とファイルかディレクトリの種別のみが返されるが、
  * --long オプションが指定された場合は最終更新時刻なども返される。
  */
-command lsdir {"long":boolean?, "kind":string?} [string, string?] :: 
+command list {"long":boolean?, "kind":string?} [string, string?] :: 
     void -> [DirectoryEntry*]
     reads [pub, data, scripts, include, sysfiles]
     refers python:caty.core.std.command.file.LsDir;
