@@ -10,6 +10,7 @@ resource Top("/index.htm") {
 };
 
 /** 開始状態 */
+@[abstract]
 state start :: void links {
   + --> Login.login;
 }; 

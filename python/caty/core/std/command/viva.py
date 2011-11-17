@@ -101,6 +101,13 @@ class DrawModule(Builtin, DrawingMixin):
                 'color': u'black',
                 'fillcolor': u'gold'
             },
+            'abstract-state': {
+                'fontsize': 14.0,
+                'shape': u'note',
+                'style': u'filled',
+                'color': u'black',
+                'fillcolor': u'#ffe7a0'
+            },
             'userrole': {
                 'fontsize': 14.0,
                 'shape': u'octagon',
@@ -325,6 +332,13 @@ class DrawAction(Builtin, DrawingMixin):
                 'style': u'filled',
                 'color': u'black',
                 'fillcolor': u'gold'
+            },
+            'state': {
+                'fontsize': 14.0,
+                'shape': u'note',
+                'style': u'filled',
+                'color': u'black',
+                'fillcolor': u'#ffe7a0'
             },
             'action': {
                 'fontsize': 14.0,

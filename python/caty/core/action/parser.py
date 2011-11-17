@@ -46,7 +46,7 @@ class ResourceActionDescriptorParser(Parser):
     def state(self, seq):
         ds = seq.parse(option(docstring, u''))
         ann = seq.parse(option(annotation, Annotations([])))
-        return StateBlock()(seq)
+        return StateBlock(ds, ann)(seq)
 
     def userrole(self, seq):
         ds = seq.parse(option(docstring, u''))
@@ -283,6 +283,10 @@ class ActionBlock(Parser):
         return proxy
 
 class StateBlock(Parser):
+    def __init__(self, docstr=u'undocumented', annotations=Annotations([])):
+        self.annotations = annotations
+        self.docstr = docstr
+
     def __call__(self, seq):
         seq.parse(keyword('state'))
         state_name = seq.parse(name)
