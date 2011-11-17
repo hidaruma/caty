@@ -1,0 +1,14 @@
+module litfile in cara;
+
+resource CasmLit("/*.casm.lit") {
+    action get("/GET#dont-care") :: {
+        %1 | text:trim "/" | text:split "." | item 0 > title;
+        ["schemata@this:", %1] | text:concat > path;
+        file:read %path | text:creole > body;
+        {
+            "title": %title,
+            "body": %body,
+        } | print include@this:/show.html
+    };
+};
+
