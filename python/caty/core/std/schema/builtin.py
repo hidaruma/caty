@@ -978,7 +978,7 @@ command ht {
 };
 
 command hr {
-} [string? pattern] :: void -> (string | HelpInfo) {
+} [string? pattern] :: void -> void {
   help --resource %1 | cout
 };
 
