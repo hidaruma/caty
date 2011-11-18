@@ -215,7 +215,7 @@ class DrawModule(Builtin, DrawingMixin):
             N = RG.get_node(name)
             attr = {}
             attr.update(self._graph_config[node['type']])
-            if (self._node == 'state' and node['type'] != 'state'):
+            if (self._node == 'state' and node['type'] not in ('state', 'abstract-state')):
                 if node['type'] == 'missing-state':
                     attr['shape'] = 'note'
                     #attr['height'] = '0.2'
