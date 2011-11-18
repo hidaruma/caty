@@ -7,7 +7,7 @@ userrole 閲覧者;
 //userrole 編集者;
 userrole 管理者;
 
-
+@[abstract]
 state 開始 for 全員 :: any links {
  + ログイン --> ログイン.取得;
  + トップ   --> トップ.一覧;
@@ -34,6 +34,7 @@ resource トップ ("/") {
  ;
 };
 
+
 state Tips一覧 for 閲覧者 :: void links {
  + ログイン --> ログイン.取得;
  + 検索 --> 検索.実行;
@@ -41,6 +42,7 @@ state Tips一覧 for 閲覧者 :: void links {
  + カテゴリ --> カテゴリ.取得;
  + 次       --> Tips.一覧;
 };
+
 
 // state 管理 for 管理者 :: void ;
 

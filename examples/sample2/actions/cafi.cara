@@ -3,13 +3,17 @@
 */
 module cafi in cara;
 
+userrole system;
+userrole caty-core;
+userrole requester;
+
 /** Catyの起動直後の状態 */
-state SYSTEM-BOOT :: void links {
+state SYSTEM-BOOT for system :: void links {
   +initialize --> StaticFacilityMgr.initialize;
 };
 
 /** Catyの終了直前の状態 */
-state SYSTEM-QUIT :: void;
+state SYSTEM-QUIT for system :: void;
 
 /**ファシリティマネージャの静的なAPI */
 resource StaticFacilityMgr ("/StaticFacilityMgr/") {
@@ -21,7 +25,7 @@ resource StaticFacilityMgr ("/StaticFacilityMgr/") {
 };
 
 /** ファシリティが利用可能となった状態 */
-state FacilityReady :: void links {
+state FacilityReady for caty-core :: void links {
   +create-and-reading --> InstanceMgr.create-and-reading;
   +create-and-updating --> InstanceMgr.create-and-updating;
   +create-and-using --> InstanceMgr.create-and-using;
@@ -44,7 +48,7 @@ resource InstanceMgr("/InstanceMgr/") {
 };
 
 /** クライアントがファシリティインスタンスをreadモードで使っている状態 */
-state reading :: void links {
+state reading for requester :: void links {
   +read --> Read.read;
   +refresh --> Read.refresh;
   +strict-read --> Read.strict-read;
@@ -66,14 +70,14 @@ resource Read("/Read/") {
 };
  
 /** クライアントがファシリティインスタンスをupdateモードで使っている状態 */
-state updating :: void links {
+state updating for requester :: void links {
   +strict-update --> Update.strict-update;
   +begin --> Update.begin;
   +dispose --> InstanceMgr.dispose;
 };
 
 /** トランザクションスコープに入っている状態 */
-state transact-updating :: void links {
+state transact-updating for requester :: void links {
   +update --> Update.update;
   +commit --> Update.commit;
   +cancel --> Update.cancel;
@@ -103,7 +107,7 @@ resource Update("/Update/") {
 /** クライアントがファシリティインスタンスをuseモードで使っている状態 
  * read + update なので省略
  */
-state using :: void links {
+state using for requester :: void links {
   /*
    * ...
    */
