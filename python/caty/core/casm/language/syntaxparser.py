@@ -37,7 +37,7 @@ def syntax(seq):
     return ASTRoot(n, v, d, a, doc)
 
 def bnf_def(seq):
-    seq.parse(many(['??', '(:', ':)', name, integer, string, sq_string, '|', '@&', '?', '*', '{', '}', '(', ')', ':', '<', '>', ',', '@']))
+    seq.parse(many(['??', '(:', ':)', name_token, integer, string, sq_string, '|', '@&', '?', '*', '{', '}', '(', ')', ':', '<', '>', ',', '@']))
 
 @try_
 def sq_string(seq):
