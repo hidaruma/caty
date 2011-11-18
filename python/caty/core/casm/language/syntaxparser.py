@@ -56,7 +56,7 @@ def sq_string(seq):
                 st.append(s)
                 s = seq.parse(Regex(r"'[^']*"))
         st.append(seq.parse("'"))
-        return stdjson.loads('"%s"' % ''.join(st[1:-1]))
+        return st[1:-1]
     except EndOfBuffer, e:
         raise ParseFailed(seq, string)
     finally:
