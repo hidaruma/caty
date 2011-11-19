@@ -360,7 +360,6 @@ class DrawAction(Builtin, DrawingMixin):
                 self._strip_xml_decl = True
                 self._format = u'svg'
         self._if_modified = opts['if-modified']
-        self.
 
     def execute(self):
         if self._out_file and self._if_modified:
@@ -480,11 +479,13 @@ class Scenarios(DrawModule, DrawAction):
             'edges': [],
         }
         for s in self._find_next_state(graph_struct, start_state['name']):
+            pass
 
 
     def _find_next_state(self, graph_struct, name, length=0):
         for e in graph_struct['edges']:
             if e['from'] == name:
+                pass
 
     def __check_start(self):
         for n in graph_struct['edges']:

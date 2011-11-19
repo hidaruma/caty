@@ -91,6 +91,6 @@ command draw-scenarios {
   } [string startAction, string userrole] :: void -> void | binary | string
      throws [ModuleNotFound, ResourNotFound, ActionNotFound]
      uses pub
-    refers python:caty.core.std.command.viva.Senarios;
+    refers python:caty.core.std.command.viva.Scenarios;
 
 """
