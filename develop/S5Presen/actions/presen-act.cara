@@ -1,0 +1,78 @@
+// -*- coding: utf-8 -*-
+
+module presen-act in cara;
+
+type DirInfo = {
+ "wikifiles" : [string*],
+ "subdirs"   : [string*],
+ "path"  : string,
+ "app"   : string,
+ "title" : string,
+};
+
+
+type PresenInfo = {
+ "title" : string, 
+ "footerLeft" : string,
+ "footerRight" : string,
+ "slides" : string, 
+};
+
+userrole 操作・閲覧者;
+
+@[abstract]
+state 開始 :: void links {
+ + 開始 --> ディレクトリ.get;
+};
+
+state ディレクトリ・リスト for 操作・閲覧者 :: DirInfo links {
+ + プレゼン選択         --> プレゼン.show;
+ + サブディレクトリ選択 --> ディレクトリ.get;
+};
+
+state プレゼン・スライド for 操作・閲覧者 :: PresenInfo links {
+
+};
+
+resource ディレクトリ("/" | "*/") {
+  /** ディレクトリへのGETリクエスト */
+  action get("/GET") 
+  :: @[in, out]#0 void -> DirInfo produces ディレクトリ・リスト
+  {
+   %CATY_APP  | $.name > app;
+   (#0 
+    do { 
+      file:list %PATH_INFO .presen |
+        each {pv name}                   >: "wikifiles",
+      file:listr --kind=dir %PATH_INFO |
+        each {pv name}                   >: "subdirs",
+      %PATH_INFO                         >: "path",
+      %app                               >: "app",
+      [%app, " ", %PATH_INFO] |
+        text:concat                      >: "title",
+    }
+   ) | print /list-files.html
+  };
+};
+
+resource プレゼン("*.presen") {
+  filetype {
+      "contentType": "text/plain",
+      "isText": true
+  };
+
+  action show ("/GET") 
+  :: @[in, out]#0 void -> PresenInfo produces プレゼン・スライド
+  {
+    (#0
+     file:read %0 | presen:split-wiki |
+     do {
+          pv title            >: "title",
+          pv footerLeft       >: "footerLeft",
+          pv footerRight      >: "footerRight",
+          pv slides | 
+            each{text:creole} >: "slides",
+     }
+    ) | print /presen-2.html
+   };
+};

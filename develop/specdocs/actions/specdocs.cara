@@ -99,7 +99,7 @@ resource SysSpecsディレクトリ ("/SysSpecs/") {
  };
 };
 
-resource ファイル("*.wiki|*.casm.lit|*.cara.lit") {
+resource ファイル("*.wiki") {
   filetype {
    "contentType" : "text/x-wiki",
    "isText" : true,
@@ -130,7 +130,7 @@ resource SysSpecsファイル ("/SysSpecs/*.casm.lit") {
 
 };
 
-/*{{{
+/*{{{ // 現状、動かない
 
 /** global
  */
