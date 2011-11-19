@@ -24,6 +24,114 @@ class DrawingMixin(object):
                 return c.toxml()
 
 class DrawModule(Builtin, DrawingMixin):
+    _graph_config = {
+        'graph': {
+            'bgcolor': 'gainsboro',
+            'fontsize': 20.0,
+            'labelloc': 't',
+        },
+        'resource_subgraph': {
+            'bgcolor': 'darkolivegreen4',
+            'color': 'black',
+            'fontsize': 14.0,
+        },
+        'state_subgraph': {
+            'fillcolor': '#ffff99',
+            'color': 'black',
+            'style': 'rounded,filled',
+            'fontsize': 14.0,
+        },
+        'edge': {
+            'action': {
+                'fontsize': 14.0,
+                'color': 'crimson'
+            },
+            'link': {
+                'fontsize': 14.0,
+                'color': 'darkorchid3',
+            },
+            'redirect': {
+                'fontsize': 14.0,
+                'color': 'blue3',
+            },
+            'usecase': {
+                'fontsize': 14.0,
+                'color': 'black',
+                'arrowhead': 'none',
+            },
+            'scenario': {
+                'fontsize': 14.0,
+                'color': 'black',
+                'arrowhead': 'none',
+            },
+            'missing': {
+                'fontsize': 14.0,
+                'color': '#333333',
+                'style': 'dotted',
+            },
+            'missing-usecase': {
+                'fontsize': 14.0,
+                'color': '#333333',
+                'style': 'dotted',
+                'arrowhead': 'none',
+            },
+        },
+        'action': {
+            'fontsize': 14.0,
+            'shape': u'ellipse',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'darkseagreen2'
+        },
+        'state': {
+            'fontsize': 14.0,
+            'shape': u'note',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'gold'
+        },
+        'abstract-state': {
+            'fontsize': 14.0,
+            'shape': u'note',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'#ffe7a0'
+        },
+        'userrole': {
+            'fontsize': 14.0,
+            'shape': u'octagon',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'white'
+        },
+        'missing-action': {
+            'fontsize': 14.0,
+            'shape': u'ellipse',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'gainsboro'
+        },
+        'missing-state': {
+            'fontsize': 14.0,
+            'shape': u'note',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'gainsboro'
+        },
+        'missing-userrole': {
+            'fontsize': 14.0,
+            'shape': u'octagon',
+            'color': u'black',
+            'fillcolor': u'gainsboro'
+        },
+        'external': {
+            'fontsize': 14.0,
+            'shape': u'ellipse',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'azure'
+        },
+    }
     def setup(self, opts, module_name):
         self._module_name = module_name
         self._out_file = opts['out']
@@ -40,109 +148,6 @@ class DrawModule(Builtin, DrawingMixin):
                 self._format = u'svg'
         self._node = opts['node']
         self._if_modified = opts['if-modified']
-        self._graph_config = {
-            'graph': {
-                'bgcolor': 'gainsboro',
-                'fontsize': 20.0,
-                'labelloc': 't',
-            },
-            'resource_subgraph': {
-                'bgcolor': 'darkolivegreen4',
-                'color': 'black',
-                'fontsize': 14.0,
-            },
-            'state_subgraph': {
-                'fillcolor': '#ffff99',
-                'color': 'black',
-                'style': 'rounded,filled',
-                'fontsize': 14.0,
-            },
-            'edge': {
-                'action': {
-                    'fontsize': 14.0,
-                    'color': 'crimson'
-                },
-                'link': {
-                    'fontsize': 14.0,
-                    'color': 'darkorchid3',
-                },
-                'redirect': {
-                    'fontsize': 14.0,
-                    'color': 'blue3',
-                },
-                'usecase': {
-                    'fontsize': 14.0,
-                    'color': 'black',
-                    'arrowhead': 'none',
-                },
-                'missing': {
-                    'fontsize': 14.0,
-                    'color': '#333333',
-                    'style': 'dotted',
-                },
-                'missing-usecase': {
-                    'fontsize': 14.0,
-                    'color': '#333333',
-                    'style': 'dotted',
-                    'arrowhead': 'none',
-                },
-            },
-            'action': {
-                'fontsize': 14.0,
-                'shape': u'ellipse',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'darkseagreen2'
-            },
-            'state': {
-                'fontsize': 14.0,
-                'shape': u'note',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'gold'
-            },
-            'abstract-state': {
-                'fontsize': 14.0,
-                'shape': u'note',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'#ffe7a0'
-            },
-            'userrole': {
-                'fontsize': 14.0,
-                'shape': u'octagon',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'white'
-            },
-            'missing-action': {
-                'fontsize': 14.0,
-                'shape': u'ellipse',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'gainsboro'
-            },
-            'missing-state': {
-                'fontsize': 14.0,
-                'shape': u'note',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'gainsboro'
-            },
-            'missing-userrole': {
-                'fontsize': 14.0,
-                'shape': u'octagon',
-                'color': u'black',
-                'fillcolor': u'gainsboro'
-            },
-            'external': {
-                'fontsize': 14.0,
-                'shape': u'ellipse',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'azure'
-            },
-        }
 
     def execute(self):
         if self._out_file and self._if_modified:
@@ -249,6 +254,96 @@ class DrawModule(Builtin, DrawingMixin):
 
 
 class DrawAction(Builtin, DrawingMixin):
+    _graph_config = {
+        'graph': {
+            'bgcolor': 'gainsboro',
+            'fontsize': 20.0,
+            'labelloc': 't',
+        },
+        'subgraph': {
+            'fillcolor': 'darkseagreen2',
+            'color': 'black',
+            'style': 'rounded,filled',
+            'fontsize': 14.0,
+        },
+        'edge': {
+            'action': {
+                'fontsize': 14.0,
+                'color': 'crimson'
+            },
+            'relay': {
+                'fontsize': 14.0,
+                'color': 'brown4',
+                'style': 'dotted',
+            },
+            'link': {
+                'fontsize': 14.0,
+                'color': 'darkorchid3',
+            }, 
+            'redirect': {
+                'fontsize': 14.0,
+                'color': 'blue3',
+            },
+            'action-to-type': {
+                'fontsize': 14.0,
+                'arrowhead': 'none',
+                'color': 'crimson'
+            },
+            'link-to-type': {
+                'fontsize': 14.0,
+                'arrowhead': 'none',
+                'color': 'darkorchid3',
+            }, 
+            'missing': {
+                'fontsize': 14.0,
+                'color': '#333333',
+                'style': 'dotted',
+            },
+        },
+        'fragment': {
+            'fontsize': 14.0,
+            'shape': u'ellipse',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'greenyellow'
+        },
+        'type': {
+            'fontsize': 14.0,
+            'shape': u'plaintext',
+            'height': '0.1',
+            'style': u'filled',
+            'color': u'gainsboro',
+            'fillcolor': u'gainsboro'
+        },
+        'state': {
+            'fontsize': 14.0,
+            'shape': u'note',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'gold'
+        },
+        'action': {
+            'fontsize': 14.0,
+            'shape': u'ellipse',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'darkseagreen2'
+        },
+        'missing-action': {
+            'fontsize': 14.0,
+            'shape': u'ellipse',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'gainsboro'
+        },
+        'missing-state': {
+            'fontsize': 14.0,
+            'shape': u'note',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'gainsboro'
+        },
+    }
     def setup(self, opts, action_name):
         self._action_name = action_name
         self._out_file = opts['out']
@@ -265,103 +360,7 @@ class DrawAction(Builtin, DrawingMixin):
                 self._strip_xml_decl = True
                 self._format = u'svg'
         self._if_modified = opts['if-modified']
-        self._graph_config = {
-            'graph': {
-                'bgcolor': 'gainsboro',
-                'fontsize': 20.0,
-                'labelloc': 't',
-            },
-            'subgraph': {
-                'fillcolor': 'darkseagreen2',
-                'color': 'black',
-                'style': 'rounded,filled',
-                'fontsize': 14.0,
-            },
-            'edge': {
-                'action': {
-                    'fontsize': 14.0,
-                    'color': 'crimson'
-                },
-                'relay': {
-                    'fontsize': 14.0,
-                    'color': 'brown4',
-                    'style': 'dotted',
-                },
-                'link': {
-                    'fontsize': 14.0,
-                    'color': 'darkorchid3',
-                }, 
-                'redirect': {
-                    'fontsize': 14.0,
-                    'color': 'blue3',
-                },
-                'action-to-type': {
-                    'fontsize': 14.0,
-                    'arrowhead': 'none',
-                    'color': 'crimson'
-                },
-                'link-to-type': {
-                    'fontsize': 14.0,
-                    'arrowhead': 'none',
-                    'color': 'darkorchid3',
-                }, 
-                'missing': {
-                    'fontsize': 14.0,
-                    'color': '#333333',
-                    'style': 'dotted',
-                },
-            },
-            'fragment': {
-                'fontsize': 14.0,
-                'shape': u'ellipse',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'greenyellow'
-            },
-            'type': {
-                'fontsize': 14.0,
-                'shape': u'plaintext',
-                'height': '0.1',
-                'style': u'filled',
-                'color': u'gainsboro',
-                'fillcolor': u'gainsboro'
-            },
-            'state': {
-                'fontsize': 14.0,
-                'shape': u'note',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'gold'
-            },
-            'state': {
-                'fontsize': 14.0,
-                'shape': u'note',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'#ffe7a0'
-            },
-            'action': {
-                'fontsize': 14.0,
-                'shape': u'ellipse',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'darkseagreen2'
-            },
-            'missing-action': {
-                'fontsize': 14.0,
-                'shape': u'ellipse',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'gainsboro'
-            },
-            'missing-state': {
-                'fontsize': 14.0,
-                'shape': u'note',
-                'style': u'filled',
-                'color': u'black',
-                'fillcolor': u'gainsboro'
-            },
-        }
+        self.
 
     def execute(self):
         if self._out_file and self._if_modified:
@@ -446,4 +445,78 @@ class DrawAction(Builtin, DrawingMixin):
                             **self._graph_config['edge'][edge['type']])
         return RG
 
+class Scenarios(DrawModule, DrawAction):
+    def setup(self, opts, state_name, userrole, mod):
+        self._max_length = opts['max-length']
+        self._userrole = userrole
+        self._state = state
+        DrawModule.setup(self, opts, state)
+        self._node = u'any'
+
+
+    def make_graph(self):
+        app = self.current_app
+        rmc = app.resource_module_container
+        rm = rmc.get_module(self._module_name)
+        user_node, state_node = self._get_target_node(rm)
+        graph_struct = self._compress_action(rm.make_graph())
+        graph_struct['nodes'].append(user_node, state_node)
+        graph_struct['edges'].append({'from': user_node['name'], 'to': self._state, 'type': 'scenario'})
+
+    def _get_user_node(self, rm):
+        userrole_struct = rm.make_userrole_graph()
+        self.__check_start(userrole_struct)
+        for n in userrole_struct['nodes']:
+            if n['type'] in ('userrole', 'missing-userrole') and n['name'] == self._userrole:
+                user_node = n
+            elif n['type'] == state and n['name'] == self._state:
+                state_node = n
+        return user_node, state_node
+
+    def _compress_action(self, graph_struct, start_state):
+        new_graph = {
+            'name': graph_struct['name'],
+            'nodes': [],
+            'edges': [],
+        }
+        for s in self._find_next_state(graph_struct, start_state['name']):
+
+
+    def _find_next_state(self, graph_struct, name, length=0):
+        for e in graph_struct['edges']:
+            if e['from'] == name:
+
+    def __check_start(self):
+        for n in graph_struct['edges']:
+            if n['from'] == self._userrole and n['to'] == self._target_action:
+                break
+        else:
+            for n in userrole_struct['nodes']:
+                if n['type'] in ('userrole', 'missing-userrole') and n['name'] == self._userrole:
+                    break
+            else:
+                raise throw_caty_exception(
+                    'UserroleNotFound',
+                    u'Userrole `$userrole` is not defined at $moduleName',
+                    userrole = self._userrole,
+                    moduleName = self._module_name
+                )
+            for n in userrole_struct['nodes']:
+                if n['type'] == 'state' and n['name'] == self._target_action:
+                    break
+            else:
+                raise throw_caty_exception(
+                    'StateNotFound',
+                    u'State `$stateName` is not defined at $moduleName',
+                    stateName = self._state,
+                    moduleName = self._module_name,
+                )
+
+    def transform(self, graph_struct, root=True):
+        self._node = 'any'
+        self._graph_config = {}
+        self._graph_config.update(DrawModule._graph_config)
+        self._graph_config['userrole'] = DrawAction._graph_config['userrole']
+        self._graph_config['edge']['usecase'] = DrawAction._graph_config['edge']['usecase']
+        return DrawModule.transform(graph_struct)
 

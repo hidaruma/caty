@@ -375,6 +375,12 @@ exception ActionNotFound = {
   "resourceName": string,
 };
 
+/** ユーザーロールが存在しない */
+exception UserroleNotFound = {
+  "moduleName": string,
+  "userrole": string,
+};
+
 /** 配列のインデックスが範囲外、または不正である。*/
 exception IndexOutOfRange = object;
 

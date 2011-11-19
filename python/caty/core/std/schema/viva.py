@@ -66,23 +66,31 @@ command draw-action {
      updates pub
     refers python:caty.core.std.command.viva.DrawAction;
 
-type GraphStruct = {
-    "name": string,
-    "subgraphs": [GraphStruct*],
-    "nodes": [Node*],
-    "edges": [Edge*],
-};
 
-type Node = {
-    "name": string,
-    "label": string,
-    "type": "action" | "state"
-};
+/**
+ * まだ出来てないよ
+ */
+command draw-scenarios {
+  @[default(10)]
+  "max-legth": integer?,
+  /** 出力ファイル
+   * 指定がないときは標準出力
+   */
+  "out" : string(remark="Catyのファイルパス")?, 
 
-type Edge = {
-    "trigger": string?,
-    "from": string?,
-    "to": string?,
-    "type": "link" | "action",
-};
+  /** 出力フォーマット */
+  @[default("gif")]
+  "format" : ("gif" | "png" | "jpeg" | "dot" | "svg" | "svge")?,
+ 
+  /** ファイル出力時に.caraの変更がされていない場合は再出力しない */
+  @[with("out"), default(false)]
+  "if-modified": booelan?,
+
+  /** 描画に使われるフォント。日本語を使う場合は指定するのを推奨 */
+  "font": string?
+  } [string startAction, string userrole] :: void -> void | binary | string
+     throws [ModuleNotFound, ResourNotFound, ActionNotFound]
+     uses pub
+    refers python:caty.core.std.command.viva.Senarios;
+
 """
