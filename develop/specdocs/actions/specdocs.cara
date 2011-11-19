@@ -1,66 +1,136 @@
 // -*- coding: utf-8 -*-
 
-/** specdocsアプリケーションのリソース＆アクション 
- */
 module specdocs in cara;
 
-/** ディレクトリ・リソース
+/* 
+ * == 型 == 
  */
-resource Dir("/" | "*/") {
-  /** ディレクトリへのGETリクエスト */
-  action dir-get("/GET") 
-  ::
-  {
-   %CATY_APP  | $.name > app;
-   { 
-     "wikifiles" : [lsdir %PATH_INFO .wiki, lsdir %PATH_INFO .lit]|list:concat | each {pv name},
-     "subdirs"  : lsdir --kind=dir %PATH_INFO | each {pv name},
-     "path" : %PATH_INFO,
-     "app" : %app,
-     "title" : [%app, " ", %PATH_INFO] | text:concat
-   } | print /list-files.html
-  };
+
+/** ディレクトリ・リストの情報 */
+type DirInfo = { 
+  "wikifiles" : [string*],
+  "subdirs"  :  [string*],
+  "path" : string,
+  "app" : string,
+  "title" : string,
+};
+
+/** ファイル内容の情報 */
+type FileInfo = {
+ "content": string,
+ "title"  : string,
 };
 
 
-/** Wikiファイル・リソース
+/* 
+ * == ユーザーロール == 
  */
-resource Wiki("*.wiki|*.casm.lit|*.cara.lit") {
+
+userrole 閲覧者;
+
+
+/* 
+ * == 状態 == 
+ */
+
+@[abstract]
+state 開始 :: void links {
+ + 閲覧開始 --> ディレクトリ.get;
+};
+
+state ディレクトリ・リスト for 閲覧者 :: DirInfo links {
+ + ディレクトリ選択 --> ディレクトリ.get;
+ + ディレクトリ選択 --> SysSpecsディレクトリ.get;
+ + ファイル選択     --> ファイル.get; 
+ + ファイル選択     --> SysSpecsファイル.get;
+};
+
+state ファイル内容 for 閲覧者 :: deferred ;
+
+/* 
+ * == コマンド == 
+ */
+
+/** ディレクトリ・リストの取得と出力 */
+command dir-get [string dir-location, string file-ext] :: void -> DirInfo {
+  %1 > dir-location;
+  %2 > file-ext;
+
+  %CATY_APP  | $.name > app;
+  { 
+    "wikifiles" : file:list %dir-location %file-ext  | each {pv name},
+    "subdirs"  :  file:list --kind=dir %dir-location | each {pv name},
+    "path" : %dir-location,
+    "app" : %app,
+    "title" : [%app, " ", %dir-location] | text:concat
+  }
+};
+
+/** Wikiファイルの取得と出力 */
+command wiki-get [string file-location, string title] :: void -> FileInfo {
+  %1 > file-location;
+  %2 > title;
+  {
+    "content": file:read %file-location | text:creole, 
+    "title"  : %title,
+  }
+};
+
+
+/* 
+ * == リソース＆アクション == 
+ */ 
+
+resource ディレクトリ("/" | "*/") {
+  /** ディレクトリへのGETリクエスト */
+  action get("/GET") 
+  :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
+  {
+   (#0 dir-get %PATH_INFO .wiki ) | print /list-files.html
+  };
+};
+
+resource SysSpecsディレクトリ ("/SysSpecs/") {
+ /** ディレクトリへのGETリクエスト */
+ action get("/GET") 
+ :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
+ {
+   (#0 dir-get schemata@SysSpecs:/ .lit ) | print /list-files.html
+ };
+};
+
+resource ファイル("*.wiki") {
   filetype {
    "contentType" : "text/x-wiki",
    "isText" : true,
   };
 
   /** WikiファイルへのGETリクエスト */
-  action wiki-get("/GET")
-  ::
+  action get("/GET")
+  :: @[in, out] #0 void -> FileInfo produces ファイル内容
   {
-    {
-      "content": file:read %0 | text:creole, 
-      "title"  : %0 | path:trunk 
-    } | print /show-wiki.html
+    %0 | path:trunk > title;
+
+    (#0 wiki-get %0 %title ) | print /show-wiki.html
   };
 };
 
-
-/** SysSpecs 
- */
-
-resource SysSpecsLit ("/SysSpecs/*.casm.lit") {
+resource SysSpecsファイル ("/SysSpecs/*.casm.lit") {
 
   /** LiterateファイルへのGETリクエスト */
   action get("/GET#exists-parent")
-  ::
+  :: @[in, out] #0 void -> FileInfo produces ファイル内容
   {
+    %0 | path:trunk > title;
     %0 | path:base > base;
     ["schemata@SysSpecs:/", %base] | text:concat > lit-file;
-    {
-      "content": file:read %lit-file | text:creole, 
-      "title"  : %0 | path:trunk 
-    } | print /show-wiki.html
+
+    (#0 wiki-get %lit-file %title) | print /show-wiki.html
   };
 
 };
+
+/*{{{ // 現状、動かない
 
 /** global
  */
@@ -80,3 +150,5 @@ resource GlobalLit ("/global/*.casm.lit") {
   };
 
 };
+
+}}}*/
