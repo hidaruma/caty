@@ -597,66 +597,6 @@ class AppModule(Module):
         msg = self._app.i18n.get('Schema: $path', path=fo.path.strip('/'))
         self._app.cout.write(u'  * ' + msg)
 
-class GlobalModule(AppModule):
-    u"""${CATY_HOME}/global/に存在する、すべてのアプリケーションから参照可能なモジュール。
-    """
-    def __init__(self, app, parent=None, is_root=False):
-        Module.__init__(self, app)
-        self.fs = GlobalFs('schemata', app._system.appencoding)
-        self.pcasm_cache = None
-        self.parser_cache = None
-        self.command_loader = CommandLoader(GlobalFs('commands', app._system.appencoding))
-        self.parent = parent
-        self.is_root= is_root
-        self.is_builtin = False
-        self.compiled = False
-        for k, v in schemata.items():
-            self.schema_ns[k] = v
-        if self.is_root:
-            self._app.i18n.write("Loading global commands and schemata")
-        self._core = None
-        self._global_module = None
-
-class GlobalFs(object):
-    def __init__(self, target, encoding):
-        self.DirectoryObject = GlobalDir(target, encoding)
-        self.open = GlobalOpener(target, encoding)
-
-import os
-from caty.util.path import join
-class GlobalDir(object):
-    def __init__(self, target, encoding):
-        self._cwd = os.getcwd()
-        self._target = target
-        self._encoding = encoding
-
-    def __call__(self, dummy):
-        return self
-
-    def read(self, dummy=True):
-        for r, d, f in os.walk(join(self._cwd, 'global', self._target)):
-            for e in f:
-                yield GlobalFile(r, '/'+e, self._encoding)
-
-class GlobalOpener(object):
-    def __init__(self, target, encoding):
-        self._cwd = os.getcwd()
-        self._target = target
-        self._encoding = encoding
-
-    def __call__(self, path):
-        return GlobalFile(join(self._cwd, 'global', self._target), path, self._encoding)
-
-class GlobalFile(object):
-    def __init__(self, base, path, encoding):
-        self.base = base
-        self.path = path
-        self.is_dir = False
-        self.encoding = encoding
-
-    def read(self):
-        return unicode(open(join(self.base, self.path)).read(), self.encoding)
-
 class FilterModule(Module):
     def __init__(self, system):
         filterapp = system.dummy_app
@@ -670,20 +610,18 @@ class IntegratedModule(object):
         coreapp = system.dummy_app
         coreapp._name = u'builtin'
         self._core = CoreModule(coreapp, None, True)
-        gapp = system.dummy_app
-        gapp._name = u'global'
-        self._global = GlobalModule(gapp, None, True)
-        self._system = system
-        self._global_compiled = False
-    
+        self._global_app = system._global_app
+        self._global = None
+
+    def set_global(self, global_app):
+        if global_app:
+            self._global = global_app._schema_module
+        else:
+            self._global = None
+
     def compile(self, *args):
         self._core.compile(*args)
         self._core.resolve()
-        if not self._global_compiled:
-            self._global.compile()
-            self._global.resolve()
-            self._global.parent = self._core
-            self._global_compiled = True
     
     def make_blank_module(self, app):
         app_module = AppModule(app, None, self._core, self._global, True)
@@ -695,12 +633,7 @@ class IntegratedModule(object):
         return app_module
 
     def reload_global(self):
-        gapp = self._system.dummy_app
-        gapp._name = u'global'
-        self._global = GlobalModule(gapp, None, True)
-        self._global.compile()
-        self._global.resolve()
-        self._global.parent = self._core
-        self._global_compiled = True
+        gapp = self._system._global_app
+        gapp.reload()
 
 

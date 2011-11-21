@@ -50,6 +50,7 @@ class System(PbcObject):
         gcfg = xjson.load(open('_global.xjson'))
         self._global_config = GlobalConfig(gcfg, 
                                            self._validate_encoding(encoding))
+        self._global_app = None
         messages = self._load_system_messages()
         self.i18n = I18nMessage(messages, writer=cout, lang=self._global_config.language)
         caty.core.runtimeobject.i18n = self.i18n # 改めて設定
@@ -75,6 +76,11 @@ class System(PbcObject):
                                      path,
                                      viva,
                                      http])
+
+        gag = ApplicationGroup('', self._global_config, no_ambient, no_app, self)
+        self._global_app = gag._apps[0]
+        self._global_app.finish_setup()
+        self._casm.set_global(self._global_app)
         #self._casm._core.schema_finder("GlobalConfig").validate(gcfg)
         # アプリケーショングループの順序は rc.caty の実行順序に関わる
         # common, main, extra, examples という順序は固定
@@ -99,6 +105,9 @@ class System(PbcObject):
             self._app_map[app.name] = app
         for app in self._app_map.values():
             app.finish_setup()
+        self._app_map['global'] = self._global_app
+        self.__app_names.append(u'global')
+        self._apps.append(self._global_app)
         #for app in self._app_map.values():
         #    app.finish_setup()
         for group in self._app_groups:

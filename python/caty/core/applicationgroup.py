@@ -54,7 +54,11 @@ class ApplicationGroup(PbcObject):
             PbcObject.__init__(self)
 
     def _get_apps(self, no_ambient, no_app):
-        if self.exists:
+        if self._name == '':
+            a = Application('global', no_ambient, self, self._system)
+            if a.enabled:
+                yield a
+        elif self.exists:
             app_group_root = self._make_super_root(self.name)
             for d in app_group_root.start().read_mode.opendir('/').read():
                 if d.is_dir and not d.basename[0] in ('.', '_') and not d.basename in self._system.ignore_names:
@@ -109,10 +113,8 @@ class ApplicationGroup(PbcObject):
     
     def __invariant__(self):
         if self.exists:
-            assert self._name
             assert self._global_config
         else:
-            assert self._name
             assert self._global_config
             assert len(self._apps) == 0
 
