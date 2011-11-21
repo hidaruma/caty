@@ -37,7 +37,7 @@ class DrawingMixin(object):
             for e2 in graph['edges']:
                 if e1 in _traced:
                     continue
-                if e1['from'] == e2['from'] and e1 != e2:
+                if e1.get('trigger', 1) == e2.get('trigger', 2) and e1 != e2:
                     new_dest = '__middle_point_{0}__'.format(n)
                     _from = e1['from']
                     _nodes.append({'name': new_dest, 'type': 'middle-point', 'label': ''})

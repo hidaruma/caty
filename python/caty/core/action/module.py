@@ -194,13 +194,13 @@ class ResourceModule(Module):
                     else:
                         appered_dest.add(to_node_name)
                         e = {u'from': s.name, u'to': to_node_name, u'type': u'link'}
-                if link.trigger:
-                    e[u'trigger'] = link.trigger
-                else:
-                    e[u'trigger'] = u''
-                if link.type == 'additional-link':
-                    e[u'trigger'] = ' '.join(['+', e[u'trigger']])
-                edges.append(e)
+                    if link.trigger:
+                        e[u'trigger'] = link.trigger
+                    else:
+                        e[u'trigger'] = u''
+                    if link.type == 'additional-link':
+                        e[u'trigger'] = ' '.join(['+', e[u'trigger']])
+                    edges.append(e)
             nodes.append({u'name': s.name, 
                           u'label': s.make_label(self), 
                           u'type': u'state' if 'abstract' not in s.annotations else u'abstract-state'
