@@ -319,3 +319,4 @@ class ResourceModule(Module):
         root['edges'] = edges
         root['subgraphs'] = subgraphs
         return root
+

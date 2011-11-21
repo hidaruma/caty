@@ -23,6 +23,28 @@ class DrawingMixin(object):
             if c.nodeType == dom.Element.ELEMENT_NODE:
                 return c.toxml()
 
+    def _branch_edge(self, graph):
+        n = 0
+        _nodes = []
+        _edges = []
+        _traced = []
+        for e1 in graph['edges']:
+            for e2 in graph['edges']:
+                if e1 in _traced:
+                    continue
+                if e1['from'] == e2['from'] and e1 != e2:
+                    new_dest = '__middle_point_{0}__'.format(n)
+                    _from = e1['from']
+                    _nodes.append({'name': new_dest, 'type': 'middle-point', 'label': ''})
+                    e1['from'] = new_dest
+                    e2['from'] = new_dest
+                    _edges.append({'from': _from, 'to': new_dest, 'type': e1['type'], 'is-middle-point': True})
+                    n += 1
+                    _traced.append(e2)
+        graph['edges'] += _edges
+        graph['nodes'] += _nodes
+        return graph
+
 class DrawModule(Builtin, DrawingMixin):
     _graph_config = {
         'graph': {
@@ -131,6 +153,12 @@ class DrawModule(Builtin, DrawingMixin):
             'color': u'black',
             'fillcolor': u'azure'
         },
+        'middle-point': {
+            'shape': 'none',
+            'height': '0.0',
+            'width': '0.0',
+            'label': ''
+        },
     }
     def setup(self, opts, module_name):
         self._module_name = module_name
@@ -153,7 +181,7 @@ class DrawModule(Builtin, DrawingMixin):
         if self._out_file and self._if_modified:
             if not self._modified(self._out_file, self._module_name):
                 return
-        src = self.make_graph()
+        src = self._branch_edge(self.make_graph())
         G = self.transform(src)
         G.layout(prog='dot')
         if self._out_file:
@@ -220,7 +248,9 @@ class DrawModule(Builtin, DrawingMixin):
             N = RG.get_node(name)
             attr = {}
             attr.update(self._graph_config[node['type']])
-            if (self._node == 'state' and node['type'] not in ('state', 'abstract-state')):
+            if node['type'] == 'middle-point':
+                pass
+            elif (self._node == 'state' and node['type'] not in ('state', 'abstract-state')):
                 if node['type'] == 'missing-state':
                     attr['shape'] = 'note'
                     #attr['height'] = '0.2'
@@ -241,15 +271,19 @@ class DrawModule(Builtin, DrawingMixin):
                attr['label'] = node['label']
             N.attr.update(attr)
         for edge in graph_struct['edges']:
+            conf = {}
+            conf.update(self._graph_config['edge'][edge['type']])
+            if edge.get('is-middle-point', False):
+                conf['arrowhead'] = 'none'
             if 'trigger' not in edge or self._node == 'action':
                 RG.add_edge(edge['from'], 
                             edge['to'], 
-                            **self._graph_config['edge'][edge['type']])
+                            **conf)
             else:
                 RG.add_edge(edge['from'], 
                             edge['to'], 
                             label=edge['trigger'],
-                            **self._graph_config['edge'][edge['type']])
+                            **conf)
         return RG
 
 
@@ -349,6 +383,12 @@ class DrawAction(Builtin, DrawingMixin):
             'style': u'filled',
             'color': u'black',
             'fillcolor': u'gainsboro'
+        }, 
+        'middle-point': {
+            'shape': 'none',
+            'height': '0.0',
+            'width': '0.0',
+            'label': ''
         },
     }
     def setup(self, opts, action_name):
@@ -373,7 +413,7 @@ class DrawAction(Builtin, DrawingMixin):
             mname, rname, aname = self._split_name()
             if not self._modified(self._out_file, mname):
                 return
-        src = self.make_graph()
+        src = sefl._branch_edge(self.make_graph())
         G = self.transform(src)
         G.layout(prog='dot')
         if self._out_file:
