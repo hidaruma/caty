@@ -55,7 +55,7 @@ class ApplicationGroup(PbcObject):
 
     def _get_apps(self, no_ambient, no_app):
         if self._name == '':
-            a = Application('global', no_ambient, self, self._system)
+            a = GlobalApplication('global', no_ambient, self, self._system)
             if a.enabled:
                 yield a
         elif self.exists:

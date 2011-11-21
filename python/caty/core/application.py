@@ -88,7 +88,7 @@ class Application(PbcObject):
     def reload(self):
         self._no_ambient = False
         self._system.reload_library()
-        self._system._casm.reload_global()
+        self._system.reload_global()
         self._initialize(self._name, self._group, self._system)
         self.finish_setup()
         self.exec_rc_script()
@@ -690,4 +690,10 @@ class SysFiles(ReadOnlyFacility):
         for k, v in kwds.items():
             setattr(self, k, v)
 
+class GlobalApplication(Application):
+    def reload(self):
+        self._no_ambient = False
+        self._initialize(self._name, self._group, self._system)
+        self.finish_setup()
+        self.exec_rc_script()
 

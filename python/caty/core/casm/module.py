@@ -610,7 +610,7 @@ class IntegratedModule(object):
         coreapp = system.dummy_app
         coreapp._name = u'builtin'
         self._core = CoreModule(coreapp, None, True)
-        self._global_app = system._global_app
+        self._system = system
         self._global = None
 
     def set_global(self, global_app):
@@ -632,8 +632,5 @@ class IntegratedModule(object):
         app_module.compile()
         return app_module
 
-    def reload_global(self):
-        gapp = self._system._global_app
-        gapp.reload()
 
 

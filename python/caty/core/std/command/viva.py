@@ -23,7 +23,7 @@ class DrawingMixin(object):
             if c.nodeType == dom.Element.ELEMENT_NODE:
                 return c.toxml()
 
-    def _branch_edge(self, graph):
+    def format_graph(self, graph):
         n = 0
         _nodes = []
         _edges = []
@@ -44,6 +44,8 @@ class DrawingMixin(object):
         graph['edges'] += _edges
         graph['nodes'] += _nodes
         return graph
+
+    def _fill_subgraph(self, graph):
 
 class DrawModule(Builtin, DrawingMixin):
     _graph_config = {
@@ -181,7 +183,7 @@ class DrawModule(Builtin, DrawingMixin):
         if self._out_file and self._if_modified:
             if not self._modified(self._out_file, self._module_name):
                 return
-        src = self._branch_edge(self.make_graph())
+        src = self.format_graph(self.make_graph())
         G = self.transform(src)
         G.layout(prog='dot')
         if self._out_file:
@@ -413,7 +415,7 @@ class DrawAction(Builtin, DrawingMixin):
             mname, rname, aname = self._split_name()
             if not self._modified(self._out_file, mname):
                 return
-        src = sefl._branch_edge(self.make_graph())
+        src = self.format_graph(self.make_graph())
         G = self.transform(src)
         G.layout(prog='dot')
         if self._out_file:

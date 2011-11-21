@@ -230,6 +230,11 @@ class System(PbcObject):
                 traceback.print_exc()
                 self.i18n.write('Failed to reload $name', name=f)
 
+    def reload_global(self):
+        self._casm.set_global(None)
+        self._global_app.reload()
+        self._casm.set_global(self._global_app)
+
     def _find_packages(self):
         for r, d, f in os.walk('./lib/'):
             for p in f:
