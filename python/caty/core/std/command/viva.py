@@ -24,6 +24,11 @@ class DrawingMixin(object):
                 return c.toxml()
 
     def format_graph(self, graph):
+        self._branch_edge(graph)
+        self._fill_subgraph(graph)
+        return graph
+
+    def _branch_edge(self, graph):
         n = 0
         _nodes = []
         _edges = []
@@ -43,9 +48,11 @@ class DrawingMixin(object):
                     _traced.append(e2)
         graph['edges'] += _edges
         graph['nodes'] += _nodes
-        return graph
 
     def _fill_subgraph(self, graph):
+        for sg in graph['subgraphs']:
+            if not sg['nodes']:
+                sg['nodes'].append({'name': 'x', 'type': 'middle-point', 'label': ''})
 
 class DrawModule(Builtin, DrawingMixin):
     _graph_config = {
