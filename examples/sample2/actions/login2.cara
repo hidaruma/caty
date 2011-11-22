@@ -1,6 +1,11 @@
 // -*- coding: utf-8  -*-
 
-/** ポートを使った（つもりの）ログインモジュール */
+/** ポートを使った（つもりの）ログインモジュール 
+ 
+ # ポート宣言はコメントアウトしてある。
+ # ポート名の参照のところで、port. で修飾した名前を使っている。
+
+*/
 module login2 in cara;
 
 
@@ -14,7 +19,7 @@ module login2 in cara;
 /** 開始状態 */
 @[abstract]
 state start :: void links {
-  + start --> Login.get;
+  - start --> Login.get;
 }; 
 
 
@@ -28,9 +33,13 @@ resource Login("/login.html") {
 /** ログイン画面 */
 state login :: object links {
   /* IDとパスワードを入れてサブミット */
-  submit --> DoLogin.do-login;
-  /* ログインは取りやめ */
-  + cancel --> port.cancel;
+  - submit --> DoLogin.do-login;
+  /* ログインは取りやめ 
+   * cancel時ターゲットのURLなどはプログラムが実行時に教える必要がある。
+   * 束縛が済まないと、
+   * リクエスト（またはリダイレクト）先のアクションが確定しない。
+   */
+  cancel() --> port.cancel; // 
 };
 
 /** ログイン処理 */

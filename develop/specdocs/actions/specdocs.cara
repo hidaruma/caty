@@ -35,15 +35,15 @@ userrole 閲覧者;
 
 @[abstract]
 state 開始 :: void links {
- + 閲覧開始 --> ディレクトリ.get;
+ - 閲覧開始 --> ディレクトリ.get;
 };
 
 state ディレクトリ・リスト for 閲覧者 :: DirInfo links {
- + ディレクトリ選択 --> ディレクトリ.get;
- + ディレクトリ選択 --> SysSpecsディレクトリ.get;
- + ディレクトリ選択 --> Globalディレクトリ.get;
+ - ディレクトリ選択 --> ディレクトリ.get;
+ - ディレクトリ選択 --> SysSpecsディレクトリ.get;
+ - ディレクトリ選択 --> Globalディレクトリ.get;
 
- + ファイル選択     --> [ファイル.get, SysSpecsファイル.get, Globalファイル.get];
+ - ファイル選択     --> [ファイル.get, SysSpecsファイル.get, Globalファイル.get];
 };
 
 state ファイル内容 for 閲覧者 :: deferred ;
