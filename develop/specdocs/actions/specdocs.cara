@@ -35,14 +35,15 @@ userrole 閲覧者;
 
 @[abstract]
 state 開始 :: void links {
- + 閲覧開始 --> ディレクトリ.get;
+ - 閲覧開始 --> ディレクトリ.get;
 };
 
 state ディレクトリ・リスト for 閲覧者 :: DirInfo links {
- + ディレクトリ選択 --> ディレクトリ.get;
- + ディレクトリ選択 --> SysSpecsディレクトリ.get;
- + ファイル選択     --> ファイル.get; 
- + ファイル選択     --> SysSpecsファイル.get;
+ - ディレクトリ選択 --> ディレクトリ.get;
+ - ディレクトリ選択 --> SysSpecsディレクトリ.get;
+ - ディレクトリ選択 --> Globalディレクトリ.get;
+
+ - ファイル選択     --> [ファイル.get, SysSpecsファイル.get, Globalファイル.get];
 };
 
 state ファイル内容 for 閲覧者 :: deferred ;
@@ -99,6 +100,15 @@ resource SysSpecsディレクトリ ("/SysSpecs/") {
  };
 };
 
+resource Globalディレクトリ ("/global/") {
+ /** ディレクトリへのGETリクエスト */
+ action get("/GET") 
+ :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
+ {
+   (#0 dir-get schemata@global:/ .lit ) | print /list-files.html
+ };
+};
+
 resource ファイル("*.wiki") {
   filetype {
    "contentType" : "text/x-wiki",
@@ -130,25 +140,19 @@ resource SysSpecsファイル ("/SysSpecs/*.casm.lit") {
 
 };
 
-/*{{{ // 現状、動かない
-
-/** global
- */
-
-resource GlobalLit ("/global/*.casm.lit") {
+resource Globalファイル ("/global/*.casm.lit") {
 
   /** LiterateファイルへのGETリクエスト */
   action get("/GET#exists-parent")
-  ::
+  :: @[in, out] #0 void -> FileInfo produces ファイル内容
   {
+    %0 | path:trunk > title;
     %0 | path:base > base;
     ["schemata@global:/", %base] | text:concat > lit-file;
-    {
-      "content": file:read %lit-file | text:creole, 
-      "title"  : %0 | path:trunk 
-    } | print /show-wiki.html
+
+    (#0 wiki-get %lit-file %title) | print /show-wiki.html
+
   };
 
 };
 
-}}}*/
