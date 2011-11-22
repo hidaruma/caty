@@ -24,7 +24,7 @@ class DrawingMixin(object):
                 return c.toxml()
 
     def format_graph(self, graph):
-        self._branch_edge(graph)
+        #self._branch_edge(graph)
         self._fill_subgraph(graph)
         return graph
 

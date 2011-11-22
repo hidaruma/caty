@@ -185,15 +185,21 @@ class ResourceModule(Module):
             for f in self._find_links_to(s.name):
                 edges.append({u'from': f, u'to': s.name, u'type': u'action'})
             for link in s.links:
+                if len(link.link_to_list) > 1:
+                    from_name = u'__middle_point_{0}'.format(link.trigger)
+                    nodes.append({'name': from_name, 'type': 'middle-point', 'label': ''})
+                    edges.append({u'from': s.name, u'to': from_name, u'type': u'link', 'is-middle-point': True})
+                else:
+                    from_name = s.name
                 for link_to in link.link_to_list:
                     act, fragment = link_to
                     to_node_name = self._find_linked_action(act)
                     if not to_node_name:
                         nodes.append({u'label': act, u'name': act, u'type': u'missing-action'})
-                        e = {u'from': s.name, u'to': act, u'type': u'missing'}
+                        e = {u'from': from_name, u'to': act, u'type': u'missing'}
                     else:
                         appered_dest.add(to_node_name)
-                        e = {u'from': s.name, u'to': to_node_name, u'type': u'link'}
+                        e = {u'from': from_name, u'to': to_node_name, u'type': u'link'}
                     if link.trigger:
                         e[u'trigger'] = link.trigger
                     else:

@@ -308,17 +308,11 @@ class StateBlock(Parser):
         return self
 
     def link_block(self, seq):
-        links = {}
         seq.parse(keyword('links'))
         seq.parse('{')
         r = many(self.link_item)(seq)
-        for l in r:
-            if l.trigger not in links:
-                links[l.trigger] = l
-            else:
-                links[l.trigger].link_to_list.extend(l.link_to_list)
         seq.parse('}')
-        return links.values()
+        return r
 
     def link_item(self, seq):
         isembed, trigger = self.trigger(seq)
