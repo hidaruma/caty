@@ -328,9 +328,11 @@ class StateBlock(Parser):
 
     def trigger(self, seq):
         if option(S('+'))(seq):
-            return False, option(name)(seq)
+            return 'additional', option(name)(seq)
+        elif option(S('-'))(seq):
+            return 'no-care', option(name)(seq)
         else:
-            return True, self.embed_trigger(seq)
+            return 'embed', self.embed_trigger(seq)
 
     def embed_trigger(self, seq):
         return seq.parse(choice(Regex(ur'(\$\.)?([a-zA-Z_][a-zA-Z0-9_-]*(\(\))?\.)*[a-zA-Z_][a-zA-Z0-9_-]*(\(\))?'), '$'))
@@ -375,11 +377,13 @@ class UserRole(Parser):
         return self
 
 class Link(object):
-    def __init__(self, trigger, dest, isembed):
+    def __init__(self, trigger, dest, type):
         self.link_to_list = dest
         self.trigger = trigger
-        if isembed:
+        if type == 'embed':
             self.type = u'embeded-link'
+        elif type == 'no-care':
+            self.type = u'no-care-link'
         else:
             self.type = u'additional-link'
 
