@@ -455,7 +455,7 @@ class LiterateRADParser(ResourceActionDescriptorParser):
     def _parse_top_level(self, seq):
         s = []
         while not seq.eof:
-            n = seq.parse([self.resourceclass, self.state, schemaparser.schema, commandparser.command, peek(S(u'}>>'))])
+            n = seq.parse(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, peek(S(u'}>>'))]))
             if n == u'}>>':
                 break
             s.append(n)
@@ -476,7 +476,7 @@ class LiterateRADParser(ResourceActionDescriptorParser):
             if seq.eof:
                 break
             seq.ignore_hook = h
-            n = seq.parse([self.resourceclass, self.state, schemaparser.schema, commandparser.command, peek(S(u'}>>'))])
+            n = seq.parse(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, peek(S(u'}>>'))]))
             if n == u'}>>':
                 S(u'}>>')(seq)
                 literal = True
