@@ -20,6 +20,9 @@ module addrbook-j in cara;
 
 == ユーザーロール
 
+
+== スタート
+
 <<{
 
 @[abstract]
@@ -50,7 +53,7 @@ state 住所一覧画面 :: Items links {
  + next --> 住所一覧.next;
  + prev --> 住所一覧.prev;
 
- + logout --> ログアウト実行.do;
+ + logout --> ログアウト処理.do;
 };
 
 }>>
@@ -58,24 +61,21 @@ state 住所一覧画面 :: Items links {
 == 住所項目表示
 
 <<{
-
-/** 画面を生成 */
 resource 住所項目表示("/view-item") {
  action get("/GET") {"itemId": integer}
  :: @[in, out]#1 void -> void produces 住所項目表示画面;
 
 };
 
-/**  */
+
 state 住所項目表示画面 :: any links {
  + all-items --> 住所一覧.get;
  + edit      --> 住所項目編集.get;
  + delete    --> 削除の確認.do;
 
- + logout --> ログアウト実行.do;
+ + logout --> ログアウト処理.do;
 };
 
-/** を生成 */
 resource 住所項目編集 ("/edit") {
  action get("/GET") {"itemId" : integer}
  :: @[in, out]#1 void -> any produces 住所項目編集画面;
@@ -93,40 +93,33 @@ state 住所項目編集画面 :: any links {
  + cancel       --> 住所一覧.get;
 };
 
-/** 画面を生成 */
 resource 保存の確認 ("/confirm-save") {
  action do ("/POST")
  :: @[in, out]#1 _ -> _ produces 保存の確認画面;
 
 };
 
-
-/** 画面を生成 */
 resource 削除の確認 ("/confirm-delete") {
  action do ("/POST")
  :: @[in, out]#1 _ -> _ produces 削除の確認画面;
 
 };
 
-/**  */
 state 保存の確認画面 :: any links {
   + save --> 住所項目の保存.do ;
   + cancel --> 住所一覧.get ;
 };
 
-/**  */
 state 削除の確認画面 :: any links {
   + delete --> 住所項目の削除.do ;
   + cancel --> 住所一覧.get ;
 };
 
-/** を実行 */
 resource 住所項目の保存("/save-item") {
  action do ("/POST")
  :: @[in, out]#1 _ -> _ redirects 住所一覧.get; // 
 };
 
-/** 住所項目の削除を実行 */
 resource 住所項目の削除("/delete-item") {
  action do ("/POST")
  :: @[in, out]#1 _ -> never redirects 住所一覧.get;
@@ -138,21 +131,17 @@ resource 住所項目の削除("/delete-item") {
 
 
 <<{
-/** ログイン画面の生成 */
 resource ログイン ("/login.html") {
  action get("/GET")
  :: @[in, out]#1 void -> void produces ログイン画面 ;
 };
 
-
-/** ログイン画面 */
 state ログイン画面 :: any links {
- + do-login --> ログイン実行.do;
+ + do-login --> ログイン処理.do;
 
 };
 
-/** ログイン処理の実行 */
-resource ログイン実行 ("/do-login.cgi") {
+resource ログイン処理 ("/do-login.cgi") {
 
  action do ("/POST") 
  :: @[in]#in any -> _ relays [ok, ng],
@@ -161,9 +150,7 @@ resource ログイン実行 ("/do-login.cgi") {
 
 };
 
-
-/** ログアウト処理の実行 */
-resource ログアウト実行 ("/do-logout.cgi") {
+resource ログアウト処理 ("/do-logout.cgi") {
  action do ("/POST") 
  :: @[in, out]#1 void -> void produces ログアウト後画面;
 

@@ -2,6 +2,7 @@
 
 module presen-act in cara;
 
+/** ディレクトリ・リストの情報 */
 type DirInfo = {
  "wikifiles" : [string*],
  "subdirs"   : [string*],
@@ -11,18 +12,22 @@ type DirInfo = {
 };
 
 
+/** プレゼンページの内容 */
 type PresenInfo = {
  "title" : string, 
  "footerLeft" : string,
  "footerRight" : string,
+ /** スライドの内容となるHTMLテキスト */
  "slides" : string, 
 };
+
 
 userrole 操作・閲覧者;
 
 @[abstract]
 state 開始 :: void links {
- + 開始 --> ディレクトリ.get;
+ + ディレクトリ --> ディレクトリ.get;
+ + プレゼン --> プレゼン.show;
 };
 
 state ディレクトリ・リスト for 操作・閲覧者 :: DirInfo links {

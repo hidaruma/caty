@@ -8,9 +8,6 @@ module login2 in cara;
 //port cancel;
 
 /** ログイン失敗時のリダイレクト先 */
-//port failure;
-
-/** ログイン失敗時のリダイレクト先 */
 //port success;
 
 
@@ -41,7 +38,7 @@ resource DoLogin("/do-login.cgi") {
   action do-login("/POST")
   :: @[in]  #in object -> _      relays [ok, ng],
      @[out] #ok _      -> object redirects port.success,
-     @[out] #ng _      -> _      redirects port.failure
+     @[out] #ng _      -> _      redirects Login.get // retry
    ;
 
 };

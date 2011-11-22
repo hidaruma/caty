@@ -4,3 +4,30 @@ module public; // -*- coding: utf-8 -*-
 command cls :: void -> void
     refers python:cls.Clear;
 
+/** モジュールの描画表示 */
+command showmo [string moduleName] :: void -> void {
+  viva:draw --font="MS UI Gothic" %1 | ct:show-image | void
+};
+
+/** モジュール状態の描画表示 */
+command showst [string moduleName] :: void -> void {
+  viva:draw --node=state --font="MS UI Gothic" %1 | ct:show-image | void
+};
+
+/** モジュールアクションの描画表示 */
+command showac [string moduleName ] :: void -> void {
+  viva:draw --node=action --font="MS UI Gothic" %1 | ct:show-image | void
+};
+
+/** モジュールユーザーロールの描画表示 */
+command showur [string moduleName] :: void -> void {
+  viva:draw --node=userrole --font="MS UI Gothic" %1 | ct:show-image | void
+};
+
+/** アクションの描画表示 */
+command show-action [string actionName] :: void -> void {
+  viva:draw-action --font="MS UI Gothic" %1 | ct:show-image | void
+};
+
+
+
