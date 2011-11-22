@@ -6,19 +6,24 @@ module login in cara;
 /** トップページ */
 resource Top("/index.htm") {
   action get("/GET")
-  ::@[in, out] #io void -> void produces start;
+  ::@[in, out] #io void -> void produces Top;
+};
+
+state Top :: any links {
+ + login --> Login.get;
 };
 
 /** 開始状態 */
 @[abstract]
 state start :: void links {
-  + --> Login.login;
+ // これエラーしない、ま、いいか
+  + --> Login.get;
 }; 
 
 
 /** ログイン開始アクション */
 resource Login("/login.html") {
-  action login("/GET")
+  action get("/GET")
   :: @[in, out] #io void -> object produces login ;
   
 };
@@ -34,7 +39,9 @@ state login :: object links {
 /** ログイン処理アクション */
 resource DoLogin("/do-login.cgi") {
   action do-login("/POST")
-  :: @[in, out] #io object -> object produces logged;
+  :: @[in, out] #io object -> object produces logged,
+     @[out] #ng _ -> _ redirects Top.get
+   ;
 
 };
 
