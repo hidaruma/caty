@@ -691,6 +691,12 @@ class SysFiles(ReadOnlyFacility):
             setattr(self, k, v)
 
 class GlobalApplication(Application):
+    def __init__(self, name, no_ambient, group, system):
+        self._initialized = False
+        self._no_ambient = False # 常にFalse
+        self._initialize(name, group, system)
+        self._initialized = True
+
     def reload(self):
         self._no_ambient = False
         self._initialize(self._name, self._group, self._system)
