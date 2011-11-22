@@ -12,18 +12,24 @@ def syntax(seq):
     v = seq.parse(option(type_arg))
     e = seq.parse(['=', '::='])
     a.add(Annotation(u'__syntax'))
+    if option(keyword(u'lexical'))(seq):
+        a.add(Annotation(u'__lexical'))
     if e == '::=':
         bnf = seq.parse(bnf_def)
         if seq.parse([':=', '=', ';']) == ';':
             a.add(Annotation(u'__deferred'))
             d = ScalarNode(u'any')
             return ASTRoot(n, v, d, a, doc)
-    deferred = seq.parse(option(keyword('deferred')))
-    if deferred:
+    ann = seq.parse(option(choice(keyword('deferred'), keyword('lexical'))))
+    if ann == u'deferred':
         a.add(Annotation(u'__deferred'))
         d = seq.parse(option(typedef))
         if not d:
             d = ScalarNode(u'any')
+    elif ann == u'lexical':
+        if '__lexical' not in a:
+            a.add(Annotation(u'__lexical'))
+        d = seq.parse(typedef)
     else:
         d = seq.parse(typedef)
     if d.optional:
