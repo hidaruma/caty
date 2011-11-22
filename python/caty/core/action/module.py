@@ -188,7 +188,13 @@ class ResourceModule(Module):
                 if len(link.link_to_list) > 1:
                     from_name = u'__middle_point_{0}'.format(link.trigger)
                     nodes.append({'name': from_name, 'type': 'middle-point', 'label': ''})
-                    edges.append({u'from': s.name, u'to': from_name, u'type': u'link', 'is-middle-point': True})
+                    edges.append({u'from': s.name, 
+                                  u'to': from_name, 
+                                  u'trigger': link.link_to_list[0][0], 
+                                  u'type': u'link', 
+                                  u'is-middle-point': True})
+                    if link.type == 'additional-link':
+                        edges[-1][u'trigger'] = ' '.join(['+', edges[-1][u'trigger']])
                 else:
                     from_name = s.name
                 for link_to in link.link_to_list:
@@ -200,12 +206,13 @@ class ResourceModule(Module):
                     else:
                         appered_dest.add(to_node_name)
                         e = {u'from': from_name, u'to': to_node_name, u'type': u'link'}
-                    if link.trigger:
-                        e[u'trigger'] = link.trigger
-                    else:
-                        e[u'trigger'] = u''
-                    if link.type == 'additional-link':
-                        e[u'trigger'] = ' '.join(['+', e[u'trigger']])
+                    if len(link.link_to_list) == 1:
+                        if link.trigger:
+                            e[u'trigger'] = link.trigger
+                        else:
+                            e[u'trigger'] = u''
+                        if link.type == 'additional-link':
+                            e[u'trigger'] = ' '.join(['+', e[u'trigger']])
                     edges.append(e)
             nodes.append({u'name': s.name, 
                           u'label': s.make_label(self), 
