@@ -4,56 +4,65 @@ module tips in cara;
 
 userrole 全員;
 userrole 閲覧者;
-//userrole 編集者;
+userrole 編集者;
 userrole 管理者;
 
 @[abstract]
 state 開始 for 全員 :: any links {
- + ログイン --> ログイン.取得;
- + トップ   --> トップ.一覧;
+ + ログイン --> ログイン.get;
+ + トップ   --> トップ.get;
 
 };
 
 /*
 resource ログイン ("/login.cgi") {
-  action 取得 ("/GET")
-  :: @[in, out]#0 void -> void produces ログイン
+  action get ("/GET")
+  :: @[in, out]#0 void -> void produces ログイン画面
   ;
 };
+
+
+
+state ログイン画面 for [編集者, 管理者] :: void links {
+  + 編集者トップ --> 編集.get;
+  + 管理者トップ   --> 管理.get;
+};
+
 */
 
-state ログイン for [編集者, 管理者] :: void links {
-  + 編集者トップ --> 編集.取得;
-  + 管理者トップ   --> 管理.取得;
+@[abstract]
+state ログイン成功 for [編集者, 管理者] :: void links {
+  - 編集者トップ --> 編集.get;
+  - 管理者トップ   --> 管理.get;
 };
 
 
 resource トップ ("/") {
- action 一覧 ("/GET")
- :: @[in, out] #0 void -> void produces Tips一覧
+ action get ("/GET")
+ :: @[in, out] #0 void -> void produces Tips一覧画面
  ;
 };
 
 
-state Tips一覧 for 閲覧者 :: void links {
- + ログイン --> ログイン.取得;
- + 検索 --> 検索.実行;
- + 詳細 --> Tips.一覧;
- + カテゴリ --> カテゴリ.取得;
- + 次       --> Tips.一覧;
+state Tips一覧画面 for 閲覧者 :: void links {
+ + ログイン --> ログイン.get;
+ + 検索 --> 検索.do;
+ + 詳細 --> Tips.get;
+ + カテゴリ --> カテゴリ.get;
+ + 次       --> Tips.get;
 };
 
 
-// state 管理 for 管理者 :: void ;
+state 管理画面 for 管理者 :: void ;
 
-state 編集 for 編集者 :: void ;
+state 編集画面 for 編集者 :: void ;
 
 resource 管理 ("/admin/") {
-  action 取得("/GET")
-  :: @[in, out]#0 void -> void produces 管理;
+  action get("/GET")
+  :: @[in, out]#0 void -> void produces 管理画面;
 };
 
 resource 編集 ("/edit/") {
-  action 取得("/GET")
-  :: @[in, out]#0 void -> void produces 編集;
+  action get("/GET")
+  :: @[in, out]#0 void -> void produces 編集画面;
 };

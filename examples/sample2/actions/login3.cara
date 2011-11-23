@@ -1,0 +1,79 @@
+// -*- coding: utf-8  -*-
+
+/** 動的ポートを使った（つもりの）ログインモジュール 
+ 
+ # ポート宣言は、仮にportリソース内でしている。
+ # ポート名の参照のところで、port. で修飾した名前を使っている。
+
+*/
+module login3 in cara;
+
+resource port ("/") {
+
+  /** ログイン取りやめ時のリクエスト先 */
+  action dyn-cancel("dyn-cancle/GET")
+  :: @[in, out] #0 void -> _
+  ;
+
+  /** ログイン成功時のリダイレクト先 */
+  action dyn-success("dyn-success/GET")
+  ::
+  ;
+
+  /** 新規ユーザー登録先 */
+  action new-user("new-user/GET")
+  ::
+  ;
+
+};
+
+
+type ReturnInfo = deferred object;
+
+@[abstract]
+state enter :: any links {
+  - enter --> Login.get;
+}; 
+
+
+/** ログイン画面の生成 */
+resource Login("/login.html") {
+  action get("/GET")
+  {
+     "returns" : uri
+  }
+  :: @[in, out] #io void -> ReturnInfo produces login ;
+  
+};
+
+/** ログイン画面 */
+state login :: ReturnInfo links {
+  /* IDとパスワードを入れてサブミット */
+  - submit --> DoLogin.do-login;
+  new-user() --> port.new-user; 
+
+  /* ログインは取りやめ 
+   * cancel時ターゲットのURLなどはプログラムが実行時に教える必要がある。
+   * 束縛が済まないと、
+   * リクエスト（またはリダイレクト）先のアクションが確定しない。
+   */
+  cancel()   --> port.dyn-cancel;
+};
+
+/** ログイン失敗画面 */
+state login-failed :: ReturnInfo links {
+  - resubmit --> DoLogin.do-login;
+  new-user() --> port.new-user; 
+  cancel()   --> port.dyn-cancel;
+};
+
+/** ログイン処理 */
+resource DoLogin("/do-login.cgi") {
+  action do-login("/POST")
+  :: @[in]  #in object -> _      relays [ok, ng],
+     @[out] #ok _      -> object redirects port.dyn-success,
+     @[out] #ng _      -> _      produces login-failed
+     // redirects Login.get // retry
+   ;
+
+};
