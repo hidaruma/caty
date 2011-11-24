@@ -10,10 +10,10 @@ module login2 in cara;
 
 
 /** ログイン取りやめ時のリクエスト先 */
-//port cancel;
+port cancel;
 
 /** ログイン失敗時のリダイレクト先 */
-//port success;
+port success;
 
 
 /** 開始状態 */

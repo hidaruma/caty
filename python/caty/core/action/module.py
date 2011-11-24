@@ -109,6 +109,7 @@ class ResourceModule(Module):
         self._resources = []
         self._states = []
         self._userroles = []
+        self._ports = []
 
     @property
     def resources(self):
@@ -154,6 +155,15 @@ class ResourceModule(Module):
                     name=ur.name, module=self._name)
         self._userroles.append(ur)
 
+    def add_port(self, port):
+        for p in self.ports:
+            if p.name == port.name:
+                throw_caty_exception(
+                    u'CARA_COMPILE_ERROR',
+                    u'Duplicated port name: $name module: $module', 
+                    name=port.name, module=self._name)
+        self._ports.append(port)
+
     def get_resource(self, name):
         for r in self._resources:
             if r.name == name:
@@ -172,6 +182,10 @@ class ResourceModule(Module):
     @property
     def userroles(self):
         return self._userroles
+
+    @property
+    def ports(self):
+        return self._ports
 
     def make_graph(self):
         root = {
@@ -240,6 +254,8 @@ class ResourceModule(Module):
                         nodes.append({u'name': st, u'label': st, u'type': u'missing-state'})
                         e = {u'to': st, u'from': act.resource_name+'.'+act.name, u'type': u'missing'}
                         edges.append(e)
+        for port in self.ports:
+            nodes.append({u'name': u'port.'+port.name, u'label': port.name, u'type': u'port'})
         for d in appered_dest:
             found = False
             for s in subgraphs:
@@ -278,30 +294,23 @@ class ResourceModule(Module):
         if ':' in action_id:
             return action_id
         rcname, aname = action_id.split('.')
+        if rcname == u'port':
+            for p in self.ports:
+                if p.name == action_id:
+                    return action_id
+            else:
+                return None
         for r in self.resources:
             if r.name == rcname:
                 res = r
                 break
         else:
             return None
-            throw_caty_exception(
-                u'ResourNotFound',
-                u'$resourceName is not defined in $moduleName',
-                resourceName=rcname,
-                moduleName=self.name
-            )
         for a in res.entries.values():
             if a.name == aname:
                 return action_id
         else:
             return None
-            throw_caty_exception(
-                u'ActionNotFound',
-                u'$actionName is not defined in $moduleName:$resourceName',
-                actionName=aname,
-                moduleName=self.name,
-                resourceName=rcname
-            )
 
     def make_userrole_graph(self):
         root = {

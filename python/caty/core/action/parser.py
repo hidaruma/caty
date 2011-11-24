@@ -28,7 +28,7 @@ class ResourceActionDescriptorParser(Parser):
         if name != self._module_name:
             raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
         rm = ResourceModule(name, ds, self._app)
-        classes = seq.parse(many(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, self.userrole])))
+        classes = seq.parse(many(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, self.userrole, self.port])))
         if not seq.eof:
             raise ParseError(seq, self)
         for c in classes:
@@ -41,6 +41,8 @@ class ResourceActionDescriptorParser(Parser):
                     rm.add_state(c)
                 elif isinstance(c, UserRole):
                     rm.add_userrole(c)
+                elif isinstance(c, Port):
+                    rm.add_port(c)
         return rm
 
     def state(self, seq):
@@ -75,6 +77,12 @@ class ResourceActionDescriptorParser(Parser):
         patterns = seq.parse(split(url_string, '|'))
         seq.parse(')')
         return u'|'.join(patterns)
+
+    def port(self, seq):
+        keyword(u'port')(seq)
+        n = name(seq)
+        S(';')(seq)
+        return Port(n)
 
 def url_string(seq):
     try:
@@ -481,4 +489,14 @@ class LiterateRADParser(ResourceActionDescriptorParser):
             else:
                 s.append(n)
         return s
+
+
+class Port(object):
+    def __init__(self, name):
+        self._name = name
+
+    @property
+    def name(self):
+        return self._name
+
 

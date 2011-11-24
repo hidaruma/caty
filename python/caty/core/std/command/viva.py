@@ -115,6 +115,13 @@ class DrawModule(Builtin, DrawingMixin):
             'style': u'filled',
             'color': u'black',
             'fillcolor': u'darkseagreen2'
+        }, 
+        'port': {
+            'fontsize': 14.0,
+            'shape': u'ellipse',
+            'style': u'filled,dotted',
+            'color': u'black',
+            'fillcolor': u'darkseagreen2'
         },
         'state': {
             'fontsize': 14.0,
