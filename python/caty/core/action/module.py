@@ -265,6 +265,10 @@ class ResourceModule(Module):
                         break
                 if found:
                     break
+            for n in nodes:
+                if n['name'] == d:
+                    found = True
+                    break
             if not found:
                 nodes.append({u'name': d, u'label': d, u'type': u'external'})
         root['nodes'] = nodes
@@ -296,7 +300,7 @@ class ResourceModule(Module):
         rcname, aname = action_id.split('.')
         if rcname == u'port':
             for p in self.ports:
-                if p.name == action_id:
+                if p.name == aname:
                     return action_id
             else:
                 return None
