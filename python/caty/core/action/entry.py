@@ -118,13 +118,19 @@ class ResourceActionEntry(object):
                             G['edges'].append({u'from': profile.name, u'to': red, u'type': u'missing'})
                         else:
                             n = red.split('.')[-1]
-                            for p in module.ports:
-                                if p.name == n:
-                                    G['nodes'].append({u'name': red, u'type': u'port'})
-                                    break
+                            dest = 'port#'+red
+                            if not '.' in red:
+                                for p in module.ports:
+                                    if p.name == red:
+                                        tp = 'port'
+                                        break
+                                else:
+                                    tp = 'missing-port'
+                                G['nodes'].append({u'name': dest, u'label': red, u'type': tp})
+                                G['edges'].append({u'to': dest, u'from': profile.name, u'type': u'redirect'})
                             else:
                                 G['nodes'].append({u'name': red, u'type': u'action'})
-                            G['edges'].append({u'to': red, u'from': profile.name, u'type': u'redirect'})
+                                G['edges'].append({u'to': red, u'from': profile.name, u'type': u'redirect'})
                     for res in module.resources:
                         for act in res.actions:
                             for prof in act.profiles:

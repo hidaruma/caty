@@ -217,9 +217,14 @@ class ResourceModule(Module):
                     act, fragment = link_to
                     to_node_name = self._find_linked_action(act)
                     if not to_node_name:
-                        nodes.append({u'label': act, u'name': act, u'type': u'missing-action'})
+                        if not '.' in act:
+                            nodes.append({u'label': act, u'name': act, u'type': u'missing-port'})
+                        else:
+                            nodes.append({u'label': act, u'name': act, u'type': u'missing-action'})
                         e = {u'from': from_name, u'to': act, u'type': u'missing'}
                     else:
+                        if not '.' in to_node_name:
+                            to_node_name = 'port#'+to_node_name
                         appered_dest.add(to_node_name)
                         e = {u'from': from_name, u'to': to_node_name, u'type': u'link'}
                     if len(link.link_to_list) == 1:
@@ -241,9 +246,14 @@ class ResourceModule(Module):
                 for red in act.profiles.redirects:
                     to_name = self._find_linked_action(red)
                     if not to_name:
-                        nodes.append({u'label': red, u'name': red, u'type': u'missing-action'})
+                        if not '.' in red:
+                            nodes.append({u'label': red, u'name': red, u'type': u'missing-port'})
+                        else:
+                            nodes.append({u'label': red, u'name': red, u'type': u'missing-action'})
                         e = {u'from': act.resource_name + '.' + act.name, u'to': red, u'type': u'missing'}
                     else:
+                        if not '.' in to_name:
+                            to_name = 'port#' + to_name
                         e = {u'from': act.resource_name + '.' + act.name, u'to': to_name, u'type': u'redirect'}
                     edges.append(e)
                 for st in act.profiles.next_states:
@@ -255,7 +265,7 @@ class ResourceModule(Module):
                         e = {u'to': st, u'from': act.resource_name+'.'+act.name, u'type': u'missing'}
                         edges.append(e)
         for port in self.ports:
-            nodes.append({u'name': u'port.'+port.name, u'label': port.name, u'type': u'port'})
+            nodes.append({u'name': u'port#'+port.name, u'label': port.name, u'type': u'port'})
         for d in appered_dest:
             found = False
             for s in subgraphs:
@@ -297,13 +307,13 @@ class ResourceModule(Module):
     def _find_linked_action(self, action_id):
         if ':' in action_id:
             return action_id
-        rcname, aname = action_id.split('.')
-        if rcname == u'port':
+        if not '.' in action_id:
             for p in self.ports:
-                if p.name == aname:
+                if p.name == action_id:
                     return action_id
             else:
                 return None
+        rcname, aname = action_id.split('.', 1)
         for r in self.resources:
             if r.name == rcname:
                 res = r

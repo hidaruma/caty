@@ -164,6 +164,13 @@ class DrawModule(Builtin, DrawingMixin):
             'color': u'black',
             'fillcolor': u'gainsboro'
         },
+        'missing-port': {
+            'fontsize': 14.0,
+            'shape': u'ellipse',
+            'style': u'filled,dotted',
+            'color': u'black',
+            'fillcolor': u'gainsboro'
+        },
         'external': {
             'fontsize': 14.0,
             'shape': u'ellipse',
@@ -276,8 +283,8 @@ class DrawModule(Builtin, DrawingMixin):
                     attr['label'] = ''
                     attr['width'] = '0.2'
                     attr['shape'] = 'circle'
-            elif (self._node == 'action' and node['type'] != 'action'):
-                if node['type'] == 'external' or node['type'] == 'missing-action':
+            elif (self._node == 'action' and node['type'] not in('action', 'port')):
+                if node['type'] in ('external', 'missing-action', 'missing-port'):
                     pass
                     #attr['shape'] = 'circle'
                 else:
@@ -408,7 +415,14 @@ class DrawAction(Builtin, DrawingMixin):
             'style': u'filled',
             'color': u'black',
             'fillcolor': u'gainsboro'
-        }, 
+        },  
+        'missing-port': {
+            'fontsize': 14.0,
+            'shape': u'ellipse',
+            'style': u'filled,dotted',
+            'color': u'black',
+            'fillcolor': u'gainsboro'
+        },
         'middle-point': {
             'shape': 'none',
             'height': '0.0',
