@@ -194,6 +194,9 @@ _identifier_ptn = _name_token_ptn + u'(\\.{0})*'.format(_name_token_ptn)
 _mod_identifier_ptn = u'({0}:)?{1}'.format(_identifier_ptn, _identifier_ptn)
 _app_identifier_ptn = u'({n}:({i}|:{n}))|({i})'.format(n=_name_token_ptn, i=_mod_identifier_ptn)
 import re
+def some_token(seq):
+    return seq.parse(Regex(u'({0})+'.format(_name_char), re.X))
+
 def name_token(seq):
     return seq.parse(Regex(_name_token_ptn, re.X))
 

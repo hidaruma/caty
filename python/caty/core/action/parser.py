@@ -3,7 +3,7 @@ from topdown import *
 from caty.core.script.parser import ScriptParser
 from caty.core.casm.language.casmparser import module_decl
 from caty.core.casm.language.schemaparser import object_, typedef
-from caty.core.language.util import docstring, annotation, fragment_name, annotation, identifier_token, identifier_token_m, name_token
+from caty.core.language.util import docstring, annotation, fragment_name, annotation, identifier_token, identifier_token_m, name_token, some_token
 from caty.jsontools.xjson import obj
 from caty.core.action.resource import ResourceClass
 from caty.core.action.module import ResourceModule
@@ -252,7 +252,7 @@ class ActionBlock(Parser):
 
     def relays(self, seq):
         p = seq.parse(keyword('relays'))
-        return p, choice(self.one_state, self.list_state)(seq)
+        return p, choice(self.one_name, self.list_name)(seq)
 
     def produces(self, seq):
         p = seq.parse(keyword('produces'))
@@ -268,6 +268,15 @@ class ActionBlock(Parser):
     def list_state(self, seq):
         seq.parse('[')
         r = split(self.name, ',', allow_last_delim=True)(seq)
+        seq.parse(']')
+        return r
+
+    def one_name(self, seq):
+        return [some_token(seq)]
+
+    def list_name(self, seq):
+        seq.parse('[')
+        r = split(some_token, ',', allow_last_delim=True)(seq)
         seq.parse(']')
         return r
 
