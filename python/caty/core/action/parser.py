@@ -79,10 +79,12 @@ class ResourceActionDescriptorParser(Parser):
         return u'|'.join(patterns)
 
     def port(self, seq):
+        ds = seq.parse(option(docstring, u''))
+        ann = seq.parse(option(annotation, Annotations([])))
         keyword(u'port')(seq)
         n = name(seq)
         S(';')(seq)
-        return Port(n)
+        return Port(n, ds, ann)
 
 def url_string(seq):
     try:
@@ -501,11 +503,22 @@ class LiterateRADParser(ResourceActionDescriptorParser):
 
 
 class Port(object):
-    def __init__(self, name):
+    def __init__(self, name, doc, annotations):
         self._name = name
+        self._doc = doc
+        self._annotations = annotations
 
     @property
     def name(self):
         return self._name
+
+    @property
+    def annotations(self):
+        return self._annotations
+
+    @property
+    def docstring(self):
+        return self._doc
+    
 
 

@@ -7,11 +7,11 @@ module login3 in cara;
 /* == ポート == */
 
 /** ログイン取りやめ時のリクエスト先 */
-// @[dynamic]
+@[dynamic]
 port dyn-cancel;
 
 /** ログイン成功時のリダイレクト先 */
-// @[dynamic]
+@[dynamic]
 port dyn-success;
 
 /** 新規ユーザー登録先 （これは起動時に確定） */

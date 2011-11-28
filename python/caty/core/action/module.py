@@ -265,7 +265,10 @@ class ResourceModule(Module):
                         e = {u'to': st, u'from': act.resource_name+'.'+act.name, u'type': u'missing'}
                         edges.append(e)
         for port in self.ports:
-            nodes.append({u'name': u'port#'+port.name, u'label': port.name, u'type': u'port'})
+            if 'dynamic' in port.annotations:
+                nodes.append({u'name': u'port#'+port.name, u'label': port.name, u'type': u'dyn-port'})
+            else:
+                nodes.append({u'name': u'port#'+port.name, u'label': port.name, u'type': u'port'})
         for d in appered_dest:
             found = False
             for s in subgraphs:
