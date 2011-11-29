@@ -1,0 +1,134 @@
+// -*- coding: utf-8 -*-
+
+/** Client Emulation
+ * クライアントエミュレーション スクリプト
+ * 「人間＋ブラウザ」の振る舞いを模倣する
+ */
+module clemu; 
+
+
+type typeName = string;
+type uri = string;
+type actionName = string;
+
+/** 起動されるアクションの代理となるコマンド */
+command say :: string -> void {
+ [pass, " from invoked action."] | text:concat | cout
+};
+
+/** 2つの引数で指定された範囲内のランダムな整数値を出力する */
+command rand-int [integer n, integer m] :: void -> integer {
+ // ダミー、常に1
+ 1
+};
+
+/** 2つの引数で指定された範囲内のランダムな整数値のタグを付ける */
+command rand-tag<X> [integer n, integer m] :: X -> @* X  {
+ // ダミー、常に @1 を付ける
+ @1 pass
+};
+
+/** 引数で指定された型のデータインスタンスを出力する */
+command gen-data [typeName t] :: void -> any {
+ // ダミー、文字列を出力
+ "Hello"
+};
+
+/** URLに対応するアクション名を求める（ルックアップ） */
+command href-to-action [uri href] :: void -> actionName {
+ // ダミー、アクションの代わりにこのモジュールのsayコマンド
+ "clemu:say"
+};
+
+/** 状態データ型の例 */
+type State = {
+ "foo" : [Trigger*],
+ "bar" : [Trigger*],
+ "baz" : [Trigger*],
+ * : any?
+};
+
+/** トリガー（単純化したもの） */
+type Trigger = {
+ "href" : uri,
+ "inputType" : typeName,
+};
+
+/** 状態データに含まれるトリガーを1つだけランダムに抜き出す 
+ * 人間がWebページ内から次のアンカーやフォームを選択する行為の模倣
+ */
+command choose-trigger :: State -> Trigger {
+ rand-tag 1 3 |
+ when {
+   1 => $.foo,
+   2 => $.bar,
+   3 => $.baz,
+ } > triggers | list:length > len ;
+ rand-int 1 %len > n ;
+ %triggers | nth %n
+};
+
+/** アクションを起動するためのデータ 
+ */
+type ActionInvoker = {
+ /** 起動すべきアクションの名前 */
+ "targetAction" : actionName,
+
+ /** アクションへの入力データ */
+ "inputData" : any,
+};
+
+/** トリガーを基にアクション起動データに作る
+ * Webを使わないので、URLではなくてアクション名を使う。
+ * 人間がフォームなどに入れるクライアント側入力データも適当に生成する。
+ */ 
+command make-invoker :: Trigger -> ActionInvoker {
+ [ $.href > href,  $.inputType > input-type ];
+ do {
+   href-to-action %href >: "targetAction",
+   gen-data %input-type >: "inputData",
+ }
+};
+
+/** forwardを使ってアクションを起動する */
+command invoke-action ::  ActionInvoker -> never {
+  [ $.targetAction > action,  $.inputData > data ];
+  %data | forward %action // このコマンドに制御が戻ることはない
+};
+
+/** 状態データに含まれるトリガーに対応するアクションを起動する 
+ * これが、その状態における人間の行為の模倣となる。
+ */
+command fire-some-action-on-state :: State -> never {
+ // 状態データからトリガーを乱数で選び出す
+ choose-trigger |
+
+ // ランダムに選んだトリガーから対応するアクション起動データを作りだす
+ make-invoker |
+
+ // 目的のアクションをforwardを使って起動する
+ invoke-action // アクション（の核）が実行され、次のステップへと制御が渡される
+};
+
+/** サンプルの状態データ */
+command sample-state :: void -> State {
+ {
+   "foo" : [/* 常に次のダミートリガーが選ばれる */
+            {
+              "href" : "http://localhost:8000/dummy/sample/say.cgi",
+              "inputType": "string"
+            }
+           ] ,
+   "bar" : [],
+   "baz" : [],
+   "other" : "other data field ..."
+ }
+};
+
+/** デモ実行 */
+command demo :: void -> never {
+ sample-state | fire-some-action-on-state
+};
+
+
+// End of Module
