@@ -43,6 +43,8 @@
 
     "Action: $path": "アクション: $path",
 
+    "Bindings: $path": "バインド: $path",
+
     "Loading global commands and schemata": "グローバルコマンド及びスキーマを読み込んでいます",
 
     "VCS module is not provided by default": "デフォルトではバージョン管理機能は提供されません",
