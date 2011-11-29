@@ -764,13 +764,13 @@ class NeverSchema(SchemaBase, Scalar):
     def validate(self, value):
         if self.optional and (value is caty.UNDEFINED):
             return
-        raise JsonSchemaError('never')
+        raise JsonSchemaError(dict(msg='It is an extra element'))
 
     def intersect(self, another):
         return NeverSchema()
 
     def _convert(self, value):
-        raise JsonSchemaError('never')
+        raise JsonSchemaError(dict(msg='It is an extra element'))
 
     def dump(self, depth, node=[]):
         return u'never'
