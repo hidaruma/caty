@@ -399,6 +399,7 @@ class Application(PbcObject):
             #msg = error_to_ustr(e)
             #cout.writeln(e)
             raise 
+        self._create_bindings() # ポートのバインド(cambの読み込み)
         self._init_interpreter() # ユーザ定義コマンドが解決されたので再度初期化
         self._init_mafs() # action定義でファイルタイプが加わっている可能性があるので再度初期化。
         if self._no_ambient: return
@@ -425,6 +426,10 @@ class Application(PbcObject):
         for c in filetype_classes:
             dispatcher.add_resource(c)
         self._dispatcher = dispatcher
+
+    def _create_bindings(self):
+        from caty.core.camb import create_bindings
+        create_bindings(self._actions.start().read_mode, self)
 
     def _extract_casm_from_cara(self):
         for mod in self._dispatcher.get_modules():
