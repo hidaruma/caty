@@ -1,0 +1,138 @@
+<!DOCTYPE html><!-- -*- coding: utf-8 -*- -->
+<html>
+<head>
+    <meta charset="UTF-8" /> 
+    <title>fire</title>
+    <script src="fire.js" ></script>
+</head>
+<body onload="fire.init()">
+
+<p>
+    <button onclick="fire.clearAll();fire.chain('node19');" >fire</button>
+    <button onclick="fire.clearAll();" >clear</button>
+</p>
+
+<div>
+<svg height="440pt" viewBox="0.00 0.00 429.00 440.00" width="429pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g class="graph" id="graph1" transform="scale(1 1) rotate(0) translate(4 436)">
+<title>login3</title>
+<polygon fill="gainsboro" points="-4,5 -4,-436 426,-436 426,5 -4,5" stroke="gainsboro"/>
+<text font-family="Times New Roman,serif" font-size="20.00" text-anchor="middle" x="210.5" y="-412">Module: login3</text>
+<g class="cluster" id="graph2"><title>cluster_Login</title>
+<polygon fill="#6e8b3d" points="275,-249 275,-324 345,-324 345,-249 275,-249" stroke="black"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="310" y="-308.8">Login</text>
+</g>
+<g class="cluster" id="graph3"><title>cluster_DoLogin</title>
+<polygon fill="#6e8b3d" points="8,-66 8,-141 106,-141 106,-66 8,-66" stroke="black"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="57" y="-125.8">DoLogin</text>
+</g>
+<!-- Login.get -->
+<g class="node" id="node2"><title>Login.get</title>
+<ellipse cx="310" cy="-275" fill="#b4eeb4" rx="27" ry="18" stroke="black"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="310" y="-271.3">get</text>
+</g>
+<!-- login -->
+<g class="node" id="node5"><title>login</title>
+<polygon fill="gold" points="331,-219 283,-219 283,-183 337,-183 337,-213 331,-219" stroke="black"/>
+<polyline fill="none" points="331,-219 331,-213 " stroke="black"/>
+<polyline fill="none" points="337,-213 331,-213 " stroke="black"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="310" y="-197.3">login</text>
+</g>
+<!-- Login.get&#45;&gt;login -->
+<g class="edge" id="edge4"><title>Login.get-&gt;login</title>
+<path d="M310,-256.937C310,-248.807 310,-238.876 310,-229.705" fill="none" stroke="crimson"/>
+<polygon fill="crimson" points="313.5,-229.441 310,-219.441 306.5,-229.441 313.5,-229.441" stroke="crimson"/>
+</g>
+<!-- DoLogin.do&#45;login -->
+<g class="node" id="node4"><title>DoLogin.do-login</title>
+<ellipse cx="57" cy="-92" fill="#b4eeb4" rx="40.4202" ry="18" stroke="black"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="57" y="-88.3">do-login</text>
+</g>
+<!-- port#dyn&#45;success -->
+<g class="node" id="node7"><title>port#dyn-success</title>
+<ellipse cx="57" cy="-18" fill="#c0ff3e" rx="55.3436" ry="18" stroke="black" stroke-dasharray="1,5"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="57" y="-14.3">dyn-success</text>
+</g>
+<!-- DoLogin.do&#45;login&#45;&gt;port#dyn&#45;success -->
+<g class="edge" id="edge6"><title>DoLogin.do-login-&gt;port#dyn-success</title>
+<path d="M57,-73.937C57,-65.8072 57,-55.8761 57,-46.7047" fill="none" stroke="#0000cd"/>
+<polygon fill="#0000cd" points="60.5001,-46.4406 57,-36.4407 53.5001,-46.4407 60.5001,-46.4406" stroke="#0000cd"/>
+</g>
+<!-- login&#45;failed -->
+<g class="node" id="node9"><title>login-failed</title>
+<polygon fill="gold" points="106,-219 34,-219 34,-183 112,-183 112,-213 106,-219" stroke="black"/>
+<polyline fill="none" points="106,-219 106,-213 " stroke="black"/>
+<polyline fill="none" points="112,-213 106,-213 " stroke="black"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="73" y="-197.3">login-failed</text>
+</g>
+<!-- DoLogin.do&#45;login&#45;&gt;login&#45;failed -->
+<g class="edge" id="edge8"><title>DoLogin.do-login-&gt;login-failed</title>
+<path d="M59.5643,-110.149C62.0929,-127.059 65.9961,-153.162 68.9452,-172.884" fill="none" stroke="crimson"/>
+<polygon fill="crimson" points="65.4888,-173.436 70.4293,-182.809 72.4119,-172.401 65.4888,-173.436" stroke="crimson"/>
+</g>
+<!-- login&#45;&gt;DoLogin.do&#45;login -->
+<g class="edge" id="edge10"><title>login-&gt;DoLogin.do-login</title>
+<path d="M282.979,-195.966C254.828,-191.103 209.903,-181.459 174,-165 162.68,-159.811 162.549,-153.656 151,-149 130.128,-140.585 120.817,-151.666 101,-141 90.5898,-135.397 81.3422,-126.362 74.0446,-117.633" fill="none" stroke="#9a32cd"/>
+<polygon fill="#9a32cd" points="76.5876,-115.203 67.6712,-109.481 71.0729,-119.515 76.5876,-115.203" stroke="#9a32cd"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="197" y="-153.3">- submit</text>
+</g>
+<!-- port#dyn&#45;cancel -->
+<g class="node" id="node12"><title>port#dyn-cancel</title>
+<ellipse cx="362" cy="-92" fill="#c0ff3e" rx="50.0684" ry="18" stroke="black" stroke-dasharray="1,5"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="362" y="-88.3">dyn-cancel</text>
+</g>
+<!-- login&#45;&gt;port#dyn&#45;cancel -->
+<g class="edge" id="edge12"><title>login-&gt;port#dyn-cancel</title>
+<path d="M337.139,-191.596C349.795,-186.162 363.657,-177.679 371,-165 378.874,-151.403 376.939,-133.965 372.884,-119.655" fill="none" stroke="#9a32cd"/>
+<polygon fill="#9a32cd" points="376.12,-118.291 369.667,-109.888 369.471,-120.481 376.12,-118.291" stroke="#9a32cd"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="398.5" y="-153.3">cancel()</text>
+</g>
+<!-- port#new&#45;user -->
+<g class="node" id="node14"><title>port#new-user</title>
+<ellipse cx="220" cy="-92" fill="#b4eeb4" rx="43.319" ry="18" stroke="black" stroke-dasharray="1,5"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="220" y="-88.3">new-user</text>
+</g>
+<!-- login&#45;&gt;port#new&#45;user -->
+<g class="edge" id="edge14"><title>login-&gt;port#new-user</title>
+<path d="M304.899,-182.856C301.258,-172.416 295.648,-159.175 288,-149 277.748,-135.361 263.518,-122.975 250.723,-113.339" fill="none" stroke="#9a32cd"/>
+<polygon fill="#9a32cd" points="252.725,-110.468 242.579,-107.419 248.61,-116.13 252.725,-110.468" stroke="#9a32cd"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="328" y="-153.3">new-user()</text>
+</g>
+<!-- login&#45;failed&#45;&gt;DoLogin.do&#45;login -->
+<g class="edge" id="edge16"><title>login-failed-&gt;DoLogin.do-login</title>
+<path d="M33.9369,-188.66C22.6263,-183.365 11.5685,-175.768 5,-165 -5.97156,-147.013 9.58344,-127.715 26.4735,-113.63" fill="none" stroke="#9a32cd"/>
+<polygon fill="#9a32cd" points="29.031,-116.074 34.7618,-107.163 24.7247,-110.555 29.031,-116.074" stroke="#9a32cd"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="33.5" y="-153.3">- resubmit</text>
+</g>
+<!-- login&#45;failed&#45;&gt;port#dyn&#45;cancel -->
+<g class="edge" id="edge18"><title>login-failed-&gt;port#dyn-cancel</title>
+<path d="M112.153,-195.715C142.793,-191.198 185.796,-182.238 220,-165 229.859,-160.032 229.152,-153.989 239,-149 252.463,-142.181 257.897,-146.371 272,-141 291.688,-133.502 312.514,-122.606 329.168,-113.091" fill="none" stroke="#9a32cd"/>
+<polygon fill="#9a32cd" points="331.075,-116.031 337.958,-107.976 327.554,-109.98 331.075,-116.031" stroke="#9a32cd"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="261.5" y="-153.3">cancel()</text>
+</g>
+<!-- login&#45;failed&#45;&gt;port#new&#45;user -->
+<g class="edge" id="edge20"><title>login-failed-&gt;port#new-user</title>
+<path d="M75.4881,-182.53C77.8434,-171.7 82.3706,-158.156 91,-149 97.2842,-142.332 101.579,-144.61 110,-141 133.914,-130.748 160.672,-119.077 181.809,-109.81" fill="none" stroke="#9a32cd"/>
+<polygon fill="#9a32cd" points="183.343,-112.959 191.094,-105.735 180.53,-106.549 183.343,-112.959" stroke="#9a32cd"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="121" y="-153.3">new-user()</text>
+</g>
+<!-- enter -->
+<g class="node" id="node19"><title>enter</title>
+<polygon fill="#ffe7a0" points="331,-402 283,-402 283,-366 337,-366 337,-396 331,-402" stroke="black"/>
+<polyline fill="none" points="331,-402 331,-396 " stroke="black"/>
+<polyline fill="none" points="337,-396 331,-396 " stroke="black"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="310" y="-380.3">enter</text>
+</g>
+<!-- enter&#45;&gt;Login.get -->
+<g class="edge" id="edge22"><title>enter-&gt;Login.get</title>
+<path d="M310,-365.809C310,-348.961 310,-323.018 310,-303.339" fill="none" stroke="#9a32cd"/>
+<polygon fill="#9a32cd" points="313.5,-303.149 310,-293.149 306.5,-303.149 313.5,-303.149" stroke="#9a32cd"/>
+<text font-family="Times New Roman,serif" font-size="14.00" text-anchor="middle" x="328" y="-336.3">- enter</text>
+</g>
+</g>
+</svg>
+</div>
+
+  </body>
+</html>
+
