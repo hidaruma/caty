@@ -456,17 +456,14 @@ class LiterateRADParser(ResourceActionDescriptorParser):
             if isinstance(c, (ASTRoot, CommandNode)):
                 c.declare(rm)
             else:
-                for r in rm.resources:
-                    if r.name == c.name:
-                        throw_caty_exception(
-                            u'CARA_PARSE_ERROR',
-                            u'Duplicated resource name: $name module: $module', 
-                            name=c.name, module=name)
-
                 if isinstance(c, ResourceClass):
                     rm.add_resource(c)
-                else:
-                    rm.states.append(c)
+                elif isinstance(c, StateBlock):
+                    rm.add_state(c)
+                elif isinstance(c, UserRole):
+                    rm.add_userrole(c)
+                elif isinstance(c, Port):
+                    rm.add_port(c)
         return rm
 
     def _parse_top_level(self, seq):
