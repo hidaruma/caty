@@ -218,16 +218,47 @@ class DrawModule(Builtin, DrawingMixin):
         G.layout(prog='dot')
         if self._out_file:
             o = G.draw(prog='dot', format=self._format)
-            o = self._strip(o)
+            o = self.apply_class(self._strip(o), src)
             with self.pub.open('/'+self._out_file, 'wb') as f:
                 f.write(o)
         else:
             o = G.draw(prog='dot', format=self._format)
-            o = self._strip(o)
+            o = self.apply_class(self._strip(o), src)
             if self._format == 'dot':
                 return unicode(o, 'utf-8')
             else:
                 return o
+
+    def apply_class(self, obj, graph):
+        import xml.dom.minidom as dom
+        if self._format != 'svg':
+            return obj
+        x = dom.parseString(obj)
+        for g in x.getElementsByTagName('g'):
+            cls = g.getAttribute('class')
+            if cls != 'node':
+                continue
+            node = self.__get_node(g.getAttribute('id'), graph)
+            if node is None:
+                continue
+            if node['type'] in ('state', 'abstract-state', 'missing-state'):
+                cls = 'node state'
+            elif node['type'] in ('port', 'dyn-port', 'missing-port'):
+                cls = 'node port'
+            elif node['type'] in ('action', 'missing-action'):
+                cls = 'node action'
+            g.setAttribute('class', cls)
+        return x.toxml(encoding='utf-8')
+    
+    def __get_node(self, name, graph):
+        for node in graph['nodes']:
+            if node['name'] == name:
+                return node
+        for sg in graph['subgraphs']:
+            n = self.__get_node(name, sg)
+            if n:
+                return n
+        return 
 
     def make_graph(self):
         app = self.current_app
@@ -533,6 +564,16 @@ class DrawAction(Builtin, DrawingMixin):
             attr = {'label': node.get('label', node['name'])}
             attr.update(self._graph_config[node['type']])
             attr['id'] = node['name']
+            if node['type'] in ('state', 'abstract-state', 'missing-state'):
+                attr['class'] = 'node state'
+            elif node['type'] in ('port', 'dyn-port', 'missing-port'):
+                attr['class'] = 'node port'
+            elif node['type'] in ('action', 'missing-action'):
+                attr['class'] = 'node action'
+            elif node['type'] == 'fragment':
+                attr['class'] = 'node fragment'
+            elif node['type'] == 'type':
+                attr['class'] = 'node type'
             N.attr.update(attr)
         for edge in graph_struct['edges']:
             if u'trigger' in edge:
