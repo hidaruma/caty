@@ -248,7 +248,7 @@ class DrawModule(Builtin, DrawingMixin):
             elif node['type'] in ('action', 'missing-action'):
                 cls = 'node action'
             if 'missing' in node['type']:
-                cls += ' missing'
+                cls += ' unknown'
             g.setAttribute('class', cls)
         return x.toxml(encoding='utf-8')
     
