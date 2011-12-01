@@ -301,6 +301,7 @@ class DrawModule(Builtin, DrawingMixin):
                     attr['height'] = '0.2'
             else:
                attr['label'] = node['label']
+            attr['id'] = node['name']
             N.attr.update(attr)
         for edge in graph_struct['edges']:
             conf = {}
@@ -531,6 +532,7 @@ class DrawAction(Builtin, DrawingMixin):
             N = RG.get_node(name)
             attr = {'label': node.get('label', node['name'])}
             attr.update(self._graph_config[node['type']])
+            attr['id'] = node['name']
             N.attr.update(attr)
         for edge in graph_struct['edges']:
             if u'trigger' in edge:
