@@ -247,6 +247,8 @@ class DrawModule(Builtin, DrawingMixin):
                 cls = 'node port'
             elif node['type'] in ('action', 'missing-action'):
                 cls = 'node action'
+            if 'missing' in node['type']:
+                cls += ' missing'
             g.setAttribute('class', cls)
         return x.toxml(encoding='utf-8')
     
