@@ -10,14 +10,14 @@ resource Top("/index.htm") {
 };
 
 state Top :: any links {
- + login --> Login.get;
+ - login --> Login.get;
 };
 
-/** 開始状態 */
+/** その他の状態 */
 @[abstract]
-state start :: void links {
+state other :: void links {
  // これエラーしない、ま、いいか
-  + --> Login.get;
+  - --> Login.get;
 }; 
 
 
@@ -31,19 +31,20 @@ resource Login("/login.html") {
 /** ログイン画面 */
 state login :: object links {
   /* IDとパスワードを入れてサブミット */
-  submit --> DoLogin.do-login;
+  submit --> DoLogin.do;
   /* ログインは取りやめ */
   + cancel --> Top.get;
 };
 
 /** ログイン処理アクション */
 resource DoLogin("/do-login.cgi") {
-  action do-login("/POST")
-  :: @[in, out] #io object -> object produces logged,
+  action do("/POST")
+  :: @[in, out] #io object -> object redirects logged,
      @[out] #ng _ -> _ redirects Top.get
    ;
 
 };
 
-/** ログイン成功した画面 */
-state logged :: object;
+/** ログイン成功後の遷移先 */
+@[dynamic]
+port logged;

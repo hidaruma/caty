@@ -80,8 +80,9 @@ state 開始 :: void links {
  + 登録開始 --> メニュー登録ページ.取得;
 };
 
-@[abstract]
-state 終了 :: void;
+/** 作業終了後の遷移先 */
+@[dynamic]
+port 終了;
 
 /* === 顧客用 === */
 
@@ -123,10 +124,10 @@ resource 予約処理 ("/process.cgi") {
   ;
 
   action 確定 ("commit/POST")
-  :: @[in, out] #0 void -> void produces 終了 ;
+  :: @[in, out] #0 void -> void redirects 終了 ;
 
   action メニュー登録 ("register/POST")
-  :: @[in, out] #0 void -> deferred produces 終了 ;
+  :: @[in, out] #0 void -> deferred redirects 終了 ;
 };
 
 // End of module

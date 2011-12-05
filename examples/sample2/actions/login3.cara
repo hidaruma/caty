@@ -29,7 +29,7 @@ state enter :: any links {
 /** ログイン画面 */
 state login :: ReturnInfo links {
   /* IDとパスワードを入れてサブミット */
-  - submit --> DoLogin.do-login;
+  - submit --> DoLogin.do;
   new-user() --> new-user; 
 
   /* ログインは取りやめ 
@@ -42,7 +42,7 @@ state login :: ReturnInfo links {
 
 /** ログイン失敗画面 */
 state login-failed :: ReturnInfo links {
-  - resubmit --> DoLogin.do-login;
+  - resubmit --> DoLogin.do;
   new-user() --> new-user; 
   cancel()   --> dyn-cancel;
 };
@@ -61,9 +61,9 @@ resource Login("/login.html") {
 
 /** ログイン処理 */
 resource DoLogin("/do-login.cgi") {
-  action do-login("/POST")
-  :: @[in]  #in object -> _      relays [ok, ng],
-     @[out] #ok _      -> object redirects dyn-success,
-     @[out] #ng _      -> _      produces login-failed
+  action do("/POST")
+  :: @[in]  #0 object -> _      relays [1, 2],
+     @[out] #1 _      -> object redirects dyn-success,
+     @[out] #2 _      -> _      produces login-failed
   ;
 };

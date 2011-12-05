@@ -2,6 +2,8 @@
 /** 標準のアノテーション */
 module stdAnnotation;
 
+/*{{{
+
 /** ドキュメンテーションテキスト
  */
 @[annotation, target("ANY_TARGET")]
@@ -9,7 +11,9 @@ type doc = {
  "value" : string
 };
 
-/** 無名モジュールへの登録
+}}}*/
+
+/** 公開モジュールへの登録
  */
 @[annotation, target(["TYPE_DECL", "COMMAND_DECL", "MODULE_DECL"]), affect-management]
 type register-public = {};
@@ -155,8 +159,4 @@ type discardable = {};
 @[annotation, target("PROPERTY")]
 type dynamic = {};
 
-
-
 // End of Module
-
-

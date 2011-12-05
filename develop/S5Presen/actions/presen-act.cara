@@ -1,4 +1,6 @@
 // -*- coding: utf-8 -*-
+// 注意：presenモジュールは schemata/ に存在するので
+// presen.caraにはできない。
 
 module presen-act in cara;
 

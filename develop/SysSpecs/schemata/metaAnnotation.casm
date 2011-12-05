@@ -48,12 +48,25 @@ type TargetType = (
 
   /** コマンドの宣言文 */
   "COMMAND_DECL" |
-  /** コマンドのオプション（プロパティ） */
+  /** コマンドのオプション（オブジェクトのプロパティ） */
   "OPTION" |
-  /** コマンドの引数（項目） */
+  /** コマンドの引数（配列の項目） */
   "ARGUMENT" |
-  /** コマンドの定義体 */
+  /** コマンドの定義体ブロック */
   "COMMAND_BODY" |
+
+  // == cara ==
+
+  /** リソース宣言 */
+  "RESOURCE_DECL" |
+  /** アクション宣言 */
+  "ACTION_DECL" |
+  /** 状態宣言 */
+  "STATE_DELC" |
+  /** ポート宣言 */
+  "PORT_DECL" |
+  /** フラグメント・プロファイル宣言 */
+  "FRAGMENT_PRORILE_DECL" |
 
 );
 
@@ -80,7 +93,7 @@ type annotation-value = {};
 @[annotation, target("ANNOTATION_DECL")]
 type strip-off-when-import = {};
 
-/** このアノテーションは型表現のパーシングに影響を与える
+/** このアノテーションは式（構文的表現）のパーシングに影響を与える
  */
 @[annotation, target("ANNOTATION_DECL")]
 type affect-parsing = {};
@@ -90,7 +103,7 @@ type affect-parsing = {};
 @[annotation, target("ANNOTATION_DECL")]
 type affect-validation = {};
 
-/** このアノテーションは型定義の管理に影響を与える
+/** このアノテーションはアンビエントの管理に影響を与える
  */
 @[annotation, target("ANNOTATION_DECL")]
 type affect-management = {};
