@@ -21,6 +21,7 @@ from caty.core.std.schema import (builtin,
                                   oslib,
                                   path, 
                                   xjsonlib, 
+                                  setlib, 
                                   viva,
                                   http)
 

@@ -364,14 +364,13 @@ class Application(PbcObject):
 
     def _init_vcs(self):
         if self._global_config.vcs_module:
-            self._vcs = self._global_config.vcs_module.VCSClient(self, self.pub.start(), self.data.start())
+            self._vcs = self._global_config.vcs_module.VCSClient
         else:
-            self._vcs = BaseClient(self, self.pub.start(), self.data.start())
+            self._vcs = BaseClient
 
     def _init_memory(self):
         if not self._initialized:
             self._memory = AppMemory()
-
 
     def _init_log(self):
         for tp in LOG_TYPES:
@@ -473,12 +472,13 @@ class Application(PbcObject):
             'data': self._data.start(),
             'storage': self._storage.set_finder(finder).start(),
             'behaviors': self._behaviors.start(),
-            'vcs': self._vcs.start(),
+            'schemata': self._schema_fs,
             'config': self._app_spec,
             'memory': self._memory.start(),
             'logger': logger.Logger(self).start(),
-            'sysfiles': self._create_sysfiles(),
         }
+        vcs = self._vcs(self, facilities['pub'], facilities['data'])
+        facilities['vcs'] = vcs
         facilities['token'] = RequestToken(facilities['session'])
         if facilities['session'].exists(CATY_USER_INFO_KEY):
             facilities['user'] = User(facilities['session'].get(CATY_USER_INFO_KEY))
@@ -487,6 +487,7 @@ class Application(PbcObject):
         fset = FacilitySet(facilities, self)
         facilities['interpreter'] = self._interpreter.file_mode(fset)
         return fset
+
 
     def _create_sysfiles(self):
         return SysFiles(
