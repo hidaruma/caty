@@ -15,3 +15,19 @@ class AbstractCursor(object):
     def insert(self, obj):
         raise NotImplementedError(u'{0}.{1}'.format(self.__class__.__name__, u'insert'))
 
+class AbstractNode(object):
+    def get_child_nodes(self):
+        raise NotImplementedError(u'{0}.{1}'.format(self.__class__.__name__, u'get_child_nodes'))
+
+    def before(self):
+        raise NotImplementedError(u'{0}.{1}'.format(self.__class__.__name__, u'before'))
+
+    def after(self):
+        raise NotImplementedError(u'{0}.{1}'.format(self.__class__.__name__, u'after'))
+
+    def current(self):
+        raise NotImplementedError(u'{0}.{1}'.format(self.__class__.__name__, u'current'))
+
+    def get_parent(self):
+        raise NotImplementedError(u'{0}.{1}'.format(self.__class__.__name__, u'get_parent'))
+

@@ -1,7 +1,7 @@
 
 class _UNDEFINED(object):pass
 
-class OperatorFactory(object):
+class BaseOperatorFactory(object):
     def simple_selector(self, func, arg=_UNDEFINED()):
         return SimpleSelector(func, arg)
 
@@ -26,7 +26,6 @@ class OperatorFactory(object):
 class Operator(object):
     def select(self, obj):
         raise NotImplementedError(u'{0}.{1}'.format(self.__class__.__name__, u'select'))
-
 
 class SimpleSelector(Operator):
     def __init__(self, func, arg=_UNDEFINED()):
@@ -99,8 +98,9 @@ class NodePositionSelector(Operator):
             elif self.func_name == u'after':
                 r.add(o.after())
             elif self.func_name == u'child':
-                if o.child_nodes:
-                    r.add(o.child_nodes[0].before())
+                cs = get_child_nodes()
+                if cs:
+                    r.add(cs[0].before())
                 else:
                     r.add(o.current())
         return r

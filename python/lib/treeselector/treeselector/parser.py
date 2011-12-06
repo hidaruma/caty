@@ -1,9 +1,8 @@
 from topdown import *
-from treeselector.operator import OperatorFactory
 
 class TreeSelectorParser(Parser):
     OPERATORS = (u'#', u'.')
-    def __init__(self, walker, operator_factory=OperatorFactory()):
+    def __init__(self, walker, operator_factory):
         self.__walker = walker
         self.__operator_factory = operator_factory
 
