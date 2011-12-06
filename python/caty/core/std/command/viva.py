@@ -21,7 +21,7 @@ class DrawingMixin(object):
         doc = dom.parseString(o)
         for c in doc.childNodes:
             if c.nodeType == dom.Element.ELEMENT_NODE:
-                return c.toxml()
+                return c.toxml().replace('<?xml version="1.0" encoding="utf-8"?>', '')
 
     def format_graph(self, graph):
         #self._branch_edge(graph)
@@ -218,12 +218,12 @@ class DrawModule(Builtin, DrawingMixin):
         G.layout(prog='dot')
         if self._out_file:
             o = G.draw(prog='dot', format=self._format)
-            o = self.apply_class(self._strip(o), src)
+            o = self._strip(self.apply_class(o, src))
             with self.pub.open('/'+self._out_file, 'wb') as f:
                 f.write(o)
         else:
             o = G.draw(prog='dot', format=self._format)
-            o = self.apply_class(self._strip(o), src)
+            o = self._strip(self.apply_class(o, src))
             if self._format == 'dot':
                 return unicode(o, 'utf-8')
             else:
