@@ -7,6 +7,7 @@ from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly
 from caty.jsontools import jstypes
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, ContinuationSignal, Internal, scriptwrapper
 from caty.core.script.node import *
+from caty.core.exception import *
 import caty
 import caty.core.schema as schema
 import types
