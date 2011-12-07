@@ -476,6 +476,7 @@ class Application(PbcObject):
             'config': self._app_spec,
             'memory': self._memory.start(),
             'logger': logger.Logger(self).start(),
+            'sysfiles': self._create_sysfiles(),
         }
         vcs = self._vcs(self, facilities['pub'], facilities['data'])
         facilities['vcs'] = vcs
@@ -693,8 +694,14 @@ class AppConfig(dict, FakeFacility):
 
 class SysFiles(ReadOnlyFacility):
     def __init__(self, **kwds):
+        self.__names = []
         for k, v in kwds.items():
             setattr(self, k, v)
+            self.__names.append(k)
+
+    def cleanup(self):
+        for n in self.__names:
+            getattr(self, n).cleanup()
 
 class GlobalApplication(Application):
     def __init__(self, name, no_ambient, group, system):
