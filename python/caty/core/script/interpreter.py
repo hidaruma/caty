@@ -119,7 +119,7 @@ class CommandExecutor(BaseInterpreter):
             if not node._mode.intersection(set(mode)):
                 raise InternalException(u"Command $name can not use while running mode $mode", 
                                         name=node.profile_container.name,
-                                        mode=str(mode)
+                                        mode=str(''.join(mode))
                 )
         try:
             node.var_storage.new_scope()
