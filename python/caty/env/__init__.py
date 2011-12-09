@@ -47,3 +47,10 @@ class Env(Facility):
     def commit(self):
         pass
 
+    def to_name_tree(self):
+        return {
+            u'kind': u'ns:env',
+            u'id': unicode(str(id(self))),
+            u'childNodes': {}
+        }
+

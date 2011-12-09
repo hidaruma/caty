@@ -510,6 +510,7 @@ class AppModule(Module):
                     self.saved_st[k] = v
                 for k, v in global_module.command_ns.items():
                     self.command_ns[k] = v
+
     def _path_to_module(self, path):
         p = path[1:].rsplit('.')[0]
         return p.replace('/', '.')
@@ -596,6 +597,65 @@ class AppModule(Module):
     def _show_msg(self, fo, error=False):
         msg = self._app.i18n.get('Schema: $path', path=fo.path.strip('/'))
         self._app.cout.write(u'  * ' + msg)
+
+    def to_name_tree(self):
+        c = {}
+        for k, v in self.schema_ns.items():
+            if self.__in_core_or_global_schema(k):
+                continue
+            c[k] = {
+                u'type': u'i:type',
+                u'id': unicode(str(id(v))),
+                u'childNodes': {}
+            }
+        for k, v in self.command_ns.items():
+            if self.__in_core_or_global_command(k):
+                continue
+            if '.' not in k:
+                c[k] = {
+                    u'type': u'i:cmd',
+                    u'id': unicode(str(id(v))),
+                    u'childNodes': {}
+                }
+        for k, v in self.sub_modules.items():
+            if v._type not in ('cara', 'cara.lit') and not self.__in_core_or_global_module(k):
+                c[k] = {
+                    u'type': u'ns:pkg',
+                    u'id': unicode(str(id(v))),
+                    u'childNodes': v.to_name_tree()
+                }
+        return {
+            u'kind': u'c:mod',
+            u'id': unicode(str(id(self))),
+            u'childNodes': c
+        }
+
+    def __in_core_or_global_schema(self, k):
+        if self._core:
+            if k in self._core.schema_ns:
+                return True
+        if self._global_module:
+            if k in self._global_module.schema_ns:
+                return True
+        return False
+
+    def __in_core_or_global_command(self, k):
+        if self._core:
+            if k in self._core.command_ns:
+                return True
+        if self._global_module:
+            if k in self._global_module.command_ns:
+                return True
+        return False
+
+    def __in_core_or_global_module(self, k):
+        if self._core:
+            if k in self._core.sub_modules:
+                return True
+        if self._global_module:
+            if k in self._global_module.sub_modules:
+                return True
+        return False
 
 class FilterModule(Module):
     def __init__(self, system):

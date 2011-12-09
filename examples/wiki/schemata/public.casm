@@ -12,5 +12,3 @@ type WikiSkele = {
 type WikiFile = {
     "body": string,
 };
-syntax 検索要求 ::= (: options: オプション* words : (word word*) :); // NG
-syntax quotedString ::= '"' stringContent '"' ;

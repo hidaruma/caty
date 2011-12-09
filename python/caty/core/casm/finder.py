@@ -86,6 +86,9 @@ class SchemaFinder(ResourceFinder, ReadOnlyFacility):
     def clone(self):
         return self
 
+    def to_name_tree(self):
+        return self._module.to_name_tree()
+
 class LocalModule(ResourceFinder):
     def __init__(self, finder):
         self.schema_ns = {}

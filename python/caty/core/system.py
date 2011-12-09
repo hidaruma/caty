@@ -275,3 +275,18 @@ class System(PbcObject):
     def debug_off(self):
         caty.DEBUG = False
         self.__debug = False
+
+    def to_name_tree(self):
+        apps = {
+            'kind': 'ns:apps',
+            'childNodes': {},
+        }
+        for k, v in self._app_map.items():
+            apps['childNodes'][k] = v.to_name_tree()
+        return {
+            'kind': u'c:sys',
+            'childNodes': {
+                u'': apps
+            }
+        }
+

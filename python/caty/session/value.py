@@ -182,6 +182,13 @@ class SessionInfoWrapper(Facility):
     def update_time(self):
         self.__session.update_time()
 
+    def to_name_tree(self):
+        return {
+            u'kind': u'ns:session',
+            u'id': unicode(str(id(self))),
+            u'childNodes': {}
+        }
+
 def create_variable():
     e = SessionInfo('env', None)
     return SessionInfoWrapper(e)

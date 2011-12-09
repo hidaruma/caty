@@ -619,6 +619,35 @@ class Application(PbcObject):
     def __invariant__(self):
         assert '/' not in self.name
 
+    def to_name_tree(self):
+        # ネームツリーの各要素は
+        # 各種mafs, JSONStorage, Session, Env, Memory
+        r = {
+            u'kind': u'c:app',
+            u'id': self._name,
+            u'childNodes': {},
+        }
+        d = r['childNodes']
+        f = self.create_facilities()
+        d['env'] = f['env'].to_name_tree()
+        d['session'] = f['session'].to_name_tree()
+        d['schema'] = f['schema'].to_name_tree()
+        #    'pub': self._pub.start(),
+        #    'scripts': self._scripts.start(),
+        #    'include': self._include.start(),
+        #    'schema': finder,
+        #    'data': self._data.start(),
+        #    'storage': self._storage.set_finder(finder).start(),
+        #    'behaviors': self._behaviors.start(),
+        #    'schemata': self._schema_fs,
+        #    'config': self._app_spec,
+        #    'memory': self._memory.start(),
+        #    'logger': logger.Logger(self).start(),
+        #    'sysfiles': self._create_sysfiles(),
+        for k, v in f.items():
+            v.rollback()
+        return r
+
 class StdStream(object):
     def __init__(self, encoding):
         self.encoding = encoding
