@@ -10,6 +10,6 @@ class TypeWriter(InlineParser):
 
     def __call__(self, seq, start):
         t = self._enter(seq)
-        return self.create_element('tt', None, [t])
+        return self.create_element('tt', None, self.escape_tilda(t))
 
 

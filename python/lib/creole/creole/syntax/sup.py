@@ -10,6 +10,6 @@ class SuperScript(InlineParser):
 
     def __call__(self, seq, start):
         t = self._enter(seq)
-        return self.create_element('sup', None, [t])
+        return self.create_element('sup', None, self.escape_tilda(t))
 
 

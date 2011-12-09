@@ -10,6 +10,34 @@ class WikiParser(Parser):
     def create_element(self, *args, **kwds):
         return self._element_factory(*args, **kwds)
 
+    def escape_tilda(self, t):
+        if t == '~':
+            return u''
+        seq = list(self._exact_split(t))
+        r = ['dummy']
+        for s in seq:
+            if not s and not r[-1]:
+                r.append(u'~')
+            else:
+                r.append(s)
+        return r[1:]
+
+    def _exact_split(self, t):
+        chunk = []
+        p = 0
+        not_line_top = False
+        pchar = ''
+        for n, c in enumerate(t):
+            if c == '~':
+                yield t[p:n]
+                if not_line_top and pchar=='~':
+                    yield u''
+                p = n+1
+            else:
+                not_line_top= True
+            pchar = c
+        yield t[p:]
+
 class BlockParser(WikiParser):
     def __init__(self, syntax, factory=None):
         self.language = syntax.language
@@ -52,31 +80,3 @@ class InlineParser(WikiParser):
         text = ''.join(t)
         return text
 
-import sys
-def escape_tilda(t):
-    if t == '~':
-        return u''
-    seq = list(_exact_split(t))
-    r = ['dummy']
-    for s in seq:
-        if not s and not r[-1]:
-            r.append(u'~')
-        else:
-            r.append(s)
-    return u''.join(r[1:])
-
-def _exact_split(t):
-    chunk = []
-    p = 0
-    not_line_top = False
-    pchar = ''
-    for n, c in enumerate(t):
-        if c == '~':
-            yield t[p:n]
-            if not_line_top and pchar=='~':
-                yield u''
-            p = n+1
-        else:
-            not_line_top= True
-        pchar = c
-    yield t[p:]

@@ -23,6 +23,9 @@ class BaseOperatorFactory(object):
     def position_spec_selector(self, sub, name):
         return PositionSpecSelector(sub, name)
 
+    def pseudo_class_selector(self, sub, name):
+        return PseudoClassSelector(sub, name)
+
 class Operator(object):
     def select(self, obj):
         raise NotImplementedError(u'{0}.{1}'.format(self.__class__.__name__, u'select'))
@@ -119,6 +122,20 @@ class PositionSpecSelector(Operator):
         if r is not _UNDEFINED:
             yield r
         
+class PseudoClassSelector(Operator):
+    def __init__(self, sub_selector, func_name):
+        self.sub_selector = sub_selector
+        self.func_name = func_name
+
+    def select(self, obj):
+        r = _UNDEFINED
+        for o in self.sub_selector.select(obj):
+            r = o
+            if self.func_name == u'first':
+                break
+        if r is not _UNDEFINED:
+            yield r
+
 class OrderedSet(list):
     def add(self, obj):
         if obj in self:

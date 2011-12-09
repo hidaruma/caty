@@ -110,6 +110,7 @@ class ResourceModule(Module):
         self._states = []
         self._userroles = []
         self._ports = []
+        self._type = u'cara'
 
     @property
     def resources(self):

@@ -18,7 +18,7 @@ class TreeSelectorParser(Parser):
             S(u'(')(seq)
             n = self.node_pos_selector(seq)
             S(u')')(seq)
-            return self.__operator_factory.node_position_selector(n, k)
+            return self.__operator_factory.position_spec_selector(n, k)
         else:
             n = option(self.node_pos_selector)(seq)
             if n is not None:
@@ -50,7 +50,15 @@ class TreeSelectorParser(Parser):
         s = self.__operator_factory.simple_selector(self.__walker.select_all)
         return self.sub_selector(seq, s)
 
-    def sub_selector(self, seq, s):
+    def sub_selector(self, seq, base):
+        s = self._class_or_id_selector(seq, base)
+        if option(S(':'))(seq):
+            i = self.parse_pseudo_class(seq)
+            return self.__operator_factory.pseudo_class_selector(s, i)
+        else:
+            return s
+
+    def _class_or_id_selector(self, seq, s):
         op = option(choice(*self.OPERATORS))(seq)
         if op == u'#':
             i = self.parse_id(seq)
@@ -76,6 +84,9 @@ class TreeSelectorParser(Parser):
 
     def parse_id(self, seq):
         return seq.parse(Regex(u'[a-zA-Z_][a-zA-Z0-9_]*'))
+
+    def parse_pseudo_class(self, seq):
+        return choice(keyword('first-child'), keyword('last-child'))(seq)
 
     def node_position_name(self, seq):
         return option(choice(keyword(u'before'), keyword(u'after'), keyword('child')))(seq)

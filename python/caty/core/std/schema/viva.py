@@ -33,7 +33,7 @@ command draw {
 ] :: void -> void | binary | string
      throws [ModuleNotFound]
      updates pub
-    refers python:caty.core.std.command.viva.DrawModule;
+    refers python:caty.core.std.command.viva.cara.DrawModule;
 
 /** 
  * アクションモジュール（.caraファイル）の個別アクションを視覚化する。
@@ -64,8 +64,35 @@ command draw-action {
 ] :: void -> void | binary | string
      throws [ModuleNotFound, ResourNotFound, ActionNotFound]
      updates pub
-    refers python:caty.core.std.command.viva.DrawAction;
+    refers python:caty.core.std.command.viva.cara.DrawAction;
 
+/**
+ * 名前ツリーのXJSON表現。
+ */
+type NameNode = {
+  "kind": string(remark="ノードの型名"),
+  "id": string(remark="同じ型を識別する内部名、省略時はkindに同じ")?,
+  "childNodes": {/** プロパティ名が辺の名前になる */ *: NameNode},
+};
+
+/**
+ * 名前ツリーの描画。今のところJSON出力のみ。
+ */
+command draw-nt {
+ /** 出力ファイル
+  * 指定がないときは標準出力
+  */
+ "out" : string(remark="Catyのファイルパス")?, 
+
+ /** 出力フォーマット */
+ @[default("json")]
+ "format" : ("gif" | "png" | "jpeg" | "dot" | "svg" | "svge" | "json")?,
+ 
+ /** 描画に使われるフォント。日本語を使う場合は指定するのを推奨 */
+ "font": string?
+} :: void -> void | binary | string | NameNode
+    updates pub
+    refers python:caty.core.std.command.viva.nt.DrawNT;
 
 /**
  * まだ出来てないよ
@@ -91,6 +118,6 @@ command draw-scenarios {
   } [string startAction, string userrole] :: void -> void | binary | string
      throws [ModuleNotFound, ResourNotFound, ActionNotFound]
      uses pub
-    refers python:caty.core.std.command.viva.Scenarios;
+    refers python:caty.core.std.command.viva.cara.Scenarios;
 
 """
