@@ -1,5 +1,4 @@
 from topdown import *
-from creole.syntax.base import escape_tilda
 from creole.syntax.heading import Heading
 from creole.syntax.blockquote import BlockQuote
 from creole.syntax.horizonal import Horizonal

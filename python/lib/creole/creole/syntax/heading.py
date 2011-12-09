@@ -17,6 +17,6 @@ class Heading(BlockParser):
             raise ParseFailed(seq, self)
         if level > 6: level = 6
         tag = 'h%d' % level
-        return self.create_element(tag, None, [s])
+        return self.create_element(tag, None, [self.escape_tilda(s)])
 
 

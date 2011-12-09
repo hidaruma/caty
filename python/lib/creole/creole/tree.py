@@ -43,6 +43,7 @@ class Element(object):
     def __iter__(self):
         return iter(self.childnode)
 
+
 class Comment(object):
     def __init__(self, text):
         self.text = text

@@ -14,6 +14,6 @@ class NoWiki(InlineParser):
             seq.next()
         if t.endswith(self.end):
             t = t[0:-3]
-        return self.create_element('tt', None, [t])
+        return self.create_element('tt', None, self.escape_tilda(t))
 
 

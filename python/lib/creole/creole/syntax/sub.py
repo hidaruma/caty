@@ -10,7 +10,7 @@ class SubScript(InlineParser):
 
     def __call__(self, seq, start):
         text = self._enter(seq)
-        return self.create_element('sub', None, [text])
+        return self.create_element('sub', None, self.escape_tilda(text))
 
 
 

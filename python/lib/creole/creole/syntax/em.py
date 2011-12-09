@@ -25,6 +25,7 @@ class Em(InlineParser):
                     break
                 s = seq.parse(end)
                 if s == u'~':
+                    t.append(s)
                     t.append(seq.current)
                     seq.next()
                 else:
