@@ -255,3 +255,45 @@ class MafsFactory(Facility, ResourceFinder, PbcObject):
         _another_mafs.require += _access_manager_not_none
         _another_mafs.ensure += _same_type
 
+    def to_name_tree(self):
+        r = {
+            u'kind': u'ns:dir',
+            u'id': unicode(str(id(self))),
+            u'childNodes': {},
+        }
+        d = self.opendir(u'/')
+        for e in d.read(False):
+            if e.is_dir:
+                o = {
+                    u'kind': u'ns:dir',
+                    u'id': unicode(str(id(e))),
+                    u'childNodes': {},
+                }
+                r['childNodes'][e.basename] = o
+                for n, c in self.__traverse(e):
+                    o['childNodes'][n] = c
+            else:
+                o = {
+                    u'kind': u'i:file',
+                    u'id': unicode(str(id(e))),
+                    u'childNodes': {},
+                }
+        return r
+
+    def __traverse(self, o):
+        for e in o.read():
+            if e.is_dir:
+                o = {
+                    u'kind': u'ns:dir',
+                    u'id': unicode(str(id(e))),
+                    u'childNodes': {},
+                }
+                for n, c in self.__traverse(e):
+                    o['childNodes'][n] = c
+            else:
+                o = {
+                    u'kind': u'i:file',
+                    u'id': unicode(str(id(e))),
+                    u'childNodes': {},
+                }
+            yield e.basename, o

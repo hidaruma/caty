@@ -632,6 +632,15 @@ class Application(PbcObject):
         d['env'] = f['env'].to_name_tree()
         d['session'] = f['session'].to_name_tree()
         d['schema'] = f['schema'].to_name_tree()
+        d['place'] = {
+            u'kind': u'ns:place',
+            u'id': self._name + '-' + u'place',
+            u'childNodes': {
+                'pub': f['pub'].to_name_tree(),
+                'data': f['data'].to_name_tree()
+            },
+        }
+        #d['storage'] = self._storage.to_name_tree()
         #    'pub': self._pub.start(),
         #    'scripts': self._scripts.start(),
         #    'include': self._include.start(),

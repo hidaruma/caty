@@ -604,7 +604,7 @@ class AppModule(Module):
             if self.__in_core_or_global_schema(k):
                 continue
             c[k] = {
-                u'type': u'i:type',
+                u'kind': u'i:type',
                 u'id': unicode(str(id(v))),
                 u'childNodes': {}
             }
@@ -613,17 +613,22 @@ class AppModule(Module):
                 continue
             if '.' not in k:
                 c[k] = {
-                    u'type': u'i:cmd',
+                    u'kind': u'i:cmd',
                     u'id': unicode(str(id(v))),
                     u'childNodes': {}
                 }
         for k, v in self.sub_modules.items():
             if v._type not in ('cara', 'cara.lit') and not self.__in_core_or_global_module(k):
-                c[k] = {
-                    u'type': u'ns:pkg',
-                    u'id': unicode(str(id(v))),
-                    u'childNodes': v.to_name_tree()
-                }
+                if '.' not in k:
+                    c[k] = v.to_name_tree()
+                else:
+                    c[k] = {
+                        u'kind': u'ns:pkg',
+                        u'id': unicode(str(id(v))),
+                        u'childNodes': {
+                            k.rsplit('.', 1)[-1]: v.to_name_tree()
+                        }
+                    }
         return {
             u'kind': u'c:mod',
             u'id': unicode(str(id(self))),
