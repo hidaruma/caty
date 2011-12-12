@@ -502,7 +502,7 @@ class Application(PbcObject):
         env.put('SYSTEM_ENCODING', unicode(self.sysencoding))
         env.put('APP_PATH', unicode(self.web_path))
         env.put('CATY_APP', {'group': self._group.name, 'description':self.description, 'name':self.name, 'path': unicode(self.web_path)})
-        env.put('DEBUG', is_debug)
+        env.put('DEBUG', system.debug)
         siteInfoList= []
         for n in system.app_names:
             s = system.get_app(n)

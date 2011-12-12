@@ -5,7 +5,17 @@ schema = u"""
 /**
  * 入力値を標準出力に書き出す。それ以外の動作は pass と同じ。
  */
-command dump<T> :: T -> T
+command dump<T> 
+ {
+  /** debugフラグに関わらず表示を強制する */
+  @[default(false)]
+  "force" : boolean?,
+
+  /** 表示の先頭に付加する文字列 */
+  @[default("")]
+  "prefix" : string?,
+ }
+ :: T -> T 
     refers python:caty.core.std.command.debug.Dump;
 
 /**

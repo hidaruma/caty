@@ -2,12 +2,21 @@
 from caty.core.command import Builtin
 from caty.core.schema import *
 from caty.util import cout
+import caty.jsontools as json
 name = u'debug'
 schema = u''
 class Dump(Builtin):
+    def setup(self, opts):
+        self._force = opts['force']
+        self._prefix = opts['prefix']
 
     def execute(self, input):
-        print input
+        e = self.env.get('SYSTEM_ENCODING')
+        if self.env.get('DEBUG') or self._force:
+            r = json.prettyprint(input).encode(e)
+            if self._prefix:
+                r = self._prefix.encode(e) + ' ' + r
+            print r
         return input
 
 class DumpSession(Builtin):
