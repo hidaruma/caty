@@ -40,7 +40,8 @@ class DrawNT(Internal):
             return obj
         cfg = {
             'strict': True,
-            'directed': True
+            'directed': True,
+            'label': self._facilities.app.name,
         }
         G = gv.AGraph(**cfg)
         if self._font:

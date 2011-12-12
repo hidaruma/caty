@@ -238,12 +238,16 @@ class ScriptParser(Parser):
         o = seq.parse(Regex(r'--[a-zA-Z]+[-a-zA-Z0-9_]*'))
         try:
             seq.parse('=')
-            v = seq.parse([self.unquoted, xjson.string, self.named_arg, self.indexed_arg])
-            v = try_parse(int, v, try_parse(Decimal, v, v))
+            v = seq.parse([self.unquoted_maybe_num, xjson.string, self.named_arg, self.indexed_arg])
             if v is None: return (None, None)
             return Option(o, v)
         except:
             return Option(o, None)
+
+    def unquoted_maybe_num(self, seq):
+        v = self.unquoted(seq)
+        v = try_parse(int, v, try_parse(Decimal, v, v))
+        return v
 
     def parameter_opt(self, seq):
         name = seq.parse(Regex(r'%--[a-zA-Z]+[-a-zA-Z0-9_]*\??'))[3:]
@@ -262,9 +266,7 @@ class ScriptParser(Parser):
         return NamedArg(name, optional)
 
     def arg(self, seq):
-        r = seq.parse([xjson.boolean, self.unquoted, xjson.string, self.named_arg, self.indexed_arg])
-        if not isinstance(r, bool):
-            r = try_parse(int, r, try_parse(Decimal, r, r))
+        r = seq.parse([xjson.boolean, self.unquoted_maybe_num, xjson.string, self.named_arg, self.indexed_arg])
         return Argument(r) if not isinstance(r, Param) else r
 
     def indexed_arg(self, seq):
