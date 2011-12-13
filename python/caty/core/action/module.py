@@ -205,7 +205,7 @@ class ResourceModule(Module):
                     nodes.append({'name': from_name, 'type': 'middle-point', 'label': ''})
                     edges.append({u'from': s.name, 
                                   u'to': from_name, 
-                                  u'trigger': link.link_to_list[0][0], 
+                                  u'trigger': link.trigger, 
                                   u'type': u'link', 
                                   u'is-middle-point': True})
                     if link.type == 'additional-link':

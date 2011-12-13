@@ -27,32 +27,8 @@ class DrawingMixin(object):
                 return c.toxml().replace('<?xml version="1.0" encoding="utf-8"?>', '')
 
     def format_graph(self, graph):
-        #self._branch_edge(graph)
         self._fill_subgraph(graph)
         return graph
-
-    def _branch_edge(self, graph):
-        n = 0
-        _nodes = []
-        _edges = []
-        _traced = []
-        for e1 in graph['edges']:
-            for e2 in graph['edges']:
-                if e1 in _traced:
-                    continue
-                if e1.get('trigger', 1) == e2.get('trigger', 2) and e1['from'] == e2['from'] and e1 != e2:
-                    new_dest = '__middle_point_{0}__'.format(n)
-                    _from = e1['from']
-                    _nodes.append({'name': new_dest, 'type': 'middle-point', 'label': ''})
-                    e1['from'] = new_dest
-                    e2['from'] = new_dest
-                    _edges.append({'from': _from, 'to': new_dest, 'trigger': e1['trigger'], 'type': e1['type'], 'is-middle-point': True})
-                    del e1['trigger']
-                    del e2['trigger']
-                    n += 1
-                    _traced.append(e2)
-        graph['edges'] += _edges
-        graph['nodes'] += _nodes
 
     def _fill_subgraph(self, graph):
         for sg in graph['subgraphs']:
