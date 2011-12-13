@@ -1,8 +1,8 @@
 // -*- coding: utf-8 -*-
 
-/** IGエクスプローラー
+/** IGエクスプローラー 分岐なしバージョン
  */
-module igexplr in cara;
+module igexplr-alt in cara;
 
 type Top = deferred;
 type Container = deferred;
@@ -30,18 +30,19 @@ state コンテナ-ディビジョン一覧  :: Container links {
 
 
 state ディビジョン-項目一覧  :: Container links {
-  /* 正: リクエスト辺ラベルは "item"、分岐は2分岐
-   * 誤: リクエスト辺ラベルは "IG.info"、分岐は3分岐 + 他の1本入る
+  /* 分岐を使わない
    */
-  - item --> [IG.info, IG.ns]; 
+  - item --> IG.info; 
+  - item --> IG.ns; 
   - parent --> IG.cont;
 };
 
 state 名前空間-項目一覧  :: Namespace links {
- /* 正: リクエスト辺ラベルは "item"、分岐は3分岐 
-  * 誤: リクエスト辺ラベルは "IG.info"、分岐は3分岐 + 他の1本入る
-  */
-  - item --> [IG.info, IG.cont, IG.ns]; 
+  /* 分岐を使わない
+   */
+  - item --> IG.info; 
+  - item --> IG.cont; 
+  - item --> IG.ns; 
 };
 
 state 末端ページ-情報表示 :: InfoItem links {
