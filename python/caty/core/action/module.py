@@ -199,9 +199,9 @@ class ResourceModule(Module):
         for s in self._states:
             for f in self._find_links_to(s.name):
                 edges.append({u'from': f, u'to': s.name, u'type': u'action'})
-            for link in s.links:
+            for i, link in enumerate(s.links):
                 if len(link.link_to_list) > 1:
-                    from_name = u'__middle_point_{0}'.format(link.trigger)
+                    from_name = u'__middle_point_{0}_{1}'.format(link.trigger, s.name)
                     nodes.append({'name': from_name, 'type': 'middle-point', 'label': ''})
                     edges.append({u'from': s.name, 
                                   u'to': from_name, 
