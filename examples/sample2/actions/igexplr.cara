@@ -1,0 +1,76 @@
+// -*- coding: utf-8 -*-
+
+/** IGエクスプローラー
+ */
+module igexplr in cara;
+
+type Top = deferred;
+type Container = deferred;
+type Division = deferred;
+type Namespace = deferred;
+type InfoItem = deferred;
+
+@[abstract]
+state 他のページ :: any links {
+  - top  --> IG.top;
+  - div  --> IG.div;
+  - cont --> IG.cont;
+};
+
+
+state IGトップ-入り口 :: Top links {
+  - rootCont --> IG.cont;
+  - majorDiv --> IG.div;
+};
+
+
+state コンテナ-ディビジョン一覧  :: Container links {
+  - div --> IG.div;
+};
+
+
+state ディビジョン-項目一覧  :: Container links {
+  /* 正: リクエスト辺ラベルは "item"、分岐は2分岐
+   * 誤: リクエスト辺ラベルは "IG.info"、分岐は3分岐 + 1本入る
+   */
+  - item --> [IG.info, IG.ns]; 
+  - parent --> IG.cont;
+};
+
+state 名前空間-項目一覧  :: Namespace links {
+ /* 正: リクエスト辺ラベルは "item"、分岐は3分岐 
+  * 誤: リクエスト辺ラベルは "IG.info"、分岐は3分岐 + 1本入る
+  */
+  - item --> [IG.info, IG.cont, IG.ns]; 
+};
+
+state 末端ページ-情報表示 :: InfoItem links {
+};
+
+/* URLパターンとインボーカーはダミー */
+resource IG("/ig.cgi") {
+
+ action top("top/GET")
+ :: @[in, out]#0 void -> Top produces IGトップ-入り口
+ ;
+
+ action cont("cont/GET")
+ :: @[in, out]#0 void -> Container produces コンテナ-ディビジョン一覧
+ ;
+
+ action div("div/GET")
+ :: @[in, out]#0 void -> Division produces ディビジョン-項目一覧
+ ;
+
+
+ action ns("ns/GET")
+ :: @[in, out]#0 void -> Namespace produces 名前空間-項目一覧
+ ;
+
+ action info("info/GET")
+ :: @[in, out]#0 void -> InfoItem produces 末端ページ-情報表示
+ ;
+
+
+};
+
