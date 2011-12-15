@@ -334,5 +334,10 @@ default_types = {
         u"isText": True,
         u"contentType": u"text/plain"
     },
+    # これがないと一部システムが正常に動作しない
+    u".py": {
+        u"isText": True,
+        u"contentType": u"text/plain"
+    },
 }
 
