@@ -1133,7 +1133,7 @@ class Sleep(Builtin):
     def setup(self, millisec = 1000):
         self.millisec = millisec
 
-    def execute(self):
+    def execute(self, input):
         sec = self.millisec / 1000 # __future__ division
         time.sleep(sec)
-        return None
+        return input

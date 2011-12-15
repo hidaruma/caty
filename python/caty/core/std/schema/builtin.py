@@ -1051,7 +1051,7 @@ command forward<S, T> [string command_name, string*] :: S -> never
  * 引数で指定されたミリ秒だけ停止する。
  * 引数が省略された場合は1秒(1000ミリ秒)停止する。
  */
-command sleep [integer(minimum=0)? millisec] :: void -> void
+command sleep<T> [integer(minimum=0)? millisec] :: T -> T
     refers python:caty.core.std.command.builtin.Sleep;
    
 """
