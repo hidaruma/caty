@@ -26,6 +26,7 @@ class Table(BlockParser):
                 p = c.find('[[', anchor_point)
                 if p == -1:
                     break
+                c += '|'
                 seq.next()
                 anchor_point = p+1
         if not c or (seq.current != '|' and not c.strip()):
