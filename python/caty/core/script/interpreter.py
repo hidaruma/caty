@@ -361,15 +361,18 @@ class _CallCommand(object):
     def _make_cmd(self, input):
         from caty.core.script.proxy import Proxy
         from caty.core.script.builder import CommandBuilder
+        from caty.core.command import VarStorage
         n = self._facilities['env'].get('CATY_APP')['name']
         app = self._system.get_app(n)
         profile = app.command_finder[self.__cmd_name]
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
-            c = scriptwrapper(profile, cls.instantiate(CommandBuilder(self._facilities, app.command_finder)))({}, self.__args)
+            c = scriptwrapper(profile, cls.instantiate(CommandBuilder(self._facilities, app.command_finder)))([], self.__args)
         else:
-            c = cls({}, self.__args)
+            c = cls([], self.__args)
+        var_storage = VarStorage(None, [])
         c.set_facility(self._facilities)
+        c.set_var_storage(var_storage)
         return CommandExecutor(c, app, self._facilities)
 
 class CallCommand(_CallCommand, Internal):
