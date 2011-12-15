@@ -16,13 +16,18 @@ class Table(BlockParser):
     def table_cell(self, seq):
         _ = seq.parse('|')
         c = ''
+        anchor_point = 0
         while not seq.eof:
             c += until('|')(seq)
             if c.endswith('~') and seq.current == '|':
                 c = c[:-1] + '|'
                 seq.next()
             else:
-                break
+                p = c.find('[[', anchor_point)
+                if p == -1:
+                    break
+                seq.next()
+                anchor_point = p+1
         if not c or (seq.current != '|' and not c.strip()):
             raise ParseFailed(seq, self.table_cell)
         h = c.startswith('=')
@@ -32,5 +37,4 @@ class Table(BlockParser):
         else:
             t = 'td'
         return self.create_element(t, None, self.inline.run(c))
-
 
