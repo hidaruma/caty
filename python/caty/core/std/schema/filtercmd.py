@@ -82,4 +82,10 @@ command isobject :: any -> boolean
 command isarray :: any -> boolean
    refers python:caty.core.std.command.filtercmd.IsArray;
 
+/**
+ * 入力値を文字列化する。
+ */
+@[filter]
+command json :: any -> string {json:pretty};
+
 """
