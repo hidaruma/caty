@@ -13,6 +13,13 @@ class OptionLoader(Param):
         self.key = key.lstrip('-')
         self.optional = optional
 
+class OptionVarLoader(Param):
+    type = 'var'
+    def __init__(self, key, value, optional):
+        self.key = key.lstrip('-')
+        self.value = value
+        self.optional = optional
+
 class Argument(Param):
     type = 'arg'
     def __init__(self, value):

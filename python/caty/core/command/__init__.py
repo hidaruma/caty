@@ -454,6 +454,14 @@ class VarLoader(object):
                     o[opt.key] = opt.value
                 else:
                     o[opt.key] = True
+            elif opt.type == 'var':
+                if opt.value.name in opts:
+                    o[opt.key] = opts[opt.value.name]
+                else:
+                    if opt.optional:
+                        o[opt.key] = UNDEFINED
+                    else:
+                        raise KeyError(opt.value.name)
             else:
                 if opt.key in opts:
                     o[opt.key] = opts[opt.key]

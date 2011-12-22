@@ -238,8 +238,10 @@ class ScriptParser(Parser):
         o = seq.parse(Regex(r'--[a-zA-Z]+[-a-zA-Z0-9_]*'))
         try:
             seq.parse('=')
-            v = seq.parse([self.unquoted_maybe_num, xjson.string, self.named_arg, self.indexed_arg])
+            v = seq.parse([self.unquoted_maybe_num, xjson.string, self.var_ref])
             if v is None: return (None, None)
+            if isinstance(v, VarRef):
+                return OptionVarLoader(o, v, v.optional)
             return Option(o, v)
         except:
             return Option(o, None)
