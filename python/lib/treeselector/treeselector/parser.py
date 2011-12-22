@@ -43,7 +43,7 @@ class TreeSelectorParser(Parser):
         return chainl(choice(self.all_selector, self.name_selector), self.child_operator)(seq)
 
     def all_selector(self, seq):
-        if peek(option(choice(*self.OPERATORS)))(seq):
+        if peek(option(choice(u':', *self.OPERATORS)))(seq):
             pass
         else:
             S(u'*')(seq)
