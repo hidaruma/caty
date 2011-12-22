@@ -28,7 +28,7 @@ from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
 from caty.core.exception import SubCatyException
 from caty.core.command.param import *
-from caty.core.language.util import fragment_name, identifier_token_a
+from caty.core.language.util import fragment_name, identifier_token_a, name_token
 
 class NothingTodo(Exception):
     u"""コメントのみの入力など、何もしないときのシグナル
@@ -194,7 +194,7 @@ class ScriptParser(Parser):
     
     def var_ref(self, seq):
         seq.parse('%')
-        n = seq.parse(self.var_name)
+        n = name_token(seq)
         o = seq.parse(option('?'))
         return VarRef(n, bool(o))
 
