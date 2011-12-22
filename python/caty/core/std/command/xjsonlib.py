@@ -83,15 +83,18 @@ class Get(Builtin):
         self._default = opts.default
 
     def execute(self, input):
-        from caty import UNDEFINED
+        import caty
         stm = selector.compile(self._pathexp)
         try:
-            return stm.select(input).next()
+            r = stm.select(input).next()
+            if r == caty.UNDEFINED:
+                if not self._safe:
+                    throw_caty_exception(u'Undefined', json.prettyprint(r))
+            return r
         except:
-            if self._default != UNDEFINED:
+            if self._default != caty.UNDEFINED:
                 return self._default
             if not self._safe:
                 raise
             else:
-                import caty
                 return caty.UNDEFINED
