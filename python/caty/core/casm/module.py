@@ -154,7 +154,7 @@ class Module(object):
         if a != 'builtin':
             m = t.module.name + t.module.type
         else:
-            t.module.name + '.py'
+            m = t.module.name + '.py'
         return m, a
 
     def has_ast(self, name, tracked=()):

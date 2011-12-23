@@ -88,4 +88,14 @@ command isarray :: any -> boolean
 @[filter]
 command json :: any -> string {json:pretty};
 
+/** JSONデータをエスケープせずにシリアライズする。
+ * このフィルターの出力は、そのままJavaScriptコード内で利用できる。
+ * JavaScriptコード以外では使用すべきではない。
+ * pre要素内部などにJSONデータを展開したいときは、
+ * エスケープを行うjsonフィルターを使用すべきである。
+ */
+@[filter]
+command javascript :: any -> any {json:pretty|noescape};
+
+
 """

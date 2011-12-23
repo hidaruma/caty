@@ -1,4 +1,9 @@
-
+<?caty-meta template="smarty"?>
+<?caty-script
+{
+    "a": "foo"
+}
+?>
 <html>
     <head>
         <title>Welcome</title>
@@ -8,6 +13,11 @@
         <h1>Welcome</h1>
 
         <p>Caty のサイトにようこそ。(UTF-8 encoded Text)</p>
-
+<pre>
+{$a|json}
+</pre>
+<pre>
+{$a|javascript}
+</pre>
     </body>
 </html>
