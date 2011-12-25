@@ -29,5 +29,8 @@ command show-action [string actionName] :: void -> void {
   viva:draw-action --font="MS UI Gothic" %1 | ct:show-image | void
 };
 
-
-
+/** Application name with group */
+command apg :: void -> string {
+ app | dump --prefix="app" > app;
+ [ %app | $.group, "/" , %app | $.name ] | dump --prefix="arr" | text:concat | dump --prefix="text"
+};
