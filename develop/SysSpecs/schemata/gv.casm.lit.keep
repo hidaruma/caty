@@ -3,6 +3,7 @@
 = Graphviz -- gvモジュール
 
 <<{
+// 本体の標準ライブラリに入れるのでSysSpecからは一旦除外
 /** GraphvizのCaty向けフロントエンド */
 module gv;
 
