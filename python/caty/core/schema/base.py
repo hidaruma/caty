@@ -797,13 +797,13 @@ class UndefinedSchema(SchemaBase, Scalar):
 
     def validate(self, value):
         if not (value is caty.UNDEFINED):
-            raise JsonSchemaError(u'undefined')
+            raise JsonSchemaError(dict(msg='It must undefined element'))
 
     def intersect(self, another):
         return another
 
     def _convert(self, value):
-        raise JsonSchemaError(u'undefined')
+        raise JsonSchemaError(dict(msg='It must undefined element'))
 
     def dump(self, depth, node=[]):
         return u'undefined'

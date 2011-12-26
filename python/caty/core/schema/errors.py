@@ -25,7 +25,7 @@ class ErrorObj(object):
         self.val = val
         self.error_message = message
         if is_error:
-            assert isinstance(message, dict)
+            assert isinstance(message, dict), message
         self._properties = {}
     
     def __setitem__(self, k, v):
@@ -44,6 +44,8 @@ class ErrorObj(object):
         return self._properties.keys()
 
     def get_message(self, i18n, depth=0):
+        if not self.is_error:
+            return u''
         m = [i18n.get(**self.error_message)]
         indent = ' ' * (depth * 4)
         for k, v in self.items():
@@ -172,9 +174,14 @@ def _flatten(obj, i18n, parent='$'):
         for e in _flatten(obj.e2, i18n, parent):
             t.append(e)
         r = t[0]
+        if isinstance(r, tuple):
+            parent = r[0]
+            r = r[1]
         for _t in t[1:]:
+            if isinstance(_t, tuple):
+                _t = _t[1]
             r['message'] = r['message'] + ' / ' + _t['message']
-        yield r
+        yield parent, r
     else:
         yield parent, obj.to_dict(i18n)
 

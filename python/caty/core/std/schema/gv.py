@@ -212,7 +212,9 @@ command draw
   "if-modified" : boolean?
   
  }
- :: Digraph -> (void | binary | string) ;
+ :: Digraph -> (void | binary | string)
+    uses [pub]
+    refers python:caty.core.std.command.gv.Draw;
 
 /** 空なグラフのデータ */
 command empty-graph :: void -> Digraph {

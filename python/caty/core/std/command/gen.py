@@ -2,6 +2,7 @@
 from caty.core.command import Builtin
 from caty.core.typeinterface import TreeCursor, Union, Tag
 from caty.core.schema import TagSchema, StringSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference
+import caty.jsontools as json
 import random
 from string import printable
 
@@ -125,7 +126,7 @@ class DataGenerator(TreeCursor):
             r.append(self.__imply_array_item(s, num))
             num += 1
 
-        if self.repeat and len(r) < l:
+        if node.repeat and len(r) < l:
             if self.__occur == 'var':
                 if l < len(r):
                     r.pop(-1)
