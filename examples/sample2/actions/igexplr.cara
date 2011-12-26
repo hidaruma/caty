@@ -12,65 +12,60 @@ type InfoItem = deferred;
 
 @[abstract]
 state 他のページ :: any links {
-  - top  --> IG.top;
-  - div  --> IG.div;
-  - cont --> IG.cont;
+  - ig-top  --> IG.top;
 };
 
-
-state IGトップ-入り口 :: Top links {
+state IGトップ :: Top links {
+  /** ルートコンテナへのリンク */
   - rootCont --> IG.cont;
+
+  /** いくつかのメジャーなディビジョンへのリンク */
   - majorDiv --> IG.div;
 };
 
 
-state コンテナ-ディビジョン一覧  :: Container links {
+state コンテナ--ディビジョン一覧  :: Container links {
+  /** コンテナにディビジョンへのリンク */
   - div --> IG.div;
 };
 
 
-state ディビジョン-項目一覧  :: Container links {
-  /* 正: リクエスト辺ラベルは "item"、分岐は2分岐
-   * 誤: リクエスト辺ラベルは "IG.info"、分岐は3分岐 + 他の1本入る
-   */
-  - item --> [IG.info, IG.ns]; 
+state ディビジョン--項目一覧  :: Container links {
+  - item --> [IG.cont, IG.info, IG.ns]; 
   - parent --> IG.cont;
 };
 
-state 名前空間-項目一覧  :: Namespace links {
- /* 正: リクエスト辺ラベルは "item"、分岐は3分岐 
-  * 誤: リクエスト辺ラベルは "IG.info"、分岐は3分岐 + 他の1本入る
-  */
+state 名前空間--項目一覧  :: Namespace links {
   - item --> [IG.info, IG.cont, IG.ns]; 
 };
 
-state 末端ページ-情報表示 :: InfoItem links {
+state 末端ページ--情報表示 :: InfoItem links {
 };
 
 /* URLパターンとインボーカーはダミー */
 resource IG("/ig.cgi") {
 
  action top("top/GET")
- :: @[in, out]#0 void -> Top produces IGトップ-入り口
+ :: @[in, out]#0 void -> Top produces IGトップ
  ;
 
  action cont("cont/GET")
- :: @[in, out]#0 void -> Container produces コンテナ-ディビジョン一覧
+ :: @[in, out]#0 void -> Container produces コンテナ--ディビジョン一覧
  ;
 
  action div("div/GET")
- :: @[in, out]#0 void -> Division produces ディビジョン-項目一覧
+ :: @[in, out]#0 void -> Division produces ディビジョン--項目一覧
  ;
 
-
  action ns("ns/GET")
- :: @[in, out]#0 void -> Namespace produces 名前空間-項目一覧
+ :: @[in, out]#0 void -> Namespace produces 名前空間--項目一覧
  ;
 
  action info("info/GET")
- :: @[in, out]#0 void -> InfoItem produces 末端ページ-情報表示
+ :: @[in, out]#0 void -> InfoItem produces 末端ページ--情報表示
  ;
 
 
 };
 
+	

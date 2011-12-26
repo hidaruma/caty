@@ -12,70 +12,52 @@ refers python:fb.Inc;
 command dividable-by [integer] :: integer -> (@True integer | @False integer)
 refers python:fb.Dividable;
 
-/** coutの代替 */
+/** coutの代替、入力に number も可能 */
 command say :: number | string -> void
 refers python:fb.Say;
-
 
 
 /** 入力値を開始の数として、FizzBuzzを永遠に続ける。
  * 出力を生成することはないので、出力の型はneverである。
  */
 command forever :: integer -> never {
- dump --prefix="dump input:" | dividable-by 15 |
+ pass > in | dividable-by 15 |
  when {
-   True => [pass, ("Fizz Buzz" | cout)] | nth 1,         // 15の倍数
+   True  => ("Fizz Buzz" | cout),    // 15の倍数
    False => dividable-by 3 |
-        when {
-          True => [pass, ("Fizz" | cout)] | nth 1,       // 3の倍数
-          False => dividable-by 5 |
-            when {
-              True  => [pass, ("Buzz" | cout)] | nth 1, // 5の倍数
-              False => [pass, fb:say         ] | nth 1, // その他
-            }
-        }
- } | dump --prefix="dump orig:" > orig;
- sleep 500;
- %orig | inc | forward fb:forever
-
+     when {
+       True => ("Fizz" | cout),      // 3の倍数
+       False => dividable-by 5 |
+         when {
+           True  => ("Buzz" | cout), // 5の倍数
+           False => fb:say,          // その他
+         }
+      }
+ };
+ sleep 200;
+ %in | inc | forward fb:forever
 };
 
-/** forever その2 */
+/** FizzBuzz forever その2 
+ */
 command forever2 :: integer -> never {
- dump --prefix="dump input:" > in | dividable-by 15 |
- when {
-   True => ("Fizz Buzz" | cout),       // 15の倍数
-   False => dividable-by 3 |
-        when {
-          True => ("Fizz" | cout),     // 3の倍数
-          False => dividable-by 5 |
-            when {
-              True  => ("Buzz" | cout),// 5の倍数
-              False => fb:say,         // その他
-            }
-        }
- }; dump --prefix="end-of-when:" ;
- sleep 500;
- %in | inc | forward fb:forever2
-
-};
-
-/** forever その3 */
-command forever3 :: integer -> never {
  dividable-by 15 |
  when {
-   True => [pass, ("Fizz Buzz" | cout)] | nth 1,         // 15の倍数
+   True => [pass, ("Fizz Buzz" | cout)] | nth 1,     // 15の倍数
    False => dividable-by 3 |
-        when {
-          True => [pass, ("Fizz" | cout)] | nth 1,       // 3の倍数
-          False => dividable-by 5 |
-            when {
-              True  => [pass, ("Buzz" | cout)] | nth 1, // 5の倍数
-              False => [pass, fb:say         ] | nth 1, // その他
-            }
-        }
- } | [pass, sleep 200] | nth 1 |
- inc | forward fb:forever3
-
+     when {
+       True => [pass, ("Fizz" | cout)] | nth 1,      // 3の倍数
+       False => dividable-by 5 |
+         when {
+           True  => [pass, ("Buzz" | cout)] | nth 1, // 5の倍数
+           False => [pass, fb:say         ] | nth 1, // その他
+         }
+     }
+ } | sleep 200 | inc | forward fb:forever2
 };
+
+command end :: void -> void {
+ "bye" | cout
+};
+
 
