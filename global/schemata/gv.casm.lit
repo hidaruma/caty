@@ -67,7 +67,6 @@ type AttrName = string(pattern="[a-zA-Z][a-zA-Z0-9]*");
 
 == 属性
 
-* id, nodesを明示的に禁止したい。現在はスキーマ処理系にバグがある。
 * propNameFormat以外にpropNameType というスキーマ属性が必要だ。
 
 <<{
@@ -247,7 +246,9 @@ command draw
   "if-modified" : boolean?
   
  }
- :: Digraph -> (void | binary | string) ;
+ :: Digraph -> (void | binary | string) 
+ uses pub
+ refers python:gv.Draw;
 
 }>> 
 
