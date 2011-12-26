@@ -223,7 +223,7 @@ class TypeCalcurator(_SubNormalizer):
             return True
 
         if l.type != r.type:
-            if len(set([l.type, r.type]).union(set(['__merging__', 'object']))) != 2:
+            if len(set([l.type, r.type]).union(set(['__merging__', '__intersection__', 'object']))) != 3:
                 if l.type not in ('integer', 'number') and r.type not in ('integer', 'number'):
                     return True
         return False
