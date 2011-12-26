@@ -72,8 +72,8 @@ type AttrName = string(pattern="[a-zA-Z][a-zA-Z0-9]*");
 <<{
 /** 属性の一般的な形式 */
 type Attributes = {
- //"id": undefined,
- //"nodes" : undefined,
+ "id": undefined,
+ "nodes" : undefined,
  * : (number|string|boolean)?
 }(propNameFormat="gv-attr-name") ;
 
