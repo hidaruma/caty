@@ -88,7 +88,7 @@ class ObjectSchema(SchemaBase, Object):
             return another ** self
         newschema_obj = {}
         if another.wildcard.type not in ('never', 'undefined'):
-            raise JsonSchemaError(dict(msg=u'Can not calculate ++: $prop which is not undefined might appear at both side', prop='some property'))
+            raise JsonSchemaError(dict(msg=u'Can not calculate ++: optional property which is not undefined might appear at both side', prop='some property'))
         for k, v in another.items():
             if k in self:
                 if self[k].type != 'undefined':

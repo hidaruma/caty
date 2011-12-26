@@ -147,6 +147,12 @@
 
     "Different pattern: $pattern1, $pattern2",
 
+    "Can not calculate ++: $prop which is not undefined might appear at both side",
+
+    "Can not calculate ++: optional property which is not undefined might appear at both side",
+
+    "Can not calculate ++: $prop which is not undefined appears at both side",
+
     /********************************
      **** Caty Schema Runtime    ****
      ********************************/

@@ -155,6 +155,12 @@
 
     "Different pattern: $pattern1, $pattern2": "異なるパターン: $pattern1, $pattern2",
 
+    "Can not calculate ++: $prop which is not undefined might appear at both side": "++を計算できません: undefinedでない$propが両辺に出現する可能性があります",
+
+    "Can not calculate ++: optional property which is not undefined might appear at both side": "++を計算できません: undefinedでない任意のプロパティが両辺に出現する可能性があります",
+
+    "Can not calculate ++: $prop which is not undefined appears at both side": "++を計算できません: undefinedでない$propが両辺に出現しています",
+
     /********************************
      **** スキーマランタイム関連 ****
      ********************************/
