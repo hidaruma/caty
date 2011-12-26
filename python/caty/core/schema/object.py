@@ -169,6 +169,9 @@ class ObjectSchema(SchemaBase, Object):
         mode, withtypes = self.__get_ann(k, 'with')
         if not withtypes:
             return None
+        d = self.schema_obj[k].annotations.get('default')
+        if d and value[k] == d.value:
+            return None
         errored_keys = []
         for withtype in withtypes:
             if withtype and withtype not in value:
