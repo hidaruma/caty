@@ -51,7 +51,7 @@ class Draw(Builtin):
             name = 'cluster_' + graph['id']
         else:
             name = graph['id']
-        if type == 'directed':
+        if type == 'digraph':
             d = True
         else:
             d = False
