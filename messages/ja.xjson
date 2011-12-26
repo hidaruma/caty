@@ -161,6 +161,15 @@
 
     "Can not calculate ++: $prop which is not undefined appears at both side": "++を計算できません: undefinedでない$propが両辺に出現しています",
 
+    "$key1 must appear with $key2": "$key1は$key2と共に出現しなければなりません",
+
+    "$key1 must appear with one $key2": "$key1は$key2のいずれかと共に出現しなければなりません",
+
+    "$key1 must not appear with $key2": "$key1は$key2と共に出現してはなりません",
+
+    "$key1 must not appear with one of $key2": "$key1は$key2のいずれかと共に出現してはなりません",
+
+
     /********************************
      **** スキーマランタイム関連 ****
      ********************************/

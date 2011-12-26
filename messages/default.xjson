@@ -153,6 +153,14 @@
 
     "Can not calculate ++: $prop which is not undefined appears at both side",
 
+    "$key1 must appear with $key2",
+
+    "$key1 must appear with one of $key2",
+
+    "$key1 must not appear with $key2",
+
+    "$key1 must not appear with one of $key2",
+
     /********************************
      **** Caty Schema Runtime    ****
      ********************************/

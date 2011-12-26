@@ -2,6 +2,7 @@
 from caty.core.schema.base import *
 from caty.core.typeinterface import Object
 import caty.core.runtimeobject as ro
+import caty.jsontools as json
 import random
 
 class PseudoTag(object):
@@ -138,11 +139,22 @@ class ObjectSchema(SchemaBase, Object):
                         errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Not matched to pseudo tag $tag: $value', tag=str(self.pseudoTag), value=v))
                         is_error = True
                 else:
+                    eo = self.__check_with_ann(value, k)
+                    if eo:
+                        errors[k] = eo
+                        is_error = True
+                        continue
+                    eo = self.__check_without_ann(value, k)
+                    if eo:
+                        errors[k] = eo
+                        is_error = True
+                        continue                    
                     try:
                         self.schema_obj[k].validate(v)
                     except JsonSchemaError, e:
                         is_error = True
                         errors[k] = e
+
         # optional でないメンバーで漏れがないかチェック
         for k, v in self.schema_obj.iteritems():
             if not v.optional and k not in value:
@@ -152,6 +164,58 @@ class ObjectSchema(SchemaBase, Object):
             e = JsonSchemaErrorObject({u'msg': u'Failed to validate object'})
             e.update(errors)
             raise e
+
+    def __check_with_ann(self, value, k):
+        mode, withtypes = self.__get_ann(k, 'with')
+        if not withtypes:
+            return None
+        errored_keys = []
+        for withtype in withtypes:
+            if withtype and withtype not in value:
+                errored_keys.append(withtype)
+        if mode == '_AND':
+            if errored_keys:
+                return ErrorObj(True, u'', u'', dict(msg=u'$key1 must appear with $key2', key1=k, key2=', '.join(withtypes)))
+        else:
+            if errored_keys == withtypes:
+                return ErrorObj(True, u'', u'', dict(msg=u'$key1 must appear with one of $key2', key1=k, key2=', '.join(withtypes)))
+
+    def __check_without_ann(self, value, k):
+        mode, withtypes = self.__get_ann(k, 'without')
+        if not withtypes:
+            return None
+        errored_keys = []
+        for withtype in withtypes:
+            if withtype and withtype in value:
+                wt = self.schema_obj.get(withtype)
+                if wt:
+                    default = wt.annotations.get('default')
+                    if default and default.value == value[withtype]:
+                        continue
+                d = self.schema_obj[k].annotations.get('default')
+                if d and value[k] == d.value:
+                    continue
+                errored_keys.append(withtype)
+        if mode == '_AND':
+            if errored_keys:
+                return ErrorObj(True, u'', u'', dict(msg=u'$key1 must not appear with $key2', key1=k, key2=', '.join(withtypes)))
+        else:
+            if errored_keys == withtypes:
+                return ErrorObj(True, u'', u'', dict(msg=u'$key1 must not appear with one of $key2', key1=k, key2=', '.join(withtypes)))
+    def __get_ann(self, k, t):
+        withann = self.schema_obj[k].annotations.get(t)
+        if withann:
+            val = withann.value
+        else:
+            val = None
+        if isinstance(val, basestring):
+            withtypes = [val]
+            mode = '_AND'
+        else:
+            mode, withtypes = json.split_tag(val)
+            if mode != '_OR':
+                mode = '_AND'
+        return mode, withtypes
 
     def _format(self, errors):
         r = []
