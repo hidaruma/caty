@@ -208,14 +208,25 @@ class TypeCalcurator(_SubNormalizer):
     def _visit_updator(self, node):
         l = node.left
         r = node.right
-        if '__variable__' in (l.type, r.type):
+        if self.__can_not_merge(l, r):
             t1 = l.type if l.type != '__variable__' else ro.i18n.get(u'type variable($name)', name=l.name)
             t2 = r.type if r.type != '__variable__' else ro.i18n.get(u'type variable($name)', name=r.name)
-            raise Exception(ro.i18n.get(u'unsupported operand types for $op: $type1, $type2', type1=str(t1), type2=t2, op='&'))
+            raise Exception(ro.i18n.get(u'unsupported operand types for $op: $type1, $type2', type1=str(t1), type2=t2, op='++'))
+
         l = l.accept(self)
         r = r.accept(self)
         n = l.update(r)
         return n.accept(self)
+
+    def __can_not_merge(self, l, r):
+        if '__variable__' in (l.type, r.type):
+            return True
+
+        if l.type != r.type:
+            if len(set([l.type, r.type]).union(set(['__merging__', 'object']))) != 2:
+                if l.type not in ('integer', 'number') and r.type not in ('integer', 'number'):
+                    return True
+        return False
 
 class NeverChecker(_SubNormalizer):
     def _visit_scalar(self, node):

@@ -86,9 +86,26 @@ class ObjectSchema(SchemaBase, Object):
             raise JsonSchemaError(dict(msg=u'Unsupported operand types for $op: $type1, $type2', op='++', type1='object', type2=t))
         if not isinstance(another, ObjectSchema):
             return another ** self
+        newschema_obj = {}
+        if another.wildcard.type not in ('never', 'undefined'):
+            raise JsonSchemaError(dict(msg=u'Can not calculate ++: $prop which is not undefined might appear at both side', prop='some property'))
+        for k, v in another.items():
+            if k in self:
+                if self[k].type != 'undefined':
+                    raise JsonSchemaError(dict(msg=u'Can not calculate ++: $prop which is not undefined appears at both side', prop=k))
+                else:
+                    newschema_obj[k] = v
+            elif self.wildcard.type not in ('never', 'undefined'):
+                raise JsonSchemaError(dict(msg=u'Can not calculate ++: $prop which is not undefined might appear at both side', prop=k))
+            else:
+                newschema_obj[k] = v
+        for k, v in self.items():
+            newschema_obj[k] = v
+
+
         newobj = ObjectSchema()
-        newschema_obj = merge_dict(self.schema_obj, another.schema_obj, 'error')
         newobj.schema_obj = newschema_obj
+        newobj.wildcard = self.wildcard
         return newobj
 
     def _validate(self, value):
