@@ -30,7 +30,7 @@ class Draw(Builtin):
         if (self._time_file or self._time_file) and self._out_file and self._if_modified:
             if not self._modified():
                 return
-        G = self.transform(graph)
+        G = self.transform(self._escape_lf(graph))
         G.layout(prog=self._engine)
         if self._out_file:
             o = G.draw(prog=self._engine, format=self._format)
@@ -44,6 +44,25 @@ class Draw(Builtin):
                 return unicode(o, 'utf-8')
             else:
                 return o
+
+    def _escape_lf(self, obj):
+        if isinstance(obj, dict):
+            r = {}
+            for k, v in obj.items():
+                r[k] = self._escape_lf(v)
+            return r
+        elif isinstance(obj, list):
+            r = []
+            for v in obj:
+                r.append(self._escape_lf(v))
+            return r
+        elif isinstance(obj, json.TaggedValue):
+            t, v = json.split_tag(obj)
+            return json.tagged(t, self._escape_lf(v))
+        elif isinstance(obj, unicode):
+            return obj.replace('\n', '\\n')
+        else:
+            return obj
 
     def transform(self, graph, cluster=False):
         type, graph = json.split_tag(graph)

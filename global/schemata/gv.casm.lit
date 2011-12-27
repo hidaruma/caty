@@ -448,7 +448,7 @@ command sample4 :: void -> Digraph {
    @node {
     "id":"struct3",
     "shape":"record",
-    "label":"hello\\nworld |{ b |{c|<here> d|e}| f}| g | h",
+    "label":"hello\nworld |{ b |{c|<here> d|e}| f}| g | h",
    },
 // 6: struct1 -> struct2;
   @edge ["struct1", "struct2"],
