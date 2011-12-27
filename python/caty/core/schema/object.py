@@ -101,7 +101,8 @@ class ObjectSchema(SchemaBase, Object):
             else:
                 newschema_obj[k] = v
         for k, v in self.items():
-            newschema_obj[k] = v
+            if k not in newschema_obj:
+                newschema_obj[k] = v
 
 
         newobj = ObjectSchema()
