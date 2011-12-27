@@ -78,12 +78,12 @@ def literate_casm(seq):
         if seq.eof:
             break
         seq.ignore_hook = h
-        n = seq.parse([try_(schema), try_(command), try_(syntax), try_(kind), peek(S(u'}>>'))])
-        if n == u'}>>':
-            S(u'}>>')(seq)
-            literal = True
-        elif n is not IGNORE:
-            s.append(n)
+        elems = seq.parse(many([try_(schema), try_(command), try_(syntax), try_(kind)]))
+        for e in elems:
+            if e is not IGNORE:
+                s.append(e)
+        S(u'}>>')(seq)
+        literal = True
     remove_comment(seq)
     return s
 
