@@ -59,7 +59,7 @@ class Draw(Builtin):
         G = AGraph(name=name, directed=d, strict=s)
         G.graph_attr.update(graph.get('graph', {}))
         G.node_attr.update(graph.get('node', {}))
-        G.edge_attr.update(graph.get('node', {}))
+        G.edge_attr.update(graph.get('edge', {}))
         for e in graph['elements']:
             type, elem = json.split_tag(e)
             if type == 'node':
