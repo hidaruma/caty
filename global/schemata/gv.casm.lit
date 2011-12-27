@@ -86,6 +86,13 @@ type NodeAttributes = Attributes & {
  "shape"     : shape?,
  "style"     : nodeStyle?,
 
+// 以下、2011-12-27T15:30:48 追加分
+
+ "sides": integer(minimum=3)?,
+ "peripheries": integer(minimum=0)?,
+ "skey": number?,
+ "distortion":number?,
+
  // まだ実験的なので拡張を許す
  *          : (number|string|boolean)?
 };
@@ -296,3 +303,163 @@ command draw-from-file
   } | draw --timefile=%file %--format %--engine %--font %--out %--if-modified 
 };
 }>>
+
+== 実験用
+
+* 参考：[[http://www.graphviz.org/Documentation/dotguide.pdf|dot Manual]]
+
+<<{
+
+/* "dot Manual" = http://www.graphviz.org/Documentation/dotguide.pdf */
+
+/** dot Manual fig. 1 */
+command sample1 :: void -> Digraph {
+ @digraph {
+   "id" : "G",
+   "elements" : [
+     @edge ["main", "parse" ],
+     @edge ["parse", "execute"],
+     @edge ["main", "init"],
+     @edge ["main", "cleanup"],
+     @edge ["execute", "make_string"],
+     @edge ["execute", "printf"],
+     @edge ["init", "make_string"],
+     @edge ["main", "printf"],
+     @edge ["execute", "compare"]
+   ]
+ }
+};
+
+/** dot Manual fig. 3 */
+command sample2 :: void -> Digraph {
+ @digraph {
+   "id" : "G",
+   "graph" : {"size": "4,4"},
+
+   "elements" : [
+     @node {
+       "id" : "main",
+       "shape" : "box"
+     },
+
+     @edge { 
+       "nodes" : ["main", "parse"],
+       "weight": "8",
+     },
+
+     @edge ["parse", "execute"],
+     @edge {
+       "nodes" : ["main", "init"],
+       "style" : "dotted",
+      },
+     @edge ["main", "cleanup"],
+     @edge ["execute", ["make_string", "printf"]],
+     @edge ["init", "make_string"],
+     @edge {
+      "nodes" : ["main", "printf"],
+      "style":"bold",
+      "label":"100 times"
+     },
+     @node {
+       "id":"make_string",
+       "label":"make a\nstring"
+     },
+     @node {
+       "id":"compare",
+       "shape":"box",
+        "style":"filled",
+        "color": ".7 .3 1.0"
+     },
+     @edge {
+       "nodes": ["execute", "compare"],
+       "color":"red"
+     },
+
+   ]
+ }
+
+};
+
+
+/** dot Manual fig. 5 */
+command sample3 :: void -> Digraph {
+
+ @digraph {
+  "id":"G",
+
+  "elements": [
+    @edge ["a", "b"],
+    @edge ["b", "c"],
+    @edge ["b", "d"],
+// 4: a [shape=polygon,sides=5,peripheries=3,color=lightblue,style=filled];
+    @node {
+     "id":"a",
+     "shape":"polygon",
+     "sides":5,
+     "peripheries":3,
+     "color":"lightblue",
+     "style":"filled",
+    },
+// 5: c [shape=polygon,sides=4,skew=.4,label="hello world"]
+    @node {
+     "id":"c",
+     "shape":"polygon",
+     "sides":4,
+     "skey":0.4,
+     "label":"hello world",
+    },
+// 6: d [shape=invtriangle];
+    @node {
+     "id":"d",
+     "shape":"invtriangle",
+    },
+// 7: e [shape=polygon,sides=4,distortion=.7];
+    @node {
+     "id":"e",
+     "shape":"polygon",
+     "sides":4,
+     "distortion":0.7,
+    },
+
+  ]
+ }
+
+};
+
+/** dot Manual fig. 7 */
+command sample4 :: void -> Digraph {
+ @digraph  {
+  "id":"structs",
+  "node" : {"shape":"record"},
+  "elements":[
+// 3: struct1 [shape=record,label="<f0> left|<f1> mid\ dle|<f2> right"];
+   @node {
+    "id":"struct1",
+    "shape":"record",
+    "label":"<f0> left|<f1> mid dle|<f2> right",
+   },
+// 4: struct2 [shape=record,label="<f0> one|<f1> two"];
+   @node {
+    "id":"struct2",
+    "shape":"record",
+    "label":"<f0> one|<f1> two",
+   },
+// 5: struct3 [shape=record,label="hello\nworld |{ b |{c|<here> d|e}| f}| g | h"];
+   @node {
+    "id":"struct3",
+    "shape":"record",
+    "label":"hello\nworld |{ b |{c|<here> d|e}| f}| g | h",
+   },
+// 6: struct1 -> struct2;
+  @edge ["struct1", "struct2"],
+// 7: struct1 -> struct3;
+  @edge ["struct1", "struct3"],
+
+  ]
+ }
+
+};
+
+
+}>>
+
