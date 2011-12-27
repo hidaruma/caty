@@ -337,6 +337,9 @@ class UnionSchema(OperatorSchema, Union):
     両方のスキーマで妥当性検証に失敗したときのみがエラーである。
     """
 
+    def operate(self, l, r):
+        return l | r
+
     def validate(self, value):
         u"""union 型に対するスキーマ適用処理。
         """
@@ -465,6 +468,9 @@ class IntersectionSchema(OperatorSchema, Intersection):
     実際にパイプラインが構築されて型解析が行われた場合、このスキーマは消滅して他のスキーマで置換される。
     """
 
+    def operate(self, l, r):
+        return l & r
+
     @property
     def type(self):
         return '__intersection__'
@@ -499,6 +505,9 @@ class UpdatorSchema(OperatorSchema, Updator):
     u"""型アップデータスキーマ。
     インターセクション同様、型変数を含んだアップデート演算に対応するためのスキーマである。
     """
+
+    def operate(self, l, r):
+        return l ** r
 
     @property
     def type(self):

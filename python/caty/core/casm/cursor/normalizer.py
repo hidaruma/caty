@@ -143,10 +143,10 @@ class TypeCalcurator(_SubNormalizer):
         else:
             # どちらもタグ型でない場合
             # 一方がnevrであれば演算結果はnever
-            if lt == 'never':
+            if lt == 'never' or rt == 'never':
                 res = NeverSchema()
-            elif rt == 'never':
-                res = NeverSchema()
+            elif lt == 'undefined' or rt == 'undefined':
+                res = UndefinedSchema()
             # anyは&演算では単位元
             elif lt == 'any':
                 res = r
@@ -169,6 +169,32 @@ class TypeCalcurator(_SubNormalizer):
                     else:
                         import operator
                         res = reduce(operator.or_, comb)
+                elif lt == '__union__':
+                    l = self._dereference(l)
+                    r = self._dereference(r)
+                    xl = self.__intersect(l.left, r)
+                    xr = self.__intersect(l.right, r)
+                    comb = filter(lambda x: x.type != 'never', [xl, xr])
+                    length = len(comb)
+                    if length == 0:
+                        res = NeverSchema()
+                    elif length == 1:
+                        res = comb[0]
+                    else:
+                        res = comb[0] | comb[1]
+                elif rt == '__union__':
+                    l = self._dereference(l)
+                    r = self._dereference(r)
+                    xl = self.__intersect(l, r.left)
+                    xr = self.__intersect(l, r.right)
+                    comb = filter(lambda x: x.type != 'never', [xl, xr])
+                    length = len(comb)
+                    if length == 0:
+                        res = NeverSchema()
+                    elif length == 1:
+                        res = comb[0]
+                    else:
+                        res = comb[0] | comb[1]
                 elif lt == rt or (lt in ('number', 'integer') and rt in ('number', 'integer')):
                     # 同じ型であればそのまま計算(numberとintegerも)
                     res = l.intersect(r).accept(self)
@@ -185,7 +211,22 @@ class TypeCalcurator(_SubNormalizer):
     def __intersect(self, l, r):
         if l == r:
             return l
-        return (l & r).accept(self)
+        if isinstance(l, EnumSchema):
+            if isinstance(r, OperatorSchema):
+                x = (l & r.left).accept(self)
+                y = (l & r.right).accept(self)
+                return r.operate(x, y).accept(self)
+            else:
+                return l.intersect(r)
+        elif isinstance(r, EnumSchema):
+            if isinstance(r, OperatorSchema):
+                x = (l & r.left).accept(self)
+                y = (l & r.right).accept(self)
+                return r.operate(x, y)
+            else:
+                return l.intersect(r)
+        else:
+            return (l & r).accept(self)
 
     def _intersect_enum_and_scalar(self, enum, scalar):
         r = []

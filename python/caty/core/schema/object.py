@@ -65,7 +65,16 @@ class ObjectSchema(SchemaBase, Object):
 
     def _intersect_obj(self, another):
         newobj = ObjectSchema()
-        newschema_obj = merge_dict(self.schema_obj, another.schema_obj, lambda a, b: a & b)
+        newschema_obj = {}
+        for k, v in self.items():
+            if k in another:
+                newschema_obj[k] = v & another[k]
+            else:
+                newschema_obj[k] = v & another.wildcard
+        for k, v in another.items():
+            if k in newschema_obj: continue
+            else:
+                newschema_obj[k] = v & self.wildcard
         newobj.schema_obj = newschema_obj
         wild = self.wildcard & another.wildcard
         newobj.wildcard = wild

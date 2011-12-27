@@ -46,9 +46,17 @@ class EnumSchema(SchemaBase, Enum):
             for e in another.enum:
                 if e in self.enum:
                     en.append(e)
-            return EnumSchema(en, self.options)
         else:
-            raise JsonSchemaError(dict(msg=u'Unsupported operand types for $op: $type1, $type2', op='&', type1='enum', type2=another.type))
+            for e in self.enum:
+                try:
+                    another.validate(e)
+                    en.append(e)
+                except:
+                    pass
+        if not en:
+            return NeverSchema()
+            #raise JsonSchemaError(dict(msg=u'Unsupported operand types for $op: $type1, $type2', op='&', type1='enum', type2=another.type))
+        return EnumSchema(en, self.options)
 
     def _deepcopy(self, ignore):
         return EnumSchema(self.enum, self.options)

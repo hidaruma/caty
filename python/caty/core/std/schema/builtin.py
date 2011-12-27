@@ -360,12 +360,14 @@ exception ModuleNotFound = {
   "moduleName": string,
   "moduleType": "cara" | "casm",
   "appName": string,
+  *: any?
 };
 
 /** リソースが存在しない */
 exception ResourceNotFound = {
   "moduleName": string,
   "resourceName": string,
+  *: any?
 };
 
 /** アクションが存在しない */
@@ -373,12 +375,14 @@ exception ActionNotFound = {
   "moduleName": string,
   "actionName": string,
   "resourceName": string,
+  *: any?
 };
 
 /** ユーザーロールが存在しない */
 exception UserroleNotFound = {
   "moduleName": string,
   "userrole": string,
+  *: any?
 };
 
 /** 配列のインデックスが範囲外、または不正である。*/
