@@ -88,11 +88,11 @@ class ObjectSchema(SchemaBase, Object):
         if not isinstance(another, ObjectSchema):
             return another ** self
         newschema_obj = {}
-        if another.wildcard.type not in ('never', 'undefined'):
+        if self._has_common_properties(another):
             raise JsonSchemaError(dict(msg=u'Can not calculate ++: optional property which is not undefined might appear at both side', prop='some property'))
         for k, v in another.items():
             if k in self:
-                if self[k].type != 'undefined':
+                if self[k].type != 'undefined' and v.type != 'undefined':
                     raise JsonSchemaError(dict(msg=u'Can not calculate ++: $prop which is not undefined appears at both side', prop=k))
                 else:
                     newschema_obj[k] = v
@@ -104,11 +104,33 @@ class ObjectSchema(SchemaBase, Object):
             if k not in newschema_obj:
                 newschema_obj[k] = v
 
-
         newobj = ObjectSchema()
         newobj.schema_obj = newschema_obj
         newobj.wildcard = self.wildcard
         return newobj
+
+    def _has_common_properties(self, another):
+        s, _s = self._list_properties(self)
+        t, _t = self._list_properties(another)
+        if s.intersection(t):
+            return True
+        if '*' in s and not _s.intersection(t):
+            return True
+        if '*' in t and not _t.intersection(s):
+            return True
+        return False
+
+    def _list_properties(self, o):
+        s = set([])
+        _s = set([])
+        for k, v in o.items():
+            if v.type not in ('undefined', 'never'):
+                s.add(k)
+            else:
+                _s.add(k)
+        if o.wildcard.type not in ('never', 'undefined'):
+            s.add('*')
+        return s, _s
 
     def _validate(self, value):
         errors = {}
