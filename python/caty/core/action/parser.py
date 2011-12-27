@@ -490,12 +490,17 @@ class LiterateRADParser(ResourceActionDescriptorParser):
             if seq.eof:
                 break
             seq.ignore_hook = h
-            n = seq.parse(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, self.port, peek(S(u'}>>'))]))
-            if n == u'}>>':
-                S(u'}>>')(seq)
-                literal = True
-            else:
-                s.append(n)
+            elems = seq.parse(
+                many(map(try_, 
+                    [self.resourceclass, 
+                     self.state, 
+                     schemaparser.schema, 
+                     commandparser.command, 
+                     self.port])))
+            for e in elems:
+                s.append(e)
+            S(u'}>>')(seq)
+            literal = True
         return s
 
 
