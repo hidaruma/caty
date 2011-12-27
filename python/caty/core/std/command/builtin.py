@@ -491,8 +491,13 @@ class Nth(Builtin):
     def execute(self, input):
         n = self.num
         if n < 1:
-            raise IndexError(n)
-        x = json.untagged(input)[n - 1] # 1始まり
+            throw_caty_exception(u'IndexOutOfRange', unicode(str(n)))
+        try:
+            x = json.untagged(input)[n - 1] # 1始まり
+        except:
+            throw_caty_exception(u'IndexOutOfRange', unicode(str(n)))
+        if x is caty.UNDEFINED:
+            throw_caty_exception(u'Undefined', unicode(str(n)))
         return x
 
 class Item(Builtin):
@@ -501,7 +506,13 @@ class Item(Builtin):
         self.num = n
 
     def execute(self, input):
-        x = json.untagged(input)[self.num] # 0 はじまり
+        n = self.num
+        try:
+            x = json.untagged(input)[self.num] # 0 はじまり
+        except:
+            throw_caty_exception(u'IndexOutOfRange', unicode(str(n)))
+        if x is caty.UNDEFINED:
+            throw_caty_exception(u'Undefined', unicode(str(n)))
         return x
 
 class GetPV(Builtin):
@@ -510,7 +521,12 @@ class GetPV(Builtin):
         self.key = key
 
     def execute(self, input):
-        x = json.untagged(input)[self.key]
+        try:
+            x = json.untagged(input)[self.key]
+        except:
+            throw_caty_exception(u'PropertyNotExist', self.key)
+        if x is caty.UNDEFINED:
+            throw_caty_exception(u'Undefined', self.key)
         return x
 
 class FindPV(Builtin):
@@ -519,7 +535,7 @@ class FindPV(Builtin):
         self.key = key
 
     def execute(self, input):
-        if self.key in input:
+        if self.key in input and input[self.key] is not caty.UNDEFINED:
             return tagged(u'EXISTS', input[self.key])
         else:
             return tagged(u'NO', None)
@@ -844,7 +860,6 @@ class TypeIs(Builtin):
         r = _type_of(input)
         return r == self.type_name
 
-import caty
 class Undef(Builtin):
     
     def execute(self):

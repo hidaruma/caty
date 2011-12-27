@@ -113,9 +113,28 @@ class PPEncoder(CatyEncoder):
     def __normalize(self, o):
         from caty import UNDEFINED
         if isinstance(o, (tuple, list)):
-            return [(a if a is not UNDEFINED else _empty) for a in o]
+            return self.__erase_undef(o)
+        elif isinstance(o, dict):
+            return self.__reduce_undef(o)
         else:
             return o
+
+    def __erase_undef(self, o):
+        from caty import UNDEFINED
+        r = o[:]
+        while r and r[-1] is UNDEFINED:
+            r.pop(-1)
+        return [(a if a is not UNDEFINED else _empty) for a in r]
+
+    def __reduce_undef(self, o):
+        from caty import UNDEFINED
+        r = {}
+        for k, v in o.items():
+            if v is UNDEFINED:
+                pass
+            else:
+                r[k] = v
+        return r
 
 def encode(obj):
     u"""Caty 内部形式から JSON 標準形式へと変換する。

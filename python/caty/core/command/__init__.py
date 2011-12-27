@@ -199,35 +199,6 @@ class Command(object):
         """
         return self._out_schema
 
-    def __call__(self, input):
-        if 'deprecated' in self.annotations:
-            util.cout.writeln(u'[DEBUG] Deprecated: %s' % self.name)
-        if self._mode: # @console など、特定のモードでしか動かしてはいけないコマンドのチェック処理
-            mode = self.env.get('CATY_EXEC_MODE')
-            if not self._mode.intersection(set(mode)):
-                raise InternalException(u"Command $name can not use while running mode $mode", 
-                                        name=self.profile_container.name,
-                                        mode=str(mode)
-                )
-        try:
-            self.__var_storage.new_scope()
-            self._prepare()
-            self.in_schema.validate(input)
-            if self.profile.in_schema.type == 'void':
-                r = self.execute()
-            else:
-                r = self.execute(input)
-            self.out_schema.validate(r)
-            if 'commit-point' in self.profile_container.get_annotations():
-                for n in self.__facility_names:
-                    getattr(self, n).commit()
-            if isinstance(r, list):
-                while r and r[-1] is UNDEFINED:
-                    r.pop(-1)
-            return r
-        finally:
-            self.__var_storage.del_scope()
-
     def accept(self, visitor):
         return visitor.visit_command(self)
 
