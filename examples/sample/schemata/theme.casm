@@ -1,6 +1,6 @@
 module theme; // -*- coding: utf-8 -*-
 
-type themaName = deferred string;
+type themeName = deferred string;
 type publClassName  = deferred string;
 type entryClassName = deferred string;
 type fileName  = deferred string;
@@ -21,7 +21,7 @@ type XDef = @def {
 type ThemeMetaSummary = {
 
   /** テーマ名 */
-  "name" : themaName,
+  "name" : themeName,
 
   /** UIで使うタイトル文字列 */
   "title" : string, // 国際化必要
