@@ -21,18 +21,19 @@ class Proxy(object):
 class CommandProxy(Proxy):
     u"""コマンド呼び出しに遭遇したときに構築されるプロキシクラス。
     """
-    def __init__(self, name, type_args, opts, args):
+    def __init__(self, name, type_args, opts, args, pos):
         self.name = name
         self.opts = opts
         self.args = args
         self.type_args = type_args
         self.module = None
+        self.pos = pos
 
     def set_module(self, module):
         self.module = module
 
     def instantiate(self, builder):
-        return builder.build(self, self.type_args, self.opts, self.args)
+        return builder.build(self, self.type_args, self.opts, self.args, self.pos)
 
 class ScalarProxy(Proxy):
     def __init__(self):

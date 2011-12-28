@@ -100,10 +100,11 @@ class ScriptParser(Parser):
 
     def command(self, seq):
         name = choice(self.name, self.xjson_path)(seq)
+        pos = (seq.col-len(name), seq.line)
         type_args = option(self.type_args, [])(seq)
         opts = self.options(seq)
         args = self.arguments(seq)
-        return CommandProxy(name, type_args, opts, args)
+        return CommandProxy(name, type_args, opts, args, pos)
 
     def xjson_path(self, seq):
         seq.parse('$')
@@ -224,6 +225,7 @@ class ScriptParser(Parser):
 
     def script(self, seq):
         path = seq.parse(Regex(r'[^\t\r\n <>|+"(){},.\[\]]+\.(caty|cgi)'))
+        pos = (seq.col, seq.line)
         if not path.startswith('/'):
             path = 'scripts@this:/' + path
         s = [Argument(path)]
@@ -231,7 +233,7 @@ class ScriptParser(Parser):
         args = self.arguments(seq)
         if not args:
             args = []
-        p = CommandProxy(u'exec', [], {}, s + args)
+        p = CommandProxy(u'exec', [], {}, s + args, pos)
         return p
 
     def longopt(self, seq):
@@ -296,7 +298,7 @@ class ScriptParser(Parser):
         return l
 
     def listitem(self, seq):
-        if seq.current == ']': return CommandProxy('undefined', [], {}, [])
+        if seq.current == ']': return CommandProxy('undefined', [], {}, [], (seq.col, seq.line))
         try:
             return seq.parse([self.make_pipeline, self.loose_item])
         except NothingTodo:
@@ -305,7 +307,7 @@ class ScriptParser(Parser):
     def loose_item(self, seq):
         if not seq.peek(self.comma):
             raise ParseFailed(seq, self.listitem)
-        return CommandProxy('undefined', [], {}, [])
+        return CommandProxy('undefined', [], {}, [], (seq.col, seq.line))
 
     def object(self, seq):
         seq.parse('{')

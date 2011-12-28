@@ -34,7 +34,7 @@ class Command(object):
     基づいてインジェクトされる。型宣言に記述の無い Caty ファシリティにはアクセスできない。
     """
 
-    def __init__(self, opts_ref, args_ref, type_args=[]):
+    def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None)):
         assert type_args != None
         self._profile = self.profile_container.determine_profile(opts_ref, args_ref)
         self.__type_args = type_args
@@ -50,9 +50,18 @@ class Command(object):
         self.__current_application = None
         self.__facility_names = []
         self.__i18n = None
+        self.__pos = pos
 
     def get_command_id(self):
         return self._id
+
+    @property
+    def col(self):
+        return self.__pos[0]
+
+    @property
+    def line(self):
+        return self.__pos[1]
 
     @property
     def i18n(self):
@@ -295,10 +304,10 @@ def new_dummy():
 
 def scriptwrapper(profile, script):
     class Wrapper(Command):
-        def __init__(self, opts_ref, args_ref, type_args=[]):
+        def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None)):
             self.profile_container = profile
             self.script = script
-            Command.__init__(self, opts_ref, args_ref, type_args)
+            Command.__init__(self, opts_ref, args_ref, type_args, pos)
 
         def execute(self, input=None):
             try:

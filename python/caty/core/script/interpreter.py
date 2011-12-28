@@ -113,7 +113,7 @@ class CommandExecutor(BaseInterpreter):
     def _exec_command(self, node, exec_func):
         input = self.input
         if 'deprecated' in node.annotations:
-            util.cout.writeln(u'[DEBUG] Deprecated: %s' % self.name)
+            util.cout.writeln(u'[DEBUG] Deprecated: %s' % node.name)
         if node._mode: # @console など、特定のモードでしか動かしてはいけないコマンドのチェック処理
             mode = node.env.get('CATY_EXEC_MODE')
             if not node._mode.intersection(set(mode)):
@@ -142,7 +142,8 @@ class CommandExecutor(BaseInterpreter):
         except Exception as e:
             if isinstance(e, PipelineInterruption) or isinstance(e, PipelineErrorExit):
                 raise
-            util.cout.writeln(u"[DEBUG] Error: " + repr(node))
+            msg = u'Error {0}: Col {1}, Line {2}'.format(node.name, node.col, node.line)
+            util.cout.writeln(msg)
             raise
         finally:
             node.var_storage.del_scope()
