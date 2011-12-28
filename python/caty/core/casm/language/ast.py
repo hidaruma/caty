@@ -1,6 +1,8 @@
 #coding: utf-8
 from caty.core.schema import schemata, TypeVariable, NamedSchema, PseudoTag, UnionSchema
 from caty.core.schema.base import SchemaBase, TypeVariable, Annotations, IntersectionSchema, UpdatorSchema, UnionSchema
+from caty.core.schema.array import ArraySchema
+from caty.core.schema.object import ObjectSchema
 from caty.core.schema.errors import JsonSchemaError
 from caty.core.command.profile import CommandProfile, ProfileContainer, ScriptProfileContainer
 from caty.core.exception import InternalException
@@ -262,7 +264,31 @@ class CallPattern(object):
         self.decl.build(cursors)
 
     def verify_type_var(self, names):
-        return self.decl.verify_type_var(names)
+        r = self.decl.verify_type_var(names)
+        if r:
+            return r
+        r = _verify_type_var(self.opt_schema, names)
+        if r:
+            return r
+        r = _verify_type_var(self.arg_schema, names)
+        if r:
+            return r
+
+def _verify_type_var(obj, names):
+    if isinstance(obj, ArraySchema):
+        for o in obj:
+            x = _verify_type_var(o, names)
+            if x:
+                return x
+    elif isinstance(obj, ObjectSchema):
+        for o in obj.values():
+            x = _verify_type_var(o, names)
+            if x:
+                return x
+    elif not isinstance(obj, TypeVariable):
+        return 
+    elif not obj.name in names:
+        return obj.name
 
 class CommandDecl(object):
     u"""コマンドの宣言部分の構造体。以下の要素それぞれのリストを持つ構造体クラスである。
@@ -309,16 +335,11 @@ class CommandDecl(object):
     def verify_type_var(self, names):
         for p in self.profiles:
             for i in p:
-                v = self._verify_type_var(i, names)
+                v = _verify_type_var(i, names)
                 if v is not None:
                     return v
         return
 
-    def _verify_type_var(self, obj, names):
-        if not isinstance(obj, TypeVariable):
-            return 
-        if not obj.name in names:
-            return obj.name
 
 class FacilityDecl(object):
     def __init__(self, name, param, alias):

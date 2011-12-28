@@ -37,7 +37,7 @@ command unzip<S, T> :: [[S, T]*] -> [[S*], [T*]]
  * 
  * このコマンドは zip3 コマンドと対になっている。
  */
-command unzip3 :: [[S, T, U]*] -> [[S*],[T*],[U*]] 
+command unzip3<S, T, U> :: [[S, T, U]*] -> [[S*],[T*],[U*]] 
     refers python:caty.core.std.command.listlib.UnZip3;
 
 /**

@@ -442,7 +442,7 @@ command sample4 :: void -> Digraph {
    @node {
     "id":"struct2",
     "shape":"record",
-    "label":"<f0> one|<f1> two",
+    "label":"<f0> \"one\"|<f1> two",
    },
 // 5: struct3 [shape=record,label="hello\nworld |{ b |{c|<here> d|e}| f}| g | h"];
    @node {

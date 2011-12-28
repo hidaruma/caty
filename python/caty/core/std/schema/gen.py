@@ -19,5 +19,5 @@ command url [PathPattern pathPattern] :: void -> string
     reads env
     refers python:caty.core.std.command.gen.Url;
 
-
+type PathPattern = string;
 """
