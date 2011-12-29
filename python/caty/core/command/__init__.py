@@ -434,7 +434,7 @@ class VarLoader(object):
         o = {}
         for opt in self.opts:
             if opt.type == 'option':
-                if opt.value is not None:
+                if opt.value != UNDEFINED:
                     o[opt.key] = opt.value
                 else:
                     o[opt.key] = True

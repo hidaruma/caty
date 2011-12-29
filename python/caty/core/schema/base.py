@@ -383,7 +383,7 @@ class UnionSchema(OperatorSchema, Union):
             try:
                 return self._right.convert(value)
             except JsonSchemaError, e2:
-                raise JsonSchemaError(dict(msg='Failed to convert to union type') + ':' + error_to_ustr(e1) + '/' + error_to_ustr(e2))
+                raise JsonSchemaError(dict(msg='Failed to convert to union type' + ':' + error_to_ustr(e1) + '/' + error_to_ustr(e2)))
 
 
     def dump(self, depth=0, node=[]):

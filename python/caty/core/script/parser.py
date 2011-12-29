@@ -240,13 +240,18 @@ class ScriptParser(Parser):
         o = seq.parse(Regex(r'--[a-zA-Z]+[-a-zA-Z0-9_]*'))
         try:
             seq.parse('=')
-            v = seq.parse([self.unquoted_maybe_num, xjson.string, self.var_ref])
-            if v is None: return (None, None)
+            v = choice(
+                      bind2nd(xjson.null, True), 
+                      bind2nd(xjson.boolean, True),
+                      self.unquoted_maybe_num, 
+                      xjson.string, 
+                      self.var_ref
+                      )(seq)
             if isinstance(v, VarRef):
                 return OptionVarLoader(o, v, v.optional)
             return Option(o, v)
         except:
-            return Option(o, None)
+            return Option(o, True)
 
     def unquoted_maybe_num(self, seq):
         v = self.unquoted(seq)
@@ -270,7 +275,14 @@ class ScriptParser(Parser):
         return NamedArg(name, optional)
 
     def arg(self, seq):
-        r = seq.parse([xjson.boolean, self.unquoted_maybe_num, xjson.string, self.named_arg, self.indexed_arg])
+        r = choice(
+                  bind2nd(xjson.null, True), 
+                  bind2nd(xjson.boolean, True),
+                  self.unquoted_maybe_num, 
+                  xjson.string, 
+                  self.named_arg,
+                  self.indexed_arg
+                  )(seq)
         return Argument(r) if not isinstance(r, Param) else r
 
     def indexed_arg(self, seq):
