@@ -192,9 +192,7 @@ class Command(object):
             self.setup()
 
     def _init_opts(self):
-        o, a = self.__var_loader.load(self.__var_storage)
-        self._opts = o or {}
-        self._args = a or []
+        self._opts, self._args = self.__var_loader.load(self.__var_storage)
 
     def setup(self): pass
 
@@ -329,9 +327,10 @@ def scriptwrapper(profile, script):
             opts = self._opts
             args = self._args
             o = {}
-            for k, v in opts.items():
-                o[k] = v
-            self.var_storage.new_masked_scope(opts, args)
+            if opts:
+                for k, v in opts.items():
+                    o[k] = v
+            self.var_storage.new_masked_scope(opts or {}, args or [])
             if opts:
                 for k, v in opts.items():
                     self.var_storage.opts[k] = v
