@@ -878,12 +878,12 @@ class Help(Builtin):
             self.__type_name = line
             self.__mode = u'type'
         elif opts['command']:
-            self.line = line
+            self.__line = line
         elif opts['resource']:
             self.__resource_name = line
             self.__mode = u'resource'
         else:
-            self.line = u''
+            self.__line = u''
         
     def execute(self):
         if self.__mode == u'type':
@@ -1031,7 +1031,7 @@ class Help(Builtin):
 
     def _command_help(self):
         interpreter = self.interpreter
-        line = self.line.strip()
+        line = self.__line.strip()
         if line == '':
             line = 'help'
         if line in ('change', 'reload', 'l', 'quit', 'ch', 'cd', 'server'):
