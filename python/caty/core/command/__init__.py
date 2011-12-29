@@ -192,7 +192,9 @@ class Command(object):
             self.setup()
 
     def _init_opts(self):
-        self._opts, self._args = self.__var_loader.load(self.__var_storage)
+        o, a = self.__var_loader.load(self.__var_storage)
+        self._opts = o or {}
+        self._args = a or []
 
     def setup(self): pass
 
