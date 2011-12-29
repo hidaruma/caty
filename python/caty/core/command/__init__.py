@@ -309,6 +309,7 @@ def scriptwrapper(profile, script):
             self.script = script
             Command.__init__(self, opts_ref, args_ref, type_args, pos)
 
+
         def execute(self, input=None):
             try:
                 return script(input)
@@ -325,6 +326,9 @@ def scriptwrapper(profile, script):
             self._init_opts()
             opts = self._opts
             args = self._args
+            o = {}
+            for k, v in opts.items():
+                o[k] = v
             self.var_storage.new_masked_scope(opts, args)
             if opts:
                 for k, v in opts.items():
@@ -336,7 +340,7 @@ def scriptwrapper(profile, script):
                 self.var_storage.opts['_ARGV'] = [u""]
                 self.var_storage.args = [u""]
             if opts:
-                self.var_storage.opts['_OPTS'] = opts
+                self.var_storage.opts['_OPTS'] = o
             else:
                 self.var_storage.opts['_OPTS'] = {}
 

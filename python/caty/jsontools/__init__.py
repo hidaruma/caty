@@ -111,7 +111,6 @@ class PPEncoder(CatyEncoder):
                 yield e
 
     def __normalize(self, o):
-        from caty import UNDEFINED
         if isinstance(o, (tuple, list)):
             return self.__erase_undef(o)
         elif isinstance(o, dict):
@@ -119,11 +118,8 @@ class PPEncoder(CatyEncoder):
         else:
             return o
 
-    def __erase_undef(self, o):
+    def __erase_undef(self, r):
         from caty import UNDEFINED
-        r = o[:]
-        while r and r[-1] is UNDEFINED:
-            r.pop(-1)
         return [(a if a is not UNDEFINED else _empty) for a in r]
 
     def __reduce_undef(self, o):
@@ -133,7 +129,7 @@ class PPEncoder(CatyEncoder):
             if v is UNDEFINED:
                 pass
             else:
-                r[k] = v
+                r[k] = self.__normalize(v)
         return r
 
 def encode(obj):
