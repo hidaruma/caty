@@ -117,6 +117,8 @@ class Range(Builtin):
     def execute(self):
         return range(self.start, self.end + 1)
 
-
+class Reverse(Builtin):
+    def execute(self, l):
+        return list(reversed(l))
     
 

@@ -102,5 +102,10 @@ command tighten :: [any*] -> [any*]
 command range [integer start, integer end] :: void  -> [integer*]
     refers python:caty.core.std.command.listlib.Range;
 
+/**
+ * 配列の要素を逆順にする。
+ */
+command reverse<T> :: [T*] -> [T*]
+    refers python:caty.core.std.command.listlib.Reverse;
 """
 
