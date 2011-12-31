@@ -20,6 +20,12 @@ class OptionVarLoader(Param):
         self.value = value
         self.optional = optional
 
+class GlobOption(Param):
+    type = 'glob'
+
+class GlobArg(Param):
+    type = 'glob'
+
 class Argument(Param):
     type = 'arg'
     def __init__(self, value):

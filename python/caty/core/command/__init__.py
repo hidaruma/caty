@@ -447,6 +447,8 @@ class VarLoader(object):
                         o[opt.key] = UNDEFINED
                     else:
                         raise KeyError(opt.value.name)
+            elif opt.type == 'glob':
+                o.update(opts['_OPTS'])
             else:
                 if opt.key in opts:
                     o[opt.key] = opts[opt.key]
@@ -466,6 +468,8 @@ class VarLoader(object):
                 else:
                     if not arg.optional:
                         raise InternalException(u'Argument does not suffice: $index', index=arg.index)
+            elif arg.type == 'glob':
+                a.extend(opts['_ARGV'][1:])
             else:
                 if arg.key in opts:
                     a.append(opts[arg.key])

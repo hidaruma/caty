@@ -163,6 +163,7 @@ class CommandProfile(object):
             key_set = set(o_s.keys())
             found_key = set()
             for opt in opts_ref:
+                if opt.type == 'glob': continue
                 if opt.key not in o_s and not has_wildcard:
                     return ro.i18n.get('Unknwon option: $key', key=opt.key)
                 found_key.add(opt.key)

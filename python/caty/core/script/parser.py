@@ -259,6 +259,8 @@ class ScriptParser(Parser):
         return v
 
     def parameter_opt(self, seq):
+        if option(S(u'%--*'))(seq):
+            return GlobOption()
         name = seq.parse(Regex(r'%--[a-zA-Z]+[-a-zA-Z0-9_]*\??'))[3:]
         optional = False
         if name.endswith('?'):
@@ -266,7 +268,10 @@ class ScriptParser(Parser):
             optional = True
         return OptionLoader(name, optional)
     
+
     def named_arg(self, seq):
+        if option(S(u'%#'))(seq):
+            return GlobArg()
         name = seq.parse(Regex(r'%[a-zA-Z]+[-a-zA-Z0-9_]*\??'))[1:]
         optional = False
         if name.endswith('?'):
