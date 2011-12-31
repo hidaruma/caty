@@ -484,11 +484,8 @@ class VarLoader(object):
         value = JsonableValues()
         key_set = set()
         for k, v in option.items():
-            key_set.add(k)
-            value[k] = v
-        for k, v in self.profile.opts_schema.items():
-            if k not in key_set:
-                value[k] = UNDEFINED
+            if v is not UNDEFINED:
+                value[k] = v
         return value
 
 class JsonableValues(dict):
