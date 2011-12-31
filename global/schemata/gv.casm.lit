@@ -207,8 +207,6 @@ type Cluster = @cluster {
 
 == 描画コマンド
 
-* 現状だと、{{{@[with(@_OR ["time", "timefile"]), default(false)]}}} で問題が出そう。
-
 <<{
 /** Catyのファイルパス */
 type filePath = string(remark="Catyのファイルパス");
@@ -262,14 +260,6 @@ command draw
 == 周辺コマンド
 
 <<{
-/** 空なグラフのデータ */
-command empty-graph :: void -> Digraph {
-  @digraph {
-    "id" : "empty-graph",
-    "elements" : []
-  }
-};
-
 // drawのラッパー
 //
 /** 引数で指定されたファイルのグラフデータを描画する */
@@ -303,6 +293,94 @@ command draw-from-file
   } | draw --timefile=%file %--format %--engine %--font %--out %--if-modified 
 };
 }>>
+
+== 便利コマンド
+
+<<{
+/** グラフの描画結果を表示する */
+command show :: Digraph -> void {
+ gv:draw | ct:show-image
+};
+
+/** グラフの描画結果を表示してからpassする */
+command peek :: Digraph -> Digraph {
+ pass > g | gv:draw | ct:show-image;
+ %g
+};
+}>>
+
+== グラフデータのコンストラクタ
+
+<<{
+/** グラフの構築 */
+command graph
+ {
+   * : (number|string|boolean),
+ }
+ [elementId? id]
+ :: (null | Node | array) -> any
+{
+  pass |
+  when {
+   null => [],
+   node  ==> [pass],
+   array ==> pass
+  } > elements;
+
+  %1? |
+  when {
+   undefined => "graph",
+   * ==> pass
+  } > id;
+
+  @digraph {
+   "id": %id,
+
+   "graph" : [%_OPTS, {"label" : %id}] | json:merge --mode=fst,
+   "elements" : %elements
+  }
+
+};
+
+/** ノードの構築 */
+command node
+ {
+   * : (number|string|boolean),
+ }
+ [elementId? id]
+ :: void -> any
+{
+  %1? |
+  when {
+   undefined => "node",
+   * ==> pass
+  } > id;
+
+  [
+   "node", 
+   [%_OPTS, {"id": %id}] | json:merge --mode=fst
+  ] | tagged
+};
+
+/** 辺の構築 */
+command edge
+ {
+   * : (number|string|boolean),
+ }
+ [elementId from, elementId to]
+ :: void -> any
+{
+  %1 > from;
+  %2 > to;
+
+  [
+    "edge",
+    [{"nodes" : [%from, %to]}, %_OPTS] | json:merge --mode=error
+  ] | tagged
+};
+
+}>>
+
 
 == 実験用
 
