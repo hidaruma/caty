@@ -251,7 +251,7 @@ command draw
   "if-modified" : boolean?
   
  }
- :: Digraph -> (void | binary | string) 
+:: Digraph -> (void | binary | string) 
  uses pub
  refers python:gv.Draw;
 
@@ -283,7 +283,7 @@ command draw-from-file
   "if-modified" : boolean?
  }
  [/** グラフデータが格納されたファイル */ filePath file]
- :: void  -> (void | binary | string) 
+:: void  -> (void | binary | string) 
 { 
   %1 > file;
   file:exists %file |
@@ -313,10 +313,29 @@ command show
 };
 
 /** グラフの描画結果を表示してからpassする */
-command peek :: Digraph -> Digraph {
- pass > g | gv:draw | ct:show-image;
- %g
+command peek 
+ {
+   /** debugの値に無関係に常に描画する */
+   @[default(false)]
+   "force": boolean?
+ }
+:: (Node|Cluster|Digraph) -> (Node|Cluster|Digraph) 
+{
+ pass > g;
+
+ [%force, %DEBUG] | pred:bor --tagged |
+ when {
+   True =>
+     %g |
+     when {
+      digraph ==> gv:draw,
+      *       ==> gv:graph "" | gv:draw,
+     } | ct:show-image; %g
+     , // カンマ忘れるから注意せよ
+   False => %g
+ }
 };
+
 }>>
 
 == グラフデータのコンストラクタ
@@ -328,7 +347,7 @@ command graph
    * : (number|string|boolean)?,
  }
  [elementId? id]
- :: (null | Node | Cluster| array) -> Digraph
+:: (null | Node | Cluster| array) -> Digraph
 {
   pass |
   when {
@@ -359,7 +378,7 @@ command node
    * : (number|string|boolean)?,
  }
  [elementId? id]
- :: void -> Node
+:: void -> Node
 {
   %1? |
   when {
@@ -379,7 +398,7 @@ command edge
    * : (number|string|boolean)?,
  }
  [elementId from, elementId to]
- :: void -> Edge
+:: void -> Edge
 {
   %1 > from;
   %2 > to;
@@ -396,15 +415,9 @@ command cluster
    * : (number|string|boolean)?,
  }
  [elementId? id]
- :: (null | Node | Cluster| array) -> Cluster
+:: (null | Node | Cluster| array) -> Cluster
 {
-  pass |
-  when {
-   null => [@node {"id":"__dummy", "style":"invis"}],
-   node    ==> [pass],
-   cluster ==>  [pass],
-   array   ==> pass
-  } > elements;
+  pass > in;
 
   %1? |
   when {
@@ -412,11 +425,59 @@ command cluster
    * ==> pass
   } > id;
 
+  %in |
+  when {
+   null => [@node {"id":["__dummy_", %id] | text:concat, "style":"invis"}],
+   node    ==> [pass],
+   cluster ==>  [pass],
+   array   ==> pass
+  } > elements;
+
   @cluster {
    "id" : %id,
    "graph" : [%_OPTS, {"label" : %id}] | json:merge --mode=fst,
    "elements" : %elements
   }
+};
+
+/** ノードのデフォルトを設定 */
+command node-attr
+ {
+   * : (number|string|boolean)?,
+ }
+:: (Digraph | Cluster) -> (Digraph | Cluster)
+{
+  pass > in;
+  %_OPTS > attrs;
+
+  %in | xjson:get --safe $.node |
+  when {
+   undefined => {},
+   *         => pass
+  } > old-attrs;
+
+  %in | [ tag > tag, untagged > content];
+  [%tag, [%content, [%attrs, %old-attrs] | json:merge --mode=fst] | xjson:put $.node] | tagged
+};
+
+/** 辺のデフォルトを設定 */
+command edge-attr
+ {
+   * : (number|string|boolean)?,
+ }
+:: (Digraph | Cluster) -> (Digraph | Cluster)
+{
+  pass > in;
+  %_OPTS > attrs;
+
+  %in | xjson:get --safe $.edge |
+  when {
+   undefined => {},
+   *         => pass
+  } > old-attrs;
+
+  %in | [ tag > tag, untagged > content];
+  [%tag, [%content, [%attrs, %old-attrs] | json:merge --mode=fst] | xjson:put $.edge] | tagged
 };
 
 }>>
