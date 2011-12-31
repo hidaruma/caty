@@ -117,7 +117,10 @@ class Draw(Builtin):
         c = self.transform(cluster, True)
         sg = graph.add_subgraph(c.iternodes(), c.name, **c.graph_attr)
         for n in c.iternodes():
-            sg.add_node(n.name, **n.attr)
+            a = {}
+            a.update(**c.node_attr)
+            a.update(n.attr)
+            sg.add_node(n.name, **a)
         sg.add_edges_from(c.iteredges())
 
     def _modified(self):
