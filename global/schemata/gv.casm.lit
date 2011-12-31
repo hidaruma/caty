@@ -207,8 +207,6 @@ type Cluster = @cluster {
 
 == 描画コマンド
 
-* 現状だと、{{{@[with(@_OR ["time", "timefile"]), default(false)]}}} で問題が出そう。
-
 <<{
 /** Catyのファイルパス */
 type filePath = string(remark="Catyのファイルパス");
@@ -253,23 +251,15 @@ command draw
   "if-modified" : boolean?
   
  }
- :: Digraph -> (void | binary | string) 
+:: Digraph -> (void | binary | string) 
  uses pub
  refers python:gv.Draw;
 
 }>> 
 
-== 周辺コマンド
+== ファイルからの描画コマンド
 
 <<{
-/** 空なグラフのデータ */
-command empty-graph :: void -> Digraph {
-  @digraph {
-    "id" : "empty-graph",
-    "elements" : []
-  }
-};
-
 // drawのラッパー
 //
 /** 引数で指定されたファイルのグラフデータを描画する */
@@ -293,7 +283,7 @@ command draw-from-file
   "if-modified" : boolean?
  }
  [/** グラフデータが格納されたファイル */ filePath file]
- :: void  -> (void | binary | string) 
+:: void  -> (void | binary | string) 
 { 
   %1 > file;
   file:exists %file |
@@ -304,7 +294,195 @@ command draw-from-file
 };
 }>>
 
-== 実験用
+== 便利コマンド
+
+<<{
+/** グラフの描画結果を表示する */
+command show 
+ {
+   "font" : string?,
+ } 
+:: Digraph -> void 
+{
+  pass > in;
+  %font? |
+  when {
+   undefind => %in | gv:draw  | ct:show-image,
+   *        => %in | gv:draw --font=%font | ct:show-image
+  }
+};
+
+/** グラフの描画結果を表示してからpassする */
+command peek 
+ {
+   /** debugの値に無関係に常に描画する */
+   @[default(false)]
+   "force": boolean?
+ }
+:: (Node|Cluster|Digraph) -> (Node|Cluster|Digraph) 
+{
+ pass > g;
+
+ [%force, %DEBUG] | pred:bor --tagged |
+ when {
+   True =>
+     %g |
+     when {
+      digraph ==> gv:draw,
+      *       ==> gv:graph "" | gv:draw,
+     } | ct:show-image; %g
+     , // カンマ忘れるから注意せよ
+   False => %g
+ }
+};
+
+}>>
+
+== グラフデータのコンストラクタ
+
+<<{
+/** グラフの構築 */
+command graph
+ {
+   * : (number|string|boolean)?,
+ }
+ [elementId? id]
+:: (null | Node | Cluster| array) -> Digraph
+{
+  pass |
+  when {
+   null => [],
+   node    ==> [pass],
+   cluster ==> [pass],
+   array   ==> pass
+  } > elements;
+
+  %1? |
+  when {
+   undefined => "graph",
+   * ==> pass
+  } > id;
+
+  @digraph {
+   "id": %id,
+
+   "graph" : [%_OPTS, {"label" : %id}] | json:merge --mode=fst,
+   "elements" : %elements
+  }
+
+};
+
+/** ノードの構築 */
+command node
+ {
+   * : (number|string|boolean)?,
+ }
+ [elementId? id]
+:: void -> Node
+{
+  %1? |
+  when {
+   undefined => "node",
+   * ==> pass
+  } > id;
+
+  [
+   "node", 
+   [%_OPTS, {"id": %id}] | json:merge --mode=fst
+  ] | tagged
+};
+
+/** 辺の構築 */
+command edge
+ {
+   * : (number|string|boolean)?,
+ }
+ [elementId from, elementId to]
+:: void -> Edge
+{
+  %1 > from;
+  %2 > to;
+
+  [
+    "edge",
+    [{"nodes" : [%from, %to]}, %_OPTS] | json:merge --mode=error
+  ] | tagged
+};
+
+/** クラスターの構築 */
+command cluster
+ {
+   * : (number|string|boolean)?,
+ }
+ [elementId? id]
+:: (null | Node | Cluster| array) -> Cluster
+{
+  pass > in;
+
+  %1? |
+  when {
+   undefined => "",
+   * ==> pass
+  } > id;
+
+  %in |
+  when {
+   null => [@node {"id":["__dummy_", %id] | text:concat, "style":"invis"}],
+   node    ==> [pass],
+   cluster ==>  [pass],
+   array   ==> pass
+  } > elements;
+
+  @cluster {
+   "id" : %id,
+   "graph" : [%_OPTS, {"label" : %id}] | json:merge --mode=fst,
+   "elements" : %elements
+  }
+};
+
+/** ノードのデフォルトを設定 */
+command node-attr
+ {
+   * : (number|string|boolean)?,
+ }
+:: (Digraph | Cluster) -> (Digraph | Cluster)
+{
+  pass > in;
+  %_OPTS > attrs;
+
+  %in | xjson:get --safe $.node |
+  when {
+   undefined => {},
+   *         => pass
+  } > old-attrs;
+
+  %in | [ tag > tag, untagged > content];
+  [%tag, [%content, [%attrs, %old-attrs] | json:merge --mode=fst] | xjson:put $.node] | tagged
+};
+
+/** 辺のデフォルトを設定 */
+command edge-attr
+ {
+   * : (number|string|boolean)?,
+ }
+:: (Digraph | Cluster) -> (Digraph | Cluster)
+{
+  pass > in;
+  %_OPTS > attrs;
+
+  %in | xjson:get --safe $.edge |
+  when {
+   undefined => {},
+   *         => pass
+  } > old-attrs;
+
+  %in | [ tag > tag, untagged > content];
+  [%tag, [%content, [%attrs, %old-attrs] | json:merge --mode=fst] | xjson:put $.edge] | tagged
+};
+
+}>>
+
+== サンプル
 
 * 参考：[[http://www.graphviz.org/Documentation/dotguide.pdf|dot Manual]]
 
