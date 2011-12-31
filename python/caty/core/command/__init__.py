@@ -428,7 +428,8 @@ class VarLoader(object):
             args = self._load_args(storage.opts, storage.args)
         else:
             args = None
-        return (self._to_option_value(self.profile.opts_schema.convert(opts)), 
+        o = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(opts))
+        return (self._to_option_value(o), 
                 self.profile.args_schema.convert(args))
 
     def _load_opts(self, opts):
@@ -443,9 +444,7 @@ class VarLoader(object):
                 if opt.value.name in opts:
                     o[opt.key] = opts[opt.value.name]
                 else:
-                    if opt.optional:
-                        o[opt.key] = UNDEFINED
-                    else:
+                    if not opt.optional:
                         raise KeyError(opt.value.name)
             elif opt.type == 'glob':
                 o.update(opts['_OPTS'])
@@ -482,10 +481,12 @@ class VarLoader(object):
         from caty import UNDEFINED
         if option is None: return
         value = JsonableValues()
-        key_set = set()
         for k, v in option.items():
             if v is not UNDEFINED:
                 value[k] = v
+        #for k, v in self.profile.opts_schema.items():
+        #    if k not in key_set:
+        #        value[k] = UNDEFINED
         return value
 
 class JsonableValues(dict):
