@@ -601,8 +601,8 @@ class Execute(Builtin, MafsMixin):
 
 class DirIndex(Internal):
     
-    def __init__(self, opt_list, arg_list, type_args=[]):
-        Internal.__init__(self, None, arg_list, type_args)
+    def __init__(self, opt_list, arg_list, type_args=[], pos=(None, None)):
+        Internal.__init__(self, None, arg_list, type_args, pos)
         self.__opts = opt_list
 
     def setup(self, path, method):

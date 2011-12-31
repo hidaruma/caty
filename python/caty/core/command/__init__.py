@@ -281,7 +281,7 @@ class Syntax(Builtin):
     それらのコマンドは通常とは異なったインスタンス化の経路を必要とするため、
     このクラスで必要な処理を提供する。
     """
-    def __init__(self, opts_ref=None, args_ref=None):
+    def __init__(self, opts_ref=None, args_ref=None, pos=(None, None)):
         Builtin.__init__(self, opts_ref or [], args_ref or [], [])
         self._in_schema = self.profile.in_schema
         self._out_schema = self.profile.out_schema
