@@ -19,13 +19,15 @@ class SmartyParser(Parser):
         return Template(ts)
 
     def term(self, seq):
-        s = seq.parse([self.literal, self.statement, try_(self.comment)])
+        s = seq.parse([self.literal, self.delim, self.statement, try_(self.comment)])
         return s
 
     def literal(self, seq):
         s = seq.parse(until('{'))
         if not s:
-            raise ParseFailed(seq, self.literal)
+            if seq.eof or not option(peek(S('{literal}')))(seq):
+                raise ParseFailed(seq, self.literal)
+            s = u''
         escape = seq.parse(option('{literal}'))
         skip_ws(seq)
         if escape is None:
@@ -37,6 +39,11 @@ class SmartyParser(Parser):
                 raise ParseError(seq, self.literal, u'missing {/literal}')
             skip_ws(seq)
             return String(''.join([s, s2]))
+
+    def delim(self, seq):
+        if choice('{$ldelim}', '{$rdelim}')(seq) == '{$ldelim}':
+            return String(u'{')
+        return String(u'}')
 
     def comment(self, seq):
         seq.parse('{*')
