@@ -257,7 +257,7 @@ command draw
 
 }>> 
 
-== 周辺コマンド
+== ファイルからの描画コマンド
 
 <<{
 // drawのラッパー
@@ -298,8 +298,18 @@ command draw-from-file
 
 <<{
 /** グラフの描画結果を表示する */
-command show :: Digraph -> void {
- gv:draw | ct:show-image
+command show 
+ {
+   "font" : string?,
+ } 
+:: Digraph -> void 
+{
+  pass > in;
+  %font? |
+  when {
+   undefind => %in | gv:draw  | ct:show-image,
+   *        => %in | gv:draw --font=%font | ct:show-image
+  }
 };
 
 /** グラフの描画結果を表示してからpassする */
@@ -315,16 +325,17 @@ command peek :: Digraph -> Digraph {
 /** グラフの構築 */
 command graph
  {
-   * : (number|string|boolean),
+   * : (number|string|boolean)?,
  }
  [elementId? id]
- :: (null | Node | array) -> any
+ :: (null | Node | Cluster| array) -> Digraph
 {
   pass |
   when {
    null => [],
-   node  ==> [pass],
-   array ==> pass
+   node    ==> [pass],
+   cluster ==> [pass],
+   array   ==> pass
   } > elements;
 
   %1? |
@@ -345,10 +356,10 @@ command graph
 /** ノードの構築 */
 command node
  {
-   * : (number|string|boolean),
+   * : (number|string|boolean)?,
  }
  [elementId? id]
- :: void -> any
+ :: void -> Node
 {
   %1? |
   when {
@@ -365,10 +376,10 @@ command node
 /** 辺の構築 */
 command edge
  {
-   * : (number|string|boolean),
+   * : (number|string|boolean)?,
  }
  [elementId from, elementId to]
- :: void -> any
+ :: void -> Edge
 {
   %1 > from;
   %2 > to;
@@ -379,10 +390,38 @@ command edge
   ] | tagged
 };
 
+/** クラスターの構築 */
+command cluster
+ {
+   * : (number|string|boolean)?,
+ }
+ [elementId? id]
+ :: (null | Node | Cluster| array) -> Cluster
+{
+  pass |
+  when {
+   null => [@node {"id":"__dummy", "style":"invis"}],
+   node    ==> [pass],
+   cluster ==>  [pass],
+   array   ==> pass
+  } > elements;
+
+  %1? |
+  when {
+   undefined => "",
+   * ==> pass
+  } > id;
+
+  @cluster {
+   "id" : %id,
+   "graph" : [%_OPTS, {"label" : %id}] | json:merge --mode=fst,
+   "elements" : %elements
+  }
+};
+
 }>>
 
-
-== 実験用
+== サンプル
 
 * 参考：[[http://www.graphviz.org/Documentation/dotguide.pdf|dot Manual]]
 
