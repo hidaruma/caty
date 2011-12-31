@@ -68,3 +68,22 @@ class Profile(Builtin):
             return unicode(str(p))
 
 
+class Fuser(Builtin):
+    def execute(self):
+        import os
+        ref = {}
+        pid = os.getpid()
+        d = "/proc/%d/fd/" % pid
+        try:
+            for fd in os.listdir(d):
+                f = os.readlink(d+fd)
+                if f not in ref:
+                    ref[f] = 1
+                else:
+                    ref[f] += 1
+        except OSError:
+            pass
+        i = 0
+        for k, v in ref.items():
+            i += v
+        return i
