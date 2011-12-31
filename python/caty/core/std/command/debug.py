@@ -73,7 +73,7 @@ class Fuser(Builtin):
         import os
         ref = {}
         pid = os.getpid()
-        d = "/proc/%d/fd/" % pid
+        d = u"/proc/%d/fd/" % pid
         try:
             for fd in os.listdir(d):
                 f = os.readlink(d+fd)
@@ -86,4 +86,5 @@ class Fuser(Builtin):
         i = 0
         for k, v in ref.items():
             i += v
-        return i
+        ref[u"total"] = i
+        return ref

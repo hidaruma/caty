@@ -373,8 +373,9 @@ class Application(PbcObject):
             self._memory = AppMemory()
 
     def _init_log(self):
-        for tp in LOG_TYPES:
-            logger.init(self, tp)
+        if not self._initialized:
+            for tp in LOG_TYPES:
+                logger.init(self, tp)
 
     def get_logger(self, type):
         assert type in LOG_TYPES

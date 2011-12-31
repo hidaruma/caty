@@ -47,9 +47,14 @@ command dump-schema [string] :: void -> void
 command profile {"tree": boolean?} :: void -> string
     refers python:caty.core.std.command.debug.Profile;
 
+type FuserReport = {
+    "total": integer,
+    *: integer,
+};
+
 /**
  * Catyの開いているファイルの数を確認する。(Linuxのみ)
  */
-command fuser :: void -> integer
+command fuser :: void -> FuserReport
     refers python:caty.core.std.command.debug.Fuser;
     """
