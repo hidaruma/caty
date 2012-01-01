@@ -12,7 +12,7 @@ def _result(tagged, result):
 
 class Or(Command):
     def setup(self, opts):
-        self.tagged = opts['tagged']
+        self.tagged = opts['tag']
 
     def execute(self, input):
         for item in input:
@@ -22,7 +22,7 @@ class Or(Command):
 
 class And(Command):
     def setup(self, opts):
-        self.tagged = opts['tagged']
+        self.tagged = opts['tag']
 
     def execute(self, input):
         for item in input:
@@ -32,7 +32,7 @@ class And(Command):
 
 class TagOr(Command):
     def setup(self, opts):
-        self.tagged = opts['tagged']
+        self.tagged = opts['tag']
 
     def execute(self, input):
         for item in input:
@@ -42,7 +42,7 @@ class TagOr(Command):
 
 class TagAnd(Command):
     def setup(self, opts):
-        self.tagged = opts['tagged']
+        self.tagged = opts['tag']
 
     def execute(self, input):
         for item in input:
@@ -52,7 +52,7 @@ class TagAnd(Command):
 
 class BAnd(Command):
     def setup(self, opts):
-        self.tagged = opts['tagged']
+        self.tagged = opts['tag']
 
     def execute(self, input):
         for item in input:
@@ -62,7 +62,7 @@ class BAnd(Command):
 
 class BOr(Command):
     def setup(self, opts):
-        self.tagged = opts['tagged']
+        self.tagged = opts['tag']
 
     def execute(self, input):
         for item in input:

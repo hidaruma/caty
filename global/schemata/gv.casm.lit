@@ -323,7 +323,7 @@ command peek
 {
  pass > g;
 
- [%force, %DEBUG] | pred:bor --tagged |
+ [%force, %DEBUG] | cpl:bor --tag |
  when {
    True =>
      %g |

@@ -1,0 +1,57 @@
+// -*- coding: utf-8 -*-
+
+/** Classical Propositional Logic */
+module cpl; 
+
+command or 
+ {
+   @[default(false)]
+   "tag": boolean?
+ }
+:: [("True"|"False")*] -> ("True" | "False" | @True null | @False null)
+ refers python:cpl.Or;
+
+command and 
+ {
+   @[default(false)]
+   "tag": boolean?
+ }
+:: [("True"|"False")*] -> ("True" | "False" | @True null | @False null)
+ refers python:cpl.And;
+
+command tag-or 
+ {
+   @[default(false)]
+   "tag": boolean?
+ }
+:: [(@True any | @False any)*] -> ("True" | "False" | @True null | @False null)
+ refers python:cpl.TagOr;
+
+command tag-and 
+ {
+   @[default(false)]
+   "tag": boolean?
+ }
+:: [(@True any | @False any)*] -> ("True" | "False" | @True null | @False null)
+ refers python:cpl.TagAnd;
+
+command band 
+ {
+   @[default(false)]
+   "tag": boolean?
+ }
+:: [boolean*] -> ("True" | "False" | @True null | @False null)
+ refers python:cpl.BAnd;
+
+command bor 
+ {
+   @[default(false)]
+   "tag": boolean?
+ }
+:: [boolean*] -> ("True" | "False" | @True null | @False null)
+ refers python:cpl.BOr;
+
+
+// End of Module
+
+
