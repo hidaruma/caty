@@ -117,12 +117,18 @@ class Draw(Builtin):
         c = self.transform(cluster, True)
         sg = graph.add_subgraph(c.iternodes(), c.name, **c.graph_attr)
         for n in c.iternodes():
-            a = {}
+            if self._font:
+                a = {'fontname': self._font}
+            else:
+                a = {}
             a.update(**c.node_attr)
             a.update(n.attr)
             sg.add_node(n.name, **a)
         for e in c.iteredges():
-            a = {}
+            if self._font:
+                a = {'fontname': self._font}
+            else:
+                a = {}
             a.update(**c.edge_attr)
             a.update(e.attr)
             sg.add_edge(e, **a)
