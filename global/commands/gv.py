@@ -121,7 +121,11 @@ class Draw(Builtin):
             a.update(**c.node_attr)
             a.update(n.attr)
             sg.add_node(n.name, **a)
-        sg.add_edges_from(c.iteredges())
+        for e in c.iteredges():
+            a = {}
+            a.update(**c.edge_attr)
+            a.update(e.attr)
+            sg.add_edge(e, **a)
 
     def _modified(self):
         with self.pub.open(self._out_file) as out:
