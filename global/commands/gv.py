@@ -86,14 +86,16 @@ class Draw(Builtin):
             type, elem = json.split_tag(e)
             if type == 'node':
                 self._add_node(G, elem)
-        for e in graph['elements']:
-            type, elem = json.split_tag(e)
-            if type == 'edge':
-                self._add_edge(G, elem)
+
         for e in graph['elements']:
             type, elem = json.split_tag(e)
             if type == 'cluster':
                 self._add_cluster(G, elem)
+
+        for e in graph['elements']:
+            type, elem = json.split_tag(e)
+            if type == 'edge':
+                self._add_edge(G, elem)
         return G
 
     def _add_node(self, graph, node):
