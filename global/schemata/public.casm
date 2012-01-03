@@ -1,5 +1,10 @@
 module public; // -*- coding: utf-8 -*-
 
+/** 入力にタグを加えて出力とする */
+command add-tag [string tag] :: any -> @* any {
+  [%1 , pass] | tagged
+};
+
 /** 画面をクリア */
 command cls :: void -> void
     refers python:cls.Clear;
