@@ -114,7 +114,7 @@ type EdgeAttributes = Attributes & {
 /** グラフの属性 */
 type GraphAttributes = Attributes & {
  @[default("X11")]
- "colorscheme" : ("X11" | "SVG" | "Brewer")?,
+ "colorscheme" : string?,// ("X11" | "SVG" | "Brewer")?, // ???
 
  "bgcolor"   : color?,
  "color"     : color?,
@@ -297,6 +297,32 @@ command draw-from-file
 == 便利コマンド
 
 <<{
+/**  略記を正式な記法にする */
+command fix
+:: (array | Node | Edge | Cluster |Digraph ) -> (array | Node|Edge|Cluster|Digraph)
+{
+  when {
+
+    array => dump --prefix="gv:fix input: array:" |
+         each {call gv:fix},
+    node =>
+         when {
+           object => pass,
+           string => {"id": pass},
+         } | add-tag node
+    ,
+    edge =>
+         when {
+           object => pass,
+           array => {"nodes": pass},
+         } | add-tag edge
+    ,
+    * ==>
+      pass
+    ,
+  }
+};
+
 /** グラフの描画結果を表示する */
 command show 
  {
@@ -319,7 +345,7 @@ command peek
    @[default(false)]
    "force": boolean?
  }
-:: (Node|Cluster|Digraph) -> (Node|Cluster|Digraph) 
+:: (array | Node|Edge|Cluster|Digraph) -> (array |Node|Edge|Cluster|Digraph) 
 {
  pass > g;
 
@@ -331,8 +357,9 @@ command peek
       digraph ==> gv:draw,
       *       ==> gv:graph "" | gv:draw,
      } | ct:show-image; %g
-     , // カンマ忘れるから注意せよ
+   , // カンマ忘れるから注意せよ、ここに書いておくのがいいかもな
    False => %g
+   ,
  }
 };
 
@@ -347,12 +374,13 @@ command graph
    * : (number|string|boolean)?,
  }
  [elementId? id]
-:: (null | Node | Cluster| array) -> Digraph
+:: (null | Node | Edge | Cluster| array) -> Digraph
 {
   pass |
   when {
    null => [],
    node    ==> [pass],
+   edge    ==> [pass],
    cluster ==> [pass],
    array   ==> pass
   } > elements;
@@ -415,7 +443,7 @@ command cluster
    * : (number|string|boolean)?,
  }
  [elementId? id]
-:: (null | Node | Cluster| array) -> Cluster
+:: (null | Node | Edge | Cluster| array) -> Cluster
 {
   pass > in;
 
@@ -429,7 +457,8 @@ command cluster
   when {
    null => [@node {"id":["__dummy_", %id] | text:concat, "style":"invis"}],
    node    ==> [pass],
-   cluster ==>  [pass],
+   edge    ==> [pass],
+   cluster ==> [pass],
    array   ==> pass
   } > elements;
 
@@ -445,7 +474,7 @@ command node-attr
  {
    * : (number|string|boolean)?,
  }
-:: (Digraph | Cluster) -> (Digraph | Cluster)
+:: ( Digraph | Cluster) -> ( Digraph | Cluster)
 {
   pass > in;
   %_OPTS > attrs;
@@ -479,6 +508,26 @@ command edge-attr
   %in | [ tag > tag, untagged > content];
   [%tag, [%content, [%attrs, %old-attrs] | json:merge --mode=fst] | xjson:put $.edge] | tagged
 };
+
+/*{{{
+
+/** 固有の属性を設定 */
+command attr
+ {
+   * : (number|string|boolean)?,
+ }
+:: (Node|Edge| Digraph | Cluster) -> (Node|Edge| Digraph | Cluster)
+{
+  pass > in;
+  %_OPTS > attrs;
+
+  %in |
+  when {
+    node => [_fix-node-content, %attrs] | xjson:merge --mode=snd,
+    edge => [_fix-edge-content, %attrs] | xjson:merge --mode=snd,
+};
+
+}}}*/
 
 }>>
 
