@@ -212,10 +212,10 @@ type Cluster = @cluster {
 type filePath = string(remark="Catyのファイルパス");
 
 /** Graphvizのレイアウトエンジン名 */
-type layoutEngine = ("dot" | "neato" | "fdp" | "sfdp" | "twopi" | "circo" | "gv");
+type layoutEngine = ("dot" | "neato" | "fdp" | "sfdp" | "twopi" | "circo");
 
 /** Graphvizの出力フォーマット名 */
-type outputFormat = ("gif" | "png" | "jpeg" | "dot" | "svg" | "svge" | "gv");
+type outputFormat = ("gif" | "png" | "jpeg" | "dot" | "svg" | "svge" | "plaindot");
 
 /** 有向グラフの描画 */
 command draw 
