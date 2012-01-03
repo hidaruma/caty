@@ -31,16 +31,17 @@ class Draw(Builtin):
             if not self._modified():
                 return
         G = self.transform(self._escape_lf(graph))
-        G.layout(prog=self._engine)
-        if self._out_file:
+        if self._format == 'plaindot':
+            o = str(G)
+        else:
+            G.layout(prog=self._engine)
             o = G.draw(prog=self._engine, format=self._format)
             o = self._strip(o)
+        if self._out_file:
             with self.pub.open(self._out_file, 'wb') as f:
                 f.write(o)
         else:
-            o = G.draw(prog=self._engine, format=self._format)
-            o = self._strip(o)
-            if self._format in ('svg', 'dot'):
+            if self._format in ('svg', 'dot', 'plaindot'):
                 return unicode(o, 'utf-8')
             else:
                 return o
