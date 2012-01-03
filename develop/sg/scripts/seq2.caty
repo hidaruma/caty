@@ -1,0 +1,19 @@
+// -*- coding: utf-8 -*-
+// sequent
+
+[
+ gv:node --shape=point --style=invis sin1,
+ gv:node --shape=point --style=invis sin2,
+
+ gv:edge --label=A                                sin1 seq,
+ gv:edge --label="&Gamma;" --style="dashed, bold" sin2 seq,
+
+ gv:node --label="==>" --style=filled --fillcolor=darkseagreen seq,
+
+ gv:node --shapa=point --style=invis  sout1,
+ gv:node --shapa=point --style=invis  sout2,
+
+ gv:edge --label=X                                seq sout1,
+ gv:edge --label="&Delta;" --style="dashed, bold" seq sout2,
+
+] | gv:graph  --label=sequent --rankdir=LR --bgcolor=gainsboro
