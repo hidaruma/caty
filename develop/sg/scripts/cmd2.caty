@@ -1,0 +1,31 @@
+// -*- coding: utf-8 -*-
+// command
+
+[
+ gv:node --shapa=point --style=invis cin,
+ gv:node --shapa=point --style=invis ain,
+ gv:node --shape=point --style=invis pin1,
+ gv:node --shape=point --style=invis pin2,
+ gv:node --label="* " --shape=diamond --style=filled --fillcolor=brown param,
+
+ gv:edge --label=StdIn cin  cmd,
+ gv:edge --label=Opts  pin1 param,
+ gv:edge --label=Arg0  ain  param,
+ gv:edge --label=Args  pin2 param,
+ gv:edge --label="ParamVars"  --arrowhead=diamond param cmd,
+
+ gv:node --label="command\nbody" --style=filled --fillcolor=darkseagreen cmd,
+
+ gv:node --shapa=point --style=invis cout,
+ gv:node --label="  " --shape=diamond --style=filled --fillcolor=white th, 
+ gv:node --shapa=point --style=invis cerr,
+ gv:node --shape=point --style=invis sout, 
+ gv:node --label=target --style="dotted, filled" --fillcolor=yellowgreen port_h, 
+
+ gv:edge --label=StdOut    cmd cout,
+ gv:edge --label=Throwable cmd th,
+ gv:edge --label=Exception --color=red --fontcolor=red  th cerr,
+ gv:edge --label="Signal" --color=blue --fontcolor=blue th sout,
+ gv:edge --color=seagreen  --fontcolor=seagreen --label="Forward" cmd port_h,
+
+] | gv:graph --label="command" --rankdir=LR --bgcolor=gainsboro

@@ -1,0 +1,28 @@
+// -*- coding: utf-8 -*-
+// sequent
+
+[
+ gv:node --shapa=point --style=invis sin1,
+ gv:node --shape=point --style=invis sin2,
+ gv:node --shape=point --style=invis sin3,
+ gv:node --label="> *" --shape=diamond --style=filled --fillcolor=brown sin4,
+
+ gv:edge --label=A     sin1 seq,
+ gv:edge --label=B     sin2 sin4,
+ gv:edge --label=C     sin3 sin4,
+ gv:edge --label="B*C" sin4 seq,
+
+ gv:node --label="==>" --style=filled --fillcolor=darkseagreen seq,
+
+ gv:node --shapa=point --style=invis sout1,
+ gv:node --label="+ &lt;" --shape=diamond --style=filled --fillcolor=white sout2, 
+ gv:node --shape=point --style=invis sout3,
+ gv:node --shape=point --style=invis sout4,
+
+
+ gv:edge --label=X     seq   sout1,
+ gv:edge --label="Y+Z" seq   sout2,
+ gv:edge --label=Y     sout2 sout3,
+ gv:edge --label=Z     sout2 sout4,
+
+] | gv:graph --label=sequent --rankdir=LR --bgcolor=gainsboro
