@@ -575,17 +575,18 @@ class Execute(Builtin, MafsMixin):
         key = None
         has_upcoming_value = False
         for a in arg_list:
-            if a.startswith('--'):
-                if '=' in a:
-                    k, v = a.split('=', 1)
-                    opts[k[2:]] = v.strip('"')
+            if isinstance(a, unicode):
+                if a.startswith('--'):
+                    if '=' in a:
+                        k, v = a.split('=', 1)
+                        opts[k[2:]] = v.strip('"')
+                        continue
+                    else:
+                        key = k[2:]
+                        continue
+                if a == '=':
+                    has_upcoming_value = True
                     continue
-                else:
-                    key = k[2:]
-                    continue
-            if a == '=':
-                has_upcoming_value = True
-                continue
             if key and has_upcoming_value:
                 opts[key] = a
                 has_upcoming_value = False
