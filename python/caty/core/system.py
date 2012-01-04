@@ -35,7 +35,7 @@ class System(PbcObject):
     __properties__ = ['app_names']
 
     @brutal_error_printer
-    def __init__(self, encoding=None, is_debug=True, quiet=False, no_ambient=False, no_app=False):
+    def __init__(self, encoding=None, is_debug=True, quiet=False, no_ambient=False, no_app=False, primary=u'root'):
         caty.core.runtimeobject.i18n = I18nMessage({}, writer=cout, lang='en') # フォールバック
         if quiet:
             class NullWriter(object):
@@ -80,7 +80,7 @@ class System(PbcObject):
                                      viva,
                                      http])
 
-        gag = ApplicationGroup('', self._global_config, no_ambient, no_app, self)
+        gag = ApplicationGroup('', self._global_config, no_ambient, no_app, primary, self)
         self._global_app = gag._apps[0]
         self._global_app.finish_setup()
         self._casm.set_global(self._global_app)
@@ -89,11 +89,11 @@ class System(PbcObject):
         # common, main, extra, examples という順序は固定
         self._app_groups = [
             ag for ag in [
-                ApplicationGroup('common', self._global_config, no_ambient, no_app, self),
-                ApplicationGroup(USER, self._global_config, no_ambient, no_app, self),
-                ApplicationGroup('extra', self._global_config, no_ambient, no_app, self),
-                ApplicationGroup('examples', self._global_config, no_ambient, no_app, self),
-                ApplicationGroup('develop', self._global_config, no_ambient, no_app, self),
+                ApplicationGroup('common', self._global_config, no_ambient, no_app, primary, self),
+                ApplicationGroup(USER, self._global_config, no_ambient, no_app, primary, self),
+                ApplicationGroup('extra', self._global_config, no_ambient, no_app, primary, self),
+                ApplicationGroup('examples', self._global_config, no_ambient, no_app, primary, self),
+                ApplicationGroup('develop', self._global_config, no_ambient, no_app, primary, self),
             ] if ag.exists
         ]
         self._apps = reduce(operator.add, map(ApplicationGroup.apps.fget, self._app_groups))
@@ -260,7 +260,6 @@ class System(PbcObject):
     def __invariant__(self):
         assert len(self._app_groups) > 0
         assert len(self._apps) > 0
-        assert ROOT in self._app_map
 
     if caty.DEBUG:
         def _contains_name(self, name):
