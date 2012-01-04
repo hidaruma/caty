@@ -297,12 +297,12 @@ class Syntax(Builtin):
         pass
 
 class Dummy(Command):
-    def execute(self):
+    def execute(self, *args, **kwds):
         raise NotImplementedError()
 
 def new_dummy():
     class _Dummy(Command):
-        def execute(self):
+        def execute(self, *args, **kwds):
             throw_caty_exception('NotImplemented', self.name)
     return _Dummy
 
