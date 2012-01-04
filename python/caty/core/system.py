@@ -41,6 +41,8 @@ class System(PbcObject):
             class NullWriter(object):
                 def write(self, *args):
                     pass
+                def writeln(self, *args):
+                    pass
             self.__cout = NullWriter()
         else:
             self.__cout = cout
@@ -55,7 +57,7 @@ class System(PbcObject):
         messages = self._load_system_messages()
         self.i18n = I18nMessage(messages, writer=cout, lang=self._global_config.language)
         caty.core.runtimeobject.i18n = self.i18n # 改めて設定
-        self.i18n.write('Loading system data')
+        self.__cout.writeln(self.i18n.get('Loading system data'))
         self._casm = casm.initialize(self,
                                      [builtin, node],
                                      [
