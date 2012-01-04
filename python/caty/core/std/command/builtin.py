@@ -559,46 +559,16 @@ class Eval(Builtin):
             return cmd(input[1])
         
 from caty.command import MafsMixin
+from caty.core.script.parser import list_to_opts_and_args
 class Execute(Builtin, MafsMixin):
     
     def setup(self, path, *rest_args_and_opts):
         self.__path = path
-        self.__opts, self.__args = self._parse_opts_and_args(rest_args_and_opts)
+        self.__opts, self.__args = list_to_opts_and_args(rest_args_and_opts)
 
     def execute(self, input):
         cmd = self.interpreter.build(self.open(self.__path).read(), self.__opts, self.__args, transaction=PEND)
         return cmd(input)
-
-    def _parse_opts_and_args(self, arg_list):
-        opts = {}
-        args = []
-        key = None
-        has_upcoming_value = False
-        for a in arg_list:
-            if isinstance(a, unicode):
-                if a.startswith('--'):
-                    if '=' in a:
-                        k, v = a.split('=', 1)
-                        opts[k[2:]] = v.strip('"')
-                        continue
-                    else:
-                        key = k[2:]
-                        continue
-                if a == '=':
-                    has_upcoming_value = True
-                    continue
-            if key and has_upcoming_value:
-                opts[key] = a
-                has_upcoming_value = False
-                key = None
-                continue
-            if key:
-                opts[key] = True
-                key = None
-            args.append(a)
-        if args:
-            args.insert(0, args[0])
-        return opts, args
 
 class DirIndex(Internal):
     

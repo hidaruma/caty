@@ -353,13 +353,21 @@ class CommandExecutor(BaseInterpreter):
     def set_var_storage(self, v):
         self.cmd.set_var_storage(v)
 
-class _CallCommand(object):
+from caty.command import MafsMixin
+class _CallCommand(MafsMixin):
     def setup(self, cmd_name, *args):
         from caty.core.command.param import Argument
         self.__cmd_name = cmd_name
         self.__args = map(Argument, args)
+        self.__raw_args = args
 
-    def _make_cmd(self, input):
+    def _make_cmd(self):
+        if self.__cmd_name.endswith('.caty'):
+            return self.__script()
+        else:
+            return self.__make_cmd()
+
+    def __make_cmd(self):
         from caty.core.script.proxy import Proxy
         from caty.core.script.builder import CommandBuilder
         from caty.core.command import VarStorage
@@ -376,14 +384,21 @@ class _CallCommand(object):
         c.set_var_storage(var_storage)
         return CommandExecutor(c, app, self._facilities)
 
+    def __script(self):
+        from caty.core.script.parser import list_to_opts_and_args
+        from caty.core.facility import PEND
+        opts, args = list_to_opts_and_args(self.__raw_args)
+        cmd = self.interpreter.build(self.open('scripts@this:/' + self.__cmd_name).read(), opts, args, transaction=PEND)
+        return cmd
+
 class CallCommand(_CallCommand, Internal):
     def execute(self, input):
-        c = self._make_cmd(input)
+        c = self._make_cmd()
         return c(input)
 
 class Forward(_CallCommand, Internal):
     def execute(self, input):
-        c = self._make_cmd(input)
+        c = self._make_cmd()
         raise ContinuationSignal(input, c.cmd)
 
 

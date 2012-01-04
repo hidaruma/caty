@@ -1042,6 +1042,7 @@ command object-to-array :: object -> [[string, any]*]
  * 引数のコマンドを呼び出す。
  */
 command call<S, T> [string command_name, string*] :: S -> T
+    reads [pub, scripts, interpreter]
     refers python:caty.core.script.interpreter.CallCommand;
 
 /** 
@@ -1049,6 +1050,7 @@ command call<S, T> [string command_name, string*] :: S -> T
  */
 command forward<S, T> [string command_name, string*] :: S -> never
     signals T
+    reads [pub, scripts, interpreter]
     refers python:caty.core.script.interpreter.Forward;
 
 /**
