@@ -1122,6 +1122,8 @@ class Sleep(Builtin):
 class ToString(Builtin):
     def execute(self, input):
         from caty.jsontools import raw_json as json
+        if isinstance(input, unicode):
+            return input
         v = json.dumps(input, cls=PPEncoder, ensure_ascii=False)
         if isinstance(v, unicode):
             return v
