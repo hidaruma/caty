@@ -114,12 +114,15 @@ class CommandExecutor(BaseInterpreter):
         input = self.input
         if 'deprecated' in node.annotations:
             util.cout.writeln(u'[DEBUG] Deprecated: %s' % node.name)
-            if node.profile_container.module:
-                name = '{0}:{1}'.format(node.profile_container.module.name, node.name)
-            else:
-                name = ':'+node.name
-            msg = '{0}:{1}'.format(self.app.name, name)
-            self.app._system.depreacte_logger.debug(msg)
+            try:
+                name = self.__get_name(node)
+                msg = '{0} at {1}:{2} Line {3}, Col {4}'.format(name, self.app.name, self.__get_name(self.cmd), self.cmd.col, self.cmd.line)
+                self.app._system.depreacte_logger.debug(msg)
+            except Exception, e:
+                import traceback
+                traceback.print_exc()
+                msg = u'[DEBUG] %s (other infomation is lacking)' % node.name
+                self.app._system.depreacte_logger.debug(msg)
         if node._mode: # @console など、特定のモードでしか動かしてはいけないコマンドのチェック処理
             mode = node.env.get('CATY_EXEC_MODE')
             if not node._mode.intersection(set(mode)):
@@ -153,6 +156,13 @@ class CommandExecutor(BaseInterpreter):
             raise
         finally:
             node.var_storage.del_scope()
+
+    def __get_name(self, node):
+        if node.profile_container.module:
+            name = '{0}:{1}'.format(node.profile_container.module.name, node.name)
+        else:
+            name = ':'+node.name
+        return name
 
     def visit_pipe(self, node):
         self.input = node.bf.accept(self)

@@ -284,6 +284,22 @@ class TransactionAdaptor(Command):
         self.isRunningAsync = False
 
     @property
+    def profile_container(self):
+        return self._command.profile_container
+
+    @property
+    def name(self):
+        return self._command.name
+
+    @property
+    def col(self):
+        return self._command.col
+
+    @property
+    def line(self):
+        return self._command.line
+
+    @property
     def var_storage(self):
         return self._command.var_storage
 
