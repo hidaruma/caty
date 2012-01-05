@@ -812,14 +812,6 @@ command proj :: void -> string
         refers python:caty.core.std.command.builtin.ShowFileType;
 
 /**
- * 引数を出力にコピーする。
- * 引数を与えなかった場合、 null が返る。
- */
-command param {"default": string?} [string?] :: void -> string|null
-
-    refers python:caty.core.std.command.builtin.Param;
-
-/**
  * リダイレクト処理。引数のパスに対してそのままリダイレクトする。
  */
 command redirect [string] :: void -> never

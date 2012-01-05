@@ -728,18 +728,6 @@ class ShowFileType(Builtin):
         else:
             return self.pub.all_types().get(self.ext, None)
 
-class Param(Builtin):
-    
-    def setup(self, opts, arg=None):
-        self.arg = arg
-        self._default = opts.default
-
-    def execute(self):
-        if self.arg:
-            return self.arg
-        else:
-            return self._default
-
 from caty.util.path import join
 class Redirect(Builtin):
     

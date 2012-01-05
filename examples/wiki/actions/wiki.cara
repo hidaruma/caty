@@ -14,7 +14,7 @@ resource Wikiファイル("*.wiki") {
     action 読み出し("/GET") :: @[in, out] #io void -> WikiPage produces HTMLページ { 
         (#io file.読み出し %1 | {
             "body": text:creole, 
-            "title": param %1 | text:rsplit "." | item 0 | text:trim /,
+            "title": %1 | text:rsplit "." | item 0 | text:trim /,
             "lastModified": file:lastmodified %1
         }) | print include@this:/HTMLページ.html
     };
@@ -23,7 +23,7 @@ resource Wikiファイル("*.wiki") {
     action 編集("edit/GET")  :: @[in, out]#io void -> WikiSkele produces 編集 {
         {
             "body":file.読み出し %1,
-            "title": param %1 | text:rsplit "." | item 0 | text:trim /
+            "title": %1 | text:rsplit "." | item 0 | text:trim /
         } | print include@this:/編集.html
     };
 
@@ -32,7 +32,7 @@ resource Wikiファイル("*.wiki") {
         @[out] #ok _ -> never redirects Wikiファイル.読み出し,
         @[out] #ng _ -> never redirects Root.get {
         (#translate translate Wikiファイル) | when {
-            OK => (#ok ["/wiki", (#part pv body) | file:書き込み %1 | param %1] | text:concat | redirect),
+            OK => (#ok ["/wiki", (#part pv body) | file:書き込み %1 | %1] | text:concat | redirect),
             NG => (#ng "/wiki/" | redirect)
         }
     };
