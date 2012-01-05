@@ -16,7 +16,7 @@ class ProfileContainer(object):
     入出力の型がオーバーロードされている場合、
     その後の処理は CommandProfile で行う。
     """
-    def __init__(self, name, uri, commands, annotations, doc, app, type_var_names):
+    def __init__(self, name, uri, commands, annotations, doc, app, type_var_names, module):
         self.profiles = []
         self.name = name
         path = (uri.split(':')[-1])
@@ -30,6 +30,7 @@ class ProfileContainer(object):
         self.defined_application = app
         self.uri = uri
         self.type_var_names = type_var_names
+        self.module = module
 
     def accept(self, cursor):
         return cursor._visit_profile(self)

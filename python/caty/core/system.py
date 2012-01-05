@@ -144,6 +144,7 @@ class System(PbcObject):
         self._access_logger = syslog.get_access_log()
         self._error_logger = syslog.get_error_log()
         self._start_logger = syslog.get_start_log()
+        self._deprecate_logger = syslog.get_deprecate_log()
     
     @property
     def access_logger(self):
@@ -152,6 +153,10 @@ class System(PbcObject):
     @property
     def error_logger(self):
         return self._error_logger
+
+    @property
+    def depreacte_logger(self):
+        return self._deprecate_logger
 
     @property
     def casm(self):

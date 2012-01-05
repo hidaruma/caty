@@ -114,6 +114,12 @@ class CommandExecutor(BaseInterpreter):
         input = self.input
         if 'deprecated' in node.annotations:
             util.cout.writeln(u'[DEBUG] Deprecated: %s' % node.name)
+            if node.profile_container.module:
+                name = '{0}:{1}'.format(node.profile_container.module.name, node.name)
+            else:
+                name = ':'+node.name
+            msg = '{0}:{1}'.format(self.app.name, name)
+            self.app._system.depreacte_logger.debug(msg)
         if node._mode: # @console など、特定のモードでしか動かしてはいけないコマンドのチェック処理
             mode = node.env.get('CATY_EXEC_MODE')
             if not node._mode.intersection(set(mode)):
