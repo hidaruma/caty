@@ -459,6 +459,4 @@ def list_to_opts_and_args(arg_list):
             opts[key] = True
             key = None
         args.append(a)
-    if args:
-        args.insert(0, args[0])
     return opts, args

@@ -387,8 +387,15 @@ class _CallCommand(MafsMixin):
     def __script(self):
         from caty.core.script.parser import list_to_opts_and_args
         from caty.core.facility import PEND
-        opts, args = list_to_opts_and_args(self.__raw_args)
-        cmd = self.interpreter.build(self.open('scripts@this:/' + self.__cmd_name).read(), opts, args, transaction=PEND)
+        from copy import deepcopy
+        opts, args = list_to_opts_and_args([self.__cmd_name] + list(self.__raw_args))
+        cmd = self.interpreter.build(self.open('scripts@this:/' + self.__cmd_name).read(),
+                                     deepcopy(opts), 
+                                     args, 
+                                     transaction=PEND)
+        vs = cmd.var_storage
+        vs.opts['_ARGV'] = args
+        vs.opts['_OPTS'] = opts
         return cmd
 
 class CallCommand(_CallCommand, Internal):
