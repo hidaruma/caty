@@ -1052,4 +1052,11 @@ command forward<S, T> [string command_name, string*] :: S -> never
 command sleep<T> [integer(minimum=0)? millisec] :: T -> T
     refers python:caty.core.std.command.builtin.Sleep;
    
+/**
+ * 入力データを文字列化する。
+ */
+command to-string :: any -> string
+    refers python:caty.core.std.command.builtin.ToString;
+   
+
 """

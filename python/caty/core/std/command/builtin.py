@@ -1111,3 +1111,13 @@ class Sleep(Builtin):
         sec = self.millisec / 1000 # __future__ division
         time.sleep(sec)
         return input
+
+class ToString(Builtin):
+    def execute(self, input):
+        from caty.jsontools import raw_json as json
+        v = json.dumps(input, cls=PPEncoder, ensure_ascii=False)
+        if isinstance(v, unicode):
+            return v
+        else:
+            return unicode(str(v))
+
