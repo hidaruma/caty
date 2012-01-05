@@ -283,6 +283,10 @@ class TransactionAdaptor(Command):
         self._command = command
         self.isRunningAsync = False
 
+    @property
+    def var_storage(self):
+        return self._command.var_storage
+
     def __call__(self, input):
         try:
             r = self._command(input)

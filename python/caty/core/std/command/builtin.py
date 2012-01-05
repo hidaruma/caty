@@ -559,15 +559,22 @@ class Eval(Builtin):
             return cmd(input[1])
         
 from caty.command import MafsMixin
-from caty.core.script.parser import list_to_opts_and_args
+from copy import deepcopy
 class Execute(Builtin, MafsMixin):
     
-    def setup(self, path, *rest_args_and_opts):
-        self.__path = path
-        self.__opts, self.__args = list_to_opts_and_args(rest_args_and_opts)
+    def setup(self, opts, *args):
+        self.__path = args[0]
+        self.__scriptopts = opts
+        self.__scriptargs = args 
 
     def execute(self, input):
-        cmd = self.interpreter.build(self.open(self.__path).read(), self.__opts, self.__args, transaction=PEND)
+        cmd = self.interpreter.build(self.open(self.__path).read(), 
+                                     deepcopy(self.__scriptopts), 
+                                     list(self.__scriptargs), 
+                                     transaction=PEND)
+        vs = cmd.var_storage
+        vs.opts['_ARGV'] = self.__scriptargs
+        vs.opts['_OPTS'] = self.__scriptopts
         return cmd(input)
 
 class DirIndex(Internal):

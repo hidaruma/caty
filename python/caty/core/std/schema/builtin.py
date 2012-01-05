@@ -689,7 +689,7 @@ command eq :: [any, any] -> @Same any | @Diff [any, any]
 /**
  * 引数のファイルをCatyスクリプトだとみなして実行する。
  */
-command exec [string path, any* opts_and_args] :: any -> any
+command exec {*:any?} [string path, any* opts_and_args] :: any -> any
     reads [pub, scripts, data]
     uses interpreter
     refers python:caty.core.std.command.builtin.Execute;
