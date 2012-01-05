@@ -79,6 +79,8 @@ class Draw(Builtin):
         G = AGraph(name=name, directed=d, strict=s)
         if self._font:
             G.graph_attr.update(fontname=self._font)
+            G.node_attr.update(fontname=self._font)
+            G.edge_attr.update(fontname=self._font)
         G.graph_attr.update(graph.get('graph', {}))
         G.node_attr.update(graph.get('node', {}))
         G.edge_attr.update(graph.get('edge', {}))
