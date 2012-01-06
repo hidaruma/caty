@@ -3,6 +3,7 @@ from caty.core.command import Builtin
 from caty.core.schema import *
 from caty.util import cout
 import caty.jsontools as json
+import caty
 name = u'debug'
 schema = u''
 class Dump(Builtin):

@@ -1,4 +1,5 @@
 #coding: utf-8
+import caty
 from caty.core.command import Builtin
 from caty.util.path import join
 from csslib.selector import select, Element

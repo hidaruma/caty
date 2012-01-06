@@ -85,7 +85,7 @@ command list-collections :: void -> [Collection*]
  */
 command select<T> {
                 @[default(-1)]
-                "limit": pinteger?, 
+                "limit": integer(minimum=-1)?, 
                 @[default(false)]
                 "reverse":boolean?, 
                 @[default("")]

@@ -47,11 +47,9 @@ command length<S> :: [S*] -> integer
     refers python:caty.core.std.command.listlib.Length;
 
 /**
- * 引数が与えられた場合、入力値を引数の回数分だけ繰り返したリストを返す。
- * そうでない場合、第二入力値の回数分だけ第一入力値を繰り返したリストを返す。
+ * 入力値を引数の回数分だけ繰り返したリストを返す。
  */
 command cycle<T> [integer] :: T -> [T*]
-        :: [T, integer] -> [T*]
     refers python:caty.core.std.command.listlib.Cycle;
 
 /**
@@ -75,7 +73,6 @@ command sort<T> {"key":string?, "reverse": boolean?} :: [T*] -> [T*]
  * 第二引数は省略可能で、その場合は配列の最終要素までのスライスが返される。
  */
 command slice<T> [integer, integer?] :: [T*] -> [T*]
-              [integer] :: [T*] -> [T*]
     refers python:caty.core.std.command.listlib.Slice;
 
 /**

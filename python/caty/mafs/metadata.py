@@ -212,6 +212,10 @@ default_types = {
         u"isText": True, 
         u"contentType": u"text/html"
     }, 
+    u".txt": {
+        u"isText": True, 
+        u"contentType": u"text/plain"
+    }, 
     u".mpeg": {
         u"isText": False, 
         u"contentType": u"video/mpeg"

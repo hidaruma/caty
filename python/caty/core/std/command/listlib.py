@@ -44,18 +44,12 @@ class Length(Builtin):
 
 class Cycle(Builtin):
 
-    def setup(self, times=None):
+    def setup(self, times):
         self.times = times
 
     def execute(self, input):
         times = self.times
-
-        if times is None:
-            times = input[1]
-            src = input[0]
-        else:
-            src = input
-        return [src for i in range(times)]
+        return [input for i in range(times)]
 
 class Enumerate(Builtin):
 

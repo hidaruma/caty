@@ -81,8 +81,6 @@ class Select(Builtin, StorageAccessor):
         self._order_by = opts['order-by']
         self._reverse = opts['reverse']
         self._path = args
-        l = ArraySchema([self.collection.schema], repeat=True)
-        self._out_schema = l
 
     def execute(self, input):
         if not input: input = TagOnly('_ANY')
@@ -119,7 +117,7 @@ class Insert(Builtin, StorageAccessor):
 
     def setup(self, opts, collection_name):
         self._collection_name = collection_name
-        self._allow_dup = opts.allow_dup
+        self._allow_dup = opts['allow-dup']
         self._in_schema = self.collection.schema
 
     def execute(self, input):
