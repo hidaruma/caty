@@ -11,10 +11,10 @@ class Draw(Builtin):
     def setup(self, opts):
         self._out_file = opts['out']
         self._format = opts['format']
-        self._font = opts['font']
+        self._font = opts.get('font', None)
         self._strip_xml_decl = False
-        self._time = opts['time']
-        self._time_file = opts['timefile']
+        self._time = opts.get('time', None)
+        self._time_file = opts.get('timefile', None)
         if self._format == 'svge':
             self._format = 'svg'
             self._strip_xml_decl = True

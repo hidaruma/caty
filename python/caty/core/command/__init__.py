@@ -422,15 +422,15 @@ class VarLoader(object):
     def load(self, storage):
         if self.profile.opts_schema.type == 'object':
             opts = self._load_opts(storage.opts)
+            opts = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(opts))
         else:
             opts = None
         if self.profile.args_schema.type == 'array':
             args = self._load_args(storage.opts, storage.args)
+            args = self.profile.args_schema.convert(args)
         else:
             args = None
-        o = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(opts))
-        return (self._to_option_value(o), 
-                self.profile.args_schema.convert(args))
+        return opts, args
 
     def _load_opts(self, opts):
         o = {}
@@ -444,7 +444,7 @@ class VarLoader(object):
                 if opt.value.name in opts:
                     o[opt.key] = opts[opt.value.name]
                 else:
-                    if not opt.optional:
+                    if opt.optional:
                         raise KeyError(opt.value.name)
             elif opt.type == 'glob':
                 o.update(opts['_OPTS'])
@@ -476,23 +476,4 @@ class VarLoader(object):
                     if not arg.optional:
                         raise InternalException(u'Argument des not suffice: $index', index=arg.index)
         return a
-
-    def _to_option_value(self, option):
-        from caty import UNDEFINED
-        if option is None: return
-        value = JsonableValues()
-        for k, v in option.items():
-            if v is not UNDEFINED:
-                value[k] = v
-        #for k, v in self.profile.opts_schema.items():
-        #    if k not in key_set:
-        #        value[k] = UNDEFINED
-        return value
-
-class JsonableValues(dict):
-    def __setitem__(self, k, v):
-        dict.__setitem__(self, k, v)
-        object.__setattr__(self, k.replace('-', '_').replace(' ', ''), v)
-
-
 

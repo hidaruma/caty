@@ -76,14 +76,14 @@ class Put(Builtin):
         stm = selector.compile(self._pathexp)
         return stm.replace(src, value, self._allow_loose)
 
+import caty
 class Get(Builtin):
     def setup(self, opts, pathexp=u'$'):
         self._pathexp = pathexp.rstrip('?')
         self._safe = opts.safe or pathexp.endswith('?')
-        self._default = opts.default
+        self._default = opts.get('default', caty.UNDEFINED)
 
     def execute(self, input):
-        import caty
         stm = selector.compile(self._pathexp)
         try:
             r = stm.select(input).next()
