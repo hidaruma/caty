@@ -12,19 +12,19 @@ resource Wikiファイル("*.wiki") {
     };
     /** 読み込み */
     action 読み出し("/GET") :: @[in, out] #io void -> WikiPage produces HTMLページ { 
-        (#io file.読み出し %1 | {
+        (#io file:read %1 | {
             "body": text:creole, 
-            "title": param %1 | text:rsplit "." | item 0 | text:trim /,
+            "title": %1 | text:rsplit "." | item 0 | text:trim /,
             "lastModified": file:lastmodified %1
-        }) | print include@this:/HTMLページ.html
+        }) | print include@this:/page.html
     };
 
     /** 編集画面呼び出し */
     action 編集("edit/GET")  :: @[in, out]#io void -> WikiSkele produces 編集 {
         {
-            "body":file.読み出し %1,
-            "title": param %1 | text:rsplit "." | item 0 | text:trim /
-        } | print include@this:/編集.html
+            "body":file:read %1,
+            "title": %1 | text:rsplit "." | item 0 | text:trim /
+        } | print include@this:/edit.html
     };
 
     action 書き込み("/POST#exists-parent")  :: 
@@ -32,7 +32,7 @@ resource Wikiファイル("*.wiki") {
         @[out] #ok _ -> never redirects Wikiファイル.読み出し,
         @[out] #ng _ -> never redirects Root.get {
         (#translate translate Wikiファイル) | when {
-            OK => (#ok ["/wiki", (#part pv body) | file:書き込み %1 | param %1] | text:concat | redirect),
+            OK => (#ok ["/wiki", (#part pv body) | file:書き込み %1 | %1] | text:concat | redirect),
             NG => (#ng "/wiki/" | redirect)
         }
     };

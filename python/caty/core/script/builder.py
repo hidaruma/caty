@@ -60,6 +60,18 @@ class CommandCombinator(Command):
     def var_storage(self):
         return self.af.var_storage
 
+    @property
+    def profile_container(self):
+        return self.bf.profile_container
+
+    @property
+    def col(self):
+        return self.bf.col
+
+    @property
+    def line(self):
+        return self.bf.line
+
     def accept(self, visitor):
         return visitor.visit_pipe(self)
 

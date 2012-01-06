@@ -50,6 +50,7 @@ class ListBuilder(Syntax):
             v.set_facility(facilities)
    
     def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
         for v in self.values:
             v.set_var_storage(storage)
 
@@ -78,6 +79,7 @@ class ObjectBuilder(Syntax):
 
    
     def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
         for v in self.__nodes.values():
             v.set_var_storage(storage)
 
@@ -217,6 +219,7 @@ class Dispatch(Syntax):
             v.set_facility(facilities)
 
     def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
         for v in self.__cases.values():
             v.set_var_storage(storage)
 
@@ -247,6 +250,7 @@ class TagBuilder(Syntax):
         self.command.set_facility(facilities)
 
     def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
         self.command.set_var_storage(storage)
 
     def accept(self, visitor):

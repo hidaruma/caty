@@ -143,7 +143,8 @@ class ProfileBuilder(SchemaBuilder):
                                   node.annotation, 
                                   node.doc, 
                                   node.application, 
-                                  node.type_var_names)
+                                  node.type_var_names,
+                                  self.module)
         else:
             pc = ScriptProfileContainer(node.name, 
                                         node.script_proxy, 

@@ -5,6 +5,7 @@ from optparse import OptionParser
 from itertools import *
 from functools import partial
 from caty.core.command.exception import *
+from caty.core.exception import throw_caty_exception
 from caty.core.i18n import I18nMessageWrapper
 import types
 import caty.util as util
@@ -194,7 +195,7 @@ class Command(object):
     def _init_opts(self):
         self._opts, self._args = self.__var_loader.load(self.__var_storage)
 
-    def setup(self): pass
+    def setup(self, *args, **kwds): pass
 
     @property
     def in_schema(self):
@@ -212,7 +213,10 @@ class Command(object):
         return visitor.visit_command(self)
 
     def execute(self, *args, **kwds):
-        raise NotImplementedError
+        throw_caty_exception(
+            'NotImplemented',
+            self.name
+        )
 
     def error(self, json_obj):
         u"""コマンドをエラーとして終了させる。
@@ -293,13 +297,13 @@ class Syntax(Builtin):
         pass
 
 class Dummy(Command):
-    def execute(self):
+    def execute(self, *args, **kwds):
         raise NotImplementedError()
 
 def new_dummy():
     class _Dummy(Command):
-        def execute(self):
-            raise NotImplementedError()
+        def execute(self, *args, **kwds):
+            throw_caty_exception('NotImplemented', self.name)
     return _Dummy
 
 def scriptwrapper(profile, script):

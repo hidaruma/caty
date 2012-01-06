@@ -472,7 +472,7 @@ def setup_shell(args, cls=CatyShell):
     if _help:
         help()
         return None, None, None
-    system = System(_encoding, debug, quiet, no_ambient, no_app)
+    system = System(_encoding, debug, quiet, no_ambient, no_app, sitename)
     site = system.get_app(sitename)
     shell = cls(site, wildcat, debug, system, dribble, ' '.join(args))
     return shell, files, script

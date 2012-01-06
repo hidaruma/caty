@@ -108,6 +108,8 @@ class RequestHandler(object):
                     lock_file = cmd(None)
                 else:
                     lock_file = None
+                if 'deprecated' in proxy.annotations:
+                    self._app._system.depreacte_logger.debug('path: %s verb: %s' % (path, verb))
                 if proxy.compiled:
                     cmd = self._interpreter._instantiate(proxy.instance, opts, [path, path], transaction=transaction)
                 else:

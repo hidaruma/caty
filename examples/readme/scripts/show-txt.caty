@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
 file:read %1 | {
     "body": text:creole, 
-    "name": param %1 | text:split "/" | item 1,
+    "name": %1 | text:split "/" | item 1,
 } | print /show.html

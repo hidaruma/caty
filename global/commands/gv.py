@@ -31,16 +31,17 @@ class Draw(Builtin):
             if not self._modified():
                 return
         G = self.transform(self._escape_lf(graph))
-        G.layout(prog=self._engine)
-        if self._out_file:
+        if self._format == 'plaindot':
+            o = str(G)
+        else:
+            G.layout(prog=self._engine)
             o = G.draw(prog=self._engine, format=self._format)
             o = self._strip(o)
+        if self._out_file:
             with self.pub.open(self._out_file, 'wb') as f:
                 f.write(o)
         else:
-            o = G.draw(prog=self._engine, format=self._format)
-            o = self._strip(o)
-            if self._format in ('svg', 'dot'):
+            if self._format in ('svg', 'dot', 'plaindot'):
                 return unicode(o, 'utf-8')
             else:
                 return o
@@ -78,6 +79,8 @@ class Draw(Builtin):
         G = AGraph(name=name, directed=d, strict=s)
         if self._font:
             G.graph_attr.update(fontname=self._font)
+            G.node_attr.update(fontname=self._font)
+            G.edge_attr.update(fontname=self._font)
         G.graph_attr.update(graph.get('graph', {}))
         G.node_attr.update(graph.get('node', {}))
         G.edge_attr.update(graph.get('edge', {}))
@@ -85,14 +88,16 @@ class Draw(Builtin):
             type, elem = json.split_tag(e)
             if type == 'node':
                 self._add_node(G, elem)
-        for e in graph['elements']:
-            type, elem = json.split_tag(e)
-            if type == 'edge':
-                self._add_edge(G, elem)
+
         for e in graph['elements']:
             type, elem = json.split_tag(e)
             if type == 'cluster':
                 self._add_cluster(G, elem)
+
+        for e in graph['elements']:
+            type, elem = json.split_tag(e)
+            if type == 'edge':
+                self._add_edge(G, elem)
         return G
 
     def _add_node(self, graph, node):
@@ -117,11 +122,21 @@ class Draw(Builtin):
         c = self.transform(cluster, True)
         sg = graph.add_subgraph(c.iternodes(), c.name, **c.graph_attr)
         for n in c.iternodes():
-            a = {}
+            if self._font:
+                a = {'fontname': self._font}
+            else:
+                a = {}
             a.update(**c.node_attr)
             a.update(n.attr)
             sg.add_node(n.name, **a)
-        sg.add_edges_from(c.iteredges())
+        for e in c.iteredges():
+            if self._font:
+                a = {'fontname': self._font}
+            else:
+                a = {}
+            a.update(**c.edge_attr)
+            a.update(e.attr)
+            sg.add_edge(e, **a)
 
     def _modified(self):
         with self.pub.open(self._out_file) as out:

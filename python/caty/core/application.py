@@ -66,7 +66,7 @@ class Application(PbcObject):
         self._physical_path = join(group.name, name)
         self._app_map = {name: self}
         self._global_config = group.global_config
-        system.i18n.write("Loading $name", name=self._path)
+        system.cout.writeln(system.i18n.get("Loading $name", name=self._path))
         self._configure()
         if not self._disabled:
             self._init_filetype()
@@ -382,7 +382,7 @@ class Application(PbcObject):
         return logger.get(str(self.name), str(type))
 
     def finish_setup(self):
-        self.i18n.write("Initializing '$name'", name=self.name)
+        self.cout.writeln(self.i18n.get("Initializing '$name'", name=self.name))
         if self._disabled: return
         self._init_interpreter() # 一旦インタープリターを初期化してスクリプトコンパイラが動くようにする
         c = {}

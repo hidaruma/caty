@@ -233,7 +233,7 @@ class ScriptParser(Parser):
         args = self.arguments(seq)
         if not args:
             args = []
-        p = CommandProxy(u'exec', [], {}, s + args, pos)
+        p = CommandProxy(u'exec', [], opts, s + args, pos)
         return p
 
     def longopt(self, seq):
@@ -437,4 +437,31 @@ class ScriptParser(Parser):
 def anything(l):
     return filter(lambda i: i!= None, l)
 
-
+def list_to_opts_and_args(arg_list):
+    opts = {}
+    args = []
+    key = None
+    has_upcoming_value = False
+    for a in arg_list:
+        if isinstance(a, unicode):
+            if a.startswith('--'):
+                if '=' in a:
+                    k, v = a.split('=', 1)
+                    opts[k[2:]] = v.strip('"')
+                    continue
+                else:
+                    key = k[2:]
+                    continue
+            if a == '=':
+                has_upcoming_value = True
+                continue
+        if key and has_upcoming_value:
+            opts[key] = a
+            has_upcoming_value = False
+            key = None
+            continue
+        if key:
+            opts[key] = True
+            key = None
+        args.append(a)
+    return opts, args

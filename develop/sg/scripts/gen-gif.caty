@@ -1,0 +1,7 @@
+
+seq1.caty | gv:draw --out=/seq1.gif;
+seq2.caty | gv:draw --out=/seq2.gif;
+seq3.caty | gv:draw --out=/seq3.gif;
+seq4.caty | gv:draw --out=/seq4.gif;
+cmd.caty  | gv:draw --out=/cmd.gif ;
+cmd2.caty | gv:draw --out=/cmd2.gif

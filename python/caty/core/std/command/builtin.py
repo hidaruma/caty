@@ -559,45 +559,23 @@ class Eval(Builtin):
             return cmd(input[1])
         
 from caty.command import MafsMixin
+from copy import deepcopy
 class Execute(Builtin, MafsMixin):
     
-    def setup(self, path, *rest_args_and_opts):
-        self.__path = path
-        self.__opts, self.__args = self._parse_opts_and_args(rest_args_and_opts)
+    def setup(self, opts, *args):
+        self.__path = args[0]
+        self.__scriptopts = opts
+        self.__scriptargs = args 
 
     def execute(self, input):
-        cmd = self.interpreter.build(self.open(self.__path).read(), self.__opts, self.__args, transaction=PEND)
+        cmd = self.interpreter.build(self.open(self.__path).read(), 
+                                     deepcopy(self.__scriptopts), 
+                                     list(self.__scriptargs), 
+                                     transaction=PEND)
+        vs = cmd.var_storage
+        vs.opts['_ARGV'] = self.__scriptargs
+        vs.opts['_OPTS'] = self.__scriptopts
         return cmd(input)
-
-    def _parse_opts_and_args(self, arg_list):
-        opts = {}
-        args = []
-        key = None
-        has_upcoming_value = False
-        for a in arg_list:
-            if a.startswith('--'):
-                if '=' in a:
-                    k, v = a.split('=', 1)
-                    opts[k[2:]] = v.strip('"')
-                    continue
-                else:
-                    key = k[2:]
-                    continue
-            if a == '=':
-                has_upcoming_value = True
-                continue
-            if key and has_upcoming_value:
-                opts[key] = a
-                has_upcoming_value = False
-                key = None
-                continue
-            if key:
-                opts[key] = True
-                key = None
-            args.append(a)
-        if args:
-            args.insert(0, args[0])
-        return opts, args
 
 class DirIndex(Internal):
     
@@ -756,18 +734,6 @@ class ShowFileType(Builtin):
             return self.pub.all_types()
         else:
             return self.pub.all_types().get(self.ext, None)
-
-class Param(Builtin):
-    
-    def setup(self, opts, arg=None):
-        self.arg = arg
-        self._default = opts.default
-
-    def execute(self):
-        if self.arg:
-            return self.arg
-        else:
-            return self._default
 
 from caty.util.path import join
 class Redirect(Builtin):
@@ -1152,3 +1118,15 @@ class Sleep(Builtin):
         sec = self.millisec / 1000 # __future__ division
         time.sleep(sec)
         return input
+
+class ToString(Builtin):
+    def execute(self, input):
+        from caty.jsontools import raw_json as json
+        if isinstance(input, unicode):
+            return input
+        v = json.dumps(input, cls=PPEncoder, ensure_ascii=False)
+        if isinstance(v, unicode):
+            return v
+        else:
+            return unicode(str(v))
+

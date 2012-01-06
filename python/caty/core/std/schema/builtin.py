@@ -689,7 +689,7 @@ command eq :: [any, any] -> @Same any | @Diff [any, any]
 /**
  * 引数のファイルをCatyスクリプトだとみなして実行する。
  */
-command exec [string path, string* opts_and_args] :: any -> any
+command exec {*:any?} [string path, any* opts_and_args] :: any -> any
     reads [pub, scripts, data]
     uses interpreter
     refers python:caty.core.std.command.builtin.Execute;
@@ -810,14 +810,6 @@ command proj :: void -> string
                           {} [string] :: void -> FileType | null
         reads pub
         refers python:caty.core.std.command.builtin.ShowFileType;
-
-/**
- * 引数を出力にコピーする。
- * 引数を与えなかった場合、 null が返る。
- */
-command param {"default": string?} [string?] :: void -> string|null
-
-    refers python:caty.core.std.command.builtin.Param;
 
 /**
  * リダイレクト処理。引数のパスに対してそのままリダイレクトする。
@@ -1042,6 +1034,7 @@ command object-to-array :: object -> [[string, any]*]
  * 引数のコマンドを呼び出す。
  */
 command call<S, T> [string command_name, string*] :: S -> T
+    reads [pub, scripts, interpreter]
     refers python:caty.core.script.interpreter.CallCommand;
 
 /** 
@@ -1049,6 +1042,7 @@ command call<S, T> [string command_name, string*] :: S -> T
  */
 command forward<S, T> [string command_name, string*] :: S -> never
     signals T
+    reads [pub, scripts, interpreter]
     refers python:caty.core.script.interpreter.Forward;
 
 /**
@@ -1058,4 +1052,11 @@ command forward<S, T> [string command_name, string*] :: S -> never
 command sleep<T> [integer(minimum=0)? millisec] :: T -> T
     refers python:caty.core.std.command.builtin.Sleep;
    
+/**
+ * 入力データを文字列化する。
+ */
+command to-string :: any -> string
+    refers python:caty.core.std.command.builtin.ToString;
+   
+
 """

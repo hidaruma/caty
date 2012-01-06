@@ -74,7 +74,7 @@ command sort<T> {"key":string?, "reverse": boolean?} :: [T*] -> [T*]
  * 第一引数は開始インデックスで、第二引数は終了インデックスとなる。
  * 第二引数は省略可能で、その場合は配列の最終要素までのスライスが返される。
  */
-command slice<T> [integer, integer] :: [T*] -> [T*]
+command slice<T> [integer, integer?] :: [T*] -> [T*]
               [integer] :: [T*] -> [T*]
     refers python:caty.core.std.command.listlib.Slice;
 

@@ -35,11 +35,13 @@ class System(PbcObject):
     __properties__ = ['app_names']
 
     @brutal_error_printer
-    def __init__(self, encoding=None, is_debug=True, quiet=False, no_ambient=False, no_app=False):
+    def __init__(self, encoding=None, is_debug=True, quiet=False, no_ambient=False, no_app=False, primary=u'root'):
         caty.core.runtimeobject.i18n = I18nMessage({}, writer=cout, lang='en') # フォールバック
         if quiet:
             class NullWriter(object):
                 def write(self, *args):
+                    pass
+                def writeln(self, *args):
                     pass
             self.__cout = NullWriter()
         else:
@@ -55,7 +57,7 @@ class System(PbcObject):
         messages = self._load_system_messages()
         self.i18n = I18nMessage(messages, writer=cout, lang=self._global_config.language)
         caty.core.runtimeobject.i18n = self.i18n # 改めて設定
-        self.i18n.write('Loading system data')
+        self.__cout.writeln(self.i18n.get('Loading system data'))
         self._casm = casm.initialize(self,
                                      [builtin, node],
                                      [
@@ -78,7 +80,7 @@ class System(PbcObject):
                                      viva,
                                      http])
 
-        gag = ApplicationGroup('', self._global_config, no_ambient, no_app, self)
+        gag = ApplicationGroup('', self._global_config, no_ambient, no_app, primary, self)
         self._global_app = gag._apps[0]
         self._global_app.finish_setup()
         self._casm.set_global(self._global_app)
@@ -87,11 +89,11 @@ class System(PbcObject):
         # common, main, extra, examples という順序は固定
         self._app_groups = [
             ag for ag in [
-                ApplicationGroup('common', self._global_config, no_ambient, no_app, self),
-                ApplicationGroup(USER, self._global_config, no_ambient, no_app, self),
-                ApplicationGroup('extra', self._global_config, no_ambient, no_app, self),
-                ApplicationGroup('examples', self._global_config, no_ambient, no_app, self),
-                ApplicationGroup('develop', self._global_config, no_ambient, no_app, self),
+                ApplicationGroup('common', self._global_config, no_ambient, no_app, primary, self),
+                ApplicationGroup(USER, self._global_config, no_ambient, no_app, primary, self),
+                ApplicationGroup('extra', self._global_config, no_ambient, no_app, primary, self),
+                ApplicationGroup('examples', self._global_config, no_ambient, no_app, primary, self),
+                ApplicationGroup('develop', self._global_config, no_ambient, no_app, primary, self),
             ] if ag.exists
         ]
         self._apps = reduce(operator.add, map(ApplicationGroup.apps.fget, self._app_groups))
@@ -142,6 +144,7 @@ class System(PbcObject):
         self._access_logger = syslog.get_access_log()
         self._error_logger = syslog.get_error_log()
         self._start_logger = syslog.get_start_log()
+        self._deprecate_logger = syslog.get_deprecate_log()
     
     @property
     def access_logger(self):
@@ -150,6 +153,10 @@ class System(PbcObject):
     @property
     def error_logger(self):
         return self._error_logger
+
+    @property
+    def depreacte_logger(self):
+        return self._deprecate_logger
 
     @property
     def casm(self):
@@ -258,7 +265,6 @@ class System(PbcObject):
     def __invariant__(self):
         assert len(self._app_groups) > 0
         assert len(self._apps) > 0
-        assert ROOT in self._app_map
 
     if caty.DEBUG:
         def _contains_name(self, name):

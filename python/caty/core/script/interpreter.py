@@ -114,6 +114,15 @@ class CommandExecutor(BaseInterpreter):
         input = self.input
         if 'deprecated' in node.annotations:
             util.cout.writeln(u'[DEBUG] Deprecated: %s' % node.name)
+            try:
+                name = self.__get_name(node)
+                msg = '{0} at {1}:{2} Line {3}, Col {4}'.format(name, self.app.name, self.__get_name(self.cmd), self.cmd.col, self.cmd.line)
+                self.app._system.depreacte_logger.debug(msg)
+            except Exception, e:
+                import traceback
+                traceback.print_exc()
+                msg = u'[DEBUG] %s (other infomation is lacking)' % node.name
+                self.app._system.depreacte_logger.debug(msg)
         if node._mode: # @console など、特定のモードでしか動かしてはいけないコマンドのチェック処理
             mode = node.env.get('CATY_EXEC_MODE')
             if not node._mode.intersection(set(mode)):
@@ -147,6 +156,13 @@ class CommandExecutor(BaseInterpreter):
             raise
         finally:
             node.var_storage.del_scope()
+
+    def __get_name(self, node):
+        if node.profile_container.module:
+            name = '{0}:{1}'.format(node.profile_container.module.name, node.name)
+        else:
+            name = ':'+node.name
+        return name
 
     def visit_pipe(self, node):
         self.input = node.bf.accept(self)
@@ -353,13 +369,21 @@ class CommandExecutor(BaseInterpreter):
     def set_var_storage(self, v):
         self.cmd.set_var_storage(v)
 
-class _CallCommand(object):
+from caty.command import MafsMixin
+class _CallCommand(MafsMixin):
     def setup(self, cmd_name, *args):
         from caty.core.command.param import Argument
         self.__cmd_name = cmd_name
         self.__args = map(Argument, args)
+        self.__raw_args = args
 
-    def _make_cmd(self, input):
+    def _make_cmd(self):
+        if self.__cmd_name.endswith('.caty'):
+            return self.__script()
+        else:
+            return self.__make_cmd()
+
+    def __make_cmd(self):
         from caty.core.script.proxy import Proxy
         from caty.core.script.builder import CommandBuilder
         from caty.core.command import VarStorage
@@ -376,14 +400,28 @@ class _CallCommand(object):
         c.set_var_storage(var_storage)
         return CommandExecutor(c, app, self._facilities)
 
+    def __script(self):
+        from caty.core.script.parser import list_to_opts_and_args
+        from caty.core.facility import PEND
+        from copy import deepcopy
+        opts, args = list_to_opts_and_args([self.__cmd_name] + list(self.__raw_args))
+        cmd = self.interpreter.build(self.open('scripts@this:/' + self.__cmd_name).read(),
+                                     deepcopy(opts), 
+                                     args, 
+                                     transaction=PEND)
+        vs = cmd.var_storage
+        vs.opts['_ARGV'] = args
+        vs.opts['_OPTS'] = opts
+        return cmd
+
 class CallCommand(_CallCommand, Internal):
     def execute(self, input):
-        c = self._make_cmd(input)
+        c = self._make_cmd()
         return c(input)
 
 class Forward(_CallCommand, Internal):
     def execute(self, input):
-        c = self._make_cmd(input)
+        c = self._make_cmd()
         raise ContinuationSignal(input, c.cmd)
 
 
