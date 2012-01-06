@@ -9,9 +9,9 @@ except:
 
 class DrawNT(Internal):
     def setup(self, opts):
-        self._out_file = opts['out']
+        self._out_file = opts.get('out', '')
         self._format = opts['format']
-        self._font = opts['font']
+        self._font = opts.get('font', '')
         if self._out_file:
             self._format = self._out_file.split('.')[-1]
             if self._out_file.endswith('.svge'):

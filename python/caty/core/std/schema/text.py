@@ -56,8 +56,7 @@ command tolower :: string -> string
  * 入力値を引数の文字列で分割して返す。
  * 第二引数が与えられた場合、それ+1が分割数の最大値となる。
  */
-command split [string] :: string -> [string*]
-              [string, integer] :: string -> [string*]
+command split [string, integer?] :: string -> [string*]
     refers python:caty.core.std.command.text.Split;
 
 /**
@@ -65,8 +64,7 @@ command split [string] :: string -> [string*]
  * 第二引数が与えられた場合、それ+1が分割数の最大値となる。
  * text:split との差異は、こちらは文字列を末尾から分割していく事である。
  */
-command rsplit [string] :: string -> [string*]
-               [string, integer] :: string -> [string*]
+command rsplit [string, integer?] :: string -> [string*]
     refers python:caty.core.std.command.text.RSplit;
 
 /**

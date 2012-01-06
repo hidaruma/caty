@@ -5,7 +5,7 @@ schema =u"""
  * app.logにデバッグログを書き込む。
  * --coutオプションが指定された場合、標準出力にもログを書き出す。
  */
-command debug {"cout": boolean?} :: string -> void
+command debug {@[default(false)]"cout": boolean?} :: string -> void
     uses [stream, logger]
     refers python:caty.core.std.command.logginglib.Debug;
 
@@ -13,7 +13,7 @@ command debug {"cout": boolean?} :: string -> void
  * app.logにインフォメーションログを書き込む。
  * --coutオプションが指定された場合、標準出力にもログを書き出す。
  */
-command info {"cout": boolean?} :: string -> void
+command info {@[default(false)]"cout": boolean?} :: string -> void
     uses [stream, logger]
     refers python:caty.core.std.command.logginglib.Info;
 
@@ -21,7 +21,7 @@ command info {"cout": boolean?} :: string -> void
  * app.logに警告ログを書き込む。
  * --coutオプションが指定された場合、標準出力にもログを書き出す。
  */
-command warning {"cout": boolean?} :: string -> void
+command warning {@[default(false)]"cout": boolean?} :: string -> void
     uses [stream, logger]
     refers python:caty.core.std.command.logginglib.Warning;
 
@@ -29,7 +29,7 @@ command warning {"cout": boolean?} :: string -> void
  * app.logにエラーログを書き込む。
  * --coutオプションが指定された場合、標準出力にもログを書き出す。
  */
-command error {"cout": boolean?} :: string -> void
+command error {@[default(false)]"cout": boolean?} :: string -> void
     uses [stream, logger]
     refers python:caty.core.std.command.logginglib.Error;
 

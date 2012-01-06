@@ -34,7 +34,7 @@ class ZeroFile(FileUtilMixin, Builtin):
 class Exists(FileUtilMixin, Builtin):
 
     def setup(self, opts, path):
-        self.__pred = opts.pred
+        self.__pred = opts['pred']
         FileUtilMixin.setup(self, path)
     
     def execute(self):

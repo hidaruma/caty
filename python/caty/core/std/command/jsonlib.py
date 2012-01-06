@@ -30,12 +30,12 @@ class Pretty(Builtin):
 from caty.util.collection import merge_dict
 class Merge(Builtin):
     def setup(self, opts):
-        if not opts.mode:
+        if not opts['mode']:
             self.merge_mode = 'pre'
         else:
-            if opts.mode == 'fst':
+            if opts['mode'] == 'fst':
                 self.merge_mode = 'pre'
-            elif opts.mode == 'snd':
+            elif opts['mode'] == 'snd':
                 self.merge_mode = 'post'
             else:
                 self.merge_mode = 'error'
@@ -48,8 +48,8 @@ class Merge(Builtin):
 
 class JsonResponse(Builtin):
     def setup(self, opts):
-        self._status = opts.status or 200
-        self._encoding = opts.encoding or 'utf-8'
+        self._status = opts['status']
+        self._encoding = opts['encoding']
 
     def execute(self, input):
         out = stdjson.dumps(input, ensure_ascii=False)

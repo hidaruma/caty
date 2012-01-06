@@ -28,7 +28,7 @@ class GetSession(Builtin):
 
     def setup(self, opts, key):
         self.__key = key
-        self.__nullable = opts.nullable
+        self.__nullable = opts.get('nullable', caty.UNDEFINED)
 
     def execute(self):
         try:
@@ -51,7 +51,7 @@ class DumpSchema(Builtin):
 class Profile(Builtin):
 
     def setup(self, opts):
-        self.tree = opts.tree
+        self.tree = opts.get('tree', caty.UNDEFINED)
 
     def execute(self):
         try:

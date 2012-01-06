@@ -7,7 +7,7 @@ except:
     except:
         print 'Python 2.6 or simplejson library is required.'
         raise
-__all__ = ['quoted_string', 'boolean', 'integer', 'number', 'null']
+__all__ = ['quoted_string', 'boolean', 'integer', 'number', 'null', 'line_by_itself']
 import itertools
 @try_
 def quoted_string(seq):

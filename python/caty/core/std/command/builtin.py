@@ -33,9 +33,9 @@ class Expand(Builtin, MafsMixin, PbcObject):
 
     def setup(self, opts, path):
         self.path, self.fs = self.parse_canonical_path(path)
-        self.raw = opts.raw
-        self.resolve = not bool(opts.no_script)
-        self.mode = opts.mode
+        self.raw = opts.get('raw', caty.UNDEFINED)
+        self.resolve = not bool(opts.get('no-script', caty.UNDEFINED))
+        self.mode = opts.get('mode', caty.UNDEFINED)
         PbcObject.__init__(self)
 
     def execute(self, input):
@@ -108,7 +108,7 @@ class Expand(Builtin, MafsMixin, PbcObject):
                 if o != None:
                     input = o
             if self.mode:
-                m = opts.mode
+                m = self.mode
                 if m == 'text':
                     template.renderer = TextRenderer()
                 elif m == 'html':
@@ -149,10 +149,10 @@ class Expand2(Expand):
 class Response(Builtin):
     
     def setup(self, opts):
-       self.ext = opts.ext
-       self.content_type = opts.content_type
-       self.encoding = opts.encoding
-       self.status = opts.status if opts.status else 200
+       self.ext = opts.get('ext', caty.UNDEFINED)
+       self.content_type = opts.get('content-type', caty.UNDEFINED)
+       self.encoding = opts.get('encoding', caty.UNDEFINED)
+       self.status = opts.get('status', caty.UNDEFINED) if opts.get('status', caty.UNDEFINED) else 200
 
     def execute(self, input):
         if not self.encoding:
@@ -213,9 +213,9 @@ class Print(Expand):
 class RequestTool(Internal):
     def setup(self, opts, path, *params):
         self._path = path
-        self._method = opts.method or 'GET'
-        self._verb = opts.verb or ''
-        self._fullpath = opts.fullpath
+        self._method = opts.get('method', caty.UNDEFINED) or 'GET'
+        self._verb = opts.get('verb', caty.UNDEFINED) or ''
+        self._fullpath = opts.get('fullpath', caty.UNDEFINED)
         self._sub_setup(opts, path, *params)
 
     def _sub_setup(self, opts, path, *params):
@@ -237,10 +237,10 @@ class Request(RequestTool):
     
     def _sub_setup(self, opts, path, params=''):
         self._opts = self._split_opts(params)
-        if opts.verb:
-            self._opts['_verb'] = opts.verb
-        self._content_type = opts.content_type
-        self._debug = opts.debug or self._system.debug
+        if opts.get('verb', caty.UNDEFINED):
+            self._opts['_verb'] = opts.get('verb', caty.UNDEFINED)
+        self._content_type = opts.get('content_type', caty.UNDEFINED)
+        self._debug = opts.get('debug', caty.UNDEFINED) or self._system.debug
 
     def _split_opts(self, params):
         r = {}
@@ -282,8 +282,8 @@ class Request(RequestTool):
 
 class SelectScript(RequestTool):
     def _sub_setup(self, opts, path, *params):
-        self._no_check = not opts.check
-        self._exception = opts.exception
+        self._no_check = not opts.get('check', caty.UNDEFINED)
+        self._exception = opts.get('exception', caty.UNDEFINED)
     
     def execute(self):
         app, path = self.find_app_and_path()
@@ -306,8 +306,8 @@ class SelectScript(RequestTool):
 
 class SelectAction(RequestTool):
     def _sub_setup(self, opts, path, *params):
-        self._no_check = not opts.check
-        self._exception = opts.exception
+        self._no_check = not opts.get('check', caty.UNDEFINED)
+        self._exception = opts.get('exception', caty.UNDEFINED)
     
     def execute(self):
         app, path = self.find_app_and_path()
@@ -333,7 +333,7 @@ class SelectAction(RequestTool):
 
 class TraceDispatch(RequestTool):
     def _sub_setup(self, opts, path, *params):
-        self._no_check = not opts.check
+        self._no_check = not opts.get('check', caty.UNDEFINED)
 
     def execute(self):
         app, path = self.find_app_and_path()
@@ -447,7 +447,7 @@ class Translate(Builtin, TypeCalculator):
 class Validate(Builtin, TypeCalculator):
     
     def setup(self, opts, schema_name):
-        self.pred = opts.pred
+        self.pred = opts.get('pred', caty.UNDEFINED)
         self.schema_name = schema_name
         self.set_schema(schema_name)
 
@@ -630,7 +630,7 @@ class Untagged(Builtin):
 
 class ConsoleOut(Builtin):
     def setup(self, opts):
-        self.nonl = opts.nonl
+        self.nonl = opts.get('nonl', caty.UNDEFINED)
     
     def execute(self, input):
         self.stream.write(input)
@@ -655,7 +655,7 @@ class DisplayApps(Builtin):
 class Home(Builtin):
     
     def setup(self, opts):
-        self.full_path = opts.long
+        self.full_path = opts.get('long', caty.UNDEFINED)
 
     def execute(self):
         if self.full_path:

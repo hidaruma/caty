@@ -84,7 +84,7 @@ command login :: LoginForm -> @OK string | @NG string
  * --userid オプションでユーザアカウントを指定することもでき、その場合はアカウント名の照合も行う。
  *
  */
-command loggedin<T> {"userid":string?} :: T -> @OK T | @NG T
+command loggedin<T> {@[default("")]"userid":string?} :: T -> @OK T | @NG T
                                 reads user
                                 refers python:caty.core.std.command.user.Loggedin;
 

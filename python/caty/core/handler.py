@@ -19,7 +19,10 @@ class AppDispatcher(object):
         self._system = system
 
     def dispatch(self, path):
-        name = path.split('/')[1].strip('/')
+        if path:
+            name = path.split('/')[1].strip('/')
+        else:
+            name = ''
         if name in self._system.app_names and name != 'global':
             return self._system.get_app(name)
         else:

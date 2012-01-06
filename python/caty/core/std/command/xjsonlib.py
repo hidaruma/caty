@@ -16,7 +16,7 @@ type AnyObject = {*:any};
 class ReadJson(FileUtilMixin, Builtin):
     def setup(self, opts, path):
         FileUtilMixin.setup(self, path)
-        self.__with_doc = opts.with_doc
+        self.__with_doc = opts['with-doc']
 
     def execute(self):
         f = self.open('rb')
@@ -33,7 +33,7 @@ class ReadJson(FileUtilMixin, Builtin):
 class WriteJson(FileUtilMixin, Builtin):
     def setup(self, opts, path):
         FileUtilMixin.setup(self, path)
-        self._json = opts.encode_json
+        self._json = opts['encode-json']
 
     def execute(self, input):
         f = self.open('wb')
@@ -69,7 +69,7 @@ class ToXML(Builtin):
 class Put(Builtin):
     def setup(self, opts, pathexp):
         self._pathexp = pathexp
-        self._allow_loose = opts.allow_loose
+        self._allow_loose = opts['allow-loose']
 
     def execute(self, input):
         src, value = input
@@ -80,7 +80,7 @@ import caty
 class Get(Builtin):
     def setup(self, opts, pathexp=u'$'):
         self._pathexp = pathexp.rstrip('?')
-        self._safe = opts.safe or pathexp.endswith('?')
+        self._safe = opts['safe'] or pathexp.endswith('?')
         self._default = opts.get('default', caty.UNDEFINED)
 
     def execute(self, input):

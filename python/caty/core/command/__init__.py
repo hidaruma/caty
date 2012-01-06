@@ -183,11 +183,11 @@ class Command(object):
             self.__var_storage.opts['_OPTS'] = opts
         else:
             self.__var_storage.opts['_OPTS'] = {}
-        if opts is not None and args:
+        if opts is not None and args is not None:
             self.setup(opts, *args)
-        elif opts:
+        elif opts is not None:
             self.setup(opts)
-        elif args:
+        elif args is not None:
             self.setup(*args)
         else:
             self.setup()

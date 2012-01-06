@@ -47,13 +47,13 @@ command pretty :: any -> string
  * * "snd": 第二要素のものを用いる
  * * "error": エラーとして扱い、 null を返す
  */
-command merge {"mode": string?} :: [AnyObject, AnyObject] -> AnyObject | null
+command merge {@[default("fst")]"mode": string?} :: [AnyObject, AnyObject] -> AnyObject | null
     refers python:caty.core.std.command.jsonlib.Merge;
 
 /**
  * 入力値を application/json フォーマットで出力する。
  */
-command response {"status": integer?, "encoding": string?} :: StandardJson -> Response
+command response {@[default(200)] "status": integer?, @[default("utf-8")]"encoding": string?} :: StandardJson -> Response
     refers python:caty.core.std.command.jsonlib.JsonResponse;
 
 /**

@@ -9,7 +9,7 @@ except:
 
 class Draw(Builtin):
     def setup(self, opts):
-        self._out_file = opts['out']
+        self._out_file = opts.get('out', '')
         self._format = opts['format']
         self._font = opts.get('font', None)
         self._strip_xml_decl = False

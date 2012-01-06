@@ -173,9 +173,9 @@ class DrawModule(Builtin, DrawingMixin):
     }
     def setup(self, opts, module_name):
         self._module_name = module_name
-        self._out_file = opts['out']
+        self._out_file = opts.get('out', '')
         self._format = opts['format']
-        self._font = opts['font']
+        self._font = opts.get('font', '')
         self._strip_xml_decl = False
         if self._format == 'svge':
             self._format = 'svg'
@@ -459,10 +459,10 @@ class DrawAction(Builtin, DrawingMixin):
     }
     def setup(self, opts, action_name):
         self._action_name = action_name
-        self._out_file = opts['out']
+        self._out_file = opts.get('out', '')
         self._lone = opts['lone']
         self._format = opts['format']
-        self._font = opts['font']
+        self._font = opts.get('font', '')
         self._strip_xml_decl = False
         if self._format == 'svge':
             self._format = 'svg'

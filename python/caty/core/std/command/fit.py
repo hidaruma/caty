@@ -6,17 +6,17 @@ from caty.jsontools import stdjson as json
 name = u'fit'
 schema = u"""
 """
-
+import caty
 class Run(Internal):
 
     def setup(self, opts, path=None):
         self._path = path.strip() if path else path
-        self._verbose = opts.verbose
-        self._force = opts.force
-        self._no_dry_run = opts.no_dry_run
-        self._debug = opts.debug
+        self._verbose = opts.get('verbose', caty.UNDEFINED)
+        self._force = opts.get('force', caty.UNDEFINED)
+        self._no_dry_run = opts.get('no-dry-run', caty.UNDEFINED)
+        self._debug = opts.get('debug', caty.UNDEFINED)
         if not path:
-            self._all = opts.all_apps
+            self._all = opts.get('all-apps', caty.UNDEFINED)
         else:
             self._all = False
 
@@ -148,9 +148,9 @@ class List(Builtin):
 class ClearReport(Internal):
 
     def setup(self, opts, dir_or_file=None):
-        self.__all = opts.all
+        self.__all = opts.get('all', caty.UNDEFINED)
         self.__path = dir_or_file
-        self.__all_apps = opts.all_apps
+        self.__all_apps = opts.get('all_apps', caty.UNDEFINED)
 
     def execute(self):
         app = self.env.get('CATY_APP')['name']
@@ -233,7 +233,7 @@ class ClearReport(Internal):
 class SendReport(Builtin):
 
     def setup(self, opts):
-        self._all = opts.all
+        self._all = opts.get('all', caty.UNDEFINED)
 
     def execute(self):
         report = self._collect_report()

@@ -1,5 +1,6 @@
 #coding: utf-8
 from topdown import *
+from topdown.util import *
 
 @as_parser
 def parser(seq):

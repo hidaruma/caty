@@ -21,7 +21,7 @@ type Collection = {
  * 第二引数はコレクション名であり、省略した場合スキーマ名がコレクション名となる。
  * 既にコレクションが存在する場合何もせず終了する。
  */
-command create-collection {"as-global": boolean?} [string, string?] :: void -> void
+command create-collection {@[default(false)]"as-global": boolean?} [string, string?] :: void -> void
     reads schema
     updates storage
     refers python:caty.core.std.command.strg.CreateCollection;
@@ -84,9 +84,13 @@ command list-collections :: void -> [Collection*]
  * 
  */
 command select<T> {
+                @[default(-1)]
                 "limit": pinteger?, 
+                @[default(false)]
                 "reverse":boolean?, 
+                @[default("")]
                 "order-by": string?, 
+                @[default(0)]
                 "offset": pinteger?,
                } [string, string*] :: any -> [T*]
     reads storage
@@ -108,7 +112,7 @@ command select1<T> [string] :: any -> T | @Error string
  * デフォルトでは重複した値を挿入しようとした場合は値が挿入されず、 @NG が出力値となる。
  * 
  */
-command insert<T> {"allow-dup": boolean?} [string] :: T -> @OK null | @NG null
+command insert<T> {@[default(false)]"allow-dup": boolean?} [string] :: T -> @OK null | @NG null
     updates storage
     refers python:caty.core.std.command.strg.Insert;
 

@@ -9,7 +9,7 @@ type AnyObject = {*:any};
  * JSON でないデータの書き込まれたファイルに対しての動作は保証しない（通常はエラー）。
  * --with-docオプションが指定された場合、ドキュメンテーション文字列を埋め込んだ形式で読み取る。
  */
-command read {"with-doc": boolean?} [string] :: void -> any
+command read {@[default(false)]"with-doc": boolean?} [string] :: void -> any
     reads [pub, data, sysfiles]
     refers python:caty.core.std.command.xjsonlib.ReadJson;
 
@@ -18,7 +18,7 @@ command read {"with-doc": boolean?} [string] :: void -> any
  * このコマンドで書き込んだデータはXJSONフォーマットとなる。
  * json:readで読み出し可能な形式にしたい場合、--encode-jsonオプションを付けること。
  */
-command write {"encode-json": boolean?} [string] :: any -> void
+command write {@[default(false)]"encode-json": boolean?} [string] :: any -> void
     updates [data, pub]
     refers python:caty.core.std.command.xjsonlib.WriteJson;
 

@@ -68,8 +68,8 @@ class Enumerate(Builtin):
 class Sort(Builtin):
 
     def setup(self, opts):
-        self.key = opts.key
-        self.rev = opts.reverse or False
+        self.key = opts.get('key', None)
+        self.rev = opts.get('reverse', False)
 
     def execute(self, input):
         r = input[:]

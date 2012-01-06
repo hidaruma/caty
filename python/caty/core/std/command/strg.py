@@ -36,7 +36,7 @@ class CreateCollection(Builtin):
         self._schema_name = schema_name
         self.schema[schema_name]
         self._collection_name = collection_name if collection_name else schema_name
-        self._global = opts.as_global
+        self._global = opts['as-global']
 
     def execute(self):
         self.storage(self._collection_name).create(self._schema_name, self._global)
@@ -74,14 +74,14 @@ class List(Builtin):
 class Select(Builtin, StorageAccessor):
 
     def setup(self, opts, collection_name, *args):
+        from caty.core.schema.array import ArraySchema
         self._collection_name = collection_name
-        self._limit = -1 if not opts.limit else opts.limit
-        self._offset = 0 if not opts.offset else opts.offset
-        self._order_by = opts.order_by
-        self._reverse = opts.reverse
+        self._limit = opts['limit']
+        self._offset = opts['offset']
+        self._order_by = opts['order-by']
+        self._reverse = opts['reverse']
         self._path = args
-        l = self.schema['list']
-        l.schemata = [self.collection.schema]
+        l = ArraySchema([self.collection.schema], repeat=True)
         self._out_schema = l
 
     def execute(self, input):
