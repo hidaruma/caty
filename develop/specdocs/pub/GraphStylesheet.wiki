@@ -1,0 +1,146 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= グラフのスタイルシート
+
+== 目的と機能
+
+Caty gv形式（XJSON形式）で記述されたグラフにGraphviz属性を付与するためのCSS類似の機能。
+
+== 変更と拡張
+
+# gv形式のすべてのオブジェクトに、（エッジにも）idプロパティ、classプロパティを許す。
+  classプロパティの使い方は、HTMLのclass属性と同じである。
+# gv:drawコマンドの入力型を拡張し、スタイルシートも受け付けるようにする。
+
+== CSSセレクター・サブセット構文
+
+以下は、CatyのCSSサブセット構文のさらにサブセットである。使わない部分はコメントアウトされている。
+
+* 擬似クラスセレクタは今回使わない。
+* '>' を使った親子セレクタも使わない。
+* 全称セレクタ、タイプセレクタ、IDセレクタ、クラスセレクタとその組みわせだけが使える。
+* クラスセレクタの複数指定（.foo.bar）は許してないが、必要になるかもしれない。
+
+
+{{{
+/** ノードのIDは@nodeオブジェクトのidプロパティ値
+ */
+syntax nodeId = lexical string; // GraphvizノードIDは任意の文字列
+
+/** ノードクラス名 */
+syntax nodeClassName = lexical string(remark="ノードクラス名");
+
+// /** 疑似クラス名 */
+// syntax pseudoClassName = lexical ("first-child"|"last-child");
+
+
+/** 全称セレクタ */
+syntax UniversalSelector ::= lexical '*'; /*delimiter*/ 
+
+/** タイプセレクタ */
+syntax TypeSelector ::= lexical ('graph' | 'node' |  'edge' |  'cluster');
+
+/** クラスセレクタ */
+syntax ClassSelector ::= '.' nodeClassName;
+
+/** IDセレクタ */
+syntax IdSelector ::= '#'  nodeId;
+
+// /** 擬似クラスセレクタ */
+// syntax PseudoClassSelector ::= ':' pseudoClassName;
+
+
+/** 基本セレクタ */
+syntax BasicSelector ::= (UniversalSelector | TypeSelector);
+
+/** クラスまたは擬似クラスまたはIDで修飾されたセレクタ
+ * 基本セレクタ省略時は '*' と解釈
+ */
+syntax QualifiedSelector ::= BasicSelector? 
+                             ( 
+                               // PseudoClassSelector |
+                               ClassSelector /* PseudoClassSelector? */ |
+                               IdSelector |
+                             )
+                             ;
+
+/** セレクタ式の因子 */
+syntax SelectorFactor ::= (BasicSelector | QualifiedSelector);
+
+/** セレクタ式の項： 因子を '>' で連結 */
+syntax SelectorTerm   ::= SelectorFactor /* ('>' SelectorFactor)* */;
+
+/** セレクタ式： 項を ',' で連結 */
+syntax SelectorExpr  ::= SelectorTerm (',' SelectorTerm)*;
+
+}}}
+
+== セレクターの解釈
+
+セレクターは、グラフの構成要素（グラフ、ノード、エッジ、クラスター）を選択する。
+クラスセレクターのために、classプロパティを導入する。
+class属性の値は、HTMLと同じく、空白で区切られたトークン列の文字列である。
+
+# 全称セレクタは、グラフのすべての構成要素を選択する。
+# タイプセレクタは、グラフ全体を意味する要素（graph）、ノードのみ（node）、エッジのみ（edge）、クラスタのみ（cluster）を選択する。
+# IDセレクタは、グラフ構成要素のidプロパティを見て、一致する要素をたかだか1つ選択する。エッジであっても、idが付いていれば選択する。
+# クラスセレクタは、グラフ構成要素のclassプロパティを見て、そのトークンの1つが指定クラス名と一致する要素を選択する。
+
+* 要検討：空白で区切られたトークン列以外に、トークン文字列の配列も認めると操作が便利そう。
+
+== スタイルシート・オブジェクト
+
+スタイルシート・オブジェクトは、次の形をしている。
+
+{{{
+
+type Stylesheet = {
+ * : {* : (boolean|number|string)?}(propNameFormat="graphviz-attribute-name")?
+}(propNameFormat="css-selector");
+
+}}}
+
+* オブジェクトのプロパティ名文字列は、CSSセレクターである。
+* プロパティ値はGraphvizの属性セットである。
+
+例：
+
+{{{
+
+{
+ "graph" : {"label":"file system"},
+ "node.file" : { "shape":"note", "style":"filled", "fillcolor":"yellow"},
+ "node.dir"  : { "shape":"folder", "style":"filled", "fillcolor":"brown"},
+ "node#root"  : { "fillcolor":"red"},
+ "edge" : {"color":"blue"},
+}
+
+}}}
+
+
+== カスケーディング（属性適用の優先順位）
+
+複数のセレクターが、同一の要素を選択し、属性設定が競合した場合どれを採用するかは、次の順位による。
+
+* ID指定 ＞ クラス指定 ＞ タイプ指定 ＞ 全称指定
+
+== gv:drawコマンド
+
+gv:drawコマンドの入力は次の型となる。
+
+* Digraph | [Digraph, Stylesheet]
+
+# Digraphが入力のときは従来と同じ。
+# [Digraph, Stylesheet] が入力のときは、スタイルシートをグラフに適用して、その結果を描画処理する。
+
+== gv:apply-ssコマンド
+
+
+{{{
+command apply-ss :: [Digraph, Stylesheet] -> Digraph;
+}}}
+
+スタイルシートをグラフに適用するだけで、描画は行わない。
+
+gv:draw に --format=caty-gv を加えるだけでもいかもしれない。
+
