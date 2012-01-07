@@ -448,7 +448,7 @@ class VarLoader(object):
                 if opt.value.name in opts:
                     o[opt.key] = opts[opt.value.name]
                 else:
-                    if opt.optional:
+                    if not opt.optional:
                         raise KeyError(opt.value.name)
             elif opt.type == 'glob':
                 o.update(opts['_OPTS'])
