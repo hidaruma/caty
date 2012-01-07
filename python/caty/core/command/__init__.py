@@ -479,5 +479,9 @@ class VarLoader(object):
                 else:
                     if not arg.optional:
                         raise InternalException(u'Argument des not suffice: $index', index=arg.index)
+                    else:
+                        a.append(UNDEFINED)
+        while a and a[-1] == UNDEFINED:
+            a.pop(-1)
         return a
 
