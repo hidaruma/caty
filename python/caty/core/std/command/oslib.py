@@ -35,3 +35,11 @@ class Status(Builtin):
         else:
             return json.tagged(u'NG', input)
 
+import platform
+class Platform(Builtin):
+    def execute(self):
+        return unicode(platform.system())
+
+
+
+

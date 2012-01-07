@@ -19,4 +19,8 @@ command exec-script [string script-name, string* args] :: void -> integer
  */
 command status :: integer -> (@OK integer | @NG integer)
  refers python:caty.core.std.command.oslib.Status;
+
+/** OSプラットフォームの種類を表す文字列を返す。*/
+command platform :: void -> ("Linux" | "Windows" | "Java")
+ refers python:caty.core.std.command.oslib.Platform;
 """
