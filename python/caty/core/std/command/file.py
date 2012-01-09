@@ -56,7 +56,7 @@ class ReadFile(FileUtilMixin, Builtin):
 class ReadFileI(FileUtilMixin, Builtin):
 
     def setup(self, opts):
-        self.dir = opts.dir
+        self.dir = opts['dir']
 
     def execute(self, input):
         self.path = input
@@ -129,8 +129,8 @@ class LsDir(FileUtilMixin, Builtin):
     def setup(self, opts, path, ext=''):
         self.path = path
         self.ext = ext
-        self.long_format = opts.long
-        kind = opts.kind
+        self.long_format = opts.get('long', False)
+        kind = opts.get('kind', None)
         self.kind = "file" if kind == "file" else ("dir" if kind == "dir"  else "any")
 
     def execute(self):

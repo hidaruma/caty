@@ -226,7 +226,8 @@ class ScriptParser(Parser):
     def script(self, seq):
         path = seq.parse(Regex(r'[^\t\r\n <>|+"(){},.\[\]]+\.(caty|cgi)'))
         if not seq.eof:
-            many1(Regex('\s'))(seq)
+            if not seq.peek(option(choice('|', ';'))):
+                raise ParseFailed(seq, path)
         pos = (seq.col, seq.line)
         if not path.startswith('/'):
             path = 'scripts@this:/' + path
