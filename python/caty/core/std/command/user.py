@@ -140,7 +140,13 @@ class Login(Builtin):
             del user['password']
             self.user.set_user_info(user)
             session.put(CATY_USER_INFO_KEY, user)
-            redirect = u'/' if not 'succ' in input else input['succ']
+            redirect_path = u'/' if not 'succ' in input else input['succ']
+            redirect = {
+            'header': {
+                'Location': unicode(join(self.env.get('HOST_URL'), redirect_path)),
+                'Set-Cookie': unicode(self._mk_cookie(session.key)),
+            },
+            'status': 302}
             return tagged(u'OK', redirect)
         else:
             msg = self.i18n.get(u'User id or password is incorrect')
@@ -160,8 +166,8 @@ class Loggedin(Builtin):
 
     def execute(self, input):
         if self.user.loggedin:
-            if self.opts.userid:
-                if self.opts.userid == self.user.userid:
+            if self.opts['userid']:
+                if self.opts['userid'] == self.user.userid:
                     return tagged(u'OK', input)
             else:
                 return tagged(u'OK', input)

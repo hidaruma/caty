@@ -72,7 +72,7 @@ type LoginForm = {
  * ログイン成功/失敗はタグで区別され、成功時は遷移先のパスが、
  * 失敗時はエラーメッセージがタグ付けされる。
  */
-command login :: LoginForm -> @OK string | @NG string
+command login :: LoginForm -> @OK Redirect | @NG string
                 reads [storage, env]
                 uses [user, session]
                 refers python:caty.core.std.command.user.Login;
