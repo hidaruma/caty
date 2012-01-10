@@ -100,6 +100,8 @@ class ScriptParser(Parser):
 
     def command(self, seq):
         name = choice(self.name, self.xjson_path)(seq)
+        if name.endswith('.caty'):
+            return self.__make_exec_script(name, seq)
         pos = (seq.col-len(name), seq.line)
         type_args = option(self.type_args, [])(seq)
         opts = self.options(seq)
@@ -175,7 +177,6 @@ class ScriptParser(Parser):
                     self.object, 
                     self.diagram_order, 
                     self.value, 
-                    self.script,
                     self.command,
                     self.list, 
                     self.var_ref,
@@ -223,11 +224,7 @@ class ScriptParser(Parser):
         finally:
             seq.ignore_hook = False
 
-    def script(self, seq):
-        path = seq.parse(Regex(r'[^\t\r\n <>|+"(){},.\[\]]+\.(caty|cgi)'))
-        if not seq.eof:
-            if not seq.peek(option(choice('|', ';'))):
-                raise ParseFailed(seq, path)
+    def __make_exec_script(self, path, seq):
         pos = (seq.col, seq.line)
         if not path.startswith('/'):
             path = 'scripts@this:/' + path
@@ -429,7 +426,6 @@ class ScriptParser(Parser):
                     self.object, 
                     self.diagram_order, 
                     self.value, 
-                    self.script,
                     self.command,
                     self.list, 
                     ])
