@@ -11,7 +11,7 @@ class Table(BlockParser):
     def table_row(self, seq):
         line = until('\n')(seq)
         lf = seq.parse('\n')
-        return self.create_element('tr', None, many1(self.table_cell).run(line))
+        return self.create_element('tr', None, many1(try_(self.table_cell)).run(line))
 
     def table_cell(self, seq):
         _ = seq.parse('|')
@@ -25,6 +25,9 @@ class Table(BlockParser):
             else:
                 p = c.find('[[', anchor_point)
                 if p == -1:
+                    break
+                p = c.find(']]', anchor_point)
+                if p != -1:
                     break
                 c += '|'
                 seq.next()

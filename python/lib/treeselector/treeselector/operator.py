@@ -179,12 +179,15 @@ class PseudoClassSelector(Operator):
 
     def _select(self, obj, func):
         r = _UNDEFINED
-        for o in func(obj):
-            r = o
-            if self.func_name == u'first-child':
-                break
-        if r is not _UNDEFINED:
-            yield r
+        if self.func_name == 'root':
+            yield obj
+        else:
+            for o in func(obj):
+                r = o
+                if self.func_name == u'first-child':
+                    break
+            if r is not _UNDEFINED:
+                yield r
 
     def to_notation(self):
         return u'{0}:{1}'.format(self.sub_selector.to_notation(), self.func_name) 

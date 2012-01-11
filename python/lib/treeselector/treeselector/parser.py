@@ -86,7 +86,7 @@ class TreeSelectorParser(Parser):
         return seq.parse(Regex(u'[a-zA-Z_][a-zA-Z0-9_]*'))
 
     def parse_pseudo_class(self, seq):
-        return choice(keyword('first-child'), keyword('last-child'))(seq)
+        return choice(keyword('first-child'), keyword('last-child'), keyword('root'))(seq)
 
     def node_position_name(self, seq):
         return option(choice(keyword(u'before'), keyword(u'after'), keyword('child')))(seq)
