@@ -1,5 +1,16 @@
 module public; // -*- coding: utf-8 -*-
 
+/** パラメータをダンプする */
+command params {* : any?} [any* args] :: void -> {"Opts (_OPTS)":object, "Argv (_ARGV)":array, "Arg0":any, "Args":array}
+{
+ {
+   "Opts (_OPTS)" : %_OPTS,
+   "Argv (_ARGV)" : %_ARGV,
+   "Arg0"  : %_ARGV | item 0,
+   "Args"  : %_ARGV | list:slice 1,
+ }
+};
+
 /** 入力にタグを加えて出力とする */
 command add-tag [string tag] :: any -> @* any {
   [%1 , pass] | tagged
