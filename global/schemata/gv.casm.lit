@@ -324,19 +324,15 @@ command fix
 };
 
 /** グラフの描画結果を表示する */
-command show 
+command show
  {
-   "font" : string?,
+   "font" : string?, // とりあえずfontオプションは使える
  } 
 :: Digraph -> void 
 {
-  pass > in;
-  %font? |
-  when {
-   undefind => %in | gv:draw  | ct:show-image,
-   *        => %in | gv:draw --font=%font | ct:show-image
-  }
+  gv:draw --font=%font? | ct:show-image
 };
+
 
 /** グラフの描画結果を表示してからpassする */
 command peek 
