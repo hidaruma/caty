@@ -108,6 +108,15 @@ class ScriptParser(Parser):
         args = self.arguments(seq)
         return CommandProxy(name, type_args, opts, args, pos)
 
+    def call_forward(self, seq):
+        name = choice(keyword('call'), keyword('forward'))(seq)
+        pos = (seq.col-len(name), seq.line)
+        cmd = self.name(seq)
+        type_args = option(self.type_args, [])(seq)
+        opts = self.options(seq)
+        args = [Argument(cmd)] + self.arguments(seq)
+        return CommandProxy(name, type_args, opts, args, pos)
+
     def xjson_path(self, seq):
         seq.parse('$')
         return u'xjson:get'
@@ -177,6 +186,7 @@ class ScriptParser(Parser):
                     self.object, 
                     self.diagram_order, 
                     self.value, 
+                    self.call_forward,
                     self.command,
                     self.list, 
                     self.var_ref,
@@ -426,6 +436,7 @@ class ScriptParser(Parser):
                     self.object, 
                     self.diagram_order, 
                     self.value, 
+                    self.call_forward,
                     self.command,
                     self.list, 
                     ])

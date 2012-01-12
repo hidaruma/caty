@@ -370,15 +370,19 @@ class CommandExecutor(BaseInterpreter):
         self.cmd.set_var_storage(v)
 
 from caty.command import MafsMixin
-class _CallCommand(MafsMixin):
-    def setup(self, cmd_name, *args):
-        from caty.core.command.param import Argument
-        self.__cmd_name = cmd_name
-        self.__args = map(Argument, args)
-        self.__raw_args = args
+class _CallCommand(MafsMixin, Internal):
+    def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None)):
+        Internal.__init__(self, [], [args_ref[0]], type_args, pos)
+        self.__opts_ref = opts_ref
+        self.__args_ref = args_ref[1:]
+
+    def setup(self, cmd_name):
+        self._cmd_name = cmd_name
+        if self._cmd_name.endswith('.caty'):
+            self._cmd_name = 'scripts@this:/' + self._cmd_name
 
     def _make_cmd(self):
-        if self.__cmd_name.endswith('.caty'):
+        if self._cmd_name.endswith('.caty'):
             return self.__script()
         else:
             return self.__make_cmd()
@@ -389,23 +393,24 @@ class _CallCommand(MafsMixin):
         from caty.core.command import VarStorage
         n = self._facilities['env'].get('CATY_APP')['name']
         app = self._system.get_app(n)
-        profile = app.command_finder[self.__cmd_name]
+        profile = app.command_finder[self._cmd_name]
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
-            c = scriptwrapper(profile, cls.instantiate(CommandBuilder(self._facilities, app.command_finder)))([], self.__args)
+            c = scriptwrapper(profile, cls.instantiate(CommandBuilder(self._facilities, app.command_finder)))(self.__opts_ref, self.__args_ref)
         else:
-            c = cls([], self.__args)
+            c = cls(self.__opts_ref, self.__args_ref)
         var_storage = VarStorage(None, [])
         c.set_facility(self._facilities)
         c.set_var_storage(var_storage)
         return CommandExecutor(c, app, self._facilities)
 
     def __script(self):
-        from caty.core.script.parser import list_to_opts_and_args
-        from caty.core.facility import PEND
         from copy import deepcopy
-        opts, args = list_to_opts_and_args([self.__cmd_name] + list(self.__raw_args))
-        cmd = self.interpreter.build(self.open('scripts@this:/' + self.__cmd_name).read(),
+        self.var_loader.opts = self.__opts_ref
+        self.var_loader.args = self.__args_ref
+        opts = self.var_loader._load_opts(self.var_storage.opts)
+        args = [self._cmd_name] + self.var_loader._load_args(self.var_storage.opts, self.var_storage.args)
+        cmd = self.interpreter.build(self.open(self._cmd_name).read(),
                                      deepcopy(opts), 
                                      args, 
                                      transaction=PEND)
@@ -414,14 +419,24 @@ class _CallCommand(MafsMixin):
         vs.opts['_OPTS'] = opts
         return cmd
 
-class CallCommand(_CallCommand, Internal):
+class CallCommand(_CallCommand):
     def execute(self, input):
         c = self._make_cmd()
         return c(input)
 
-class Forward(_CallCommand, Internal):
+class Forward(_CallCommand):
     def execute(self, input):
         c = self._make_cmd()
         raise ContinuationSignal(input, c.cmd)
 
+from caty.command import MafsMixin
+from copy import deepcopy
+from caty.core.facility import PEND
+class Execute(_CallCommand):
+    
+    def setup(self, path):
+        self._cmd_name = path
 
+    def execute(self, input):
+        c = self._make_cmd()
+        return c(input)

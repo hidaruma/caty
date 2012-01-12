@@ -687,14 +687,6 @@ command eq :: [any, any] -> @Same any | @Diff [any, any]
     refers python:caty.core.std.command.builtin.Eval;
 
 /**
- * 引数のファイルをCatyスクリプトだとみなして実行する。
- */
-command exec {*:any?} [string path, any* opts_and_args] :: any -> any
-    reads [pub, scripts, data]
-    uses interpreter
-    refers python:caty.core.std.command.builtin.Execute;
-
-/**
  * ディレクトリへのアクセスをindex.html, index.cgi, index.actに振り分ける。
  * このコマンドではverbを用いたアクセスをインデックスファイルに行えない。
  * もしもindex.htmlなどにverb付きアクセスをしたいのであれば、ディレクトリアクセスのアクションも書くこと。
@@ -1033,17 +1025,25 @@ command object-to-array :: object -> [[string, any]*]
 /** 
  * 引数のコマンドを呼び出す。
  */
-command call<S, T> [string command_name, string*] :: S -> T
+command call<S, T> [string command_name] :: S -> T
     reads [pub, scripts, interpreter]
     refers python:caty.core.script.interpreter.CallCommand;
 
 /** 
  * 引数のコマンドを呼び出し、制御をそちらに移す。
  */
-command forward<S, T> [string command_name, string*] :: S -> never
+command forward<S, T>  [string command_name] :: S -> never
     signals T
     reads [pub, scripts, interpreter]
     refers python:caty.core.script.interpreter.Forward;
+
+/**
+ * 引数のファイルをCatyスクリプトだとみなして実行する。
+ */
+command exec<S, T> [string path] :: S -> T
+    reads [pub, scripts, data]
+    uses interpreter
+    refers python:caty.core.script.interpreter.Execute;
 
 /**
  * 引数で指定されたミリ秒だけ停止する。
