@@ -180,7 +180,7 @@ command check-files [string path] ::  DirDesc -> FileCheckResult
  refers python:checker.CheckFiles;
 
 
-type FileTree of jsonfs:DIR-TYPE = {
+type FileTree in jsonfs:DIR-TYPE = {
  * : (true | FileTree)
 }(propNameFormat="file-basename");
 

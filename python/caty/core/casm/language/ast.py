@@ -377,9 +377,10 @@ class KindReference(object):
         module.add_kind(self._name, self, self.__annotation)
 
 class TypeParam(object):
-    def __init__(self, name, kind):
+    def __init__(self, name, kind, default_type):
         self.name = name
         self.kind = kind
+        self.default = default_type
 
     def __repr__(self):
         return self.name + ":" + str(self.kind)

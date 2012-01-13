@@ -120,10 +120,18 @@ def type_arg(seq):
 def type_paramater(seq):
     name = name_token(seq)
     kind = option(kind_of)(seq)
-    return TypeParam(name, kind)
+    if kind:
+        default = option(default_type)(seq)
+    else:
+        default = None
+    return TypeParam(name, kind, default)
 
 def kind_of(seq):
-    seq.parse(keyword('of'))
+    seq.parse(keyword('in'))
+    return seq.parse(typename)
+
+def default_type(seq):
+    seq.parse(keyword('default'))
     return seq.parse(typename)
 
 @try_

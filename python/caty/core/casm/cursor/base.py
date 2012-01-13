@@ -53,7 +53,7 @@ class SchemaBuilder(TreeCursor):
         else:
             for t in self._type_params:
                 if t.name == node.name:
-                    schema = TypeVariable(node.name, node.type_args, node.options, self.module)
+                    schema = TypeVariable(node.name, node.type_args, t.kind, t.default, node.options, self.module)
                     return schema 
             raise KeyError(node.name)
 
@@ -128,7 +128,7 @@ class ProfileBuilder(SchemaBuilder):
             schema = self.module.get_schema(node.name)
             return schema
         else:
-            schema = TypeVariable(node.name, node.type_args, node.options, self.module)
+            schema = TypeVariable(node.name, node.type_args, node.options, None, None, self.module)
             return schema 
 
     def _visit_function(self, node):

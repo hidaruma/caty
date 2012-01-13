@@ -830,12 +830,23 @@ class UndefinedSchema(SchemaBase, Scalar):
         return self.type
 
 class TypeVariable(SchemaBase, Scalar):
-    def __init__(self, var_name, type_arguments, options, module):
+    def __init__(self, var_name, type_arguments, kind, default, options, module):
         self.var_name = var_name
         self._type_arguments = type_arguments
         self._schema = None
         self._module = module
+        self._kind = kind
+        self._default = default
+        self._default_schema = None
         SchemaBase.__init__(self, options)
+
+    @property
+    def default(self):
+        return self._default
+
+    @property
+    def kind(self):
+        return self._kind
 
     @property
     def type_args(self):
@@ -861,15 +872,24 @@ class TypeVariable(SchemaBase, Scalar):
     def type_vars(self):
         return self._schema.type_vars if self._schema else []
 
+    def set_default(self, schema):
+        self._default_schema = schema
+
     def validate(self, value):
         if self.optional and value is caty.UNDEFINED:
             return 
         if self._schema:
-            self._schema.validate(value)
-            if self._schema.format: # フォーマットの指定がある場合
-                r = self._module.get_plugin(self._schema.format).validate(value)
-                if r:
-                    raise JsonSchemaError(r)
+            self.__validate(self._schema, value)
+        elif self._default_schema:
+            self.__validate(self._default_schema, value)
+
+    def __validate(self, s, value):
+        s.validate(value)
+        if s.format: # フォーマットの指定がある場合
+            r = self._module.get_plugin(s.format).validate(value)
+            if r:
+                raise JsonSchemaError(r)
+
 
     def convert(self, value):
         return self._schema.convert(value) if self._schema else AnySchema().convert(value)
@@ -884,14 +904,16 @@ class TypeVariable(SchemaBase, Scalar):
         return NeverSchema()
 
     def clone(self, checked=None, options=None):
+        t = TypeVariable(self.var_name, self._type_arguments, self._kind, self._default, options or self.options, self._module)
         if self._schema:
             s = self._schema.clone(checked, options=(options or self.options))
             s.annotations = self.annotations
-            t = TypeVariable(self.var_name, self._type_arguments, options or self.options, self._module)
             t._schema = s
-            return t
-        else:
-            return TypeVariable(self.var_name, self._type_arguments, options or self.options, self._module)
+        if self._default_schema:
+            s = self._default_schema.clone(checked, options=(options or self.options))
+            s.annotations = self.annotations
+            t._default_schema = s
+        return t
 
     @property
     def definition(self):
