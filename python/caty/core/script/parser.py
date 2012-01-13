@@ -223,7 +223,7 @@ class ScriptParser(Parser):
         return seq.parse(['*!', '*', xjson.string, self.name, Regex(r'[-0-9a-zA-Z_]+')])
 
     def unquoted(self, seq):
-        return seq.parse(Regex(r'[^;\t\r\n <>|%+"(){},\[\]]([^;\t\r\n <>|%+"(){},\[\]]|\(\))*'))
+        return seq.parse(Regex('[^;\\t\\r\\n\' <>|%+"(){},\\[\\]]([^;\\t\\r\\n\' <>|%+"(){},\\[\\]]|\\(\\))*'))
 
     def opt(self, seq):
         seq.ignore_hook = True
@@ -253,6 +253,7 @@ class ScriptParser(Parser):
                       bind2nd(xjson.boolean, True),
                       self.unquoted_maybe_num, 
                       xjson.string, 
+                      xjson.multiline_string,
                       self.var_ref
                       )(seq)
             if isinstance(v, VarRef):
@@ -293,6 +294,7 @@ class ScriptParser(Parser):
                   bind2nd(xjson.boolean, True),
                   self.unquoted_maybe_num, 
                   xjson.string, 
+                  xjson.multiline_string,
                   self.named_arg,
                   self.indexed_arg
                   )(seq)
