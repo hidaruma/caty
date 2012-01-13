@@ -216,8 +216,8 @@ class CatyApp(object):
     def error_403(self, e, env):
         msg = u'403 Forbidden'
         json = {
+            'status': 403,
             'header': {
-                'status': 403,
                 'content-type': 'text/html'
             },
             'body': """

@@ -323,7 +323,7 @@ class ExceptionAdaptor(PipelineAdaptor):
         return result, False
 
 class ErrorLogHandler(object):
-    def __init__(self, app, path, method, verb):
+    def __init__(self, app, path, verb, method):
         self._error_logger = app._system.error_logger
         self._path = path
         self._method = method
