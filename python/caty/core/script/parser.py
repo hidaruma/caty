@@ -236,14 +236,12 @@ class ScriptParser(Parser):
 
     def __make_exec_script(self, path, seq):
         pos = (seq.col, seq.line)
-        if not path.startswith('/'):
-            path = 'scripts@this:/' + path
         s = [Argument(path)]
         opts = self.options(seq)
         args = self.arguments(seq)
         if not args:
             args = []
-        p = CommandProxy(u'exec', [], opts, s + args, pos)
+        p = CommandProxy(u'call', [], opts, s + args, pos)
         return p
 
     def longopt(self, seq):

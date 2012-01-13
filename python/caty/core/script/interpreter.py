@@ -1,5 +1,8 @@
 #coding: utf-8
 from caty.core.command.exception import *
+from caty.command import MafsMixin
+from copy import deepcopy
+from caty.core.facility import PEND
 import caty.util as util
 from caty import UNDEFINED
 from caty.jsontools.path import build_query
@@ -429,14 +432,3 @@ class Forward(_CallCommand):
         c = self._make_cmd()
         raise ContinuationSignal(input, c.cmd)
 
-from caty.command import MafsMixin
-from copy import deepcopy
-from caty.core.facility import PEND
-class Execute(_CallCommand):
-    
-    def setup(self, path):
-        self._cmd_name = path
-
-    def execute(self, input):
-        c = self._make_cmd()
-        return c(input)

@@ -1023,27 +1023,19 @@ command object-to-array :: object -> [[string, any]*]
     refers python:caty.core.std.command.builtin.ObjectToArray;
 
 /** 
- * 引数のコマンドを呼び出す。
+ * 引数のコマンドあるいはCatyScriptを呼び出す。
  */
 command call<S, T> [string command_name] :: S -> T
     reads [pub, scripts, interpreter]
     refers python:caty.core.script.interpreter.CallCommand;
 
 /** 
- * 引数のコマンドを呼び出し、制御をそちらに移す。
+ * 引数のコマンドあるいはCatyScriptを呼び出し、制御をそちらに移す。
  */
 command forward<S, T>  [string command_name] :: S -> never
     signals T
     reads [pub, scripts, interpreter]
     refers python:caty.core.script.interpreter.Forward;
-
-/**
- * 引数のファイルをCatyスクリプトだとみなして実行する。
- */
-command exec<S, T> [string path] :: S -> T
-    reads [pub, scripts, data]
-    uses interpreter
-    refers python:caty.core.script.interpreter.Execute;
 
 /**
  * 引数で指定されたミリ秒だけ停止する。
