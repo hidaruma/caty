@@ -1,0 +1,42 @@
+module xlist; // -*- coding: utf-8 -*-
+
+/** 指定された個数の項目をまとめて、ネストしたリストを作る。*/
+command nest
+ {
+   /** 内側のリストの長さ */
+   @[default(2)]
+   "length" : integer(minimum=1)?,
+   /** 入力リストがlengthの倍数でないときはエラーとする */
+   @[default(false)]
+   "strict" : boolean?,
+ }
+:: list<any> -> list<list<any>>
+  refers python:xlist.Nest;
+
+/** ネストしたリスト（リストのリスト）を一段階だけ平坦化する */
+command flatten
+:: list<list<any>> -> list<any>
+  refers python:xlist.Flatten;
+
+/** 入力を指定回数だけ繰り返したリストを作る。 */
+command dup
+ [
+  /** 繰り返しの回数＝結果リストの長さ */
+  integer(minimum=0) length
+ ]
+:: any -> list<any>
+  refers python:xlist.Dup;
+
+/** リストの項目をグルーピングしたオブジェクトにする。
+ * 入力はリストのリスト。
+ * 項目であるリストの最初の項目の値をキー（プロパティ名）とした
+ * オブジェクトを作る。
+ */
+command group
+:: list<[string, any*]> -> {*: [ [string, any*]* ]?}
+  refers python:xlist.Group;
+
+
+// End of Module
+
+
