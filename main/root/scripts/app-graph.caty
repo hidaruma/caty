@@ -1,0 +1,23 @@
+// -*- coding: utf-8 -*-
+
+"g:" > GROUP_PREFIX;
+
+apps | each {[pv group, pv name]} | xlist:group > groups |
+each {
+ pass > group-name | [%GROUP_PREFIX, pass] | text:concat > group-id;
+ %groups | pv %group-name |
+ each {
+   item 1 > app-name;
+   [
+     gv:node --style="filled" --fillcolor=limegreen %app-name,
+     // global以外のアプリケーションには、
+     // globalへのusesエッジを加える
+     [%app-name, null] | tagged |
+     when {
+      global => undefined,
+      *      => gv:edge --color=blue --label=uses %app-name global,
+     }
+   ]
+ } | xlist:flatten | gv:cluster --style="filled, rounded" --fillcolor=khaki /*--label=%group-name*/ %group-id
+} | gv:graph --label=applications --bgcolor=gainsboro --rankdir=BT
+
