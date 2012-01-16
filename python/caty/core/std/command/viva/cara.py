@@ -180,7 +180,7 @@ class DrawModule(Builtin, DrawingMixin):
         if self._format == 'svge':
             self._format = 'svg'
             self._strip_xml_decl = True
-        if self._out_file:
+        if self._out_file and 'format' not in self._opt_names:
             self._format = self._out_file.split('.')[-1]
             if self._out_file.endswith('.svge'):
                 self._strip_xml_decl = True
@@ -467,7 +467,7 @@ class DrawAction(Builtin, DrawingMixin):
         if self._format == 'svge':
             self._format = 'svg'
             self._strip_xml_decl = True
-        if self._out_file:
+        if self._out_file and 'format' not in self._opt_names:
             self._format = self._out_file.split('.')[-1]
             if self._out_file.endswith('.svge'):
                 self._strip_xml_decl = True
