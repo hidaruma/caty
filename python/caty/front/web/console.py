@@ -22,12 +22,17 @@ class HTTPConsoleThread(threading.Thread):
                                  handler_class)
         from caty.util import cout
         cout.writeln("HTTP console serving on port %s..." % port)
+        self.port = port
 
     def run(self):
         self.httpd.serve_forever()
 
     def stop(self):
         self.httpd.server_close()
+
+
+    def status(self):
+        return u'running on port %s' % self.port
 
 class HTTPConsoleRequestHandler(WSGIRequestHandler):
     def get_environ(self):

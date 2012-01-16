@@ -61,6 +61,7 @@ class CatyShell(cmd.Cmd):
         self.system = system
         self.last_session = None
         self.server = None
+        self.hcon = None
         self.system = system
         if dribble:
             import time
@@ -260,6 +261,45 @@ Web サーバの起動・停止を行う
             self._echo(u'未知の引数: %s' % cmd)
             usage()
 
+    @catch
+    def do_hcon(self, line):
+        u"""
+Usage: server start|stop
+Web サーバの起動・停止を行う
+        """
+        def usage():
+            self._echo(u'使い方: hcon start port または hcon stop')
+        from caty.front.web.console import HTTPConsoleThread
+        cmd = line.strip()
+        if ' ' in cmd:
+            cmd, rest = map(str.strip, line.split(' ', 1))
+        else:
+            rest = ''
+            usage()
+            return
+        if cmd == 'start':
+            if self.server is None:
+                from caty.util import try_parse
+                port = try_parse(int, rest) or self.app._global_config.server_port
+                self.hcon = HTTPConsoleThread(self.system, port)
+                self.hcon.start()
+            else:
+                self._echo(u'サーバは既に起動しています')
+        elif cmd == 'stop':
+            if self.server is not None:
+                self.hcon.shutdown()
+                self.hcon.stop()
+                self.hcon = None
+            else:
+                self._echo(u'サーバが起動していません')
+        elif cmd == 'status' or cmd == '':
+            if self.hcon is not None:
+                self._echo(self.hcon.status())
+            else:
+                self._echo(u'stopped')
+        else:
+            self._echo(u'未知の引数: %s' % cmd)
+            usage()
     do_l = do_reload
 
     def default(self, line):
