@@ -275,9 +275,10 @@ Web サーバの起動・停止を行う
             cmd, rest = map(str.strip, line.split(' ', 1))
         else:
             rest = ''
-            usage()
-            return
         if cmd == 'start':
+            if not rest:
+                usage()
+                return
             if self.server is None:
                 from caty.util import try_parse
                 port = try_parse(int, rest) or self.app._global_config.server_port
@@ -416,6 +417,9 @@ Web サーバの起動・停止を行う
         if self.server is not None:
             self.server.shutdown()
             self.server.stop()
+        if self.hcon is not None:
+            self.hcon.shutdown()
+            self.hcon.stop()
 
 import threading
 class ServerThread(threading.Thread):
