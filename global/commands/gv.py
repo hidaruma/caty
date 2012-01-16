@@ -66,6 +66,17 @@ class Draw(Builtin):
             return obj
 
     def transform(self, graph, cluster=False):
+        G, graph = self._make_graph(graph, cluster)
+        G.graph_attr.update(graph.get('graph', {}))
+        G.node_attr.update(graph.get('node', {}))
+        G.edge_attr.update(graph.get('edge', {}))
+        self._add_nodes(G, graph)
+        self._add_cluster_nodes(G, graph)
+        self._add_edges(G, graph)
+        self._add_cluster_edges(G, graph)
+        return G
+
+    def _make_graph(self, graph, cluster):
         type, graph = json.split_tag(graph)
         if cluster:
             name = 'cluster_' + graph['id']
@@ -81,24 +92,13 @@ class Draw(Builtin):
             G.graph_attr.update(fontname=self._font)
             G.node_attr.update(fontname=self._font)
             G.edge_attr.update(fontname=self._font)
-        G.graph_attr.update(graph.get('graph', {}))
-        G.node_attr.update(graph.get('node', {}))
-        G.edge_attr.update(graph.get('edge', {}))
-        for e in graph['elements']:
+        return G, graph
+
+    def _add_nodes(self, G, src):
+        for e in src['elements']:
             type, elem = json.split_tag(e)
             if type == 'node':
                 self._add_node(G, elem)
-
-        for e in graph['elements']:
-            type, elem = json.split_tag(e)
-            if type == 'cluster':
-                self._add_cluster(G, elem)
-
-        for e in graph['elements']:
-            type, elem = json.split_tag(e)
-            if type == 'edge':
-                self._add_edge(G, elem)
-        return G
 
     def _add_node(self, graph, node):
         if isinstance(node, basestring):
@@ -107,19 +107,36 @@ class Draw(Builtin):
             i = node.pop('id')
             graph.add_node(i, **node)
 
-    def _add_edge(self, graph, edge, attr={}):
+    def _add_edges(self, G, src, parent=None):
+        for e in src['elements']:
+            type, elem = json.split_tag(e)
+            if type == 'edge':
+                self._add_edge(G, elem, parent=parent)
+
+    def _add_edge(self, graph, edge, attr={}, parent=None):
         if isinstance(edge, list):
             s, d = edge
             if isinstance(d, basestring):
                 d = [d]
             for i in d:
-                graph.add_edge(s, i, **attr)
+                if graph.has_node(i):
+                    graph.add_edge(s, i, **attr)
+                else:
+                    parent.add_edge(s, i, **attr)
         else:
             e = edge.pop('nodes')
-            self._add_edge(graph, e, edge)
+            self._add_edge(graph, e, edge, parent=parent)
 
-    def _add_cluster(self, graph, cluster):
-        c = self.transform(cluster, True)
+    def _add_cluster_nodes(self, G, src):
+        for e in src['elements']:
+            type, elem = json.split_tag(e)
+            if type == 'cluster':
+                self._add_cluster_node(G, elem)
+
+
+    def _add_cluster_node(self, graph, cluster):
+        c, cluster = self._make_graph(cluster, True)
+        self._add_nodes(c, cluster)
         sg = graph.add_subgraph(c.iternodes(), c.name, **c.graph_attr)
         for n in c.iternodes():
             if self._font:
@@ -129,14 +146,18 @@ class Draw(Builtin):
             a.update(**c.node_attr)
             a.update(n.attr)
             sg.add_node(n.name, **a)
-        for e in c.iteredges():
-            if self._font:
-                a = {'fontname': self._font}
-            else:
-                a = {}
-            a.update(**c.edge_attr)
-            a.update(e.attr)
-            sg.add_edge(e, **a)
+
+    def _add_cluster_edges(self, G, src):
+        for e in src['elements']:
+            type, elem = json.split_tag(e)
+            if type == 'cluster':
+                self._add_cluster_edge(G, elem)
+
+    def _add_cluster_edge(self, graph, cluster):
+        type, cluster = json.split_tag(cluster)
+        name = 'cluster_' + cluster['id']
+        sg = graph.get_subgraph(name)
+        self._add_edges(sg, cluster, parent=graph)
 
     def _modified(self):
         with self.pub.open(self._out_file) as out:
