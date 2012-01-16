@@ -279,9 +279,9 @@ Web サーバの起動・停止を行う
             if not rest:
                 usage()
                 return
-            if self.server is None:
+            if self.hcon is None:
                 from caty.util import try_parse
-                port = try_parse(int, rest) or self.app._global_config.server_port
+                port = try_parse(int, rest)
                 self.hcon = HTTPConsoleThread(self.system, port)
                 self.hcon.start()
             else:
