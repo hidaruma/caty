@@ -63,7 +63,7 @@ class HTTPConsoleApp(object):
         else:
             encoding = self._system.sysencoding
         if content_type == 'text/plain':
-            app_name = environ['HTTP_X_CATY_TARGET_APP']
+            app_name = environ.get('HTTP_X_CATY_TARGET_APP', 'root')
             input = WebStream(environ, encoding).read()
         else:
             try:
