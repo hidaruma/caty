@@ -30,6 +30,8 @@ class HTTPConsoleThread(threading.Thread):
     def stop(self):
         self.httpd.server_close()
 
+    def shutdown(self):
+        self.httpd.shutdown()
 
     def status(self):
         return u'running on port %s' % self.port

@@ -287,7 +287,7 @@ Web サーバの起動・停止を行う
             else:
                 self._echo(u'サーバは既に起動しています')
         elif cmd == 'stop':
-            if self.server is not None:
+            if self.hcon is not None:
                 self.hcon.shutdown()
                 self.hcon.stop()
                 self.hcon = None
