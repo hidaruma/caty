@@ -58,13 +58,16 @@ class HTTPConsoleApp(object):
 
     def __call__(self, environ, start_response):
         content_type = environ.get('CONTENT_TYPE', 'text/plain')
-        content_type, _ = map(str.strip, content_type.split(';', 1))
+        if ';' in content_type:
+            content_type, encoding = map(str.strip, content_type.split(';', 1))
+        else:
+            encoding = self._system.sysencoding
         if content_type == 'text/plain':
             app_name = environ['HTTP_X_CATY_TARGET_APP']
-            input = WebStream(environ, self._system.sysencoding).read()
+            input = WebStream(environ, encoding).read()
         else:
             try:
-                req = json.untagged(WebStream(environ, self._system.sysencoding).read())
+                req = json.untagged(WebStream(environ, encoding).read())
                 if content_type != 'application/json':
                     for k, v in req.items():
                         req[k] = v[0]
