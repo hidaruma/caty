@@ -18,6 +18,6 @@ each {
       *      => gv:edge --color=blue --label=uses %app-name global,
      }
    ]
- } | xlist:flatten | gv:cluster --style="filled, rounded" --fillcolor=khaki /*--label=%group-name*/ %group-id
+ } | xlist:flatten | gv:cluster --style="filled, rounded" --fillcolor=khaki --label=%group-name %group-id
 } | gv:graph --label=applications --bgcolor=gainsboro --rankdir=BT
 

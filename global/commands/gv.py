@@ -67,9 +67,6 @@ class Draw(Builtin):
 
     def transform(self, graph, cluster=False):
         G, graph = self._make_graph(graph, cluster)
-        G.graph_attr.update(graph.get('graph', {}))
-        G.node_attr.update(graph.get('node', {}))
-        G.edge_attr.update(graph.get('edge', {}))
         self._add_nodes(G, graph)
         self._add_cluster_nodes(G, graph)
         self._add_edges(G, graph)
@@ -92,6 +89,9 @@ class Draw(Builtin):
             G.graph_attr.update(fontname=self._font)
             G.node_attr.update(fontname=self._font)
             G.edge_attr.update(fontname=self._font)
+        G.graph_attr.update(graph.get('graph', {}))
+        G.node_attr.update(graph.get('node', {}))
+        G.edge_attr.update(graph.get('edge', {}))
         return G, graph
 
     def _add_nodes(self, G, src):
