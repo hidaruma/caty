@@ -58,6 +58,7 @@ class HTTPConsoleApp(object):
 
     def __call__(self, environ, start_response):
         content_type = environ.get('CONTENT_TYPE', 'text/plain')
+        content_type, _ = map(str.strip, content_type.split(';', 1))
         if content_type == 'text/plain':
             app_name = environ['HTTP_X_CATY_TARGET_APP']
             input = WebStream(environ, self._system.sysencoding).read()
