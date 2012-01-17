@@ -37,6 +37,10 @@ class Command(object):
 
     def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None)):
         assert type_args != None
+        if opts_ref:
+            self._opt_names = set([o.key for o in opts_ref])
+        else:
+            self._opt_names = []
         self._profile = self.profile_container.determine_profile(opts_ref, args_ref)
         self.__type_args = type_args
         self.__var_loader = VarLoader(opts_ref, args_ref, self._profile)
@@ -52,10 +56,6 @@ class Command(object):
         self.__facility_names = []
         self.__i18n = None
         self.__pos = pos
-        if opts_ref:
-            self._opt_names = set([o.key for o in opts_ref])
-        else:
-            self._opt_names = []
 
     def get_command_id(self):
         return self._id
