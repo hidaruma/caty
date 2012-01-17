@@ -169,6 +169,8 @@
 
     "$key1 must not appear with one of $key2": "$key1は$key2のいずれかと共に出現してはなりません",
 
+    "Type variable which neither instantiated nor a default value was given: $name": "具体化されておらず初期値も与えられていない型変数: $name",
+
 
     /********************************
      **** スキーマランタイム関連 ****

@@ -16,19 +16,19 @@ command sq :: number -> number
 
 
 /* 直積の結合律 */
-command prod-assoc<A,B,C> :: [[A, B], C] -> [A, [B, C]] 
+command prod-assoc<A default any, B default any, C default any> :: [[A, B], C] -> [A, [B, C]] 
  refers python:dummy.Dummy;
 
 /** 直和の結合律 */
-command sum-assoc<A,B,C> :: (@1 (@1 A | @2 B) | @2 C) -> (@1 A | @2 (@1 B | @2 C)) 
+command sum-assoc<A default any, B default any, C default any> :: (@1 (@1 A | @2 B) | @2 C) -> (@1 A | @2 (@1 B | @2 C)) 
  refers python:dummy.Dummy;
 
 /** 直積の単位律 */
-command prod-unit<A> :: [null, A] -> A 
+command prod-unit<A default any> :: [null, A] -> A 
  refers python:dummy.Dummy;
 
 /** 直和の単位律 */
-command sum-unit<A> :: (never | A) -> A 
+command sum-unit<A default any> :: (never | A) -> A 
  refers python:dummy.Dummy;
 
 /* ゼロ法則 */
@@ -38,11 +38,11 @@ command zero<A> :: [never, A] -> never {
 */
 
 /** 直和の対称スワップ */
-command sum-swap<A,B> :: (@1 A | @2 B) -> (@1 B | @2 A) 
+command sum-swap<A default any, B default any> :: (@1 A | @2 B) -> (@1 B | @2 A) 
  refers python:dummy.Dummy;
 
 /** 直和に対する直積の分配法則 */
-command dist<A,B,C> :: [A, (@1 B | @2 C)] -> (@1 [A, B] | @2 [A, C]) 
+command dist<A default any, B default any, C default any> :: [A, (@1 B | @2 C)] -> (@1 [A, B] | @2 [A, C]) 
  refers python:dummy.Dummy;
 
 

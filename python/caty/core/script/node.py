@@ -13,7 +13,7 @@ import types
 schema = u''
 
 class ScalarBuilder(Syntax):
-    command_decl = u"""command scalar-builder<T> :: void -> T
+    command_decl = u"""command scalar-builder<T default any> :: void -> T
                         reads schema
                         refers python:caty.core.script.node.ScalarBuilder;
     """
@@ -29,7 +29,7 @@ class ScalarBuilder(Syntax):
         return visitor.visit_scalar(self)
 
 class ListBuilder(Syntax):
-    command_decl = u"""command list-builder<T> :: T -> array
+    command_decl = u"""command list-builder<T default any> :: T -> array
                         refers python:caty.core.script.node.ListBuilder;
     """
     def __init__(self, *args, **kwds):
@@ -61,7 +61,7 @@ class ListBuilder(Syntax):
         return visitor.visit_list(self)
 
 class ObjectBuilder(Syntax):
-    command_decl = u"""command __object-builder<T> :: T -> object
+    command_decl = u"""command __object-builder<T default any> :: T -> object
                         refers python:caty.core.script.node.ObjectBuilder;
     """
     def __init__(self, *args, **kwds):
@@ -91,7 +91,7 @@ class ObjectBuilder(Syntax):
         return self.__nodes.iteritems()
 
 class VarStore(Syntax):
-    command_decl = u"""command __var-store<T> :: T -> T
+    command_decl = u"""command __var-store<T default any> :: T -> T
                         refers python:caty.core.script.node.VarStore;
     """
     def __init__(self, *args, **kwds):
@@ -106,7 +106,7 @@ class VarStore(Syntax):
         return visitor.visit_varstore(self)
 
 class VarRef(Syntax):
-    command_decl = u"""command __var-ref<T> :: void -> T
+    command_decl = u"""command __var-ref<T default any> :: void -> T
                         refers python:caty.core.script.node.VarRef;
     """
     def __init__(self, name, optional):
@@ -121,12 +121,12 @@ class VarRef(Syntax):
     def var_name(self):
         return self.__var_name
 
-    @property
-    def optional(self):
+@property
+def optional(self):
         return self.__optional
 
 class ArgRef(Syntax):
-    command_decl = u"""command __arg-ref<T> :: void -> T
+    command_decl = u"""command __arg-ref<T default any> :: void -> T
                         refers python:caty.core.script.node.ArgRef;
     """
     def __init__(self, num, optional):
@@ -287,7 +287,7 @@ class Case(object):
 class UntagCase(Case):pass
 
 class Each(Syntax):
-    command_decl = u"""command each-functor-applied<T> {"seq":boolean?} :: [T*] -> [T*]
+    command_decl = u"""command each-functor-applied<T default any> {"seq":boolean?} :: [T*] -> [T*]
                                                        {"seq":boolean?, "prop": boolean} :: object -> object
                         refers python:caty.core.script.node.Each;"""
     def __init__(self, cmd, opts_ref):
@@ -323,7 +323,7 @@ class Each(Syntax):
 
 class Time(Syntax):
     command_decl = u"""
-    command time-functor<T> :: T -> T
+    command time-functor<T default any> :: T -> T
         refers python:caty.core.script.node.Time;
     """
     def __init__(self, cmd, ignore):
@@ -344,7 +344,7 @@ class Time(Syntax):
 
 class Take(Syntax):
     command_decl = u"""
-    command take-functor<T> :: [T*] -> [T*]
+    command take-functor<T default any> :: [T*] -> [T*]
         refers python:caty.core.script.node.Take;
     """
     def __init__(self, cmd, opts_ref):
@@ -363,7 +363,7 @@ class Take(Syntax):
 
 class Start(Syntax):
     command_decl = u"""
-    command start-functor<T> :: T -> never
+    command start-functor<T default any> :: T -> never
         refers python:caty.core.script.node.Start;
     """
     def __init__(self, cmd, ignore):
@@ -383,7 +383,7 @@ class Start(Syntax):
 
 class PipelineFragment(Syntax):
     command_decl = u"""
-    command __pipeline-gragment-functor<S, T> :: S -> T
+    command __pipeline-gragment-functor<S default any, T default any> :: S -> T
         refers python:caty.core.script.node.PipelineFragment;
     """
     def __init__(self, cmd, fragment_name):

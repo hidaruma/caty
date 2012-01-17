@@ -211,7 +211,7 @@ class OptionNode(Node, Optional):
         Node.__init__(self, node.options)
 
 class CommandNode(Function):
-    def __init__(self, name, patterns, uri_or_script, doc, annotation, type_var_names):
+    def __init__(self, name, patterns, uri_or_script, doc, annotation, type_params):
         self.name = name
         self.patterns = patterns
         self.uri = None
@@ -223,7 +223,8 @@ class CommandNode(Function):
         self.doc = doc
         self.annotation = annotation
         self.profile_container = None
-        self.type_var_names = type_var_names
+        self.type_var_names = [n.name for n in type_params]
+        self.type_params = type_params
 
     def declare(self, module):
         self.module = module

@@ -509,7 +509,7 @@ type DefaultTemplateContext = {
 /**
  * 入力値を標準出力に書き出す。それ以外の動作は pass と同じ。
  */
-command dump<T> // 実は総称、passと同じだから
+command dump<T default any> // 実は総称、passと同じだから
  {
   /** debugフラグに関わらず表示を強制する */
   @[default(false)]
@@ -613,7 +613,7 @@ command validate {"pred":boolean?} [string] :: any -> @OK any | @NG MiniErrorInf
  * 入力を捨てるコマンド。
  * 
  */
-command void<T> :: T -> void
+command void<T default any> :: T -> void
   refers python:caty.core.std.command.builtin.Void;
 
 /**
@@ -641,33 +641,33 @@ command lsdir {"long":boolean?, "kind":string?} [string, string?] ::
  * 入力をそのまま出力にコピーする。
  *
  */
-command pass<T> :: T -> T
+command pass<T default any> :: T -> T
     refers python:caty.core.std.command.builtin.PassData;
 
 /**
  * 配列の n 番目のデータを返す。 item との違いはこちらは 1 始まりということである。
  */
-command nth<T> [integer] :: @* [T*] -> T
+command nth<T default any> [integer] :: @* [T*] -> T
     refers python:caty.core.std.command.builtin.Nth;
 
 /**
  * 配列の添字 n のデータを返す。 nth との違いはこちらは 0 始まりということである。
  */
-command item<T> [integer] :: @* [T*] -> T
+command item<T default any> [integer] :: @* [T*] -> T
     refers python:caty.core.std.command.builtin.Item;
 
 /**
  * JSON オブジェクトから引数で与えられた名前のプロパティの値を取得する。
  * 値が存在しなかった場合は実行時エラーとなる。
  */
-command pv<T> [string] :: @* object -> T
+command pv<T default any> [string] :: @* object -> T
     refers python:caty.core.std.command.builtin.GetPV;
 
 /**
  * JSON オブジェクトから引数で与えられた名前のプロパティの値を取得する。
  * 値が存在した場合 @EXISTS タグがついた値が返り、そうでなければ @NO タグのついた null が返る。
  */
-command findpv<T> [string] :: object -> @EXISTS T | @NO null
+command findpv<T default any> [string] :: object -> @EXISTS T | @NO null
         refers python:caty.core.std.command.builtin.FindPV;
     
 /**
@@ -682,7 +682,7 @@ command eq :: [any, any] -> @Same any | @Diff [any, any]
  * 入力値二つのうち第一要素を Caty スクリプトの式、第二要素をその入力として実行する。
  * このコマンドはテストモードでしか動作しないため、通常は使う必要はない。
  */
-@[test] command eval<T> :: [string, any] | string -> T
+@[test] command eval<T default any> :: [string, any] | string -> T
     uses interpreter
     refers python:caty.core.std.command.builtin.Eval;
 
@@ -698,20 +698,20 @@ command dir-index [string path, string method] :: any -> any
 /**
  * 入力値のタグを取得する。組み込み型が与えられた場合、その型名がタグとして扱われる。
  */
-command tag<T> :: T -> string
+command tag<T default any> :: T -> string
     refers python:caty.core.std.command.builtin.GetTag;
 
 /**
  * 第一の入力値をタグ名とし、第二の入力値をタグ付きにして返す。
  */
-command tagged<S, T> :: [string, S] -> T
+command tagged<S default any, T default any> :: [string, S] -> T
     refers python:caty.core.std.command.builtin.Tagged;
 
 /**
  * 入力値のタグを除去して返す。組み込み型が与えられた場合、その値がそのまま返る。
  * 引数が与えられた場合、タグ名と引数を比較し、異なっていた場合は例外を創出する。
  */
-command untagged<S, T> [string?] :: S -> T
+command untagged<S default any, T default any> [string?] :: S -> T
     refers python:caty.core.std.command.builtin.Untagged;
 
 /**
@@ -779,7 +779,7 @@ command proj :: void -> string
  * ファイルに関連付けられたスクリプトを実行する。
  *
  */
-@[console] command exec-context<S, T> [string] :: S -> T
+@[console] command exec-context<S default any, T default any> [string] :: S -> T
     uses [pub, include, interpreter]
     refers python:caty.core.std.command.builtin.ExecContext;
 
@@ -1025,14 +1025,14 @@ command object-to-array :: object -> [[string, any]*]
 /** 
  * 引数のコマンドあるいはCatyScriptを呼び出す。
  */
-command call<S, T> [string command_name] :: S -> T
+command call<S default any, T default any> [string command_name] :: S -> T
     reads [pub, scripts, interpreter]
     refers python:caty.core.script.interpreter.CallCommand;
 
 /** 
  * 引数のコマンドあるいはCatyScriptを呼び出し、制御をそちらに移す。
  */
-command forward<S, T>  [string command_name] :: S -> never
+command forward<S default any, T default any>  [string command_name] :: S -> never
     signals T
     reads [pub, scripts, interpreter]
     refers python:caty.core.script.interpreter.Forward;
@@ -1041,7 +1041,7 @@ command forward<S, T>  [string command_name] :: S -> never
  * 引数で指定されたミリ秒だけ停止する。
  * 引数が省略された場合は1秒(1000ミリ秒)停止する。
  */
-command sleep<T> [integer(minimum=0)? millisec] :: T -> T
+command sleep<T default any> [integer(minimum=0)? millisec] :: T -> T
     refers python:caty.core.std.command.builtin.Sleep;
    
 /**

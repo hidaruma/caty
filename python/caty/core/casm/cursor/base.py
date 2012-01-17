@@ -6,6 +6,7 @@ from caty.core.casm.language.ast import *
 from caty.core.schema import *
 from caty.util.collection import OverlayedDict
 import caty.jsontools as json
+from caty.core.exception import CatyException
 
 def apply_annotation(f):
     def _apply(cursor, node):
@@ -23,13 +24,17 @@ class SchemaBuilder(TreeCursor):
     def __init__(self, module):
         self._current_node = None
         self.module = module
+        self._root_name = None
 
     @apply_annotation
     def _visit_root(self, node):
+        if self._root_name is None:
+            self._root_name = node.name
         self._type_params = node._type_params
         body = node.body.accept(self)
         s = NamedSchema(node.name, node._type_params, body, self.module)
         self._type_params = None
+        self._root_name = None
         return s
 
     @apply_annotation
@@ -55,7 +60,9 @@ class SchemaBuilder(TreeCursor):
                 if t.name == node.name:
                     schema = TypeVariable(node.name, node.type_args, t.kind, t.default, node.options, self.module)
                     return schema 
-            raise KeyError(node.name)
+            raise CatyException(u'SCHEMA_COMPILE_ERROR', 
+                                u'Undeclared type variable at $this: $name',
+                                this=self._root_name, name=node.name)
 
     @apply_annotation
     def _visit_option(self, node):
@@ -133,6 +140,8 @@ class ProfileBuilder(SchemaBuilder):
 
     def _visit_function(self, node):
         from caty.core.casm.cursor.resolver import ReferenceResolver
+        from caty.core.casm.cursor.typevar import TypeVarApplier
+        from caty.core.casm.cursor.normalizer import TypeNormalizer
         from caty.core.exception import CatyException
         if node.profile_container:
             return node
@@ -155,18 +164,33 @@ class ProfileBuilder(SchemaBuilder):
                                         node.type_var_names, 
                                         self.module)
 
-        for p in node.patterns:
+        for pat in node.patterns:
             rr = ReferenceResolver(self.module)
-            p.build([self, rr])
-            e = p.verify_type_var(node.type_var_names)
+            params = []
+            # 型パラメータのデフォルト値を設定
+            for p in node.type_params:
+                schema = TypeVariable(p.name, [], p.kind, p.default, {}, self.module)
+                params.append(schema.accept(rr))
+            node.type_params = params
+            pat.build([self, rr])
+            e = pat.verify_type_var(node.type_var_names)
             if e:
                 raise CatyException(u'SCHEMA_COMPILE_ERROR', 
                                     u'Undeclared type variable at $this: $name',
                                     this=node.name, name=e)
-            pc.add_profile(CommandProfile(p.opt_schema, p.arg_schema, p.decl))
+            tc = TypeVarApplier(self.module)
+            tn = TypeNormalizer(self.module)
+            tc._init_type_params(node)
+            tc.real_root = False
+            opt_schema = tn.visit(pat.opt_schema.accept(tc))
+            arg_schema = tn.visit(pat.arg_schema.accept(tc))
+            new_prof = []
+            for d in pat.decl.profiles:
+                new_prof.append((tn.visit(d[0].accept(tc)), tn.visit(d[1].accept(tc))))
+            pat.decl.profiles = new_prof
+            pc.add_profile(CommandProfile(pat.opt_schema, pat.arg_schema, pat.decl))
         return pc
 
     def _visit_profile(self, node):
         return node
-
 

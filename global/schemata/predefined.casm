@@ -1,10 +1,10 @@
 module predefined;// -*- coding: utf-8 -*-
 
 @[register-public]
-type list<X> = [X*];
+type list<X default any> = [X*];
 
 @[register-public]
-type record<X> = {*: X?};
+type record<X default any> = {*: X?};
 
 @[register-public]
 type scalar  = null|boolean|number|string|binary;

@@ -21,7 +21,7 @@ command draw {
 
  /** ファイル出力時に.caraの変更がされていない場合は再出力しない */
  @[with("out"), default(false)]
- "if-modified": booelan?,
+ "if-modified": boolean?,
 
  /** 描画に使われるフォント。日本語を使う場合は指定するのを推奨 */
  "font": string?
@@ -54,7 +54,7 @@ command draw-action {
 
  /** ファイル出力時に.caraの変更がされていない場合は再出力しない */
  @[with("out"), default(false)]
- "if-modified": booelan?,
+ "if-modified": boolean?,
 
  /** 描画に使われるフォント。日本語を使う場合は指定するのを推奨 */
  "font": string?
@@ -111,7 +111,7 @@ command draw-scenarios {
  
   /** ファイル出力時に.caraの変更がされていない場合は再出力しない */
   @[with("out"), default(false)]
-  "if-modified": booelan?,
+  "if-modified": boolean?,
 
   /** 描画に使われるフォント。日本語を使う場合は指定するのを推奨 */
   "font": string?

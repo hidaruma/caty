@@ -83,7 +83,7 @@ command list-collections :: void -> [Collection*]
  * * @_GE <数値>        オブジェクトの値が<数値>より大きいあるいは等しい
  * 
  */
-command select<T> {
+command select<T default object> {
                 @[default(-1)]
                 "limit": integer(minimum=-1)?, 
                 @[default(false)]
@@ -102,7 +102,7 @@ command select<T> {
  * 検索結果が一件でない場合、 @Error が出力値となる。
  *
  */
-command select1<T> [string] :: any -> T | @Error string
+command select1<T default object> [string] :: any -> T | @Error string
     reads storage
     refers python:caty.core.std.command.strg.Select1;
 
@@ -112,7 +112,7 @@ command select1<T> [string] :: any -> T | @Error string
  * デフォルトでは重複した値を挿入しようとした場合は値が挿入されず、 @NG が出力値となる。
  * 
  */
-command insert<T> {@[default(false)]"allow-dup": boolean?} [string] :: T -> @OK null | @NG null
+command insert<T default object> {@[default(false)]"allow-dup": boolean?} [string] :: T -> @OK null | @NG null
     updates storage
     refers python:caty.core.std.command.strg.Insert;
 

@@ -5,7 +5,7 @@ schema = u"""
 /**
  * 入力値を標準出力に書き出す。それ以外の動作は pass と同じ。
  */
-command dump<T> 
+command dump<T default any> 
  {
   /** debugフラグに関わらず表示を強制する */
   @[default(false)]
@@ -29,7 +29,7 @@ command dump<T>
  * セッションから指定されたキーの値を取得する。
  * nullable オプションが指定された場合、キーが見つからなかったときに null を返す。
  */
- command get-session<T> {"nullable": boolean?} [string] :: void -> T
+ command get-session<T default any> {"nullable": boolean?} [string] :: void -> T
     reads session
     refers python:caty.core.std.command.debug.GetSession;
 

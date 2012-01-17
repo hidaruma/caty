@@ -8,7 +8,7 @@ schema = u"""
  *
  * このコマンドは unzip と対になっている。
  */
-command zip<S, T> :: [[S*], [T*]] -> [[S, T]*]
+command zip<S default any, T default any> :: [[S*], [T*]] -> [[S, T]*]
         refers python:caty.core.std.command.listlib.Zip;
 
 /**
@@ -18,7 +18,7 @@ command zip<S, T> :: [[S*], [T*]] -> [[S, T]*]
  *
  * このコマンドは unzip3 と対になっている。
  */
-command zip3<S, T, U> :: [[S*],[T*],[U*]] -> [[S, T, U]*]
+command zip3<S default any, T default any, U default any> :: [[S*],[T*],[U*]] -> [[S, T, U]*]
         refers python:caty.core.std.command.listlib.Zip3;
 
 /**
@@ -27,7 +27,7 @@ command zip3<S, T, U> :: [[S*],[T*],[U*]] -> [[S, T, U]*]
  * 
  * このコマンドは zip コマンドと対になっている。
  */
-command unzip<S, T> :: [[S, T]*] -> [[S*], [T*]]
+command unzip<S default any, T default any> :: [[S, T]*] -> [[S*], [T*]]
     refers python:caty.core.std.command.listlib.UnZip;
 
 /**
@@ -37,26 +37,26 @@ command unzip<S, T> :: [[S, T]*] -> [[S*], [T*]]
  * 
  * このコマンドは zip3 コマンドと対になっている。
  */
-command unzip3<S, T, U> :: [[S, T, U]*] -> [[S*],[T*],[U*]] 
+command unzip3<S default any, T default any, U default any> :: [[S, T, U]*] -> [[S*],[T*],[U*]] 
     refers python:caty.core.std.command.listlib.UnZip3;
 
 /**
  * 入力値の長さを返す。
  */
-command length<S> :: [S*] -> integer
+command length<S default any> :: [S*] -> integer
     refers python:caty.core.std.command.listlib.Length;
 
 /**
  * 入力値を引数の回数分だけ繰り返したリストを返す。
  */
-command cycle<T> [integer] :: T -> [T*]
+command cycle<T default any> [integer] :: T -> [T*]
     refers python:caty.core.std.command.listlib.Cycle;
 
 /**
  * 入力値を添字のリストと zip した値を返す。
  * 例えば ["x", "y", "z"] という入力に対しては [(0, "x"), (1, "y"), (2, "z")] という値が返る。
  */
-command enumerate<T> :: [T*] -> [[integer, T]*]
+command enumerate<T default any> :: [T*] -> [[integer, T]*]
     refers python:caty.core.std.command.listlib.Enumerate;
 
 /**
@@ -64,7 +64,7 @@ command enumerate<T> :: [T*] -> [[integer, T]*]
  * オプションの key が指定されて尚且つ入力値が object の配列の場合、
  * key にあたるプロパティがソートキーとして使われる（JSON パス式には未対応）。
  */
-command sort<T> {"key":string?, "reverse": boolean?} :: [T*] -> [T*]
+command sort<T default any>  {"key":string?, "reverse": boolean?} :: [T*] -> [T*]
     refers python:caty.core.std.command.listlib.Sort;
 
 /**
@@ -72,7 +72,7 @@ command sort<T> {"key":string?, "reverse": boolean?} :: [T*] -> [T*]
  * 第一引数は開始インデックスで、第二引数は終了インデックスとなる。
  * 第二引数は省略可能で、その場合は配列の最終要素までのスライスが返される。
  */
-command slice<T> [integer, integer?] :: [T*] -> [T*]
+command slice<T default any> [integer, integer?] :: [T*] -> [T*]
     refers python:caty.core.std.command.listlib.Slice;
 
 /**
@@ -102,7 +102,7 @@ command range [integer start, integer end] :: void  -> [integer*]
 /**
  * 配列の要素を逆順にする。
  */
-command reverse<T> :: [T*] -> [T*]
+command reverse<T default any> :: [T*] -> [T*]
     refers python:caty.core.std.command.listlib.Reverse;
 """
 

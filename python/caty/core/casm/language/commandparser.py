@@ -3,7 +3,7 @@ import re
 from topdown import *
 from caty.core.casm.language.ast import *
 from caty.core.language.util import *
-from caty.core.casm.language.schemaparser import term, typedef, object_, array
+from caty.core.casm.language.schemaparser import term, typedef, object_, array, type_arg
 from caty.jsontools import xjson
 RESERVED = frozenset([
 'number', 'integer', 'string', 'boolean', 'array', 'object',
@@ -23,7 +23,7 @@ def command(seq):
         n = seq.parse(cmdname)
         if n in RESERVED:
             raise ParseFailed(seq, command, '%s is reserved.' % n)
-        t = seq.parse(option(typenames, []))
+        t = seq.parse(option(type_arg, []))
         patterns = many1(call_pattern)(seq)
         j = seq.parse(jump)
         r = seq.parse(many(resource))

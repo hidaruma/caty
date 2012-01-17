@@ -161,6 +161,8 @@
 
     "$key1 must not appear with one of $key2",
 
+    "Type variable which neither instantiated nor a default value was given: $name",
+
     /********************************
      **** Caty Schema Runtime    ****
      ********************************/

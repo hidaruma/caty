@@ -11,7 +11,7 @@ type httpMethod = ("GET" | "PUT" | "POST" | "DELETE" | "HEAD");
 type email = string(remark="email");
 
 
-type PostForm<InputType> = {
+type PostForm<InputType default object> = {
  "href" : uri,
  "method" : "POST",
  "verb" : string?,

@@ -23,7 +23,7 @@ command rand-int [integer n, integer m] :: void -> integer {
 };
 
 /** 2つの引数で指定された範囲内のランダムな整数値のタグを付ける */
-command rand-tag<X> [integer n, integer m] :: X -> @* X  {
+command rand-tag<X default any> [integer n, integer m] :: X -> @* X  {
  // ダミー、常に @1 を付ける
  @1 pass
 };

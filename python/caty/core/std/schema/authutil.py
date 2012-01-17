@@ -8,7 +8,7 @@ type TokenProperty = {
 
 type TokenEmbeded = any;
 
-type TokenCheckResult<T> = @OK T | @NG null;
+type TokenCheckResult<T default any> = @OK T | @NG null;
 
 type Token = string;
 
@@ -44,7 +44,7 @@ command gen-token :: void -> string
  * 入力に含まれるトークンとサーバ側のトークンを照合し、入力のトークンがサーバ側に含まれていなければエラーとする。
  *
  */
-command check-token<T> :: TokenEmbeded -> TokenCheckResult<T>
+command check-token<T default any> :: TokenEmbeded -> TokenCheckResult<T>
     reads token
     uses session
     refers python:caty.core.std.command.authutil.CheckToken;

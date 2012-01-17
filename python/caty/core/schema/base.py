@@ -882,6 +882,8 @@ class TypeVariable(SchemaBase, Scalar):
             self.__validate(self._schema, value)
         elif self._default_schema:
             self.__validate(self._default_schema, value)
+        else:
+            raise JsonSchemaError(dict(msg=u'Type variable which neither instantiated nor a default value was given: $name', name=self.name))
 
     def __validate(self, s, value):
         s.validate(value)

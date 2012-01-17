@@ -13,6 +13,8 @@ class TypeNormalizer(TreeCursor):
         normalized = tc.visit(ol.visit(ue.visit(node)))
         nc = NeverChecker(self.module)
         nc.visit(normalized)
+        vc = VariableChecker(self.module)
+        vc.visit(normalized)
         return normalized
 
 class _SubNormalizer(SchemaBuilder):
@@ -342,4 +344,14 @@ class NeverChecker(_SubNormalizer):
 
     def _visit_function(self, node):
         assert False
+
+class VariableChecker(_SubNormalizer):
+    def _visit_scalar(self, node):
+        if isinstance(node, TypeVariable):
+            if node._schema is None and node._default_schema is None:
+                raise CatyException(
+                    u'SCHEMA_COMPILE_ERROR',
+                    u'Type variable which neither instantiated nor a default value was given: $name', 
+                    name=node.name)
+        return node
 

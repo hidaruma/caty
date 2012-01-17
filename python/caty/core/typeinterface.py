@@ -101,43 +101,43 @@ class TreeCursor(object):
         return node.accept(self)
 
     def _visit_root(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_root'.format(self.__class__.__name__))
 
     def _visit_scalar(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_scalar'.format(self.__class__.__name__))
 
     def _visit_option(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_option'.format(self.__class__.__name__))
 
     def _visit_enum(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_enum'.format(self.__class__.__name__))
 
     def _visit_object(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_object'.format(self.__class__.__name__))
 
     def _visit_array(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_array'.format(self.__class__.__name__))
 
     def _visit_bag(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_bag'.format(self.__class__.__name__))
 
     def _visit_intersection(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_intersection'.format(self.__class__.__name__))
 
     def _visit_union(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_union'.format(self.__class__.__name__))
 
     def _visit_updator(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_updator'.format(self.__class__.__name__))
 
     def _visit_tag(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_tag'.format(self.__class__.__name__))
 
     def _visit_pseudo_tag(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_pseudo_tag'.format(self.__class__.__name__))
 
     def _visit_function(self, node):
-        raise NotImplementedError
+        raise NotImplementedError(u'{0}._visit_function'.format(self.__class__.__name__))
 
     @property
     def result(self):

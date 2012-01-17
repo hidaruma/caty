@@ -6,6 +6,7 @@ class TypeVarApplier(SchemaBuilder):
     def __init__(self, module):
         SchemaBuilder.__init__(self, module)
         self.type_args = None
+        self.scope_stack = []
         self.real_root = True
         self.history = dict()
         self.current = None
@@ -21,12 +22,9 @@ class TypeVarApplier(SchemaBuilder):
     def _visit_root(self, node):
         r = self.real_root
         if r:
-            self.current = node
-            self.real_root = False
-            parameters = {}
-            for v in node.type_params:
-                parameters[v.name] = v
-            self.type_args = OverlayedDict(parameters)
+            self._init_type_params(node)
+        else:
+            self._mask_scope(node)
         body = node.body.accept(self)
         if r:
             node._schema = body
@@ -36,9 +34,28 @@ class TypeVarApplier(SchemaBuilder):
             self.history = dict()
             return node
         else:
+            self._unmask_scope()
             s = NamedSchema(node.name, node._type_params, body, node.module)
             s._options = node.options
             return s
+
+    def _init_type_params(self, node):
+        self.current = node
+        self.real_root = False
+        parameters = {}
+        for v in node.type_params:
+            parameters[v.name] = v
+        self.type_args = OverlayedDict(parameters)
+
+    def _mask_scope(self, node):
+        self.scope_stack.append(self.type_args)
+        parameters = {}
+        for v in node.type_params:
+            parameters[v.name] = v
+        self.type_args = OverlayedDict(parameters)
+
+    def _unmask_scope(self):
+        self.type_args = self.scope_stack.pop(-1)
 
     @apply_annotation
     def _visit_scalar(self, node):
@@ -72,3 +89,5 @@ class TypeVarApplier(SchemaBuilder):
             else:
                 raise KeyError(node.name)
         return node
+
+
