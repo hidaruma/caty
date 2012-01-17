@@ -44,14 +44,14 @@ class TypeVarApplier(SchemaBuilder):
         self.real_root = False
         parameters = {}
         for v in node.type_params:
-            parameters[v.name] = v
+            parameters[v.var_name] = v
         self.type_args = OverlayedDict(parameters)
 
     def _mask_scope(self, node):
         self.scope_stack.append(self.type_args)
         parameters = {}
         for v in node.type_params:
-            parameters[v.name] = v
+            parameters[v.var_name] = v
         self.type_args = OverlayedDict(parameters)
 
     def _unmask_scope(self):
@@ -80,14 +80,14 @@ class TypeVarApplier(SchemaBuilder):
             finally:
                 self.type_args.del_scope()
         elif isinstance(node, TypeVariable):
-            if node.name in self.type_args:
-                r = self.type_args[node.name]
+            if node.var_name in self.type_args:
+                r = self.type_args[node.var_name]
                 if isinstance(r, TypeParam):
                     return node
                 else:
                     return r
             else:
-                raise KeyError(node.name)
+                raise KeyError(node.var_name)
         return node
 
 

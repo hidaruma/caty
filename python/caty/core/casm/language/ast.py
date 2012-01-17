@@ -223,7 +223,7 @@ class CommandNode(Function):
         self.doc = doc
         self.annotation = annotation
         self.profile_container = None
-        self.type_var_names = [n.name for n in type_params]
+        self.type_var_names = [n.var_name for n in type_params]
         self.type_params = type_params
 
     def declare(self, module):
@@ -379,9 +379,15 @@ class KindReference(object):
 
 class TypeParam(object):
     def __init__(self, name, kind, default_type):
-        self.name = name
+        self._name = name
+        self.var_name = name
         self.kind = kind
         self.default = default_type
+
+    @property
+    def name(self):
+        print '[Error] deprecated property'
+        raise
 
     def __repr__(self):
         return self.name + ":" + str(self.kind)

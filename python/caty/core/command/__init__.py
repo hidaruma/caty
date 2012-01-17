@@ -48,7 +48,6 @@ class Command(object):
         self._annotations = self.profile_container.get_annotations()
         self._mode = set([u'console', u'web', u'test']).intersection(self._annotations)
         self._defined_application = self.profile_container.defined_application
-        self.__type_var_names = self.profile_container.type_var_names
         self.async_queue = self._defined_application.async_queue
         self.__facility_names = set()
         self._id = '%s(%s)' % (self.profile_container.name, self.profile_container.uri)
@@ -56,9 +55,27 @@ class Command(object):
         self.__facility_names = []
         self.__i18n = None
         self.__pos = pos
+        _ta = []
+        schema = self.profile_container.module.schema_finder
+        l = len(self.__type_args)
+        for i, p in enumerate(self.profile_container.type_params):
+            if i < l:
+                t = self.__type_args[i]
+                s = schema[t]
+                x = p.clone(set())
+                x._schema = s
+                _ta.append(x)
+            else:
+                _ta.append(p)
+        self.__type_params = _ta
+        self._in_schema, self._out_schema = self.profile.apply(self, self.profile_container.module)
 
     def get_command_id(self):
         return self._id
+
+    @property
+    def type_params(self):
+        return self.__type_params
 
     @property
     def col(self):
@@ -143,14 +160,6 @@ class Command(object):
             setattr(self, 'logger', facilities['logger'].read_mode)
             _set.add('logger')
         self.__facility_names = _set
-
-        _ta = []
-        for t in self.__type_args:
-            s = self.schema[t].clone()
-            _ta.append(s)
-        self.profile.apply(dict(zip(self.__type_var_names, _ta)))
-        self._in_schema = self.profile.in_schema
-        self._out_schema = self.profile.out_schema
 
     def get_facility(self, facility_name):
         u"""ファシリティの取得。

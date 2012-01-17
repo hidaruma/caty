@@ -57,7 +57,7 @@ class SchemaBuilder(TreeCursor):
             return TypeReference(node.name, type_args, self.module)
         else:
             for t in self._type_params:
-                if t.name == node.name:
+                if t.var_name == node.name:
                     schema = TypeVariable(node.name, node.type_args, t.kind, t.default, node.options, self.module)
                     return schema 
             raise CatyException(u'SCHEMA_COMPILE_ERROR', 
@@ -152,7 +152,6 @@ class ProfileBuilder(SchemaBuilder):
                                   node.annotation, 
                                   node.doc, 
                                   node.application, 
-                                  node.type_var_names,
                                   self.module)
         else:
             pc = ScriptProfileContainer(node.name, 
@@ -161,7 +160,6 @@ class ProfileBuilder(SchemaBuilder):
                                         node.annotation, 
                                         node.doc, 
                                         node.application, 
-                                        node.type_var_names, 
                                         self.module)
 
         for pat in node.patterns:
@@ -169,9 +167,10 @@ class ProfileBuilder(SchemaBuilder):
             params = []
             # 型パラメータのデフォルト値を設定
             for p in node.type_params:
-                schema = TypeVariable(p.name, [], p.kind, p.default, {}, self.module)
+                schema = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
                 params.append(schema.accept(rr))
             node.type_params = params
+            pc.type_params = params
             pat.build([self, rr])
             e = pat.verify_type_var(node.type_var_names)
             if e:

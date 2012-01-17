@@ -16,7 +16,7 @@ class ProfileContainer(object):
     入出力の型がオーバーロードされている場合、
     その後の処理は CommandProfile で行う。
     """
-    def __init__(self, name, uri, commands, annotations, doc, app, type_var_names, module):
+    def __init__(self, name, uri, commands, annotations, doc, app, module):
         self.profiles = []
         self.name = name
         path = (uri.split(':')[-1])
@@ -29,8 +29,8 @@ class ProfileContainer(object):
         self.doc = doc if doc else 'undocumented'
         self.defined_application = app
         self.uri = uri
-        self.type_var_names = type_var_names
         self.module = module
+        self.type_params = []
 
     def accept(self, cursor):
         return cursor._visit_profile(self)
@@ -196,11 +196,14 @@ class CommandProfile(object):
             o.resolve_reference()
         self.resolved = True
 
-    def apply(self, type_vars):
-        if type_vars:
-            self._in_schema = self._in_schema.apply(type_vars)
-            self._out_schema = self._out_schema.apply(type_vars)
-
+    def apply(self, type_params, module):
+        from caty.core.casm.cursor.typevar import TypeVarApplier
+        tc = TypeVarApplier(module)
+        tc._init_type_params(type_params)
+        tc.real_root = False
+        i = self._in_schema.accept(tc)
+        o = self._out_schema.accept(tc)
+        return i, o
 
 def check_enum(t, name, option, opt_str, value, parser):
     from caty.core.casm.cursor import TreeDumper
@@ -212,7 +215,7 @@ def check_enum(t, name, option, opt_str, value, parser):
     setattr(parser.values, option.dest, value)
 
 class ScriptProfileContainer(ProfileContainer):
-    def __init__(self, name, proxy, commands, annotations, doc, app, type_var_names, module):
+    def __init__(self, name, proxy, commands, annotations, doc, app, module):
         self.profiles = []
         self.name = name
         self.command_class = proxy
@@ -220,7 +223,7 @@ class ScriptProfileContainer(ProfileContainer):
         self.doc = doc if doc else 'undocumented'
         self.defined_application = app
         self.uri = ''
-        self.type_var_names = type_var_names
+        self.type_params = []
         self.module = module
         self.command_class.set_module(module)
 
