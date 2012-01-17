@@ -128,7 +128,7 @@ class ScriptParser(Parser):
         return types
 
     def arguments(self, seq):
-        args = filter(lambda a: a is not None, seq.parse(many(self.arg)))
+        args = filter(lambda a: a is not None, seq.parse(many(try_(self.arg))))
         return args
 
     def options(self, seq):
@@ -223,7 +223,8 @@ class ScriptParser(Parser):
         return seq.parse(['*!', '*', xjson.string, self.name, Regex(r'[-0-9a-zA-Z_]+')])
 
     def unquoted(self, seq):
-        return seq.parse(Regex('[^;\\t\\r\\n\' <>|%+"(){},\\[\\]]([^;\\t\\r\\n\' <>|%+"(){},\\[\\]]|\\(\\))*'))
+        v = seq.parse(Regex('[^;\\t\\r\\n <>|%+"(){},\\[\\]]([^;\\t\\r\\n <>|%+"(){},\\[\\]]|\\(\\))*'))
+        return _remove_comment(v)
 
     def opt(self, seq):
         seq.ignore_hook = True
@@ -251,9 +252,9 @@ class ScriptParser(Parser):
             v = choice(
                       bind2nd(xjson.null, True), 
                       bind2nd(xjson.boolean, True),
-                      self.unquoted_maybe_num, 
                       xjson.string, 
                       xjson.multiline_string,
+                      self.unquoted_maybe_num, 
                       self.var_ref
                       )(seq)
             if isinstance(v, VarRef):
@@ -292,9 +293,9 @@ class ScriptParser(Parser):
         r = choice(
                   bind2nd(xjson.null, True), 
                   bind2nd(xjson.boolean, True),
-                  self.unquoted_maybe_num, 
                   xjson.string, 
                   xjson.multiline_string,
+                  self.unquoted_maybe_num, 
                   self.named_arg,
                   self.indexed_arg
                   )(seq)
@@ -475,3 +476,12 @@ def list_to_opts_and_args(arg_list):
             key = None
         args.append(a)
     return opts, args
+
+
+
+import re
+_SINGLE = re.compile(u'(.*)//.*')
+_MULTI = re.compile(u'(.*)/\\*.*\\*/(.*)', re.M)
+def _remove_comment(v):
+    return _MULTI.sub(u'\\1\\2', _SINGLE.sub(u'\\1', v))
+
