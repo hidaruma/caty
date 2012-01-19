@@ -224,7 +224,11 @@ class ScriptParser(Parser):
         return seq.parse(['*!', '*', xjson.string, self.name, Regex(r'[-0-9a-zA-Z_]+')])
 
     def unquoted(self, seq):
-        v = seq.parse(Regex('[^;\\t\\r\\n <>|%+"(){},\\[\\]]([^;\\t\\r\\n <>|%+"(){},\\[\\]]|\\(\\))*'))
+        #v = seq.parse(Regex('([^;\\t\\r\\n <>|%+"(){},\\[\\]]|(?!\\\'\\\'\\\'))([^;\\t\\r\\n <>|%+"(){},\\[\\]]|\\(\\)|(?!\\\'\\\'\\\'))*'))
+        delim = list(u';\t\r\n <>|%+"(){},[]') + [u"'''"]
+        v = choice('()', until(delim))(seq)
+        if not v:
+            raise ParseFailed(seq, self.unquoted)
         if u'/*' in v:
             while not seq.eof:
                 seq.next()
