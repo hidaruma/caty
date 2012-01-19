@@ -17,7 +17,10 @@ def dump(obj, fo, **kwds):
     return json.dump(obj, fo, cls=CatyEncoder, **kwds)
 
 def dumps(obj, **kwds):
-    return json.dumps(obj, cls=CatyEncoder, **kwds)
-
+    v = json.dumps(obj, cls=CatyEncoder, **kwds)
+    if isinstance(v, unicode):
+        return v
+    else:
+        return unicode(v)
 
 
