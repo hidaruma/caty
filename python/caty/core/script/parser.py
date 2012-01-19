@@ -51,12 +51,13 @@ class ScriptParser(Parser):
     def parse(self, text):
         if not text:
             return None
+        text = _remove_comment(text)
         seq = CharSeq(text, hook=xjson.remove_comment, auto_remove_ws=True)
         try:
             self._script = self.make_pipeline(seq)
             if not seq.eof:
                 raise ParseFailed(seq, self.make_pipeline)
-        except EndOfBuffer, e:
+        except (ContinuedComment, EndOfBuffer) as e:
             return None
         return self._script
 
@@ -224,7 +225,11 @@ class ScriptParser(Parser):
 
     def unquoted(self, seq):
         v = seq.parse(Regex('[^;\\t\\r\\n <>|%+"(){},\\[\\]]([^;\\t\\r\\n <>|%+"(){},\\[\\]]|\\(\\))*'))
-        return _remove_comment(v)
+        if u'/*' in v:
+            while not seq.eof:
+                seq.next()
+            raise ContinuedComment()
+        return v
 
     def opt(self, seq):
         seq.ignore_hook = True
@@ -480,8 +485,10 @@ def list_to_opts_and_args(arg_list):
 
 
 import re
-_SINGLE = re.compile(u'(.*)//.*')
-_MULTI = re.compile(u'(.*)/\\*.*\\*/(.*)', re.M)
+_SINGLE = re.compile(u'//.*')
+_MULTI = re.compile(u'/\\*.*\\*/', re.DOTALL)
 def _remove_comment(v):
-    return _MULTI.sub(u'\\1\\2', _SINGLE.sub(u'\\1', v))
+    return _SINGLE.sub(u'', _MULTI.sub(u'', v))
+
+class ContinuedComment(Exception): pass
 
