@@ -51,7 +51,6 @@ class ScriptParser(Parser):
     def parse(self, text):
         if not text:
             return None
-        text = _remove_comment(text)
         seq = CharSeq(text, hook=xjson.remove_comment, auto_remove_ws=True)
         try:
             self._script = self.make_pipeline(seq)
@@ -230,9 +229,11 @@ class ScriptParser(Parser):
         if not v:
             raise ParseFailed(seq, self.unquoted)
         if u'/*' in v:
-            while not seq.eof:
-                seq.next()
-            raise ContinuedComment()
+            v, _ = v.split('/*', 1)
+            until('*/')(seq)
+            if seq.eof:
+                raise ContinuedComment()
+            S('*/')(seq)
         return v
 
     def opt(self, seq):
@@ -492,7 +493,7 @@ import re
 _SINGLE = re.compile(u'//.*')
 _MULTI = re.compile(u'/\\*.*\\*/', re.DOTALL)
 def _remove_comment(v):
-    return _SINGLE.sub(u'', _MULTI.sub(u'', v))
+    return _SINGLE.sub(u' ', _MULTI.sub(u' ', v))
 
 class ContinuedComment(Exception): pass
 
