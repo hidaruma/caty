@@ -234,6 +234,9 @@ class ScriptParser(Parser):
             if seq.eof:
                 raise ContinuedComment()
             S('*/')(seq)
+        elif '//' in v:
+            v, _ = v.split('//', 1)
+            until('\n')(seq)
         return v
 
     def opt(self, seq):
