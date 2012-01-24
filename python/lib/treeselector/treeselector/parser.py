@@ -99,6 +99,8 @@ class TreeSelectorParser(Parser):
         return self.__operator_factory.union_operator
 
     def child_operator(self, seq):
+        if option(peek(choice(self.parse_name, '*')))(seq):
+            return self.__operator_factory.descendant_operator
         S('>')(seq)
         return self.__operator_factory.child_operator
 

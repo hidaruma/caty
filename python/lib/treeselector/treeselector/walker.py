@@ -31,3 +31,11 @@ class AbstractNode(object):
     def get_parent(self):
         raise NotImplementedError(u'{0}.{1}'.format(self.__class__.__name__, u'get_parent'))
 
+    def get_ancestors(self):
+        r = []
+        p = self
+        while p:
+            r.append(p.get_parent())
+            p = r[-1]
+        return r
+

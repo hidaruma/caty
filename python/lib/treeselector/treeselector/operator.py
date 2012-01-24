@@ -17,6 +17,9 @@ class BaseOperatorFactory(object):
     def union_operator(self, op1, op2):
         return UnionOperator(op1, op2)
 
+    def descendant_operator(self, op1, op2):
+        return DescendantOperator(op1, op2)
+
     def node_position_selector(self, sub, name):
         return NodePositionSelector(sub, name)
 
@@ -36,9 +39,14 @@ class Operator(object):
     def __str__(self):
         return '{0}.{1}({2})'.format(self.__module__, self.__class__.__name__, self.to_notation())
 
-    def select_child(self, parent):
-        for o in self.select(parent):
-            if o.get_parent() == parent:
+    def select_child(self, src):
+        for o in self.select(src):
+            if o.get_parent() == src:
+                yield o
+
+    def select_descendant(self, src):
+        for o in self.select(src):
+            if src in o.get_ancestors():
                 yield o
 
     def to_notation(self):
@@ -108,6 +116,17 @@ class ChildOperator(BinOperator):
 
     def to_notation(self):
         return u'{0} > {1}'.format(self.op1.to_notation(), self.op2.to_notation()) 
+
+class DescendantOperator(BinOperator):
+    def select(self, obj):
+        r = OrderedSet()
+        for o1 in self.op1.select(obj):
+            for o2 in self.op2.select_descendant(o1):
+                r.add(o2)
+        return r
+
+    def to_notation(self):
+        return u'{0} {1}'.format(self.op1.to_notation(), self.op2.to_notation()) 
 
 class UnionOperator(BinOperator):
 
