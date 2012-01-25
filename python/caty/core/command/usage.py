@@ -8,7 +8,7 @@ class CommandUsage(object):
         r = []
         for p in self.pc.profiles:
             opts, args, input, output = self.profile_usage(p)
-            type_vars = ', '.join(map(lambda x:'<%s>' % x, self.pc.type_var_names))
+            type_vars = ', '.join(map(lambda x:'<%s>' % x.var_name, self.pc.type_params))
             if opts:
                 r.append('Usage: %s%s OPTION %s' % (self.pc.name, type_vars, args))
                 r.append('Option:\n%s' % self.indent(opts))
