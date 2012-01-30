@@ -53,7 +53,7 @@ type WebItem = any;
 type JsonInput = @json any;
 
 type Response = {
-    "status": integer,
+    "status": integer(minimum=200, maximum=299),
     "header": {
         "content-type": string?,
         "content-length": integer?,
@@ -64,7 +64,7 @@ type Response = {
 };
 
 type Redirect = {
-    "status": integer,
+    "status": integer(minimum=300, maximum=399),
     "header": {
         "Location": string,
         *: string
@@ -480,6 +480,9 @@ exception UnknownError = object;
 
 /** 実装のバグ。 */
 exception ImplementationBug = object;
+
+/** コンパイルエラー */
+exception CompileError = object;
 
 /**
  * テンプレートを展開する際に扱われるデータ。

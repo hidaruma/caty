@@ -176,26 +176,27 @@ class CommandNode(object):
     def accept(self, visitor):
         return self.cmd.accept(visitor)
 
+_scalar_tag_map = {
+    types.IntType: ['integer', 'number'],
+    types.FloatType: ['number'],
+    types.UnicodeType: ['string'], 
+    types.BooleanType: ['boolean'], 
+    types.NoneType: ['null'], 
+    types.ListType: ['array'],
+    types.DictType: ['object'],
+    types.StringType: ['binary'],
+    caty._Undefined: ['undefined'],
+}
 class Dispatch(Syntax):
     command_decl = u"""command __dispatch {"seq": boolean?, "multi": boolean?} :: any -> any
                         refers python:caty.core.script.node.Dispatch;
     """
 
     def __init__(self):
-        Syntax.__init__(self)
         self.__cases = {}
         self.__query = build_query('$')
-        self.__scalar_tag_map = {
-            types.IntType: ['integer', 'number'],
-            types.FloatType: ['number'],
-            types.UnicodeType: ['string'], 
-            types.BooleanType: ['boolean'], 
-            types.NoneType: ['null'], 
-            types.ListType: ['array'],
-            types.DictType: ['object'],
-            types.StringType: ['binary'],
-            caty._Undefined: ['undefined'],
-        }
+        self.__scalar_tag_map = _scalar_tag_map
+        Syntax.__init__(self)
     
     @property
     def cases(self):
@@ -285,6 +286,60 @@ class Case(object):
         return self.cmd.accept(visitor)
 
 class UntagCase(Case):pass
+
+
+class TypeCase(Syntax):
+    command_decl = u"""command __type_case :: any -> any
+                        refers python:caty.core.script.node.TypeCase;
+    """
+
+    def __init__(self):
+        self.__cases = []
+        self.__scalar_tag_map = _scalar_tag_map
+        Syntax.__init__(self)
+    
+    @property
+    def cases(self):
+        return self.__cases
+
+    @property
+    def query(self):
+        return self.__query
+
+    @property
+    def scalar_tag_map(self):
+        return self.__scalar_tag_map
+
+    def add_case(self, case):
+        self.__cases.append(case)
+
+    def set_facility(self, facilities):
+        for v in self.__cases:
+            v.set_facility(facilities)
+
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        for v in self.__cases:
+            v.set_var_storage(storage)
+
+
+    def accept(self, visitor):
+        return visitor.visit_case(self)
+
+class Branch(object):
+    def __init__(self, type, cmd):
+        self.type = type
+        self.cmd = cmd
+
+    def set_facility(self, facilities):
+        self.cmd.set_facility(facilities)
+
+    def set_var_storage(self, storage):
+        self.cmd.set_var_storage(storage)
+    
+    def accept(self, visitor):
+        return self.cmd.accept(visitor)
+
 
 class Each(Syntax):
     command_decl = u"""command each-functor-applied<T default any> {"seq":boolean?} :: [T*] -> [T*]

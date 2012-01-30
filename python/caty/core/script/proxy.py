@@ -2,7 +2,7 @@
 from caty.core.command import *
 from caty.core.script.node import *
 from caty.core.script.builder import CommandCombinator, DiscardCombinator
-from caty.core.exception import InternalException
+from caty.core.exception import InternalException, throw_caty_exception
 
 class Proxy(object):
     u"""パイプライン構築のためのプロキシ。
@@ -126,6 +126,55 @@ class DispatchProxy(Proxy):
     def set_module(self, module):
         for c in self.cases:
             c.set_module(module)
+
+class TypeCaseProxy(Proxy):
+    def __init__(self, opts):
+        self.cases = []
+        self.opts = opts
+
+    def add_case(self, case):
+        self.cases.append(case)
+
+    def instantiate(self, builder):
+        t = TypeCase()
+        for c in self.cases:
+            t.add_case(c.instantiate(builder))
+        return t
+
+    def set_module(self, module):
+        for c in self.cases:
+            c.set_module(module)
+        import operator
+        types = [c.type for c in self.cases if c.typedef != u'*']
+        for t1, t2 in [(t1, t2) for t1 in types for t2 in types]:
+            if t1 != t2:
+                x = t1 & t2
+                tn = module.make_type_normalizer()
+                n = tn.visit(x)
+                if n.type != 'never':
+                    throw_caty_exception('CompileError', module._app.i18n.get(u'types are not exclusive: $type1, $type2', type1=module.make_dumper().visit(t1), type2=module.make_dumper().visit(t2)))
+
+class BranchProxy(Proxy):
+    def __init__(self, typedef, cmdproxy):
+        self.typedef = typedef
+        self.cmdproxy = cmdproxy
+        self.type = None
+
+    def set_module(self, module):
+        self.cmdproxy.set_module(module)
+        if self.typedef == u'*': return
+        from caty.core.casm.language.schemaparser import ASTRoot, Annotations
+        ar = ASTRoot(u'', [], self.typedef, Annotations([]), u'')
+        sb = module.make_schema_builder()
+        rr = module.make_reference_resolver()
+        cd = module.make_cycle_detecter()
+        ta = module.make_typevar_applier()
+        tn = module.make_type_normalizer()
+        self.type = ar.accept(sb).accept(rr).accept(cd).accept(ta).accept(tn).body
+
+    def instantiate(self, builder):
+        return Branch(self.type, self.cmdproxy.instantiate(builder))
+        
 
 class TagProxy(Proxy):
     def __init__(self, t, c):

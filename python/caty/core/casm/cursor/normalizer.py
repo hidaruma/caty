@@ -1,10 +1,14 @@
 #coding:utf-8
 from caty.core.casm.cursor.base import *
 from caty.core.casm.cursor.dump import TreeDumper
+from caty.core.exception import throw_caty_exception
 
 class TypeNormalizer(TreeCursor):
     def __init__(self, module):
         self.module = module
+
+    def _visit_root(self, node):
+        return self.visit(node)
 
     def visit(self, node):
         ue = UndefinedEraser(self.module)
@@ -19,9 +23,29 @@ class TypeNormalizer(TreeCursor):
 
 class _SubNormalizer(SchemaBuilder):
     def _visit_root(self, node):
-        body = node.body.accept(self)
+        try:
+            body = node.body.accept(self)
+        except:
+            print u'[DEBUG]', node.name
+            raise
         node._schema = body
         return node
+
+    @apply_annotation
+    def _visit_object(self, node):
+        o = {}
+        for k, v in node.items():
+            try:
+                o[k] = v.accept(self)
+            except:
+                print '[DEBUG]', k
+                raise
+        try:
+            w = node.wildcard.accept(self)
+        except:
+            print '[DEBUG] *'
+            raise
+        return ObjectSchema(o, w, node.options)
 
 class UndefinedEraser(_SubNormalizer):
     @apply_annotation
@@ -137,11 +161,17 @@ class TypeCalcurator(_SubNormalizer):
                     n = (self._dereference(l) & self._dereference(r)).accept(self)
                     return TagSchema(r.tag, n.accept(self))
             else:
-                n = (self._dereference(l) & r).accept(self)
-                res = TagSchema(l.tag, n)
+                if lt == '@*!': 
+                    # ワイルドカードタグ
+                    n = (self._dereference(l) & r).accept(self)
+                    return n
+                else:
+                    return NeverSchema()
         elif rt.startswith('@'):
-            n = (l & self._dereference(r)).accept(self)
-            res = TagSchema(r.tag, n)
+            if rt == u'@*!':
+                n = (l & self._dereference(r)).accept(self)
+                return n
+            return NeverSchema()
         else:
             # どちらもタグ型でない場合
             # 一方がnevrであれば演算結果はnever
@@ -230,6 +260,43 @@ class TypeCalcurator(_SubNormalizer):
         else:
             return (l & r).accept(self)
 
+    def _compress(self, l):
+        # 計算過程で生じた同一スキーマを単一のスキーマに圧縮する
+        # ここでは簡単なタグ名/型名でのチェックに留める
+        r = []
+        print '>>>', map(lambda x: TreeDumper().visit(x), l)
+        for c in l:
+            if not r:
+                r.append(c)
+            else:
+                if all(map(lambda x: self._is_different_schema(x, c), r)):
+                    r.append(c)
+        print '<<<', map(lambda x: TreeDumper().visit(x), r)
+        return r
+
+
+    def _is_different_schema(self, c, c2):
+        if c.type == '__union__':
+            if c2.type == '__union__':
+                if ((self._is_different_schema(c.left, c2.right) and self._is_different_schema(c.right, c2.left))
+                    and (self._is_different_schema(c.left, c2.left) and self._is_different_schema(c.right, c2.right))):
+                    return True
+                else:
+                    return False
+            else:
+                if (self._is_different_schema(c.left, c2) and self._is_different_schema(c.right, c2)):
+                    return True
+                else:
+                    return False
+        elif c2.type == '__union__':
+            if (self._is_different_schema(c2.left, c) and self._is_different_schema(c2.right, c)):
+                return True
+            else:
+                return False
+        elif c.type != c2.type:
+            return True
+        return False
+
     def _intersect_enum_and_scalar(self, enum, scalar):
         r = []
         for e in enum:
@@ -239,6 +306,8 @@ class TypeCalcurator(_SubNormalizer):
                 pass
             else:
                 r.append(r)
+        if not r:
+            return NeverSchema()
         return EnumSchema(r, enum.options)
 
     def _dereference(self, o):
@@ -272,6 +341,10 @@ class TypeCalcurator(_SubNormalizer):
         return False
 
 class NeverChecker(_SubNormalizer):
+    def __init__(self, module, safe=False):
+        _SubNormalizer.__init__(self, module)
+        self.safe = safe
+
     def _visit_scalar(self, node):
         if node.type == 'never':
             return [['never']]
@@ -285,7 +358,9 @@ class NeverChecker(_SubNormalizer):
                     paths.append('$.' + '.'.join(p[:-1]) + ':' + p[-1])
                 else:
                     paths.append(p[0])
-            raise Exception(ro.i18n.get(u'Type representation is never: $typedef', typedef='\n'.join(paths)))
+            if not self.safe:
+                raise Exception(ro.i18n.get(u'Type representation is never: $typedef', typedef='\n'.join(paths)))
+        return r
 
     def _visit_option(self, node):
         return None
@@ -328,6 +403,19 @@ class NeverChecker(_SubNormalizer):
         assert False, TreeDumper().visit(node)
 
     def _visit_union(self, node):
+        # タイミングの関係上、ノーマライズ後のユニオンの排他性チェックはここで
+        from operator import truth
+        tc = TypeCalcurator(self.module)
+        o = node.left&node.right
+        c = tc.visit(o)
+        is_never = truth(c.accept(self))
+        if c.type in ('integer', 'number') and (node.left.type in ('integer', 'number') or node.right.type in ('integer', 'number')):
+            is_never = True
+        if is_never:
+            pass
+        else:
+            throw_caty_exception('CompileError', ro.i18n.get(u'types are not exclusive: $type1, $type2', type1=module.make_dumper().visit(node.left), type2=module.make_dumper().visit(node.right)))
+
         l = node.left.accept(self)
         r = node.right.accept(self)
         if l and r:

@@ -9,6 +9,7 @@ from caty.jsontools.path import build_query
 from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly
 from caty.jsontools import jstypes
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, ContinuationSignal, Internal, scriptwrapper
+from caty.core.exception import throw_caty_exception
 from caty.core.script.node import *
 from caty.core.exception import *
 import caty
@@ -70,6 +71,9 @@ class BaseInterpreter(object):
 
     def visit_start(self, node):
         raise NotImplementedError(u'{0}#visit_start'.format(self.__class__.__name__))
+
+    def visit_case(self, node):
+        raise NotImplementedError(u'{0}#visit_case'.format(self.__class__.__name__))
 
 class CommandExecutor(BaseInterpreter):
     def __init__(self, cmd, app, facility_set):
@@ -352,6 +356,27 @@ class CommandExecutor(BaseInterpreter):
         while not worker.isStarted and time.time() - t < 2:
             pass
         return self.input
+
+
+    def visit_case(self, node):
+        default = None
+        for c in node.cases:
+            if c.type is None:
+                default = c
+            else:
+                try:
+                    c.type.validate(self.input)
+                except:
+                    pass
+                else:
+                    return c.accept(self)
+        if c is None:
+            throw_caty_exception(
+                u'TypeError',
+                node.scalar_tag_map.get(self.input, [type(self.input)])[0]
+            )
+        else:
+            return default.accept(self)
 
     @property
     def in_schema(self):

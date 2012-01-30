@@ -66,9 +66,9 @@ class TypeVarApplier(SchemaBuilder):
                 ta = zip(node.type_params, node.type_args)
                 for param, type in ta:
                     a = type.accept(self)
-                    self.type_args[param.name] = a
+                    self.type_args[param.var_name] = a
                     v =  TreeDumper(True).visit(a)
-                    arg_memo.append((param.name, v))
+                    arg_memo.append((param.var_name, v))
                 key = tuple(arg_memo)
                 if key in self.history:
                     return self.history[key]

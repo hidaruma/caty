@@ -23,6 +23,8 @@ from caty.core.script.proxy import VarStoreProxy as VarStore
 from caty.core.script.proxy import VarRefProxy as VarRef
 from caty.core.script.proxy import ArgRefProxy as ArgRef
 from caty.core.script.proxy import FragmentProxy as PipelineFragment
+from caty.core.script.proxy import TypeCaseProxy as TypeCase
+from caty.core.script.proxy import BranchProxy as Branch
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
@@ -182,6 +184,7 @@ class ScriptParser(Parser):
         parsers = map(try_, [
                     self.functor,
                     self.tag,
+                    self.type_case,
                     self.cond,
                     self.object, 
                     self.diagram_order, 
@@ -393,6 +396,31 @@ class ScriptParser(Parser):
         n = xjson.string(seq)
         return CommandNode(n, v)
 
+    def type_case(self, seq):
+        seq.parse('case')
+        opts = self.options(seq)
+        seq.parse('{')
+        name_set = set()
+        cases = seq.parse(split(lambda s:self.type_case_branch(s, name_set), self.comma, allow_last_delim=True))
+        seq.parse('}')
+        t = TypeCase(opts)
+        for c in anything(cases):
+            t.add_case(c)
+        return t
+
+    def type_case_branch(self, seq, name_set):
+        from caty.core.casm.language.schemaparser import typedef
+        t = choice(u'*', typedef)(seq)
+        if t in name_set:
+            raise ParseFailed(seq, self.type_case_branch, t)
+        name_set.add(t)
+        S(u'=>')(seq)
+        try:
+            v = self.make_pipeline(seq)
+        except NothingTodo:
+            raise ParseFailed(seq, self.case)
+        return Branch(t, v)
+
     def cond(self, seq):
         seq.parse('when')
         opts = self.options(seq)
@@ -446,6 +474,7 @@ class ScriptParser(Parser):
         parsers = map(try_, [
                     self.functor,
                     self.tag,
+                    self.type_case,
                     self.cond,
                     self.object, 
                     self.diagram_order, 

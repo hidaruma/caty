@@ -111,10 +111,12 @@ class AbstractCommandCompiler(FakeFacility):
     def clone(self):
         return self.__class__(self._facilities.clone(), self.module)
 
-    def build(self, string, opts=None, args=None, transaction=COMMIT, type_check=False):
+    def build(self, string, opts=None, args=None, transaction=COMMIT, type_check=False, module=None):
         u"""コマンド文字列とコマンドライン引数リストを受け取り、コマンドオブジェクトを構築する。
         """
         proxy = None
+        if module is None:
+            module = self.module._app._schema_module
         if self.cache_enabled:
             key = string
             proxy = self._cache.get(key)
@@ -122,6 +124,7 @@ class AbstractCommandCompiler(FakeFacility):
             proxy = self._compile(string)
             if self.cache_enabled:
                 self._cache.set(key, proxy)
+            proxy.set_module(module)
         return self._instantiate(proxy, opts, args, transaction, type_check)
 
     def _instantiate(self, proxy, opts=None, args=None, transaction=COMMIT, type_check=False):

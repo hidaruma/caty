@@ -11,6 +11,7 @@ from caty.core.casm.cursor import (SchemaBuilder,
                                    ProfileBuilder, 
                                    TypeVarApplier, 
                                    TypeNormalizer, 
+                                   TreeDumper,
                                    DependencyAnalizer)
 from caty.core.casm.plugin import PluginMap
 from caty.jsontools.path.validator import to_decl_style
@@ -351,34 +352,52 @@ class Module(object):
         for m in self.sub_modules.values():
             m.compiled = True
 
+    def make_schema_builder(self):
+        return SchemaBuilder(self)
+
+    def make_reference_resolver(self):
+        return ReferenceResolver(self)
+
+    def make_typevar_applier(self):
+        return TypeVarApplier(self)
+
+    def make_cycle_detecter(self):
+        return CycleDetecter(self)
+
+    def make_type_normalizer(self):
+        return TypeNormalizer(self)
+
+    def make_dumper(self):
+        return TreeDumper()
+
     def _build_schema_tree(self):
         self.saved_st.update(self.ast_ns)
         if not self.compiled:
-            self._loop_exec(self.ast_ns, SchemaBuilder(self), lambda k, v:self.add_schema(v))
+            self._loop_exec(self.ast_ns, self.make_schema_builder(), lambda k, v:self.add_schema(v))
         for m in self.sub_modules.values():
             m._build_schema_tree()
 
     def _resolve_reference(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, ReferenceResolver(self), lambda k, v:self.schema_ns.__setitem__(k, v))
+            self._loop_exec(self.schema_ns, self.make_reference_resolver(), lambda k, v:self.schema_ns.__setitem__(k, v))
         for m in self.sub_modules.values():
             m._resolve_reference()
 
     def _apply_type_var(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, TypeVarApplier(self), lambda k, v:self.schema_ns.__setitem__(k, v))
+            self._loop_exec(self.schema_ns, self.make_typevar_applier(), lambda k, v:self.schema_ns.__setitem__(k, v))
         for m in self.sub_modules.values():
             m._apply_type_var()
 
     def _detect_cycle(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, CycleDetecter(self), lambda k, v: v)
+            self._loop_exec(self.schema_ns, self.make_cycle_detecter(), lambda k, v: v)
         for m in self.sub_modules.values():
             m._detect_cycle()
 
     def _normalize(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, TypeNormalizer(self), lambda k, v:self.schema_ns.__setitem__(k, v))
+            self._loop_exec(self.schema_ns, self.make_type_normalizer(), lambda k, v:self.schema_ns.__setitem__(k, v))
         for m in self.sub_modules.values():
             m._normalize()
 
