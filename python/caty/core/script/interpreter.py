@@ -373,7 +373,7 @@ class CommandExecutor(BaseInterpreter):
         if default is None:
             throw_caty_exception(
                 u'TypeError',
-                node.scalar_tag_map.get(self.input, [type(self.input)])[0]
+                node.scalar_tag_map.get(type(self.input), [str(type(self.input))])[0]
             )
         else:
             return default.accept(self)
