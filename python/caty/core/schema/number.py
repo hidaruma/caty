@@ -38,6 +38,8 @@ class NumberSchema(ScalarSchema):
             maximum = self.maximum if another.maximum is None else another.maximum
         else:
             maximum = min(self.maximum, another.maximum)
+        if minimum > maximum and maximum is not None:
+            return NeverSchema()
         is_integer = self.is_integer or another.is_integer
         opts = {
             'minimum': minimum,
