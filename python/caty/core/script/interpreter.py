@@ -361,13 +361,15 @@ class CommandExecutor(BaseInterpreter):
     def visit_case(self, node):
         default = None
         if node.path:
-            self.input = node.path.select(self.input).next()
+            case_in = node.path.select(self.input).next()
+        else:
+            case_in = self.input
         for c in node.cases:
             if c.type is None:
                 default = c
             else:
                 try:
-                    c.type.validate(self.input)
+                    c.type.validate(case_in)
                 except:
                     pass
                 else:
@@ -377,7 +379,7 @@ class CommandExecutor(BaseInterpreter):
         if default is None:
             throw_caty_exception(
                 u'TypeError',
-                node.scalar_tag_map.get(type(self.input), [str(type(self.input))])[0]
+                node.scalar_tag_map.get(type(case_in), [str(type(case_in))])[0]
             )
         else:
             return default.accept(self)
