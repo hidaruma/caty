@@ -124,7 +124,8 @@ class AbstractCommandCompiler(FakeFacility):
             proxy = self._compile(string)
             if self.cache_enabled:
                 self._cache.set(key, proxy)
-            proxy.set_module(module)
+            if proxy:
+                proxy.set_module(module)
         return self._instantiate(proxy, opts, args, transaction, type_check)
 
     def _instantiate(self, proxy, opts=None, args=None, transaction=COMMIT, type_check=False):
