@@ -360,6 +360,8 @@ class CommandExecutor(BaseInterpreter):
 
     def visit_case(self, node):
         default = None
+        if node.path:
+            self.input = node.path.select(self.input).next()
         for c in node.cases:
             if c.type is None:
                 default = c
@@ -369,6 +371,8 @@ class CommandExecutor(BaseInterpreter):
                 except:
                     pass
                 else:
+                    if node.via:
+                        self.input = node.via.accept(self)
                     return c.accept(self)
         if default is None:
             throw_caty_exception(

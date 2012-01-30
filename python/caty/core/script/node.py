@@ -293,10 +293,12 @@ class TypeCase(Syntax):
                         refers python:caty.core.script.node.TypeCase;
     """
 
-    def __init__(self):
+    def __init__(self, path, via):
         self.__cases = []
         self.__scalar_tag_map = _scalar_tag_map
         Syntax.__init__(self)
+        self.path= path
+        self.via = via
     
     @property
     def cases(self):
@@ -314,11 +316,15 @@ class TypeCase(Syntax):
         self.__cases.append(case)
 
     def set_facility(self, facilities):
+        if self.via:
+            self.via.set_facility(facilities)
         for v in self.__cases:
             v.set_facility(facilities)
 
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)
+        if self.via:
+            self.via.set_var_storage(storage)
         for v in self.__cases:
             v.set_var_storage(storage)
 

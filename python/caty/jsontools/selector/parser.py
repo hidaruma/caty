@@ -19,7 +19,7 @@ class JSONPathSelectorParser(Parser):
                     self.namewildcard, 
                     self.itemwildcard, 
                     try_(self.oldtag),
-                    ], self.comma)(seq)
+                    ], self.dot)(seq)
         if not seq.eof:
             raise ParseFailed(seq, self)
         return o
@@ -28,7 +28,7 @@ class JSONPathSelectorParser(Parser):
         stm.empty_when_error = self.empty_when_error
         return stm
 
-    def comma(self, seq):
+    def dot(self, seq):
         seq.parse('.')
         def _(a, b):
             self.apply_option(a)

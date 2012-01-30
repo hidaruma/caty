@@ -128,20 +128,23 @@ class DispatchProxy(Proxy):
             c.set_module(module)
 
 class TypeCaseProxy(Proxy):
-    def __init__(self, opts):
+    def __init__(self, path, via):
         self.cases = []
-        self.opts = opts
+        self.path = path
+        self.via = via
 
     def add_case(self, case):
         self.cases.append(case)
 
     def instantiate(self, builder):
-        t = TypeCase()
+        t = TypeCase(self.path, self.via)
         for c in self.cases:
             t.add_case(c.instantiate(builder))
         return t
 
     def set_module(self, module):
+        if self.via:
+            self.via.set_module(module)
         for c in self.cases:
             c.set_module(module)
         import operator

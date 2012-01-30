@@ -31,6 +31,7 @@ import caty.jsontools.xjson as xjson
 from caty.core.exception import SubCatyException
 from caty.core.command.param import *
 from caty.core.language.util import fragment_name, identifier_token_a, name_token
+from caty.jsontools.selector.parser import JSONPathSelectorParser
 
 class NothingTodo(Exception):
     u"""コメントのみの入力など、何もしないときのシグナル
@@ -397,13 +398,19 @@ class ScriptParser(Parser):
         return CommandNode(n, v)
 
     def type_case(self, seq):
-        seq.parse('case')
-        opts = self.options(seq)
+        seq.parse(keyword('case'))
+        path = option(SelectorParserInScript(False))(seq)
+        if option(keyword('via'))(seq):
+            seq.parse('{')
+            via = self.make_pipeline(seq)
+            seq.parse('}')
+        else:
+            via = None
         seq.parse('{')
         name_set = set()
         cases = seq.parse(split(lambda s:self.type_case_branch(s, name_set), self.comma, allow_last_delim=True))
         seq.parse('}')
-        t = TypeCase(opts)
+        t = TypeCase(path, via)
         for c in anything(cases):
             t.add_case(c)
         return t
@@ -528,4 +535,19 @@ def _remove_comment(v):
     return _SINGLE.sub(u' ', _MULTI.sub(u' ', v))
 
 class ContinuedComment(Exception): pass
+
+class SelectorParserInScript(JSONPathSelectorParser):
+    def __call__(self, seq):
+        o = chainl([self.all, 
+                    self.tag,
+                    self.exp_tag,
+                    self.untagged,
+                    self.length,
+                    self.name, 
+                    self.index, 
+                    self.namewildcard, 
+                    self.itemwildcard, 
+                    try_(self.oldtag),
+                    ], self.dot)(seq)
+        return o
 
