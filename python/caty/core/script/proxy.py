@@ -137,7 +137,11 @@ class TypeCaseProxy(Proxy):
         self.cases.append(case)
 
     def instantiate(self, builder):
-        t = TypeCase(self.path, self.via)
+        if self.via:
+            via = self.via.instantiate(builder)
+        else:
+            via = None
+        t = TypeCase(self.path, via)
         for c in self.cases:
             t.add_case(c.instantiate(builder))
         return t
