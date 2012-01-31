@@ -88,7 +88,7 @@ def term(seq):
         return ScalarNode('never', {}, [])
 
     doc = option(docstring)(seq)
-    s = seq.parse([_pseudo_tag, _type_name_tag, _tag, enum, _term, bag, object_, array, scalar])
+    s = seq.parse(map(try_, [_pseudo_tag, _type_name_tag, _tag, _never]) + [enum, _term, bag, object_, array, scalar])
     o = seq.parse(option('?'))
     if doc:
         s.docstring = doc
@@ -208,6 +208,7 @@ def repeatable_type(seq):
     return [s, r]
 
 def maybe_tagged_value(seq):
+    @try_
     def _tagged(s):
         _ = s.parse('@')
         t = s.parse([name, '*'])

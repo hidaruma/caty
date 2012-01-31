@@ -549,7 +549,7 @@ type MultipleSelectControl  = @multipleSelect (AbstractControlObj & {
 **これ、エラーするはずが、バグだ。**
 
 <<{
-type FileUploadControl = @ (AbstractControlObj & {
+type FileUploadControl = @file (AbstractControlObj & {
 
   "value" : undefined,
   "options" : undefined,

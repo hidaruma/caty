@@ -79,10 +79,10 @@ class ObjectSchema(SchemaBase, Object):
         wild = self.wildcard & another.wildcard
         newobj.wildcard = wild
         ps1 = self.pseudoTag
-        ps2 = self.pseudoTag
+        ps2 = another.pseudoTag
         if ps1.defined and ps2.defined:
             if ps1.exclusive(ps2):
-                raise JsonSchemaError(dict(msg=u'Unsupported operand types for $op: $type1, $type2', op='&', type1='@?(%s)object' % str(ps1), type2='@?(%s)object' % str(ps2)))
+                return NeverSchema()
             newobj.pseudoTag = ps1
         elif ps.defined and not ps2.defined:
             newobj.pseudoTag = ps1
