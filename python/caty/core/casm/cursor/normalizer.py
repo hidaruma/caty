@@ -17,8 +17,8 @@ class TypeNormalizer(TreeCursor):
         normalized = tc.visit(ol.visit(ue.visit(node)))
         nc = NeverChecker(self.module)
         nc.visit(normalized)
-        vc = VariableChecker(self.module)
-        vc.visit(normalized)
+        #vc = VariableChecker(self.module)
+        #vc.visit(normalized)
         return normalized
 
 class _SubNormalizer(SchemaBuilder):

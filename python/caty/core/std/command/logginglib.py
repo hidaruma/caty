@@ -4,7 +4,7 @@ from caty.core.command import Builtin
 
 class _Log(Builtin):
     def setup(self, opts):
-        self.__cout = opts.cout
+        self.__cout = opts['cout']
 
     def execute(self, string):
         self._write(string)
