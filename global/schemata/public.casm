@@ -1,5 +1,19 @@
 module public; // -*- coding: utf-8 -*-
 
+/** 実行環境をダンプする */
+command dump-closure {* : any?} [any* args] 
+:: any -> {"opts":object, "arg0":any, "args":array, "input": any?, "env": object}
+{
+ {
+   "opts" : %_OPTS,
+   "arg0"  : %_ARGV | item 0,
+   "args"  : %_ARGV | list:slice 1,
+   "input"  : pass, 
+   "env" : env,
+ }
+};
+
+
 /** パラメータをダンプする */
 command params {* : any?} [any* args] :: void -> {"Opts (_OPTS)":object, "Argv (_ARGV)":array, "Arg0":any, "Args":array}
 {

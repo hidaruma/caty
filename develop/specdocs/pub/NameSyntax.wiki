@@ -6,8 +6,16 @@
 
 Name ::= NameStartChar (NameChar)*
 
+SafeName ::= SafeNameStartChar (NameChar)*
+
 /* 英字、アンダスコア、国際化名前開始文字 */
 NameStartChar ::= [A-Z] | "_" | [a-z] | ExtNameStartChar
+
+/* アンダースコアは除く 
+ * アンダースコアはシステムで使う名前のときがある。
+ */
+SafeNameStartChar ::= [A-Z] | [a-z] | ExtNameStartChar
+
 
 /* 数字とハイフン、国際化名前文字を追加 */
 NameChar ::= NameStartChar | "-" | [0-9] | ExtNameChar
@@ -29,6 +37,8 @@ ExtNameChar ::= #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
 * [[>http://www.w3.org/TR/2008/REC-xml-20081126/#NT-Name]]
 * [[>http://d.hatena.ne.jp/m-hiyama/20110104/1294128925]]
 
+
+ピリオド、ドル記号、アットマークは名前に使えないことに注意せよ。
 
 Windows Pythonでは、[#x10000-#xEFFFF] が使えない。
 
