@@ -390,5 +390,5 @@ class TypeParam(object):
         raise
 
     def __repr__(self):
-        return self.name + ":" + str(self.kind)
+        return self.var_name + ":" + str(self.kind)
 
