@@ -27,7 +27,7 @@ command write {@[default(false)]"encode-json": boolean?} [string] :: any -> void
  */
 command parse :: string -> any
     reads env
-    refers python:caty.core.std.command.jsonlib.Parse;
+    refers python:caty.core.std.command.xjsonlib.Parse;
 
 /**
  * XJSON->JSONの変換
