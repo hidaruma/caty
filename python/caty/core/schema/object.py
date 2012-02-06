@@ -112,6 +112,8 @@ class ObjectSchema(SchemaBase, Object):
         for k, v in self.items():
             if k not in newschema_obj:
                 newschema_obj[k] = v
+            elif newschema_obj[k].type == 'undefined':
+                newschema_obj[k] = v
 
         newobj = ObjectSchema()
         newobj.schema_obj = newschema_obj
