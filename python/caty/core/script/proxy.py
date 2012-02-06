@@ -152,13 +152,18 @@ class TypeCaseProxy(Proxy):
         for c in self.cases:
             c.set_module(module)
         import operator
+        from caty.core.casm.language.schemaparser import Annotations
+        from caty.core.schema.base import NamedSchema
         types = [c.type for c in self.cases if c.typedef != u'*']
         for t1, t2 in [(t1, t2) for t1 in types for t2 in types]:
             if t1 != t2:
-                x = t1 & t2
+                x = NamedSchema(u'', [], t1 & t2, module)
                 tn = module.make_type_normalizer()
-                n = tn.visit(x)
-                if n.type != 'never':
+                try:
+                    n = x.accept(tn)
+                except:
+                    pass
+                else:
                     throw_caty_exception('CompileError', module._app.i18n.get(u'types are not exclusive: $type1, $type2', type1=module.make_dumper().visit(t1), type2=module.make_dumper().visit(t2)))
 
 class BranchProxy(Proxy):

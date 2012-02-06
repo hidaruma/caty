@@ -136,8 +136,12 @@ class ArraySchema(SchemaBase, Array):
     def intersect(self, another):
         al = another.schema_list
         r = []
-        for a, b in zip(self.schema_list, al):
+        n = 0
+        while n < len(self.schema_list) and n < len(another.schema_list):
+            a = self.__get_nth(n, self)
+            b = self.__get_nth(n, another)
             r.append(a & b)
+            n += 1
         o = {}
         if self.maxItems and another.maxItems:
             o['maxItems'] = min(self.maxItems, another.maxItems)
@@ -147,13 +151,20 @@ class ArraySchema(SchemaBase, Array):
             o['minItems'] = max(self.minItems, another.minItems)
         else:
             o['minItems'] = self.minItems if self.minItems != None else another.minItems
-        if self.optional or another.optional:
-            o['optional'] = True
         if self.repeat and another.repeat:
             o['repeat'] = True
         n = ArraySchema(r, o)
         return n
        
+    def __get_nth(self, n, o):
+        if n >= len(o.schema_list):
+            if o.repeat:
+                return o.schema_list[-1]
+            else:
+                return NeverSchema()
+        else:
+            return o.schema_list[n]
+
     @property
     def type(self):
         return 'array'
