@@ -24,6 +24,7 @@ from caty.core.script.proxy import VarRefProxy as VarRef
 from caty.core.script.proxy import ArgRefProxy as ArgRef
 from caty.core.script.proxy import FragmentProxy as PipelineFragment
 from caty.core.script.proxy import TypeCaseProxy as TypeCase
+from caty.core.script.proxy import TypeCondProxy as TypeCond
 from caty.core.script.proxy import BranchProxy as Branch
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
@@ -186,6 +187,7 @@ class ScriptParser(Parser):
                     self.functor,
                     self.tag,
                     self.type_case,
+                    self.type_cond,
                     self.cond,
                     self.object, 
                     self.diagram_order, 
@@ -415,6 +417,18 @@ class ScriptParser(Parser):
             t.add_case(c)
         return t
 
+    def type_cond(self, seq):
+        seq.parse(keyword('cond'))
+        path = option(SelectorParserInScript(False))(seq)
+        seq.parse('{')
+        name_set = set()
+        cases = seq.parse(split(lambda s:self.type_case_branch(s, name_set), self.comma, allow_last_delim=True))
+        seq.parse('}')
+        t = TypeCond(path)
+        for c in anything(cases):
+            t.add_case(c)
+        return t
+
     def type_case_branch(self, seq, name_set):
         from caty.core.casm.language.schemaparser import typedef
         t = choice(u'*', typedef)(seq)
@@ -482,6 +496,7 @@ class ScriptParser(Parser):
                     self.functor,
                     self.tag,
                     self.type_case,
+                    self.type_cond,
                     self.cond,
                     self.object, 
                     self.diagram_order, 

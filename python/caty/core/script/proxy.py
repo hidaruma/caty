@@ -166,6 +166,24 @@ class TypeCaseProxy(Proxy):
                 else:
                     throw_caty_exception('CompileError', module._app.i18n.get(u'types are not exclusive: $type1, $type2', type1=module.make_dumper().visit(t1), type2=module.make_dumper().visit(t2)))
 
+class TypeCondProxy(Proxy):
+    def __init__(self, path):
+        self.cases = []
+        self.path = path
+
+    def add_case(self, case):
+        self.cases.append(case)
+
+    def instantiate(self, builder):
+        t = TypeCase(self.path, None)
+        for c in self.cases:
+            t.add_case(c.instantiate(builder))
+        return t
+
+    def set_module(self, module):
+        for c in self.cases:
+            c.set_module(module)
+
 class BranchProxy(Proxy):
     def __init__(self, typedef, cmdproxy):
         self.typedef = typedef
