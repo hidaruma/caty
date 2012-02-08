@@ -76,6 +76,12 @@ type typeExpr = (
 
 );
 
+/** 内部型表現
+ * 型変数の名前が内部変数名になる以外は型表現と同じ
+ * 内部変数名は "$1", "$2", ... のような名前
+ */
+type internalTypeExpr = typeExpr;
+
 }>>
 
 == 基本型
@@ -106,7 +112,7 @@ type SingletonType = @_singleton scalar;
 /** 配列の項目 */
 type ArrayItem = @_arrayItem (AnnoDocMixin & {
  "type" : typeExpr,
- "name" : string?
+ "name" : string? // 項目名、ヒントに過ぎない
 });
 
 /** 配列型 */
@@ -123,7 +129,7 @@ type ArrayType = @_array (AnnoDocMixin & {
 /** オブジェクトのプロパティ */
 type ObjectProperty = @_objectProperty (AnnoDocMixin & {
  "type" : typeExpr,
- "name" : string,
+ "name" : string, // プロパティ名
 });
 
 
@@ -142,7 +148,7 @@ type ObjectType = @_object (AnnoDocMixin & {
 <<{
 /** タグ付き型 */
 type TaggedType = @_tagged (AnnoDocMixin & {
- "tag" : typeExpr,
+ "tag" : typeExpr, // stringの部分型
  "content" : typeExpr
 });
 
@@ -196,7 +202,7 @@ type UnionType = @_union (AnnoDocMixin & {
 === インターセクション型
 
 <<{
-type IntersectionType = @_intersection [typeExpr*];
+type IntersectionType = @_intersection [typeExpr, typeExpr*];
 
 }>>
 
@@ -237,13 +243,41 @@ type AugmentedType = {
 
 <<{
 type GenericType = @_generic {
- "vars" : [string, string*],
- "type" : typeExpr,
+ "argNames" : [string, string*],
+ "argKinds" : [kindExpr, kindExpr*],
+ "type" : internalTypeExpr, // 束縛変数は内部変数に書き換えられている
 };
 
 type AppliedType = @_applied {
- "type" : GenericType,
+ "type" : (GenericType | string),
  "arguments" : [typeExpr, typeExpr*]
+};
+
+type Fixpoint = @_fixpoint {
+ "argNames" : [string, string*],
+ "argKinds" : [kindExpr, kindExpr*],
+ "type" : internalTypeExpr, // 束縛変数は内部変数に書き換えられ、自分を指す名前 $this が導入される
+};
+
+}>>
+
+== カインド
+
+<<{
+/** カインド表現 */
+type kindExpr = (TypeRange | IntersectionKind | ForallKind);
+
+/** 型レンジ */
+type TypeRange = @_Range [typeExpr min, typeExpr max];
+
+/** インターセクションカインド */
+type IntersectionKind = @_IntersectionKind [kindExpr, kindExpr*];
+
+/** forallカインド */
+type ForallKind = @_Forall {
+ "argNames" : [string, string*],
+ "argKinds" : [kindExpr, kindExpr*],
+ "type" : internalTypeExpr, // 束縛変数は内部変数に書き換えられている
 };
 
 }>>
@@ -258,8 +292,6 @@ type PseudTaggedType = deferred;
 プロパティ名 ::= 文字列 | 名前
 擬似タグ :=  '@?' '(' JSONパス ':' 型 ')' 
 */
-
-// End of Module
 
 
 }>>
