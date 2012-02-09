@@ -1,0 +1,335 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= ASymmetric Type Unification 
+
+
+<<{
+/** ASymmetric Type Unification 
+ */
+module astu; 
+
+}>>
+
+== 制限と前提
+
+# インターセクション（&）とマージ（++）は前もって計算されているとする。
+# オプション型 A? は (A | undefined) と展開して表現する。
+# 特殊な型 never, any は入れてない。
+# タグ付き型のタグは明示的タグだとする。暗黙タグの正規化（消去）は済んでいるとする。
+# スキーマ属性は考えない。
+# integer型は、numberにスキーマ属性が付いたものと解釈するので、考えない。
+# 配列のクリーネスター、オブジェクトのプロパティ名ワイルドカードは考えない。
+# アノテーションと文書コメントは考えない。
+# タグ名ワイルドカードは考えない（リテラルタグのみ）。
+# 再帰的に定義された型は考えない（サイクルの処理が必要）。
+# バッグ型は考えない（等号が異なる）。
+# 型変数は許すが、ユニオン型の選択肢には出現できない。
+
+<<{
+
+/** 型を表現するデータ */
+type TypeExpr = (
+ BasicType   |
+ ProductType |
+ UnionType   |
+ TypeVar     |
+);
+
+}>>
+
+== 基本型 
+
+undefined型、null型、boolean型、nunmber型、string型、binary型と、すべてのスカラーシングルトン型（リテラル）。
+nullは型名とリテラル表記が一致するので、型名として処理して、シングルトン型からは除く。
+
+基本型は、次のデータで表現される。
+
+# "undefined"
+# "null"
+# "boolean"
+# "number"
+# "string"
+# "binary"
+# @_boolean true, @_boolean false
+# @_number n （nは任意の数）
+# @_string s （sは任意の文字列）
+
+スカラー基本型を表す名前以外の名前（の文字列）はユーザー定義データ型の名前とみなすが、
+ここでは扱わない。
+
+<<{
+type BuiltinType = (
+ "undefined"|
+ "null"     |
+ "boolean"  |
+ "number"   |
+ "string"   |
+ "binary"   |
+);
+
+type BooleanSingletonType = @_boolean boolean;
+type NumberSingletonType  = @_number  number;
+type StringSingletonType  = @_string  string;
+
+type BasicType = (
+  BuiltinType | 
+  BooleanSingletonType |
+  NumberSingletonType  |
+  StringSingletonType  |
+);
+
+}>>
+
+== 積・複合型 
+
+集合の直積（の変種）により構成された型。配列型、オブジェクト型、タグ付き型。
+
+積・複合型は、次のデータで表現される。
+
+<<{
+/** 配列型 */
+type ArrayType = @_array [TypeExpr*];
+
+/** オブジェクト型 */
+type ObjectType = @_object {* : TypeExpr?};
+
+/** タグ付き型 */
+type TaggedType = @_tagged (@*! any);
+
+/** 直積ベースの型 */
+type ProductType = (
+ ArrayType  |
+ ObjectType |
+ TaggedType |
+);
+
+/** ユニオンを構成する要素的な型 */
+type ElementalType = (
+  BasicType   |
+  ProductType |
+);
+
+}>>
+
+== 和・複合型 
+
+集合の直和により構成された型。排他的ユニオン型。
+
+和・複合型は、次のデータで表現される。
+
+<<{
+
+/** ユニオン型 */
+type UnionType = @_union [ElementalType, ElementalType, ElementalType*];
+
+}>>
+
+== 型変数
+
+<<{
+type TypeVar = @_var string;
+
+}>>
+
+== インスタンスの型への埋め込み
+
+<<{
+
+command to-type :: any? -> TypeExpr
+{
+ when {
+ /* 基本型 */
+  undefined => "undefined",
+  null      => "null",
+  boolean   => @_boolean pass,
+  number    => @_number pass,
+  string    => @_string pass,
+ /* 直積複合型 */
+  array     => each { call astu:to-type } | @_array pass,
+  object    => each --obj { call astu:to-type } | @_object pass,
+
+ /* その他はタグ付き型 */
+  *         ==> [tag, untagged | call astu:to-type] | tagged | @_tagged pass,
+ }
+};
+
+}>>
+
+== 単一化
+
+* unify
+* unify-left-elemental
+* unify-both-elemental
+
+<<{
+
+type TypePair = [TypeExpr, TypeExpr];
+
+type Result = @True [TypePair*] | @False null | @NG any;
+
+
+command unify :: [TypeExpr left, TypeExpr right] -> Result
+{
+ [nth 1 > left, nth 2 > right];
+
+ %left |
+ when {
+  _union => 
+    each {
+      [pass, %right] | dump --prefix="unify (1)" | call astu:unify-left-elemental
+    }  | cpl:gather,
+
+  * ==> [pass, %right] | dump --prefix="unify (2)" | call astu:unify-left-elemental,
+ }
+};
+
+command unify-left-elemental :: [TypeExpr left, TypeExpr right] -> Result
+{
+ [nth 1 > left, nth 2 > right];
+
+ %right |
+ when {
+  _union =>
+    each {
+     [%left, pass] | call astu:unify-both-elemental
+    } | cpl:choose,
+
+  * ==> [%left, pass] | call astu:unify-both-elemental,
+ }
+
+};
+
+command unify-both-elemental :: [TypeExpr left, TypeExpr right] -> Result
+{
+ [nth 1 > left, nth 2 > right];
+
+ %left |
+ when {
+  _array  => pass > left-items;
+     %rigth |
+     when {
+      _array => [%left-items, pass] | call astu:unify-array-items,
+      * => @False null,
+     },
+  _object  => pass > left-properties;
+     %rigth |
+     when {
+      _object => [%left-properties, pass] | call astu:unify-object-properties,
+      * => @False null,
+     },
+   _tagged => pass > left-tagged;
+     %rigth |
+     when {
+      _tagged => [%left-tagged, pass] | call astu:unify-tagged,
+      * => @False null,
+     },
+
+   // 複合型以外の型、または型変数
+    *    ==> [pass, %right] | call astu:unify-var-or-basic
+ }
+};
+
+
+}>>
+
+
+== 積・複合型の単一化
+
+* unify-array-items
+* unify-object-properties
+* unify-tagged
+
+<<{
+
+command unify-array-items :: [[TypeExpr*] left, [TypeExpr*] right] -> Result
+{
+ [nth 1 > left, nth 2 > right];
+
+  // 最初に長さを調べる
+  [%left | list:length, %right | list:length] | eq |
+  when {
+   Diff => @False null, // 失敗
+   Same => [%left, %right] | list:zip |
+           // 配列の項目ごとに単一化
+           each { call astu:unify } | cpl:gather,
+  }
+};
+
+command unify-object-properties :: [{* : TypeExpr?} left, {* : TypeExpr?} right] -> Result
+{
+ [nth 1 > left, nth 2 > right];
+
+  // 最初にプロパティ名セットを調べる
+  [%left | properties | list:sort, %right | properties | list:sort] | eq |
+  when {
+   Diff => @False null, // 失敗
+   Same => [
+            %left  | each {pass}, 
+            %right | each {pass}
+           ] | list:zip | dump --prefix="unify-object-properties" |
+           // オブジェクトのプロパティごとに単一化
+           each { call astu:unify } | cpl:gather,
+  }
+};
+
+
+command unify-tagged :: [(@*! TypeExpr) left, (@*! TypeExpr) right] -> Result
+{
+ [nth 1 > left, nth 2 > right];
+
+ // 書いてない
+
+ @NG null
+
+};
+
+
+}>>
+
+== 型変数と基本的な型の単一化
+
+* unify-var-or-basic
+
+<<{
+command unify-var-or-basic :: [TypeExpr left, TypeExpr right] -> Result
+{
+  dump --prefix="unify-var-or-basic" |
+  cond {
+   [@_var string,          any] => @True [[nth 1, nth 2]],
+   [any,          @_var string] => @True [[nth 1, nth 2]],
+
+   // never型, any型は出現しない
+   
+   ["undefined",   "undefined"] => @True [],
+   ["null",        "null"]      => @True [],
+   ["boolean",     "boolean"]   => @True [],
+   ["nummer",      "number" ]   => @True [],
+   ["string",      "string" ]   => @True [],
+   ["binary",      "binary" ]   => @True [],
+
+   [@_boolean boolean, "boolean"] => @True [],
+
+
+   [@_number number, "number"]  => @True [],
+   [@_number number, @_number number]  => compare-values,
+
+
+   [@_string string, "string"]  => @True [],
+   [@_string string, @_string string]  => compare-values,
+  
+   * => @False null,
+ }
+};
+
+command compare-values :: [any, any] -> Result
+{
+  [untagged, untagged] | eq |
+  when {
+   Same => @Ture [],
+   Diff => @False null,
+  }
+};
+
+
+}>>
+
