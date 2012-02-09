@@ -298,9 +298,12 @@ class CommandExecutor(BaseInterpreter):
     def visit_each(self, node):
         node._prepare()
         if node.prop:
-            return self.__iter_obj(node)
+            return self.__iter_obj_as_array(node)
         else:
-            return self.__iter_array(node)
+            if isinstance(self.input, dict):
+                return self.__iter_obj(node)
+            else:
+                return self.__iter_array(node)
 
     def __iter_array(self, node):
         r = []
@@ -318,19 +321,31 @@ class CommandExecutor(BaseInterpreter):
             n+=1
         return r
 
-    def __iter_obj(self, node):
+    def __iter_obj_as_array(self, node):
         r = []
-        i = self.input.iteritems()
-        for v in i:
+        for k, v in self.input.iteritems():
             self.input = v
             try:
                 node.var_storage.new_scope()
-                node.var_storage.opts['_key'] = v[0]
-                node.var_storage.opts['_value'] = v[1]
-                r.append(node.cmd.accept(self))
+                node.var_storage.opts['_key'] = k
+                node.var_storage.opts['_value'] = v
+                r.append([k, node.cmd.accept(self)])
             finally:
                 node.var_storage.del_scope()
         return dict(r)
+
+    def __iter_obj(self, node):
+        r = []
+        for k, v in self.input.iteritems():
+            self.input = v
+            try:
+                node.var_storage.new_scope()
+                node.var_storage.opts['_key'] = k
+                node.var_storage.opts['_value'] = v
+                r.append(node.cmd.accept(self))
+            finally:
+                node.var_storage.del_scope()
+        return r
 
     def visit_time(self, node):
         s = time.time()

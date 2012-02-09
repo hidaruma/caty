@@ -348,7 +348,7 @@ class Branch(object):
 
 
 class Each(Syntax):
-    command_decl = u"""command each-functor-applied<T default any> {"seq":boolean?} :: [T*] -> [T*]
+    command_decl = u"""command each-functor-applied<T default any> {"seq":boolean?} :: object|[T*] -> [T*]|object
                                                        {"seq":boolean?, "obj": boolean} :: object -> object
                         refers python:caty.core.script.node.Each;"""
     def __init__(self, cmd, opts_ref):
