@@ -206,19 +206,19 @@ command unify-both-elemental :: [TypeExpr left, TypeExpr right] -> Result
  %left |
  when {
   _array  => pass > left-items;
-     %rigth |
+     %right |
      when {
       _array => [%left-items, pass] | call astu:unify-array-items,
       * => @False null,
      },
   _object  => pass > left-properties;
-     %rigth |
+     %right |
      when {
       _object => [%left-properties, pass] | call astu:unify-object-properties,
       * => @False null,
      },
    _tagged => pass > left-tagged;
-     %rigth |
+     %right |
      when {
       _tagged => [%left-tagged, pass] | call astu:unify-tagged,
       * => @False null,

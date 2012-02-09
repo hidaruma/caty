@@ -121,9 +121,9 @@ class VarRef(Syntax):
     def var_name(self):
         return self.__var_name
 
-@property
-def optional(self):
-        return self.__optional
+    @property
+    def optional(self):
+            return self.__optional
 
 class ArgRef(Syntax):
     command_decl = u"""command __arg-ref<T default any> :: void -> T
