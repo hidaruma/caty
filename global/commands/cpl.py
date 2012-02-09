@@ -69,3 +69,21 @@ class BOr(Command):
             if item == True:
                 return _result(self.tagged, u'True')
         return _result(self.tagged, u'False')
+
+class Gather(Command):
+    def execute(self, input):
+        content = []
+        for item in input:
+            if json.tag(item) == u'False':
+                return json.tagged(u'False', None)
+            else:
+                content[len(content):] = json.untagged(item)
+        return json.tagged(u'True', content)
+
+class Choose(Command):
+    def execute(self, input):
+        content = []
+        for item in input:
+            if json.tag(item) == u'True':
+                return item
+        return json.tagged(u'False', None)
