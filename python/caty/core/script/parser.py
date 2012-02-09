@@ -83,7 +83,9 @@ class ScriptParser(Parser):
         return identifier_token_a(seq)
 
     def functor(self, seq):
-        func = seq.parse([u'each', u'take', u'time', u'start'])
+        import string as str_mod
+        k = lambda s: keyword(s, str_mod.ascii_letters + '_.')
+        func = seq.parse([k(u'each'), k(u'take'), k(u'time'), k(u'start')])
         try:
             opts = self.options(seq)
             seq.parse(u'{')

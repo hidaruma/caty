@@ -305,13 +305,17 @@ class CommandExecutor(BaseInterpreter):
     def __iter_array(self, node):
         r = []
         i = self.input
+        n = 0
         for v in i:
             self.input = v
             try:
                 node.var_storage.new_scope()
+                node.var_storage.opts['_key'] = n
+                node.var_storage.opts['_value'] = i[n]
                 r.append(node.cmd.accept(self))
             finally:
                 node.var_storage.del_scope()
+            n+=1
         return r
 
     def __iter_obj(self, node):
@@ -321,6 +325,8 @@ class CommandExecutor(BaseInterpreter):
             self.input = v
             try:
                 node.var_storage.new_scope()
+                node.var_storage.opts['_key'] = v[0]
+                node.var_storage.opts['_value'] = v[1]
                 r.append(node.cmd.accept(self))
             finally:
                 node.var_storage.del_scope()

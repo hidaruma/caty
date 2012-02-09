@@ -48,13 +48,14 @@ class ProfileContainer(object):
     def determine_profile(self, opts_ref, args_ref):
         lasterror = None
         last_tb = None
+        err_msg = ''
         for p in self.profiles:
             err_msg = p.conform_opts_and_args(opts_ref, args_ref, self.name)
             if not err_msg:
                 return p.clone()
-            else:
-                raise CommandUsageError(err_msg, self)
-    
+        else:
+            raise CommandUsageError(err_msg, self)
+
     def get_command_class(self):
         return self.command_class
 

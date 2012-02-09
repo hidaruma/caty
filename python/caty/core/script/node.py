@@ -349,7 +349,7 @@ class Branch(object):
 
 class Each(Syntax):
     command_decl = u"""command each-functor-applied<T default any> {"seq":boolean?} :: [T*] -> [T*]
-                                                       {"seq":boolean?, "prop": boolean} :: object -> object
+                                                       {"seq":boolean?, "obj": boolean} :: object -> object
                         refers python:caty.core.script.node.Each;"""
     def __init__(self, cmd, opts_ref):
         Syntax.__init__(self, opts_ref)
@@ -366,7 +366,7 @@ class Each(Syntax):
         Command._prepare(self)
 
     def setup(self, opts, *ignore):
-        self.__prop = opts['prop'] if 'prop' in opts else None
+        self.__prop = opts['obj'] if 'obj' in opts else None
 
     @property
     def prop(self):
