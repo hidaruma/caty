@@ -12,11 +12,12 @@ module astu;
 
 型表現（type expression）をXJSONデータにレイフィケーションして、
 型表現の代理であるXJSONデータの操作により型単一化を行う。
-型単一化は非対称（不等式的）であり、単一化の結果は、
+ここで扱う型単一化は非対称（不等式的）であり、単一化の結果は、
 型（＝集合）の包含関係の真偽または成立条件となる。
 
 別な言い方をすると、非対称単一化により、
 型（＝集合）の連立不等式系の可解性が判断できる。
+（包含関係⊆を不等号とみなす。）
 
 実行例：
 
@@ -38,6 +39,7 @@ caty:SysSpecs>
 # インターセクション（&）とマージ（++）は前もって計算されているとする。
 # ユーザー定義型は考えない。前もって展開されているとする。
 # オプション型 A? は (A | undefined) と展開して表現する。ただし、any? は特別にアトミックな型と考える。
+  （any?は順序構造のトップ。anyはトップではなく余アトミックな要素。）
 # タグ付き型のタグは明示的タグだとする。暗黙タグの正規化（消去）は済んでいるとする。
 # スキーマ属性は考えない。
 # integer型は、numberにスキーマ属性が付いたものと解釈するので、考えない。
@@ -219,7 +221,7 @@ command print :: TypeExpr -> string
   string            => pass,
   @_boolean boolean => untagged | to-string,
   @_number number   => untagged | to-string,
-  @_string string   => untagged | json:pretty, // カンマ忘れてエラーにならない
+  @_string string   => untagged | json:pretty, // カンマ忘れてエラーにならない ^^;
 
   // 積・複合型
   @_array  array    => untagged | each {call astu:print} | text:join ", " | ["[", pass, "]"] | text:concat,
@@ -286,7 +288,7 @@ command unify-left-elemental :: [TypeExpr left, TypeExpr right] -> Result
   _union =>
     each {
      [%left, pass] | call astu:unify-both-elemental
-    } | cpl:choose,
+    } | dump --prefix="unify-left-elemental" | cpl:choose,
 
   * ==> [%left, pass] | call astu:unify-both-elemental,
  }
@@ -393,6 +395,7 @@ command unify-simple :: [TypeExpr left, TypeExpr right] -> Result
   cond {
    ["never",               any] => @True [],
    [any,                "any?"] => @True [],
+   ["any",              "any" ] => @True [],
    
    ["undefined",   "undefined"] => @True [],
    ["null",        "null"]      => @True [],
@@ -453,3 +456,36 @@ command do :: [TypeExpr left, TypeExpr right]  -> void
 };
 
 }>>
+
+== 単一化を利用したバリデーションと型等号
+
+<<{
+
+command validate :: [any, TypeExpr] -> Result
+{
+  [nth 1 | to-type , nth 2] | unify
+};
+
+command do-val :: [any, TypeExpr]  -> void
+{
+  validate | print-result | cout
+};
+
+/** teq = type equals */
+command teq :: [TypeExpr, TypeExpr] -> Result
+{
+  [nth 1 > left, nth 2 > right];
+ 
+ [
+   [%left,  %right] | unify, 
+   [%right, %left ] | unify
+ ] | cpl:gather
+};
+
+command do-teq :: [TypeExpr, TypeExpr]  -> void
+{
+  teq | print-result | cout
+};
+
+}>>
+
