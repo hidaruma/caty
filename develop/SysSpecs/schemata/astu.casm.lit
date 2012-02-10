@@ -16,7 +16,7 @@ module astu;
 型（＝集合）の包含関係の真偽または成立条件となる。
 
 別な言い方をすると、非対称単一化により、
-型（＝集合）の連列不等式系の可解性が判断できる。
+型（＝集合）の連立不等式系の可解性が判断できる。
 
 実行例：
 
@@ -391,8 +391,6 @@ command unify-simple :: [TypeExpr left, TypeExpr right] -> Result
 {
   dump --prefix="unify-simple" |
   cond {
-
-
    ["never",               any] => @True [],
    [any,                "any?"] => @True [],
    
@@ -411,11 +409,9 @@ command unify-simple :: [TypeExpr left, TypeExpr right] -> Result
    [@_boolean boolean, "boolean"] => @True [],
    [@_boolean boolean, "any"    ] => @True [],
 
-
    [@_number number, "number"]  => @True [],
    [@_number number, "any"   ]  => @True [],
    [@_number number, @_number number]  => compare-values,
-
 
    [@_string string, "string"]  => @True [],
    [@_string string, "any"   ]  => @True [],
@@ -433,7 +429,6 @@ command compare-values :: [any, any] -> Result
    Diff => @False null,
   }
 };
-
 
 }>>
 
