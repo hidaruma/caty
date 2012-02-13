@@ -44,6 +44,15 @@ class Selector(object):
     def run(self, obj):
         raise NotImplementedError()
 
+    def _to_str(self):
+        return u''
+
+    def to_str(self):
+        r = self._to_str()
+        if self.next:
+            r = '%s.%s' % (r, self.next.to_str())
+        return r
+
 class AllSelector(Selector):
     def run(self, obj):
         yield obj
@@ -57,6 +66,9 @@ class AllSelector(Selector):
                 return r
         else:
             return new
+
+    def _to_str(self):
+        return '$'
 
 class PropertySelector(Selector):
     def __init__(self, prop):
@@ -86,6 +98,9 @@ class PropertySelector(Selector):
         else:
             obj[self.property] = new
             return obj
+
+    def _to_str(self):
+        return self.property if ' ' not in self.property else '"%s"' % self.property
 
 class ItemSelector(Selector):
     def __init__(self, prop):
@@ -130,6 +145,9 @@ class ItemSelector(Selector):
                 else:
                     raise IndexError(self.property)
 
+    def _to_str(self):
+        return str(self.property)
+
 class NameWildcardSelector(Selector):
     def run(self, obj):
         if isinstance(obj, dict):
@@ -146,6 +164,9 @@ class NameWildcardSelector(Selector):
     def replace(self, obj, new, allow_loose):
         for k in obj.keys():
             obj[k] = new
+
+    def _to_str(self):
+        return '*'
 
 class ItemWildcardSelector(Selector):
     def run(self, obj):
@@ -164,6 +185,9 @@ class ItemWildcardSelector(Selector):
         for k in obj.keys():
             obj[k] = new
 
+    def _to_str(self):
+        return '#'
+
 class TagSelector(Selector):
     def __init__(self, name, explicit):
         Selector.__init__(self)
@@ -177,6 +201,12 @@ class TagSelector(Selector):
                 raise Exception('%s!=%s' % (self.name, tag(obj)))
         yield v
 
+    def _to_str(self):
+        r = '^%s*' % self.name
+        if self.explicit:
+            r += '!'
+        return r
+
 class TagReplacer(Selector):
     def __init__(self, name, explicit):
         Selector.__init__(self)
@@ -185,6 +215,13 @@ class TagReplacer(Selector):
 
     def replace(self, obj, new, allow_loose):
         return tagged(new, obj, self.explicit)
+
+    def _to_str(self):
+        r = '^%s^' % self.name
+        if self.explicit:
+            r += '!'
+        return r
+
 
 class TagNameSelector(Selector):
     def __init__(self, explicit):
@@ -195,13 +232,23 @@ class TagNameSelector(Selector):
         v = tag(obj, self.explicit)
         yield v
 
+    def _to_str(self):
+        if self.explicit:
+            return 'exp-tag()'
+        else:
+            return 'tag()'
+
 class TagContentSelector(Selector):
-    def __init__(self):
+    def __init__(self, src):
         Selector.__init__(self)
+        self.src= src
 
     def run(self, obj):
         v = untagged(obj)
         yield v
+
+    def _to_str(self):
+        return self.src
 
 class LengthSelector(Selector):
 
@@ -213,3 +260,7 @@ class LengthSelector(Selector):
             yield len(obj)
         else:
             raise Exception('not a array')
+
+    def _to_str(self):
+        return 'length()'
+

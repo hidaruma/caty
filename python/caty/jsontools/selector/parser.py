@@ -4,9 +4,10 @@ from caty.jsontools.selector.stm import *
 from caty.jsontools import stdjson
 
 class JSONPathSelectorParser(Parser):
-    def __init__(self, empty_when_error=False):
+    def __init__(self, empty_when_error=False, ignore_rest=False):
         Parser.__init__(self)
         self.empty_when_error = empty_when_error
+        self.ignore_rest = ignore_rest
 
     def __call__(self, seq):
         o = chainl([self.all, 
@@ -20,7 +21,7 @@ class JSONPathSelectorParser(Parser):
                     self.itemwildcard, 
                     try_(self.oldtag),
                     ], self.dot)(seq)
-        if not seq.eof:
+        if not seq.eof and not self.ignore_rest:
             raise ParseFailed(seq, self)
         return o
 

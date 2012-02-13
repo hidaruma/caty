@@ -26,6 +26,7 @@ from caty.core.script.proxy import FragmentProxy as PipelineFragment
 from caty.core.script.proxy import TypeCaseProxy as TypeCase
 from caty.core.script.proxy import TypeCondProxy as TypeCond
 from caty.core.script.proxy import BranchProxy as Branch
+from caty.core.script.proxy import JsonPathProxy as JsonPath
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
@@ -104,8 +105,11 @@ class ScriptParser(Parser):
         except ParseFailed as e:
             raise ParseError(e.cs, self.functor)
 
+
     def command(self, seq):
-        name = choice(self.name, self.xjson_path)(seq)
+        if option(peek('$'))(seq):
+            return self.xjson_path(seq)
+        name = self.name(seq)
         if name.endswith('.caty'):
             return self.__make_exec_script(name, seq)
         pos = (seq.col-len(name), seq.line)
@@ -124,8 +128,9 @@ class ScriptParser(Parser):
         return CommandProxy(name, type_args, opts, args, pos)
 
     def xjson_path(self, seq):
-        seq.parse('$')
-        return u'xjson:get'
+        pos = (seq.col-1, seq.line)
+        stm = SelectorParserInScript(False)(seq)
+        return JsonPath(stm, pos)
 
     def type_args(self, seq):
         seq.parse('<')

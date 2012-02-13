@@ -483,6 +483,26 @@ class ActionEnvelope(Syntax):
         self.cmd.set_var_storage(new_storage)
         return self.cmd.accept(visitor)
 
+class JsonPath(Syntax):
+    command_decl = u"""
+    command __jsonpath<S, T> :: S -> T 
+        refers python:caty.core.script.node.JsonPath;
+    """
+    def __init__(self, stm, pos):
+        Syntax.__init__(self, pos=pos)
+        self.pos = pos
+        self.stm = stm
+        self.path = stm.to_str()
+
+    def set_facility(self, facilities):
+        pass
+
+    def set_var_storage(self, storage):
+        pass
+
+    def accept(self, visitor):
+        return visitor.visit_json_path(self)
+
 class VarStorageForAction(VarStorage):
     def __init__(self, storage):
         self.opts = storage.opts

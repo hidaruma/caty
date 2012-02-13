@@ -345,6 +345,17 @@ class EnvelopeProxy(Proxy):
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
+class JsonPathProxy(Proxy):
+    def __init__(self, stm, pos):
+        self.stm = stm
+        self.pos = pos
+
+    def set_module(self, module):
+        self.module = module
+
+    def instantiate(self, builder):
+        return JsonPath(self.stm, self.pos)
+
 def combine_proxy(args):
     return reduce(CombinatorProxy, args)
 

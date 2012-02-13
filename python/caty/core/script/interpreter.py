@@ -75,6 +75,9 @@ class BaseInterpreter(object):
     def visit_case(self, node):
         raise NotImplementedError(u'{0}#visit_case'.format(self.__class__.__name__))
 
+    def visit_json_path(self, node):
+        raise NotImplementedError(u'{0}#visit_json_path'.format(self.__class__.__name__))
+
 class CommandExecutor(BaseInterpreter):
     def __init__(self, cmd, app, facility_set):
         self.cmd = cmd
@@ -404,6 +407,17 @@ class CommandExecutor(BaseInterpreter):
             )
         else:
             return default.accept(self)
+
+    def visit_json_path(self, node):
+        stm = node.stm
+        try:
+            r = stm.select(self.input).next()
+            if r == caty.UNDEFINED:
+                msg = '{0} at {1}:{2} Line {3}, Col {4}'.format(node.path, self.app.name, self.__get_name(self.cmd), self.cmd.col, self.cmd.line)
+                throw_caty_exception(u'Undefined', msg)
+            return r
+        except:
+            raise
 
     @property
     def in_schema(self):
