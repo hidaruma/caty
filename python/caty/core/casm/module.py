@@ -58,7 +58,7 @@ class Module(object):
             m, a = self._get_mod_and_app(ref)
             raise Exception(self.application.i18n.get(u'Type $name of $this is already defined in $module of $app', 
                                                       name=ref.name, 
-                                                      this=self.name+self.type,
+                                                      this=self.name+'.'+self.type,
                                                       module=m,
                                                       app=a))
 
@@ -96,7 +96,7 @@ class Module(object):
             m, a = self._get_mod_and_app(t)
             raise Exception(self.application.i18n.get(u'Type $name of $this is already defined in $module of $app', 
                                                       name=name, 
-                                                      this=self.name+self.type,
+                                                      this=self.name+'.'+self.type,
                                                       module=m,
                                                       app=a))
         #if 'register-public' in annotations:
@@ -111,7 +111,7 @@ class Module(object):
             m, a = self._get_mod_and_app(t)
             raise Exception(self.application.i18n.get(u'Kind $name of $this is already defined in $module.casm of $app', 
                                                       name=name, 
-                                                      this=self.name+self.type,
+                                                      this=self.name+'.'+self.type,
                                                       module=m,
                                                       app=a))
         if 'register-public' in annotations:
@@ -127,7 +127,7 @@ class Module(object):
             m, a = self._get_mod_and_app(t)
             raise Exception(self.application.i18n.get(u'Command $name of $this is already defined in $module of $app', 
                                                        name=name, 
-                                                       this=self.name+self.type,
+                                                       this=self.name+'.'+self.type,
                                                        module=m,
                                                        app=a))
         self.proto_ns[name] = proto
@@ -138,7 +138,7 @@ class Module(object):
             m, a = self._get_mod_and_app(t)
             raise Exception(self.application.i18n.get(u'Command $name of $this is already defined in $module of $app', 
                                                        name=name, 
-                                                       this=self.name+self.type,
+                                                       this=self.name+'.'+self.type,
                                                        module=m,
                                                        app=a))
         if 'register-public' in profile.annotations:
