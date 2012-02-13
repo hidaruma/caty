@@ -51,10 +51,10 @@ command bor
 :: [boolean*] -> ("True" | "False" | @True null | @False null)
  refers python:cpl.BOr;
 
-command gather :: [(@True array | @False array)*] -> (@True array | @False null)
+command gather :: [(@True array | @False null)*] -> (@True array | @False null)
  refers python:cpl.Gather;
 
-command choose :: [(@True array | @False array)*] -> (@True array | @False null)
+command choose :: [(@True array | @False null)*] -> (@True array | @False null)
  refers python:cpl.Choose;
 
 

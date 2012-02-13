@@ -10,11 +10,36 @@ module astu;
 
 }>>
 
+型表現（type expression）をXJSONデータにレイフィケーションして、
+型表現の代理であるXJSONデータの操作により型単一化を行う。
+ここで扱う型単一化は非対称（不等式的）であり、単一化の結果は、
+型（＝集合）の包含関係の真偽または成立条件となる。
+
+別な言い方をすると、非対称単一化により、
+型（＝集合）の連立不等式系の可解性が判断できる。
+（包含関係⊆を不等号とみなす。）
+
+実行例：
+
+{{{
+caty:SysSpecs> [@_var "x", @_boolean true] | astu:do
+$x ⊆ true
+caty:SysSpecs> [@_string "hello" , @_var "y"] | astu:do
+"hello" ⊆ $y
+caty:SysSpecs> [@_array [@_string "hello", @_var "x"] , @_array [@_var "y", @_var "z"]] | astu:do
+"hello" ⊆ $y
+$x ⊆ $z
+caty:SysSpecs> [@_array [@_string "hello", @_var "x"] , @_array [@_var "y"]] | astu:do
+**CAN NOT**
+caty:SysSpecs>
+}}}
+
 == 制限と前提
 
 # インターセクション（&）とマージ（++）は前もって計算されているとする。
-# オプション型 A? は (A | undefined) と展開して表現する。
-# 特殊な型 never, any は入れてない。
+# ユーザー定義型は考えない。前もって展開されているとする。
+# オプション型 A? は (A | undefined) と展開して表現する。ただし、any? は特別にアトミックな型と考える。
+  （any?は順序構造のトップ。anyはトップではなく余アトミックな要素。）
 # タグ付き型のタグは明示的タグだとする。暗黙タグの正規化（消去）は済んでいるとする。
 # スキーマ属性は考えない。
 # integer型は、numberにスキーマ属性が付いたものと解釈するので、考えない。
@@ -24,6 +49,17 @@ module astu;
 # 再帰的に定義された型は考えない（サイクルの処理が必要）。
 # バッグ型は考えない（等号が異なる）。
 # 型変数は許すが、ユニオン型の選択肢には出現できない。
+# 型変数の意図せぬ捕捉（本来違う変数が偶発的に同じ名前になること）が起きないようにリネームは済んでいるとする。
+# 型変数は、視認性から接頭辞'$'を付けて表示する。
+
+クリーネスター／ワイルドカード（星印付き型）と再帰は無限構造を導入するが、
+実用上は無限構造を避けては通れない。
+無限構造を扱うには、ここで述べるようなやり方（構文駆動方式）が向いているとは限らない。
+
+スキーマ属性を導入すると、
+「台集合＋論理式」からなる制限型（restricted type）／部分集合型（subset type）が現れる。
+台の操作と論理計算を組み合わせる必要が出てくる。
+
 
 <<{
 
@@ -32,6 +68,7 @@ type TypeExpr = (
  BasicType   |
  ProductType |
  UnionType   |
+ SpecialType |
  TypeVar     |
 );
 
@@ -39,8 +76,9 @@ type TypeExpr = (
 
 == 基本型 
 
-undefined型、null型、boolean型、nunmber型、string型、binary型と、すべてのスカラーシングルトン型（リテラル）。
-nullは型名とリテラル表記が一致するので、型名として処理して、シングルトン型からは除く。
+undefined型、null型、boolean型、nunmber型、string型、binary型と、すべてのスカラーシングルトン型（リテラル）が基本型。
+nullは型名とリテラル表記が同じなので、型名として処理して、シングルトン型からは除く。
+undefined型は（後述の）特殊な型に分類するのが適切かもしれない。
 
 基本型は、次のデータで表現される。
 
@@ -82,7 +120,8 @@ type BasicType = (
 
 == 積・複合型 
 
-集合の直積（の変種）により構成された型。配列型、オブジェクト型、タグ付き型。
+集合の直積（の変種）により構成された型を積・複合型と呼ぶ。
+配列型、オブジェクト型、タグ付き型がある。
 
 積・複合型は、次のデータで表現される。
 
@@ -94,7 +133,7 @@ type ArrayType = @_array [TypeExpr*];
 type ObjectType = @_object {* : TypeExpr?};
 
 /** タグ付き型 */
-type TaggedType = @_tagged (@*! any);
+type TaggedType = @_tagged (@*! TypeExpr);
 
 /** 直積ベースの型 */
 type ProductType = (
@@ -113,7 +152,7 @@ type ElementalType = (
 
 == 和・複合型 
 
-集合の直和により構成された型。排他的ユニオン型。
+集合の直和により構成された型を和・複合型と呼ぶ。排他的ユニオン型ともいう。
 
 和・複合型は、次のデータで表現される。
 
@@ -121,6 +160,21 @@ type ElementalType = (
 
 /** ユニオン型 */
 type UnionType = @_union [ElementalType, ElementalType, ElementalType*];
+
+}>>
+
+== 特殊な型
+
+any? を独立の型のように扱うことにする。
+
+<<{
+
+/** 特殊な型 */
+type SpecialType = (
+  "never" |
+  "any"   |
+  "any?"  |
+);
 
 }>>
 
@@ -144,13 +198,51 @@ command to-type :: any? -> TypeExpr
   boolean   => @_boolean pass,
   number    => @_number pass,
   string    => @_string pass,
- /* 直積複合型 */
+ /* 積・複合型 */
   array     => each { call astu:to-type } | @_array pass,
   object    => each --obj { call astu:to-type } | @_object pass,
 
  /* その他はタグ付き型 */
-  *         ==> [tag, untagged | call astu:to-type] | tagged | @_tagged pass,
+  *         ==> [tag, (untagged | call astu:to-type)] | tagged | @_tagged pass,
  }
+};
+
+}>>
+
+== 文字列化
+
+<<{
+
+/** 型表現を文字列化する */
+command print :: TypeExpr -> string
+{
+ case {
+  // 基本型と特殊な型
+  string            => pass,
+  @_boolean boolean => untagged | to-string,
+  @_number number   => untagged | to-string,
+  @_string string   => untagged | json:pretty, // カンマ忘れてエラーにならない ^^;
+
+  // 積・複合型
+  @_array  array    => untagged | each {call astu:print} | text:join ", " | ["[", pass, "]"] | text:concat,
+  @_object object   => untagged | call astu:print-object, // 下請けに回す
+  @_tagged any      => untagged | ["@", tag, " ", untagged | call astu:print] | text:concat,
+
+  // 和・複合型
+  @_union array     => untagged | each {call astu:print} | text:join " | " | ["(", pass, ")"] | text:concat,
+
+  // 型変数
+  @_var string      => ["$", untagged] | text:concat,
+ }
+};
+
+/** オブジェクト型を文字列化する */
+command print-object :: {*:TypeExpr?} -> string
+{
+  each {[%_key, call astu:print]} |
+  dump --prefix="print-object" |
+  each {[nth 1 | json:pretty, ":", nth 2] | text:concat} |
+  text:join ", " | ["{", pass, "}"] | text:concat
 };
 
 }>>
@@ -174,6 +266,8 @@ command unify :: [TypeExpr left, TypeExpr right] -> Result
 
  %left |
  when {
+  _var   => 
+    @True [ [%left, %right] ],
   _union => 
     each {
       [pass, %right] | dump --prefix="unify (1)" | call astu:unify-left-elemental
@@ -189,10 +283,12 @@ command unify-left-elemental :: [TypeExpr left, TypeExpr right] -> Result
 
  %right |
  when {
+  _var   => 
+    @True [ [%left, %right] ],
   _union =>
     each {
      [%left, pass] | call astu:unify-both-elemental
-    } | cpl:choose,
+    } | dump --prefix="unify-left-elemental" | cpl:choose,
 
   * ==> [%left, pass] | call astu:unify-both-elemental,
  }
@@ -224,8 +320,8 @@ command unify-both-elemental :: [TypeExpr left, TypeExpr right] -> Result
       * => @False null,
      },
 
-   // 複合型以外の型、または型変数
-    *    ==> [pass, %right] | call astu:unify-var-or-basic
+   // 型変数または複合型以外の型
+    *    ==> [pass, %right] | call astu:unify-simple
  }
 };
 
@@ -277,44 +373,51 @@ command unify-tagged :: [(@*! TypeExpr) left, (@*! TypeExpr) right] -> Result
 {
  [nth 1 > left, nth 2 > right];
 
- // 書いてない
-
- @NG null
-
+  // 最初にタグ名を調べる
+  [%left | tag, %right | tag] | eq |
+  when {
+   Diff => @False null, // 失敗
+   Same => // 次に内容（untagged部）を調べる 
+           [%left | untagged,  %right | untagged] | call astu:unify
+  }
 };
-
 
 }>>
 
-== 型変数と基本的な型の単一化
+== 基本的な型と特殊な型の単一化
 
-* unify-var-or-basic
+* unify-simple
 
 <<{
-command unify-var-or-basic :: [TypeExpr left, TypeExpr right] -> Result
+command unify-simple :: [TypeExpr left, TypeExpr right] -> Result
 {
-  dump --prefix="unify-var-or-basic" |
+  dump --prefix="unify-simple" |
   cond {
-   [@_var string,          any] => @True [[nth 1, nth 2]],
-   [any,          @_var string] => @True [[nth 1, nth 2]],
-
-   // never型, any型は出現しない
+   ["never",               any] => @True [],
+   [any,                "any?"] => @True [],
+   ["any",              "any" ] => @True [],
    
    ["undefined",   "undefined"] => @True [],
    ["null",        "null"]      => @True [],
+   ["null",        "any" ]      => @True [],
    ["boolean",     "boolean"]   => @True [],
+   ["boolean",     "any"    ]   => @True [],
    ["nummer",      "number" ]   => @True [],
+   ["nummer",      "any"    ]   => @True [],
    ["string",      "string" ]   => @True [],
+   ["string",      "any"    ]   => @True [],
    ["binary",      "binary" ]   => @True [],
+   ["binary",      "any"    ]   => @True [],
 
    [@_boolean boolean, "boolean"] => @True [],
-
+   [@_boolean boolean, "any"    ] => @True [],
 
    [@_number number, "number"]  => @True [],
+   [@_number number, "any"   ]  => @True [],
    [@_number number, @_number number]  => compare-values,
 
-
    [@_string string, "string"]  => @True [],
+   [@_string string, "any"   ]  => @True [],
    [@_string string, @_string string]  => compare-values,
   
    * => @False null,
@@ -330,6 +433,59 @@ command compare-values :: [any, any] -> Result
   }
 };
 
+}>>
+
+== 単一化の結果の表示
+
+<<{
+
+command print-result :: Result -> string
+{
+ when {
+  True => dump --prefix="print-result" |
+     each {
+       [nth 1 | astu:print, " ⊆ ", nth 2 | astu:print] | text:concat
+      } | text:join "\n",
+  * => "**CAN NOT**"
+ }
+};
+
+command do :: [TypeExpr left, TypeExpr right]  -> void
+{
+  unify | print-result | cout
+};
+
+}>>
+
+== 単一化を利用したバリデーションと型等号
+
+<<{
+
+command validate :: [any, TypeExpr] -> Result
+{
+  [nth 1 | to-type , nth 2] | unify
+};
+
+command do-val :: [any, TypeExpr]  -> void
+{
+  validate | print-result | cout
+};
+
+/** teq = type equals */
+command teq :: [TypeExpr, TypeExpr] -> Result
+{
+  [nth 1 > left, nth 2 > right];
+ 
+ [
+   [%left,  %right] | unify, 
+   [%right, %left ] | unify
+ ] | cpl:gather
+};
+
+command do-teq :: [TypeExpr, TypeExpr]  -> void
+{
+  teq | print-result | cout
+};
 
 }>>
 
