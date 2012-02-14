@@ -102,9 +102,11 @@ class Annotate(Builtin, MafsMixin):
         from copy import deepcopy
         from caty.core.script.annotation import ScriptAnnotation
         from caty.core.script import PEND
+        opts = self.var_loader._load_opts(self.var_storage.opts)
+        args = [self._path] + self.var_loader._load_args(self.var_storage.opts, self.var_storage.args)
         cmd = self.interpreter.build(self.open(self._path).read(),
-                                     [], 
-                                     [], 
+                                     opts, 
+                                     args, 
                                      transaction=None)
         r = ScriptAnnotation().visit(cmd.cmd)
         return u''.join(r)

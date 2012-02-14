@@ -1,4 +1,5 @@
 # coding: utf-8
+from caty import UNDEFINED
 from caty.core.schema import *
 from caty.core.script.builder import CommandCombinator
 from caty.core.script.interpreter import BaseInterpreter
@@ -24,6 +25,37 @@ class ScriptAnnotation(BaseInterpreter):
 
     def __remove_marker(self, s):
         return s.replace('/*', '').replace('*/', '')
+
+    def __walk_options(self, node):
+        vl = node.var_loader
+        r = []
+        for o in vl.opts:
+            if o.type == 'option':
+                if o.value == UNDEFINED:
+                    r.append('--%s' % o.key)
+                else:
+                    r.append('--%s=%s' % (o.key, json.pp(o.value)))
+            elif o.type == 'var':
+                r.append('--%s=%s' % (o.key, o.value.name))
+            elif o.type == 'glob':
+                r.append('%--*')
+            else:
+                if o.optional:
+                    r.append('%--%s?' % o.key)
+                else:
+                    r.append('%--%s' % o.key)
+            r.append(' ')
+        for a in vl.args:
+            if a.type == 'arg':
+                r.append(json.pp(a.value))
+            elif a.type == 'iarg':
+                r.append('%' + str(a.index))
+            elif a.type == 'glob':
+                r.append('%#')
+            else:
+                r.append('%' + a.key)
+            r.append(' ')
+        return r
 
     def __get_canonical_name(self, node):
         if node.profile_container.module and node.profile_container.module.name != 'builtin':
@@ -113,25 +145,71 @@ class ScriptAnnotation(BaseInterpreter):
         return r
 
     def visit_varstore(self, node):
-        raise NotImplementedError(u'{0}#visit_varstore'.format(self.__class__.__name__))
+        return [' > ', node.var_name]
 
     def visit_varref(self, node):
-        raise NotImplementedError(u'{0}#visit_varref'.format(self.__class__.__name__))
+        if node.optional:
+            return ['%' + node.var_name + '?']
+        else:
+            return ['%' + node.var_name]
 
     def visit_argref(self, node):
-        raise NotImplementedError(u'{0}#visit_argref'.format(self.__class__.__name__))
+        if node.optional:
+            return ['%' + str(node.arg_num) + '?']
+        else:
+            return ['%' + str(node.arg_num)]
 
     def visit_when(self, node):
-        raise NotImplementedError(u'{0}#visit_when'.format(self.__class__.__name__))
+        r = ['when']
+        r.extend(self.__walk_options(node))
+        r.append('{')
+        i = []
+        o = []
+        for c in node.cases.values():
+            if c.tag != '*':
+                i.append('@' + c.tag)
+            r.append(c.tag)
+            r.append('=>')
+            x = c.accept(self)
+            r.extend(x)
+            if x[-1].startswith('/*'):
+                o.append(self.__remove_marker(x[-1]))
+            else:
+                o.append(x[-1])
+        r.append('}')
+        if i:
+            r.insert(0, '/* %s */' % ('&'.join(i)))
+        if o:
+            r.append('/* [%s] */' % (', '.join(o)))
+        return r
 
     def visit_binarytag(self, node):
-        raise NotImplementedError(u'{0}#visit_binarytag'.format(self.__class__.__name__))
+        r = node.command.accept(self)
+        if r[-1].startswith('/*'):
+            r[-1] = '/* @%s %s */' % (node.tag, self.__remove_marker(r[-1]))
+        else:
+            r[-1] = '/* @%s %s */' % (node.tag, r[-1])
+        return r
 
     def visit_unarytag(self, node):
-        raise NotImplementedError(u'{0}#visit_unarytag'.format(self.__class__.__name__))
+        return ['@' + node.tag]
 
     def visit_each(self, node):
-        raise NotImplementedError(u'{0}#visit_each'.format(self.__class__.__name__))
+        r = ['each']
+        r.extend(self.__walk_options(node))
+        r.append('{')
+        x = node.cmd.accept(self)
+        if x[0].startswith('/*'):
+            r.insert(0, '[%s*]' % self.__remove_marker(x[0]))
+            x.pop(0)
+        r.extend(x)
+        r.append('}')
+        if x[-1].startswith('/*'):
+            r.append('[%s*]' % self.__remove_marker(x[-1]))
+            x.pop(-1)
+        else:
+            r.append('[%s*]' % x[-1])
+        return r
 
     def visit_time(self, node):
         raise NotImplementedError(u'{0}#visit_time'.format(self.__class__.__name__))
@@ -147,3 +225,4 @@ class ScriptAnnotation(BaseInterpreter):
 
     def visit_json_path(self, node):
         raise NotImplementedError(u'{0}#visit_json_path'.format(self.__class__.__name__))
+

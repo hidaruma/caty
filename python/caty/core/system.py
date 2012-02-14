@@ -108,7 +108,7 @@ class System(PbcObject):
             self._app_map[app.name] = app
         for app in self._app_map.values():
             app.finish_setup()
-        self._app_map['global'] = self._global_app
+        self._app_map[u'global'] = self._global_app
         self.__app_names.append(u'global')
         self._apps.append(self._global_app)
         #for app in self._app_map.values():
