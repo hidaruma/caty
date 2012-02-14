@@ -71,6 +71,8 @@ type Redirect = {
     }
 };
 
+type WebOutput = Response | Redirect;
+
 type ErrorStatus = {
     "status": integer
 };

@@ -5,7 +5,7 @@ schema = u"""
 /**
  * 与えられたパスに対しての302 Foundレスポンスを出力する。
  */
-command found [string] :: void -> Response
+command found [string] :: void -> Redirect
     refers python:caty.core.std.command.http.Found;
 
 /**

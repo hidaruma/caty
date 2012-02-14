@@ -174,10 +174,7 @@ class PipelineAdaptor(object):
     def _handle_pipeline(self, input, debug=False):
         try:
             result = self.__execute(input, debug)
-            try:
-                self.schema['Response'].validate(result)
-            except:
-                self.schema['Redirect'].validate(result)
+            self.schema['WebOutput'].validate(result)
             transaction = True
         except PipelineInterruption, e:
             result = e.json_obj

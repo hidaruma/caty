@@ -12,7 +12,6 @@ class Found(Builtin):
 
         return {
             'status': 302,
-            'body': u'',
             'header': {
                 'Location': self._path
             }
