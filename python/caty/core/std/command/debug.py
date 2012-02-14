@@ -1,6 +1,7 @@
 #coding: utf-8
 from caty.core.command import Builtin
 from caty.core.schema import *
+from caty.command import *
 from caty.util import cout
 import caty.jsontools as json
 import caty
@@ -89,3 +90,21 @@ class Fuser(Builtin):
             i += v
         ref[u"total"] = i
         return ref
+
+
+class Annotate(Builtin, MafsMixin):
+    def setup(self, path):
+        self._path = path
+        if not self._path.startswith('/'):
+            self._path = 'scripts@this:/' + self._path
+
+    def execute(self):
+        from copy import deepcopy
+        from caty.core.script.annotation import ScriptAnnotation
+        from caty.core.script import PEND
+        cmd = self.interpreter.build(self.open(self._path).read(),
+                                     [], 
+                                     [], 
+                                     transaction=None)
+        r = ScriptAnnotation().visit(cmd.cmd)
+        return u''.join(r)

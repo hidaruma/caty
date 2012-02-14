@@ -155,6 +155,8 @@ class AbstractCommandCompiler(FakeFacility):
             return TransactionDiscardAdaptor(c, self.facilities)
         elif transaction == PEND:
             return TransactionPendingAdaptor(c, self.facilities)
+        elif transaction == None:
+            return c
         else:
             raise Exception(self.module._app.i18n.get(u'Invalid transaction mode: $mode', mode=str(transaction)))
 

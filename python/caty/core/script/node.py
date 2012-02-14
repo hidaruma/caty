@@ -90,6 +90,9 @@ class ObjectBuilder(Syntax):
     def iteritems(self):
         return self.__nodes.iteritems()
 
+    def items(self):
+        return self.__nodes.items()
+
 class VarStore(Syntax):
     command_decl = u"""command __var-store<T default any> :: T -> T
                         refers python:caty.core.script.node.VarStore;

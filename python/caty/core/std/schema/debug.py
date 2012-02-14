@@ -57,4 +57,15 @@ type FuserReport = {
  */
 command fuser :: void -> FuserReport
     refers python:caty.core.std.command.debug.Fuser;
+
+/**
+ * Catyスクリプトに型情報の注釈を付ける。
+ * 引数はCatyスクリプトファイルのパスである。
+ * スクリプトファイルのサーチパスは、通常のCatyスクリプト同様、
+ * /で始まらなければscriptsから探す物とする。
+ */
+command annotate [string path] :: void -> string
+    reads [scripts, pub, data, interpreter]
+    refers python:caty.core.std.command.debug.Annotate;
+
     """
