@@ -200,15 +200,15 @@ class ScriptAnnotation(BaseInterpreter):
         r.append('{')
         x = node.cmd.accept(self)
         if x[0].startswith('/*'):
-            r.insert(0, '[%s*]' % self.__remove_marker(x[0]))
+            r.insert(0, '/* [%s*] */' % self.__remove_marker(x[0]))
             x.pop(0)
         r.extend(x)
         r.append('}')
         if x[-1].startswith('/*'):
-            r.append('[%s*]' % self.__remove_marker(x[-1]))
+            r.append('/* [%s*] */' % self.__remove_marker(x[-1]))
             x.pop(-1)
         else:
-            r.append('[%s*]' % x[-1])
+            r.append('/* [%s*] */' % x[-1])
         return r
 
     def visit_time(self, node):

@@ -187,6 +187,13 @@ class AbstractCommandCompiler(FakeFacility):
                 if isinstance(c, types.TypeType) and issubclass(c, Syntax):
                     continue
                 yield v
+        elif name == 'public':
+            for k, v in self.builder.namespace.items():
+                c = v.get_command_class()
+                if isinstance(c, types.TypeType) and issubclass(c, Syntax):
+                    continue
+                if v.module.name == name:
+                    yield v
         else:
             subm = self.builder.namespace._module.sub_modules.get(name)
             for k, v in subm.command_ns.items():
