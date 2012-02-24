@@ -30,10 +30,10 @@ class List(BlockParser):
                 if seq.peek(option('\n')) or seq.eof or seq.peek(option(not_next)):
                     return self.create_element('li', None, self.inline.run(self._format('\n'.join(node))))
                 elif seq.peek(option(next)):
-                    next_parser = try_(List(self.__syntax, level + 1, self.symbol, self.another, self._element_factory))
+                    next_parser = try_(self.__class__(self.__syntax, level + 1, self.symbol, self.another, self._element_factory))
                     return self.create_element('li', None, self.inline.run(self._format('\n'.join(node))) + [next_parser(seq)])
                 elif seq.peek(option(another_next)):
-                    next_parser = try_(List(self.__syntax, level + 1, self.another, self.symbol, self._element_factory))
+                    next_parser = try_(self.__class__(self.__syntax, level + 1, self.another, self.symbol, self._element_factory))
                     return self.create_element('li', None, self.inline.run(self._format('\n'.join(node))) + [next_parser(seq)])
                 else:
                     node.append(seq.parse(until('\n')))
