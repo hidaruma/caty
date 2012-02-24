@@ -686,18 +686,19 @@ class Assoc(Internal):
     def execute(self):
         _assoc = self._app.verb_dispatcher
         assoc = {}
-        for path, entries in _assoc._ftd._entries.items():
+        for cls, path_matcher in _assoc._selectors[2]._entries.items():
             e = {}
-            for v, entry in entries._verbs.items():
-                for m, ent in entry.items():
-                    src = ent['command'].source
-                    p = ent['parent']
-                    if p:
-                        k = v + '/' + m + '#exists-parent'
-                    else:
-                        k = v + '/' + m
-                    e[k] = src
-            assoc[path] = e
+            for path, verb_matcher in path_matcher._entries.items():
+                for v, methods in verb_matcher._verbs.items():
+                    for m, ent in methods.items():
+                        src = ent['command'].source
+                        p = ent['parent']
+                        if p:
+                            k = v + '/' + m + '#exists-parent'
+                        else:
+                            k = v + '/' + m
+                        e[k] = src
+                assoc[path] = e
         if self.ext is None:
             return assoc
         else:
