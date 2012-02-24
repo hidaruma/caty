@@ -544,11 +544,11 @@ def main(args):
     init_log()
     _encoding = get_encoding()
     code = 0
-    if sys.platform == 'win32':
-        import pyreadline as readline
-#        from ctypes import windll
-    else:
+    try:
         import readline
+    except:
+        readline = None
+        print '[Warning] readline module is not installed.'
     orgdelims = readline.get_completer_delims()
     newdelims = orgdelims.replace('/', '')
     readline.set_completer_delims(newdelims)
