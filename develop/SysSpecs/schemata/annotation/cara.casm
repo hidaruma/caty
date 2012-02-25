@@ -1,0 +1,29 @@
+// -*- coding: utf-8 -*-
+module annotation.cara;
+
+/** 動的なポートである
+ */
+@[annotation, target(["PORT_DECL"]) ]
+type dynamic = {};
+
+
+/** 抽象状態である
+ */
+@[annotation, target(["STATE_DECL"]) ]
+type abstract = {};
+
+
+/** アクション核の入力境界となるフラグメントである
+ */
+@[annotation, target(["FRAGMENT_PROFILE_DECL"]) ]
+type in = {};
+
+/** アクション核の出力境界となるフラグメントである
+ */
+@[annotation, target(["FRAGMENT_PROFILE_DECL"]) ]
+type out = {};
+
+
+// End of Module
+
+

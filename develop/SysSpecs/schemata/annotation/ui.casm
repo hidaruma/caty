@@ -1,4 +1,4 @@
-module uiAnnotation; // -*- coding: utf-8 -*-
+module annotation.ui; // -*- coding: utf-8 -*-
 
 /** HTMLフォームで使うUIコントロールの種別 */
 type UiControl = (
