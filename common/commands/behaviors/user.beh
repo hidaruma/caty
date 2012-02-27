@@ -65,8 +65,8 @@ each {pv userid} | [pass, ["foo", "bar"]] | eq | when {
 
 === !exec 
 
-|=env|=input|=command|=output|=備考|
-|%hosturl|{"userid": "boo", "password": "qwerty"}|%login|@OK "/"|Cookie のセッション ID の値は予測不可能なので、オブジェクトの部分一致でチェック|
+|=env|=input|=command|=outputMatch|=備考|
+|%hosturl|{"userid": "boo", "password": "qwerty"} | %login | {"status": 302, "location": %TOP} |Cookie のセッション ID の値は予測不可能なので、オブジェクトの部分一致でチェック|
 |%hosturl|{"userid": "boo", "password": "zxcvb"}|%login|||
 
 == user:logout
@@ -75,8 +75,8 @@ each {pv userid} | [pass, ["foo", "bar"]] | eq | when {
 
 === !exec 
 
-|=env|=input|=command|=output|=備考|
-|%hosturl|{"userid": "boo", "password": "qwerty"}|%login| @OK "/" ||
+|=env|=input|=command|=outputMatch|=備考|
+|%hosturl|{"userid": "boo", "password": "qwerty"}|%login| {"status": 302, "location": %TOP} ||
 |%hosturl|"/login.html"|%logout|"http://localhost/login.html"||
 |%hosturl|"/login.html"|%logout|"http://localhost/login.html"|既にログアウトしているが、同様に処理される|
 
@@ -100,5 +100,9 @@ user:login
 user:logout | pv header | pv Location
 }}}
 
+=== !name:TOP
 
+{{{
+    [env | pv HOST_URL, "/"] | text:concat
+}}}
 

@@ -93,10 +93,21 @@ class Select(Builtin, StorageAccessor):
         else:
             if len(path) == 1:
                 q = build_query('$.'+path[0])
-                return [q.find(v).next() for v in r]
+                r_ = []
+                for v in r:
+                    r_.append(q.find(v).next())
+                    q.reset()
+                return r_
             else:
                 queries = map(build_query, map(lambda a:'$.' + a, path))
-                return [[q.find(v).next() for q in queries] for v in r]
+                r_ = []
+                for v in r:
+                    _ = []
+                    for q in queries:
+                        _.append(q.find(v).next())
+                        q.reset()
+                    r_.append(_)
+                return r_
 
 
 from caty.core.schema.base import TagSchema, NullSchema

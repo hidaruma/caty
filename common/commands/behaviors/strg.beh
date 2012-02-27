@@ -17,7 +17,7 @@ type struct1 =  {
 
 type struct2 = {
     "a": string | null,
-    "b": list<integer>,
+    "b": [integer*],
     "c": {
         "d": integer,
         "e": @tag integer
@@ -123,7 +123,7 @@ JSON データをテーブルに挿入する。この時の JSON データは JS
 |{"a": null}|strg:select|struct2| [ %struct2-2 ] | a の値が null|
 |{"b": @_CONTAINS 0}|strg:select|struct2| [ %struct2-1 ] | b が 0 を含む|
 |null|strg:select|struct2 "c"| [{"d": 10, "e": @tag 100}, {"d": 10, "e": @tag 0}, {"d": -1, "e": @tag 1}] |オブジェクトの一部を取得|
-|null|strg:select|struct2 "a" "c.d"| [["hoge", 10], [null, 10], ["fuga", -1]] |オブジェクトの一部を取得|
+|null|strg:select<array>|struct2 "a" "c.d"| [["hoge", 10], [null, 10], ["fuga", -1]] |オブジェクトの一部を取得|
 
 == update TABLE_NAME
 

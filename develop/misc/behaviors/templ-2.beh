@@ -7,4 +7,9 @@
 == !exec
 
 |= command       |= params           |= outputCond |= exception |
-| request        | /misc/foreach.html| true        |            |
+| request        | /foreach.html| true        |            |
+
+注: requestの引数にはアプリケーション名を入れない。以下は404エラー
+
+|= command       |= params           |= outputCond |= exception |
+| request        | /misc/foreach.html|  true     |          |

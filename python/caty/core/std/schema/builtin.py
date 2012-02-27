@@ -71,7 +71,18 @@ type Redirect = {
     }
 };
 
-type WebOutput = Response | Redirect;
+type ErrorResponse = {
+    "status": integer(minimum=400),
+    "header": {
+        "content-type": string?,
+        "content-length": integer?,
+        *: string
+    },
+    "body": string | binary,
+    "encoding": string? // テキストデータを返すときは必ずこれを追加
+};
+
+type WebOutput = Response | Redirect | ErrorResponse;
 
 type ErrorStatus = {
     "status": integer
@@ -595,7 +606,7 @@ command request {
                 "method": string?,
                 "debug": boolean?,
                 "fullpath": boolean?,
-                "content-type": string?} [string path, string? query] :: WebInput | null -> Response
+                "content-type": string?} [string path, string? query] :: WebInput | null -> WebOutput
     reads [env, schema]
     uses interpreter
     refers python:caty.core.std.command.builtin.Request;
