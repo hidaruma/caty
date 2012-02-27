@@ -72,13 +72,24 @@ command mkdir [string] :: void -> void
  * ディレクトリ一覧の表示。
  *
  * 第一引数で指定されたディレクトリを読み込み、配下のファイルとディレクトリ一覧を返す。
- * 第二引数は拡張子の指定であり、例えば .html が指定された場合 .html 拡張子のファイル一覧だけが返される。
+ * 第二引数はglobの指定で、リソース定義と同様に以下のルールに従う。
+ *
+ * * ファイル名に使われる文字は*と/を含まない。
+ * * *は.を含まないファイル名にマッチ。
+ * * ~**は.まで含めたファイル名にマッチ。
+ * * パターンはファイル名の末尾からマッチされる。
+ * * ワイルドカードはファイル名に一回までしか出現できない。
+ * * ワイルドカードを含まないglobには*を前置する。
+ *
  * 通常はファイル名とファイルかディレクトリの種別のみが返されるが、
  * --long オプションが指定された場合は最終更新時刻なども返される。
+ *
+ * --recオプションが指定された場合、ディレクトリを再帰的に検索する。
  */
-command list {"long":boolean?, "kind":string?} [string, string?] :: 
+command list {"long":boolean?, "kind":string?, "rec": boolean?} [string, string?] :: 
     void -> [DirectoryEntry*]
     reads [pub, data, scripts, include, sysfiles]
     refers python:caty.core.std.command.file.LsDir;
+
 
 """

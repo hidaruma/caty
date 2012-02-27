@@ -124,20 +124,48 @@ def kind_of(ent, kind):
         return ent.is_dir
     else:
         return True
+
 class LsDir(FileUtilMixin, Builtin):
     
-    def setup(self, opts, path, ext=''):
+    def setup(self, opts, path, glob=''):
+        if not path.endswith('/'):
+            path = path + '/'
         self.path = path
-        self.ext = ext
+        self.glob = glob
         self.long_format = opts.get('long', False)
+        self.rec = opts.get('rec', False)
         kind = opts.get('kind', None)
         self.kind = "file" if kind == "file" else ("dir" if kind == "dir"  else "any")
 
     def execute(self):
         from caty.util import bind2nd
+        from caty.core.action.selector import PathMatchingAutomaton
         dirobj = self.opendir()
-        files = list(sorted([ent for ent in dirobj.read() 
-                             if has_ext(ent, self.ext) and kind_of(ent, self.kind)],
+        if self.glob:
+            if '*' not in self.glob:
+                p = '*' + self.glob
+            else:
+                p = self.glob
+            matcher = PathMatchingAutomaton(p)
+        else:
+            matcher = FakeMatcher()
+        if not self.rec:
+            entries = dirobj.read()
+        else:
+            entries = self.rec_read(dirobj)
+        files = list(sorted([ent for ent in entries if matcher.match(ent.path) and kind_of(ent, self.kind)],
                             cmp=namecmp))
         r = map(bind2nd(fo_to_json, self.long_format), files)
         return r
+
+    def rec_read(self, dirobj):
+        for e in dirobj.read():
+            yield e
+            if e.is_dir:
+                for e2 in self.rec_read(e):
+                    yield e2
+
+class FakeMatcher(object):
+    def match(self, s):
+        return True
+
