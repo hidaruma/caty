@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 
 /**  @[anchor] と @[form] の仕様 */
-module triggerAnnotation ; 
+module annotation.trigger ; 
 
 /** リネームの指定
  * プロパティ名 -- 新しい名前＝標準の名前

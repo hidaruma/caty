@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 
 /** アノテーション宣言において使うアノテーション */
-module metaAnnotation;
+module annotation.meta;
 
 /** アノテーションのターゲットタイプ 
  */

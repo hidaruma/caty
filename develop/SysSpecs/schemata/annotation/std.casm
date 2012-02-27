@@ -1,6 +1,6 @@
 // -*- coding: utf-8 -*-
 /** 標準のアノテーション */
-module stdAnnotation;
+module annotation.std;
 
 /*{{{
 
@@ -36,6 +36,8 @@ type deprecated = {};
 @[annotation, target(["TYPE_DECL", "COMMAND_DECL", "PROPERTY"])]
 type unquiet = {};
 
+/*{{{
+
 /** open制約
  * この型の制約はopenと解釈される。再帰的に適用される。
  */
@@ -47,6 +49,9 @@ type open = {};
  */
 @[annotation, target(["OBJECT", "ARRAY"]), affect-parsing]
 type closed = {};
+
+}}}*/
+
 
 /** デフォルト値
  * オブジェクトのプロパティが省略されたときのデフォルト値を指定する。
@@ -74,7 +79,7 @@ type recomended = {
 type no-default = {
 };
 
-/** 依存性
+/** 同時出現性
  * 指定した名前のプロパティがないときは、ターゲットのプロパティは出現できない。
  * 複数のプロパティに依存関係があるときに使用する。
  */
@@ -85,7 +90,7 @@ type with = {
   "val" : any?
 };
 
-/** 排他性
+/** 排他出現性
  * 指定した名前のプロパティがあるときは、ターゲットのプロパティは出現できない。
  * 複数のプロパティに依存関係があるときに使用する。
  */
@@ -93,6 +98,16 @@ type with = {
 type without = {
   @[annotation-value]
   "name" :  string
+};
+
+/** 依存性
+ * このプロパティの値は指定した名前のプロパティ値に依存する。
+ * 例えば、このプロパティ値は関数として計算可能であるときなど。
+ */
+@[annotation, target("PROPERTY")]
+type depends = {
+  @[annotation-value]
+  "name" : string,
 };
 
 /** 暫定的な定義である
@@ -105,6 +120,13 @@ type tentative = {};
  */
 @[annotation, target(["TYPE_DECL", "COMMAND_DECL", "MODULE_DECL"])]
 type experimental = {};
+
+/** 抽象的な仕様記述である
+ * 型やコマンドを、そのまま実際の使用することを想定してない。
+ * 抽象的な仕様の記述に採用している。
+ */
+@[annotation, target(["TYPE_DECL", "COMMAND_DECL", "MODULE_DECL"])]
+type abstract-spec = {};
 
 
 /** フィルター

@@ -52,9 +52,12 @@ caty:SysSpecs>
 # 型変数の意図せぬ捕捉（本来違う変数が偶発的に同じ名前になること）が起きないようにリネームは済んでいるとする。
 # 型変数は、視認性から接頭辞'$'を付けて表示する。
 
+
+----
+
 クリーネスター／ワイルドカード（星印付き型）と再帰は無限構造を導入するが、
 実用上は無限構造を避けては通れない。
-無限構造を扱うには、ここで述べるようなやり方（構文駆動方式）が向いているとは限らない。
+無限構造、特に再帰をを扱うときには、ここで述べるようなやり方（構文駆動方式）が向いているとは限らない。
 
 スキーマ属性を導入すると、
 「台集合＋論理式」からなる制限型（restricted type）／部分集合型（subset type）が現れる。
@@ -70,6 +73,10 @@ type TypeExpr = (
  UnionType   |
  SpecialType |
  TypeVar     |
+ // 再帰的な型のためにRefを追加
+ // これはユーザー定義型とは無関係
+ Ref         |
+
 );
 
 }>>
@@ -143,10 +150,22 @@ type ProductType = (
 );
 
 /** ユニオンを構成する要素的な型 */
-type ElementalType = (
+type ChoosableType = (
   BasicType   |
   ProductType |
+  // 再帰で追加
+  Ref         |
 );
+
+
+/** ユニオンではない型 */
+type ElementalType = (
+  TypeVar     |
+  BasicType   |
+  ProductType |
+  Ref         |
+);
+
 
 }>>
 
@@ -159,7 +178,12 @@ type ElementalType = (
 <<{
 
 /** ユニオン型 */
-type UnionType = @_union [ElementalType, ElementalType, ElementalType*];
+type UnionType = @_union {
+  "specified" : [ChoosableType, /*ChoosableType, */ChoosableType*],
+
+  @[default("never")]
+  "other" : ("never" | TypeVar | @other TypeExpr)?,
+};
 
 }>>
 
@@ -214,7 +238,7 @@ command to-type :: any? -> TypeExpr
 <<{
 
 /** 型表現を文字列化する */
-command print :: TypeExpr -> string
+command print :: (TypeExpr|RecTypeExpr) -> string
 {
  case {
   // 基本型と特殊な型
@@ -229,10 +253,14 @@ command print :: TypeExpr -> string
   @_tagged any      => untagged | ["@", tag, " ", untagged | call astu:print] | text:concat,
 
   // 和・複合型
-  @_union array     => untagged | each {call astu:print} | text:join " | " | ["(", pass, ")"] | text:concat,
+  @_union object    => untagged | pv specified 
+                      | each {call astu:print} | text:join " | " | ["(", pass, ")"] | text:concat,
 
   // 型変数
   @_var string      => ["$", untagged] | text:concat,
+
+  RecTypeExpr       => "TBD",
+
  }
 };
 
@@ -247,6 +275,36 @@ command print-object :: {*:TypeExpr?} -> string
 
 }>>
 
+== 2つのオブジェクト型のプロパティ名セットをそろえる
+
+
+<<{
+
+command commonalize :: [{* : TypeExpr?} left, {* : TypeExpr?} right] ->  [{* : TypeExpr?} left, {* : TypeExpr?} right]
+{
+ [
+   nth 1 > left  | properties > left-props, 
+   nth 2 > right | properties > right-props
+ ];
+
+ [%right-props, %left-props ] | set:diff > left-diff ;
+ [%left-props,  %right-props] | set:diff > right-diff;
+
+ [
+   [
+     %left-diff | each {[pass, "undefined"]} | array-to-object,
+     %left
+   ] | json:merge,
+
+   [
+     %right-diff | each {[pass, "undefined"]} | array-to-object,
+     %right
+   ] | json:merge,
+ ]
+};
+
+}>>
+
 == 単一化
 
 * unify
@@ -257,7 +315,7 @@ command print-object :: {*:TypeExpr?} -> string
 
 type TypePair = [TypeExpr, TypeExpr];
 
-type Result = @True [TypePair*] | @False null | @NG any;
+type Result = @True [TypePair*] | @False null | @Indef null | @Error any;
 
 
 command unify :: [TypeExpr left, TypeExpr right] -> Result
@@ -269,11 +327,12 @@ command unify :: [TypeExpr left, TypeExpr right] -> Result
   _var   => 
     @True [ [%left, %right] ],
   _union => 
+    pv specified |
     each {
-      [pass, %right] | dump --prefix="unify (1)" | call astu:unify-left-elemental
+      [pass, %right] | dump --prefix="unify (union)" | call astu:unify-left-elemental
     }  | cpl:gather,
 
-  * ==> [pass, %right] | dump --prefix="unify (2)" | call astu:unify-left-elemental,
+  * ==> [pass, %right] | dump --prefix="unify (other)" | call astu:unify-left-elemental,
  }
 };
 
@@ -286,9 +345,10 @@ command unify-left-elemental :: [TypeExpr left, TypeExpr right] -> Result
   _var   => 
     @True [ [%left, %right] ],
   _union =>
+    pv specified |
     each {
      [%left, pass] | call astu:unify-both-elemental
-    } | dump --prefix="unify-left-elemental" | cpl:choose,
+    } | dump --prefix="unify-left-elemental (union)" | cpl:choose,
 
   * ==> [%left, pass] | call astu:unify-both-elemental,
  }
@@ -353,19 +413,14 @@ command unify-array-items :: [[TypeExpr*] left, [TypeExpr*] right] -> Result
 
 command unify-object-properties :: [{* : TypeExpr?} left, {* : TypeExpr?} right] -> Result
 {
- [nth 1 > left, nth 2 > right];
+ commonalize | [nth 1 > left, nth 2 > right]; // プロパティ名セットを最初に揃える
 
-  // 最初にプロパティ名セットを調べる
-  [%left | properties | list:sort, %right | properties | list:sort] | eq |
-  when {
-   Diff => @False null, // 失敗
-   Same => [
-            %left  | each {pass}, 
-            %right | each {pass}
-           ] | list:zip | dump --prefix="unify-object-properties" |
-           // オブジェクトのプロパティごとに単一化
-           each { call astu:unify } | cpl:gather,
-  }
+ [
+   %left  | each {pass}, 
+   %right | each {pass}
+ ] | list:zip | dump --prefix="unify-object-properties" |
+ // オブジェクトのプロパティごとに単一化
+ each { call astu:unify } | cpl:gather
 };
 
 
@@ -466,7 +521,7 @@ command validate :: [any, TypeExpr] -> Result
   [nth 1 | to-type , nth 2] | unify
 };
 
-command do-val :: [any, TypeExpr]  -> void
+command do-vali :: [any, TypeExpr]  -> void
 {
   validate | print-result | cout
 };
@@ -485,6 +540,407 @@ command teq :: [TypeExpr, TypeExpr] -> Result
 command do-teq :: [TypeExpr, TypeExpr]  -> void
 {
   teq | print-result | cout
+};
+
+}>>
+
+== 再帰的な型 -- はじめに
+
+非再帰的（non-recursive）な型に関する単一化アルゴリズムを書いた。
+これに加えて再帰的な型の単一化アルゴリズムを示すが、
+一部は非再帰版を利用しなばら、コピー＆モディファイ方式で再帰版を書くので、
+冗長コードが多い鬱陶しいものとなる。
+
+非再帰／再帰をひとつにまとめる作業は次の機会として、
+再帰的な型に対して//とりあえずは動く//アルゴリズムを記述することにする。
+
+=== ツリーからグラフへ
+
+非再帰的な型表現（type expression, type term）の構文データはツリーとなる。
+それに対して、再帰的な型表現はサイクルを許す有向グラフとなる。（以下、グラフと言えばそれは有向グラフ。）
+
+我々が対象とすべき有向グラフ全体の集合を Graph とする。
+
+* G∈Graph  ⇔  Gは有向グラフである
+
+グラフGに対して、Gに含まれる独立なサイクルの個数を β(G) とする。
+β(G) （1次元のベッチ数）は、Gのトポロジーから決まる非負整数である。
+
+* β(G) = 0 ⇔ Gはサイクルを持たない
+* β(G) ≧ 1 ⇔ Gはサイクルを持つ
+
+ACyclicGraph と CyclicGraph を次のように定義する。
+
+* ACyclicGraph = {G∈Graph | β(G) = 0 }
+* CyclicGraph = {G∈Graph | β(G) ≧ 1 }
+
+定義より、Graph = ACyclicGraph + CyclicGraph となる。ここで、「+」は集合の直和である。
+
+Graphに対応する型構文構造を**TypeGraph**（型グラフ）、
+ACyclicGraphに対応する型構文構造を**NonrecTypeGraph**（非再帰的型グラフ）
+CyclicGraphに対応する型構文構造を**RecTypeGraph**（再帰的型グラフ）と命名する。
+
+型グラフは、名前が付いたツリーの集合（named forest）と参照ノードで表す。
+このデータ構造は、型に関するletrec式に素直に対応する。
+このデータ構造を採用するのは、
+CatyScriptでも比較的容易に扱えるからであり、意味的に同値な他のデータ構造が色々ある。
+
+
+== 再帰的な型
+
+<<{
+/** 再帰的な参照 
+ * サイクルの戻り点（loop-back point）。
+ * 再帰的な型の型表現内に出現する。
+ * 非再帰的な型では出現しない。
+ */
+type Ref = @_ref string;
+
+/** 再帰のルート
+ * サイクルの基点。
+ * unifyrecだけで内部的に使う。
+ */
+type Root = @_root {
+  "name" : string,
+  "type" : TypeExpr,
+};
+
+/** 再帰のルートを追加した型表現
+ * unifyrecだけで内部的に使う
+ */
+type RootedTypeExpr = TypeExpr | Root;
+
+/** 再帰的な型を表現するデータ */
+type RecTypeExpr = @_rec {
+ "$" : TypeExpr,
+ * : TypeExpr?
+};
+
+}>>
+
+=== 補足的な注意
+
+RecTypeExprはRecTypeGraphと同じ意味である。
+RecTypeExprには必ずサイクルがあると仮定する。
+
+再帰と非再帰を一緒に扱うときは、次のようなデータを使うことになるだろう。
+
+{{{
+type TypeGraph = @_type {
+ /** 再帰しているかどうかのフラグ */
+ "rec" : boolean,
+
+ "$" : TypeExpr,
+  * : TypeExpr?
+};
+}}}
+
+== 再帰的な型のサンプル
+
+{{{
+type t1 = t1;
+
+type t2 = (number | t2);
+
+type t3 = {"left": t3, "right":t3};
+
+type t4 = {"val": number, "next":t4};
+}}}
+
+<<{
+/** ループ */
+command loop :: void -> RecTypeExpr
+{
+  @_rec {
+   "$" : @_ref "$"
+  }
+};
+
+/** ループして数値 */
+command loopnum :: void -> RecTypeExpr
+{
+  @_rec {
+   "$" : @_union{"specified":[@_ref "$", "number"]}
+  }
+};
+
+
+/** ノード値を持つツリー */
+command vtree :: void -> RecTypeExpr 
+{
+  @_rec {
+   "$": @_object {
+      "val" : @_union{"specified":["undefined"],"other":@_var "Val" },
+      "left": @_union{"specified":[@_ref "$"],"other":@_var "Leaf"},
+      "right": @_union{"specified":[@_ref "$"],"other":@_var "Leaf"},
+    }
+  }
+};
+
+/** 標準的なツリー構造 */
+command tree :: void -> RecTypeExpr 
+{
+  @_rec {
+   "$": @_object {
+      "left": @_union [@_var "Leaf", @_ref "$"],
+      "right": @_union [@_var "Leaf", @_ref "$"],
+    }
+  }
+};
+
+/** 左にだけ伸びるツリー構造 */
+command ltree :: void -> RecTypeExpr 
+{
+  @_rec {
+   "$": @_object {
+      "left": @_union [@_var "Val", @_ref "$"],
+      "right": @_var "Val",
+    }
+  }
+};
+
+/** 右にだけ伸びるツリー構造 */
+command rtree :: void -> RecTypeExpr 
+{
+  @_rec {
+   "$": @_object {
+      "left": @_var "Val",
+      "right": @_union [@_var "Val", @_ref "$"],
+    }
+  }
+};
+
+}>>
+
+== 再帰的型の単一化
+
+<<{
+
+/** 再帰的型の単一化のエントリーポイント */
+command unifyrec :: [RecTypeExpr, RecTypeExpr] -> Result
+{
+ [nth 1 > left, nth 2 > right];
+
+ [
+   %left,
+   @_root {"name":"$", "type": %left | pv "$"},
+   %right,
+   @_root {"name":"$", "type": %right | pv "$"},
+   {}
+ ] | unifyrec0
+};
+
+
+command unifyrec0 :: [RecTypeExpr, RootedTypeExpr, RecTypeExpr, RootedTypeExpr, object] -> Result
+{
+  [nth 1 > left, nth 2 > lcurr, nth 3 > right, nth 4 > rcurr, nth 5 > visited];
+// [%left, %lcurr, %right, %rcurr, %visited] | dump --force --prefix="Enter unifyrec0, arguments:";
+  [%left, %lcurr, %right, %rcurr, %visited] | json:pretty | logging:debug --cout;
+
+
+ [%lcurr, %rcurr] |
+ cond {
+ // 両方がルート
+  [@_root any, @_root any] =>
+      [nth 1 | pv name > left-name, nth 2 | pv name > right-name];
+      // 過去の訪問記録を調べる
+      [%visited, %right-name] | mvo:has-val %left-name |
+      when {
+       False => // 訪問してない、はじめて
+          // 記録する
+          [%visited, %right-name] | mvo:add-val %left-name > new-visited;
+	  // 先に進む
+          // ルートマーカーを外して再帰
+          [%left, (%lcurr | pv type), %right, (%rcurr | pv type), %new-visited]
+          | call astu:unifyrec0,
+       True => // すでに訪問済み
+          // それじゃオワリ
+          @True [],
+      },
+
+ // 左だけがルート
+  [@_root any, any] => 
+      // ルートマーカーを外して再帰
+      [%left, (%lcurr | pv type), %right, %rcurr, %visited]
+      | call astu:unifyrec0,
+
+ // 右だけがルート
+  [any, @_root any] => 
+      // ルートマーカーを外して再帰
+      [%left, %lcurr, %right, (%rcurr | pv type), %visited]
+      | call astu:unifyrec0,
+
+
+
+ /* 注意： 参照が間違っているときは例外で終わる */
+
+ // 両方が参照
+ [@_ref string, @_ref string] =>
+     [nth 1 | untagged > left-name,  nth 2 | untagged > right-name];
+     %left  | pv %left-name  | @_root {"name":%left-name,  "type": pass} > new-lcurr;
+     %right | pv %right-name | @_root {"name":%right-name, "type": pass} > new-rcurr;
+     // 参照を解決して再帰
+     [%left, %new-lcurr, %right, %new-rcurr, %visited]
+     | call astu:unifyrec0,
+
+ // 左だけが参照
+ [@_ref string, any] =>
+     [nth 1 | untagged > left-name,  nth 2 > new-rcurr];
+     %left  | pv %left-name | @_root {"name":%left-name,  "type": pass} > new-lcurr;
+     // 参照を解決して再帰
+     [%left, %new-lcurr, %right, %new-rcurr, %visited]
+     | call astu:unifyrec0,
+
+ // 右だけが参照
+ [any, @_ref string] =>
+     [nth 1 > new-lcurr,  nth 2 | untagged > right-name];
+     %right | pv %right-name | @_root {"name":%right-name, "type": pass} > new-rcurr;
+     // 参照を解決して再帰
+     [%left, %new-lcurr, %right, %new-rcurr, %visited]
+     | call astu:unifyrec0,
+
+
+  * =>
+    [%left, %lcurr, %right, %rcurr, %visited] | dump --force --prefix="Exit unifyrec0, arguments:";
+    @False null,
+
+ }
+
+};
+
+
+
+}>>
+
+
+
+<<{
+
+command unify1 :: [RecTypeExpr, RootedTypeExpr, RecTypeExpr, RootedTypeExpr, object] -> Result
+{
+  pass > in | [nth 1 > left, nth 2 > lcurr, nth 3 > right, nth 4 > rcurr, nth 5 > visited];
+
+ %lcur |
+ when {
+  _var   => 
+    @True [ [%lcurr, %rcurr] ],
+  _union => 
+    pv specified |
+    each {
+      [%left, pass, %right, %rcurr, %visited] | 
+      dump --prefix="unify1 (union)" | call astu:unify-left-elemental1
+    }  | cpl:gather,
+
+   // other部の処理をサボっている
+
+  * => %in | dump --prefix="unify1 (other)" | call astu:unify-left-elemental1,
+ }
+};
+
+command unify-left-elemental :: [RecTypeExpr, RootedTypeExpr, RecTypeExpr, RootedTypeExpr, object] -> Result
+{
+  pass > in | [nth 1 > left, nth 2 > lcurr, nth 3 > right, nth 4 > rcurr, nth 5 > visited];
+
+ %rcurr |
+ when {
+  _var   => 
+    @True [ [%lcurr, %rcurr] ],
+  _union =>
+    pv specified |
+    each {
+     [%left, %lcurr, %right, pass, %visited] | 
+     call astu:unify-both-elemental1
+    } | dump --prefix="unify-left-elemental (union)" | cpl:choose,
+
+   // other部の処理をサボっている
+
+  * => %in | call astu:unify-both-elemental1,
+ }
+
+};
+
+command unify-both-elemental1 :: [RecTypeExpr, RootedTypeExpr, RecTypeExpr, RootedTypeExpr, object] -> Result
+{
+  [nth 1 > left, nth 2 > lcurr, nth 3 > right, nth 4 > rcurr, nth 5 > visited];
+
+
+ %lcurr |
+ when {
+  _array  => pass > left-items;
+     %rcurr |
+     when {
+      _array => [%left-items, pass] | 
+                call astu:unify-array-items,
+      * => @False null,
+     },
+  _object  => pass > left-properties;
+     %rcurr |
+     when {
+      _object => [%left-properties, pass] | 
+                 call astu:unify-object-properties,
+      * => @False null,
+     },
+   _tagged => pass > left-tagged;
+     %rcurr |
+     when {
+      _tagged => [%left-tagged, pass] | 
+                 call astu:unify-tagged,
+      * => @False null,
+     },
+
+   // 型変数または複合型以外の型
+    *    ==> [pass, %right] | call astu:unify-simple
+ }
+};
+
+
+}>>
+
+* unify-simple
+
+<<{
+command unify-simple :: [TypeExpr left, TypeExpr right] -> Result
+{
+  dump --prefix="unify-simple" |
+  cond {
+   ["never",               any] => @True [],
+   [any,                "any?"] => @True [],
+   ["any",              "any" ] => @True [],
+   
+   ["undefined",   "undefined"] => @True [],
+   ["null",        "null"]      => @True [],
+   ["null",        "any" ]      => @True [],
+   ["boolean",     "boolean"]   => @True [],
+   ["boolean",     "any"    ]   => @True [],
+   ["nummer",      "number" ]   => @True [],
+   ["nummer",      "any"    ]   => @True [],
+   ["string",      "string" ]   => @True [],
+   ["string",      "any"    ]   => @True [],
+   ["binary",      "binary" ]   => @True [],
+   ["binary",      "any"    ]   => @True [],
+
+   [@_boolean boolean, "boolean"] => @True [],
+   [@_boolean boolean, "any"    ] => @True [],
+
+   [@_number number, "number"]  => @True [],
+   [@_number number, "any"   ]  => @True [],
+   [@_number number, @_number number]  => compare-values,
+
+   [@_string string, "string"]  => @True [],
+   [@_string string, "any"   ]  => @True [],
+   [@_string string, @_string string]  => compare-values,
+  
+   * => @False null,
+ }
+};
+
+command compare-values :: [any, any] -> Result
+{
+  [untagged, untagged] | eq |
+  when {
+   Same => @Ture [],
+   Diff => @False null,
+  }
 };
 
 }>>
