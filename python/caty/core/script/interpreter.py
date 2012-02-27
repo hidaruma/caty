@@ -111,6 +111,26 @@ class CommandExecutor(BaseInterpreter):
             return args[0].execute(args[1])
 
     def _do_script(self, *args):
+        opts = node._opts
+        args = node._args
+        o = {}
+        if opts:
+            for k, v in opts.items():
+                o[k] = v
+        node.var_storage.new_masked_scope(opts or {}, args or [])
+        if opts:
+            for k, v in opts.items():
+                node.var_storage.opts[k] = v
+        if args:
+            node.var_storage.opts['_ARGV'] = [u""] + args
+            node.var_storage.args = [u""] + args
+        else:
+            node.var_storage.opts['_ARGV'] = [u""]
+            node.var_storage.args = [u""]
+        if opts:
+            node.var_storage.opts['_OPTS'] = o
+        else:
+            node.var_storage.opts['_OPTS'] = {}
         try:
             if len(args) == 1:
                 return args[0].script.accept(self)

@@ -341,26 +341,6 @@ def scriptwrapper(profile, script):
 
         def _prepare(self):
             self._init_opts()
-            opts = self._opts
-            args = self._args
-            o = {}
-            if opts:
-                for k, v in opts.items():
-                    o[k] = v
-            self.var_storage.new_masked_scope(opts or {}, args or [])
-            if opts:
-                for k, v in opts.items():
-                    self.var_storage.opts[k] = v
-            if args:
-                self.var_storage.opts['_ARGV'] = [u""] + args
-                self.var_storage.args = [u""] + args
-            else:
-                self.var_storage.opts['_ARGV'] = [u""]
-                self.var_storage.args = [u""]
-            if opts:
-                self.var_storage.opts['_OPTS'] = o
-            else:
-                self.var_storage.opts['_OPTS'] = {}
 
         def set_var_storage(self, storage):
             Command.set_var_storage(self, storage)
