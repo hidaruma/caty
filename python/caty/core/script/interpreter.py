@@ -358,18 +358,40 @@ class CommandExecutor(BaseInterpreter):
         return r
 
     def visit_take(self, node):
-        r = []
-        i = self.input
-        for v in i:
-            try:
-                self.input = v
+        node._prepare()
+        if not node.obj:
+            r = []
+            i = self.input
+            if isinstance(i, dict):
+                i = i.values()
+            for v in i:
                 node.var_storage.new_scope()
-                x = node.cmd.accept(self)
-                if x == True or tag(x) == 'True':
-                    r.append(v)
-            finally:
-                node.var_storage.del_scope()
+                try:
+                    self.input = v
+                    x = node.cmd.accept(self)
+                    if self.__truth(x, node):
+                        r.append(v)
+                finally:
+                    node.var_storage.del_scope()
+        else:
+            r = {}
+            i = self.input
+            for k, v in i.items():
+                try:
+                    self.input = v
+                    node.var_storage.new_scope()
+                    x = node.cmd.accept(self)
+                    if self.__truth(x, node):
+                        r[k] = v
+                finally:
+                    node.var_storage.del_scope()
         return r
+
+    def __truth(self, v, node):
+        if node.indef:
+            return v == True or tag(v) == 'True' or tag(v) == 'Indef'
+        else:
+            return v == True or tag(v) == 'True'
 
     def visit_start(self, node):
         from caty.core.facility import TransactionAdaptor

@@ -408,12 +408,31 @@ class Time(Syntax):
 
 class Take(Syntax):
     command_decl = u"""
-    command take-functor<T default any> :: [T*] -> [T*]
+    command take-functor<T default any> {"indef": boolean?} :: array | object -> [T*]
+                                        {"indef": boolean?, "obj": true} :: object -> object
         refers python:caty.core.script.node.Take;
     """
     def __init__(self, cmd, opts_ref):
         Syntax.__init__(self, opts_ref)
         self.cmd = cmd
+
+    def setup(self, opts, *ignore):
+        self.__obj = opts['obj'] if 'obj' in opts else None
+        self.__indef = opts['indef'] if 'indef' in opts else None
+
+    def _prepare(self):
+        Command._prepare(self)
+
+    def _init_opts(self):
+        Command._init_opts(self)
+
+    @property
+    def obj(self):
+        return self.__obj
+
+    @property
+    def indef(self):
+        return self.__indef
 
     def set_facility(self, facilities):
         self.cmd.set_facility(facilities)
