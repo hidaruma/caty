@@ -111,6 +111,7 @@ class CommandExecutor(BaseInterpreter):
             return args[0].execute(args[1])
 
     def _do_script(self, *args):
+        node = args[0]
         opts = node._opts
         args = node._args
         o = {}
