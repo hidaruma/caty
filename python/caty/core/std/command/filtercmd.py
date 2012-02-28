@@ -66,18 +66,16 @@ class RawStringFilter(Builtin):
 class IsObject(Builtin):
 
     def execute(self, input):
-        input_type = type(input)
-        if input_type == DictType:
-            return true
+        if isinstance(input, dict):
+            return True
         else:
-            return false
+            return False
 
 class IsArray(Builtin):
 
     def execute(self, input):
-        input_type = type(input)
-        if input_type == ListType:
-            return true
+        if isinstance(input, list):
+            return True
         else:
-            return false
+            return False
 
