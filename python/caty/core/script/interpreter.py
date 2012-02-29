@@ -110,8 +110,8 @@ class CommandExecutor(BaseInterpreter):
         else:
             return args[0].execute(args[1])
 
-    def _do_script(self, *args):
-        node = args[0]
+    def _do_script(self, *argv):
+        node = argv[0]
         opts = node._opts
         args = node._args
         o = {}
@@ -133,13 +133,13 @@ class CommandExecutor(BaseInterpreter):
         else:
             node.var_storage.opts['_OPTS'] = {}
         try:
-            if len(args) == 1:
-                return args[0].script.accept(self)
+            if len(argv) == 1:
+                return node.script.accept(self)
             else:
-                self.input = args[1]
-                return args[0].script.accept(self)
+                self.input = argv[1]
+                return node.script.accept(self)
         finally:
-            args[0].var_storage.del_masked_scope()
+            node.var_storage.del_masked_scope()
 
     def _exec_command(self, node, exec_func):
         input = self.input
