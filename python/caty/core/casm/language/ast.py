@@ -1,6 +1,6 @@
 #coding: utf-8
 from caty.core.schema import schemata, TypeVariable, NamedSchema, PseudoTag, UnionSchema
-from caty.core.schema.base import SchemaBase, TypeVariable, Annotations, IntersectionSchema, UpdatorSchema, UnionSchema
+from caty.core.schema.base import SchemaBase, TypeVariable, Annotations, Annotation, IntersectionSchema, UpdatorSchema, UnionSchema
 from caty.core.schema.array import ArraySchema
 from caty.core.schema.object import ObjectSchema
 from caty.core.schema.errors import JsonSchemaError
@@ -391,4 +391,31 @@ class TypeParam(object):
 
     def __repr__(self):
         return self.var_name + ":" + str(self.kind)
+
+class ConstDecl(object):
+    def __init__(self, name, type, schema, script, doc, ann):
+        self.name = name
+        self.doc = doc
+        a = Annotations([])
+        for c in ann._annotations:
+            a.add(c)
+        a.add(Annotation('__const'))
+        self.__schema = ASTRoot(name, None, type if type is not None else schema, a, doc)
+        self.__command = CommandNode(name, 
+                                     [CallPattern(None, 
+                                                 None, 
+                                                 CommandDecl(
+                                                    [(ScalarNode('void'), type if type is not None else schema)],
+                                                    [], 
+                                                    []
+                                                 ), 
+                                     )],
+                                     script,
+                                     doc, 
+                                     a,
+                                     [])
+
+    def declare(self, module):
+        self.__schema.declare(module)
+        self.__command.declare(module)
 

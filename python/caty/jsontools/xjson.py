@@ -223,6 +223,8 @@ parsers = [
     array, 
     obj]
 
+def parse(seq):
+    return seq.parse(parsers)
 
 def remove_comment(seq):
     seq.parse(skip_ws)
