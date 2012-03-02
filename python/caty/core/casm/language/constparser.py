@@ -10,7 +10,7 @@ def const(seq):
     if n in RESERVED:
         raise ParseFailed(seq, command, '%s is reserved.' % n)
     if seq.parse(option('::', None)):
-        type = typdef(seq)
+        type = typedef(seq)
     else:
         type = None
     seq.parse('=')
