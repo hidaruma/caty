@@ -211,7 +211,7 @@ class ScriptParser(Parser):
     def tag(self, seq):
         _ = seq.parse('@')
         n = self.tag_name(seq)
-        delim = True if seq.eof else seq.peek(option([',', ']', '}'], False))
+        delim = True if seq.eof else seq.peek(option([',', ']', '}', ';', '|'], False))
         if delim:
             return UnaryTagBuilder(n)
         r = seq.parse([self.term, self.group])

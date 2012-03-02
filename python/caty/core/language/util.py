@@ -76,8 +76,9 @@ class SchemaSyntaxError(Exception):
     def __repr__(self):
         return repr(self.exception)
 
+from caty.jsontools.xjson import parsers, string, multiline_string
 def value(seq):
-    return seq.parse([string, boolean, number, integer])
+    return seq.parse([string, boolean, number, integer, multiline_string])
 
 def boolean(seq):
     b = seq.parse(['true', 'false'])
@@ -91,9 +92,6 @@ def integer(seq):
 
 def number(seq):
     return Decimal(seq.parse(Regex(r'-?[0-9]+\.[0-9]+')))
-
-from caty.jsontools.xjson import parsers, string
-
 
 
 def _is_doc_str(seq):

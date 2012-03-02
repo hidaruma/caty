@@ -147,7 +147,10 @@ class TypeCalcurator(_SubNormalizer):
         if lt == 'never' or rt == 'never':
             res = NeverSchema()
         elif lt == 'undefined' or rt == 'undefined':
-            res = UndefinedSchema()
+            if lt == rt:
+                res = UndefinedSchema()
+            else:
+                res = NeverSchema()
         # anyは&演算では単位元
         elif lt == 'any':
             res = r

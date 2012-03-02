@@ -27,7 +27,7 @@ def _undefined(seq):
 def _script(seq):
     from caty.core.script.parser import ScriptParser
     p = ScriptParser()
-    return choice(p.object, p.value, p.list, p.tag)(seq)
+    return choice(*map(try_, [p.value, p.object, p.list, p.tag, p.command]))(seq)
 
 
 

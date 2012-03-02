@@ -53,7 +53,7 @@ def term(seq):
     def _tag(s):
         _ = s.parse('@')
         t = s.parse([tagname, string, '*!', '*'])
-        v = s.parse(option(term)) # @foo だけなら @foo any (or @foo _T)?
+        v = s.parse(option(term))
         return TaggedNode(t, v)
 
     def _type_name_tag(s):

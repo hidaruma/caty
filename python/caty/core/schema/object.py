@@ -101,7 +101,7 @@ class ObjectSchema(SchemaBase, Object):
             raise JsonSchemaError(dict(msg=u'Can not calculate ++: optional property which is not undefined might appear at both side', prop='some property'))
         for k, v in another.items():
             if k in self:
-                if self[k].type != 'undefined' and v.type != 'undefined':
+                if self[k].type not in ('undefined', 'never') and v.type not in ('undefined', 'never'):
                     raise JsonSchemaError(dict(msg=u'Can not calculate ++: $prop which is not undefined appears at both side', prop=k))
                 else:
                     newschema_obj[k] = v
