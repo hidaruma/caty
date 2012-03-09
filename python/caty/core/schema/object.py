@@ -5,20 +5,6 @@ import caty.core.runtimeobject as ro
 import caty.jsontools as json
 import random
 
-class PseudoTag(object):
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
-
-    def exclusive(self, another):
-        return self.name == another.name and self.value != another.value
-
-    def defined(self):
-        return self.name
-
-    def __str__(self):
-        return '%s=%s' % (self.name, repr(self.value))
-
 class ObjectSchema(SchemaBase, Object):
     u"""JSON オブジェクトの妥当性検証を行うクラス。
     """

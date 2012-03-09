@@ -22,3 +22,4 @@ class ReferenceResolver(SchemaBuilder):
             if node.default and self.module.has_schema(node.default):
                 node.set_default(self.module.get_schema(node.default))
         return node
+

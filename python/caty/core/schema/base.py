@@ -316,6 +316,27 @@ class SchemaBase(Resource, PbcObject):
             another = another.body
         return UpdatorSchema(self, another)
 
+class PseudoTag(object):
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+    def exclusive(self, another):
+        return self.name == another.name and self.value != another.value
+
+    def defined(self):
+        return self.name
+
+    def __str__(self):
+        return '%s=%s' % (self.name, repr(self.value))
+
+class SchemaAttribute(property):
+    def __init__(self, name, default=None):
+        property.__init__(self, lambda obj: obj.options.get(name, default), lambda obj, v: obj._options.__setitem__(name, v))
+
+attribute = SchemaAttribute
+
+
 class OperatorSchema(SchemaBase):
     def __init__(self, a, b, options=None):
         self._left = a
@@ -1223,6 +1244,10 @@ class NamedSchema(SchemaBase, Root):
         return 'NamedSchema:' + self.name + repr(self.body)
 
 class TypeReference(SchemaBase, Scalar):
+
+    # 参照先がオブジェクトの可能性もあるので擬似タグをサポート
+    pseudoTag = attribute('pseudoTag', PseudoTag(None, None))
+    __options__ = SchemaBase.__options__ | set(['pseudoTag'])
     def __init__(self, name, type_args, module):
         SchemaBase.__init__(self)
         self._name = name
@@ -1272,6 +1297,18 @@ class TypeReference(SchemaBase, Scalar):
 
     def validate(self, value):
         self.body.validate(value)
+        if isinstance(value, dict): 
+            errors = {}
+            is_error = False
+            for k, v in value.iteritems():
+                if self.pseudoTag.name == k:
+                    if self.pseudoTag.value != v:
+                        errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Not matched to pseudo tag $tag: $value', tag=str(self.pseudoTag), value=v))
+                        is_error = True
+            if is_error:
+                e = JsonSchemaErrorObject({u'msg': u'Failed to validate object'})
+                e.update(errors)
+                raise e
 
     def convert(self, value):
         return self.body.convert(value)
@@ -1313,12 +1350,6 @@ class OverlayedDict(object):
 
     def __contains__(self, k):
         return k in self.a or k in self.b
-
-class SchemaAttribute(property):
-    def __init__(self, name, default=None):
-        property.__init__(self, lambda obj: obj.options.get(name, default), lambda obj, v: obj._options.__setitem__(name, v))
-
-attribute = SchemaAttribute
 
 class Annotations(dict):
     def __init__(self, annotations):

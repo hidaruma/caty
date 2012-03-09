@@ -91,4 +91,44 @@ class TypeVarApplier(SchemaBuilder):
                 raise KeyError(node.var_name)
         return node
 
+    @apply_annotation
+    def _visit_intersection(self, node):
+        h = self.history
+        self.history = dict()
+        self.history.update(h)
+        l = node.left.accept(self)
+        h2 = self.history
 
+        self.history = dict()
+        self.history.update(h)
+        r = node.right.accept(self)
+        self.history.update(h2)
+        return IntersectionSchema(l, r, node.options)
+
+    @apply_annotation
+    def _visit_union(self, node):
+        h = self.history
+        self.history = dict()
+        self.history.update(h)
+        l = node.left.accept(self)
+        h2 = self.history
+
+        self.history = dict()
+        self.history.update(h)
+        r = node.right.accept(self)
+        self.history.update(h2)
+        return UnionSchema(l, r, node.options)
+
+    @apply_annotation
+    def _visit_updator(self, node):
+        h = self.history
+        self.history = dict()
+        self.history.update(h)
+        l = node.left.accept(self)
+        h2 = self.history
+
+        self.history = dict()
+        self.history.update(h)
+        r = node.right.accept(self)
+        self.history.update(h2)
+        return UpdatorSchema(l, r, node.options)

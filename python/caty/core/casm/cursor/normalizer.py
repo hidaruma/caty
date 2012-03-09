@@ -232,6 +232,8 @@ class TypeCalcurator(_SubNormalizer):
                     res = comb[0] | comb[1]
             elif lt == rt or (lt in ('number', 'integer') and rt in ('number', 'integer')):
                 # 同じ型であればそのまま計算(numberとintegerも)
+                if self.__exclusive_pseudotag(l, r):
+                    return NeverSchema()
                 res = l.intersect(r).accept(self)
             elif lt == 'enum' and isinstance(r, Scalar):
                 res = self._intersect_enum_and_scalar(self._dereference(l), r)
@@ -313,11 +315,27 @@ class TypeCalcurator(_SubNormalizer):
             return NeverSchema()
         return EnumSchema(r, enum.options)
 
-    def _dereference(self, o):
-        if isinstance(o, (Root, Tag, TypeReference)):
-            return self._dereference(o.body)
+    def __exclusive_pseudotag(self, a, b):
+        if a.type != 'object':
+            return False
+        p1 = self.__traverse_pseudotag(a)
+        p2 = self.__traverse_pseudotag(b)
+        if p1 and p2 and p1.name and p2.name:
+            return p1.exclusive(p2)
+        return False
+
+    def __traverse_pseudotag(self, o):
+        if isinstance(o, TypeReference):
+            if o.pseudoTag:
+                return o.pseudoTag
+            else:
+                return self.__traverse_pseudotag(o.body)
+        elif isinstance(o, NamedSchema):
+            return self.__traverse_pseudotag(o.body)
+        elif isinstance(o, ObjectSchema):
+            return o.pseudoTag
         else:
-            return o
+            return None
 
     @apply_annotation
     def _visit_updator(self, node):

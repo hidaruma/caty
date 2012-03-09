@@ -127,6 +127,14 @@ class SchemaBuilder(TreeCursor):
         s.pseudoTag = pseudoTag(node._name, node._value)
         return s
 
+
+    def _dereference(self, o):
+        if isinstance(o, (Root, Tag, TypeReference)):
+            return self._dereference(o.body)
+        else:
+            return o
+
+
 class ProfileBuilder(SchemaBuilder):
 
     def _visit_function(self, node):
