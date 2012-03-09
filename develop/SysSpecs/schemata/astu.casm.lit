@@ -837,7 +837,7 @@ command unify1 :: [RecTypeExpr, RootedTypeExpr, RecTypeExpr, RootedTypeExpr, obj
  }
 };
 
-command unify-left-elemental :: [RecTypeExpr, RootedTypeExpr, RecTypeExpr, RootedTypeExpr, object] -> Result
+command unify-left-elemental1 :: [RecTypeExpr, RootedTypeExpr, RecTypeExpr, RootedTypeExpr, object] -> Result
 {
   pass > in | [nth 1 > left, nth 2 > lcurr, nth 3 > right, nth 4 > rcurr, nth 5 > visited];
 
@@ -891,56 +891,6 @@ command unify-both-elemental1 :: [RecTypeExpr, RootedTypeExpr, RecTypeExpr, Root
    // 型変数または複合型以外の型
     *    ==> [pass, %right] | call astu:unify-simple
  }
-};
-
-
-}>>
-
-* unify-simple
-
-<<{
-command unify-simple :: [TypeExpr left, TypeExpr right] -> Result
-{
-  dump --prefix="unify-simple" |
-  cond {
-   ["never",               any] => @True [],
-   [any,                "any?"] => @True [],
-   ["any",              "any" ] => @True [],
-   
-   ["undefined",   "undefined"] => @True [],
-   ["null",        "null"]      => @True [],
-   ["null",        "any" ]      => @True [],
-   ["boolean",     "boolean"]   => @True [],
-   ["boolean",     "any"    ]   => @True [],
-   ["nummer",      "number" ]   => @True [],
-   ["nummer",      "any"    ]   => @True [],
-   ["string",      "string" ]   => @True [],
-   ["string",      "any"    ]   => @True [],
-   ["binary",      "binary" ]   => @True [],
-   ["binary",      "any"    ]   => @True [],
-
-   [@_boolean boolean, "boolean"] => @True [],
-   [@_boolean boolean, "any"    ] => @True [],
-
-   [@_number number, "number"]  => @True [],
-   [@_number number, "any"   ]  => @True [],
-   [@_number number, @_number number]  => compare-values,
-
-   [@_string string, "string"]  => @True [],
-   [@_string string, "any"   ]  => @True [],
-   [@_string string, @_string string]  => compare-values,
-  
-   * => @False null,
- }
-};
-
-command compare-values :: [any, any] -> Result
-{
-  [untagged, untagged] | eq |
-  when {
-   Same => @Ture [],
-   Diff => @False null,
-  }
 };
 
 }>>
