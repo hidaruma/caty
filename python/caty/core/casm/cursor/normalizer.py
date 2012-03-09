@@ -114,6 +114,7 @@ class TypeCalcurator(_SubNormalizer):
     def __init__(self, module):
         _SubNormalizer.__init__(self, module)
         self.history = set()
+        self.traced = set()
 
     @apply_annotation
     def _visit_scalar(self, node):
@@ -121,7 +122,10 @@ class TypeCalcurator(_SubNormalizer):
             if node in self.history:
                 return node
             self.history.add(node)
-            node.body = node.body.accept(self)
+            try:
+                node.body = node.body.accept(self)
+            except:
+                print '[DEBUG]', node.name
         return node
 
     @apply_annotation
@@ -264,43 +268,6 @@ class TypeCalcurator(_SubNormalizer):
                 return r.intersect(l)
         else:
             return (l & r).accept(self)
-
-    def _compress(self, l):
-        # 計算過程で生じた同一スキーマを単一のスキーマに圧縮する
-        # ここでは簡単なタグ名/型名でのチェックに留める
-        r = []
-        print '>>>', map(lambda x: TreeDumper().visit(x), l)
-        for c in l:
-            if not r:
-                r.append(c)
-            else:
-                if all(map(lambda x: self._is_different_schema(x, c), r)):
-                    r.append(c)
-        print '<<<', map(lambda x: TreeDumper().visit(x), r)
-        return r
-
-
-    def _is_different_schema(self, c, c2):
-        if c.type == '__union__':
-            if c2.type == '__union__':
-                if ((self._is_different_schema(c.left, c2.right) and self._is_different_schema(c.right, c2.left))
-                    and (self._is_different_schema(c.left, c2.left) and self._is_different_schema(c.right, c2.right))):
-                    return True
-                else:
-                    return False
-            else:
-                if (self._is_different_schema(c.left, c2) and self._is_different_schema(c.right, c2)):
-                    return True
-                else:
-                    return False
-        elif c2.type == '__union__':
-            if (self._is_different_schema(c2.left, c) and self._is_different_schema(c2.right, c)):
-                return True
-            else:
-                return False
-        elif c.type != c2.type:
-            return True
-        return False
 
     def _intersect_enum_and_scalar(self, enum, scalar):
         r = []
