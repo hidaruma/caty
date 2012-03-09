@@ -128,15 +128,6 @@ class SchemaBuilder(TreeCursor):
         return s
 
 class ProfileBuilder(SchemaBuilder):
-    def _visit_scalar(self, node):
-        if node.name in types:
-            return types[node.name].clone(None, node.options)
-        elif self.module.has_schema(node.name):
-            schema = self.module.get_schema(node.name)
-            return schema
-        else:
-            schema = TypeVariable(node.name, node.type_args, node.options, None, None, self.module)
-            return schema 
 
     def _visit_function(self, node):
         from caty.core.casm.cursor.resolver import ReferenceResolver
@@ -170,6 +161,7 @@ class ProfileBuilder(SchemaBuilder):
                 schema = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
                 params.append(schema.accept(rr))
             node.type_params = params
+            self._type_params = params
             pc.type_params = params
             pat.build([self, rr])
             e = pat.verify_type_var(node.type_var_names)

@@ -23,7 +23,7 @@ class TreeDumper(TreeCursor):
             if node.type_params:
                 buff.append('<')
                 for t in node.type_params:
-                    buff.append(t.name)
+                    buff.append(t.var_name)
                     buff.append(', ')
                 buff.pop(-1)
                 buff.append('>')

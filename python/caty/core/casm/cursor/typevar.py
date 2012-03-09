@@ -43,19 +43,20 @@ class TypeVarApplier(SchemaBuilder):
         self.current = node
         self.real_root = False
         parameters = {}
+        self.type_params = node.type_params
         for v in node.type_params:
             parameters[v.var_name] = v
         self.type_args = OverlayedDict(parameters)
 
     def _mask_scope(self, node):
         self.scope_stack.append(self.type_args)
-        parameters = {}
-        for v in node.type_params:
-            parameters[v.var_name] = v
-        self.type_args = OverlayedDict(parameters)
+        self.type_args.new_scope()
+        for p, v in zip(node.type_params, node.type_args):
+            self.type_args[p.var_name] = v
 
     def _unmask_scope(self):
         self.type_args = self.scope_stack.pop(-1)
+        self.type_args.del_scope()
 
     @apply_annotation
     def _visit_scalar(self, node):

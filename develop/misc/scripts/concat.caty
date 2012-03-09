@@ -1,2 +1,2 @@
 
-[param %1,  param %2] | text:concat
+[%1, %2] | text:concat

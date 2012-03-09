@@ -62,7 +62,7 @@ command draw-action {
   /** モジュール名:リソース名.アクション名 */
   string action_name
 ] :: void -> void | binary | string
-     throws [ModuleNotFound, ResourNotFound, ActionNotFound]
+     throws [ModuleNotFound, ResourceNotFound, ActionNotFound]
      updates pub
     refers python:caty.core.std.command.viva.cara.DrawAction;
 
@@ -116,7 +116,7 @@ command draw-scenarios {
   /** 描画に使われるフォント。日本語を使う場合は指定するのを推奨 */
   "font": string?
   } [string startAction, string userrole] :: void -> void | binary | string
-     throws [ModuleNotFound, ResourNotFound, ActionNotFound]
+     throws [ModuleNotFound, ResourceNotFound, ActionNotFound]
      uses pub
     refers python:caty.core.std.command.viva.cara.Scenarios;
 
