@@ -3,7 +3,7 @@
 == !exec
 
 
-|= inut   |= command        |= params          |= output   |= 備考 |
+|= input   |= command        |= params          |= output   |= 備考 |
 | 1       |validate --pred  | extBase:xnumber  | true      | |
 | 2       |validate --pred  | extBase:xnumber  | true      | |
 | 100     |validate --pred  | extBase:xnumber  | true      | |
