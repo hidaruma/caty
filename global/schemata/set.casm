@@ -9,8 +9,16 @@ type Set = array(tight=true);
 command union :: [Set, Set] -> Set
  refers python:setlib.Union;
 
-/** 集合の共通部分（交） */
+/** 集合の合併（別名） */
+command join :: [Set, Set] -> Set
+ refers python:setlib.Union;
+
+/** 集合の共通部分 */
 command meet :: [Set, Set] -> Set
+ refers python:setlib.Meet;
+
+/** 集合の共通部分（別名） */
+command intersection :: [Set, Set] -> Set
  refers python:setlib.Meet;
 
 /** 差集合 */

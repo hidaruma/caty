@@ -2,8 +2,13 @@
 # 
 #
 from caty.command import Command
-import Image 
 from cStringIO import StringIO 
+try:
+    import Image 
+except ImportError:
+    print "Cannot use Image library."
+    Image = None
+
 
 class ShowImage(Command):
 

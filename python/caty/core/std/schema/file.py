@@ -35,7 +35,7 @@ command read-i [] :: string -> string | binary
 /**
  * 引数で指定したファイルに入力値を書き込む。
  */
-command write [string] :: string -> void
+command write [string] :: (string|binary) -> void
     updates [data, include, pub]
     refers python:caty.core.std.command.file.WriteFile;
 
