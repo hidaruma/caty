@@ -48,7 +48,7 @@ class DumpSchema(Builtin):
         self.__schema_name = name
 
     def execute(self):
-        print TreeDumper().visit(self.schema[self.__schema_name])
+        print TreeDumper(deep=True).visit(self.schema[self.__schema_name])
 
 class Profile(Builtin):
 
@@ -110,3 +110,13 @@ class Annotate(Builtin, MafsMixin):
                                      transaction=None)
         r = ScriptAnnotation().visit(cmd.cmd)
         return u''.join(r)
+
+def enter(system):
+    return system
+
+class Debugger(Builtin):
+    def execute(self):
+        import pdb
+        system = self._defined_application._system
+        pdb.runcall(enter, system)
+

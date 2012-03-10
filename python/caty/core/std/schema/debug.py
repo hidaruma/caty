@@ -68,4 +68,10 @@ command annotate [string path] :: void -> string
     reads [scripts, pub, data, interpreter]
     refers python:caty.core.std.command.debug.Annotate;
 
+/**
+ * デバッガを起動する。
+ */
+command debugger :: void -> void
+    refers python:caty.core.std.command.debug.Debugger;
+
     """

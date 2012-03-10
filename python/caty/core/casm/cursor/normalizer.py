@@ -147,6 +147,18 @@ class TypeCalcurator(_SubNormalizer):
             r = r.body
         lt = l.type
         rt = r.type
+        # 型変数の場合はデフォルトもしくはカインドを元に計算する。
+        # XXX:現状デフォルトのみ実装
+        if lt == '__variable__':
+            d = self._dereference(l)._default_schema
+            if d:
+                lt = d.type
+                l = self._dereference(l)
+        if rt == '__variable__':
+            d = self._dereference(r)._default_schema
+            if d:
+                rt = d.type
+                r = self._dereference(r)
         # 一方がnevrであれば演算結果はnever
         if lt == 'never' or rt == 'never':
             res = NeverSchema()
@@ -235,6 +247,11 @@ class TypeCalcurator(_SubNormalizer):
                 else:
                     res = comb[0] | comb[1]
             elif lt == rt or (lt in ('number', 'integer') and rt in ('number', 'integer')):
+                # デフォルト指定された型変数が含まれている場合、そちらを返す。
+                if isinstance(l, TypeVariable):
+                    return l
+                if isinstance(r, TypeVariable):
+                    return r
                 # 同じ型であればそのまま計算(numberとintegerも)
                 if self.__exclusive_pseudotag(l, r):
                     return NeverSchema()
@@ -277,7 +294,7 @@ class TypeCalcurator(_SubNormalizer):
             except:
                 pass
             else:
-                r.append(r)
+                r.append(e)
         if not r:
             return NeverSchema()
         return EnumSchema(r, enum.options)

@@ -36,7 +36,7 @@ type TriggerBase = {
   * : any?
 };
 
-type Trigger<ActionName> = TriggerBase & {"$actionName" : ActionName, * : any?};
+type Trigger<ActionName in string default string> = TriggerBase & {"$actionName" : ActionName, * : any?};
 
 type EditTrigger = Trigger<"edit">;
 

@@ -65,7 +65,7 @@ type xl = {
 |translate |@form {"x.i": ["0"], "y.i":["2"], "y.s":["s"]}| t02:xy| @OK {"x":{"i" : 0}, "y":{"i":2, "s":"s"}}  | | |
 |translate |@form {"x.i": ["0"], "l":["1", "2"]}| t02:xl   | @OK {"x":{"i" : 0}, "l":[1, 2]}  | | |
 |translate |@form {"x.i": ["0"], "l":["1"]}| t02:xl   | @OK {"x":{"i":0}, "l":[1]}  | | |
-|translate |@form {"l":["1"]}              | t02:xl   | @OK {"x":{}, "l":[1]}  | | 微妙ではある、後述の「問題点」参照 |
+|translate |@form {"l":["1"]}              | t02:xl   |   | | 微妙ではある、後述の「問題点」参照 |
 |translate |@form {"x.i":[], "l":["1"]}      | t02:xl   |   |Exception | @OK {"x":{}, "l":[1]} 空列を非存在とすればツジツマはあうが、これは送れない |
 
 

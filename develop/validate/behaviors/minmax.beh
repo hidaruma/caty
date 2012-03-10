@@ -37,8 +37,6 @@ type nonPositive = integer(maximum=0);
 |  0    | validate --pred mm:nonNegative| true    |
 |  1    | validate --pred mm:nonNegative| true    |
 
-|= command |= output |= 備考 |
-| true     | false   |以下のメッセージ文言がおかしい |
 
 |= input|= command             |= output |= judge |
 |  1    | validate  mm:positive|     |ignore|

@@ -211,7 +211,7 @@
 
     "minmum($min) is longer than maxLength($max)": "minmum($min)がmaxLength($max)よりも大きく設定されています",
 
-    "value should be greater than $val": "値は$valよりも大きくなければなりません",
+    "value should be greater than $val": "値は$val以上でなければなりません",
     
     "value should be smaller than $val": "値は$val以下でなければなりません",
 
