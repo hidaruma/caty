@@ -5,7 +5,7 @@ import caty.jsontools.stdjson as json
 try:
     import pygraphviz as gv
 except:
-    print '[Warning] graphviz is not install, viva module does not work.'
+    print '[Warning] graphviz is not installed, viva module does not work.'
 
 class DrawNT(Internal):
     def setup(self, opts):

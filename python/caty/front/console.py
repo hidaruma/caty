@@ -471,7 +471,7 @@ def setup_shell(args, cls=CatyShell):
                          'file=',
                          'no-ambient',
                          'no-app'])
-    sitename = ''
+    sitename = []
     wildcat = False
     system_encoding = locale.getpreferredencoding()
     script = ''
@@ -487,10 +487,7 @@ def setup_shell(args, cls=CatyShell):
     dribble = False
     for o, v in opts:
         if o in ('-a', '--app'):
-            if not sitename:
-                sitename = [v]
-            else:
-                sitename.append(v)
+            sitename.append(v)
         elif o in ('-u', '--unleash-wildcats'):
             wildcat = True
         elif o in ('-d', '--debug'):
