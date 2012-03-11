@@ -35,7 +35,7 @@ class System(PbcObject):
     __properties__ = ['app_names']
 
     @brutal_error_printer
-    def __init__(self, encoding=None, is_debug=True, quiet=False, no_ambient=False, no_app=False, primary=u'root'):
+    def __init__(self, encoding=None, is_debug=True, quiet=False, no_ambient=False, no_app=False, app_names=(u'root',)):
         caty.core.runtimeobject.i18n = I18nMessage({}, writer=cout, lang='en') # フォールバック
         if quiet:
             class NullWriter(object):
@@ -80,7 +80,7 @@ class System(PbcObject):
                                      viva,
                                      http])
 
-        gag = ApplicationGroup('', self._global_config, no_ambient, no_app, primary, self)
+        gag = ApplicationGroup('', self._global_config, no_ambient, no_app, app_names, self)
         self._global_app = gag._apps[0]
         self._global_app.finish_setup()
         self._casm.set_global(self._global_app)
@@ -89,11 +89,11 @@ class System(PbcObject):
         # common, main, extra, examples という順序は固定
         self._app_groups = [
             ag for ag in [
-                ApplicationGroup('common', self._global_config, no_ambient, no_app, primary, self),
-                ApplicationGroup(USER, self._global_config, no_ambient, no_app, primary, self),
-                ApplicationGroup('extra', self._global_config, no_ambient, no_app, primary, self),
-                ApplicationGroup('examples', self._global_config, no_ambient, no_app, primary, self),
-                ApplicationGroup('develop', self._global_config, no_ambient, no_app, primary, self),
+                ApplicationGroup('common', self._global_config, no_ambient, no_app, app_names, self),
+                ApplicationGroup(USER, self._global_config, no_ambient, no_app, app_names, self),
+                ApplicationGroup('extra', self._global_config, no_ambient, no_app, app_names, self),
+                ApplicationGroup('examples', self._global_config, no_ambient, no_app, app_names, self),
+                ApplicationGroup('develop', self._global_config, no_ambient, no_app, app_names, self),
             ] if ag.exists
         ]
         self._apps = reduce(operator.add, map(ApplicationGroup.apps.fget, self._app_groups))

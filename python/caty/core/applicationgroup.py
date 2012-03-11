@@ -29,7 +29,7 @@ class ApplicationGroup(PbcObject):
 
     __properties__ = ['name', 'apps', 'global_config']
 
-    def __init__(self, group_name, global_config, no_ambient, no_app, primary, system):
+    def __init__(self, group_name, global_config, no_ambient, no_app, app_names, system):
         self._name = unicode(group_name)
         self._global_config = global_config
         self._system = system
@@ -50,10 +50,10 @@ class ApplicationGroup(PbcObject):
                 r.create()
                 d.commit()
         if self._exists:
-            self._apps = list(self._load_apps(no_ambient, no_app, primary))
+            self._apps = list(self._load_apps(no_ambient, no_app, app_names))
             PbcObject.__init__(self)
 
-    def _load_apps(self, no_ambient, no_app, primary):
+    def _load_apps(self, no_ambient, no_app, app_names):
         if self._name == '':
             a = GlobalApplication(u'global', no_ambient, self, self._system)
             if a.enabled:
@@ -63,7 +63,7 @@ class ApplicationGroup(PbcObject):
             for d in app_group_root.start().read_mode.opendir('/').read():
                 if d.is_dir and not d.basename[0] in ('.', '_') and not d.basename in self._system.ignore_names:
                     name = d.path.strip('/')
-                    if name != primary and no_app:
+                    if name not in app_names and no_app:
                         continue
                     if name in RESERVED:
                         throw_caty_exception(

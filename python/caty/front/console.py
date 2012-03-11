@@ -471,7 +471,7 @@ def setup_shell(args, cls=CatyShell):
                          'file=',
                          'no-ambient',
                          'no-app'])
-    sitename = 'root'
+    sitename = ''
     wildcat = False
     system_encoding = locale.getpreferredencoding()
     script = ''
@@ -487,7 +487,10 @@ def setup_shell(args, cls=CatyShell):
     dribble = False
     for o, v in opts:
         if o in ('-a', '--app'):
-            sitename = v
+            if not sitename:
+                sitename = [v]
+            else:
+                sitename.append(v)
         elif o in ('-u', '--unleash-wildcats'):
             wildcat = True
         elif o in ('-d', '--debug'):
@@ -510,6 +513,8 @@ def setup_shell(args, cls=CatyShell):
             no_app = True
         elif o == '--dribble':
             dribble = True
+    if not sitename:
+        sitename = ['root']
     if args:
         help(u'不明な引数です: %s' % ', '.join(args))
         return None, None, None
@@ -517,7 +522,7 @@ def setup_shell(args, cls=CatyShell):
         help()
         return None, None, None
     system = System(_encoding, debug, quiet, no_ambient, no_app, sitename)
-    site = system.get_app(sitename)
+    site = system.get_app(sitename[0])
     shell = cls(site, wildcat, debug, system, dribble, ' '.join(args))
     return shell, files, script
 
@@ -528,7 +533,10 @@ def help(msg=None):
     op.add(u'Catyコンソール')
     op.add(u'Usage: python stdcaty.py console [opts]')
     op.add(u'\n起動オプション:')
-    op.add(u'-a, --app APP_NAME', u'起動時にAPP_NAMEに移動')
+    op.add(u'-a, --app APP_NAME', 
+u"""--no-appと同時に使用。APP_NAMEを例外的に起動する
+-a APP1 -a APP2などと複数指定可能
+デフォルトアプリケーションは最初に指定した物""")
     op.add(u'-s, --system-encoding', 
 u"""コンソール出力時の文字エンコーディング
 デフォルト値は環境変数から取得する
@@ -536,6 +544,8 @@ u"""コンソール出力時の文字エンコーディング
     op.add(u'-e, --eval SCRIPT', u'起動時にSCRIPTをCatyスクリプトだとして実行する')
     op.add(u'-f, --file SCRIPT_FILE', u'起動時にSCRIPT_FILEを読み込み実行する')
     op.add(u'-q, --quiet', u'起動メッセージを省略')
+    op.add(u'--no-app', u'-aで指定しなかったアプリケーションを読み込まない\n-aが未指定の場合rootのみが読み込まれる')
+    op.add(u'--no-ambient', u'global以外のアプリケーションのスキーマを読み込まない')
     op.show()
 
 @exc_wrapper
