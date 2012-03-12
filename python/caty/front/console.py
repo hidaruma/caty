@@ -470,7 +470,7 @@ def setup_shell(args, cls=CatyShell):
                          'dribble',
                          'file=',
                          'no-ambient',
-                         'exit=',
+                         'goodbye=',
                          'no-app'])
     sitename = []
     wildcat = False
@@ -512,7 +512,7 @@ def setup_shell(args, cls=CatyShell):
             no_app = True
         elif o == '--dribble':
             dribble = True
-        elif o == '--exit':
+        elif o == '--goodbye':
             exit = v
     if not sitename:
         sitename = ['root']

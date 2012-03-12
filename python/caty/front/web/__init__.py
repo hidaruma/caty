@@ -78,7 +78,7 @@ def build_server(system, is_debug, port=8000):
 def setup(args):
     from getopt import getopt
     import locale
-    opts, args = getopt(args, 's:dp:h', ['system-encoding=', 'debug', 'port=', 'help', 'pid=', 'hcon-port=', 'hcon-name=', 'exit='])
+    opts, args = getopt(args, 'sq:dp:h', ['system-encoding=', 'quiet', 'debug', 'port=', 'help', 'pid=', 'hcon-port=', 'hcon-name=', 'goodbye='])
     debug = False
     system_encoding = locale.getpreferredencoding()
     use_shell = False
@@ -88,6 +88,7 @@ def setup(args):
     init_writer(_encoding)
     _help = False
     exit = False
+    quiet = False
     for o, v in opts:
         if o in ('-d', '--debug'):
             debug = True
@@ -102,14 +103,16 @@ def setup(args):
             ro.PID_FILE = v
         elif o == '--hcon-port' or o == '--hcon-name':
             hcon_port = v
-        elif o == '--exit':
+        elif o == '--goodbye':
             exit = v
+        elif o in ('-q', '--quiet'):
+            quiet = True
     if os.path.exists(ro.PID_FILE):
         os.unlink(ro.PID_FILE)
     if _help:
         help()
         return None, None, None, None
-    system = System(system_encoding, debug)
+    system = System(system_encoding, debug, quiet)
     if exit:
         print exit
         return None, None, None, None
