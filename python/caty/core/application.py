@@ -34,7 +34,7 @@ import tempfile
 RC_SCRIPT = u'rc.caty'
 RC_ONCE_SCRIPT = u'rc-once'
 RC_DONE = u'rc-done'
-RESERVED = set(['this', 'global'])
+RESERVED = set(['this', u'global'])
 ROOT = 'root'
 USER = 'main'
 LOG_TYPES = ['app', 'performance', 'exec']
@@ -101,7 +101,7 @@ class Application(PbcObject):
             return
         if not scripts.open('/' + RC_SCRIPT).exists:
             return
-        self.i18n.write("Running init script of $name", name=self.name)
+        self.cout.write(self.i18n.get("Running init script of $name", name=self.name))
         facilities = self.create_facilities()
         interpreter = self.interpreter.file_mode(facilities)
         modes = [unicode('console')]
