@@ -400,7 +400,7 @@ class ConstDecl(object):
         for c in ann._annotations:
             a.add(c)
         a.add(Annotation('__const'))
-        self.__schema = ASTRoot(name, None, type if type is not None else schema, a, doc)
+        self.__schema = ASTRoot(name, None, schema, a, doc)
         self.__command = CommandNode(name, 
                                      [CallPattern(None, 
                                                  None, 

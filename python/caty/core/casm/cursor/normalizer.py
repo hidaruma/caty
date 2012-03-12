@@ -275,14 +275,14 @@ class TypeCalcurator(_SubNormalizer):
                 y = (l & r.right).accept(self)
                 return r.operate(x, y).accept(self)
             else:
-                return l.intersect(r)
+                return l.intersect(self._dereference(r))
         elif isinstance(r, EnumSchema):
             if isinstance(r, OperatorSchema):
                 x = (l & r.left).accept(self)
                 y = (l & r.right).accept(self)
                 return r.operate(x, y)
             else:
-                return r.intersect(l)
+                return r.intersect(self._dereference(l))
         else:
             return (l & r).accept(self)
 
