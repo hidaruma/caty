@@ -356,9 +356,11 @@ class VarStorage(object):
     コマンドライン引数やオプション引数がストアされる。
     """
     def __init__(self, opts, args):
-        self.opts = OverlayedDict(opts if opts else {})
+        from copy import deepcopy
+        self.opts = OverlayedDict(deepcopy(opts) if opts else {})
         self.args = args if args else []
         self.opts['_ARGV'] = args
+        self.opts['_OPTS'] = opts
         self.args_stack = []
         self.opts_stack = []
 

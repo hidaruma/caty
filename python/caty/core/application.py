@@ -427,6 +427,7 @@ class Application(PbcObject):
             dispatcher.add_resource(c)
         self._dispatcher = dispatcher
 
+
     def _create_bindings(self):
         from caty.core.camb import create_bindings
         create_bindings(self._actions.start().read_mode, self)
