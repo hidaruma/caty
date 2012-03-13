@@ -170,7 +170,7 @@ class System(PbcObject):
 
     @property
     def app_names(self):
-        return self.__app_names
+        return [n for n in self.__app_names if n != 'caty']
 
     @property
     def server_module_name(self):
