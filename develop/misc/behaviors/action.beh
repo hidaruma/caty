@@ -4,15 +4,18 @@
 
 == !exec
 
-|=command|=outputMatch|=備考|
-|%cmd1  | {"q": {"foo": "bar"}, "a": ["/dump", "/dump"]} | #dont-caraの指定されたリソース |
+|=command|=outputMatch|=!exception|=備考|
+|%cmd1  | {"q": {"foo": "bar"}, "a": ["/dump", "/dump"]} | | #dont-caraの指定されたリソース |
+|%cmd1-2  | {"q": {"foo": "bar"}, "a": ["/dump", "/dump"]} | | #dont-caraの指定されたリソース |
 |%cmd2   | ["a", "b", "c"]|  |
+|%cmd2-2   | ["a", "b", "c"]|  |
 |%cmd3   | {"status": 404}|  |
+|%cmd3-2   | | Exception ||
 
 == !name:cmd1
 
 {{{
-    request /dump | $.body | json:parse
+    request /dump "foo=bar" | $.body | json:parse
 }}}
 
 == !name:cmd2
@@ -27,5 +30,25 @@
 {{{
     request /x.data
 }}}
+
+== !name:cmd1-2
+
+{{{
+    sample:Dump.get --foo=bar /dump| $.body | json:parse
+}}}
+
+== !name:cmd2-2
+
+{{{
+    sample:Data.get /foo.data| $.body | json:parse
+}}}
+
+
+== !name:cmd3-2
+
+{{{
+    sample:Data.get /x.data
+}}}
+
 
 
