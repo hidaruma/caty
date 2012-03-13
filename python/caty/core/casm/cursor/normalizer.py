@@ -353,7 +353,7 @@ class NeverChecker(_SubNormalizer):
 
     def _visit_scalar(self, node):
         if node.type == 'never':
-            return [['never']]
+            return [[u'never']]
 
     def _visit_root(self, node):
         r = node.body.accept(self)

@@ -26,5 +26,5 @@ class BoolSchema(ScalarSchema):
 
     @property
     def type(self):
-        return 'boolean'
+        return u'boolean'
 

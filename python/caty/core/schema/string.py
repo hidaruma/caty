@@ -70,6 +70,6 @@ class StringSchema(ScalarSchema):
 
     @property
     def type(self):
-        return 'string'
+        return u'string'
 
 

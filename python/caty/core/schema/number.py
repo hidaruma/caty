@@ -75,8 +75,8 @@ class NumberSchema(ScalarSchema):
     @property
     def type(self):
         if self.is_integer:
-            return 'integer'
-        return 'number'
+            return u'integer'
+        return u'number'
 
 class IntegerSchema(NumberSchema):
     is_integer = True

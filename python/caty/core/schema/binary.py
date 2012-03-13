@@ -52,6 +52,6 @@ class BinarySchema(ScalarSchema):
 
     @property
     def type(self):
-        return 'binary'
+        return u'binary'
 
 

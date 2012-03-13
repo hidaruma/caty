@@ -85,7 +85,7 @@ def term(seq):
 
     def _never(s):
         _ = s.parse(Regex(r'\(\s*\)'))
-        return ScalarNode('never', {}, [])
+        return ScalarNode(u'never', {}, [])
 
     doc = option(docstring)(seq)
     s = seq.parse(map(try_, [_pseudo_tag, _type_name_tag, _tag, _never]) + [enum, _term, bag, object_, array, scalar])

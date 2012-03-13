@@ -109,7 +109,7 @@ class TreeDumper(TreeCursor):
             return str(e)
 
     def _visit_object(self, node):
-        buff = ['{\n']
+        buff = [u'{\n']
         self.depth += 1
         for k, v in node.items():
             if v.docstring:

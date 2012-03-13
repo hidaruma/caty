@@ -11,6 +11,7 @@ from caty.core.std.schema import (builtin,
                                   filtercmd, 
                                   jsonlib, 
                                   listlib, 
+                                  inspect,
                                   logginglib,
                                   strg, 
                                   test, 
@@ -66,6 +67,7 @@ class System(PbcObject):
                                      file, 
                                      filtercmd, 
                                      jsonlib, 
+                                     inspect,
                                      listlib, 
                                      logginglib,
                                      strg, 
@@ -80,6 +82,7 @@ class System(PbcObject):
                                      viva,
                                      http])
 
+        self._core_app = CoreApplication(self)
         gag = ApplicationGroup('', self._global_config, no_ambient, no_app, app_names, self)
         self._global_app = gag._apps[0]
         self._global_app.finish_setup()
@@ -111,6 +114,9 @@ class System(PbcObject):
         self._app_map[u'global'] = self._global_app
         self.__app_names.append(u'global')
         self._apps.append(self._global_app)
+        self._app_map[u'caty'] = self._core_app
+        self.__app_names.append(u'caty')
+        self._apps.append(self._core_app)
         #for app in self._app_map.values():
         #    app.finish_setup()
         for group in self._app_groups:
@@ -295,4 +301,51 @@ class System(PbcObject):
                 u'': apps
             }
         }
+
+class CoreApplication(Application):
+    def __init__(self, system):
+        self._name = 'caty'
+        self._system = system
+        self._schema_fs = None
+        self._command_fs = None
+        self._description = u'Caty Core System'
+        self._global_config = system._global_config
+        self._group = DummyGroup(self)
+        self._schema_module = system._casm._core
+        self._web_path = u''
+        self._interpreter = script.initialize(self._schema_module, self, self._system)
+        self._command_finder = self._interpreter.finder
+        self._dispatcher = self._create_system_dispatcher()
+
+    def _create_system_dispatcher(self):
+        from caty.core.action.module import ResourceModuleContainer
+        from caty.core.std.action import create_default_resources
+        rmc = ResourceModuleContainer(self)
+        for r in create_default_resources(self.create_facilities()):
+            rmc.add_resource(r)
+        return rmc
+
+    def create_facilities(self, session_maker=None):
+        from caty.session.value import create_variable
+        from caty.env import Env
+        env = Env().dual_mode
+        var = create_variable().dual_mode
+        finder = self._schema_module.schema_finder.start()
+        facilities = {
+            'env': env.start().dual_mode,
+            'schema': finder,
+        }
+        fset = FacilitySet(facilities, self)
+        facilities['interpreter'] = self._interpreter.file_mode(fset)
+        return fset
+
+    def __invariant__(self):
+        pass
+
+class DummyGroup(object):
+    def __init__(self, coreapp):
+        self.name = u''
+        self.apps = [coreapp]
+        self.global_config = coreapp._global_config
+
 
