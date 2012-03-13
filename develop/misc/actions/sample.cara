@@ -1,0 +1,19 @@
+module sample in cara;
+
+resource Dump("/dump") {
+ action get("/GET#dont-care")
+ ::
+ {
+   {
+    "q" : %_OPTS,
+    "a" : %_ARGV
+    } | json:response
+ };
+};
+
+resource Data("*.data") {
+  action get("/GET") :: {
+    json:read %1 | json:response
+  };
+};
+

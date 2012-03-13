@@ -22,15 +22,19 @@ syntax KindExpr ::= BasicExpr | AndExpr;
 
 syntax ComparisonExpr ::= ('upper' | 'lower') ClosedTypeExpr | 'notnever';
 
-syntax ForallExpr ::= 'forall' TypeArgs TypeExpr ;
+// syntax ForallExpr ::= 'forall' TypeArgs TypeExpr ; // 当面実装しない
 
-syntax AtomicExpr ::= KindName | ComparisonExpr | ForallExpr ; // 構文定義には使わないが、原子論理式
+syntax AtomicExpr ::= KindName | ComparisonExpr ; // 構文定義には使わないが、原子論理式
 
-syntax BasicExpr ::= KindName | ComparisonExpr | ForallExpr | '(' KindExpr ')' ;
+syntax BasicExpr ::= KindName | ComparisonExpr | '(' KindExpr ')' ;
 
 syntax AndExpr ::= BasicExpr 'and' BasicExpr ('and' BasicExpr)* ;
 
 syntax KindName = lexical QName ; // 他のモジュールのカインドも参照できる
+
+}}}
+
+<<ignore
 
 syntax TypeArgs ::= '<' TypeArg (',' TypeArg)* '>' ; // 引数となる型変数の名前は重複しないこと
 
@@ -39,7 +43,9 @@ syntax TypeArg ::= TVarName ('in' KindExprOnArg)? ;
 syntax TVarName = lexical Name;
 
 syntax KindExprOnArg ::= deferred; // 要検討、後述
-}}}
+
+>>
+
 
 ==  strgモジュールの問い合わせ言語との対比
 
@@ -51,6 +57,8 @@ syntax KindExprOnArg ::= deferred; // 要検討、後述
 | notnever         | @_NOT_NULL |
 | J and K          | @_AND [P, Q] |
 
+
+<<ignore 
 forall<x> F は、f(i) が非負整数iに依存する式だとして、@_OR [f(0), f(1), f(2), ...] に似てると言える。
 
 * x が 条件 @_OR [f(0), f(1), f(2), ...] を満たす ⇔ f(n) = x となるnがある。
@@ -60,6 +68,7 @@ forall<x> F は、f(i) が非負整数iに依存する式だとして、@_OR [f(
 
 * x が 条件 @_OR [f(0), f(1), f(2), ...] を満たす ⇔ xが関数fの像に所属する ⇔ x∈Im(f)
 * X が カインド forall<x> F に所属する ⇔ xが型関数λx.Fの像に所属する ⇔ X∈Im(λx.F)
+>>
 
 
 問い合わせ言語は**データに関する条件**を記述する。
@@ -93,6 +102,8 @@ x, y などは型変数（を表すメタ変数）、E, F, Gなどは型表現�
 閉じた型表現は具体的な集合を確実に指し示す。しばしば、閉じた型表現とdenotationである集合を同一視する。
 この同一視を合理化した方法が、Sets-as-Typesのエルブラン・モデル（Herbrand model）。
 
+<<ignore
+
 == forallの制限
 
 カインドに型変数を持たせることはできない（総称カインドは考えない）ので、forallはボディとなる型表現の型変数をすべて束縛する。
@@ -119,6 +130,8 @@ forallカインドには次の条件を課す。
   型名とカインド名を同じ名前空間（記号テーブル）に入れれば、これを禁止できる。
 
 //予約語と名前空間構造//はもっと考える必要がある。
+
+
 
 == 型引数内のカインド
 
@@ -152,6 +165,7 @@ type Point2D<S in (lower number) and notnever>
      = @point {"x":S, "y":S, *:any?};
 }}}
 
+>>
 
 == 意味論とアルゴリズムの概略
 

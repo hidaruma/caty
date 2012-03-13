@@ -52,6 +52,11 @@ type closed = {};
 
 }}}*/
 
+/** 副作用のないコマンドをマークする
+ */
+@[annotation, target(["COMMAND_DECL"])]
+type no-effect = {};
+
 
 /** デフォルト値
  * オブジェクトのプロパティが省略されたときのデフォルト値を指定する。

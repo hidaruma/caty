@@ -1,0 +1,31 @@
+= アクションの呼び出し
+
+アクションは通常のリクエスト処理の他、コマンドとしても呼び出し可能となっている。
+
+== !exec
+
+|=command|=outputMatch|=備考|
+|%cmd1  | {"q": {"foo": "bar"}, "a": ["/dump", "/dump"]} | #dont-caraの指定されたリソース |
+|%cmd2   | ["a", "b", "c"]|  |
+|%cmd3   | {"status": 404}|  |
+
+== !name:cmd1
+
+{{{
+    request /dump | $.body | json:parse
+}}}
+
+== !name:cmd2
+
+{{{
+    request /foo.data | $.body | json:parse
+}}}
+
+
+== !name:cmd3
+
+{{{
+    request /x.data
+}}}
+
+

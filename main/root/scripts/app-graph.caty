@@ -4,7 +4,7 @@
 
 apps | each {[pv group, pv name]} | xlist:group > groups |
 each {
- pass > group-name | [%GROUP_PREFIX, pass] | text:concat > group-id;
+ %_key > group-name | [%GROUP_PREFIX, pass] | text:concat > group-id;
  %groups | pv %group-name |
  each {
    item 1 > app-name;
