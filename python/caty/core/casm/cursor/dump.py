@@ -56,9 +56,9 @@ class TreeDumper(TreeCursor):
                     buff.append(', ')
                 buff.pop(-1)
                 buff.append('>')
-                if isinstance(node, TypeReference):
-                    if node.body:
-                        buff.append(node.body.accept(self))
+                #if isinstance(node, TypeReference):
+                #    if node.body:
+                #        buff.append(node.body.accept(self))
         self._process_option(node, buff)
         return ''.join(buff)
 

@@ -329,3 +329,25 @@ class OverlayedDict(dict):
         for s in self.scope:
             n.scope.insert(0, deepcopy(s))
         return n
+
+    def keys(self):
+        r = []
+        for s in self.scope:
+            for k in s.keys():
+                r.append(k)
+        return r
+
+    def values(self):
+        r = []
+        for s in self.scope:
+            for k in s.values():
+                r.append(k)
+        return r
+
+    def items(self):
+        r = []
+        for s in self.scope:
+            for k in s.items():
+                r.append(k)
+        return r
+
