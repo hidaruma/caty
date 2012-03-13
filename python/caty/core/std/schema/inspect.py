@@ -47,8 +47,9 @@ type ShortProfile = {
  */
 command list-cmd 
  {
-   /** 当面、常にshortオプションを要求する */
-   "short" : true,
+   /** 当面、shortオプションのデフォルトはtrue */
+   @[default(true)]
+   "short" : boolean?,
  }
  [string moduleName] :: void -> [ShortProfile*]
  throws ModuleNotFound
