@@ -14,6 +14,6 @@ resource Dump("/dump") {
 resource Data("*.data") {
   action get("/GET") :: {
     json:read %1 | json:response
-  }
+  };
 };
 
