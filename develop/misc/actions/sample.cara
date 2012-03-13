@@ -1,7 +1,7 @@
 module sample in cara;
 
 resource Dump("/dump") {
- action get("/GET#dont-care") 
+ action get("/GET#dont-care")
  ::
  {
    {

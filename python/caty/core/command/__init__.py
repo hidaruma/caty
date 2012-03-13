@@ -311,12 +311,11 @@ class Syntax(Builtin):
 
 class Dummy(Command):
     def execute(self, *args, **kwds):
-        raise NotImplementedError()
+        throw_caty_exception('NotImplemented', self.name)
 
 def new_dummy():
-    class _Dummy(Command):
-        def execute(self, *args, **kwds):
-            throw_caty_exception('NotImplemented', self.name)
+    class _Dummy(Dummy):
+        pass
     return _Dummy
 
 def scriptwrapper(profile, script):
