@@ -114,6 +114,7 @@ def setup(args):
         return None, None, None, None
     system = System(system_encoding, debug, quiet)
     if exit:
+        print
         print exit
         return None, None, None, None
     return system, debug, port, hcon_port

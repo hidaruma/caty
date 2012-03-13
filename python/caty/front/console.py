@@ -524,6 +524,7 @@ def setup_shell(args, cls=CatyShell):
         return None, None, None
     system = System(_encoding, debug, quiet, no_ambient, no_app, sitename)
     if exit:
+        print
         print exit
         return None, None, None
     site = system.get_app(sitename[0])
