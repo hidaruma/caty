@@ -59,9 +59,12 @@ def clear_screen ():
 
   hConOut = stdout_handle
   if GetConsoleScreenBufferInfo (hConOut, byref(csbi)):
+    import pdb; pdb.set_trace()
     FillConsoleOutputCharacterA (hConOut, 32, 
                                  csbi.dwSize.X * csbi.dwSize.Y, 
                                  coord, byref(dwDummy))
+    import pdb; pdb.set_trace()
+    coord = COORD()
     FillConsoleOutputAttribute (hConOut, csbi.wAttributes, 
                                 csbi.dwSize.X * csbi.dwSize.Y, 
                                 coord, byref(dwDummy))

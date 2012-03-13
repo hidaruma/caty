@@ -814,7 +814,7 @@ command unifyrec0 :: [RecTypeExpr, RootedTypeExpr, RecTypeExpr, RootedTypeExpr, 
 
 
 
-<<{
+~<<{
 
 command unify1 :: [RecTypeExpr, RootedTypeExpr, RecTypeExpr, RootedTypeExpr, object] -> Result
 {
@@ -893,5 +893,5 @@ command unify-both-elemental1 :: [RecTypeExpr, RootedTypeExpr, RecTypeExpr, Root
  }
 };
 
-}>>
 
+~}>>

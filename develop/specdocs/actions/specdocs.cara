@@ -56,10 +56,11 @@ state ファイル内容 for 閲覧者 :: deferred ;
 command dir-get [string dir-location, string file-ext] :: void -> DirInfo {
   %1 > dir-location;
   %2 > file-ext;
+  ["**", %file-ext] | text:concat > file-patt;
 
   %CATY_APP  | $.name > app;
   { 
-    "wikifiles" : file:list %dir-location %file-ext  | each {pv name},
+    "wikifiles" : file:list %dir-location %file-patt  | each {pv name},
     "subdirs"  :  file:list --kind=dir %dir-location | each {pv name},
     "path" : %dir-location,
     "app" : %app,
@@ -68,6 +69,7 @@ command dir-get [string dir-location, string file-ext] :: void -> DirInfo {
 };
 
 /** Wikiファイルの取得と出力 */
+
 command wiki-get [string file-location, string title] :: void -> FileInfo {
   %1 > file-location;
   %2 > title;
@@ -97,6 +99,25 @@ resource SysSpecsディレクトリ ("/SysSpecs/") {
  :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
  {
    (#0 dir-get schemata@SysSpecs:/ .lit ) | print /list-files.html
+ };
+};
+
+
+resource instantディレクトリ ("/instant/") {
+ /** ディレクトリへのGETリクエスト */
+ action get("/GET") 
+ :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
+ {
+   (#0 dir-get schemata@instant:/ .lit ) |  print /list-files.html
+ };
+};
+
+resource newディレクトリ ("/new/") {
+ /** ディレクトリへのGETリクエスト */
+ action get("/GET") 
+ :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
+ {
+   (#0 dir-get schemata@new:/ .lit ) | dump --prefix="dir-get /new/" | print /list-files.html
  };
 };
 
@@ -138,6 +159,48 @@ resource SysSpecsファイル ("/SysSpecs/*.casm.lit") {
     (#0 wiki-get %lit-file %title) | print /show-wiki.html
   };
 
+};
+
+resource newファイル ("/new/*.casm.lit") {
+
+  /** LiterateファイルへのGETリクエスト */
+  action get("/GET#exists-parent")
+  :: @[in, out] #0 void -> FileInfo produces ファイル内容
+  {
+    %0 | path:trunk > title;
+    %0 | path:base > base;
+    ["schemata@new:/", %base] | text:concat > lit-file;
+
+    (#0 wiki-get %lit-file %title) | print /show-wiki.html
+  };
+
+};
+
+command show-lit [string pathInfo, string appName] :: void -> FileInfo
+{
+  %1 > pathInfo;
+  %2 > appName;
+
+  %pathInfo | path:trunk > title;
+  %pathInfo | path:base > base;
+  
+  [
+    ["schemata@", %appName, ":/"] | text:concat, 
+    %base
+  ] | text:concat > lit-file;
+
+  wiki-get %lit-file %title
+};
+
+
+resource instantファイル ("/instant/*.casm.lit") {
+
+  /** instantファイルへのGETリクエスト */
+  action get("/GET#exists-parent")
+  :: @[in, out] #0 void -> FileInfo produces ファイル内容
+  {
+    (#0 show-lit %0 instant) | print /show-wiki.html
+  };
 };
 
 resource Globalファイル ("/global/*.casm.lit") {
