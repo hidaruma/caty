@@ -34,7 +34,7 @@ import tempfile
 RC_SCRIPT = u'rc.caty'
 RC_ONCE_SCRIPT = u'rc-once'
 RC_DONE = u'rc-done'
-RESERVED = set(['this', u'global'])
+RESERVED = set(['this', u'global', u'caty'])
 ROOT = 'root'
 USER = 'main'
 LOG_TYPES = ['app', 'performance', 'exec']

@@ -832,7 +832,8 @@ class Help(Builtin):
             self.__mode = u'resource'
         else:
             self.__line = u''
-        
+        self.long = opts['long']
+
     def execute(self):
         if self.__mode == u'type':
             return self._type_help()

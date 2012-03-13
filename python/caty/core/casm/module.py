@@ -184,7 +184,12 @@ class Module(object):
             return True
         else:
             if ':' in name:
-                m, n = name.rsplit(':', 1)
+                m, n = name.split(':', 1)
+                if ':' in n:
+                    if m == 'this' or m == 'global' or m == 'caty':
+                        m, n = n.split(':', 1)
+                    else:
+                        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s command is forbidden')
                 if m == 'public':
                     return self.has_schema(n)
                 if m == self.name:
@@ -204,7 +209,12 @@ class Module(object):
             return True
         else:
             if ':' in name:
-                m, n = name.rsplit(':', 1)
+                m, n = name.split(':', 1)
+                if ':' in n:
+                    if m == 'this' or m == 'global' or m == 'caty':
+                        m, n = n.split(':', 1)
+                    else:
+                        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s command is forbidden')
                 if m == 'public' and self.name != 'public':
                     return self.parent.has_command(n)
                 if m == self.name:
@@ -244,7 +254,12 @@ class Module(object):
             return r
         else:
             if ':' in name:
-                m, n = name.rsplit(':', 1)
+                m, n = name.split(':', 1)
+                if ':' in n:
+                    if m == 'this' or m == 'global' or m == 'caty':
+                        m, n = n.split(':', 1)
+                    else:
+                        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s command is forbidden')
                 if m == 'public':
                     return self.get_schema(n)
                 if m == self.name:
@@ -260,7 +275,12 @@ class Module(object):
             return self.command_ns[name]
         else:
             if ':' in name:
-                m, n = name.rsplit(':', 1)
+                m, n = name.split(':', 1)
+                if ':' in n:
+                    if m == 'this' or m == 'global' or m == 'caty':
+                        m, n = n.split(':', 1)
+                    else:
+                        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s command is forbidden')
                 if m == 'public' and self.name != 'public':
                     return self.parent.get_command_type(n)
                 if m == self.name:
