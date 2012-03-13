@@ -45,7 +45,7 @@ type ShortProfile = {
  *  * otherapp:somepkg.yourmod
  *  * this:pkg.mymod
  */
-command list 
+command list-cmd 
  {
    /** 当面、常にshortオプションを要求する */
    "short" : true,
