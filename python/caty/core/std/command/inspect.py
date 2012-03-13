@@ -30,7 +30,7 @@ class ListCommands(Internal):
         for p in proto_type.patterns:
             o = {
                 'name': proto_type.name,
-                'implemented': proto_type.script_proxy is not None or proto_type.uri != 'caty.core.command.Dummy',
+                'implemented': u'catyscript' if proto_type.script_proxy is not None else u'python' if proto_type.uri != 'caty.core.command.Dummy' else u'none',
             }
             o['opts'] = td.visit(p.opts) if p.opts else u'void'
             o['args'] = td.visit(p.args) if p.args else u'void'

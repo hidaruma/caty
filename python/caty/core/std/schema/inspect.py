@@ -13,7 +13,7 @@ type ShortProfile = {
  /** 実装を持つか 
   * 宣言だけのときはfalse
   */
- "implemented" : boolean?,
+ "implemented" : implemented?,
 
  /** オプションの型 */
  "opts" : typeExprText,
@@ -32,7 +32,18 @@ type ShortProfile = {
  /** 例外の型 */
  "throws" : ([exceptionName*] | @only [exceptionName*])?,
 };
+/** 実装状況を示す値 
+ */
+type implemented = (
+  /** 実装はない、宣言されているだけ */
+  "none" |
 
+  /** Python実装を持つ */
+  "python" |
+
+  /** CatyScript実装を持つ */
+  "catyscript" |
+);
 /** モジュールに含まれるコマンドを列挙する
  * 引数に指定されたモジュールに固有なコマンドだけを列挙する。
  * 別名として存在するコマンドや、そのモジュールから可視な別モジュールのコマンドは列挙しない。
