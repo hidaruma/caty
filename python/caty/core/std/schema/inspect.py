@@ -10,9 +10,13 @@ type ShortProfile = {
  /** コマンドの名前 */
  "name" : string,
 
- /** 実装を持つか 
-  * 宣言だけのときはfalse
+ /** コマンドの型引数
+  * コマンドが多相IOプロファイルを持つとき、束縛型変数（名前文字列）のリストを指定する。
+  * IOプロファイルが具体的（単相）なときは省略される。
   */
+ "typeVars" : [string, string*]?,
+
+ /** 実装状況 */
  "implemented" : implemented?,
 
  /** オプションの型 */

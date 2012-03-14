@@ -739,10 +739,9 @@ command untagged<S default any, T default any> [string?] :: S -> T
     refers python:caty.core.std.command.builtin.ConsoleOut;
 
 /**
- * 標準入力より値を読み込み、それを JSON オブジェクトに変換して返す。
+ * 標準入力より1行を読み込み、それを文字列として返す。
  */
-@[console] command cin :: void -> any
-    reads stream
+@[console] command cin [string? prompt] :: void -> string
     refers python:caty.core.std.command.builtin.ConsoleIn;
 
 /**

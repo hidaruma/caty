@@ -619,9 +619,12 @@ class ConsoleOut(Builtin):
             self.stream.write('\n')
 
 class ConsoleIn(Builtin):
-    
+# self.stream は使ってない
+    def setup(self, prompt=u''):
+        self.prompt = prompt
+
     def execute(self):
-        return xjson.loads(self.stream.read())
+        return unicode(raw_input(self.prompt))
 
 class DisplayApp(Builtin):
     
