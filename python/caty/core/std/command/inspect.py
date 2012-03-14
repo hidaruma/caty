@@ -24,7 +24,7 @@ class ListCommands(Internal):
 
     def _get_command_info(self, proto_type):
         from caty.core.casm.cursor.dump import TreeDumper
-        td = TreeDumper()
+        td = TreeDumper(withoutdoc=True)
         td.started = True
         profiles = []
         for p in proto_type.patterns:
@@ -37,7 +37,8 @@ class ListCommands(Internal):
             o['input'] = td.visit(p.decl.profiles[0][0])
             o['output'] = td.visit(p.decl.profiles[0][1])
             o['throws'] = []
-            o['typeVars'] = [v.var_name for v in proto_type.type_params]
+            if proto_type.type_params:
+                o['typeVars'] = [v.var_name for v in proto_type.type_params]
             for ls in p.decl.jump:
                 for node in ls:
                     o['throws'].append(td.visit(node))

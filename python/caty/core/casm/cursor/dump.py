@@ -4,16 +4,17 @@ from caty.core.schema import *
 import caty.jsontools as json
 
 class TreeDumper(TreeCursor):
-    def __init__(self, deep=False):
+    def __init__(self, deep=False, withoutdoc=False):
         self.started = False
         self.depth = 0
         self.deep = deep
+        self.withoutdoc = withoutdoc
 
     def _visit_root(self, node):
         buff = []
         if not self.started:
             self.started = True
-            if node.docstring:
+            if node.docstring and not self.withoutdoc:
                 buff.append(self._format(node.docstring, self.depth))
             if node.annotations:
                 buff.append(node.annotations.to_str())
@@ -112,7 +113,7 @@ class TreeDumper(TreeCursor):
         buff = [u'{\n']
         self.depth += 1
         for k, v in node.items():
-            if v.docstring:
+            if v.docstring and not self.withoutdoc:
                 buff.append('    ' * self.depth)
                 buff.append(v.docstring.strip())
                 buff.append('\n')
@@ -129,7 +130,7 @@ class TreeDumper(TreeCursor):
         buff.append('    ' * self.depth)
         buff.append('*: ')
         buff.append(node.wildcard.accept(self))
-        buff.append('    ' * self.depth)
+        buff.append('?    ' * self.depth)
         buff.append('\n')
         buff.append('    ' * (self.depth-1))
         buff.append('}')
