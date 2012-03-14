@@ -101,7 +101,7 @@ class Application(PbcObject):
             return
         if not scripts.open('/' + RC_SCRIPT).exists:
             return
-        self.cout.write(self.i18n.get("Running init script of $name", name=self.name))
+        self.cout.writeln(self.i18n.get("Running init script of $name", name=self.name))
         facilities = self.create_facilities()
         interpreter = self.interpreter.file_mode(facilities)
         modes = [unicode('console')]

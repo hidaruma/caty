@@ -398,6 +398,11 @@ exception UserroleNotFound = {
   *: any?
 };
 
+exception ApplicationNotFound = {
+  "appName": string,
+  *: any?,
+};
+
 /** 配列のインデックスが範囲外、または不正である。*/
 exception IndexOutOfRange = object;
 

@@ -44,3 +44,23 @@ class ListCommands(Internal):
             profiles.append(o)
         return profiles
         
+class ListModules(Internal):
+    def setup(self, app_name):
+        self.app_name = app_name
+
+    def execute(self):
+        app = self._system.get_app(self.app_name)
+        r = []
+        for mod in app._schema_module.get_modules():
+            if mod._app.name != self.app_name:
+                continue
+            o = {
+                'name': mod.name,
+                'syntax': unicode(mod._type.split('.', 1)[0]),
+                'place': u'schemata' if mod._type.startswith('casm') else u'actions'
+            }
+            r.append(o)
+        return r
+        
+
+

@@ -152,7 +152,7 @@ class Module(object):
 
     def _get_mod_and_app(self, t):
         a = t.module.application.name
-        if a != 'builtin':
+        if a != 'caty':
             m = t.module.name + t.module.type
         else:
             m = t.module.name + '.py'
@@ -503,7 +503,7 @@ class CoreModule(Module):
     def compile(self, schema_string, module):
         if self.is_root:
             if module is None:
-                self._name = 'builtin'
+                self._name = u'builtin'
                 for t in iparse(schema_string):
                     t.declare(self)
             else:
@@ -511,7 +511,7 @@ class CoreModule(Module):
                 mod.compile(schema_string, module)
                 self.sub_modules[mod.name] = mod
         else:
-            self._name = module.name
+            self._name = unicode(module.name)
             for t in iparse(schema_string):
                 t.declare(self)
 
@@ -568,7 +568,7 @@ class AppModule(Module):
                 mod.filepath = e.path
                 if e.path.endswith(u'.casm.lit'):
                     mod._type = 'casm.lit'
-                mod._name = self._path_to_module(mod.filepath)
+                mod._name = unicode(self._path_to_module(mod.filepath))
                 if mod._name in self.sub_modules:
                     raise Exception(self._app.i18n.get(u'Module $name is already defined', 
                                                name=mod._name))
@@ -711,8 +711,7 @@ class IntegratedModule(object):
     u"""標準モジュールとユーザ定義モジュールの複合モジュール
     """
     def __init__(self, system):
-        coreapp = system.dummy_app
-        coreapp._name = u'builtin'
+        coreapp = system._core_app
         self._core = CoreModule(coreapp, None, True)
         self._system = system
         self._global = None

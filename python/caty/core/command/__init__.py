@@ -48,7 +48,6 @@ class Command(object):
         self._annotations = self.profile_container.get_annotations()
         self._mode = set([u'console', u'web', u'test']).intersection(self._annotations)
         self._defined_application = self.profile_container.defined_application
-        self.async_queue = self._defined_application.async_queue
         self.__facility_names = set()
         self._id = '%s(%s)' % (self.profile_container.name, self.profile_container.uri)
         self.__current_application = None
@@ -138,8 +137,11 @@ class Command(object):
                 facility = facility.dual_mode
             # Dummy で定義されてない（=ユーザ定義）ファシリティは、
             # 定義元のアプリケーションへの参照に差し替える
-            if self._defined_application.name not in ('builtin', 'global') and not 'volatile' in self._annotations:
+            if self._defined_application.name not in ('caty', 'global') and not 'volatile' in self._annotations:
                 facility.application = self._defined_application
+                self.async_queue = self._defined_application.async_queue
+            else:
+                self.async_queue = self.__current_application.async_queue
             setattr(self, key, facility)
             _set.add(name)
         # 互換性維持のため、envとschemaを追加

@@ -58,6 +58,12 @@ class System(PbcObject):
         messages = self._load_system_messages()
         self.i18n = I18nMessage(messages, writer=cout, lang=self._global_config.language)
         caty.core.runtimeobject.i18n = self.i18n # 改めて設定
+        self._app_map = {}
+        self._apps = []
+        self.__app_names = []
+        # catyアプリケーション
+        self._core_app = CoreApplication(self)
+
         self.__cout.writeln(self.i18n.get('Loading system data'))
         self._casm = casm.initialize(self,
                                      [builtin, node],
@@ -82,7 +88,7 @@ class System(PbcObject):
                                      viva,
                                      http])
 
-        self._core_app = CoreApplication(self)
+        self._core_app._init()
         gag = ApplicationGroup('', self._global_config, no_ambient, no_app, app_names, self)
         self._global_app = gag._apps[0]
         self._global_app.finish_setup()
@@ -99,15 +105,14 @@ class System(PbcObject):
                 ApplicationGroup('develop', self._global_config, no_ambient, no_app, app_names, self),
             ] if ag.exists
         ]
-        self._apps = reduce(operator.add, map(ApplicationGroup.apps.fget, self._app_groups))
-        self.__app_names = [app.name for app in self._apps]
-        self._app_map = {}
+        self._apps.extend(reduce(operator.add, map(ApplicationGroup.apps.fget, self._app_groups)))
+        self.__app_names.extend([app.name for app in self._apps])
         if is_debug:
             caty.DEBUG = True
         self.__debug = is_debug
         for app in self._apps:
             if app.name in self._app_map:
-                raise Exception(self.i18n.get('Application name conflicted', name=app.name))
+                raise Exception(self.i18n.get('Application name conflicted: $name', name=app.name))
             self._app_map[app.name] = app
         for app in self._app_map.values():
             app.finish_setup()
@@ -117,6 +122,7 @@ class System(PbcObject):
         self._app_map[u'caty'] = self._core_app
         self.__app_names.append(u'caty')
         self._apps.append(self._core_app)
+
         #for app in self._app_map.values():
         #    app.finish_setup()
         for group in self._app_groups:
@@ -125,6 +131,9 @@ class System(PbcObject):
         PbcObject.__init__(self)
 
     def get_app(self, app_name):
+        from caty.core.exception import throw_caty_exception
+        if app_name not in self._app_map:
+            throw_caty_exception('ApplicationNotFound', u'$appName', appName=app_name)
         app = self._app_map[app_name]
         return app
 
@@ -272,14 +281,6 @@ class System(PbcObject):
         assert len(self._app_groups) > 0
         assert len(self._apps) > 0
 
-    if caty.DEBUG:
-        def _contains_name(self, name):
-            assert name in self._app_map
-
-        get_app = Contract(get_app)
-        get_app.require += _contains_name
-
-
     def debug_on(self):
         caty.DEBUG = True
         self.__debug = True
@@ -311,7 +312,10 @@ class CoreApplication(Application):
         self._description = u'Caty Core System'
         self._global_config = system._global_config
         self._group = DummyGroup(self)
-        self._schema_module = system._casm._core
+        self.i18n = system.i18n
+
+    def _init(self):
+        self._schema_module = self._system._casm._core
         self._web_path = u''
         self._interpreter = script.initialize(self._schema_module, self, self._system)
         self._command_finder = self._interpreter.finder
@@ -338,6 +342,9 @@ class CoreApplication(Application):
         fset = FacilitySet(facilities, self)
         facilities['interpreter'] = self._interpreter.file_mode(fset)
         return fset
+
+    def finish_setup(self):
+        pass
 
     def __invariant__(self):
         pass

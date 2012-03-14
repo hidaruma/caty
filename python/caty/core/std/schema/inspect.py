@@ -69,4 +69,33 @@ command list-cmd
  [string moduleName] :: void -> [ShortProfile*]
  throws ModuleNotFound
  refers python:caty.core.std.command.inspect.ListCommands;
+
+
+/** モジュール情報 */
+type Module = {
+
+ /** モジュールの名前 
+  * パッケージ修飾されている可能性がある。
+  */
+ "name" : string,
+
+ /** モジュールの記述構文 */
+ "syntax" : ("casm" | "cara"), // "camb" はとりあえず除いておく
+
+ /** モジュールが置かれている場所 */
+ "place" : ("schemata" | "actions")
+};
+
+/** アプリケーションに含まれるモジュールを列挙する
+ * 引数に指定されたアプリケーションに固有なモジュールだけを列挙する。
+ * そのアプリケーションから可視なモジュールでも別なアプリケーションに所属するモジュールは列挙しない。
+ * アプリケーションとして caty が指定された場合は、
+ * Catyコアに組み込みのモジュールを列挙する。
+ *
+ */
+command list-mod
+ [string appName] :: void -> [Module*]
+ throws ApplicationNotFound
+ refers python:caty.core.std.command.inspect.ListModules;
+
 """
