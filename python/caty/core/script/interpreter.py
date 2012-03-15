@@ -164,12 +164,15 @@ class CommandExecutor(BaseInterpreter):
         try:
             node.var_storage.new_scope()
             node._prepare()
-            node.in_schema.validate(input)
             if node.profile.in_schema.type == 'void':
                 r = exec_func(node)
             else:
+                node.in_schema.validate(input)
                 r = exec_func(node, input)
-            node.out_schema.validate(r)
+            if node.out_schema.type == 'void':
+                r = None
+            else:
+                node.out_schema.validate(r)
             if 'commit-point' in node.profile_container.get_annotations():
                 for n in node.facility_names:
                     getattr(node, n).commit()
