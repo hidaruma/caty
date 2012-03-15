@@ -94,7 +94,7 @@ type ul = @ul {
 };
 
 // Ordered List  #
-type ol = @ul {
+type ol = @ol {
      "" : [(li)*]
 };
 

@@ -759,10 +759,11 @@ class NullSchema(SchemaBase, Scalar):
 class VoidSchema(SchemaBase, Scalar):
     u"""Null と同じ unit だが、値なしを意味するところが違う。
     """
-
-
     def validate(self, value):
-        pass
+        if self.optional and (value is caty.UNDEFINED):
+            return
+        if value is not None:
+            raise JsonSchemaError(dict(msg='Not a null'))
 
     def intersect(self, another):
         if type(another) != VoidSchema:

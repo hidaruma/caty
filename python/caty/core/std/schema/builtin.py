@@ -294,9 +294,9 @@ type BuiltinTypeName = (
  | "unknown" // 不明
 );
 
-type typeName = string(format="type-name");
-type uri = string(format="uri");
-type mediaType = string(format="media-type");
+type typeName = string(remark="type-name");
+type uri = string(remark="uri");
+type mediaType = string(remark="media-type");
 type httpMethod = ("GET" | "PUT" | "POST" | "DELETE" | "HEAD");
 
 type Trigger = {

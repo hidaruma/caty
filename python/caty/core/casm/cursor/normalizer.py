@@ -55,29 +55,15 @@ class UndefinedEraser(_SubNormalizer):
         else:
             return node
 
-    @apply_annotation
-    def _visit_union(self, node):
-        l = node.left.accept(self)
-        r = node.right.accept(self)
-        o = False
-        if l.optional:
-            l = l.body
-            o = True
-        if r.optional:
-            r = r.body
-            o = True
-        u = UnionSchema(l, r, node.options)
-        if o:
-            u = OptionalSchema(u)
-        return u
-
 class OptionLifter(_SubNormalizer):
+    def __init__(self, *args):
+        _SubNormalizer.__init__(self, *args)
 
     def _visit_scalar(self, node):
         return node
 
     @apply_annotation
-    def _visit_intersection(self, node):
+    def _visit_union(self, node):
         l = node.left.accept(self)
         r = node.right.accept(self)
         o1 = False
@@ -88,27 +74,10 @@ class OptionLifter(_SubNormalizer):
         if r.optional:
             r = r.body.accept(self)
             o2 = True
-        i = IntersectionSchema(l, r, node.options)
-        if o1 and o2:
+        i = UnionSchema(l, r, node.options)
+        if o1 or o2:
             i = OptionalSchema(i)
         return i
-
-    @apply_annotation
-    def _visit_updator(self, node):
-        l = node.left.accept(self)
-        r = node.right.accept(self)
-        o1 = False
-        o2 = False
-        if l.optional:
-            l = l.body
-            o1 = True
-        if r.optional:
-            r = r.body
-            o2 = True
-        u = UpdatorSchema(l, r, node.options)
-        if o1 and o2:
-            u = OptionalSchema(u)
-        return u
 
 class TypeCalcurator(_SubNormalizer):
     def __init__(self, module):
@@ -132,7 +101,11 @@ class TypeCalcurator(_SubNormalizer):
     def _visit_union(self, node):
         l = node.left.accept(self)
         r = node.right.accept(self)
-        if l.type == 'enum' and r.type == 'enum':
+        if l.type == 'never':
+            return r
+        elif r.type == 'never':
+            return l
+        elif l.type == 'enum' and r.type == 'enum':
             return l.union(r)
         else:
             return UnionSchema(l, r, node.options)
@@ -159,7 +132,7 @@ class TypeCalcurator(_SubNormalizer):
             if d:
                 rt = d.type
                 r = self._dereference(r)
-        # 一方がnevrであれば演算結果はnever
+        # 一方がneverであれば演算結果はnever
         if lt == 'never' or rt == 'never':
             res = NeverSchema()
         elif lt == 'undefined' or rt == 'undefined':
@@ -172,81 +145,82 @@ class TypeCalcurator(_SubNormalizer):
             res = r
         elif rt == 'any':
             res = l
+        # ユニオン演算
+        elif lt == '__union__' and rt == '__union__':
+            l = self._dereference(l)
+            r = self._dereference(r)
+            xl = self.__intersect(l.left, r.left)
+            xr = self.__intersect(l.right, r.left)
+            yl = self.__intersect(l.left, r.right)
+            yr = self.__intersect(l.right, r.right)
+            comb = filter(lambda x: x.type != 'never', [xl, xr, yl, yr])
+            length = len(comb)
+            if length == 0:
+                res = NeverSchema()
+            elif length == 1:
+                res = comb[0]
+            else:
+                import operator
+                res = reduce(operator.or_, comb)
+        elif lt == '__union__':
+            l = self._dereference(l)
+            r = self._dereference(r)
+            xl = self.__intersect(l.left, r)
+            xr = self.__intersect(l.right, r)
+            comb = filter(lambda x: x.type != 'never', [xl, xr])
+            length = len(comb)
+            if length == 0:
+                res = NeverSchema()
+            elif length == 1:
+                res = comb[0]
+            else:
+                res = comb[0] | comb[1]
+        elif rt == '__union__':
+            l = self._dereference(l)
+            r = self._dereference(r)
+            xl = self.__intersect(l, r.left)
+            xr = self.__intersect(l, r.right)
+            comb = filter(lambda x: x.type != 'never', [xl, xr])
+            length = len(comb)
+            if length == 0:
+                res = NeverSchema()
+            elif length == 1:
+                res = comb[0]
+            else:
+                res = comb[0] | comb[1]
         elif lt.startswith('@'): # タグ型の場合はタグ名一致時は中身を計算
             if rt.startswith('@'):
                 if lt != rt:
                     if lt == '@*!' or lt == '@*': 
                         # ワイルドカードタグ & 通常タグ
-                        n = (self._dereference(l) & self._dereference(r)).accept(self)
+                        n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
                         res = TagSchema(r.tag, n)
                     elif  rt == '@*!' or rt == '@*':
                         # 通常タグ & ワイルドカードタグ 
-                        n = (self._dereference(l) & self._dereference(r)).accept(self)
+                        n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
                         res = TagSchema(l.tag, n)
                     else:
                         res = NeverSchema()
                 else:
                     # タグ名が一致
-                    n = (self._dereference(l) & self._dereference(r)).accept(self)
+                    n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
                     res = TagSchema(r.tag, n.accept(self))
             else:
                 if lt == '@*!': 
                     # ワイルドカードタグ
-                    n = (self._dereference(l) & r).accept(self)
+                    n = (self._dereference(l, True) & r).accept(self)
                     res = n
                 else:
                     res = NeverSchema()
         elif rt.startswith('@'):
             if rt == u'@*!':
-                n = (l & self._dereference(r)).accept(self)
+                n = (l & self._dereference(r, True)).accept(self)
                 res = n
             else:
                 res = NeverSchema()
         else:
             # どちらもタグ型でない場合
-            if lt == '__union__' and rt == '__union__':
-                l = self._dereference(l)
-                r = self._dereference(r)
-                xl = self.__intersect(l.left, r.left)
-                xr = self.__intersect(l.right, r.left)
-                yl = self.__intersect(l.left, r.right)
-                yr = self.__intersect(l.right, r.right)
-                comb = filter(lambda x: x.type != 'never', [xl, xr, yl, yr])
-                length = len(comb)
-                if length == 0:
-                    res = NeverSchema()
-                elif length == 1:
-                    res = comb[0]
-                else:
-                    import operator
-                    res = reduce(operator.or_, comb)
-            elif lt == '__union__':
-                l = self._dereference(l)
-                r = self._dereference(r)
-                xl = self.__intersect(l.left, r)
-                xr = self.__intersect(l.right, r)
-                comb = filter(lambda x: x.type != 'never', [xl, xr])
-                length = len(comb)
-                if length == 0:
-                    res = NeverSchema()
-                elif length == 1:
-                    res = comb[0]
-                else:
-                    res = comb[0] | comb[1]
-            elif rt == '__union__':
-                l = self._dereference(l)
-                r = self._dereference(r)
-                xl = self.__intersect(l, r.left)
-                xr = self.__intersect(l, r.right)
-                comb = filter(lambda x: x.type != 'never', [xl, xr])
-                length = len(comb)
-                if length == 0:
-                    res = NeverSchema()
-                elif length == 1:
-                    res = comb[0]
-                else:
-                    res = comb[0] | comb[1]
-            elif lt == rt or (lt in ('number', 'integer') and rt in ('number', 'integer')):
+            if lt == rt or (lt in ('number', 'integer') and rt in ('number', 'integer')):
                 # デフォルト指定された型変数が含まれている場合、そちらを返す。
                 if isinstance(l, TypeVariable):
                     return l
@@ -262,11 +236,13 @@ class TypeCalcurator(_SubNormalizer):
                 res = self._intersect_enum_and_scalar(self._dereference(r), l)
             else:
                 res = NeverSchema()
-        if node.left.optional or node.right.optional:
+        if node.left.optional and node.right.optional:
             res = OptionalSchema(res)
         return res
 
     def __intersect(self, l, r):
+        l = self._dereference(l)
+        r = self._dereference(r)
         if l == r:
             return l
         if isinstance(l, EnumSchema):
@@ -425,6 +401,7 @@ class NeverChecker(_SubNormalizer):
         if is_never:
             pass
         else:
+            print TreeDumper().visit(c)
             throw_caty_exception('CompileError', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
 
         l = node.left.accept(self)

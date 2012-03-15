@@ -130,7 +130,8 @@ class TreeDumper(TreeCursor):
         buff.append('    ' * self.depth)
         buff.append('*: ')
         buff.append(node.wildcard.accept(self))
-        buff.append('?    ' * self.depth)
+        if not buff[-1].endswith('?'):
+            buff.append('?    ' * self.depth)
         buff.append('\n')
         buff.append('    ' * (self.depth-1))
         buff.append('}')

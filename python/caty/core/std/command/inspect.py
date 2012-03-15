@@ -32,8 +32,8 @@ class ListCommands(Internal):
                 'name': proto_type.name,
                 'implemented': u'catyscript' if proto_type.script_proxy is not None else u'python' if proto_type.uri != 'caty.core.command.Dummy' else u'none',
             }
-            o['opts'] = td.visit(p.opts) if p.opts else u'void'
-            o['args'] = td.visit(p.args) if p.args else u'void'
+            o['opts'] = td.visit(p.opts) if p.opts else u'{}'
+            o['args'] = td.visit(p.args) if p.args else u'[]'
             o['input'] = td.visit(p.decl.profiles[0][0])
             o['output'] = td.visit(p.decl.profiles[0][1])
             o['throws'] = []

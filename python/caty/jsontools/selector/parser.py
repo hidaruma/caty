@@ -102,8 +102,8 @@ class JSONPathSelectorParser(Parser):
         return TagNameSelector(True)
 
     def untagged(self, seq):
-        seq.parse(choice('untagged()', 'content()'))
-        return TagContentSelector()
+        v = seq.parse(choice('untagged()', 'content()'))
+        return TagContentSelector(v)
 
     def length(self, seq):
         seq.parse('length()')
