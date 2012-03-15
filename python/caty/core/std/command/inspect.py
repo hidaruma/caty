@@ -41,6 +41,10 @@ class ListCommands(Internal):
             for ls in p.decl.jump:
                 for node in ls:
                     o['throws'].append(td.visit(node))
+            if not self._short:
+                o['facilityUsages'] = []
+                for mode, decl in p.decl.get_all_resources():
+                    o['facilityUsages'].append({'usageType': unicode(mode), 'facilityName': decl.name})
             profiles.append(o)
         return profiles
         

@@ -35,7 +35,11 @@ type ShortProfile = {
 
  /** 例外の型 */
  "throws" : ([exceptionName*] | @only [exceptionName*])?,
+
+ /** ファシリティの利用宣言 */
+ "facilityUsages": [FacilityUsage*]?,
 };
+
 /** 実装状況を示す値 
  */
 type implemented = (
@@ -48,6 +52,15 @@ type implemented = (
   /** CatyScript実装を持つ */
   "catyscript" |
 );
+
+/**
+ * ファシリティの利用宣言
+ */
+type FacilityUsage = {
+    "facilityName": string,
+    "usageType": "reads" | "writes" | "uses",
+};
+
 /** モジュールに含まれるコマンドを列挙する
  * 引数に指定されたモジュールに固有なコマンドだけを列挙する。
  * 別名として存在するコマンドや、そのモジュールから可視な別モジュールのコマンドは列挙しない。
