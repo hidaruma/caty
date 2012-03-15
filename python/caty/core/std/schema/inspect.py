@@ -25,7 +25,7 @@ type ShortProfile = {
  /** 引数の型 
   * arg0は含まれないので、args[0]がargv[1]であることに注意
   */
- "args" : typeExprText,
+ "args" : any, //typeExprText,
 
  /** 入力の型 */
  "input" : typeExprText,
@@ -37,7 +37,8 @@ type ShortProfile = {
  "throws" : ([exceptionName*] | @only [exceptionName*])?,
 
  /** ファシリティの利用宣言 */
- "facilityUsages": [FacilityUsage*]?,
+ //"facilityUsages": [FacilityUsage*]?,
+ * : any?
 };
 
 /** 実装状況を示す値 

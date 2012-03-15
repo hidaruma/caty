@@ -1,0 +1,20 @@
+<<ignore -*- coding: utf-8 -*- >>
+= void と null
+
+
+== !exec 
+
+|= command       |= params   |= input   |= output   |
+|validate --pred | void      | null     | true      |
+|validate --pred | void      | {}       | false     |
+|validate --pred | void      | []       | false     |
+|validate --pred | void      | ""       | false     |
+|validate --pred | void      | 0        | false     |
+|validate --pred | void      | false    | false     |
+|validate --pred | null      | null     | true      |
+|validate --pred | null      | {}       | false     |
+|validate --pred | null      | []       | false     |
+|validate --pred | null      | ""       | false     |
+|validate --pred | null      | 0        | false     |
+|validate --pred | null      | false    | false     |
+
