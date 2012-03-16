@@ -88,6 +88,6 @@ class TypeVarApplier(SchemaBuilder):
                 else:
                     return r
             else:
-                raise KeyError(node.var_name)
+                return node
         return node
 

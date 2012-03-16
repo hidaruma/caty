@@ -358,10 +358,13 @@ Web サーバの起動・停止を行う
         return o
 
     def not_void_out(self, command):
+        from caty.core.casm.cursor import SchemaBuilder
         scm = command.out_schema
         if scm.type == 'void':
             return False
         elif scm.type == 'array':
+            sb = SchemaBuilder(None)
+            scm = sb._dereference(scm)
             if all(map(lambda s: s.type == 'void', scm.schema_list)):
                 return False
         return True
