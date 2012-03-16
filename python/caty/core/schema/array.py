@@ -137,7 +137,7 @@ class ArraySchema(SchemaBase, Array):
         al = another.schema_list
         r = []
         n = 0
-        while n < len(self.schema_list) and n < len(another.schema_list):
+        while n < len(self.schema_list) or n < len(another.schema_list):
             a = self.__get_nth(n, self)
             b = self.__get_nth(n, another)
             r.append(a & b)
