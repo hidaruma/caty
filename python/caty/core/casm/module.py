@@ -15,6 +15,7 @@ from caty.core.casm.cursor import (SchemaBuilder,
                                    DependencyAnalizer)
 from caty.core.casm.plugin import PluginMap
 from caty.jsontools.path.validator import to_decl_style
+from caty.core.exception import throw_caty_exception
 from threading import RLock
 from StringIO import StringIO
 

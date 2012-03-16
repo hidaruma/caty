@@ -11,9 +11,8 @@ class CommandBuilder(object):
         from caty.core.script.proxy import Proxy
         if proxy.module:
             try:
-                profile = proxy.module.get_command_type(proxy.name)
+                profile = proxy.module.command_finder[proxy.name]
             except:
-                print proxy.module.name, proxy.module.parent
                 raise
         else:
             profile = self.namespace[proxy.name]
