@@ -4,17 +4,21 @@
 
 == !exec 
 
-|= command       |= params   |= input   |= output   |
-|validate --pred | void      | null     | true      |
-|validate --pred | void      | {}       | false     |
-|validate --pred | void      | []       | false     |
-|validate --pred | void      | ""       | false     |
-|validate --pred | void      | 0        | false     |
-|validate --pred | void      | false    | false     |
-|validate --pred | null      | null     | true      |
-|validate --pred | null      | {}       | false     |
-|validate --pred | null      | []       | false     |
-|validate --pred | null      | ""       | false     |
-|validate --pred | null      | 0        | false     |
-|validate --pred | null      | false    | false     |
+|= command       |= params   |= input   |= output   |= exception |
+|validate --pred | void      | null     | true      | |
+|validate --pred | void      | {}       | false     | | 
+|validate --pred | void      | []       | false     | |
+|validate --pred | void      | ""       | false     | |
+|validate --pred | void      | 0        | false     | |
+|validate --pred | void      | false    | false     | |
+|validate --pred | "null"      | null     | true      | |
+|validate --pred | "null"      | {}       | false     | |
+|validate --pred | "null"      | []       | false     | |
+|validate --pred | "null"      | ""       | false     | |
+|validate --pred | "null"      | 0        | false     | |
+|validate --pred | "null"      | false    | false     | |
+|validate --pred | null      |     |      | exception |
+
+注: {{{validate null}}}のnullは文字列ではなく実装言語のnullになる。引数として渡すときはクオートすること。
+
 
