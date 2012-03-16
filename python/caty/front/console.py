@@ -141,7 +141,7 @@ class CatyShell(cmd.Cmd):
 
     def parseline(self, line):
         c, arg, line = cmd.Cmd.parseline(self, line)
-        if arg.startswith(':'):
+        if arg and arg.startswith(':'):
             return None, None, line
         else:
             return c, arg, line
