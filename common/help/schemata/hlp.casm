@@ -6,12 +6,16 @@ type ModInfo = {
  "fullname" : string(remark="アプリケーションで修飾されたモジュール名"),
 
  /** コマンド情報配列 */
- "cmds" : [inspect:ShortProfile*]
+ "cmds" : CmdList,
 };
+
+type CmdInfo = inspect:ShortProfile;
+
+type CmdList = [CmdInfo*];
 
 type ModInfoList = [ModInfo*];
 
-command mods :: void -> any {
+command mods :: void -> ModInfoList {
  apps | each {pv name} > app-names;
  %app-names |
  each {
@@ -25,23 +29,13 @@ command mods :: void -> any {
  } | xlist:flatten
 };
 
-
-command mods2 :: void -> ModInfoList {
- apps | each {pv name} > app-names;
- %app-names |
+command core :: void -> ModInfoList { 
+ inspect:list-mod caty | 
  each {
-  pass > app;
-  inspect:list-mod %app | 
-  each {
-   pv name >n;
-   [%app, ":", %n] | text:concat | dump > mod;
-   {"fullname":%mod, "cmds":inspect:list-cmd %mod}
-  }
- } | xlist:flatten
-};
-
-command mods3 :: void -> ModInfoList {
- mods
+  pv name >n;
+  ["caty:", %n] | text:concat | dump > mod;
+  {"fullname":%mod, "cmds":inspect:list-cmd %mod}
+ }
 };
 
 // End of Module

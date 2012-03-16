@@ -1,0 +1,26 @@
+// -*- coding: utf-8 -*-
+
+module acts in cara;
+
+resource UserCmds("/user-cmds.html") {
+ action get("/GET#dont-care")
+ ::
+ {
+   do {
+    "User-Defined Commands">: "title",
+     hlp:mods              >: "mods",
+   } | print /tpl.html
+ };
+};
+
+resource CoreCmds("/core-cmds.html") {
+ action get("/GET#dont-care")
+ ::
+ {
+   do {
+    "Core Commands"  >: "title",
+     hlp:core        >: "mods",
+   } | print /tpl.html
+ };
+};
+

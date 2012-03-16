@@ -1,0 +1,45 @@
+<!-- -*- coding: utf-8 -*- -->
+<?caty-meta template="smarty" ?>
+{** 
+ * コマンドのプロファイルをテーブルの1行として整形
+ *}
+{function name=cmd type="hlp:CmdInfo"}
+  <tr class="cmd"><td>{$name}</td><td>{$input}</td><td>{$output}</td><td>{$throws}<td>{$implemented}</td></tr>
+{/function}
+
+{**
+ * コマンドプロファイルのリストをテーブルとして整形
+*}
+{function name=cmdlist type="hlp:CmdList"}
+  <table class="cmdlist" border="1">
+  <tr><th>名前</th><th>入力</th><th>出力</th><th>例外</th><th>実装</th></tr>
+  {foreach from=$_CONTEXT item=cmd}
+    {call name=cmd context=$cmd }
+  {/foreach}
+  </table>
+{/function}
+
+{**
+ * モジュール情報をh2セクションとして整形
+ * type="hlp:ModInfo"
+ *}
+{function name=mod }
+ <div class="mod">
+  <h2>モジュール {$_CONTEXT.fullname}</h2>
+  {call name=cmdlist context=$_CONTEXT.cmds }
+ </div>
+{/function}
+
+<html>
+  <head>
+    <title>{$title}</title>
+  </head>
+  <body>
+    <h1>{$title}</h1>
+
+    {foreach from=$mods item=mod}
+       {call name=mod context=$mod }
+    {/foreach}
+
+  </body>
+</html>
