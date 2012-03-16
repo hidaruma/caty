@@ -1,0 +1,49 @@
+// -*- coding: utf-8 -*-
+module hlp; 
+
+type ModInfo = {
+ /** モジュールフルネーム */
+ "fullname" : string(remark="アプリケーションで修飾されたモジュール名"),
+
+ /** コマンド情報配列 */
+ "cmds" : [inspect:ShortProfile*]
+};
+
+type ModInfoList = [ModInfo*];
+
+command mods :: void -> any {
+ apps | each {pv name} > app-names;
+ %app-names |
+ each {
+  pass > app;
+  inspect:list-mod %app | 
+  each {
+   pv name >n;
+   [%app, ":", %n] | text:concat | dump > mod;
+   {"fullname":%mod, "cmds":inspect:list-cmd %mod}
+  }
+ } | xlist:flatten
+};
+
+
+command mods2 :: void -> ModInfoList {
+ apps | each {pv name} > app-names;
+ %app-names |
+ each {
+  pass > app;
+  inspect:list-mod %app | 
+  each {
+   pv name >n;
+   [%app, ":", %n] | text:concat | dump > mod;
+   {"fullname":%mod, "cmds":inspect:list-cmd %mod}
+  }
+ } | xlist:flatten
+};
+
+command mods3 :: void -> ModInfoList {
+ mods
+};
+
+// End of Module
+
+
