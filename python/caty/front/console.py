@@ -139,6 +139,14 @@ class CatyShell(cmd.Cmd):
         else:
             print u'Usage: type_check [on|off]'
 
+    def parseline(self, line):
+        c, arg, line = cmd.Cmd.parseline(self, line)
+        if arg.startswith(':'):
+            return None, None, line
+        else:
+            return c, arg, line
+
+
     def onecmd(self, line):
         if self.dribble_file:
             self.dribble_file.write(self.prompt)
@@ -190,8 +198,6 @@ Usage: debug [on|off]
 デバッグモードの切り替え
         """
         mode = line.strip()
-        if ':' in line:
-            return self.default('debug' + line)
         if mode == 'on':
             self.app._system.debug_on()
         elif mode == 'off':
