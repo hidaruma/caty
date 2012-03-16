@@ -25,7 +25,7 @@ type ShortProfile = {
  /** 引数の型 
   * arg0は含まれないので、args[0]がargv[1]であることに注意
   */
- "args" : any, //typeExprText,
+ "args" : typeExprText,
 
  /** 入力の型 */
  "input" : typeExprText,
@@ -59,7 +59,7 @@ type implemented = (
  */
 type FacilityUsage = {
     "facilityName": string,
-    "usageType": "reads" | "writes" | "uses",
+    "usageType": "reads" | "updates" | "uses",
 };
 
 /** モジュールに含まれるコマンドを列挙する

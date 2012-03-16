@@ -140,9 +140,9 @@ class TreeDumper(TreeCursor):
         return ''.join(buff)
 
     def _visit_array(self, node):
-        buff = ['[']
+        buff = [u'[']
         self.__vist_iter(node, buff)
-        buff.append(']')
+        buff.append(u']')
         self._process_option(node, buff)
         return ''.join(buff)
 
