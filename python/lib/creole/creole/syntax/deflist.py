@@ -9,15 +9,22 @@ class DefList(BlockParser):
             defn = seq.parse(until(['::', '\n']))
             seq.parse(option('\n'))
             seq.parse(many(' '))
-            seq.parse('::')
-            term = seq.parse(until(['*', '\n\n']))
+            dts = []
+            while not seq.eof:
+                seq.parse('::')
+                term = seq.parse(until(['*', '::', '\n\n']))
+                t = self.create_element('dd', None, self.inline.run(self._format(term)))
+                dts.append(t)
+                if peek(option('::'))(seq):
+                    continue
+                break
             d = self.create_element('dt', None, self.inline.run(self._format(defn)))
-            t = self.create_element('dd', None, self.inline.run(self._format(term)))
-            return d,t 
+            return d, dts 
         items = many1(item)(seq)
         l = []
-        for d, t in items:
+        for d, ts in items:
             l.append(d)
-            l.append(t)
+            for t in ts:
+                l.append(t)
         return self.create_element('dl', None, l)
 

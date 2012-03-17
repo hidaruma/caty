@@ -49,7 +49,8 @@ class ParseError(Exception):
             return repr(obj)
 
 class ParseFailed(ParseError):
-    pass
+    def to_error(self):
+        return ParseError(self.cs, self.cause, self._error_message)
 
 class EndOfBuffer(ParseFailed):
     pass
@@ -94,11 +95,22 @@ class Location(object):
             return 'Line %d, Col %d' % (self._lineno, self._colno)
 
 class CharSeq(object):
+    u"""A sequence of characters.
+    Usually, topdown's parser object is stateless, immutable object.
+    So state of parsing is held in this object.
+    """
     def __init__(self, text, auto_remove_ws=False, 
                              hook=None, 
                              ws_char=[' ', '\t', '\r', '\n'], 
                              suppress_eof=False,
                              location_info=None):
+        u"""
+        * text :: string to parse.
+        * hook :: If it is not None, hook will called when each time CharSeq.parse is called. default is None.
+        * auto_remove_ws :: If it is True, white space characters will removed automatically. default is False.
+        * ws_char :: White space characters. default is ' ', '\\t', '\\r' and '\\n'.
+        * suppress_eof :: If it is True, 
+        """
         self.text = text
         self.pos = 0
         self.length = len(text)
@@ -582,12 +594,26 @@ class mandatory(Parser):
     def __call__(self, seq):
         return seq.parse(self.parser)
 
+
 class peek(Parser):
     def __init__(self, parser):
         self.parser = parser
 
     def __call__(self, seq):
         return seq.peek(self.parser)
+
+
+class strict(object):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is None:
+            return True
+        elif exc_type is ParseFailed:
+            raise exc_val.to_error()
+        else:
+            return False
 
 alpha = Regex(r'[a-zA-Z_]+')
 number = Regex(r'[0-9]+')

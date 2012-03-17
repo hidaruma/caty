@@ -155,16 +155,17 @@ class SmartyParser(Parser):
 
     def if_(self, seq):
         _ = seq.parse('{if')
-        ws = seq.parse(skip_ws)
-        varnode = self.varload(seq)
-        ws = seq.parse(skip_ws)
-        _ = seq.parse('}')
-        subtempl = self.smarty_template(seq)
-        elifnodes = many(self.elif_)(seq) or Null()
-        elsenode = option(self.else_, Null())(seq)
-        _ = seq.parse('{/if}')
-        skip_ws(seq)
-        return If(varnode, subtempl, elifnodes, elsenode)
+        with strict():
+            ws = seq.parse(skip_ws)
+            varnode = self.varload(seq)
+            ws = seq.parse(skip_ws)
+            _ = seq.parse('}')
+            subtempl = self.smarty_template(seq)
+            elifnodes = many(self.elif_)(seq) or Null()
+            elsenode = option(self.else_, Null())(seq)
+            _ = seq.parse('{/if}')
+            skip_ws(seq)
+            return If(varnode, subtempl, elifnodes, elsenode)
 
     def elif_(self, seq):
         _ = seq.parse('{elseif')
