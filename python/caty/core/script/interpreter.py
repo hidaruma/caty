@@ -493,11 +493,13 @@ class _CallCommand(MafsMixin, Internal):
 
     def setup(self, cmd_name):
         self._cmd_name = cmd_name
-        if self._cmd_name.endswith('.caty'):
+        if self._cmd_name.endswith('.caty') and self._cmd_name[0] != u'/':
             self._cmd_name = 'scripts@this:/' + self._cmd_name
 
     def _make_cmd(self):
-        if self._cmd_name.endswith('.caty'):
+        n = self._facilities['env'].get('CATY_APP')['name']
+        app = self._system.get_app(n)
+        if self._cmd_name.endswith('.caty') or any(map(lambda x: self._cmd_name.endswith(x), app.web_config.get('script_ext'))):
             return self.__script()
         else:
             return self.__make_cmd()

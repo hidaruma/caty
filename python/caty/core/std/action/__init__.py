@@ -13,8 +13,8 @@ def create_default_resources(facility):
 def _script_actions(facility):
     parser = ScriptParser(facility)
     return {
-        '/GET': ResourceActionEntry(parser.parse(u'exec %0'), u'exec %0', u'get'),
-        '/POST': ResourceActionEntry(parser.parse(u'exec %0'), u'exec %0', u'post'),
+        '/GET': ResourceActionEntry(parser.parse(u'call %0'), u'call %0', u'get'),
+        '/POST': ResourceActionEntry(parser.parse(u'call %0'), u'call %0', u'post'),
         '/PUT': ResourceActionEntry(parser.parse(u'http:not-allowed %0 PUT'), u'http:not-allowed %0 PUT', u'put'),
         '/DELETE': ResourceActionEntry(parser.parse(u'http:not-allowed %0 PUT'), u'http:not-allowed %0 DELETE', u'delete'),
     }

@@ -110,7 +110,7 @@ class ScriptParser(Parser):
         if option(peek('$'))(seq):
             return self.xjson_path(seq)
         name = self.name(seq)
-        if name.endswith('.caty'):
+        if name.endswith('.caty') and name[0] != '/':
             return self.__make_exec_script(name, seq)
         pos = (seq.col-len(name), seq.line)
         type_args = option(self.type_args, [])(seq)
