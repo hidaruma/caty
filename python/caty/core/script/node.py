@@ -538,6 +538,7 @@ class VarStorageForAction(VarStorage):
         self.opts_stack = []
 
     def new_masked_scope(self, opts, args):
+        from caty.util.collection import OverlayedDict
         self.opts_stack.append(self.opts)
         self.args_stack.append(self.args)
         self.opts = OverlayedDict(opts if opts else {})
