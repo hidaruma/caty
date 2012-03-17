@@ -24,3 +24,11 @@ resource CoreCmds("/core-cmds.html") {
  };
 };
 
+resource Apps("/apps.html") {
+ action get("/GET#dont-care")
+ ::
+ {
+   apps | json:response
+ };
+};
+

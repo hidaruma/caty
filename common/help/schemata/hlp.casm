@@ -1,6 +1,10 @@
 // -*- coding: utf-8 -*-
 module hlp; 
 
+type CmdInfo = inspect:ShortProfile;
+
+type CmdList = [CmdInfo*];
+
 type ModInfo = {
  /** モジュールフルネーム */
  "fullname" : string(remark="アプリケーションで修飾されたモジュール名"),
@@ -9,11 +13,26 @@ type ModInfo = {
  "cmds" : CmdList,
 };
 
-type CmdInfo = inspect:ShortProfile;
-
-type CmdList = [CmdInfo*];
-
 type ModInfoList = [ModInfo*];
+
+/** CmdInfoに型変数配列を文字列化したものを追加
+ * CmdInfoはオープン制約なので、
+ * プロパティの追加は自由で、バリデーションにも影響しない。
+ */
+type CmdInfo2 = CmdInfo & {
+ "typeVarsStr" : string,
+ * : any?
+};
+
+command modify-cmd-info :: CmdInfo -> CmdInfo2 {
+ pass > in | $.typeVars | text:join ", " |
+ cond {
+  "" => "",
+   * => ["<", pass, ">"] | text:concat,
+ } > vars;
+
+ [%in, %vars] | xjson:put $.typeVarsStr
+};
 
 command mods :: void -> ModInfoList {
  apps | each {pv name} > app-names;
@@ -24,7 +43,7 @@ command mods :: void -> ModInfoList {
   each {
    pv name >n;
    [%app, ":", %n] | text:concat | dump > mod;
-   {"fullname":%mod, "cmds":inspect:list-cmd %mod}
+   {"fullname":%mod, "cmds":inspect:list-cmd %mod | each {modify-cmd-info}}
   }
  } | xlist:flatten
 };
@@ -34,7 +53,7 @@ command core :: void -> ModInfoList {
  each {
   pv name >n;
   ["caty:", %n] | text:concat | dump > mod;
-  {"fullname":%mod, "cmds":inspect:list-cmd %mod}
+  {"fullname":%mod, "cmds":inspect:list-cmd %mod  | each {modify-cmd-info}}
  }
 };
 

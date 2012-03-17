@@ -2,6 +2,7 @@
 <?caty-meta template="smarty" ?>
 {** 
  * コマンドの名前を作る
+ * これを使うとものすごく遅くなる
  *}
 {function name=cmdname type="hlp:CmdInfo"}
   <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;{foreach from=$typeVars item=var name=vars}{$var}{if $smarty.foreach.vars.last|not}, {/if}{/foreach}>
@@ -45,10 +46,28 @@
 
 {** 
  * コマンドのプロファイルをテーブルの1行として整形
+ * cmdname関数を使用。遅い。
  *}
 {function name=cmd type="hlp:CmdInfo"}
-  <tr class="cmd"><td>{call name=cmdname3}</td><td>{$input}</td><td>{$output}</td><td>{$throws}<td>{$implemented}</td></tr>
+  <tr class="cmd"><td>{call name=cmdname}</td><td>{$input}</td><td>{$output}</td><td>{$throws}<td>{$implemented}</td></tr>
 {/function}
+
+
+{** 
+ * コマンドのプロファイルをテーブルの1行として整形
+ * cmdname関数を展開。last変数参照をやめたら、多少は速いか？
+ *}
+{function name=cmd2 type="hlp:CmdInfo2"}
+  <tr class="cmd">
+   <td>
+    <span {if $deprecated} style="color:red;font-weight:bold" {/if}>
+      {$name}{$typeVarsStr}
+    </span>
+   </td>
+   <td>{$input}</td><td>{$output}</td><td>{$throws}<td>{$implemented}</td>
+  </tr>
+{/function}
+
 
 {**
  * コマンドプロファイルのリストをテーブルとして整形
@@ -57,7 +76,7 @@
   <table class="cmdlist" border="1">
   <tr><th>名前</th><th>入力</th><th>出力</th><th>例外</th><th>実装</th></tr>
   {foreach from=$_CONTEXT item=cmd}
-    {call name=cmd context=$cmd }
+    {call name=cmd2 context=$cmd }
   {/foreach}
   </table>
 {/function}
