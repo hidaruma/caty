@@ -2,42 +2,52 @@
 <?caty-meta template="smarty" ?>
 {** 
  * コマンドの名前を作る
- * これは今動かない。
  *}
 {function name=cmdname type="hlp:CmdInfo"}
-  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}<
-    {foreach from=$typeVars item=var name=vars}{$var}
-      {if $smarty.foreach.vars.last|not}, {/if}
-    {/foreach}
-   >
-  {*{/if}*}
+  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;{foreach from=$typeVars item=var name=vars}{$var}{if $smarty.foreach.vars.last|not}, {/if}{/foreach}>
+  {/if}
   </span>
 {/function}
 
 {* これは動く *}
 {function name=cmdname1 type="hlp:CmdInfo"}
-  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}<
-    {foreach from=$typeVars item=var name=vars}{$var} {/foreach}
+  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;
+    {foreach from=$typeVars item=var name=vars}{$var}
+    {/foreach}
    >
   {/if}
   </span>
 {/function}
 
-{* cmdname1 とレイアウトを変えただけだが、挙動が変わる *}
+{* これも動く *}
 {function name=cmdname2 type="hlp:CmdInfo"}
-  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}
-   <{foreach from=$typeVars item=var name=vars}{$var} {/foreach}
+  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;
+    {foreach from=$typeVars item=var name=vars}{$var}
+      {if $smarty.foreach.vars.last}. {/if}
+    {/foreach}
    >
    {/if}
   </span>
 {/function}
+
+{* これがエラーにならない *}
+{function name=cmdname3 type="hlp:CmdInfo"}
+  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;
+    {foreach from=$typeVars item=var name=vars}{$var}
+      {if $smarty.foreach.vars.last|not}, {/if}
+    {/foreach}
+   >
+   {*{/if}*}
+  </span>
+{/function}
+
 
 
 {** 
  * コマンドのプロファイルをテーブルの1行として整形
  *}
 {function name=cmd type="hlp:CmdInfo"}
-  <tr class="cmd"><td>{call name=cmdname1}</td><td>{$input}</td><td>{$output}</td><td>{$throws}<td>{$implemented}</td></tr>
+  <tr class="cmd"><td>{call name=cmdname3}</td><td>{$input}</td><td>{$output}</td><td>{$throws}<td>{$implemented}</td></tr>
 {/function}
 
 {**
