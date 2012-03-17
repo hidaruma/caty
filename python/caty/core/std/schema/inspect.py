@@ -36,6 +36,9 @@ type ShortProfile = {
  /** 例外の型 */
  "throws" : ([exceptionName*] | @only [exceptionName*])?,
 
+ /** deprecatedか否か */
+ "deprecated" : boolean,
+
  /** ファシリティの利用宣言 */
  //"facilityUsages": [FacilityUsage*]?,
  * : any?
