@@ -1,0 +1,117 @@
+module tpl;
+
+command render :: {"title": string, "mods": hlp:ModInfoList} -> string {
+[pv title > title, pv mods > mods];
+['''<html>
+  <head>
+    <title>''', %title, '''</title>
+  </head>
+  <body>
+    <h1>''', %title, "</h1>\n",
+    %mods | each {
+        mod
+    }|text:concat,
+'''
+  </body>
+</html>
+'''] | text:concat
+};
+/**
+ * モジュール情報をh2セクションとして整形
+ * type="hlp:ModInfo"
+ */
+command mod :: hlp:ModInfo -> string {
+ [pv fullname > fullname, pv cmds > cmds];
+ ['''<div class="mod">
+  <h2>モジュール ''', %fullname, "</h2>",
+  %cmds | cmdlist
+  ,
+ "</div>"
+ ] | text:concat
+};
+
+/**
+ * コマンドプロファイルのリストをテーブルとして整形
+*/
+command cmdlist :: hlp:CmdList -> string {
+  pass > cmds;
+  [
+  '''<table class="cmdlist" border="1">
+  <tr><th>名前</th><th>入力</th><th>出力</th><th>例外</th><th>実装</th></tr>
+  ''',
+  %cmds | each {
+      cmd
+  }|text:concat,
+  "</table>"] | text:concat
+};
+
+/** 
+ * コマンドのプロファイルをテーブルの1行として整形
+ */
+command cmd :: hlp:CmdInfo -> string {
+  pass > src;
+  ["<tr class=\"cmd\"><td>",
+  %src|cmdname3,
+  "</td><td>",
+  %src | pv input,
+  "</td><td>",
+  %src | pv output,
+  "</td><td>",
+  %src | xjson:get --default="" throws|to-string,
+  "<td>",
+  %src | pv implemented,
+  "</td></tr>" ] | case {
+      [string, string*] => text:concat,
+      [] => "",
+  }
+};
+
+command cmdname3 :: hlp:CmdInfo -> string {
+  pass > src;
+  ["<span ",
+   %src | pv deprecated | case {
+      true => '''style="color:red;font-weight:bold">''',
+      false => ">"
+   },
+   %src | pv name,
+   %src | pv typeVars | case {
+      [string*] => ["&lt;", text:join ", ", "&gt;"] | text:concat,
+      [] => ""
+   },
+  "</span>"] | text:concat
+};
+
+
+/**
+{** 
+ * コマンドの名前を作る
+ *}
+{function name=cmdname type="hlp:CmdInfo"}
+  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;{foreach from=$typeVars item=var name=vars}{$var}{if $smarty.foreach.vars.last|not}, {/if}{/foreach}>
+  {/if}
+  </span>
+{/function}
+
+{* これは動く *}
+{function name=cmdname1 type="hlp:CmdInfo"}
+  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;
+    {foreach from=$typeVars item=var name=vars}{$var}
+    {/foreach}
+   >
+  {/if}
+  </span>
+{/function}
+
+{* これも動く *}
+{function name=cmdname2 type="hlp:CmdInfo"}
+  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;
+    {foreach from=$typeVars item=var name=vars}{$var}
+      {if $smarty.foreach.vars.last}. {/if}
+    {/foreach}
+   >
+   {/if}
+  </span>
+{/function}
+
+
+*/
