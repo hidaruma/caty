@@ -834,7 +834,7 @@ command redirect [string] :: void -> never
 
 /**
  * スクリプトローカルスキーマの定義。
- * CatyFIT で使うためのコマンドなので、ユーザが明示的に使う必要はないはずである。
+ * CatyFIT で使うためのコマンドなので、ユーザが明示的に使う事は想定していない。
  */
 command define-local-schema :: string -> void
     reads schema

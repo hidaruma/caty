@@ -79,6 +79,8 @@ class Application(PbcObject):
             self._init_vcs()
             self._init_memory()
             self._init_log()
+            self._init_interpreter()
+            self._init_action()
         else:
            self.cout.writeln(u'* ' + system.i18n.get("$name is set not to start", name=self._name))
         self.async_queue = AsyncQueue(self)
@@ -381,6 +383,10 @@ class Application(PbcObject):
         assert type in LOG_TYPES
         return logger.get(str(self.name), str(type))
 
+    def _init_action(self):
+        self._create_dispatcher()
+        self._extract_casm_from_cara() # .caraで定義されたコマンド、スキーマの登録。
+
     def finish_setup(self):
         self.cout.writeln(self.i18n.get("Initializing '$name'", name=self.name))
         if self._disabled: return
@@ -390,8 +396,6 @@ class Application(PbcObject):
         c['script_ext'] = ['.cgi', '.act', '.do']
         c['missingSlash'] = self._manifest['missingSlash']
         self._web_config = ImmutableDict(c)
-        self._create_dispatcher()
-        self._extract_casm_from_cara() # .caraで定義されたコマンド、スキーマの登録。
         try:
             if not self._no_ambient:
                 self._schema_module.resolve() # 型参照は最終的にここで解決される。
