@@ -135,12 +135,20 @@ class TypeCalcurator(_SubNormalizer):
         # 一方がneverであれば演算結果はnever
         if lt == 'never' or rt == 'never':
             res = NeverSchema()
+        # フォーリンデータはどうしようもないのでnever
+        elif lt == 'foreign' or rt == 'foreign':
+            res = NeverSchema()
         elif lt == 'undefined' or rt == 'undefined':
             if lt == rt:
                 res = UndefinedSchema()
             else:
                 res = NeverSchema()
-        # anyは&演算では単位元
+        # univは&演算では単位元
+        elif lt == 'univ':
+            res = r
+        elif rt == 'univ':
+            res = l
+        # anyはforeignとundefined以外に対して単位元
         elif lt == 'any':
             res = r
         elif rt == 'any':

@@ -80,6 +80,8 @@ __all__ = [
     "UndefinedSchema",
     "TypeVariable",
     "OptionalSchema",
+    "UnivSchema",
+    "ForeignSchema",
     "NamedSchema",
     "TypeReference",
     "OverlayedDict",
@@ -115,6 +117,8 @@ types = {
     'enum': EnumSchema([]),
     'bag': BagSchema([]),
     'undefined': OptionalSchema(UndefinedSchema()),
+    'univ': UnivSchema({}),
+    'foreign': ForeignSchema({}),
 }
 
 schemata = types # とりあえず互換性維持のために残しておく

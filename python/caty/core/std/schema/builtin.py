@@ -626,7 +626,7 @@ command translate [string] :: WebInput -> @OK any | @NG MiniErrorInfo
 /**
  * 引数で指定された型で入力値を検証する。
  */
-command validate {"pred":boolean?} [string] :: any -> @OK any | @NG MiniErrorInfo | boolean
+command validate {"pred":boolean?} [string] :: univ -> @OK univ | @NG MiniErrorInfo | boolean
     reads schema
     refers python:caty.core.std.command.builtin.Validate;
 
@@ -634,7 +634,7 @@ command validate {"pred":boolean?} [string] :: any -> @OK any | @NG MiniErrorInf
  * 入力を捨てるコマンド。
  * 
  */
-command void<T default any> :: T -> void
+command void<T default univ> :: T -> void
   refers python:caty.core.std.command.builtin.Void;
 
 /**

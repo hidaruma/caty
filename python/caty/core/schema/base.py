@@ -691,7 +691,8 @@ class ScalarSchema(SchemaBase, Scalar):
     def _clone(self, checked, options):
         return self.__class__(options if options else self.options)
 
-class AnySchema(SchemaBase, Scalar):
+
+class UnivSchema(SchemaBase, Scalar):
     u"""あらゆる型を受け付けるスキーマ。
     つまり何もしない。
     """
@@ -701,6 +702,74 @@ class AnySchema(SchemaBase, Scalar):
 
     def validate(self, value):
         pass
+
+    def _convert(self, value):
+        return value
+
+    def dump(self, depth, node=[]):
+        return u'univ'
+
+
+    def clone(self, checked=None, *args, **kwds):
+        s = UnivSchema(*args, **kwds)
+        s.annotations = self.annotations
+        return s
+
+    @property
+    def type(self):
+        return u'univ'
+
+    @property
+    def tag(self):
+        return self.type
+
+class ForeignSchema(SchemaBase, Scalar):
+    u"""フォーリンデータ型を受け付けるスキーマ。
+    """
+
+    def intersect(self, another):
+        return another.clone(None)
+
+    def validate(self, value):
+        if value is caty.UNDEFINED:
+            raise JsonSchemaError(dict(msg='undefined value'))
+        if type(value) in (dict, list, tuple, unicode, str, int, bool, Decimal, TagOnly, TaggedValue):
+            raise JsonSchemaError(dict(msg='Not a foreign data'))
+
+    def _convert(self, value):
+        return value
+
+    def dump(self, depth, node=[]):
+        return u'foreign'
+
+
+    def clone(self, checked=None, *args, **kwds):
+        s = ForeignSchema(*args, **kwds)
+        s.annotations = self.annotations
+        return s
+
+    @property
+    def type(self):
+        return u'foreign'
+
+    @property
+    def tag(self):
+        return self.type
+
+from decimal import Decimal
+from caty.jsontools import TaggedValue, TagOnly
+class AnySchema(SchemaBase, Scalar):
+    u"""undefined、foreign以外のあらゆる型を受け付けるスキーマ。
+    """
+
+    def intersect(self, another):
+        return another.clone(None)
+
+    def validate(self, value):
+        if value is caty.UNDEFINED:
+            raise JsonSchemaError(dict(msg='undefined value'))
+        if type(value) not in (dict, list, tuple, unicode, str, int, bool, Decimal, TagOnly, TaggedValue):
+            raise JsonSchemaError(dict(msg='Not a json value'))
 
     def _convert(self, value):
         return value
