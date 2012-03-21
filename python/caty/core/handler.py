@@ -23,7 +23,7 @@ class AppDispatcher(object):
             name = path.split('/')[1].strip('/')
         else:
             name = ''
-        if name in self._system.app_names and name != 'global':
+        if name in self._system.app_names and name not in (u'global', u'caty'):
             return self._system.get_app(name)
         else:
             return self._system.get_app('root')

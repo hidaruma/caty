@@ -19,8 +19,24 @@ class SmartyParser(Parser):
         return Template(ts)
 
     def term(self, seq):
-        s = seq.parse([self.literal, self.delim, self.statement, try_(self.comment)])
+        s = seq.parse([try_(self.escape_pi), self.literal, self.delim, self.statement, try_(self.comment)])
         return s
+
+    def escape_pi(self, seq):
+        s = until('<?')(seq)
+        if s:
+            if s.endswith('<'):
+                p = s.find('<')
+                rest = s[:p]
+                op = s[p:]
+                cn = until('?>')(seq)
+                S('?>')(seq)
+                cn += u'?>'
+                cp = ''.join(many('>')(seq))
+                if len(op) != len(cp) or len(op) < 1:
+                    raise ParseFailed(seq, self.escape_pi)
+                return String(u'%s%s%s%s' % (rest, op[1:], cn, cp[1:]))
+        raise ParseFailed(seq, self.escape_pi)
 
     def literal(self, seq):
         s = seq.parse(until('{'))
@@ -28,17 +44,34 @@ class SmartyParser(Parser):
             if seq.eof or not option(peek(S('{literal}')))(seq):
                 raise ParseFailed(seq, self.literal)
             s = u''
-        escape = seq.parse(option('{literal}'))
-        skip_ws(seq)
-        if escape is None:
-            return String(s)
+        op = option('{literal}')(seq)
+        if op is None:
+            try:
+                escaped = try_(self.escaped_syntax)(seq)
+                if escaped:
+                    return String(s + escaped)
+                else:
+                    return String(s)
+            except ParseFailed:
+                return String(s)
         else:
+            skip_ws(seq)
             s2 = seq.parse(until('{/literal}'))
             closing = seq.parse(option('{/literal}'))
             if not closing:
                 raise ParseError(seq, self.literal, u'missing {/literal}')
             skip_ws(seq)
             return String(''.join([s, s2]))
+
+    def escaped_syntax(self, seq):
+        op = many('{')(seq)
+        cn = until('}')(seq)
+        cp = many('}')(seq)
+        if len(op) != len(cp):
+            raise ParseError(seq, self.escaped_syntax)
+        if len(op) < 2:
+            raise ParseFailed(seq, self.escaped_syntax)
+        return u'%s%s%s' % (''.join(op[1:]), cn, ''.join(cp[1:]))
 
     def delim(self, seq):
         if choice('{$ldelim}', '{$rdelim}')(seq) == '{$ldelim}':
