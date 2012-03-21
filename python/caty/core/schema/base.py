@@ -10,6 +10,9 @@ from caty.core.typeinterface import *
 
 import copy
 import random
+from decimal import Decimal
+from caty.jsontools import TaggedValue, TagOnly
+from types import NoneType
 
 class SchemaBase(Resource, PbcObject):
     u"""あらゆるスキーマクラスのベースクラス。
@@ -733,7 +736,7 @@ class ForeignSchema(SchemaBase, Scalar):
     def validate(self, value):
         if value is caty.UNDEFINED:
             raise JsonSchemaError(dict(msg='undefined value'))
-        if type(value) in (dict, list, tuple, unicode, str, int, bool, Decimal, TagOnly, TaggedValue):
+        if type(value) in (dict, list, tuple, unicode, NoneType, str, int, bool, Decimal, TagOnly, TaggedValue):
             raise JsonSchemaError(dict(msg='Not a foreign data'))
 
     def _convert(self, value):
@@ -756,8 +759,6 @@ class ForeignSchema(SchemaBase, Scalar):
     def tag(self):
         return self.type
 
-from decimal import Decimal
-from caty.jsontools import TaggedValue, TagOnly
 class AnySchema(SchemaBase, Scalar):
     u"""undefined、foreign以外のあらゆる型を受け付けるスキーマ。
     """
@@ -768,7 +769,7 @@ class AnySchema(SchemaBase, Scalar):
     def validate(self, value):
         if value is caty.UNDEFINED:
             raise JsonSchemaError(dict(msg='undefined value'))
-        if type(value) not in (dict, list, tuple, unicode, str, int, bool, Decimal, TagOnly, TaggedValue):
+        if type(value) not in (dict, list, tuple, unicode, NoneType, str, int, bool, Decimal, TagOnly, TaggedValue):
             raise JsonSchemaError(dict(msg='Not a json value'))
 
     def _convert(self, value):
