@@ -1474,5 +1474,5 @@ class Annotation(object):
             return self.name
 
     def reify(self):
-        return [self.name, self.value]
+        return {'name': self.name, 'value': self.value}
 
