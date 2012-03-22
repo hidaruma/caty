@@ -1,6 +1,8 @@
 #coding: utf-8
-from caty.core.command import Internal
+from caty.core.command import Internal, Builtin
 from caty.core.exception import *
+import caty.jsontools as json
+
 class ListCommands(Internal):
     def setup(self, opts, module_name):
         self._short = opts['short']
@@ -67,5 +69,24 @@ class ListModules(Internal):
             r.append(o)
         return r
         
+
+
+class ReifyType(Builtin):
+    def setup(self, type_name):
+        self._type_name = type_name
+
+    def execute(self):
+        from caty.core.casm.language.ast import ScalarNode, BagNode, ObjectNode, ArrayNode
+        mod = self.schema._module
+        if self._type_name in ('integer', 'number', 'boolean', 'string', 'binary', 'null', 'undefined', 'any', 'never', 'univ'):
+            return ScalarNode(self._type_name).reify()
+        elif self._type_name == 'object':
+            return ObjectNode(wildcard=ScalarNode(u'any')).reify()
+        elif self._type_name == 'array':
+            return ArrayNode(wildcard=ArrayNode(u'any'), options={'repeat': True}).reify()
+        elif self._type_name == 'bag':
+            return BagNode().reify()
+        ast = mod.get_ast(self._type_name)
+        return ast.reify()
 
 

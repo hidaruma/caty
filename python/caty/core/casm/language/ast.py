@@ -8,6 +8,7 @@ from caty.core.command.profile import CommandProfile, ProfileContainer, ScriptPr
 from caty.core.exception import InternalException
 from caty.core.typeinterface import *
 import caty.core.runtimeobject as ro
+import caty.jsontools as json
 
 class Provide(object):
     def __init__(self, names):
@@ -80,6 +81,18 @@ class ASTRoot(Root):
         self.module = module
         module.add_ast(self)
 
+    def reify(self):
+        o = json.tagged('type', {
+            'name': self._name, 
+            'typeParams': [p.reify() for p in self._type_params],
+            'typeBody': self.body.reify(),
+            'annotation': self.annotations.reify(),
+            'docstring': self.docstring,
+        })
+        if self.options:
+            o.value['options'] = self.options
+        return o
+
 class Node(object):
     def __init__(self, options=None):
         self.options = {} if options is None else options
@@ -93,21 +106,30 @@ class Node(object):
     def apply_type_name(self, t):
         pass
 
+    def reify(self):
+        o = self._reify()
+        if self.annotations:
+            o['annotations'] = self.annotations.reify()
+        if self.docstring:
+            o['docstring'] = self.docstring
+        o['options'] = self.options
+        return json.tagged(self.reification_type, o)
+
 class ScalarNode(Scalar, Node):
+    reification_type = u'_scalar'
+
     def __init__(self, schema_name, options=None, type_args=None):
         Node.__init__(self)
         self.name = schema_name
         self.options = options if options is not None else {}
         self.type_args = type_args if type_args is not None else []
 
-class TypeVarNode(Scalar, Node):
-    def __init__(self, type_name):
-        Node.__init__(self)
-        self.type_name = type_name
+    def _reify(self):
+        return {
+            'name': self.name, 
+            'typeArgs': [t.reify() for t in self.type_args], 
+        }
 
-    def _build(self, module):
-        schema = TypeVariable(self.type_name)
-        return schema
 
 class OperatorNode(Node):
     def __init__(self, node1, node2):
@@ -123,13 +145,20 @@ class OperatorNode(Node):
     def right(self):
         return self._right
 
-class UnionNode(OperatorNode, Union): pass
+    def _reify(self):
+        return {'left': self.left.reify(), 'right': self.right.reify()}
 
-class IntersectionNode(OperatorNode, Intersection): pass
+class UnionNode(OperatorNode, Union):
+    reification_type = u'_union'
 
-class UpdatorNode(OperatorNode, Updator): pass
+class IntersectionNode(OperatorNode, Intersection):
+    reification_type = u'_intersection'
+
+class UpdatorNode(OperatorNode, Updator):
+    reification_type = u'_updator'
 
 class TaggedNode(Node, Tag):
+    reification_type = u'_tag'
     def __init__(self, tag, node):
         Node.__init__(self)
         self._tag = tag
@@ -138,6 +167,12 @@ class TaggedNode(Node, Tag):
     @property
     def tag(self):
         return self._tag
+
+    def _reify(self):
+        return {
+            'tag': self._tag,
+            'body': self.body.reify()
+        }
 
 class NamedTaggedNode(TaggedNode):
     def __init__(self, node):
@@ -156,7 +191,13 @@ class PseudoTaggedNode(Node, PseudoTag):
     def tag(self):
         return self._value
 
+    def reify(self):
+        o = self.body.reify()
+        json.untagged(o)['pseudoTag'] = json.tagged('_pseudoTag', [self._name, self._value])
+        return o
+
 class EnumNode(Node, Enum):
+    reification_type = u'_enum'
     def __init__(self, enum):
         Node.__init__(self)
         #t = type(enum[0])
@@ -164,7 +205,11 @@ class EnumNode(Node, Enum):
         #    raise ValueError(t)
         self.enum = enum
 
+    def _reify(self):
+        return  {'enum': self.enum if isinstance(self.enum, (list, tuple)) else [self.enum]}
+
 class ArrayNode(Node, Array):
+    reification_type = u'_array'
     def __init__(self, items, options):
         Node.__init__(self, options)
         self.items = items
@@ -174,7 +219,16 @@ class ArrayNode(Node, Array):
     def __iter__(self):
         return iter(self.items)
 
+    def _reify(self):
+        items = []
+        for v in self.leaves,items():
+            items.append(v.reify())
+        return {
+                'items': items,
+            }
+
 class BagNode(Node, Bag):
+    reification_type = u'_bag'
     def __init__(self, items, options):
         Node.__init__(self, options)
         self.items = items
@@ -183,7 +237,13 @@ class BagNode(Node, Bag):
     def __iter__(self):
         return iter(self.items)
 
+    def _reify(self):
+        return {
+            'items': [v.reify() for v in self.items],
+        }
+
 class ObjectNode(Node, Object):
+    reification_type = u'_object'
     def __init__(self, items=None, wildcard=None, options=None):
         Node.__init__(self, options)
         self.leaves = items if items else {}
@@ -205,10 +265,24 @@ class ObjectNode(Node, Object):
     def __setitem__(self, key, value):
         raise Exception()
 
+    def _reify(self):
+        items = {}
+        for k, v in self.leaves.items():
+            items[k] = v.reify()
+        return {
+                'items': items,
+                'wildcard': self.wildcard.reify(),
+            }
+
+
 class OptionNode(Node, Optional):
+    reification_type = u'_optional'
     def __init__(self, node):
         self.body = node
         Node.__init__(self, node.options)
+
+    def _reify(self):
+        return {'body': self.body.reify()}
 
 class CommandNode(Function):
     def __init__(self, name, patterns, uri_or_script, doc, annotation, type_params):
@@ -391,6 +465,14 @@ class TypeParam(object):
 
     def __repr__(self):
         return self.var_name + ":" + str(self.kind)
+
+    def reify(self):
+        return json.tagged('_typeparam', 
+        {
+            'var_name': self.var_name,
+            'kind': self.kind,
+            'default': self.default_type
+        })
 
 class ConstDecl(object):
     def __init__(self, name, type, schema, script, doc, ann):

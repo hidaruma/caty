@@ -116,12 +116,19 @@ command list-mod
  refers python:caty.core.std.command.inspect.ListModules;
 
 
+/**
+ * 引数の型に対するレイフィケーションイメージを出力する。
+ */
+command reify-type [string typeName] :: void -> ReifiedTypeTerm | RTypeDef
+    throws [ApplicationNotFound, ModuleNotFound, TypeNotFound]
+    reads schema
+    refers python:caty.core.std.command.inspect.ReifyType;
 
 /*レイフィケーション関係*/
 
 type ReifiedModule = @module {
     "name": string,
-    "doc": string,
+    "docstring": string,
     "type": "casm" | "cara",
     "member": {
         *: ReifiedTypeTerm | ReifiedKind | ReifiedCommand | ReifiedAction,
@@ -129,9 +136,8 @@ type ReifiedModule = @module {
 };
 
 type TypeAttribute = {
-    "annotation": @annotation [ReifiedAnnotation*],
-    "options": object,
-    "typeParams": [RTypeParam*],
+    "annotation": (@annotation [ReifiedAnnotation*])?,
+    "options": object?,
     "docstring": string?
 };
 
@@ -140,11 +146,11 @@ type ReifiedAnnotation = {
     "value": any,
 };
 
-type ReifiedTypeTerm = @type {
+type ReifiedTypeTerm = @type (TypeAttribute ++ {
     "name": string(remark="型名"),
-    "typeArgs": [RTypeParam*] | null,
-    "typeBody": RTypeDef
-};
+    "typeParams": [RTypeParam*] | null,
+    "typeBody": RTypeDef,
+});
 
 type RTypeDef = (RObject 
                 | RArray 
@@ -154,14 +160,14 @@ type RTypeDef = (RObject
                 | RUnion
                 | RIntersection
                 | RUpdator
-                | RTypeParam
+                | ROptional
                 | RTag);
 
 type RObject = @_object (
     TypeAttribute ++ {
         "items": {*: RTypeDef}, 
         "wildcard": RTypeDef,
-        "pseudoTag": RPseudoTag,
+        "pseudoTag": RPseudoTag?,
     });
 
 type RPseudoTag = @_pseudoTag ([string, any] | [null, null]);
@@ -173,7 +179,7 @@ type RIntersection = @_intersection (TypeAttribute ++ {"left": RTypeDef, "right"
 type RUpdator = @_updator (TypeAttribute ++ {"left": RTypeDef, "right": RTypeDef});
 type RScalar = @_scalar (TypeAttribute ++ {
     "name": string(remark="参照している型名"),
-    "typeArgs": [RTypeDef*],   
+    "typeArgs": [RTypeDef*],
     }
 );
 type RTypeParam = @_typeparam {
@@ -186,7 +192,7 @@ type RTag = @_tag (TypeAttribute ++ {
     "tag": string,
     "body": RTypeDef,
 });
-
+type ROptional = @_optional (TypeAttribute ++ {"body": RTypeDef});
 type ReifiedAction = @action object;
 type ReifiedKind = @kind object;
 type ReifiedCommand = @commands object;

@@ -1452,6 +1452,9 @@ class Annotations(dict):
             n.add(b)
         return n
 
+    def reify(self):
+        return tagged('annotation', [a.reify() for a in self._annotations])
+
 class Annotation(object):
     def __init__(self, name, value=None):
         self.name = name
@@ -1469,4 +1472,7 @@ class Annotation(object):
             return '%s(%s)' % (self.name, json.dumps(self.value))
         else:
             return self.name
+
+    def reify(self):
+        return [self.name, self.value]
 

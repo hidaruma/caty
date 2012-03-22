@@ -383,6 +383,14 @@ exception ResourceNotFound = {
   *: any?
 };
 
+
+/** 型が存在しない */
+exception TypeNotFound = {
+  "moduleName": string,
+  "typeName": string,
+  *: any?
+};
+
 /** アクションが存在しない */
 exception ActionNotFound = {
   "moduleName": string,
