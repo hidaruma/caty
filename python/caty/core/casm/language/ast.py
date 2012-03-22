@@ -471,7 +471,7 @@ class TypeParam(object):
         {
             'var_name': self.var_name,
             'kind': self.kind,
-            'default': self.default_type
+            'default': self.default
         })
 
 class ConstDecl(object):

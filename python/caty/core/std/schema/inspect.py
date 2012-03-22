@@ -184,8 +184,8 @@ type RScalar = @_scalar (TypeAttribute ++ {
 );
 type RTypeParam = @_typeparam {
     "var_name": string,
-    "kind": string,
-    "default": string,
+    "kind": string | null,
+    "default": string | null,
 };
 
 type RTag = @_tag (TypeAttribute ++ {
