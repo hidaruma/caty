@@ -7,7 +7,7 @@ schema = u"""
  *
  */
 @[filter]
-command notnull :: any -> boolean
+command notnull :: univ -> boolean
     refers python:caty.core.std.command.filtercmd.NotNullFilter;
 
 /**
@@ -15,7 +15,7 @@ command notnull :: any -> boolean
  *
  */
 @[filter]
-command notempty :: any -> boolean
+command notempty :: univ -> boolean
     refers python:caty.core.std.command.filtercmd.NotEmptyFilter;
 
 /**
@@ -23,70 +23,70 @@ command notempty :: any -> boolean
  *
  */
 @[filter]
-command empty :: any -> boolean
+command empty :: univ -> boolean
     refers python:caty.core.std.command.filtercmd.EmptyFilter;
 
 /**
  * 入力値を引数で割ったその余りを返す。
  */
 @[filter]
-command mod [string] :: any -> any
+command mod [string] :: univ -> univ
     refers python:caty.core.std.command.filtercmd.ModuloFilter;
 
 /**
  * 入力値と引数が等しいかを返す。
  */
 @[filter]
-command eq [string] :: any -> boolean
+command eq [string] :: univ -> boolean
     refers python:caty.core.std.command.filtercmd.EqFilter;
 
 /**
  * 入力値と引数が異なっているかを返す。
  */
 @[filter]
-command ne [string] :: any -> boolean
+command ne [string] :: univ -> boolean
     refers python:caty.core.std.command.filtercmd.NotEqFilter;
 
 /**
  * 入力値の否定を返す。
  */
 @[filter]
-command not :: any -> boolean
+command not :: univ -> boolean
     refers python:caty.core.std.command.filtercmd.NotFilter;
 
 /**
  * 入力が未定義値でなければtrueを返す。
  */
 @[filter]
-command defined :: any -> boolean
+command defined :: univ -> boolean
     refers python:caty.core.std.command.filtercmd.DefinedFilter;
 
 /**
  * 文字列をエスケープしないようにテンプレートエンジンに伝える。
  */
 @[filter]
-command noescape :: any -> any
+command noescape :: univ -> univ
     refers python:caty.core.std.command.filtercmd.RawStringFilter;
 
 /**
  * 入力がオブジェクト型かどうかを判定する。
  */
 @[filter]
-command isobject :: any -> boolean
+command isobject :: univ -> boolean
     refers python:caty.core.std.command.filtercmd.IsObject;
 
 /**
  * 入力が配列型かどうかを判定する。
  */
 @[filter]
-command isarray :: any -> boolean
+command isarray :: univ -> boolean
    refers python:caty.core.std.command.filtercmd.IsArray;
 
 /**
  * 入力値を文字列化する。
  */
 @[filter]
-command json :: any -> string {json:pretty};
+command json :: univ -> string {json:pretty};
 
 /** JSONデータをエスケープせずにシリアライズする。
  * このフィルターの出力は、そのままJavaScriptコード内で利用できる。
@@ -95,7 +95,6 @@ command json :: any -> string {json:pretty};
  * エスケープを行うjsonフィルターを使用すべきである。
  */
 @[filter]
-command javascript :: any -> any {json:pretty|noescape};
-
+command javascript :: univ -> univ {json:pretty|noescape};
 
 """
