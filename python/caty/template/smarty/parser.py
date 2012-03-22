@@ -43,9 +43,16 @@ class SmartyParser(Parser):
 
     def literal(self, seq, upcoming=None):
         if upcoming:
-            s = seq.parse(until([upcoming, '{']))
-            if option(peek(upcoming))(seq):
-                return String(s+seq.parse(upcoming)[1:])
+            l = len(upcoming)
+            ups = []
+            for i in range(l):
+                ups.insert(0, upcoming[:i+1])
+            s = seq.parse(until(ups + ['{']))
+            if option(peek(upcoming[0]))(seq):
+                tok = seq.parse(many(upcoming[0]))
+                if len(tok) > 1:
+                    tok = tok[1:]
+                return String(s+''.join(tok))
         else:
             s = seq.parse(until('{'))
         if not s:
