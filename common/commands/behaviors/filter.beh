@@ -1,0 +1,12 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= テンプレートフィルター
+
+=== !exec
+
+|=input      |=command         |=params |=output |=備考       |
+| "hello"    | filter:noescape |        |"hello" | デグレ防止 |
+
+
+
+
