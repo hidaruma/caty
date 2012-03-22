@@ -1115,3 +1115,7 @@ class ToString(Builtin):
         else:
             return unicode(str(v))
 
+class Foreign(Builtin):
+    def execute(self):
+        return object()
+

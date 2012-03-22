@@ -849,6 +849,13 @@ command binary [("base64"|"raw")?] :: string -> binary
     refers python:caty.core.std.command.builtin.Binary;
 
 /**
+ * フォーリンデータを出力する。
+ */
+command foreign :: void -> foreign
+    refers python:caty.core.std.command.builtin.Foreign;
+
+
+/**
  * 環境変数の一覧の出力
  */
 command env :: void -> object
