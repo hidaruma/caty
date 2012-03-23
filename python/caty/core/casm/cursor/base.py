@@ -187,10 +187,9 @@ class ProfileBuilder(SchemaBuilder):
             tc.real_root = False
             opt_schema = tn.visit(pat.opt_schema.accept(tc))
             arg_schema = tn.visit(pat.arg_schema.accept(tc))
-            new_prof = []
-            for d in pat.decl.profiles:
-                new_prof.append((tn.visit(d[0].accept(tc)), tn.visit(d[1].accept(tc))))
-            pat.decl.profiles = new_prof
+            p = pat.decl.profile
+            new_prof = (tn.visit(p[0].accept(tc)), tn.visit(p[1].accept(tc)))
+            pat.decl.profile = new_prof
             pc.add_profile(CommandProfile(pat.opt_schema, pat.arg_schema, pat.decl))
         return pc
 

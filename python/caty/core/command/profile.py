@@ -95,14 +95,7 @@ class CommandProfile(object):
         self._in_schema = None
         self._out_schema = None
         self.resolved = False
-        if len(declobj.profiles) == 1:
-            self._in_schema, self._out_schema = declobj.profiles[0]
-        else:
-            for i, o in declobj.profiles:
-                if isinstance(i, NullSchema):
-                    self._in_schema = i
-                    self._out_schema = o
-                    break
+        self._in_schema, self._out_schema = declobj.profile
     
     def clone(self):
         n = CommandProfile(self.opts_schema, self.args_schema, self.declobj)

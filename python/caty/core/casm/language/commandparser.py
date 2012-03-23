@@ -84,7 +84,7 @@ def profile(seq):
     i = typedef(seq)
     _ = seq.parse('->')
     o = typedef(seq)
-    return [(i, o)]
+    return (i, o)
 
 def jump(seq):
     t = None

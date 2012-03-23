@@ -221,7 +221,7 @@ class ArrayNode(Node, Array):
 
     def _reify(self):
         items = []
-        for v in self.leaves,items():
+        for v in self.items:
             items.append(v.reify())
         return {
                 'items': items,
@@ -372,9 +372,9 @@ class CommandDecl(object):
     資源使用宣言 uses, reads, updates
     コマンドURI参照 refers
     """
-    def __init__(self, profiles, jump, resource):
+    def __init__(self, profile, jump, resource):
         self.uri = '' # 後で挿入される
-        self.profiles = profiles
+        self.profile = profile
         self.jump = jump if isinstance(jump, list) else [jump]
         self.resource = resource if isinstance(resource, list) else [resource]
         self.__initialized = False
@@ -388,13 +388,11 @@ class CommandDecl(object):
     def build(self, cursors):
         if self.__initialized:
             return
-        p = []
-        for i, o in self.profiles:
-            for cursor in cursors:
-                i = i.accept(cursor)
-                o = o.accept(cursor)
-            p.append((i, o))
-        self.profiles = p
+        i, o = self.profile
+        for cursor in cursors:
+            i = i.accept(cursor)
+            o = o.accept(cursor)
+        self.profile = (i, o)
 
         j = []
         for t, ls in self.jump:
@@ -408,11 +406,10 @@ class CommandDecl(object):
         self.__initialized = True
 
     def verify_type_var(self, names):
-        for p in self.profiles:
-            for i in p:
-                v = _verify_type_var(i, names)
-                if v is not None:
-                    return v
+        for i in self.profile:
+            v = _verify_type_var(i, names)
+            if v is not None:
+                return v
         return
 
 
@@ -487,7 +484,7 @@ class ConstDecl(object):
                                      [CallPattern(None, 
                                                  None, 
                                                  CommandDecl(
-                                                    [(ScalarNode('void'), type if type is not None else schema)],
+                                                    (ScalarNode('void'), type if type is not None else schema),
                                                     [], 
                                                     []
                                                  ), 
