@@ -18,6 +18,9 @@ class Proxy(object):
     def set_module(self, module):
         pass
 
+    def reify(self):
+        raise NotImplemtentedError(u'{0}.reify'.format(self.__class__.__name__))
+
 class CommandProxy(Proxy):
     u"""コマンド呼び出しに遭遇したときに構築されるプロキシクラス。
     """

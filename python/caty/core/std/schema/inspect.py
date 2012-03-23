@@ -195,6 +195,163 @@ type RTag = @_tag (TypeAttribute ++ {
 type ROptional = @_optional (TypeAttribute ++ {"body": RTypeDef});
 type ReifiedAction = @action object;
 type ReifiedKind = @kind object;
-type ReifiedCommand = @commands object;
+
+type ReifiedCommand = @command (RHostLangCommand | RScriptCommand | RStubCommand);
+
+type CommandAttribute = {
+    "name": string,
+    "annotation": @annotation [ReifiedAnnotation*],
+    "typeParams": [RTypeParam*]?,
+    "docstring": string?,
+    "profiles": [RProfile],
+    "exception": [string*]?,
+    "resrouce": [FacilityUsage*]?,
+};
+
+type RProfile = {
+    "opts": RObject,
+    "args": RArray,
+    "input": RTypeDef,
+    "output": RTypeDef,
+};
+
+type RHostLangCommand = @_hostLang (CommandAttribute ++ {
+    "refers": string,
+    "script": undefined,
+});
+
+type RStubCommand = @_stub (CommandAttribute ++ {
+    "refers": undefined,
+    "script": undefined,
+});
+
+type RScriptCommand = @_script (CommandAttribute ++ {
+    "refers": undefined,
+    "script": ReifiedScript,
+});
+
+type ReifiedScript = (RCommandCall 
+                    | RScalarVal
+                    | RListBuilder 
+                    | RObjectBuilder
+                    | RTypeDispatch
+                    | RTypeCase
+                    | RTypeCond
+                    | RTagBuilder
+                    | RUnaryTagBuilder
+                    | RFunctor
+                    | RFragment
+                    | RJson
+                    | RPipe
+                    | RDiscard
+                    | RVarStore
+                    | RVarRef
+                    | RArgRef);
+
+type RCommandCall = @_call {
+    "name": string,
+    "opts": [ROptProxy],
+    "args": [RArgProxy],
+    "typeArgs": [string*],
+    "pos": [integer, integer],
+};
+
+type ROptProxy = ROption | ROptionLoader | ROptionVarLoader | RGlobOption;
+
+type ROption = @_opt {
+    "key": string,
+    "value": any,
+    "optional": undefined,
+};
+
+type ROptionLoader = @_optLoader {
+    "key": string,
+    "value": undefined,
+    "optional": boolean,
+};
+
+type ROptionVarLoader = @_optVarLoader {
+    "key": string,
+    "value": any,
+    "optional": boolean,
+};
+
+type RGlobOption = @_glob {};
+
+type RArgProxy = RArgument | RNamedArg | RIndexArg | RGlobArg;
+
+type RArgument = @_arg {
+    "value": any,
+};
+
+type RNamedArg = @_narg {
+    "key": any,
+    "optional": boolean,
+};
+
+
+type RIndexArg = @_iarg {
+    "index": any,
+    "optional": boolean,
+};
+
+
+type RGlobArg = @_garg {
+};
+
+type RScalarVal = @_scalar string|binary|integer|number|null;
+
+type RListBuilder = @_list [ReifiedScript*];
+
+type RObjectBuilder = @_object {*: ReifiedScript};
+
+type RTypeDispatch = @_when {"opts": ROptProxy, "cases": [(RTagBuilder|RUntag)*]};
+
+type RTagBuilder = @_tag {"tag": string, "value": ReifiedScript};
+
+type RUntag = @_untag  {"tag": string, "value": ReifiedScript};
+
+type RUnaryTagBuilder = @_unaryTag {"tag": string};
+
+type RTypeCase = @_case {
+    "path": string?,
+    "via": ReifiedScript?,
+    "cases": [RCaseNode*],
+};
+
+type RTypeCond = @_cond {
+    "path": string?,
+    "cases": [RCaseNode*],
+};
+
+type RCaseNode = {
+    "type": RTypeDef,
+    "body": ReifiedScript
+};
+
+type RFunctor = REach | RTake | RTime | RStart;
+
+type REach = @_each FunctorBody;
+type RTake = @_take FunctorBody;
+type RTime = @_time FunctorBody;
+type RStart = @_start FunctorBody;
+
+type FunctorBody = {"opts": ROptProxy, "body": ReifiedScript};
+
+type RFragment = @_fragment {
+    "name": string,
+    "body": ReifiedScript,
+};
+
+type RJson = @_jsonPath {
+    "path": string,
+    "pos": [integer, integer],
+};
+
+type RPipe = @_pipe [ReifiedScript, ReifiedScript];
+type RDiscard = @_discard [ReifiedScript, ReifiedScript];
+type RVarStore = @_store {"name": string};
+type RVarRef = @_varref {"name": string, "optional": boolean};
+type RArgRef = @_argref {"name": string, "optional": boolean};
 
 """

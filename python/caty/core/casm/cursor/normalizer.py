@@ -399,23 +399,39 @@ class NeverChecker(_SubNormalizer):
         # タイミングの関係上、ノーマライズ後のユニオンの排他性チェックはここで
         from operator import truth
         tc = TypeCalcurator(self.module)
-        o = node.left&node.right
-        c = tc.visit(o)
-        if c.optional:
-            c = c.body
-        is_never = truth(c.accept(self))
-        if c.type in ('integer', 'number') and (node.left.type in ('integer', 'number') or node.right.type in ('integer', 'number')):
-            is_never = True
-        if is_never:
-            pass
-        else:
-            print TreeDumper().visit(c)
-            throw_caty_exception('CompileError', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
+        nodes = self.__flatten_union(node)
+        unions = [(a, b) for a in nodes for b in nodes if a != b]
+        for u in unions:
+            o = u[0] & u[1]
+            c = tc.visit(o)
+            if c.optional:
+                c = c.body
+            is_never = truth(c.accept(self))
+            if c.type in ('integer', 'number') and (u[0].type in ('integer', 'number') or u[1].type in ('integer', 'number')):
+                is_never = True
+            if is_never:
+                pass
+            else:
+                print TreeDumper().visit(c)
+                throw_caty_exception('CompileError', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
+            a = u[0].accept(self)
+            b = u[1].accept(self)
+            if a and b:
+                return a
 
-        l = node.left.accept(self)
-        r = node.right.accept(self)
-        if l and r:
-            return l
+        return []
+
+    def __flatten_union(self, node):
+        r = []
+        if node.left.type == '__union__':
+            r.extend(self.__flatten_union(self._dereference(node.left)))
+        else:
+            r.append(node.left)
+        if node.right.type == '__union__':
+            r.extend(self.__flatten_union(self._dereference(node.right)))
+        else:
+            r.append(node.right)
+        return r
 
     def _visit_updator(self, node):
         assert False, TreeDumper().visit(node)
