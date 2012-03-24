@@ -44,6 +44,8 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 
 入力値をそのまま返す。
 
+=== !exec
+
 |= input |= command |=output |= exception|=備考|
 | 1      |pass      | 1      ||
 | "a"      |pass      | "a"      ||
@@ -54,6 +56,26 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 | [1,2,3]      |pass<array>      | [1,2,3]      ||
 | {"foo":1, "bar": 2}      |pass<object>      | {"foo":1, "bar": 2}      ||
 
+== tagged
+
+タグ型を生成する。
+
+=== !exec
+
+|= input |= command |=output |= exception|=備考|
+|["a", 1] |tagged| @a 1| | |
+|["string", 1] |tagged --exp|| Exception|明示的なタグが要求される|
+|["a", undefined] |tagged|@a||undefinedが第2要素の場合はタグのみの型になる|
+|["a"] |tagged|@a||要素数1の配列は意味的に上記と同じ|
 
 
+== untagged
 
+タグ型からタグ付けされたデータを取り出す。
+
+=== !exec
+
+|= input |= command |=output |= exception|=備考|
+|@foo 1| untagged | 1||||
+|1| untagged | 1|||タグ型でない場合passと同様|
+|@foo|untagged|undefined |||
