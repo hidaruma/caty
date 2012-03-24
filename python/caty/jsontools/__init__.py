@@ -12,6 +12,7 @@ except:
     except:
         raise ImportError('Python 2.6 (or later) or simplejson package is needed')
 import caty.core.runtimeobject as ro
+from caty import UNDEFINED
 import decimal
 __all__ = ['load', 
            'loads', 
@@ -99,6 +100,8 @@ class PPEncoder(CatyEncoder):
             yield u'@%s ' % t
             for e in self._iterencode(v, markers):
                 yield e
+        elif isinstance(o, TagOnly):
+            yield u'@%s' % (o.tag)
         elif not isinstance(o, (basestring, bool, int, decimal.Decimal, InternalDecimal, dict, list, tuple)) and o is not None:
             from caty import UNDEFINED
             if o is UNDEFINED:
@@ -124,7 +127,6 @@ class PPEncoder(CatyEncoder):
         return [(a if a is not UNDEFINED else _empty) for a in r]
 
     def __reduce_undef(self, o):
-        from caty import UNDEFINED
         r = {}
         for k, v in o.items():
             if v is UNDEFINED:
@@ -244,17 +246,19 @@ class TagOnly(object):
 
     @property
     def value(self):
-        raise JsonError(ro.i18n.get(u'This is tagonly object: $tag', tag=self.tag))
+        return UNDEFINED
 
     def __eq__(self, o):
         return isinstance(o, TagOnly) and self.tag == tag(o)
 
-def tagged(tagname, val):
+def tagged(tagname, val=UNDEFINED):
     if tagname in _reserved:
         if not type(val) in _builtin_types[tagname]:
             raise JsonError(ro.i18n.get(u'$keyword is reserved tag', keyword=tagname))
         else:
             return val
+    if val is UNDEFINED:
+        return TagOnly(tagname)
     r = TaggedValue(tagname, val)
     return r
 

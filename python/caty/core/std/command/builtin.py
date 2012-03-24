@@ -595,7 +595,7 @@ class GetTag(Builtin):
 class Tagged(Builtin):
     
     def execute(self, input):
-        return tagged(input[0], input[1])
+        return tagged(*input)
 
 class Untagged(Builtin):
     

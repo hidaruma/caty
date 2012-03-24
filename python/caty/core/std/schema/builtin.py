@@ -733,14 +733,14 @@ command tag<T default any> :: T -> string
 /**
  * 第一の入力値をタグ名とし、第二の入力値をタグ付きにして返す。
  */
-command tagged<S default any, T default any> :: [string, S] -> T
+command tagged<S default any, T default any> :: [string, S?] -> T
     refers python:caty.core.std.command.builtin.Tagged;
 
 /**
  * 入力値のタグを除去して返す。組み込み型が与えられた場合、その値がそのまま返る。
  * 引数が与えられた場合、タグ名と引数を比較し、異なっていた場合は例外を創出する。
  */
-command untagged<S default any, T default any> [string?] :: S -> T
+command untagged<S default any, T default univ> [string?] :: S -> T
     refers python:caty.core.std.command.builtin.Untagged;
 
 /**
