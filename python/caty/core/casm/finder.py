@@ -50,12 +50,25 @@ class SchemaFinder(ResourceFinder, ReadOnlyFacility):
         return self[key]
 
     def get_ast(self, key):
-        if self._module.has_ast(key):
-            return self._module.get_ast(key)
+        key = key.lstrip(':')
+        c = key.count(':')
+        if  c == 2:
+            app_name, scm = key.split(':', 1)
+            if app_name == self.application.name:
+                return self.get_syntax_tree(scm)
+            if app_name in self.system.app_names:
+                app = self.system.get_app(app_name)
+                return app.schema_finder.get_syntax_tree(scm)
         else:
-            if key in schema.types:
-                return schema[key]
-            raise KeyError(key)
+            if key.startswith(self._local.name+':'):
+                k = key.split(':')[1]
+                if self._local.get_ast(k):
+                    return True
+            elif self._local.name == 'public':
+                if self._local.get_syntax_tree(key):
+                    return True
+            return self._module.get_syntax_tree(key)
+
 
     def get_schema(self, key):
         return self[key]

@@ -2,33 +2,73 @@
 
 module acts in cara;
 
+
+/** インデックスページ */
+state IndexPage :: any links {
+ + user-cmd --> UserCmds.get;
+ + core-cmd --> CoreCmds.get;
+ + apps     --> Apps.get;
+
+};
+
+/** コマンド一覧のページ */
+state CmdsViewingPage :: any;
+
+
 resource UserCmds("/user-cmds.html") {
  action get("/GET#dont-care")
  ::
+ @[in, out] # 0 void -> help:ModInfoList produces CmdsViewingPage
  {
+  (#0
    do {
     "User-Defined Commands">: "title",
-     hlp:mods              >: "mods",
-   } | print /tpl.html
+     help:user              >: "mods",
+   }) | print /cmds.html
  };
 };
 
 resource CoreCmds("/core-cmds.html") {
  action get("/GET#dont-care")
  ::
+ @[in, out] # 0 void -> help:ModInfoList produces CmdsViewingPage
  {
+  (#0
    do {
     "Core Commands"  >: "title",
-     hlp:core        >: "mods",
-   } | print /tpl.html
+     help:core        >: "mods",
+   }) | print /cmds.html
  };
+};
+
+/** アプリケーション一覧のページ */
+state AppsPage :: {*: [AppInfo*]?} links {
+  - mods     --> Mods.get;
+};
+
+command grouping :: [{"group": string, *:any?}*] -> {*:[AppInfo*]?} {
+ each {[pv group, pass]} | xlist:group | each --obj {each {item 1}}
 };
 
 resource Apps("/apps.html") {
  action get("/GET#dont-care")
  ::
+  @[in, out] #0 void -> {*: [AppInfo*]?} produces AppsPage
  {
-   apps | json:response
+   (#0 apps | grouping) | print /apps.html
  };
 };
 
+/** モジュール覧のページ */
+state ModsPage :: any;
+
+resource Mods("/*.mods/") {
+  action get("/GET#dont-care")
+  ::
+  @[in, out] #0 void -> [inspect:Module*] produces ModsPage
+  {
+   (#0 
+    %0 | path:dir | path:trunk > app-name;
+    inspect:list-mod %app-name ) | json:response
+  };
+};

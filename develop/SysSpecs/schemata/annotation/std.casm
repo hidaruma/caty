@@ -33,7 +33,7 @@ type deprecated = {};
 /** 将来の懸念となる対象をマークする
  * 代替となる機能が実装された段階でunquietをdeprecatedに変更する。
  */
-@[annotation, target(["TYPE_DECL", "COMMAND_DECL", "PROPERTY"])]
+@[annotation, target(["TYPE_DECL", "COMMAND_DECL", "PROPERTY"]), affect-management]
 type unquiet = {};
 
 /*{{{
@@ -54,7 +54,7 @@ type closed = {};
 
 /** 副作用のないコマンドをマークする
  */
-@[annotation, target(["COMMAND_DECL"])]
+@[annotation, target(["COMMAND_DECL"]), affect-management]
 type no-effect = {};
 
 

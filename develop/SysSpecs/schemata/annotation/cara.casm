@@ -2,9 +2,10 @@
 module annotation.cara;
 
 /** 動的なポートである
+ * dynamicから変更
  */
 @[annotation, target(["PORT_DECL"]) ]
-type dynamic = {};
+type indirect = {};
 
 
 /** 抽象状態である
