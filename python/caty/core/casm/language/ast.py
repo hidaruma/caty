@@ -315,6 +315,28 @@ class CommandNode(Function):
         if msg:
             raise JsonSchemaError('\n'.join(msg))
 
+
+    def reify(self):
+        r = {
+            'name': self.name,
+            'annotation': self.annotation.reify(),
+            'typeParams': [p.reify() for p in self.type_params],
+            'docstring': self.doc,
+        }
+        profiles = [pro.reify() for pro in self.profiles]
+        r['profiles'] = profiles
+        r['exception'] = [e for (t, e) in self.profiles[0].jump_decl if t == 'throws']
+        r['resource'] = []
+        for t, n in self.profiles[0].get_all_resources():
+            r['resource'].append({'facilityName': n, 'usageType': t})
+        if self.uri:
+            if self.uri != 'caty.core.command.Dummy': 
+                r['refers'] = self.uri
+        else:
+            r['script'] = self.script_proxy.reify()
+        return json.tagged(u'command', r)
+        
+
 class CallPattern(object):
     def __init__(self, opts, args, decl):
         self.opts = opts
@@ -349,6 +371,14 @@ class CallPattern(object):
         if r:
             return r
 
+    def reify(self):
+        return {
+            'opts': self.opts.reify(),
+            'args': self.args.reify(),
+            'input': self.decl.profile[0].reify(),
+            'output': self.decl.profile[1].reify(),
+        }
+
 def _verify_type_var(obj, names):
     if isinstance(obj, ArraySchema):
         for o in obj:
@@ -375,7 +405,7 @@ class CommandDecl(object):
     def __init__(self, profile, jump, resource):
         self.uri = '' # 後で挿入される
         self.profile = profile
-        self.jump = jump if isinstance(jump, list) else [jump]
+        self.jump_decl = jump if isinstance(jump, list) else [jump]
         self.resource = resource if isinstance(resource, list) else [resource]
         self.__initialized = False
 
@@ -395,7 +425,7 @@ class CommandDecl(object):
         self.profile = (i, o)
 
         j = []
-        for t, ls in self.jump:
+        for t, ls in self.jump_decl:
             l = []
             for node in ls:
                 for cursor in cursors:

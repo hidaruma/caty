@@ -77,7 +77,7 @@ class ReifyType(Builtin):
 
     def execute(self):
         from caty.core.casm.language.ast import ScalarNode, BagNode, ObjectNode, ArrayNode
-        mod = self.schema._module
+        mod = self.schema
         if self._type_name in ('integer', 'number', 'boolean', 'string', 'binary', 'null', 'undefined', 'any', 'never', 'univ'):
             return ScalarNode(self._type_name).reify()
         elif self._type_name == 'object':

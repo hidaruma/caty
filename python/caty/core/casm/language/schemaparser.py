@@ -52,7 +52,7 @@ def op(seq):
 def term(seq):
     def _tag(s):
         _ = s.parse('@')
-        t = s.parse([tagname, string, '*!', '*'])
+        t = s.parse([tagname, string, u'*!', u'*'])
         v = s.parse(option(term))
         return TaggedNode(t, v)
 
