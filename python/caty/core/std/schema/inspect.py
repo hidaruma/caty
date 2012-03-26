@@ -124,6 +124,14 @@ command reify-type [string typeName] :: void -> ReifiedTypeTerm | RTypeDef
     reads schema
     refers python:caty.core.std.command.inspect.ReifyType;
 
+/**
+ * 引数のコマンドに対するレイフィケーションイメージを出力する。
+ */
+command reify-cmd [string cmdName] :: void -> ReifiedCommand
+    throws [ApplicationNotFound, ModuleNotFound, CommandNotFound]
+    reads schema
+    refers python:caty.core.std.command.inspect.ReifyCmd;
+
 /*レイフィケーション関係*/
 
 type ReifiedModule = @module {
@@ -205,7 +213,7 @@ type CommandAttribute = {
     "docstring": string?,
     "profiles": [RProfile],
     "exception": [string*]?,
-    "resrouce": [FacilityUsage*]?,
+    "resource": [FacilityUsage*]?,
 };
 
 type RProfile = {
@@ -250,8 +258,8 @@ type ReifiedScript = (RCommandCall
 
 type RCommandCall = @_call {
     "name": string,
-    "opts": [ROptProxy],
-    "args": [RArgProxy],
+    "opts": [ROptProxy*],
+    "args": [RArgProxy*],
     "typeArgs": [string*],
     "pos": [integer, integer],
 };
@@ -305,7 +313,7 @@ type RListBuilder = @_list [ReifiedScript*];
 
 type RObjectBuilder = @_object {*: ReifiedScript};
 
-type RTypeDispatch = @_when {"opts": ROptProxy, "cases": [(RTagBuilder|RUntag)*]};
+type RTypeDispatch = @_when {"opts": [ROptProxy*], "cases": [(RTagBuilder|RUntag)*]};
 
 type RTagBuilder = @_tag {"tag": string, "value": ReifiedScript};
 
@@ -336,7 +344,7 @@ type RTake = @_take FunctorBody;
 type RTime = @_time FunctorBody;
 type RStart = @_start FunctorBody;
 
-type FunctorBody = {"opts": ROptProxy, "body": ReifiedScript};
+type FunctorBody = {"opts": [ROptProxy*], "body": ReifiedScript};
 
 type RFragment = @_fragment {
     "name": string,

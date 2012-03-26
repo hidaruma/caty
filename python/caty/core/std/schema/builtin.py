@@ -391,6 +391,13 @@ exception TypeNotFound = {
   *: any?
 };
 
+/** コマンドが存在しない */
+exception CommandNotFound = {
+  "moduleName": string,
+  "cmdName": string,
+  *: any?
+};
+
 /** アクションが存在しない */
 exception ActionNotFound = {
   "moduleName": string,

@@ -19,7 +19,7 @@ def command(seq):
         #seq.parser_hook = ParserHook(skip_ws, rmcmt)
         doc = option(docstring)(seq)
         a = seq.parse(annotation)
-        _ = seq.parse(keyword('command'))
+        _ = seq.parse(keyword(u'command'))
         n = seq.parse(cmdname)
         if n in RESERVED:
             raise ParseFailed(seq, command, '%s is reserved.' % n)
@@ -28,7 +28,7 @@ def command(seq):
         j = seq.parse(jump)
         r = seq.parse(many(resource))
         rf = seq.parse(option([script, refers]))
-        _ = seq.parse(';')
+        _ = seq.parse(u';')
         return CommandNode(n, map(lambda p:p(j, r), patterns), rf, doc, a, t)
     finally:
         seq.parser_hook = h
@@ -40,7 +40,7 @@ def is_doc_str(seq):
             seq.parse(skip_ws)
             seq.parse(annotation)
             seq.parse(skip_ws)
-            seq.parse(keyword('command'))
+            seq.parse(keyword(u'command'))
             return True
         except:
             return False
@@ -50,9 +50,9 @@ def cmdname(seq):
     return name_token(seq)
 
 def typenames(seq):
-    seq.parse('<')
+    seq.parse(u'<')
     names = seq.parse(split(name_token, ','))
-    seq.parse('>')
+    seq.parse(u'>')
     return names
 
 @try_
@@ -72,7 +72,7 @@ def call_pattern(seq):
         arg = a
     else:
         arg = None
-    _ = seq.parse('::')
+    _ = seq.parse(u'::')
     d = decl(seq)
     return lambda j, r: CallPattern(opt, arg, d(j, r))
 
@@ -82,7 +82,7 @@ def decl(seq):
 
 def profile(seq):
     i = typedef(seq)
-    _ = seq.parse('->')
+    _ = seq.parse(u'->')
     o = typedef(seq)
     return (i, o)
 
@@ -114,30 +114,30 @@ def signals(seq):
     return _, seq.parse([lambda s: [typedef(s)], typelist])
 
 def typelist(seq):
-    _ = seq.parse('[')
+    _ = seq.parse(u'[')
     r = chain_flat(typedef, comma)(seq)
-    _ = seq.parse(']')
+    _ = seq.parse(u']')
     return r
 
 def namelist(seq):
-    _ = seq.parse('[')
+    _ = seq.parse(u'[')
     r = chain_flat(res_name, comma)(seq)
-    _ = seq.parse(']')
+    _ = seq.parse(u']')
     return r
 
 def resource(seq):
     return seq.parse([uses, reads, updates])
 
 def updates(seq):
-    _ = seq.parse(keyword('uses'))
+    _ = seq.parse(keyword(u'uses'))
     return _.strip(), seq.parse([lambda s:[res_name(s)], namelist])
 
 def reads(seq):
-    _ = seq.parse(keyword('reads'))
+    _ = seq.parse(keyword(u'reads'))
     return _.strip(), seq.parse([lambda s:[res_name(s)], namelist])
 
 def uses(seq):
-    _ = seq.parse(keyword('updates'))
+    _ = seq.parse(keyword(u'updates'))
     return _.strip(), seq.parse([lambda s:[res_name(s)], namelist])
 
 def res_name(seq):
@@ -147,13 +147,13 @@ def res_name(seq):
     return FacilityDecl(n, p, a)
 
 def res_param(seq):
-    seq.parse('(')
+    seq.parse(u'(u')
     p = seq.parse(xjson.parsers)
-    seq.parse(')')
+    seq.parse(u')')
     return p
 
 def alias(seq):
-    seq.parse(keyword('as'))
+    seq.parse(keyword(u'as'))
     return seq.parse(name)
 
 def refers(seq):
@@ -161,17 +161,17 @@ def refers(seq):
         return CommandURI(many1(refer)(seq))
     except:
 
-        return CommandURI([('python', 'caty.core.command.Dummy')])
+        return CommandURI([(u'python', 'caty.core.command.Dummy')])
 
 def refer(seq):
-    _ = seq.parse(keyword('refers'))
+    _ = seq.parse(keyword(u'refers'))
     l = seq.parse(Regex(r'[a-zA-Z]+:'))
-    return l.strip(':'), seq.parse(Regex(r'([a-zA-Z][a-zA-Z0-9]*(\.[a-zA-Z][a-zA-Z0-9]*)*)'))
+    return l.strip(u':'), seq.parse(Regex(r'([a-zA-Z][a-zA-Z0-9]*(\.[a-zA-Z][a-zA-Z0-9]*)*)'))
 
 def script(seq):
     from caty.core.script.parser import ScriptParser
-    seq.parse('{')
+    seq.parse(u'{')
     p = ScriptParser()(seq)
-    seq.parse('}')
+    seq.parse(u'}')
     return p
 

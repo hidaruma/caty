@@ -306,6 +306,30 @@ class Module(object):
                     return self.sub_modules[m].get_kind(n)
         return self.parent.get_kind(name)
 
+    def get_proto_type(self, name):
+        if name in self.proto_ns:
+            return self.proto_ns[name]
+        else:
+            if ':' in name:
+                m, n = name.split(':', 1)
+                if ':' in n:
+                    if m == 'this' or m == 'global' or m == 'caty':
+                        m, n = n.split(':', 1)
+                    else:
+                        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s command is forbidden')
+                if m == 'public' and self.name != 'public':
+                    return self.parent.get_proto_type(n)
+                if m == self.name:
+                    return self.get_proto_type(n)
+                if m in self.sub_modules:
+                    return self.sub_modules[m].get_proto_type(n)
+        if self._core:
+            try:
+                return self._core.get_proto_type(name)
+            except:
+                return self._global.get_proto_type(name)
+        return self.parent.get_proto_type(name)
+
     @property
     def command_profiles(self):
         for k, v in self.command_ns.iteritems():

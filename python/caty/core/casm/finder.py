@@ -277,6 +277,18 @@ class CommandFinder(dict, ResourceFinder, ReadOnlyFacility):
             return self._module.get_command_type(key)
         raise KeyError(key)
 
+
+    def get_proto_type(self, key):
+        c = key.count(':')
+        if c == 2: #別のアプリケーションを参照している場合
+            app_name, cmd = key.split(':', 1)
+            if app_name in self.system.app_names:
+                app = self.system.get_app(app_name)
+                return app.command_finder.get_proto_type(cmd)
+        else:
+            return self._module.get_proto_type(key)
+        raise KeyError(key)
+
     def __contains__(self, key):
         c = key.count(':')
         if c == 2: #別のアプリケーションを参照している場合

@@ -3,6 +3,7 @@ from caty.core.command import *
 from caty.core.script.node import *
 from caty.core.script.builder import CommandCombinator, DiscardCombinator
 from caty.core.exception import InternalException, throw_caty_exception
+import caty.jsontools as json
 
 class Proxy(object):
     u"""パイプライン構築のためのプロキシ。
@@ -19,11 +20,16 @@ class Proxy(object):
         pass
 
     def reify(self):
+        return json.tagged(self.reification_type, self._reify())
+
+    def _reify(self):
         raise NotImplemtentedError(u'{0}.reify'.format(self.__class__.__name__))
 
 class CommandProxy(Proxy):
     u"""コマンド呼び出しに遭遇したときに構築されるプロキシクラス。
     """
+    reification_type = u'_call'
+
     def __init__(self, name, type_args, opts, args, pos):
         self.name = name
         self.opts = opts
@@ -38,7 +44,17 @@ class CommandProxy(Proxy):
     def instantiate(self, builder):
         return builder.build(self, self.type_args, self.opts, self.args, self.pos)
 
+    def _reify(self):
+        return {
+            'name': self.name,
+            'opts': [o.reify() for o in self.opts],
+            'args': [o.reify() for o in self.args],
+            'typeArgs': self.type_args,
+            'pos': self.pos,
+        }
+
 class ScalarProxy(Proxy):
+    reification_type = u'_scalar'
     def __init__(self):
         self.value = None
 
@@ -57,7 +73,11 @@ class ScalarProxy(Proxy):
     def set_module(self, module):
         pass
 
+    def _reify(self):
+        return self.value
+
 class ListProxy(Proxy):
+    reification_type = u'_list'
     def __init__(self):
         self.values= []
     
@@ -73,7 +93,11 @@ class ListProxy(Proxy):
         for v in self.values:
             v.set_module(module)
 
+    def _reify(self):
+        return [v.reify() for v in self.values]
+
 class ObjectProxy(Proxy):
+    reification_type = u'_object'
     def __init__(self):
         self.nodes = []
 
@@ -90,6 +114,11 @@ class ObjectProxy(Proxy):
         for n in self.nodes:
             n.set_module(module)
 
+    def _reify(self):
+        o = {}
+        for n in self.nodes:
+            o[n.name] = n.reify()
+
 class ConstNodeProxy(Proxy):
     def __init__(self, n, v):
         self.name = n
@@ -100,6 +129,9 @@ class ConstNodeProxy(Proxy):
 
     def set_module(self, module):
         pass
+
+    def reify(self):
+        return json.tagged(u'_scalar', self.value)
 
 class CommandNodeProxy(Proxy):
     def __init__(self, n, c):
@@ -112,7 +144,11 @@ class CommandNodeProxy(Proxy):
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
+    def reify(self):
+        return self.cmdproxy.reify()
+
 class DispatchProxy(Proxy):
+    reification_type = u'_when'
     def __init__(self, opts):
         self.cases = []
         self.opts = opts
@@ -130,7 +166,14 @@ class DispatchProxy(Proxy):
         for c in self.cases:
             c.set_module(module)
 
+    def _reify(self):
+        return {
+            'opts': [o.reify() for o in self.opts],
+            'cases': [c.reify for c in self.cases]
+        }
+
 class TypeCaseProxy(Proxy):
+    reification_type = u'_case'
     def __init__(self, path, via):
         self.cases = []
         self.path = path
@@ -169,7 +212,19 @@ class TypeCaseProxy(Proxy):
                 else:
                     throw_caty_exception('CompileError', module._app.i18n.get(u'types are not exclusive: $type1, $type2', type1=module.make_dumper().visit(t1), type2=module.make_dumper().visit(t2)))
 
+    def _reify(self):
+        o = {
+            'cases': [c.reify for c in self.cases]
+        }
+        if self.path:
+            p = self.path._to_str()
+            o['path'] = unicode(p) if not isinstance(p, unicode) else p
+        if self.via:
+            o['via'] = self.via.reify()
+        return o
+
 class TypeCondProxy(Proxy):
+    reification_type = u'_cond'
     def __init__(self, path):
         self.cases = []
         self.path = path
@@ -186,6 +241,15 @@ class TypeCondProxy(Proxy):
     def set_module(self, module):
         for c in self.cases:
             c.set_module(module)
+
+    def _reify(self):
+        o = {
+            'cases': [c.reify for c in self.cases]
+        }
+        if self.path:
+            p = self.path._to_str()
+            o['path'] = unicode(p) if not isinstance(p, unicode) else p
+        return o
 
 class BranchProxy(Proxy):
     def __init__(self, typedef, cmdproxy):
@@ -208,8 +272,14 @@ class BranchProxy(Proxy):
     def instantiate(self, builder):
         return Branch(self.type, self.cmdproxy.instantiate(builder))
         
-
+    def reify(self):
+        return {
+            'type': self.typedef.reify(),
+            'body': self.cmdproxy.reify()
+        }
+    
 class TagProxy(Proxy):
+    reification_type = u'_tag'
     def __init__(self, t, c):
         self.tag = t
         self.cmdproxy = c
@@ -220,7 +290,14 @@ class TagProxy(Proxy):
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
+    def _reify(self):
+        return {
+            'tag': self.tag,
+            'value': self.cmdproxy.reify()
+        }
+
 class UnaryTagProxy(Proxy):
+    reification_type = u'_unaryTag'
     def __init__(self, t):
         self.tag = t
 
@@ -230,11 +307,17 @@ class UnaryTagProxy(Proxy):
     def set_module(self, module):
         pass
 
+    def _reify(self):
+        return {
+            'tag': self.tag
+        }
+
 class CaseProxy(TagProxy):
     def instantiate(self, builder):
         return Case(self.tag, self.cmdproxy.instantiate(builder))
 
 class UntagCaseProxy(TagProxy):
+    reification_type = u'_untag'
     def instantiate(self, builder):
         return UntagCase(self.tag, self.cmdproxy.instantiate(builder))
 
@@ -251,23 +334,34 @@ class FunctorProxy(Proxy):
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
+    def _reify(self):
+        return {
+            'opts': [o.reify() for o in self.opts],
+            'body': self.cmdproxy.reify()
+        }
+
 class EachProxy(FunctorProxy):
+    reification_type = u'_each'
     def _get_class(self):
         return Each
 
 class TakeProxy(FunctorProxy):
+    reification_type = u'_take'
     def _get_class(self):
         return Take
 
 class TimeProxy(FunctorProxy):
+    reification_type = u'_time'
     def _get_class(self):
         return Time
 
 class StartProxy(FunctorProxy):
+    reification_type = u'_start'
     def _get_class(self):
         return Start
 
 class CombinatorProxy(Proxy):
+    reification_type = u'_pipe'
     def __init__(self, a, b):
         self.a = a
         self.b = b
@@ -282,7 +376,11 @@ class CombinatorProxy(Proxy):
         self.a.set_module(module)
         self.b.set_module(module)
 
+    def _reify(self):
+        return [self.a.reify(), self.b.reify()]
+
 class VarStoreProxy(CommandProxy):
+    reification_type = u'_store'
     def __init__(self, name):
         self.name = name
 
@@ -292,7 +390,13 @@ class VarStoreProxy(CommandProxy):
     def set_module(self, module):
         pass
 
+    def _reify(self):
+        return {
+            'name': self.name
+        }
+
 class VarRefProxy(CommandProxy):
+    reification_type = u'_varref'
     def __init__(self, name, optional):
         self.name = name
         self.optional = optional
@@ -303,7 +407,14 @@ class VarRefProxy(CommandProxy):
     def set_module(self, module):
         pass
 
+    def _reify(self):
+        return {
+            'name': self.name,
+            'optional': self.optional
+        }
+
 class ArgRefProxy(CommandProxy):
+    reification_type = u'_argref'
     def __init__(self, name, optional):
         self.name = name
         self.optional = optional
@@ -314,7 +425,14 @@ class ArgRefProxy(CommandProxy):
     def set_module(self, module):
         pass
 
+    def _reify(self):
+        return {
+            'name': self.name,
+            'optional': self.optional
+        }
+
 class DiscardProxy(Proxy):
+    reification_type = u'_discard'
     def __init__(self, target):
         self.target = target
 
@@ -324,7 +442,11 @@ class DiscardProxy(Proxy):
     def set_module(self, module):
         self.target.set_module(module)
 
+    def _reify(self):
+        return [self.a.reify(), self.b.reify()]
+
 class FragmentProxy(Proxy):
+    reification_type = u'_fragment'
     def __init__(self, c, fragment_name):
         self.cmdproxy = c
         self.fragment_name = fragment_name
@@ -337,6 +459,12 @@ class FragmentProxy(Proxy):
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
+    def _reify(self):
+        return {
+            'name': self.fragment_name,
+            'body': self.cmdproxy.reify()
+        }   
+
 class EnvelopeProxy(Proxy):
     def __init__(self, c):
         self.cmdproxy = c
@@ -348,7 +476,11 @@ class EnvelopeProxy(Proxy):
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
+    def reify(self):
+        throw_caty_exception('RuntimeError', u'Action command can not reified by inspect:reify-type')
+
 class JsonPathProxy(Proxy):
+    reification_type = u'_jsonPath'
     def __init__(self, stm, pos):
         self.stm = stm
         self.pos = pos
@@ -358,6 +490,13 @@ class JsonPathProxy(Proxy):
 
     def instantiate(self, builder):
         return JsonPath(self.stm, self.pos)
+
+    def _reify(self):
+        p = self.stm._to_str()
+        return {
+            'path': unicode(p) if not isinstance(p, unicode) else p,
+            'pos': self.pos
+        }
 
 def combine_proxy(args):
     return reduce(CombinatorProxy, args)

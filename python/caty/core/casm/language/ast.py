@@ -109,7 +109,7 @@ class Node(object):
     def reify(self):
         o = self._reify()
         if self.annotations:
-            o['annotations'] = self.annotations.reify()
+            o['annotation'] = self.annotations.reify()
         if self.docstring:
             o['docstring'] = self.docstring
         o['options'] = self.options
@@ -321,20 +321,24 @@ class CommandNode(Function):
             'name': self.name,
             'annotation': self.annotation.reify(),
             'typeParams': [p.reify() for p in self.type_params],
-            'docstring': self.doc,
+            'docstring': self.doc or u'undocumented',
         }
-        profiles = [pro.reify() for pro in self.profiles]
+        profiles = [pro.reify() for pro in self.patterns]
         r['profiles'] = profiles
-        r['exception'] = [e for (t, e) in self.profiles[0].jump_decl if t == 'throws']
+        r['exception'] = [e for (t, e) in self.patterns[0].decl.jump_decl if t == 'throws']
         r['resource'] = []
-        for t, n in self.profiles[0].get_all_resources():
-            r['resource'].append({'facilityName': n, 'usageType': t})
+        for t, n in self.patterns[0].decl.get_all_resources():
+            r['resource'].append({'facilityName': n.name, 'usageType': t})
         if self.uri:
             if self.uri != 'caty.core.command.Dummy': 
                 r['refers'] = self.uri
+                t = u'_hostLang'
+            else:
+                t = u'_stub'
         else:
             r['script'] = self.script_proxy.reify()
-        return json.tagged(u'command', r)
+            t = u'_script'
+        return json.tagged(u'command', json.tagged(t, r))
         
 
 class CallPattern(object):
@@ -375,8 +379,8 @@ class CallPattern(object):
         return {
             'opts': self.opts.reify(),
             'args': self.args.reify(),
-            'input': self.decl.profile[0].reify(),
-            'output': self.decl.profile[1].reify(),
+            'input': self.decl.profile_ast[0].reify(),
+            'output': self.decl.profile_ast[1].reify(),
         }
 
 def _verify_type_var(obj, names):
@@ -404,7 +408,8 @@ class CommandDecl(object):
     """
     def __init__(self, profile, jump, resource):
         self.uri = '' # 後で挿入される
-        self.profile = profile
+        self.profile_ast = profile
+        self.profile = None
         self.jump_decl = jump if isinstance(jump, list) else [jump]
         self.resource = resource if isinstance(resource, list) else [resource]
         self.__initialized = False
@@ -418,7 +423,7 @@ class CommandDecl(object):
     def build(self, cursors):
         if self.__initialized:
             return
-        i, o = self.profile
+        i, o = self.profile_ast
         for cursor in cursors:
             i = i.accept(cursor)
             o = o.accept(cursor)

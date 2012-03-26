@@ -89,4 +89,13 @@ class ReifyType(Builtin):
         ast = mod.get_ast(self._type_name)
         return ast.reify()
 
+class ReifyCmd(Builtin):
+    def setup(self, type_name):
+        self._cmd_name = type_name
+
+    def execute(self):
+        mod = self.schema._module.command_finder
+        ast = mod.get_proto_type(self._cmd_name)
+        return ast.reify()
+
 
