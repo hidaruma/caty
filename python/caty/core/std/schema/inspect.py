@@ -217,8 +217,8 @@ type CommandAttribute = {
 };
 
 type RProfile = {
-    "opts": RObject,
-    "args": RArray,
+    "opts": RObject?,
+    "args": RArray?,
     "input": RTypeDef,
     "output": RTypeDef,
 };

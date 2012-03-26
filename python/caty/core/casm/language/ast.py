@@ -299,6 +299,7 @@ class CommandNode(Function):
         self.profile_container = None
         self.type_var_names = [n.var_name for n in type_params]
         self.type_params = type_params
+        self.type_params_ast = type_params
 
     def declare(self, module):
         self.module = module
@@ -320,7 +321,7 @@ class CommandNode(Function):
         r = {
             'name': self.name,
             'annotation': self.annotation.reify(),
-            'typeParams': [p.reify() for p in self.type_params],
+            'typeParams': [p.reify() for p in self.type_params_ast],
             'docstring': self.doc or u'undocumented',
         }
         profiles = [pro.reify() for pro in self.patterns]
@@ -376,12 +377,15 @@ class CallPattern(object):
             return r
 
     def reify(self):
-        return {
-            'opts': self.opts.reify(),
-            'args': self.args.reify(),
+        r = {
             'input': self.decl.profile_ast[0].reify(),
             'output': self.decl.profile_ast[1].reify(),
         }
+        if self.opts:
+            r['opts'] = self.opts.reify()
+        if self.args:
+            r['args'] = self.args.reify()
+        return r
 
 def _verify_type_var(obj, names):
     if isinstance(obj, ArraySchema):

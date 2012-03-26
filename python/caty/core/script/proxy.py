@@ -118,6 +118,7 @@ class ObjectProxy(Proxy):
         o = {}
         for n in self.nodes:
             o[n.name] = n.reify()
+        return o
 
 class ConstNodeProxy(Proxy):
     def __init__(self, n, v):
@@ -361,10 +362,10 @@ class StartProxy(FunctorProxy):
         return Start
 
 class CombinatorProxy(Proxy):
-    reification_type = u'_pipe'
     def __init__(self, a, b):
         self.a = a
         self.b = b
+        self.reification_type = u'_pipe' if not isinstance(self.b, DiscardProxy) else u'_discard'
 
     def instantiate(self, builder):
         if isinstance(self.b, DiscardProxy):
@@ -432,7 +433,6 @@ class ArgRefProxy(CommandProxy):
         }
 
 class DiscardProxy(Proxy):
-    reification_type = u'_discard'
     def __init__(self, target):
         self.target = target
 
@@ -442,8 +442,8 @@ class DiscardProxy(Proxy):
     def set_module(self, module):
         self.target.set_module(module)
 
-    def _reify(self):
-        return [self.a.reify(), self.b.reify()]
+    def reify(self):
+        return self.target.reify()
 
 class FragmentProxy(Proxy):
     reification_type = u'_fragment'
