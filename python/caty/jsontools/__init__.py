@@ -272,7 +272,7 @@ def tag(val, explicit=False):
         try:
             return _tag_class_dict[t]
         except:
-            raise JsonError(ro.i18n.get(u'Not a JSON value: $obj', obj=str(t)))
+            raise JsonError(ro.i18n.get(u'Not a JSON value: $obj', obj=str(val)))
 
 def untagged(val, explicit=False):
     try:

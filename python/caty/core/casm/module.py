@@ -509,6 +509,17 @@ class Module(object):
                     return self.sub_modules[m].get_syntax_tree(n)
         return self.parent.get_syntax_tree(name)
 
+    def reify(self):
+        import caty.jsontools as json
+        o = {'name': self.name, 'docstring': self.docstring or u'undocumented', 'types': {}, 'commands': {}}
+        for k, v in self.ast_ns.items():
+            o['types'][k] = v.reify()
+        for k, v in self.proto_ns.items():
+            o['commands'][k] = v.reify()
+        return json.tagged('module', o)
+
+
+
 class CoreModule(Module):
     u"""Caty付属のモジュール。
     コマンドクラスはすべてライブラリのサーチパス上にあり、

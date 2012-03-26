@@ -90,12 +90,28 @@ class ReifyType(Builtin):
         return ast.reify()
 
 class ReifyCmd(Builtin):
-    def setup(self, type_name):
-        self._cmd_name = type_name
+    def setup(self, cmd_name):
+        self._cmd_name = cmd_name
 
     def execute(self):
         mod = self.schema._module.command_finder
         ast = mod.get_proto_type(self._cmd_name)
         return ast.reify()
 
+class ReifyModule(Internal):
+    def setup(self, mod_name):
+        self._module_name = mod_name
 
+    def execute(self):
+        if ':' in self._module_name:
+            app_name, mod_name = self._module_name.split(':', 1)
+            if app_name == 'this':
+                app_name = self.current_app.name
+        else:
+            app_name = self.current_app.name
+            mod_name = self._module_name
+        app = self._system.get_app(app_name)
+        mod = app._schema_module.get_module(mod_name)
+        if not mod.type.startswith('casm'):
+            throw_caty_exception(u'BadArg', self._mod_name)
+        return mod.reify()

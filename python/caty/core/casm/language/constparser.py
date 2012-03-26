@@ -5,7 +5,7 @@ from caty.jsontools import xjson
 def const(seq):
     doc = option(docstring)(seq)
     a = seq.parse(annotation)
-    _ = seq.parse(keyword('const'))
+    _ = seq.parse(keyword(u'const'))
     n = seq.parse(name_token)
     if n in RESERVED:
         raise ParseFailed(seq, command, '%s is reserved.' % n)

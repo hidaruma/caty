@@ -6,7 +6,7 @@ from caty.core.facility import PEND
 import caty.util as util
 from caty import UNDEFINED
 from caty.jsontools.path import build_query
-from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly
+from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettyprint
 from caty.jsontools import jstypes
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, ContinuationSignal, Internal, scriptwrapper
 from caty.core.exception import throw_caty_exception

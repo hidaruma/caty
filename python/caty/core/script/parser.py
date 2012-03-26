@@ -119,7 +119,7 @@ class ScriptParser(Parser):
         return CommandProxy(name, type_args, opts, args, pos)
 
     def call_forward(self, seq):
-        name = choice(keyword('call'), keyword('forward'))(seq)
+        name = choice(keyword(u'call'), keyword(u'forward'))(seq)
         pos = (seq.col-len(name), seq.line)
         cmd = self.name(seq)
         type_args = option(self.type_args, [])(seq)
@@ -224,16 +224,16 @@ class ScriptParser(Parser):
         return VarRef(n, bool(o))
 
     def var_name(self, seq):
-        return seq.parse(Regex(r'[a-zA-Z_]+[-a-zA-Z0-9_]*'))
+        return seq.parse(Regex(ur'[a-zA-Z_]+[-a-zA-Z0-9_]*'))
 
     def arg_ref(self, seq):
         seq.parse('%')
-        n = seq.parse(Regex(r'[0-9]+'))
+        n = seq.parse(Regex(ur'[0-9]+'))
         o = seq.parse(option('?'))
         return ArgRef(n, bool(o))
     
     def tag_name(self, seq):
-        return seq.parse(['*!', '*', xjson.string, self.name, Regex(r'[-0-9a-zA-Z_]+')])
+        return seq.parse([u'*!', u'*', xjson.string, self.name, Regex(ur'[-0-9a-zA-Z_]+')])
 
     def unquoted(self, seq):
         #v = seq.parse(Regex('([^;\\t\\r\\n <>|%+"(){},\\[\\]]|(?!\\\'\\\'\\\'))([^;\\t\\r\\n <>|%+"(){},\\[\\]]|\\(\\)|(?!\\\'\\\'\\\'))*'))
@@ -272,7 +272,7 @@ class ScriptParser(Parser):
         return p
 
     def longopt(self, seq):
-        o = seq.parse(Regex(r'--[a-zA-Z]+[-a-zA-Z0-9_]*'))
+        o = seq.parse(Regex(ur'--[a-zA-Z]+[-a-zA-Z0-9_]*'))
         try:
             seq.parse('=')
             v = choice(
@@ -328,7 +328,7 @@ class ScriptParser(Parser):
         return Argument(r) if not isinstance(r, Param) else r
 
     def indexed_arg(self, seq):
-        index = seq.parse(Regex(r'%[0-9]+\??'))[1:]
+        index = seq.parse(Regex(ur'%[0-9]+\??'))[1:]
         optional = False
         if index.endswith('?'):
             index = int(index[:-1])
@@ -352,7 +352,7 @@ class ScriptParser(Parser):
         return l
 
     def listitem(self, seq):
-        if seq.current == ']': return CommandProxy('undefined', [], {}, [], (seq.col, seq.line))
+        if seq.current == ']': return CommandProxy(u'undefined', [], {}, [], (seq.col, seq.line))
         try:
             return seq.parse([self.make_pipeline, self.loose_item])
         except NothingTodo:
@@ -361,7 +361,7 @@ class ScriptParser(Parser):
     def loose_item(self, seq):
         if not seq.peek(self.comma):
             raise ParseFailed(seq, self.listitem)
-        return CommandProxy('undefined', [], {}, [], (seq.col, seq.line))
+        return CommandProxy(u'undefined', [], {}, [], (seq.col, seq.line))
 
     def object(self, seq):
         seq.parse('{')
@@ -498,7 +498,7 @@ class ScriptParser(Parser):
         if delim == "'":
             seq.parse('undefined')
             raise HashNotationFound('undefined')
-        name = seq.parse(Regex(r'[a-zA-Z_]+[a-zA-Z0-9_-]*'))
+        name = seq.parse(Regex(ur'[a-zA-Z_]+[a-zA-Z0-9_-]*'))
         parsers = map(try_, [
                     self.functor,
                     self.tag,

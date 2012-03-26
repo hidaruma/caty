@@ -170,7 +170,7 @@ class DispatchProxy(Proxy):
     def _reify(self):
         return {
             'opts': [o.reify() for o in self.opts],
-            'cases': [c.reify for c in self.cases]
+            'cases': [c.reify() for c in self.cases]
         }
 
 class TypeCaseProxy(Proxy):
@@ -215,7 +215,7 @@ class TypeCaseProxy(Proxy):
 
     def _reify(self):
         o = {
-            'cases': [c.reify for c in self.cases]
+            'cases': [c.reify() for c in self.cases]
         }
         if self.path:
             p = self.path._to_str()
@@ -245,7 +245,7 @@ class TypeCondProxy(Proxy):
 
     def _reify(self):
         o = {
-            'cases': [c.reify for c in self.cases]
+            'cases': [c.reify() for c in self.cases]
         }
         if self.path:
             p = self.path._to_str()

@@ -126,20 +126,30 @@ command reify-type [string typeName] :: void -> ReifiedTypeTerm | RTypeDef
 
 /**
  * 引数のコマンドに対するレイフィケーションイメージを出力する。
+ * アクションコマンドについては対象外。
  */
 command reify-cmd [string cmdName] :: void -> ReifiedCommand
     throws [ApplicationNotFound, ModuleNotFound, CommandNotFound]
     reads schema
     refers python:caty.core.std.command.inspect.ReifyCmd;
 
+/**
+ * スキーマモジュールのレイフィケーションイメージを出力する。
+ */
+command reify-module [string modName] :: void -> ReifiedModule
+    throws [ApplicationNotFound, ModuleNotFound, BadArg]
+    refers python:caty.core.std.command.inspect.ReifyModule;
+
 /*レイフィケーション関係*/
 
 type ReifiedModule = @module {
     "name": string,
     "docstring": string,
-    "type": "casm" | "cara",
-    "member": {
-        *: ReifiedTypeTerm | ReifiedKind | ReifiedCommand | ReifiedAction,
+    "types": {
+        *: ReifiedTypeTerm,
+    },
+    "commands": {
+        *: ReifiedCommand
     },
 };
 

@@ -517,13 +517,13 @@ class ConstDecl(object):
         a = Annotations([])
         for c in ann._annotations:
             a.add(c)
-        a.add(Annotation('__const'))
+        a.add(Annotation(u'__const'))
         self.__schema = ASTRoot(name, None, schema, a, doc)
         self.__command = CommandNode(name, 
                                      [CallPattern(None, 
                                                  None, 
                                                  CommandDecl(
-                                                    (ScalarNode('void'), type if type is not None else schema),
+                                                    (ScalarNode(u'void'), type if type is not None else schema),
                                                     [], 
                                                     []
                                                  ), 
