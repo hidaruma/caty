@@ -92,15 +92,11 @@ class CommandProfile(object):
         self.opts_schema = opts_schema
         self.args_schema = args_schema
         self.declobj = declobj
-        self._in_schema = None
-        self._out_schema = None
         self.resolved = False
         self._in_schema, self._out_schema = declobj.profile
     
     def clone(self):
         n = CommandProfile(self.opts_schema, self.args_schema, self.declobj)
-        n._in_schema = self.in_schema.clone(set())
-        n._out_schema = self.out_schema.clone(set())
         return n
 
     @property
@@ -183,17 +179,10 @@ class CommandProfile(object):
     def get_command_class(self):
         return self.declobj.get_command_class()
 
-    def resolve(self):
-        if self.resolved: return
-        for i, o in self.declobj.profiles:
-            i.resolve_reference()
-            o.resolve_reference()
-        self.resolved = True
-
-    def apply(self, type_params, module):
+    def apply(self, node, module):
         from caty.core.casm.cursor.typevar import TypeVarApplier
         tc = TypeVarApplier(module)
-        tc._init_type_params(type_params)
+        tc._init_type_params(node)
         tc.real_root = False
         i = self._in_schema.accept(tc)
         o = self._out_schema.accept(tc)

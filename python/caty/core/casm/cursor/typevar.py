@@ -10,6 +10,7 @@ class TypeVarApplier(SchemaBuilder):
         self.real_root = True
         self.history = dict()
         self.current = None
+        self.debug = False
 
     def visit(self, node):
         try:

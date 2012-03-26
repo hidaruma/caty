@@ -64,10 +64,12 @@ class Command(object):
                 x = p.clone(set())
                 x._schema = s
                 _ta.append(x)
-            else:
-                _ta.append(p)
         self.__type_params = _ta
-        self._in_schema, self._out_schema = self.profile.apply(self, self.profile_container.module)
+        if self.type_params:
+            self._in_schema, self._out_schema = self.profile.apply(self, self.profile_container.module)
+        else:
+            self._in_schema = self.profile.in_schema
+            self._out_schema = self.profile.out_schema
 
     def get_command_id(self):
         return self._id

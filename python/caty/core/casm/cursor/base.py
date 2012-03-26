@@ -183,13 +183,18 @@ class ProfileBuilder(SchemaBuilder):
                                     this=node.name, name=e)
             tc = TypeVarApplier(self.module)
             tn = TypeNormalizer(self.module)
-            tc._init_type_params(node)
             tc.real_root = False
+            tc._init_type_params(node)
             opt_schema = tn.visit(pat.opt_schema.accept(tc))
+            tc._init_type_params(node)
             arg_schema = tn.visit(pat.arg_schema.accept(tc))
             p = pat.decl.profile
-            new_prof = (tn.visit(p[0].accept(tc)), tn.visit(p[1].accept(tc)))
-            pat.decl.profile = new_prof
+            new_prof = [None, None]
+            tc._init_type_params(node)
+            new_prof[0] = tn.visit(p[0].accept(tc)) 
+            tc._init_type_params(node)
+            new_prof[1] = tn.visit(p[1].accept(tc))
+            pat.decl.profile = tuple(new_prof)
             pc.add_profile(CommandProfile(pat.opt_schema, pat.arg_schema, pat.decl))
         return pc
 
