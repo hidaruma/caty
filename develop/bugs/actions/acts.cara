@@ -1,0 +1,156 @@
+// -*- coding: utf-8 -*-
+
+module acts in cara;
+
+/* 
+ * == 型 == 
+ */
+
+/** ディレクトリ・リストの情報 */
+type DirInfo = { 
+  "wikifiles" : [string*],
+  "subdirs"  :  [string*],
+  "path" : string,
+  "app" : string,
+  "title" : string,
+};
+
+/** ファイル内容の情報 */
+type FileInfo = {
+ "content": string,
+ "title"  : string,
+};
+
+
+/* 
+ * == ユーザーロール == 
+ */
+
+userrole 閲覧者;
+
+
+/* 
+ * == 状態 == 
+ */
+
+@[abstract]
+state 開始 :: void links {
+ - 閲覧開始 --> ディレクトリ.get;
+};
+
+state ディレクトリ・リスト for 閲覧者 :: DirInfo links {
+ - ディレクトリ選択 --> ディレクトリ.get;
+ - ディレクトリ選択 --> SysSpecsディレクトリ.get;
+ - ディレクトリ選択 --> Globalディレクトリ.get;
+
+ - ファイル選択     --> [ファイル.get, SysSpecsファイル.get, Globalファイル.get];
+};
+
+state ファイル内容 for 閲覧者 :: deferred ;
+
+/* 
+ * == コマンド == 
+ */
+
+/** ディレクトリ・リストの取得と出力 */
+command dir-get [string dir-location, string file-ext] :: void -> DirInfo {
+  %1 > dir-location;
+  %2 > file-ext;
+  ["**", %file-ext] | text:concat > file-patt;
+
+  %CATY_APP  | $.name > app;
+  { 
+    "wikifiles" : file:list %dir-location %file-patt  | each {pv name},
+    "subdirs"  :  file:list --kind=dir %dir-location | each {pv name},
+    "path" : %dir-location,
+    "app" : %app,
+    "title" : [%app, " ", %dir-location] | text:concat
+  }
+};
+
+/** Wikiファイルの取得と出力 */
+
+command wiki-get [string file-location, string title] :: void -> FileInfo {
+  %1 > file-location;
+  %2 > title;
+  {
+    "content": file:read %file-location | text:creole, 
+    "title"  : %title,
+  }
+};
+
+
+/* 
+ * == リソース＆アクション == 
+ */ 
+
+resource ディレクトリ("/" | "*/") {
+  /** ディレクトリへのGETリクエスト */
+  action get("/GET") 
+  :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
+  {
+   (#0 dir-get %PATH_INFO .wiki ) | print /list-files.html
+  };
+};
+
+resource Litsディレクトリ ("/lits/") {
+ /** ディレクトリへのGETリクエスト */
+ action get("/GET") 
+ :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
+ {
+   (#0 dir-get schemata@this:/ .lit ) | print /list-files.html
+ };
+};
+
+resource ファイル("*.wiki") {
+  filetype {
+   "contentType" : "text/x-wiki",
+   "isText" : true,
+  };
+
+  /** WikiファイルへのGETリクエスト */
+  action get("/GET")
+  :: @[in, out] #0 void -> FileInfo produces ファイル内容
+  {
+    %0 | path:trunk > title;
+
+    (#0 wiki-get %0 %title ) | print /show-wiki.html
+  };
+};
+
+resource Litsファイル ("/lits/*.casm.lit") {
+
+  /** LiterateファイルへのGETリクエスト */
+  action get("/GET#exists-parent")
+  :: @[in, out] #0 void -> FileInfo produces ファイル内容
+  {
+    %0 | path:trunk > title;
+    %0 | path:base > base;
+    ["schemata@this:/", %base] | text:concat > lit-file;
+
+    (#0 wiki-get %lit-file %title) | print /show-wiki.html
+  };
+
+};
+
+/* 使ってない */
+command show-lit [string pathInfo, string appName] :: void -> FileInfo
+{
+  %1 > pathInfo;
+  %2 > appName;
+
+  %pathInfo | path:trunk > title;
+  %pathInfo | path:base > base;
+  
+  [
+    ["schemata@", %appName, ":/"] | text:concat, 
+    %base
+  ] | text:concat > lit-file;
+
+  wiki-get %lit-file %title
+};
+
+/*
+static ShowWiki("/show-wiki.html") ;
+static ListFiles("/list-files.html");
+*/

@@ -1,0 +1,301 @@
+<<ignore // -*- coding: utf-8 -*- >>
+
+= 入力型チェックがアヤシイ
+
+{{{
+$ hg parent
+changeset:   642:bc52bca51e23
+tag:         tip
+user:        ckuwata
+date:        Sat Mar 24 16:27:47 2012 +0900
+summary:     tagged, untaggedの.behを追加
+
+}}}
+
+モナドの例を作ろうとした。
+
+== 準備的定義
+
+<<{
+// -*- coding: utf-8 -*-
+module b1; // test
+
+type controlToken = ("escape" | "noescape" | "compact" | "preserve");
+
+type Controlled<T> = {
+  "control": [controlToken*],
+  "data"  : T
+};
+
+type commandStr = string;
+
+command controlled<S, T> [commandStr] :: Controlled<S> -> Controlled<T> {
+  do {
+    pv control           >: "control", 
+    [%1, pv data] | eval >: "data"
+  }
+};
+
+
+command embed<T> :: T -> Controlled<T> {
+ {
+   "control" : [],
+   "data" : pass
+ }
+};
+
+}>>
+
+ここまでで重要なのは、型関数 Controlled<T>。モナドのベースとなる。
+
+== エラーするコマンド
+
+<<{
+/** エラーする： b1:sample | b1:flatten */
+command flatten<T default any> :: Controlled<Controlled<T>> -> Controlled<T> {
+  [pv control > outer-control, pv data > outer-data];
+  %outer-data |
+  [pv control > inner-control, pv data > inner-data];
+
+  do {
+    [%inner-control, %outer-control] | list:concat >: "control",
+    %inner-data                                    >: "data"
+  }
+};
+    
+const sample = {
+  "control": ["escape"], 
+  "data": {
+    "control": ["preserve"], 
+    "data": "hello"
+  }
+};
+
+}>>
+
+モナド乗法を与えるコマンドが型エラーする。
+
+{{{
+caty:bugs> b1:sample | b1:flatten
+Error flatten: Col 12, Line 1
+Traceback (most recent call last):
+  File "./python\caty\front\console.py", line 328, in default
+    r = c(None)
+  File "./python\caty\core\facility\__init__.py", line 308, in __call__
+    r = self._command(input)
+  File "./python\caty\core\script\interpreter.py", line 91, in __call__
+    return self.cmd.accept(self)
+  File "./python\caty\core\script\builder.py", line 75, in accept
+    return visitor.visit_pipe(self)
+  File "./python\caty\core\script\interpreter.py", line 203, in visit_pipe
+    return node.af.accept(self)
+  File "./python\caty\core\command\__init__.py", line 341, in accept
+    return visitor.visit_script(self)
+  File "./python\caty\core\script\interpreter.py", line 105, in visit_script
+    return self._exec_command(node, self._do_script)
+  File "./python\caty\core\script\interpreter.py", line 170, in _exec_command
+    node.in_schema.validate(input)
+  File "./python\caty\core\schema\base.py", line 1370, in validate
+    self.body.validate(value)
+  File "./python\caty\core\schema\base.py", line 1226, in validate
+    self._schema.validate(value)
+  File "./python\caty\core\schema\base.py", line 257, in validate
+    self._validate(value)
+  File "./python\caty\core\schema\object.py", line 188, in _validate
+    raise e
+JsonSchemaErrorObject: {u'msg': u'Failed to validate object'}
+
+{
+    "$.data.data": {
+        "message": "値はobjectでなければなりません",
+        "isError": true,
+        "val": "",
+        "orig": ""
+    }
+}
+caty:bugs>
+}}}
+
+
+== 確認
+
+<<{
+/* +++ 以下、確認用 +++ */
+
+/** flattenの入力型、短縮形 */
+type CCA = Controlled<Controlled<any>>;
+
+/** flattenの出力型、短縮形 */
+type CA = Controlled<any>;
+
+command flatten0<T default any> :: any -> Controlled<T> {
+  [pv control > outer-control, pv data > outer-data];
+  %outer-data |
+  [pv control > inner-control, pv data > inner-data];
+
+  do {
+    [%inner-control, %outer-control] | list:concat >: "control",
+    %inner-data                                    >: "data"
+  }
+};
+}>>
+
+flatten0は、flattenとまったく同じ。ただ入力型チェックを外している。
+これはエラーしない。
+
+{{{
+caty:bugs> b1:sample | b1:flatten0
+{
+    "control": [
+        "preserve",
+        "escape"
+    ],
+    "data": "hello"
+}
+caty:bugs>
+}}}
+
+入力型は、CCAとして妥当。
+
+{{{
+caty:bugs> b1:sample | validate b1:CCA
+@OK {
+    "control": [
+        "escape"
+    ],
+    "data": {
+        "control": [
+            "preserve"
+        ],
+        "data": "hello"
+    }
+}
+caty:bugs>
+}}}
+
+== 内部で入力型の検査をする
+
+
+<<{
+command flatten1<T default any> :: any -> Controlled<T> {
+  validate b1:CCA |
+  when {
+    OK => flatten0,
+    NG => forward b1:error,
+  }
+};
+
+command error :: any? -> void {
+  "\n** ERROR **\n" | cout
+};
+ 
+}>>
+
+flatten1は、
+flatten0と同様に宣言では入力型を指定してない。
+内部で b1:CCA 型の検査をしている。
+
+{{{
+caty:bugs> b1:sample | b1:flatten1
+{
+    "control": [
+        "preserve",
+        "escape"
+    ],
+    "data": "hello"
+}
+caty:bugs>
+}}}
+
+ついにで、型パラメータのテストもしてみる。
+
+{{{
+caty:bugs> b1:sample | b1:flatten1<string>
+{
+    "control": [
+        "preserve",
+        "escape"
+    ],
+    "data": "hello"
+}
+caty:bugs> b1:sample | b1:flatten1<boolean>
+Error flatten1: Col 12, Line 1
+Traceback (most recent call last):
+  File "./python\caty\front\console.py", line 328, in default
+    r = c(None)
+  File "./python\caty\core\facility\__init__.py", line 308, in __call__
+    r = self._command(input)
+  File "./python\caty\core\script\interpreter.py", line 91, in __call__
+    return self.cmd.accept(self)
+  File "./python\caty\core\script\builder.py", line 75, in accept
+    return visitor.visit_pipe(self)
+  File "./python\caty\core\script\interpreter.py", line 203, in visit_pipe
+    return node.af.accept(self)
+  File "./python\caty\core\command\__init__.py", line 341, in accept
+    return visitor.visit_script(self)
+  File "./python\caty\core\script\interpreter.py", line 105, in visit_script
+    return self._exec_command(node, self._do_script)
+  File "./python\caty\core\script\interpreter.py", line 175, in _exec_command
+    node.out_schema.validate(r)
+  File "./python\caty\core\schema\base.py", line 1370, in validate
+    self.body.validate(value)
+  File "./python\caty\core\schema\base.py", line 1226, in validate
+    self._schema.validate(value)
+  File "./python\caty\core\schema\base.py", line 257, in validate
+    self._validate(value)
+  File "./python\caty\core\schema\object.py", line 188, in _validate
+    raise e
+JsonSchemaErrorObject: {u'msg': u'Failed to validate object'}
+
+{
+    "$.data": {
+        "message": "値はbooleanでなければなりません",
+        "isError": true,
+        "val": "",
+        "orig": ""
+    }
+}
+caty:bugs> b1:sample | b1:flatten1<integer>
+Error flatten1: Col 12, Line 1
+Traceback (most recent call last):
+  File "./python\caty\front\console.py", line 328, in default
+    r = c(None)
+  File "./python\caty\core\facility\__init__.py", line 308, in __call__
+    r = self._command(input)
+  File "./python\caty\core\script\interpreter.py", line 91, in __call__
+    return self.cmd.accept(self)
+  File "./python\caty\core\script\builder.py", line 75, in accept
+    return visitor.visit_pipe(self)
+  File "./python\caty\core\script\interpreter.py", line 203, in visit_pipe
+    return node.af.accept(self)
+  File "./python\caty\core\command\__init__.py", line 341, in accept
+    return visitor.visit_script(self)
+  File "./python\caty\core\script\interpreter.py", line 105, in visit_script
+    return self._exec_command(node, self._do_script)
+  File "./python\caty\core\script\interpreter.py", line 175, in _exec_command
+    node.out_schema.validate(r)
+  File "./python\caty\core\schema\base.py", line 1370, in validate
+    self.body.validate(value)
+  File "./python\caty\core\schema\base.py", line 1226, in validate
+    self._schema.validate(value)
+  File "./python\caty\core\schema\base.py", line 257, in validate
+    self._validate(value)
+  File "./python\caty\core\schema\object.py", line 188, in _validate
+    raise e
+JsonSchemaErrorObject: {u'msg': u'Failed to validate object'}
+
+{
+    "$.data": {
+        "message": "値はintegerでなければなりません",
+        "isError": true,
+        "val": "",
+        "orig": "hello"
+    }
+}
+caty:bugs>
+}}}
+
+問題ない。
+
+
+

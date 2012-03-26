@@ -68,10 +68,10 @@ caty:SysSpecs>
 
 /** 型を表現するデータ */
 type TypeExpr = (
+ SpecialType |
  BasicType   |
  ProductType |
  UnionType   |
- SpecialType |
  TypeVar     |
  // 再帰的な型のためにRefを追加
  // これはユーザー定義型とは無関係
