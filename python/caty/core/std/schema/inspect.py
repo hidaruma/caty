@@ -221,7 +221,7 @@ type CommandAttribute = {
     "annotation": @annotation [ReifiedAnnotation*],
     "typeParams": [RTypeParam*]?,
     "docstring": string?,
-    "profiles": [RProfile],
+    "profiles": [RProfile*],
     "exception": [RTypeDef*]?,
     "resource": [FacilityUsage*]?,
 };
