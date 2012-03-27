@@ -28,13 +28,16 @@ class SchemaBuilder(TreeCursor):
 
     @apply_annotation
     def _visit_root(self, node):
+        _ = False
         if self._root_name is None:
             self._root_name = node.name
+            _ = True
         self._type_params = node._type_params
         body = node.body.accept(self)
         s = NamedSchema(node.name, node._type_params, body, self.module)
-        self._type_params = None
-        self._root_name = None
+        if _:
+            self._type_params = None
+            self._root_name = None
         return s
 
     @apply_annotation
@@ -146,6 +149,7 @@ class ProfileBuilder(SchemaBuilder):
         from caty.core.casm.cursor.typevar import TypeVarApplier
         from caty.core.casm.cursor.normalizer import TypeNormalizer
         from caty.core.exception import CatyException
+        self._root_name = node.name
         if node.profile_container:
             return node
         if node.uri:
