@@ -15,8 +15,8 @@ RESERVED = frozenset([
 def command(seq):
     try:
         h = seq.parser_hook
-        rmcmt = bind2nd(remove_comment, is_doc_str)
-        seq.parser_hook = ParserHook(skip_ws, rmcmt)
+        #rmcmt = bind2nd(remove_comment, is_doc_str)
+        #seq.parser_hook = ParserHook(skip_ws, rmcmt)
         doc = option(docstring)(seq)
         a = seq.parse(annotation)
         _ = seq.parse(keyword(u'command'))

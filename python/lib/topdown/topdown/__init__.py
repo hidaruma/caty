@@ -136,7 +136,9 @@ class CharSeq(object):
             self.text,
             self._auto_remove_ws,
             self._hook,
-            self.ws_char
+            self.ws_char,
+            self._suppress_eof,
+            self._location_info
         )
 
     def __iter__(self):
@@ -304,6 +306,19 @@ class CharSeq(object):
     @property
     def location(self):
         return Location(self._location_info, self.line, self.col)
+
+    def without_hook(self):
+        n = self.clone()
+        n.pos = self.pos
+        n.ignore_hook = True
+        n.base = self
+        return n
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.base.pos = self.pos
 
 def tolist(f):
     def _join(*args, **kwds):

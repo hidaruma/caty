@@ -8,22 +8,16 @@ from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.commandparser import command
 from caty.core.casm.language.constparser import const
 from caty.core.casm.language.kindparser import kind
-
+import sys
 def parse(t):
     try:
         return as_parser(casm).run(t, hook=remove_comment, auto_remove_ws=True)
     except ParseFailed, e:
-        raise SchemaSyntaxError(e)
+        raise SchemaSyntaxError(e), None, sys.exc_info()[2]
 
-def iparse(t):
+def parse_literate(t):
     try:
-        return (i for i in as_parser(casm).run(t, hook=remove_comment, auto_remove_ws=True))
-    except ParseFailed, e:
-        raise SchemaSyntaxError(e)
-
-def iparse_literate(t):
-    try:
-        return (i for i in as_parser(literate_casm).run(t, hook=remove_comment, auto_remove_ws=True))
+        return as_parser(literate_casm).run(t, hook=remove_comment, auto_remove_ws=True)
     except ParseFailed, e:
         raise SchemaSyntaxError(e)
 

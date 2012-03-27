@@ -1,7 +1,7 @@
 #coding:utf-8
 from caty.core.resource import ResourceFinder
 from caty.core.facility import ReadOnlyFacility
-from caty.core.casm.language.casmparser import iparse
+from caty.core.casm.language.casmparser import parse
 from caty.core.casm.language.ast import ModuleName
 import caty.core.runtimeobject as ro
 import caty.core.schema as schema
@@ -205,7 +205,7 @@ class LocalModule(ResourceFinder):
         self.saved_st = {}
         self.schema_ns = {}
         self.name = as_parser(modname).run(schema_string)
-        for t in iparse(schema_string):
+        for t in parse(schema_string):
             t.declare(self)
             
         self._build_schema_tree()

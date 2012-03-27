@@ -3,7 +3,7 @@ from __future__ import with_statement
 from caty.core.casm.finder import SchemaFinder, CommandFinder
 from caty.core.casm.loader import CommandLoader, BuiltinLoader
 from caty.core.schema import schemata
-from caty.core.casm.language.casmparser import iparse, iparse_literate
+from caty.core.casm.language.casmparser import parse, parse_literate
 from caty.core.casm.language import xcasmparser as xcasm
 from caty.core.casm.cursor import (SchemaBuilder, 
                                    ReferenceResolver, 
@@ -540,7 +540,7 @@ class CoreModule(Module):
         if self.is_root:
             if module is None:
                 self._name = u'builtin'
-                for t in iparse(schema_string):
+                for t in parse(schema_string):
                     t.declare(self)
             else:
                 mod = self.__class__(self._app, self)
@@ -548,7 +548,7 @@ class CoreModule(Module):
                 self.sub_modules[mod.name] = mod
         else:
             self._name = unicode(module.name)
-            for t in iparse(schema_string):
+            for t in parse(schema_string):
                 t.declare(self)
 
 class AppModule(Module):
@@ -618,7 +618,7 @@ class AppModule(Module):
     def _compile(self, path):
         o = self.fs.open(path)
         if path.endswith('.casm'):
-            for t in self.find_or_create_cache(o):
+            for t in self.parse_casm(o):
                 t.declare(self)
         elif path.endswith('.pcasm'):
             d = to_decl_style(o)
@@ -628,38 +628,33 @@ class AppModule(Module):
                 io = StringIO(d)
                 io.path = o.path
                 self.pcasm_cache = io
-            for t in self.find_or_create_cache(io):
+            for t in self.parse_casm(io):
                 t.declare(self)
         elif path.endswith('.xcasm'):
-            for t in self.find_or_create_cache(o, 'xcasm'):
+            for t in self.parse_casm(o, 'xcasm'):
                 t.declare(self)
         else:
-            for t in self.find_or_create_cache(o, 'lit'):
+            for t in self.parse_casm(o, 'lit'):
                 t.declare(self)
 
-    def find_or_create_cache(self, fo, type='casm'):
-        if not self.parser_cache:
+    def parse_casm(self, fo, type='casm'):
+        try:
             if type == 'casm':
-                try:
-                    self._show_msg(fo)
-                    self._app.cout.write(u'...')
-                    self.parser_cache = iparse(fo.read())
-                    self._app.cout.writeln(u'OK')
-                except:
-                    self._app.cout.writeln(u'NG')
-                    raise
+                self._show_msg(fo)
+                self._app.cout.write(u'...')
+                r = parse(fo.read())
             elif type == 'xcasm':
-                self.parser_cache = xcasm.iparse(fo.read())
+                r = xcasm.parse(fo.read())
             elif type == 'lit':
-                try:
-                    self._show_msg(fo)
-                    self._app.cout.write(u'...')
-                    self.parser_cache = iparse_literate(fo.read())
-                    self._app.cout.writeln(u'OK')
-                except:
-                    self._app.cout.writeln(u'NG')
-                    raise
-        return self.parser_cache
+                self._show_msg(fo)
+                self._app.cout.write(u'...')
+                r = parse_literate(fo.read())
+        except:
+            self._app.cout.writeln(u'NG')
+            raise
+        else:
+            self._app.cout.writeln(u'OK')
+        return r
 
     def find(self, do):
         for e in do.read():

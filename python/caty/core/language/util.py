@@ -38,30 +38,37 @@ def docstring(seq):
     return many1(__docstring)(seq)[-1]
 
 def __docstring(seq):
-    seq.parse(skip_ws)
-    seq.parse('/**')
-    doc = seq.parse(until('*/')).strip('\n')#Regex(r'/\*\*.+?\*/', re.S))[3:-2].strip('\n')
-    seq.parse('*/')
-    seq.parse(skip_ws)
-    r = []
-    lines = [d.strip() for d in doc.splitlines()]
-    space = 0
-    if not lines:
-        return u''
-    for i in list(lines[0]):
-        if i == ' ':
-            space += 1
-        else:
-            break
-    d = []
-    for l in lines:
-        l = l.replace(' '*space, '', 1)
-        if l == '*':
-            l = ''
-        elif l.startswith('* '):
-            l = l[2:]
-        d.append(l)
-    return u'\n'.join(d)
+    h = seq.ignore_hook
+    seq.ignore_hook = True
+    try:
+        seq.parse(skip_ws)
+        seq.parse('/**')
+        doc = seq.parse(until('*/')).strip('\n')#Regex(r'/\*\*.+?\*/', re.S))[3:-2].strip('\n')
+        seq.parse('*/')
+        seq.parse(skip_ws)
+        if seq.eof:
+            return None
+        r = []
+        lines = [d.strip() for d in doc.splitlines()]
+        space = 0
+        if not lines:
+            return u''
+        for i in list(lines[0]):
+            if i == ' ':
+                space += 1
+            else:
+                break
+        d = []
+        for l in lines:
+            l = l.replace(' '*space, '', 1)
+            if l == '*':
+                l = ''
+            elif l.startswith('* '):
+                l = l[2:]
+            d.append(l)
+        return u'\n'.join(d)
+    finally:
+        seq.ignore_hook = h
 
 class SchemaSyntaxError(Exception):
     def __init__(self, exception):
