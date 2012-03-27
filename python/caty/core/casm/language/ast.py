@@ -326,7 +326,11 @@ class CommandNode(Function):
         }
         profiles = [pro.reify() for pro in self.patterns]
         r['profiles'] = profiles
-        r['exception'] = [e for (t, e) in self.patterns[0].decl.jump_decl if t == 'throws']
+        r['exception'] = []
+        for (t, es) in self.patterns[0].decl.jump_decl:
+            if t == 'throws':
+                for e in es:
+                    r['exception'].append(e.reify())
         r['resource'] = []
         for t, n in self.patterns[0].decl.get_all_resources():
             r['resource'].append({'facilityName': n.name, 'usageType': t})

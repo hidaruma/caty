@@ -222,7 +222,7 @@ type CommandAttribute = {
     "typeParams": [RTypeParam*]?,
     "docstring": string?,
     "profiles": [RProfile],
-    "exception": [string*]?,
+    "exception": [RTypeDef*]?,
     "resource": [FacilityUsage*]?,
 };
 

@@ -19,7 +19,7 @@ def schema(seq):
     type_args = seq.parse(option(type_arg))
     k_of = option(kind_of)(seq)
     e = seq.parse('=')
-    deferred = seq.parse(option(keyword('deferred')))
+    deferred = seq.parse(option(keyword(u'deferred')))
     if deferred:
         annotations.add(Annotation(u'__deferred'))
         definition = seq.parse(option(typedef))
@@ -29,8 +29,8 @@ def schema(seq):
         definition = seq.parse(typedef)
     if t == 'exception':
         definition = IntersectionNode(TaggedNode(name_of_type, definition), ScalarNode(u'Exception'))
-        annotations.add(Annotation('__exception'))
-        annotations.add(Annotation('register-public'))
+        annotations.add(Annotation(u'__exception'))
+        annotations.add(Annotation(u'register-public'))
     else:
         if isinstance(definition, NamedTaggedNode):
             definition._tag = name_of_type
