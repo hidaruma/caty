@@ -36,8 +36,8 @@ class ListCommands(Internal):
             }
             o['opts'] = td.visit(p.opts) if p.opts else u'{}'
             o['args'] = td.visit(p.args) if p.args else u'[]'
-            o['input'] = td.visit(p.decl.profiles[0][0])
-            o['output'] = td.visit(p.decl.profiles[0][1])
+            o['input'] = td.visit(p.decl.profile[0])
+            o['output'] = td.visit(p.decl.profile[1])
             o['deprecated'] = 'deprecated' in proto_type.annotation
             o['throws'] = []
             o['typeVars'] = [v.var_name for v in proto_type.type_params]
