@@ -555,8 +555,8 @@ class Eval(Builtin):
             cmd = self.interpreter.build(input, transaction=PEND)
             return cmd(None)
         else:
-            cmd = self.interpreter.build(input[0], transaction=PEND)
-            return cmd(input[1])
+            cmd = self.interpreter.build(input[1], transaction=PEND)
+            return cmd(input[0])
         
 class DirIndex(Internal):
     

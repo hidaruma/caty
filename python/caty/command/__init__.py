@@ -1,6 +1,10 @@
 #coding: utf-8
-from caty.core.command import Command, PipelineInterruption, PipelineErrorExit, Filter
+from caty.core.command import (Command,
+                               PipelineInterruption,
+                               PipelineErrorExit,
+                               Filter)
 from caty.core.exception import *
+
 
 class MafsMixin(object):
     u"""mafs を扱うコマンドのための mix-in クラス。

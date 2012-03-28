@@ -8,9 +8,13 @@ from caty.jsontools import xjson
 from caty.util.collection import merge_dict
 from caty.core.globalconf import *
 from caty.core import script, casm
-from caty.core.facility import Facility, FakeFacility, FacilitySet, AccessManager
+from caty.core.facility import (Facility,
+                                FakeFacility,
+                                FacilitySet,
+                                AccessManager)
 from caty.core.memory import AppMemory
-from caty.core.std.command.authutil import RequestToken, CATY_USER_INFO_KEY
+from caty.core.std.command.authutil import (RequestToken,
+                                            CATY_USER_INFO_KEY)
 from caty.core.std.command.user import User
 from caty.core.exception import throw_caty_exception
 from caty.util.collection import ImmutableDict
@@ -21,7 +25,7 @@ from caty.core.action.dispatcher import resource_class_from_assocs, ResourceActi
 import caty.core.runtimeobject
 import caty.core.logger as logger
 from pbc import PbcObject, Contract
-        
+
 from copy import deepcopy
 from operator import truth as _
 import locale
@@ -38,6 +42,8 @@ RESERVED = set(['this', u'global', u'caty'])
 ROOT = 'root'
 USER = 'main'
 LOG_TYPES = ['app', 'performance', 'exec']
+
+
 class Application(PbcObject):
     u"""Caty アプリケーションオブジェクト。
     Caty アプリケーションは自身に特有なファイルシステム、スキーマ、コマンドなどを格納し、
@@ -82,7 +88,7 @@ class Application(PbcObject):
             self._init_interpreter()
             self._init_action()
         else:
-           self.cout.writeln(u'* ' + system.i18n.get("$name is set not to start", name=self._name))
+            self.cout.writeln(u'* ' + system.i18n.get("$name is set not to start", name=self._name))
         self.async_queue = AsyncQueue(self)
         PbcObject.__init__(self)
         self._lock_set = set()
@@ -96,8 +102,10 @@ class Application(PbcObject):
         self.exec_rc_script()
 
     def exec_rc_script(self):
-        if self._disabled: return
-        if self._no_ambient: return
+        if self._disabled:
+            return
+        if self._no_ambient:
+            return
         scripts = self._scripts.start()
         if isinstance(scripts, FakeFacility):
             return
@@ -118,14 +126,16 @@ class Application(PbcObject):
         facilities._facilities.clear()
 
     def exec_rc_once_script(self):
-        if self._disabled: return
-        if self._no_ambient: return
+        if self._disabled:
+            return
+        if self._no_ambient:
+            return
         scripts = self._scripts.start()
         if isinstance(scripts, FakeFacility):
             return
         if not scripts.opendir('/' + RC_ONCE_SCRIPT).exists:
             return
-        d =  scripts.opendir('/' + RC_ONCE_SCRIPT)
+        d = scripts.opendir('/' + RC_ONCE_SCRIPT)
         for f in d.read(True):
             if not f.path.endswith('.caty') or f.path.count('.') != 1:
                 continue
@@ -203,8 +213,8 @@ class Application(PbcObject):
             try:
                 cfg = xjson.loads(f.read())
             except Exception, e:
-               self._system.i18n.write(u'Failed to parse JSON: $path\n$error', path=f.path, error=error_to_ustr(e))
-               raise
+                self._system.i18n.write(u'Failed to parse JSON: $path\n$error', path=f.path, error=error_to_ustr(e))
+                raise
         else:
             cfg = self.default_conf()
         manifest_type = self._system._casm._core.schema_finder('AppManifest')
@@ -215,7 +225,7 @@ class Application(PbcObject):
             try:
                 ft = xjson.loads(ft.read())
             except Exception, e:
-               self.i18n.write(u'Failed to parse JSON: $path\n$error', path=ft.path, error=error_to_ustr(e))
+                self.i18n.write(u'Failed to parse JSON: $path\n$error', path=ft.path, error=error_to_ustr(e))
         else:
             ft = {}
         if 'filetypes' in cfg:
@@ -232,15 +242,15 @@ class Application(PbcObject):
             msg = self._load_messages()
             self.i18n = self._system.i18n.extend(msg)
         except Exception, e:
-           self.i18n = self._system.i18n
+            self.i18n = self._system.i18n
 
     def _load_messages(self):
         default_file = self._messages_fs.open('/default.xjson')
         try:
             base = xjson.loads(default_file.read()) if default_file.exists else []
         except Exception, e:
-           self.i18n.write(u'Failed to parse JSON: $path\n$error', path='/default.xjson', error=error_to_ustr(e))
-           raise
+            self.i18n.write(u'Failed to parse JSON: $path\n$error', path='/default.xjson', error=error_to_ustr(e))
+            raise
         msg = {}
         for m in base:
             msg[m] = {}
@@ -259,14 +269,14 @@ class Application(PbcObject):
                     msg[e_msg] = {lang: trans}
                 else:
                     msg[e_msg][lang] = trans
-                    
+
         return msg
 
     def default_conf(self):
         return {
             'disabled': False,
             'description': u'%s' % self.name,
-            'implLang' : u"python",
+            'implLang': u"python",
             'assign': {
                 'pub': u'pub',
                 'include': u'include',
@@ -334,8 +344,8 @@ class Application(PbcObject):
         self._command_fs = mafs_init('commands', assign['commands']).start().read_mode
         self._schema_fs = mafs_init('schemata', assign['schemata']).start().read_mode
         self._messages_fs = mafs_init('messages', assign['messages']).start().read_mode
-        
-        # スクリプトファイル
+
+  # スクリプトファイル
         _scripts = mafs_init('scripts', assign['scripts'])
         if _scripts:
             self._scripts = _scripts
@@ -352,7 +362,7 @@ class Application(PbcObject):
             self._schema_module = self._system.casm.make_blank_module(self)
         else:
             self._schema_module = self._system.casm.make_app_module(self)
-        #self._schema_module.compile()
+  #self._schema_module.compile()
 
     def _init_interpreter(self):
         self._interpreter = script.initialize(self._schema_module, self, self._system)
@@ -360,7 +370,7 @@ class Application(PbcObject):
 
     def _init_session(self):
         self._session_storage = self._global_config.session_storage
-    
+
     def _init_storage(self):
         self._storage = storage.initialize(self._global_config.storage_conf)
 
@@ -385,12 +395,13 @@ class Application(PbcObject):
 
     def _init_action(self):
         self._create_dispatcher()
-        self._extract_casm_from_cara() # .caraで定義されたコマンド、スキーマの登録。
+        self._extract_casm_from_cara()  # .caraで定義されたコマンド、スキーマの登録。
 
     def finish_setup(self):
         self.cout.writeln(self.i18n.get("Initializing '$name'", name=self.name))
-        if self._disabled: return
-        self._init_interpreter() # 一旦インタープリターを初期化してスクリプトコンパイラが動くようにする
+        if self._disabled:
+            return
+        self._init_interpreter()  # 一旦インタープリターを初期化してスクリプトコンパイラが動くようにする
         c = {}
         c['indexfiles'] = self.indexfiles[:]
         c['script_ext'] = ['.cgi', '.act', '.do']
@@ -398,15 +409,16 @@ class Application(PbcObject):
         self._web_config = ImmutableDict(c)
         try:
             if not self._no_ambient:
-                self._schema_module.resolve() # 型参照は最終的にここで解決される。
+                self._schema_module.resolve()  # 型参照は最終的にここで解決される。
         except Exception, e:
-            #msg = error_to_ustr(e)
-            #cout.writeln(e)
-            raise 
-        self._create_bindings() # ポートのバインド(cambの読み込み)
-        self._init_interpreter() # ユーザ定義コマンドが解決されたので再度初期化
-        self._init_mafs() # action定義でファイルタイプが加わっている可能性があるので再度初期化。
-        if self._no_ambient: return
+  #msg = error_to_ustr(e)
+  #cout.writeln(e)
+            raise
+        self._create_bindings()  # ポートのバインド(cambの読み込み)
+        self._init_interpreter()  # ユーザ定義コマンドが解決されたので再度初期化
+        self._init_mafs()  # action定義でファイルタイプが加わっている可能性があるので再度初期化。
+        if self._no_ambient:
+            return
         if self._app_spec:
             if not '$typename' in self._app_spec:
                 raise Exception(self.i18n.get("Schema for AppSpec is not specified: $app", app=self.name))
@@ -430,7 +442,6 @@ class Application(PbcObject):
         for c in filetype_classes:
             dispatcher.add_resource(c)
         self._dispatcher = dispatcher
-
 
     def _create_bindings(self):
         from caty.core.camb import create_bindings
@@ -498,8 +509,8 @@ class Application(PbcObject):
 
     def _create_sysfiles(self):
         return SysFiles(
-            actions = self._actions.start().read_mode,
-            schemata = self._schema_fs.start().read_mode,
+            actions=self._actions.start().read_mode,
+            schemata=self._schema_fs.start().read_mode,
         )
 
     def init_env(self, facilities, is_debug, modes, system, environ={}):
@@ -520,7 +531,7 @@ class Application(PbcObject):
         env.put('CATY_HOME', unicode(os.getcwd(), self._system.sysencoding))
         env.put('CATY_PROJECT', self._system.project_name)
         env.put('APP_MANIFEST', self._manifest)
-        #env.put('FILE_ASSOC', self._raw_associations)
+  #env.put('FILE_ASSOC', self._raw_associations)
         if 'CONTENT_TYPE' in environ:
             env.put('CONTENT_TYPE', unicode(environ['CONTENT_TYPE']))
         else:
@@ -571,7 +582,7 @@ class Application(PbcObject):
     @property
     def indexfiles(self):
         return self._indexfiles
-    
+
     @property
     def session_storage(self):
         return self._session_storage
@@ -626,8 +637,8 @@ class Application(PbcObject):
         assert '/' not in self.name
 
     def to_name_tree(self):
-        # ネームツリーの各要素は
-        # 各種mafs, JSONStorage, Session, Env, Memory
+  # ネームツリーの各要素は
+  # 各種mafs, JSONStorage, Session, Env, Memory
         r = {
             u'kind': u'c:app',
             u'id': self._name,
@@ -646,22 +657,23 @@ class Application(PbcObject):
                 'data': f['data'].to_name_tree()
             },
         }
-        #d['storage'] = self._storage.to_name_tree()
-        #    'pub': self._pub.start(),
-        #    'scripts': self._scripts.start(),
-        #    'include': self._include.start(),
-        #    'schema': finder,
-        #    'data': self._data.start(),
-        #    'storage': self._storage.set_finder(finder).start(),
-        #    'behaviors': self._behaviors.start(),
-        #    'schemata': self._schema_fs,
-        #    'config': self._app_spec,
-        #    'memory': self._memory.start(),
-        #    'logger': logger.Logger(self).start(),
-        #    'sysfiles': self._create_sysfiles(),
+  #d['storage'] = self._storage.to_name_tree()
+  #    'pub': self._pub.start(),
+  #    'scripts': self._scripts.start(),
+  #    'include': self._include.start(),
+  #    'schema': finder,
+  #    'data': self._data.start(),
+  #    'storage': self._storage.set_finder(finder).start(),
+  #    'behaviors': self._behaviors.start(),
+  #    'schemata': self._schema_fs,
+  #    'config': self._app_spec,
+  #    'memory': self._memory.start(),
+  #    'logger': logger.Logger(self).start(),
+  #    'sysfiles': self._create_sysfiles(),
         for k, v in f.items():
             v.rollback()
         return r
+
 
 class StdStream(object):
     def __init__(self, encoding):
@@ -675,11 +687,12 @@ class StdStream(object):
     def read(self):
         return xjson.loads(self.input.read())
 
+
 class StreamWrapper(Facility):
     def __init__(self, stream):
         self.__stream = stream
         Facility.__init__(self)
-    
+
     am = AccessManager()
 
     @am.update
@@ -708,7 +721,7 @@ INDEX_HTML = u"""
     <body>
         {include file="templates:/global_menu.html"}
         <h1>Welcome</h1>
-    <!-- 
+    <!--
     This file is automatically generated by Caty.
     The file contains Japanese characters encoded in UTF-8.
     -->
@@ -729,12 +742,14 @@ class DummyApplication(Application):
         self._lock_set= set()
         self.i18n = system.i18n if system else None
 
+
 class AppConfig(dict, FakeFacility):
     def clone(self):
         n = AppConfig()
         for k, v in self.items():
             n[k] = deepcopy(v)
         return n
+
 
 class SysFiles(ReadOnlyFacility):
     def __init__(self, **kwds):
@@ -747,10 +762,11 @@ class SysFiles(ReadOnlyFacility):
         for n in self.__names:
             getattr(self, n).cleanup()
 
+
 class GlobalApplication(Application):
     def __init__(self, name, no_ambient, group, system):
         self._initialized = False
-        self._no_ambient = False # 常にFalse
+        self._no_ambient = False  # 常にFalse
         self._initialize(name, group, system)
         self._initialized = True
 
@@ -759,4 +775,3 @@ class GlobalApplication(Application):
         self._initialize(self._name, self._group, self._system)
         self.finish_setup()
         self.exec_rc_script()
-

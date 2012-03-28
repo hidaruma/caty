@@ -45,4 +45,3 @@ def create_std_schema(module):
     yield module.schema
     #for s in filter_command(module):
     #    yield s
-

@@ -718,7 +718,7 @@ command eq :: [any, any] -> @Same any | @Diff [any, any]
  * 入力値二つのうち第一要素を Caty スクリプトの式、第二要素をその入力として実行する。
  * このコマンドはテストモードでしか動作しないため、通常は使う必要はない。
  */
-@[test] command eval<T default any> :: [string, any] | string -> T
+@[test] command eval<T default any> :: [any, string] | string -> T
     uses interpreter
     refers python:caty.core.std.command.builtin.Eval;
 

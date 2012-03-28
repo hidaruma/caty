@@ -1,6 +1,9 @@
 # coding: utf-8
+
 __version__ = 'pp-2.0.0'
 DEBUG = True
+
+
 class _Undefined(object):
     def __nonzero__(self):
         return False
@@ -11,10 +14,11 @@ class _Undefined(object):
     def __repr__(self):
         return '#undefined'
 
-UNDEFINED = _Undefined() # singleton
+UNDEFINED = _Undefined()  # singleton
 import sys
 from caty.front import console, web, profiler
 from caty.util import OptPrinter
+
 
 def main(raw_argv):
     opts, argv = getopt(raw_argv)
@@ -43,6 +47,7 @@ def main(raw_argv):
     else:
         return console.main(argv)
 
+
 def getopt(args):
     opts = []
     idx = 0
@@ -53,6 +58,7 @@ def getopt(args):
         else:
             break
     return opts, args[idx:]
+
 
 def show_help(argv):
     op = OptPrinter()
@@ -66,10 +72,10 @@ def show_help(argv):
     op.add(u'\n各コマンドのヘルプは python stdcaty.py command -h で表示される')
     op.show()
 
+
 def show_version():
     print u'Caty', __version__
 
+
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
-
-
