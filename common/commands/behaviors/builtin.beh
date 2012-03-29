@@ -79,3 +79,21 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 |@foo 1| untagged | 1||||
 |1| untagged | 1|||タグ型でない場合passと同様|
 |@foo|untagged|undefined |||
+
+== typeof
+
+=== !exec
+
+|= input   |= command |=output   |=備考|
+| 1        | typeof   | "number" | 1は数値である |
+|@number 1 | typeof   | "number" | numberタグは吸収される |
+|@foo 1    | typeof   | "tagged" | これはタグ付きの値 |
+|@foo      | typeof   | "tagged" | tag-onlyでもタグ付きの値 |
+|undefined | typeof   | "undefined" | 未定義型 |
+|foreign   | typeof   | "foreign" | フォーリン型 |
+
+
+
+
+
+
