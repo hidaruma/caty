@@ -1,0 +1,75 @@
+<?caty-meta template="smarty-mx" ?>{* -*- coding: utf-8 -*- *}
+{* this is /auto.html 
+*}{* 
+ *
+ * 簡単なauto-print機能を提供するライブラリ
+ * 
+ *}{**
+ * スカラー（バイナリを除く）
+ *}
+{function match="null | boolean | number | string" matched=type}
+  <span class="{$type}">{$type}:{$_CONTEXT}</span>
+{/function}
+{** 
+ * バイナリは内容を表示しない 
+ *}
+{function match="binary"}
+  <span class="binary">... binary ...</span>
+{/function}
+{**
+ * 配列、番号付き箇条書き
+ *}
+{function match="array"}
+  <ol class="array" start="0">
+  {foreach from=$_CONTEXT item=it}
+    <li class="item">{apply context=$it}</li>
+  {/foreach}
+  </ol>
+{/function}
+{**
+ * オブジェクト、番号なし箇条書き
+ *}
+{function match="object"}
+  <ul class="object">
+  {foreach from=$_CONTEXT key=name item=val}
+    <li class="property">
+      <span class="prop-name">{$name}</span>:
+      <div  class="prop-value">{apply context=$val}</div>
+    </li>
+  {/foreach}
+  </ul>
+{/function}
+{**
+ * タグ付きデータ
+ *}
+{function match="*" matched=tag}
+  <div class="tagged"><span class="tag">{$tag}</span>{apply}</div>
+{/function}
+<html>
+  <head>
+    <title>auto</title>
+    <style>
+{literal}
+/* stylesheet */
+.null {}
+.boolean {}
+.number {}
+.string {}
+
+.object {}
+.property {}
+.prop-name {}
+.prop-value {}
+
+.array {}
+.item {}
+{/literal}
+  </style>
+  </head>
+  <body>
+   <pre>{$_CONTEXT|json}</pre>
+{*   <hr>
+   {apply}
+*}
+  </body>
+</html>
