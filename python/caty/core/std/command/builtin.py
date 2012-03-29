@@ -775,6 +775,9 @@ from types import *
 import decimal
 
 def _type_of(input):
+    import caty
+    if input is caty.UNDEFINED:
+        return u'undefined'
     input_type = type(input)
     if input_type == NoneType:
         type_name = u'null'
@@ -794,7 +797,7 @@ def _type_of(input):
     elif input_type == StringType: # Uuuum by HIYAMA
         type_name = u'binary'
     else:
-        type_name = u'unknown'
+        type_name = u'foreign'
     return type_name
 
 class TypeOf(Builtin):

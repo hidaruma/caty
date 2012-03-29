@@ -109,7 +109,7 @@ class PPEncoder(CatyEncoder):
             elif o is _empty:
                 yield u''
             else:
-                yield u'#<unknown %s>' % repr(o)
+                yield u'#<foreign %s>' % repr(o)
         else:
             for e in CatyEncoder._iterencode(self, self.__normalize(o), markers):
                 yield e

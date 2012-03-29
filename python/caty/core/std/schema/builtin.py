@@ -291,7 +291,8 @@ type BuiltinTypeName = (
    "number" | "string" | "boolean" | "null" | "binary" // スカラー型
  | "array" | "object" // 複合型
  | "tagged"  // XJSONによる拡張
- | "unknown" // 不明
+ | "undefined" // 未定義
+ | "foreign" // フォーリンデータ
 );
 
 type typeName = string(remark="type-name");
@@ -884,7 +885,7 @@ command properties :: object -> [string*]
     refers python:caty.core.std.command.builtin.Properties;
 
 /** 入力の型を判断する */
-command typeof :: any -> BuiltinTypeName 
+command typeof :: univ -> BuiltinTypeName 
     refers python:caty.core.std.command.builtin.TypeOf;
 
 /** 入力の型が引数で指定された名前の型であるかどうかを判断する */
