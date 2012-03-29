@@ -789,7 +789,7 @@ def _type_of(input):
         type_name = u'array'
     elif input_type == DictType:
         type_name = u'object'
-    elif isinstance(input, caty.jsontools.TaggedValue):
+    elif isinstance(input, (caty.jsontools.TagOnly, caty.jsontools.TaggedValue)):
         type_name = u'tagged'
     elif input_type == StringType: # Uuuum by HIYAMA
         type_name = u'binary'
