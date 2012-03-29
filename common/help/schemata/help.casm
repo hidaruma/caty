@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-module hlp; 
+module help; 
 
 type CmdInfo = inspect:ShortProfile;
 
@@ -34,29 +34,26 @@ command modify-cmd-info :: CmdInfo -> CmdInfo2 {
  [%in, %vars] | xjson:put $.typeVarsStr
 };
 
-command mods :: void -> ModInfoList {
- apps | each {pv name} > app-names;
- %app-names |
- each {
-  pass > app;
-  inspect:list-mod %app | 
-  each {
-   pv name >n;
-   [%app, ":", %n] | text:concat | dump > mod;
-   {"fullname":%mod, "cmds":inspect:list-cmd %mod | each {modify-cmd-info}}
-  }
- } | xlist:flatten
-};
-
-command core :: void -> ModInfoList { 
- inspect:list-mod caty | 
+command mods [string appName] :: void -> ModInfoList {
+ inspect:list-mod %1 | 
  each {
   pv name >n;
-  ["caty:", %n] | text:concat | dump > mod;
+  [%1, ":", %n] | text:concat | dump > mod;
   {"fullname":%mod, "cmds":inspect:list-cmd %mod  | each {modify-cmd-info}}
  }
 };
 
+command user :: void -> ModInfoList {
+ apps | each {pv name} > app-names;
+ %app-names |
+ each {
+  pass > app;
+  mods %app
+ } | xlist:flatten
+};
+
+command core :: void -> ModInfoList { 
+ mods caty
+};
+
 // End of Module
-
-
