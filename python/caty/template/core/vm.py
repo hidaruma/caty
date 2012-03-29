@@ -420,7 +420,7 @@ class VirtualMachine(object):
         opmap[UNMASK_CONTEXT] = unmask_context
 
         def discard(ignore):
-            self.stack.pop()
+            stack.pop()
         opmap[DISCARD] = discard
 
         def def_function(name):
@@ -480,19 +480,24 @@ class VirtualMachine(object):
             t, v = json.split_tag(stack.top())
             if tag_name == '*':
                 stack.list[-1] = v
+                stack.push(t)
                 stack.push(True)
             elif tag_name == '*!':
                 if t in schema.type:
+                    stack.push(t)
                     stack.push(False)
                 else:
+                    stack.push(t)
                     stack.push(True)
             else:
                 for name in map(lambda s: s.strip(), tag_name.split('|')):
                     if t == name:
                         stack.list[-1] = v
+                        stack.push(t)
                         stack.push(True)
                         break
                 else:
+                    stack.push(t)
                     stack.push(False)
             return
         opmap[DISPATCH] = dispatch

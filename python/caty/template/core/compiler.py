@@ -291,9 +291,17 @@ class ObjectCodeGenerator(STVistor):
         skip_label = self.create_label(node)
         yield (FUNCTION_MATCH, '.'.join(self.current_namespace))
         yield (DISPATCH, node.match)
+        yield (SWAP, None)
+        yield (DISCARD, None)
         yield (JMPUNLESS, skip_label)
         yield (FUNCTION_DEF, '.'.join(self.current_namespace + [node.name]))
-        yield (VALIDATE, node.context_type)
+        if node.match:
+            yield (DISPATCH, node.match)
+            yield (JMPUNLESS, skip_label)
+        elif node.context_type:
+            yield (VALIDATE, node.context_type)
+        else:
+            raise
         yield (SWAP, None)
         yield (MASK_CONTEXT, None)
         yield (CPUSH, node.matched)
