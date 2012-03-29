@@ -1,6 +1,6 @@
 module tpl;
 
-command render :: {"title": string, "mods": hlp:ModInfoList} -> string {
+command render :: {"title": string, "mods": help:ModInfoList} -> string {
 [pv title > title, pv mods > mods];
 ['''<html>
   <head>
@@ -20,7 +20,7 @@ command render :: {"title": string, "mods": hlp:ModInfoList} -> string {
  * モジュール情報をh2セクションとして整形
  * type="help:ModInfo"
  */
-command mod :: hlp:ModInfo -> string {
+command mod :: help:ModInfo -> string {
  [pv fullname > fullname, pv cmds > cmds];
  ['''<div class="mod">
   <h2>モジュール ''', %fullname, "</h2>",
@@ -33,7 +33,7 @@ command mod :: hlp:ModInfo -> string {
 /**
  * コマンドプロファイルのリストをテーブルとして整形
 */
-command cmdlist :: hlp:CmdList -> string {
+command cmdlist :: help:CmdList -> string {
   pass > cmds;
   [
   '''<table class="cmdlist" border="1">
@@ -48,7 +48,7 @@ command cmdlist :: hlp:CmdList -> string {
 /** 
  * コマンドのプロファイルをテーブルの1行として整形
  */
-command cmd :: hlp:CmdInfo -> string {
+command cmd :: help:CmdInfo -> string {
   pass > src;
   ["<tr class=\"cmd\"><td>",
   %src|cmdname3,
@@ -66,7 +66,7 @@ command cmd :: hlp:CmdInfo -> string {
   }
 };
 
-command cmdname3 :: hlp:CmdInfo -> string {
+command cmdname3 :: help:CmdInfo -> string {
   pass > src;
   ["<span ",
    %src | pv deprecated | case {
