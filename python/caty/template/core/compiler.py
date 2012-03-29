@@ -261,7 +261,7 @@ class ObjectCodeGenerator(STVistor):
     def create_label(self, obj):
         label = str(id(obj))
         while label in self.label_stack:
-            label = str(id(label))
+            label += 'x'
         self.label_stack.append(label)
         return label
 
@@ -292,7 +292,6 @@ class ObjectCodeGenerator(STVistor):
         yield (FUNCTION_MATCH, '.'.join(self.current_namespace))
         yield (DISPATCH, node.match)
         yield (JMPUNLESS, skip_label)
-        yield (SWAP, None)
         yield (FUNCTION_DEF, '.'.join(self.current_namespace + [node.name]))
         yield (VALIDATE, node.context_type)
         yield (SWAP, None)

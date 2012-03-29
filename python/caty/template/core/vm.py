@@ -386,7 +386,7 @@ class VirtualMachine(object):
         def enum(ignore):
             v = stack.pop()
             if isinstance(v, basestring):
-                raise TemplateRuntimeError('String is not iterable')
+                raise TemplateRuntimeError('String is not iterable: %s' % v)
             stack.push(list(enumerate(v) if not isinstance(v, dict) else v.items()))
             return
         opmap[ENUM] = enum
@@ -480,20 +480,16 @@ class VirtualMachine(object):
             t, v = json.split_tag(stack.top())
             if tag_name == '*':
                 stack.list[-1] = v
-                stack.push(t)
                 stack.push(True)
             elif tag_name == '*!':
                 if t in schema.type:
                     stack.push(False)
                 else:
-                    stack.list[-1] = v
-                    stack.push(t)
                     stack.push(True)
             else:
                 for name in map(lambda s: s.strip(), tag_name.split('|')):
                     if t == name:
                         stack.list[-1] = v
-                        stack.push(t)
                         stack.push(True)
                         break
                 else:
