@@ -375,10 +375,22 @@ class CommandExecutor(BaseInterpreter):
         return r
 
     def visit_time(self, node):
-        s = time.time()
-        r = node.cmd.accept(self)
-        e = time.time()
-        print e - s, '[sec]'
+        node._prepare()
+        if node.verbose:
+            import hotshot, hotshot.stats
+            prof = hotshot.Profile("caty.prof")
+            m = lambda : node.cmd.accept(self)
+            result = prof.runcall(m)
+            prof.close()
+            stats = hotshot.stats.load("caty.prof")
+            stats.sort_stats('cumulative', 'time', 'calls')
+            stats.print_stats('python/caty', 20)
+            return result
+        else:
+            s = time.time()
+            r = node.cmd.accept(self)
+            e = time.time()
+            print e - s, '[sec]'
         return r
 
     def visit_take(self, node):

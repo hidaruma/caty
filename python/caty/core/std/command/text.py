@@ -41,7 +41,7 @@ class Concat(Builtin):
 
 
     def execute(self, input):
-        return ''.join(input)
+        return u''.join(input)
 
 class ToUpper(Builtin):
 

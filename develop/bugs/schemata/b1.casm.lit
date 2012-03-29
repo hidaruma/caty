@@ -32,7 +32,7 @@ type commandStr = string;
 command controlled<S, T> [commandStr] :: Controlled<S> -> Controlled<T> {
   do {
     pv control           >: "control", 
-    [%1, pv data] | eval >: "data"
+    [pv data, %1] | eval >: "data"
   }
 };
 

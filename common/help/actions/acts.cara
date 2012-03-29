@@ -50,7 +50,7 @@ command grouping :: [{"group": string, *:any?}*] -> {*:[AppInfo*]?} {
  each {[pv group, pass]} | xlist:group | each --obj {each {item 1}}
 };
 
-resource Apps("/apps.html") {
+resource Apps("/system.app/") {
  action get("/GET#dont-care")
  ::
   @[in, out] #0 void -> {*: [AppInfo*]?} produces AppsPage
@@ -58,6 +58,20 @@ resource Apps("/apps.html") {
    (#0 apps | grouping) | print /apps.html
  };
 };
+
+/** アプリケーション一覧生成 */
+resource App("/system.app/*") {
+  action get("/GET#dont-care")
+  ::
+  @[in, out] #0 void -> [inspect:Module*] produces AppModsPage
+  {
+   (#0 
+    %0 | path:trunk > app-name;
+    inspect:list-mod %app-name ) | json:response
+  };
+
+};
+
 
 /** モジュール覧のページ */
 state ModsPage :: any;
@@ -69,6 +83,6 @@ resource Mods("/*.mods/") {
   {
    (#0 
     %0 | path:dir | path:trunk > app-name;
-    inspect:list-mod %app-name ) | json:response
+    inspect:list-mod %app-name ) | print /auto.html
   };
 };
