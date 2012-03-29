@@ -387,12 +387,21 @@ class Each(Syntax):
 
 class Time(Syntax):
     command_decl = u"""
-    command time-functor<T default any> :: T -> T
+    command time-functor<T default any> {"verbose": boolean?} :: T -> T
         refers python:caty.core.script.node.Time;
     """
-    def __init__(self, cmd, ignore):
-        Syntax.__init__(self)
+    def __init__(self, cmd, opts):
+        Syntax.__init__(self, opts)
         self.cmd = cmd
+
+    def _init_opts(self):
+        Command._init_opts(self)
+
+    def _prepare(self):
+        Command._prepare(self)
+
+    def setup(self, opts, *ignore):
+        self.verbose = opts.get('verbose', False)
 
     def set_facility(self, facilities):
         Syntax.set_facility(self, facilities)
@@ -401,7 +410,6 @@ class Time(Syntax):
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
         Syntax.set_var_storage(self, storage)
-
 
     def accept(self, visitor):
         return visitor.visit_time(self)
