@@ -1,0 +1,40 @@
+<?caty-meta template="smarty-mx" ?><!-- -*- coding: utf-8 -*- -->
+{* = モジュールのディレクトリリスト生成 *}
+{** モジュール情報を、箇条書きして整形 
+ * name, place, syntax
+ *}
+{function name=mod type="inspect:Module"}
+  <ul>
+  <li>name: {$name}</li>
+  <li>place: {$place}</li>
+  <li>syntax: {$syntax}</li>
+{* 
+ * ハイパーリンクはコンテキストから組み立てた
+ * トリガー抽出処理をテンプレートコードで行なっている。
+ * 中途半端。
+*}
+  <li>LINK: <a href="{$name}.mod">{$name}.mod</a></li>
+  </ul>
+{/function}
+
+{** モジュール情報のリストを、箇条書きとして整形 *}
+{function name=modlist }
+ <ol>
+  {foreach from=$_CONTEXT item=mod}
+   <li>{call name=mod context=$mod}</li>
+  {/foreach}
+ </ol>
+{/function}
+
+
+<html>
+  <head>
+    <title>Modules</title>
+  </head>
+  <body>
+    <h1>Modules</h1>
+
+     {call name=modlist }
+
+  </body>
+</html>

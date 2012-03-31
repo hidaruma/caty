@@ -1,0 +1,107 @@
+<!-- -*- coding: utf-8 -*- -->
+<?caty-meta template="smarty" ?>
+{** 
+ * コマンドの名前を作る
+ * これを使うとものすごく遅くなる
+ *}
+{function name=cmdname type="help:CmdInfo"}
+  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;{foreach from=$typeVars item=var name=vars}{$var}{if $smarty.foreach.vars.last|not}, {/if}{/foreach}>
+  {/if}
+  </span>
+{/function}
+
+{* これは動く *}
+{function name=cmdname1 type="help:CmdInfo"}
+  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;
+    {foreach from=$typeVars item=var name=vars}{$var}
+    {/foreach}
+   >
+  {/if}
+  </span>
+{/function}
+
+{* これも動く *}
+{function name=cmdname2 type="help:CmdInfo"}
+  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;
+    {foreach from=$typeVars item=var name=vars}{$var}
+      {if $smarty.foreach.vars.last}. {/if}
+    {/foreach}
+   >
+   {/if}
+  </span>
+{/function}
+
+{* これがエラーにならない *}
+{function name=cmdname3 type="help:CmdInfo"}
+  <span {if $deprecated} style="color:red;font-weight:bold" {/if}>{$name}{if $typeVars|notempty}&lt;
+    {foreach from=$typeVars item=var name=vars}{$var}
+      {if $smarty.foreach.vars.last|not}, {/if}
+    {/foreach}
+   >
+   {/if}
+  </span>
+{/function}
+
+
+
+{** 
+ * コマンドのプロファイルをテーブルの1行として整形
+ * cmdname関数を使用。遅い。
+ *}
+{function name=cmd type="help:CmdInfo"}
+  <tr class="cmd"><td>{call name=cmdname}</td><td>{$input}</td><td>{$output}</td><td>{$throws}<td>{$implemented}</td></tr>
+{/function}
+
+
+{** 
+ * コマンドのプロファイルをテーブルの1行として整形
+ * cmdname関数を展開。last変数参照をやめたら、多少は速いか？
+ *}
+{function name=cmd2 type="help:CmdInfo2"}
+  <tr class="cmd">
+   <td>
+    <span {if $deprecated} style="color:red;font-weight:bold" {/if}>
+      {$name}{$typeVarsStr}
+    </span>
+   </td>
+   <td>{$input}</td><td>{$output}</td><td>{$throws}<td>{$implemented}</td>
+  </tr>
+{/function}
+
+
+{**
+ * コマンドプロファイルのリストをテーブルとして整形
+*}
+{function name=cmdlist type="help:CmdList"}
+  <table class="cmdlist" border="1">
+  <tr><th>名前</th><th>入力</th><th>出力</th><th>例外</th><th>実装</th></tr>
+  {foreach from=$_CONTEXT item=cmd}
+    {call name=cmd2 context=$cmd }
+  {/foreach}
+  </table>
+{/function}
+
+{**
+ * モジュール情報をh2セクションとして整形
+ * type="help:ModInfo"
+ *}
+{function name=mod }
+ <div class="mod">
+  <h2>モジュール {$_CONTEXT.fullname}</h2>
+  {call name=cmdlist context=$_CONTEXT.cmds }
+ </div>
+{/function}
+
+<html>
+  <head>
+    <title>{$title}</title>
+  </head>
+  <body>
+    <h1>{$title}</h1>
+
+    {foreach from=$mods item=mod}
+       {call name=mod context=$mod }
+    {/foreach}
+
+  </body>
+</html>

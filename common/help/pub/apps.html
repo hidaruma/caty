@@ -1,19 +1,31 @@
 <?caty-meta template="smarty-mx" ?><!-- -*- coding: utf-8 -*- -->
 
-{** アプリケーション情報を、テーブルの1行として整形 *}
+{** アプリケーション情報を、箇条書きして整形 
+*}
 {function name=app type=AppInfo}
-  <dt><a href="/help/{$name}.mods/">{$name}</a></dt>
-  <dd>{$description}</dd>
+  <ul>
+  <li>name: {$name}</li>
+  <li>description: {$description}</li>
+  <li>group: {$group}</li>
+  <li>path: {$path}</li>
+{* 
+ * ハイパーリンクはコンテキストから組み立てた
+ * トリガー抽出処理をテンプレートコードで行なっている。
+ * 中途半端。
+*}
+  <li>LINK: <a href="{$name}.app">{$name}.app</a></li>
+  </ul>
 {/function}
 
-{** アプリケーション情報のリストを、定義箇条書きとして整形 *}
+{** アプリケーション情報のリストを、箇条書きとして整形 *}
 {function name=applist }
- <dl>
+ <ol>
   {foreach from=$_CONTEXT item=app}
-    {call name=app context=$app}
+   <li>{call name=app context=$app}</li>
   {/foreach}
- </dl>
+ </ol>
 {/function}
+
 
 <html>
   <head>
@@ -22,12 +34,7 @@
   <body>
     <h1>Applications</h1>
 
-    {foreach from=$_CONTEXT key=group item=applist}
-     <div class="app-group"><h2>グループ {$group}</h2>
-      {call name=applist context=$applist }
-     </div>
-    {/foreach}
+     {call name=applist }
 
   </body>
 </html>
-

@@ -1,0 +1,33 @@
+<?caty-meta template="smarty-mx" ?><!-- -*- coding: utf-8 -*- -->
+
+{** アプリケーション情報を、テーブルの1行として整形 *}
+{function name=app type=AppInfo}
+  <dt><a href="/help/{$name}.mods/">{$name}</a></dt>
+  <dd>{$description}</dd>
+{/function}
+
+{** アプリケーション情報のリストを、定義箇条書きとして整形 *}
+{function name=applist }
+ <dl>
+  {foreach from=$_CONTEXT item=app}
+    {call name=app context=$app}
+  {/foreach}
+ </dl>
+{/function}
+
+<html>
+  <head>
+    <title>Applications</title>
+  </head>
+  <body>
+    <h1>Applications</h1>
+
+    {foreach from=$_CONTEXT key=group item=applist}
+     <div class="app-group"><h2>グループ {$group}</h2>
+      {call name=applist context=$applist }
+     </div>
+    {/foreach}
+
+  </body>
+</html>
+

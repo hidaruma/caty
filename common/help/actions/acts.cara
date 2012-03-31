@@ -7,13 +7,170 @@ module acts in cara;
 state IndexPage :: any links {
  + user-cmd --> UserCmds.get;
  + core-cmd --> CoreCmds.get;
- + apps     --> Apps.get;
+ + caty-sys --> CatySys.get;
 
 };
 
-/** コマンド一覧のページ */
-state CmdsViewingPage :: any;
+/** Catyシステムのインデックスページ生成
+ */
+resource CatySys ("/caty.sys") {
+  action get("/GET#dont-care")
+  ::
+  @[in, out] # 0 void -> void produces SysIndexPage
+  {
+    (#0 void )| print --raw /caty.sys.html
+  };
+};
+/** Catyシステムのインデックスページ
+ */
+state SysIndexPage :: void links {
+ + all-applications --> AppsDir.get;
+};
 
+/** アプリケーションのディレクトリリスト生成
+ */
+resource AppsDir ("**.apps/") {
+  action get("/GET#dont-care")
+  ::
+  @[in, out] # 0 void -> [AppInfo*] produces AppsDirList
+  {
+    (#0 apps ) | print /apps.html
+  };
+
+};
+/** アプリケーションのディレクトリリスト
+ */
+state AppsDirList :: [AppInfo*] links {
+ - the-application --> App.get;
+};
+
+
+/** アプリケーションのインデックスページ生成 */
+resource App ("*.app") {
+  action get("/GET#dont-care")
+  ::
+  @[in, out] # 0 void -> void produces AppIndexPage
+  {
+    %0 | path:base > title;
+    do {
+      %title  >: "title",
+      %title  >: "head",
+      [%APP_PATH, %0] | path:join >: "absPath",
+    } | print /app.html
+  };
+ 
+};
+/** アプリケーションのインデックスページ */
+state AppIndexPage :: void links {
+ - all-modules --> ModsDir.get;
+ - all-packages --> PkgsDir.get;
+};
+
+
+/** モジュールのディレクトリリスト生成
+ */
+resource ModsDir ("**.mods/") {
+  action get("/GET#dont-care")
+  ::
+  @[in, out] # 0 void -> void produces ModsDirList
+  {
+    // 臨時; app-nameを作るのに、この方法がいつでも使えるわけではない
+    %0 | path:dir | path:trunk | ["/", pass] | text:concat | path:trunk > app-name;
+    inspect:list-mod %app-name | print /mods.html
+  };
+
+};
+/** モジュールのディレクトリリスト
+ */
+state ModsDirList :: void links {
+ - the-module --> Mod.get;
+};
+
+/** モジュールのインデックスページ生成 */
+resource Mod ("*.mod") {
+  action get("/GET#dont-care")
+  ::
+  @[in, out] # 0 void -> void produces ModIndexPage
+  {
+    %0 | path:base > title;
+    do {
+      %title  >: "title",
+      %title  >: "head",
+      [%APP_PATH, %0] | path:join >: "absPath",
+    } | print /mod.html
+  };
+ 
+};
+/** モジュールのインデックスページ */
+state ModIndexPage :: void links {
+ - all-types --> TypsDir.get;
+ - all-commands --> CmdsDir.get;
+ - all-classes --> ClssDir.get;
+};
+
+/** コマンドのディレクトリリスト生成
+ */
+resource CmdsDir ("**.cmds/") {
+// %0 は、{application}.app.mods/{module}.mod.cmds/
+  action get("/GET#dont-care")
+  ::
+  @[in, out] # 0 void -> void produces CmdsDirList
+  {
+    // 臨時; app-nameを作るのに、この方法がいつでも使えるわけではない
+    %0 | path:dir | path:dir | path:trunk | ["/", pass] | text:concat | path:trunk > app-name;
+    // 臨時; mod-nameを作るのに、この方法がいつでも使えるわけではない
+    %0 | path:dir | path:trunk | ["/", pass] | text:concat | path:trunk > mod-name;
+    [%app-name, ":", %mod-name] | text:concat > mod-fullname;
+
+    inspect:list-cmd %mod-fullname | print /cmds.html
+  };
+
+};
+/** コマンドのディレクトリリスト
+ */
+state CmdsDirList :: void links {
+ - the-command --> Cmd.get;
+};
+
+/** コマンドの情報ページ生成
+ */
+resource Cmd ("**.cmd") {
+// %0 は、{application}.app.mods/{module}.mod.cmds/{command}.cmd
+
+  action get("/GET#dont-care")
+  ::
+  @[in, out] # 0 void -> void produces CmdInfoPage
+  {
+    // 臨時; app-nameを作るのに、この方法がいつでも使えるわけではない
+    %0 | path:dir | path:dir | path:trunk | ["/", pass] | text:concat | path:trunk > app-name;
+    // 臨時; mod-nameを作るのに、この方法がいつでも使えるわけではない
+    %0 | path:dir | path:trunk | ["/", pass] | text:concat | path:trunk > mod-name;
+    // 臨時; cmd-nameを作るのに、この方法がいつでも使えるわけではない
+    %0 | path:trunk > cmd-name;
+    [
+      %app-name, 
+      ":", 
+      %mod-name,
+      ":", 
+      %cmd-name,
+    ] | text:concat > cmd-fullname;
+    inspect:reify-cmd %cmd-fullname | print /auto.html
+  };
+
+};
+/** コマンドの情報ページ
+ */
+state CmdInfoPage :: void links {
+
+};
+
+
+
+/* == ++++++++++++++++++++ */
+
+/** コマンド一覧 */
+state CmdsViewingPage :: any links {
+};
 
 resource UserCmds("/user-cmds.html") {
  action get("/GET#dont-care")
@@ -24,7 +181,7 @@ resource UserCmds("/user-cmds.html") {
    do {
     "User-Defined Commands">: "title",
      help:user              >: "mods",
-   }) | print /cmds.html
+   }) | print /cmds1.html
  };
 };
 
@@ -37,30 +194,34 @@ resource CoreCmds("/core-cmds.html") {
    do {
     "Core Commands"  >: "title",
      help:core        >: "mods",
-   }) | print /cmds.html
+   }) | print /cmds1.html
  };
 };
 
+/*{{{
 /** アプリケーション一覧のページ */
 state AppsPage :: {*: [AppInfo*]?} links {
   - mods     --> Mods.get;
 };
+}}}*/
+
 
 command grouping :: [{"group": string, *:any?}*] -> {*:[AppInfo*]?} {
  each {[pv group, pass]} | xlist:group | each --obj {each {item 1}}
 };
 
-resource Apps("/system.app/") {
+/*{{{
+resource Apps1("/system.app/") {
  action get("/GET#dont-care")
  ::
   @[in, out] #0 void -> {*: [AppInfo*]?} produces AppsPage
  {
-   (#0 apps | grouping) | print /apps.html
+   (#0 apps | grouping) | print /apps1.html
  };
 };
 
 /** アプリケーション一覧生成 */
-resource App("/system.app/*") {
+resource App1("/system.app/*") {
   action get("/GET#dont-care")
   ::
   @[in, out] #0 void -> [inspect:Module*] produces AppModsPage
@@ -86,3 +247,5 @@ resource Mods("/*.mods/") {
     inspect:list-mod %app-name ) | print /auto.html
   };
 };
+
+}}}*/
