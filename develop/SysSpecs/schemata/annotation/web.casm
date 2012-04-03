@@ -1,0 +1,13 @@
+// -*- coding: utf-8 -*-
+/** Webと関係するアノテーション */
+module web; 
+
+/** このコマンドの第1引数はURL起原である
+ * コマンドがアクションから使用されることを想定している。
+ */
+@[annotation, target(["COMMAND_DECL"])]
+type arg1-from-url = {};
+
+// End of Module
+
+
