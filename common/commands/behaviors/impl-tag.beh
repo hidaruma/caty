@@ -1,0 +1,49 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= 暗黙タグ
+
+
+データの全領域（unive）は次の10個の部分領域に分割される。
+（参考： [[http://return0.info/note/caty_type_hierarchy.html|Catyの型階層]]）
+
+# null
+# boolean
+# number
+# string
+# binary
+# array
+# object
+# tagged
+# undefined
+# foreign
+
+明示的なタグが付いたデータの領域taggedを除く
+9個の領域のデータには、暗黙タグが存在する。
+9個のタグ名は予約されていて、ユーザーが勝手に使うことはできない。
+
+== !exec
+
+|= input  |= command |= output |
+| null    | tag      | "null" |
+| true    | tag      | "boolean"|
+| 2       | tag      | "number" |
+| ""      | tag      | "string" |
+| (""~|binary)| tag  | "binary" |
+| []      | tag      | "array"  |
+| {}      | tag      | "object" |
+| undefined | tag    | "undefined"|
+| foreign | tag      | "foreign"|
+
+
+|= command            |=output    |
+|@null null           | null      |
+|@boolean true        | true      |
+|@number 2            | 2         |
+|@string ""           | ""        |
+|@binary (""~|binary) | (""~|binary)|
+|@array []            | []        |
+|@object {}           | {}        |
+|@undefined undefined | undefined |
+|@foreign foreign     | foreign   |
+
+
