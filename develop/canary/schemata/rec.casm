@@ -1,0 +1,19 @@
+// -*- coding: utf-8 -*-
+/** 再帰的データ型 */
+module rec; 
+
+
+/** リーフノードが型Xのデータであるツリー構造 */
+type Tree<X> = {
+  "nodeVal" : string,
+  "children": [(X | Tree<X>)*]
+};
+
+
+/** 型Xのデータを要素として、入れ子を許すリスト構造 */
+type NestedList<X> = [(X|NestedList<X>)*];
+
+// End of Module
+
+
+
