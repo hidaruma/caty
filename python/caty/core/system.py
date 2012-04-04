@@ -36,8 +36,16 @@ class System(PbcObject):
     __properties__ = ['app_names']
 
     @brutal_error_printer
-    def __init__(self, encoding=None, is_debug=True, quiet=False, no_ambient=False, no_app=False, app_names=(u'root',)):
+    def __init__(self, 
+                 encoding=None, 
+                 is_debug=True, 
+                 quiet=False, 
+                 no_ambient=False, 
+                 no_app=False, 
+                 app_names=(u'root',),
+                 force_app=None):
         caty.core.runtimeobject.i18n = I18nMessage({}, writer=cout, lang='en') # フォールバック
+        self.force_app = force_app
         if quiet:
             class NullWriter(object):
                 def write(self, *args):
@@ -63,7 +71,6 @@ class System(PbcObject):
         self.__app_names = []
         # catyアプリケーション
         self._core_app = CoreApplication(self)
-
         self.__cout.writeln(self.i18n.get('Loading system data'))
         self._casm = casm.initialize(self,
                                      [builtin, node],

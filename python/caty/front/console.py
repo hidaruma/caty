@@ -480,6 +480,7 @@ def setup_shell(args, cls=CatyShell):
                          'file=',
                          'no-ambient',
                          'goodbye=',
+                         'force-app=',
                          'no-app'])
     sitename = []
     wildcat = False
@@ -494,6 +495,7 @@ def setup_shell(args, cls=CatyShell):
     files = []
     no_ambient = False
     no_app = False
+    force_app = None
     dribble = False
     exit = False
     for o, v in opts:
@@ -523,6 +525,8 @@ def setup_shell(args, cls=CatyShell):
             dribble = True
         elif o == '--goodbye':
             exit = v
+        elif o == '--force-app':
+            force_app = v
     if not sitename:
         sitename = ['root']
     if args:
@@ -531,7 +535,7 @@ def setup_shell(args, cls=CatyShell):
     if _help:
         help()
         return None, None, None
-    system = System(_encoding, debug, quiet, no_ambient, no_app, sitename)
+    system = System(_encoding, debug, quiet, no_ambient, no_app, sitename, force_app)
     if exit:
         print
         print exit

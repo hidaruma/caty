@@ -74,7 +74,7 @@ class Application(PbcObject):
         self._global_config = group.global_config
         system.cout.writeln(system.i18n.get("Loading $name", name=self._path))
         self._configure()
-        if not self._disabled:
+        if not self._disabled or system.force_app == name:
             self._init_filetype()
             self._init_mafs()
             self._init_msg()

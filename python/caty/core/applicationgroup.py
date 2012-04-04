@@ -63,7 +63,7 @@ class ApplicationGroup(PbcObject):
             for d in app_group_root.start().read_mode.opendir('/').read():
                 if d.is_dir and not d.basename[0] in ('.', '_') and not d.basename in self._system.ignore_names:
                     name = d.path.strip('/')
-                    if name not in app_names and no_app:
+                    if name not in app_names and no_app and self._system.force_app != name:
                         continue
                     if name in RESERVED:
                         throw_caty_exception(
