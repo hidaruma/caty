@@ -48,7 +48,7 @@ class CycleDetecter(SchemaBuilder):
                             rest.append(a)
                     if t.type != '__variable__':
                         target = _AlphaTransformer(t).visit(t)
-                        if _VariableFinderInRecType(param.name).visit(target):
+                        if _VariableFinderInRecType(param.var_name).visit(target):
                             #cycles[num] = max(cycles[num], 2)
                             raise Exception(ro.i18n.get(u'Infinite expansion was detected'))
                         else:
@@ -57,7 +57,7 @@ class CycleDetecter(SchemaBuilder):
                                     if _VariableFinderInRecType(p.name).visit(target):
                                         cycles[i] = max(cycles[i], 2)
                     else:
-                        if t.name != param.name:
+                        if t.name != param.var_name:
                             for i, p in enumerate(self._current_node.type_params):
                                 if p != param:
                                     if t.name == p.name:
