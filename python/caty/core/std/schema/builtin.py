@@ -735,13 +735,13 @@ command dir-index [string path, string method] :: any -> any
 /**
  * 入力値のタグを取得する。組み込み型が与えられた場合、その型名がタグとして扱われる。
  */
-command tag<T default any> :: T -> string
+command tag<T default univ> :: T -> string
     refers python:caty.core.std.command.builtin.GetTag;
 
 /**
  * 第一の入力値をタグ名とし、第二の入力値をタグ付きにして返す。
  */
-command tagged<S default any, T default any> :: [string, S?] -> T
+command tagged<S default univ, T default any> :: [string, S?] -> T
     refers python:caty.core.std.command.builtin.Tagged;
 
 /**

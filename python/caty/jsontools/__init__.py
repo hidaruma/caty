@@ -203,6 +203,7 @@ _tag_class_dict = {
 
 _reserved = set(_tag_class_dict.values())
 _reserved.add('integer')
+_reserved.add('foreign')
 
 _builtin_types = dict()
 for a, b in _tag_class_dict.items():
@@ -212,6 +213,10 @@ for a, b in _tag_class_dict.items():
         _builtin_types[b].append(a)
 _builtin_types['number'].append(int)
 _builtin_types['integer'] = [int]
+
+class _anything(object):
+    def __contains__(self, v): return True
+_builtin_types['foreign'] = _anything()
 
 class TaggedValue(object):
     """type tag 付きのスカラー値用のクラス。
@@ -269,10 +274,7 @@ def tag(val, explicit=False):
         if explicit:
             raise JsonError(ro.i18n.get(u'No explicit tag'))
         t = type(val)
-        try:
-            return _tag_class_dict[t]
-        except:
-            raise JsonError(ro.i18n.get(u'Not a JSON value: $obj', obj=str(val)))
+        return _tag_class_dict.get(t, u'foreign')
 
 def untagged(val, explicit=False):
     try:

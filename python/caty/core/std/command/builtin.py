@@ -1117,8 +1117,11 @@ class ToString(Builtin):
             return v
         else:
             return unicode(str(v))
-
+class _Foreign(object):
+    def __repr__(self):
+        return 'foreign'
+_foreign = _Foreign()
 class Foreign(Builtin):
     def execute(self):
-        return object()
+        return _foreign
 
