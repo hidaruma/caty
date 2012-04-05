@@ -39,7 +39,7 @@ state login :: object links {
    * 束縛が済まないと、
    * リクエスト（またはリダイレクト）先のアクションが確定しない。
    */
-  cancel() --> port.cancel; // 
+  cancel --> port.cancel; // 
 };
 
 /** ログイン処理 */

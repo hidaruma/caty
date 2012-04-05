@@ -21,29 +21,29 @@ state error :: any links {
 
 /** Atomフィードの表示状態 */
 state feed :: any links {
- new-entry()    --> Collection.new-entry;
- view-entry()   --> Entry.view;
- edit-entry()   --> Entry.edit;
- delete-entry() --> Entry.delete;
+ new-entry    --> Collection.new-entry;
+ view-entry   --> Entry.view;
+ edit-entry   --> Entry.edit;
+ delete-entry --> Entry.delete;
 };
 
 /** Atomエントリーの表示状態 */
 state view-entry :: any links {
- feed()      --> Collection.feed;
- edit-this() --> Entry.edit;
+ feed      --> Collection.feed;
+ edit-this --> Entry.edit;
 };
 
 /** Atomエントリーの編集UI */
 state edit-entry :: any links {
- feed()        --> Collection.feed;
- update-this() --> Entry.update;
- put-this()    --> Entry.put;
- delete-this() --> Entry.delete;
+ feed        --> Collection.feed;
+ update-this --> Entry.update;
+ put-this    --> Entry.put;
+ delete-this --> Entry.delete;
 };
 
 /** Atomエントリーが削除された状態 */
 state entry-deleted :: void links {
- feed()   --> Collection.feed;
+ feed   --> Collection.feed;
 };
 
 

@@ -30,21 +30,21 @@ state enter :: any links {
 state login :: ReturnInfo links {
   /* IDとパスワードを入れてサブミット */
   - submit --> DoLogin.do;
-  new-user() --> new-user; 
+  new-user --> new-user; 
 
   /* ログインは取りやめ 
    * cancel時ターゲットのURLなどはプログラムが実行時に教える必要がある。
    * 束縛が済まないと、
    * リクエスト（またはリダイレクト）先のアクションが確定しない。
    */
-  cancel()   --> dyn-cancel;
+  cancel   --> dyn-cancel;
 };
 
 /** ログイン失敗画面 */
 state login-failed :: ReturnInfo links {
   - resubmit --> DoLogin.do;
-  new-user() --> new-user; 
-  cancel()   --> dyn-cancel;
+  new-user --> new-user; 
+  cancel   --> dyn-cancel;
 };
 
 /* == アクション == */
