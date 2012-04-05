@@ -106,7 +106,7 @@ class ScriptParser(Parser):
             raise ParseError(e.cs, self.functor)
 
 
-    def command(self, seq):
+    def command(self, seq, no_opt=False):
         if option(peek('$'))(seq):
             return self.xjson_path(seq)
         name = self.name(seq)
@@ -114,8 +114,12 @@ class ScriptParser(Parser):
             return self.__make_exec_script(name, seq)
         pos = (seq.col-len(name), seq.line)
         type_args = option(self.type_args, [])(seq)
-        opts = self.options(seq)
-        args = self.arguments(seq)
+        if not no_opt:
+            opts = self.options(seq)
+            args = self.arguments(seq)
+        else:
+            opts = []
+            args = []
         return CommandProxy(name, type_args, opts, args, pos)
 
     def call_forward(self, seq):

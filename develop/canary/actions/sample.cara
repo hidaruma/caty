@@ -1,0 +1,31 @@
+module sample in cara;
+
+resource Dump("/dump") {
+ action get("/GET#dont-care")
+ ::
+ {
+   {
+    "q" : %_OPTS,
+    "a" : %_ARGV
+    } | json:response
+ };
+};
+
+resource Data("*.data") {
+  action get("/GET") :: {
+    json:read %1 | json:response
+  };
+};
+
+type X = {
+    "foo": string,
+    "bar": [string*]
+};
+
+command get-data :: X -> string;
+
+state foo for x :: X as s
+    links {
+        dump! $.foo --> Dump.get;
+        data* get-data --> Data.get;
+    };

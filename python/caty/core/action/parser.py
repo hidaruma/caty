@@ -48,7 +48,7 @@ class ResourceActionDescriptorParser(Parser):
     def state(self, seq):
         ds = seq.parse(option(docstring, u''))
         ann = seq.parse(option(annotation, Annotations([])))
-        return StateBlock(ds, ann)(seq)
+        return StateBlock(ds, ann, self._script_parser)(seq)
 
     def userrole(self, seq):
         ds = seq.parse(option(docstring, u''))
@@ -302,39 +302,50 @@ class ActionBlock(Parser):
         return proxy
 
 class StateBlock(Parser):
-    def __init__(self, docstr=u'undocumented', annotations=Annotations([])):
+    def __init__(self, docstr=u'undocumented', annotations=Annotations([]), parser=None):
         self.annotations = annotations
         self.docstr = docstr
+        self.modifier = u'state'
+        self.merge = False
+        self.link_name = u'links'
+        self._script_parser = parser
 
     def __call__(self, seq):
         seq.parse(keyword('state'))
-        state_name = seq.parse(name)
-        if option(keyword('for'))(seq):
-            if option(peek(S('[')))(seq):
-                S('[')(seq)
-                self.actor_names = split(name, u',', allow_last_delim=True)(seq)
-                S(']')(seq)
+        with strict():
+            state_name = seq.parse(name)
+            if option(keyword('for'))(seq):
+                if option(peek(S('[')))(seq):
+                    S('[')(seq)
+                    self.actor_names = split(name, u',', allow_last_delim=True)(seq)
+                    S(']')(seq)
+                else:
+                    self.actor_names = [seq.parse(name)]
             else:
-                self.actor_names = [seq.parse(name)]
-        else:
-            self.actor_names = [u'']
-        seq.parse('::')
-        type = typedef(seq)
-        links = option(self.link_block, [])(seq)
-        seq.parse(';')
-        self.name = state_name
-        self.links = links
-        return self
+                self.actor_names = [u'']
+            seq.parse('::')
+            type = typedef(seq)
+            if option(keyword('as'))(seq):
+                self.modifier = name(seq)
+            elif option(keyword('baseobject'))(seq):
+                self.merge = True
+            links = option(self.link_block, [])(seq)
+            seq.parse(';')
+            self.name = state_name
+            self.links = links
+            return self
 
     def link_block(self, seq):
         seq.parse(keyword('links'))
+        if option(keyword('as'))(seq):
+            self.link_name = name(seq)
         seq.parse('{')
         r = many(self.link_item)(seq)
         seq.parse('}')
         return r
 
     def link_item(self, seq):
-        isembed, trigger = self.trigger(seq)
+        isembed, trigger, occ, path = self.trigger(seq)
         seq.parse('-->')
         if peek(option(S('[')))(seq):
             S('[')(seq)
@@ -347,14 +358,24 @@ class StateBlock(Parser):
 
     def trigger(self, seq):
         if option(S('+'))(seq):
-            return 'additional', option(name)(seq)
+            n = option(name)(seq)
+            o = option(choice([u'+', u'*', u'!', u'?'], u'*'))(seq)
+            p = None
+            t = u'additional'
         elif option(S('-'))(seq):
-            return 'no-care', option(name)(seq)
+            n = option(name)(seq)
+            o = option(choice([u'+', u'*', u'!', u'?'], u'*'))(seq)
+            p = None
+            t = u'no-care'
         else:
-            return 'embed', self.embed_trigger(seq)
+            n = option(name)(seq)
+            o = option(choice([u'+', u'*', u'!', u'?'], u'*'))(seq)
+            p = option(self.embed_trigger, n)(seq)
+            t = u'embed' 
+        return t, n, o, p
 
     def embed_trigger(self, seq):
-        return seq.parse(choice(Regex(ur'(\$\.)?([a-zA-Z_][a-zA-Z0-9_-]*(\(\))?\.)*[a-zA-Z_][a-zA-Z0-9_-]*(\(\))?'), '$'))
+        return self._script_parser.command(seq, no_opt=True)
 
     def action_ref(self, seq):
         actname = identifier_token_m(seq)
