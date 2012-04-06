@@ -58,7 +58,7 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 
 == tagged
 
-タグ型を生成する。
+タグ付き型を生成する。
 
 === !exec
 
@@ -69,16 +69,31 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 |["a"] |tagged|@a||要素数1の配列は意味的に上記と同じ|
 
 
-== untagged
+== tag
 
-タグ型からタグ付けされたデータを取り出す。
+タグ付き型からタグを取り出す。
 
 === !exec
 
-|= input |= command |=output |= exception|=備考|
-|@foo 1| untagged | 1||||
-|1| untagged | 1|||タグ型でない場合passと同様|
-|@foo|untagged|undefined |||
+|= input |= command |=output   |
+|@foo 1  | tag      | "foo"    |
+|1       | tag      | "number" |
+|{}      | tag      | "object" |
+|@foo    | tag      | "foo"    |
+|@bar    | tag      | "bar"    |
+
+
+== untagged
+
+タグ付き型からタグ付けされたデータを取り出す。
+
+=== !exec
+
+|= input |= command |=output  |= exception|=備考|
+|@foo 1  | untagged | 1       |||
+|1       | untagged | 1       ||タグ型でない場合passと同様|
+|@number 1|untagged | 1       ||暗黙タグがあっても同じ|
+|@foo    | untagged |undefined|||
 
 == typeof
 
@@ -91,9 +106,4 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 |@foo      | typeof   | "tagged" | tag-onlyでもタグ付きの値 |
 |undefined | typeof   | "undefined" | 未定義型 |
 |foreign   | typeof   | "foreign" | フォーリン型 |
-
-
-
-
-
 
