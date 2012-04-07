@@ -187,7 +187,7 @@ class CommandExecutor(BaseInterpreter):
                 raise
             if self.app._system.debug:
                 msg = u'[DEBUG] {0}: Col {1}, Line {2}'.format(node.name, node.col, node.line)
-            util.cout.writeln(msg)
+                util.cout.writeln(msg)
             raise
         finally:
             node.var_storage.del_scope()
