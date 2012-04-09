@@ -13,7 +13,11 @@
  * トリガー抽出処理をテンプレートコードで行なっている。
  * 中途半端。
 *}
+  {if $place|eq:"actions"}
+  <li>LINK: <a href="{$name}.res">{$name}.res</a></li>
+  {else}
   <li>LINK: <a href="{$name}.mod">{$name}.mod</a></li>
+  {/if}
   </ul>
 {/function}
 
