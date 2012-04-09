@@ -111,5 +111,6 @@ class ReifyModule(Internal):
         app = self._system.get_app(app_name)
         mod = app._schema_module.get_module(mod_name)
         if not mod.type.startswith('casm'):
-            throw_caty_exception(u'BadArg', self._mod_name)
+            throw_caty_exception(u'BadArg', self._module_name)
         return mod.reify()
+

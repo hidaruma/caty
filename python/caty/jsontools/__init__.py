@@ -214,9 +214,10 @@ for a, b in _tag_class_dict.items():
 _builtin_types['number'].append(int)
 _builtin_types['integer'] = [int]
 
-class _anything(object):
-    def __contains__(self, v): return True
-_builtin_types['foreign'] = _anything()
+class _anything_else(object):
+    def __contains__(self, tp):
+        return tp not in _tag_class_dict
+_builtin_types['foreign'] = _anything_else()
 
 class TaggedValue(object):
     """type tag 付きのスカラー値用のクラス。

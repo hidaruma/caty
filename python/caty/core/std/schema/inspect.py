@@ -144,14 +144,17 @@ type ReifiedModule = @module {
     "name": string,
     "docstring": string,
     "types": {
-        *: ReifiedTypeTerm,// | ReifiedKind,
+        *: ReifiedTypeTerm | ReifiedKind,
     },
     "commands": {
         *: ReifiedCommand
     },
-//    "consts": {
-//        *: ReifiedConst
-//    },
+    "consts": {
+        *: ReifiedConst
+    },
+    "classes": {
+        *: ReifiedClass
+    },
 };
 
 type TypeAttribute = {
@@ -372,5 +375,8 @@ type RDiscard = @_discard [ReifiedScript, ReifiedScript];
 type RVarStore = @_store {"name": string};
 type RVarRef = @_varref {"name": string, "optional": boolean};
 type RArgRef = @_argref {"name": string, "optional": boolean};
+
+type ReifiedConst = deferred;
+type ReifiedClass = deferred;
 
 """
