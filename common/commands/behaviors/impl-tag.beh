@@ -47,3 +47,24 @@
 |@foreign foreign     | foreign   |
 
 
+|= command      |=output|=exception |
+| @null 1       |       | Exception |
+| @null ""      |       | Exception |
+| @boolean 1    |       | Exception |
+| @boolean ""   |       | Exception |
+| @number ""    |       | Exception |
+| @number true  |       | Exception |
+| @string 1     |       | Exception |
+| @string true  |       | Exception |
+| @binary 1     |       | Exception |
+| @binary ""    |       | Exception |
+| @array  ""    |       | Exception |
+| @array  {}    |       | Exception |
+| @object ""    |       | Exception |
+| @object []    |       | Exception |
+| @undefined 1  |       | Exception |
+| @undefined false|     | Exception |
+| @foreign 1    |       | Exception |
+| @foreign ""   |       | Exception |
+
+
