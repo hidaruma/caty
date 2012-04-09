@@ -516,6 +516,8 @@ class Module(object):
             o['types'][k] = v.reify()
         for k, v in self.proto_ns.items():
             o['commands'][k] = v.reify()
+        o['classes'] = {}
+        o['consts'] = {}
         return json.tagged('module', o)
 
 

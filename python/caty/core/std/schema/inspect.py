@@ -321,7 +321,7 @@ type RIndexArg = @_iarg {
 type RGlobArg = @_garg {
 };
 
-type RScalarVal = @_scalar string|binary|integer|number|null;
+type RScalarVal = @_scalar (string|binary|integer|number|null);
 
 type RListBuilder = @_list [ReifiedScript*];
 
