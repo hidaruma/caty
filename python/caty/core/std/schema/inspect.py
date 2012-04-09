@@ -87,7 +87,6 @@ command list-cmd
  throws ModuleNotFound
  refers python:caty.core.std.command.inspect.ListCommands;
 
-
 /** モジュール情報 */
 type Module = {
 
@@ -106,7 +105,7 @@ type Module = {
 /** アプリケーションに含まれるモジュールを列挙する
  * 引数に指定されたアプリケーションに固有なモジュールだけを列挙する。
  * そのアプリケーションから可視なモジュールでも別なアプリケーションに所属するモジュールは列挙しない。
- * アプリケーションとして caty が指定された場合は、
+ * アプリケーションとしてcatyが指定された場合は、
  * Catyコアに組み込みのモジュールを列挙する。
  *
  */
@@ -114,7 +113,6 @@ command list-mod
  [string appName] :: void -> [Module*]
  throws ApplicationNotFound
  refers python:caty.core.std.command.inspect.ListModules;
-
 
 /**
  * 引数の型に対するレイフィケーションイメージを出力する。
@@ -146,10 +144,13 @@ type ReifiedModule = @module {
     "name": string,
     "docstring": string,
     "types": {
-        *: ReifiedTypeTerm,
+        *: ReifiedTypeTerm | ReifiedKind,
     },
     "commands": {
         *: ReifiedCommand
+    },
+    "consts": {
+        *: ReifiedConst
     },
 };
 

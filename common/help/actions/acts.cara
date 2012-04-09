@@ -74,10 +74,25 @@ resource ModsDir ("**.mods/") {
   {
     // 臨時; app-nameを作るのに、この方法がいつでも使えるわけではない
     %0 | path:dir | path:trunk | ["/", pass] | text:concat | path:trunk > app-name;
-    inspect:list-mod %app-name | print /mods.html
+    inspect:list-mod %app-name | take {pv place | filter:eq "schemata"} | print /mods.html
   };
 
 };
+
+/** リソースのディレクトリリスト生成
+ */
+resource ResourcesDir ("**.ress/") {
+  action get("/GET#dont-care")
+  ::
+  @[in, out] # 0 void -> void produces ModsDirList
+  {
+    // 臨時; app-nameを作るのに、この方法がいつでも使えるわけではない
+    %0 | path:dir | path:trunk | ["/", pass] | text:concat | path:trunk > app-name;
+    inspect:list-mod %app-name | take {pv place | filter:eq "actions"} | print /mods.html
+  };
+
+};
+
 /** モジュールのディレクトリリスト
  */
 state ModsDirList :: void links {

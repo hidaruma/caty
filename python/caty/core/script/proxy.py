@@ -477,7 +477,7 @@ class EnvelopeProxy(Proxy):
         self.cmdproxy.set_module(module)
 
     def reify(self):
-        throw_caty_exception('RuntimeError', u'Action command can not reified by inspect:reify-type')
+        throw_caty_exception('RuntimeError', u'Action command can not reified by inspect:reify-cmd')
 
 class JsonPathProxy(Proxy):
     reification_type = u'_jsonPath'
