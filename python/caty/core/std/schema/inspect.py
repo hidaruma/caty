@@ -144,14 +144,14 @@ type ReifiedModule = @module {
     "name": string,
     "docstring": string,
     "types": {
-        *: ReifiedTypeTerm | ReifiedKind,
+        *: ReifiedTypeTerm,// | ReifiedKind,
     },
     "commands": {
         *: ReifiedCommand
     },
-    "consts": {
-        *: ReifiedConst
-    },
+//    "consts": {
+//        *: ReifiedConst
+//    },
 };
 
 type TypeAttribute = {
