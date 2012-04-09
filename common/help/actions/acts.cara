@@ -51,12 +51,10 @@ resource App ("*.app") {
   ::
   @[in, out] # 0 void -> void produces AppIndexPage
   {
-    %0 | path:base > title;
-    do {
-      %title  >: "title",
-      %title  >: "head",
-      [%APP_PATH, %0] | path:join >: "absPath",
-    } | print /app.html
+    %0 | path:trunk > title;
+    [%APP_PATH, %0] | path:join > absPath;
+    apps | take {pv name | filter:eq %title} | item 0 > info;
+    [%info, %absPath] | xjson:put "$.absPath" | print /app.html
   };
  
 };

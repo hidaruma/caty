@@ -414,9 +414,9 @@ class CommandExecutor(BaseInterpreter):
             r = {}
             i = self.input
             for k, v in i.items():
+                node.var_storage.new_scope()
                 try:
                     self.input = v
-                    node.var_storage.new_scope()
                     x = node.cmd.accept(self)
                     if self.__truth(x, node):
                         r[k] = v
