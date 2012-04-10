@@ -511,15 +511,19 @@ class Module(object):
 
     def reify(self):
         import caty.jsontools as json
-        o = {'name': self.name, 'docstring': self.docstring or u'undocumented', 'types': {}, 'commands': {}}
+        o = {'name': self.name, 'document': self.doc_object, 'types': {}, 'commands': {}}
         for k, v in self.ast_ns.items():
             o['types'][k] = v.reify()
         for k, v in self.proto_ns.items():
             o['commands'][k] = v.reify()
         o['classes'] = {}
         o['consts'] = {}
-        return json.tagged('module', o)
+        return json.tagged('casm', o)
 
+    @property
+    def doc_object(self):
+        from caty.core.language.util import make_structured_doc
+        return make_structured_doc(self.docstring or u'undocumented')
 
 
 class CoreModule(Module):

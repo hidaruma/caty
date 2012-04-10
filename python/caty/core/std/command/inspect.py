@@ -63,6 +63,7 @@ class ListModules(Internal):
                 continue
             o = {
                 'name': mod.name,
+                'document': mod.doc_object,
                 'syntax': unicode(mod._type.split('.', 1)[0]),
                 'place': u'schemata' if mod._type.startswith('casm') else u'actions'
             }

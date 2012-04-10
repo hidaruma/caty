@@ -94,6 +94,9 @@ type Module = {
   * パッケージ修飾されている可能性がある。
   */
  "name" : string,
+ 
+ /** ドキュメンテーションコメント */
+ "document": Doc,
 
  /** モジュールの記述構文 */
  "syntax" : ("casm" | "cara"), // "camb" はとりあえず除いておく
@@ -140,9 +143,16 @@ command reify-module [string modName] :: void -> ReifiedModule
 
 /*レイフィケーション関係*/
 
-type ReifiedModule = @module {
+/** モジュールのレイフィケーションイメージ */
+type ReifiedModule = RCasm | RCara;
+
+type RCasm = @casm ModuleAttribute;
+
+type RCara = @cara (ModuleAttribute ++ {"resources": {*: ReifiedResource}});
+
+type ModuleAttribute = {
     "name": string,
-    "docstring": string,
+    "document": Doc?,
     "types": {
         *: ReifiedTypeTerm | ReifiedKind,
     },
@@ -157,10 +167,19 @@ type ReifiedModule = @module {
     },
 };
 
+/** 型のレイフィケーションイメージ共通の属性 */
 type TypeAttribute = {
     "annotation": (@annotation [ReifiedAnnotation*])?,
     "options": object?,
-    "docstring": string?
+    "document": Doc?
+};
+
+/** ドキュメンテーションコメント */
+type Doc = {
+ /** 短い簡潔な記述 */
+ "description": string,
+ /** より詳しい説明 */
+ "moreDescription" : string(remark="Wikiテキスト")?   
 };
 
 type ReifiedAnnotation = {
@@ -224,7 +243,7 @@ type CommandAttribute = {
     "name": string,
     "annotation": @annotation [ReifiedAnnotation*],
     "typeParams": [RTypeParam*]?,
-    "docstring": string?,
+    "document": Doc?,
     "profiles": [RProfile*],
     "exception": [RTypeDef*]?,
     "resource": [FacilityUsage*]?,
@@ -378,5 +397,7 @@ type RArgRef = @_argref {"name": string, "optional": boolean};
 
 type ReifiedConst = deferred;
 type ReifiedClass = deferred;
+type ReifiedResource = deferred;
+
 
 """

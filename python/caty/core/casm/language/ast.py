@@ -8,6 +8,7 @@ from caty.core.command.profile import CommandProfile, ProfileContainer, ScriptPr
 from caty.core.exception import InternalException
 from caty.core.typeinterface import *
 import caty.core.runtimeobject as ro
+from caty.core.language.util import make_structured_doc
 import caty.jsontools as json
 
 class Provide(object):
@@ -87,7 +88,7 @@ class ASTRoot(Root):
             'typeParams': [p.reify() for p in self._type_params],
             'typeBody': self.body.reify(),
             'annotation': self.annotations.reify(),
-            'docstring': self.docstring,
+            'document': make_structured_doc(self.docstring),
         })
         if self.options:
             o.value['options'] = self.options
@@ -111,7 +112,7 @@ class Node(object):
         if self.annotations:
             o['annotation'] = self.annotations.reify()
         if self.docstring:
-            o['docstring'] = self.docstring
+            o['document'] = make_structured_doc(self.docstring)
         o['options'] = self.options
         return json.tagged(self.reification_type, o)
 
@@ -322,7 +323,7 @@ class CommandNode(Function):
             'name': self.name,
             'annotation': self.annotation.reify(),
             'typeParams': [p.reify() for p in self.type_params_ast],
-            'docstring': self.doc or u'undocumented',
+            'document': make_structured_doc(self.doc or u'undocumented'),
         }
         profiles = [pro.reify() for pro in self.patterns]
         r['profiles'] = profiles
