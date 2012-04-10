@@ -161,13 +161,10 @@ type ModuleAttribute = {
     "name": string,
     "document": Doc?,
     "types": {
-        *: ReifiedTypeTerm | ReifiedKind,
+        *: ReifiedTypeTerm | ReifiedKind | ReifiedConst,
     },
     "commands": {
         *: ReifiedCommand
-    },
-    "consts": {
-        *: ReifiedConst
     },
     "classes": {
         *: ReifiedClass
@@ -402,7 +399,7 @@ type RVarStore = @_store {"name": string};
 type RVarRef = @_varref {"name": string, "optional": boolean};
 type RArgRef = @_argref {"name": string, "optional": boolean};
 
-type ReifiedConst = deferred;
+type ReifiedConst = @const (TypeAttribute ++ {"name": string, "constBody": string|binary|number|integer|null|boolean|array|object|undefined|@*! (any|undefined)});
 type ReifiedClass = deferred;
 type ReifiedResource = deferred;
 

@@ -194,7 +194,12 @@ class PseudoTaggedNode(Node, PseudoTag):
 
     def reify(self):
         o = self.body.reify()
-        json.untagged(o)['pseudoTag'] = json.tagged('_pseudoTag', [self._name, self._value])
+        t, v = json.split_tag(o)
+        p =  json.tagged('_pseudoTag', [self._name, self._value])
+        if t == '_object':
+            v['pseudoTag'] = p
+        else:
+            v['options']['pseudoTag'] = p
         return o
 
 class EnumNode(Node, Enum):
@@ -516,9 +521,11 @@ class TypeParam(object):
         })
 
 class ConstDecl(object):
-    def __init__(self, name, type, schema, script, doc, ann):
+    def __init__(self, name, type, schema, script, doc, ann, value):
         self.name = name
-        self.doc = doc
+        self.docstring = doc
+        self.value = value
+        self.annotations = ann
         a = Annotations([])
         for c in ann._annotations:
             a.add(c)
@@ -541,4 +548,15 @@ class ConstDecl(object):
     def declare(self, module):
         self.__schema.declare(module)
         self.__command.declare(module)
+        module.const_ns[self.name] = self
+
+    def reify(self):
+        o = json.tagged('const', {
+            'name': self.name, 
+            'constBody': self.value,
+            'annotation': self.annotations.reify(),
+            'document': make_structured_doc(self.docstring or u'undocumented'),
+        })
+        return o
+
 

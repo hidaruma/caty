@@ -36,6 +36,7 @@ class Module(object):
         self.ast_ns = {}
         self.proto_ns = {}
         self.saved_st = {}
+        self.const_ns = {}
         self.compiled = False
         self.docstring = u'undocumented'
     
@@ -513,12 +514,16 @@ class Module(object):
     def reify(self):
         import caty.jsontools as json
         o = {'name': self.name, 'document': self.doc_object, 'types': {}, 'commands': {}}
-        for k, v in self.ast_ns.items():
-            o['types'][k] = v.reify()
-        for k, v in self.proto_ns.items():
-            o['commands'][k] = v.reify()
         o['classes'] = {}
-        o['consts'] = {}
+        for k, v in self.ast_ns.items():
+            if '__const' in v.annotations:
+                o['types'][k] = self.const_ns[k].reify()
+            else:
+                o['types'][k] = v.reify()
+        for k, v in self.proto_ns.items():
+            if '__const' in v.annotation:
+                continue
+            o['commands'][k] = v.reify()
         return json.tagged('casm', o)
 
     @property
