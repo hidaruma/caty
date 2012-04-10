@@ -37,6 +37,7 @@ class Module(object):
         self.proto_ns = {}
         self.saved_st = {}
         self.compiled = False
+        self.docstring = u'undocumented'
     
     @property
     def type(self):
