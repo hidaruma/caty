@@ -91,14 +91,29 @@ resource Mod ("*.mod") {
   ::
   @[in, out] # 0 void -> void produces ModIndexPage
   {
-    %0 | path:base > title;
+    %0 > path;
+    %path | path-to-mod > modname;
+    inspect:mod-info %modname > info;
     do {
-      %title  >: "title",
-      %title  >: "head",
-      [%APP_PATH, %0] | path:join >: "absPath",
+      %info | $.name  >: "title",
+      %info | $.name  >: "head",
+      %info | $.document.description >: "description",
+      %info | xjson:get $.document.moreDescription? | when {
+        undefined => "",
+        string => text:creole
+      } >: "document",
+      %info | $.syntax >: "syntax",
+      %info | $.place >: "place",
+      [%APP_PATH, %path] | path:join >: "absPath",
     } | print /mod.html
   };
- 
+};
+
+command path-to-mod :: string -> string {
+    text:split / > chunks;
+    %chunks | item 2 | text:split . | item 0 > app;
+    %chunks | item 3 | text:split . | item 0 > mod;
+    [%app, %mod] | text:join :
 };
 
 /** モジュールのインデックスページ生成 */

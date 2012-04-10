@@ -1,4 +1,7 @@
 // -*- coding: utf-8 -*-
+/** ヘルプページの出力のためのユーティリティ
+ * 
+ */
 module help; 
 
 type CmdInfo = inspect:ShortProfile;

@@ -5,6 +5,13 @@
   </head>
   <body>
     <h1>{$head}</h1>
+  <ul>
+  <li>place: {$place}</li>
+  <li>syntax: {$syntax}</li>
+  </ul>
+    <p>{$description}</p>
+    {$document|noescape}
+    <h2>Module Contents</h2>
     <ul>
       <li><a href="{$absPath}.typs/" >Namespace for Types</a></li>
       <li><a href="{$absPath}.cmds/" >Namespace for Commands</a></li>

@@ -117,6 +117,13 @@ command list-mod
  throws ApplicationNotFound
  refers python:caty.core.std.command.inspect.ListModules;
 
+/** モジュールの情報を取得する。
+ */
+command mod-info
+ [string appName] :: void -> Module
+ throws ApplicationNotFound
+ refers python:caty.core.std.command.inspect.ModuleInfo;
+
 /**
  * 引数の型に対するレイフィケーションイメージを出力する。
  */
