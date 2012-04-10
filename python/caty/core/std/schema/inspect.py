@@ -238,7 +238,6 @@ type RTag = @_tag (TypeAttribute ++ {
     "body": RTypeDef,
 });
 type ROptional = @_optional (TypeAttribute ++ {"body": RTypeDef});
-type ReifiedAction = @action object;
 type ReifiedKind = @kind object;
 
 type ReifiedCommand = @command (RHostLangCommand | RScriptCommand | RStubCommand);
@@ -401,7 +400,35 @@ type RArgRef = @_argref {"name": string, "optional": boolean};
 
 type ReifiedConst = @const (TypeAttribute ++ {"name": string, "constBody": string|binary|number|integer|null|boolean|array|object|undefined|@*! (any|undefined)});
 type ReifiedClass = deferred;
-type ReifiedResource = deferred;
+type ReifiedResource = @_res {
+    "name": string,
+    "document": Doc,
+    "annotation": (@annotation [ReifiedAnnotation*])?,
+    "filetype": {"contentType": string, "isText": boolean}?,
+    "actions": {
+        *: ReifiedAction,
+    },
+    "url": string,
+};
 
+type ReifiedAction = @_act {
+    "name": string,
+    "document": Doc,
+    "annotation": (@annotation [ReifiedAnnotation*])?,
+    "profiles": [ReifiedActionProfile*],
+    "invoker": string,
+    "script": ReifiedScript,
+    "lock": ReifiedScript?,
+};
+
+type ReifiedActionProfile = {
+    "name": string?,
+    "io_type": ("in" | "out" | "io")?,
+    "input_type": (RTypeDef | "_")?,
+    "output_type": (RTypeDef | "_")?,
+    "produces": [string*],
+    "relays": [string*],
+    "redirects": [string*],
+};
 
 """

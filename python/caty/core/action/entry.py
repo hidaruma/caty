@@ -4,7 +4,7 @@ from caty.util import indent_lines, justify_messages
 from caty.core.exception import *
 
 class ResourceActionEntry(object):
-    def __init__(self, proxy, source, name=u'', docstring=u'Undocumented', annotations=Annotations([]), resource_name=u'system', module_name=u'builtin', profiles=None, invoker=None):
+    def __init__(self, proxy, source, name=u'', docstring=u'undocumented', annotations=Annotations([]), resource_name=u'system', module_name=u'builtin', profiles=None, invoker=None):
         self.profiles = profiles if profiles else ActionProfiles([ActionProfile(None, None, None, None, [],  [], [])])
         self.instance = proxy
         self.source = source
@@ -49,6 +49,20 @@ class ResourceActionEntry(object):
         if with_doc:
             m = self.docstring.strip() + '\n\n' + m
         return m
+
+    def reify(self):
+        import caty.jsontools as json
+        from caty.core.language.util import make_structured_doc
+        r = {}
+        r['name'] = self.name
+        r['document'] = make_structured_doc(self.docstring or u'undocumented')
+        r['annotation'] = self.annotations.reify()
+        r['script'] = self.instance.reify()
+        if self._lock_cmd:
+            r['lock'] = self._lock_cmd.reify()
+        r['invoker'] = self.invoker
+        r['profiles'] = self.profiles.reify()
+        return json.tagged('_act', r)
 
     def make_graph(self, module, lone=False):
         try:
@@ -259,6 +273,9 @@ class ActionProfiles(object):
     def __iter__(self):
         return iter(self._profiles)
 
+    def reify(self):
+        return [p.reify() for p in self._profiles]
+
 class ActionProfile(object):
     def __init__(self, io_type, name, input_type, output_type, relay_list, next_states, redirects):
         self._name = name
@@ -268,6 +285,22 @@ class ActionProfile(object):
         self._relay_list = relay_list
         self._next_states = next_states
         self._redirects = redirects
+
+    def reify(self):
+        r = {
+            'relays': self._relay_list,
+            'redirects': self._redirects,
+            'produces': self._next_states,
+        }
+        if self._name:
+            r['name'] = self.name
+        if self._io_type:
+            r['io_type'] = self._io_type
+        if self._input_type:
+            r['input_type'] = u'_' if self._input_type == '_' else self._input_type.reify()
+        if self._output_type:
+            r['output_type'] = u'_' if self._output_type == '_' else self._output_type.reify()
+        return r
 
     def to_str(self):
         if self._io_type == 'in':

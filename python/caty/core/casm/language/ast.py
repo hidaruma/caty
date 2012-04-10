@@ -291,7 +291,7 @@ class OptionNode(Node, Optional):
         return {'body': self.body.reify()}
 
 class CommandNode(Function):
-    def __init__(self, name, patterns, uri_or_script, doc, annotation, type_params):
+    def __init__(self, name, patterns, uri_or_script, doc, annotation, type_params, command_type=u'command'):
         self.name = name
         self.patterns = patterns
         self.uri = None
@@ -306,6 +306,7 @@ class CommandNode(Function):
         self.type_var_names = [n.var_name for n in type_params]
         self.type_params = type_params
         self.type_params_ast = type_params
+        self.command_type = command_type
 
     def declare(self, module):
         self.module = module

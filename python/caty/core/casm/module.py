@@ -513,6 +513,7 @@ class Module(object):
 
     def reify(self):
         import caty.jsontools as json
+        from caty.core.script.proxy import EnvelopeProxy
         o = {'name': self.name, 'document': self.doc_object, 'types': {}, 'commands': {}}
         o['classes'] = {}
         for k, v in self.ast_ns.items():
@@ -523,7 +524,8 @@ class Module(object):
         for k, v in self.proto_ns.items():
             if '__const' in v.annotation:
                 continue
-            o['commands'][k] = v.reify()
+            if not v.command_type == u'action': 
+                o['commands'][k] = v.reify()
         return json.tagged('casm', o)
 
     @property
