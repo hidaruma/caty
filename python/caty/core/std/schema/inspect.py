@@ -155,7 +155,12 @@ type ReifiedModule = RCasm | RCara;
 
 type RCasm = @casm ModuleAttribute;
 
-type RCara = @cara (ModuleAttribute ++ {"resources": {*: ReifiedResource}});
+type RCara = @cara (ModuleAttribute ++ {
+    "resources": {*: ReifiedResource}, 
+    "userroles": {*: ReifiedUserRole},
+    "states": {*: ReifiedState},
+    "ports": {*: ReifiedPort},
+    });
 
 type ModuleAttribute = {
     "name": string,
@@ -429,6 +434,38 @@ type ReifiedActionProfile = {
     "produces": [string*],
     "relays": [string*],
     "redirects": [string*],
+};
+
+type ReifiedUserRole = {
+    "name": string,
+    "document": Doc,
+    "annotation": (@annotation [ReifiedAnnotation*])?,
+};
+
+type ReifiedPort = {
+    "name": string,
+    "document": Doc,
+    "annotation": (@annotation [ReifiedAnnotation*])?,
+};
+
+type ReifiedState = {
+    "name": string,
+    "document": Doc,
+    "annotation": (@annotation [ReifiedAnnotation*])?,
+    "actors": [string*],
+    "linkName": string|null,
+    "modifier": string|null,
+    "isBaseobject": boolean,
+    "links": [RLink*],
+    "type": RTypeDef,
+};
+
+type RLink = {
+    "trigger": string | null,
+    "type": "embeded" | "no-care" | "additional",
+    "appearance": "*" | "+" | "!" | "?",
+    "links-to": [[string, (string|null)]*],
+    "path": string|null,
 };
 
 """
