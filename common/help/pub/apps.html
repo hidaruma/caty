@@ -20,7 +20,7 @@
 {** アプリケーション情報のリストを、箇条書きとして整形 *}
 {function name=applist }
  <ol>
-  {foreach from=$_CONTEXT item=app}
+  {foreach from=$CONTEXT item=app}
    <li>{call name=app context=$app}</li>
   {/foreach}
  </ol>

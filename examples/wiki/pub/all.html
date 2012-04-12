@@ -24,7 +24,7 @@ lsdir / .wiki | each {
         </div>
     <h1>Wiki Page Index</h1>
     <ul>
-    {foreach from=$_CONTEXT item=t}
+    {foreach from=$CONTEXT item=t}
         <li><a href="./{$t.file}">{$t.title}</a></li>
     {foreachelse}
         <li>No page found.</li>

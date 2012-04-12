@@ -1,6 +1,6 @@
 <?caty-meta template="smarty"?>
 <ul>
-{foreach from=$_CONTEXT item=fit}
+{foreach from=$CONTEXT item=fit}
     {if $fit.context|notempty}
     <li class="{$fit.context.result}"><a href="/fit-view{$fit.context.path}">{$fit.context.title}</a></li>
     {/if}

@@ -1,19 +1,19 @@
 <?caty-meta template="smarty"?>
-{if $_CONTEXT["$$tag"]|eq:"_section"}
+{if $CONTEXT["$$tag"]|eq:"_section"}
     <dl>
-        {foreach from=$_CONTEXT["$$val"] item=o}
+        {foreach from=$CONTEXT["$$val"] item=o}
         <dt>"{$key}"</dt>
         {include file="pub@this:/property.html" context="o"}
         {/foreach}
     </dl>
-{elif $_CONTEXT["$$tag"]|eq:"_list"}
+{elif $CONTEXT["$$tag"]|eq:"_list"}
     <ul>
-        {foreach from=$_CONTEXT["$$val"] item=o}
+        {foreach from=$CONTEXT["$$val"] item=o}
         {include file="pub@this:/list.html" context="o"}
         {/foreach}
     </ul>
-{elif $_CONTEXT["$$tag"]|eq:"_doc"}
-    {include file="pub@this:/property.html" context="_CONTEXT"}
+{elif $CONTEXT["$$tag"]|eq:"_doc"}
+    {include file="pub@this:/property.html" context="CONTEXT"}
 {else}
-    設定値:{$_CONTEXT["$$val"]}
+    設定値:{$CONTEXT["$$val"]}
 {/if}

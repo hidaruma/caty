@@ -80,7 +80,7 @@ class SmartyMXParser(SmartyParser):
         skip_ws(seq)
         name = self.name(seq)
         skip_ws(seq)
-        ctx = option(self._context, VarLoad('_CONTEXT', True))(seq)
+        ctx = option(self._context, VarLoad('CONTEXT', True))(seq)
         S('}')(seq)
         return CallFunc(name, ctx)
 
@@ -104,7 +104,7 @@ class SmartyMXParser(SmartyParser):
         else:
             name = None
         skip_ws(seq)
-        ctx = option(self._context, VarLoad('_CONTEXT', True))(seq)
+        ctx = option(self._context, VarLoad('CONTEXT', True))(seq)
         S('}')(seq)
         return CallGroup(name, ctx)
 

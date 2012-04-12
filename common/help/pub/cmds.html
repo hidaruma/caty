@@ -21,7 +21,7 @@
 *}
 {function name=cmdlist }
   <ol>
-  {foreach from=$_CONTEXT item=cmd}
+  {foreach from=$CONTEXT item=cmd}
     {call name=cmd context=$cmd }
   {/foreach}
   </ol>

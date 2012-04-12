@@ -195,7 +195,7 @@ class SmartyParser(Parser):
             cn = seq.parse(until('"'))
             q = seq.parse('"')
         else:
-            cn = u'_CONTEXT'
+            cn = u'CONTEXT'
         ws = seq.parse(option(skip_ws))
         cb = seq.parse('}')
         skip_ws(seq)

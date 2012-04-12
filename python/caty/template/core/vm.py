@@ -409,9 +409,11 @@ class VirtualMachine(object):
             if isinstance(value, dict):
                 _context = {}
                 _context['_CONTEXT'] = value
+                _context['CONTEXT'] = value
                 _context.update(value)
             else:
                 _context = {'_CONTEXT': value}
+                _context['CONTEXT'] = value
             self._context = Context(_context, False)
         opmap[MASK_CONTEXT] = mask_context
 

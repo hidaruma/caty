@@ -14,10 +14,10 @@ class Template(object):
         def _set(self, value):
             if isinstance(value, dict):
                 self._context = {}
-                self._context['_CONTEXT'] = value
+                self._context['CONTEXT'] = value
                 self._context.update(value)
             else:
-                self._context = {'_CONTEXT': value}
+                self._context = {'CONTEXT': value}
         return _get, _set
     context = property(*context())
 

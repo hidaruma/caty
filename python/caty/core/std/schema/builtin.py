@@ -522,7 +522,7 @@ exception CompileError = object;
  * テンプレートを展開する際に扱われるデータ。
  * expand, printなどでテンプレートが展開される際、
  * 入力がobjectの場合はこの型のデータがプロパティとして追加される。
- * 入力がobjectでない場合は、入力を_CONTEXTの値としたobjectとなる。
+ * 入力がobjectでない場合は、入力をCONTEXTの値としたobjectとなる。
  *
  */
 type DefaultTemplateContext = {
@@ -539,7 +539,7 @@ type DefaultTemplateContext = {
     "_CATY_VERSION": string,
 
     /** print, expandへの実際の入力 */
-    "_CONTEXT": any,
+    "CONTEXT": any,
     *: any?
 };
 

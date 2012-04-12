@@ -1,1 +1,1 @@
-<?caty-meta template="smarty" ?>{$_CONTEXT}
+<?caty-meta template="smarty" ?>{$CONTEXT}

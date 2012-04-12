@@ -25,7 +25,7 @@
 {** モジュール情報のリストを、箇条書きとして整形 *}
 {function name=modlist }
  <ol>
-  {foreach from=$_CONTEXT item=mod}
+  {foreach from=$CONTEXT item=mod}
    <li>{call name=mod context=$mod}</li>
   {/foreach}
  </ol>
