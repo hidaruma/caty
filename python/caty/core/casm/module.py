@@ -36,7 +36,9 @@ class Module(object):
         self.ast_ns = {}
         self.proto_ns = {}
         self.saved_st = {}
+        self.const_ns = {}
         self.compiled = False
+        self.docstring = u'undocumented'
     
     @property
     def type(self):
@@ -511,13 +513,25 @@ class Module(object):
 
     def reify(self):
         import caty.jsontools as json
-        o = {'name': self.name, 'docstring': self.docstring or u'undocumented', 'types': {}, 'commands': {}}
+        from caty.core.script.proxy import EnvelopeProxy
+        o = {'name': self.name, 'document': self.doc_object, 'types': {}, 'commands': {}}
+        o['classes'] = {}
         for k, v in self.ast_ns.items():
-            o['types'][k] = v.reify()
+            if '__const' in v.annotations:
+                o['types'][k] = self.const_ns[k].reify()
+            else:
+                o['types'][k] = v.reify()
         for k, v in self.proto_ns.items():
-            o['commands'][k] = v.reify()
-        return json.tagged('module', o)
+            if '__const' in v.annotation:
+                continue
+            if not v.command_type == u'action': 
+                o['commands'][k] = v.reify()
+        return json.tagged('casm', o)
 
+    @property
+    def doc_object(self):
+        from caty.core.language.util import make_structured_doc
+        return make_structured_doc(self.docstring or u'undocumented')
 
 
 class CoreModule(Module):

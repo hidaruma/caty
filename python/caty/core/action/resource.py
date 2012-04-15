@@ -91,6 +91,21 @@ class ResourceClass(object):
     def actions(self):
         return self.entries.values()
 
+    def reify(self):
+        import caty.jsontools as json
+        from caty.core.language.util import make_structured_doc
+        r = {}
+        r['name'] = self.name
+        r['document'] = make_structured_doc(self.docstring or u'undocumented')
+        r['annotation'] = self.annotations.reify()
+        if self.filetypes:
+            r['filetype'] = self.filetypes.values()[0]
+        r['actions'] = {}
+        for invoker, action in self.entries.items():
+            r['actions'][action.name] = action.reify()
+        r['url'] = self.url_pattern
+        return json.tagged('_res', r)
+
 class DefaultResource(ResourceClass):
     def __init__(self, url_pattern, actions, module_name, resource_name, docstring=u'Undocumented', annotations=Annotations([])):
         ResourceClass.__init__(self, url_pattern, actions, {}, module_name, resource_name, docstring, annotations)

@@ -7,13 +7,13 @@
 === file:/foreach.txt
 {{{
 <?caty-meta template="smarty" ?>
-{foreach from=$_CONTEXT item=it}{$it}+{/foreach}
+{foreach from=$CONTEXT item=it}{$it}+{/foreach}
 }}}
 
 === file:/foreachelse.txt
 {{{
 <?caty-meta template="smarty" ?>
-{foreach from=$_CONTEXT item=it}{$it}+{foreachelse}*else*{/foreach}
+{foreach from=$CONTEXT item=it}{$it}+{foreachelse}*else*{/foreach}
 }}}
 
 === script:/foreach.caty

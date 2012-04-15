@@ -9,7 +9,7 @@
 {** アプリケーション情報のリストを、定義箇条書きとして整形 *}
 {function name=applist }
  <dl>
-  {foreach from=$_CONTEXT item=app}
+  {foreach from=$CONTEXT item=app}
     {call name=app context=$app}
   {/foreach}
  </dl>
@@ -22,7 +22,7 @@
   <body>
     <h1>Applications</h1>
 
-    {foreach from=$_CONTEXT key=group item=applist}
+    {foreach from=$CONTEXT key=group item=applist}
      <div class="app-group"><h2>グループ {$group}</h2>
       {call name=applist context=$applist }
      </div>

@@ -4,7 +4,7 @@
 
 === file:/echo.txt
 {{{
-<?caty-meta template="smarty" ?>{$_CONTEXT}
+<?caty-meta template="smarty" ?>{$CONTEXT}
 }}}
 
 === script:/echo.caty

@@ -75,7 +75,7 @@
 {function name=cmdlist type="help:CmdList"}
   <table class="cmdlist" border="1">
   <tr><th>名前</th><th>入力</th><th>出力</th><th>例外</th><th>実装</th></tr>
-  {foreach from=$_CONTEXT item=cmd}
+  {foreach from=$CONTEXT item=cmd}
     {call name=cmd2 context=$cmd }
   {/foreach}
   </table>
@@ -87,8 +87,8 @@
  *}
 {function name=mod }
  <div class="mod">
-  <h2>モジュール {$_CONTEXT.fullname}</h2>
-  {call name=cmdlist context=$_CONTEXT.cmds }
+  <h2>モジュール {$CONTEXT.fullname}</h2>
+  {call name=cmdlist context=$CONTEXT.cmds }
  </div>
 {/function}
 

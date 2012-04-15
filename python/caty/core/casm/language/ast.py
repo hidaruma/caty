@@ -8,6 +8,7 @@ from caty.core.command.profile import CommandProfile, ProfileContainer, ScriptPr
 from caty.core.exception import InternalException
 from caty.core.typeinterface import *
 import caty.core.runtimeobject as ro
+from caty.core.language.util import make_structured_doc
 import caty.jsontools as json
 
 class Provide(object):
@@ -87,7 +88,7 @@ class ASTRoot(Root):
             'typeParams': [p.reify() for p in self._type_params],
             'typeBody': self.body.reify(),
             'annotation': self.annotations.reify(),
-            'docstring': self.docstring,
+            'document': make_structured_doc(self.docstring),
         })
         if self.options:
             o.value['options'] = self.options
@@ -111,7 +112,7 @@ class Node(object):
         if self.annotations:
             o['annotation'] = self.annotations.reify()
         if self.docstring:
-            o['docstring'] = self.docstring
+            o['document'] = make_structured_doc(self.docstring)
         o['options'] = self.options
         return json.tagged(self.reification_type, o)
 
@@ -193,7 +194,12 @@ class PseudoTaggedNode(Node, PseudoTag):
 
     def reify(self):
         o = self.body.reify()
-        json.untagged(o)['pseudoTag'] = json.tagged('_pseudoTag', [self._name, self._value])
+        t, v = json.split_tag(o)
+        p =  json.tagged('_pseudoTag', [self._name, self._value])
+        if t == '_object':
+            v['pseudoTag'] = p
+        else:
+            v['options']['pseudoTag'] = p
         return o
 
 class EnumNode(Node, Enum):
@@ -285,7 +291,7 @@ class OptionNode(Node, Optional):
         return {'body': self.body.reify()}
 
 class CommandNode(Function):
-    def __init__(self, name, patterns, uri_or_script, doc, annotation, type_params):
+    def __init__(self, name, patterns, uri_or_script, doc, annotation, type_params, command_type=u'command'):
         self.name = name
         self.patterns = patterns
         self.uri = None
@@ -300,6 +306,7 @@ class CommandNode(Function):
         self.type_var_names = [n.var_name for n in type_params]
         self.type_params = type_params
         self.type_params_ast = type_params
+        self.command_type = command_type
 
     def declare(self, module):
         self.module = module
@@ -322,7 +329,7 @@ class CommandNode(Function):
             'name': self.name,
             'annotation': self.annotation.reify(),
             'typeParams': [p.reify() for p in self.type_params_ast],
-            'docstring': self.doc or u'undocumented',
+            'document': make_structured_doc(self.doc or u'undocumented'),
         }
         profiles = [pro.reify() for pro in self.patterns]
         r['profiles'] = profiles
@@ -515,9 +522,11 @@ class TypeParam(object):
         })
 
 class ConstDecl(object):
-    def __init__(self, name, type, schema, script, doc, ann):
+    def __init__(self, name, type, schema, script, doc, ann, value):
         self.name = name
-        self.doc = doc
+        self.docstring = doc
+        self.value = value
+        self.annotations = ann
         a = Annotations([])
         for c in ann._annotations:
             a.add(c)
@@ -540,4 +549,15 @@ class ConstDecl(object):
     def declare(self, module):
         self.__schema.declare(module)
         self.__command.declare(module)
+        module.const_ns[self.name] = self
+
+    def reify(self):
+        o = json.tagged('const', {
+            'name': self.name, 
+            'constBody': self.value,
+            'annotation': self.annotations.reify(),
+            'document': make_structured_doc(self.docstring or u'undocumented'),
+        })
+        return o
+
 

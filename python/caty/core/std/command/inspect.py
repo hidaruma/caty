@@ -63,12 +63,35 @@ class ListModules(Internal):
                 continue
             o = {
                 'name': mod.name,
+                'document': mod.doc_object,
                 'syntax': unicode(mod._type.split('.', 1)[0]),
                 'place': u'schemata' if mod._type.startswith('casm') else u'actions'
             }
             r.append(o)
         return r
         
+class ModuleInfo(Internal):
+    def setup(self, mod_name):
+        self._module_name = mod_name
+
+    def execute(self):
+        if ':' in self._module_name:
+            app_name, mod_name = self._module_name.split(':', 1)
+            if app_name == 'this':
+                app_name = self.current_app.name
+        else:
+            app_name = self.current_app.name
+            mod_name = self._module_name
+        app = self._system.get_app(app_name)
+        mod = app._schema_module.get_module(mod_name)
+        o = {
+            'name': mod.name,
+            'document': mod.doc_object,
+            'syntax': unicode(mod._type.split('.', 1)[0]),
+            'place': u'schemata' if mod._type.startswith('casm') else u'actions'
+        }
+        return o
+
 class ReifyType(Builtin):
     def setup(self, type_name):
         self._type_name = type_name
@@ -110,7 +133,5 @@ class ReifyModule(Internal):
             mod_name = self._module_name
         app = self._system.get_app(app_name)
         mod = app._schema_module.get_module(mod_name)
-        if not mod.type.startswith('casm'):
-            throw_caty_exception(u'BadArg', self._module_name)
         return mod.reify()
 

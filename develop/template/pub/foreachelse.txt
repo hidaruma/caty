@@ -1,2 +1,2 @@
 <?caty-meta template="smarty" ?>
-{foreach from=$_CONTEXT item=it}{$it}+{foreachelse}*else*{/foreach}
+{foreach from=$CONTEXT item=it}{$it}+{foreachelse}*else*{/foreach}

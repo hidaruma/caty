@@ -8,7 +8,7 @@
  * スカラー（バイナリを除く）
  *}
 {function match="null | boolean | number | string" matched=type}
-  <span class="{$type}">{$type}:{$_CONTEXT}</span>
+  <span class="{$type}">{$type}:{$CONTEXT}</span>
 {/function}
 {** 
  * バイナリは内容を表示しない 
@@ -21,7 +21,7 @@
  *}
 {function match="array"}
   <ol class="array" start="0">
-  {foreach from=$_CONTEXT item=it}
+  {foreach from=$CONTEXT item=it}
     <li class="item">{apply context=$it}</li>
   {/foreach}
   </ol>
@@ -31,7 +31,7 @@
  *}
 {function match="object"}
   <ul class="object">
-  {foreach from=$_CONTEXT key=name item=val}
+  {foreach from=$CONTEXT key=name item=val}
     <li class="property">
       <span class="prop-name">{$name}</span>:
       <div  class="prop-value">{apply context=$val}</div>
@@ -70,6 +70,6 @@
    {apply}
    <hr />
    <h2>Raw XJSON Data</h2>
-   <pre>{$_CONTEXT|json}</pre>
+   <pre>{$CONTEXT|json}</pre>
   </body>
 </html>

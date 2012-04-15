@@ -16,7 +16,7 @@
 <body>
     <h1>Caty FIT</h1>
     <dl>
-    {foreach from=$_CONTEXT item=app}
+    {foreach from=$CONTEXT item=app}
         <dt><a href="{$app.name}/">{$app.name}</a><dt>
         <dd>
         {include file="fit-view:/test-list-for-index.html" context="app.contents"}

@@ -11,7 +11,7 @@ lsdir --long / .wiki | each {
 <div class="wiki_sidemenu">
 <div class="wiki_sidemenutitle">Recent Updated</div>
 <ul>
-{foreach from=$_CONTEXT item=t}
+{foreach from=$CONTEXT item=t}
     <li><a href="./{$t.file}">{$t.title}</a></li>
 {foreachelse}
     <li>No page found.</li>

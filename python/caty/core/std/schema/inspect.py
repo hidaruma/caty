@@ -94,6 +94,9 @@ type Module = {
   * パッケージ修飾されている可能性がある。
   */
  "name" : string,
+ 
+ /** ドキュメンテーションコメント */
+ "document": Doc,
 
  /** モジュールの記述構文 */
  "syntax" : ("casm" | "cara"), // "camb" はとりあえず除いておく
@@ -113,6 +116,13 @@ command list-mod
  [string appName] :: void -> [Module*]
  throws ApplicationNotFound
  refers python:caty.core.std.command.inspect.ListModules;
+
+/** モジュールの情報を取得する。
+ */
+command mod-info
+ [string appName] :: void -> Module
+ throws ApplicationNotFound
+ refers python:caty.core.std.command.inspect.ModuleInfo;
 
 /**
  * 引数の型に対するレイフィケーションイメージを出力する。
@@ -140,27 +150,45 @@ command reify-module [string modName] :: void -> ReifiedModule
 
 /*レイフィケーション関係*/
 
-type ReifiedModule = @module {
+/** モジュールのレイフィケーションイメージ */
+type ReifiedModule = RCasm | RCara;
+
+type RCasm = @casm ModuleAttribute;
+
+type RCara = @cara (ModuleAttribute ++ {
+    "resources": {*: ReifiedResource}, 
+    "userroles": {*: ReifiedUserRole},
+    "states": {*: ReifiedState},
+    "ports": {*: ReifiedPort},
+    });
+
+type ModuleAttribute = {
     "name": string,
-    "docstring": string,
+    "document": Doc?,
     "types": {
-        *: ReifiedTypeTerm | ReifiedKind,
+        *: ReifiedTypeTerm | ReifiedKind | ReifiedConst,
     },
     "commands": {
         *: ReifiedCommand
-    },
-    "consts": {
-        *: ReifiedConst
     },
     "classes": {
         *: ReifiedClass
     },
 };
 
+/** 型のレイフィケーションイメージ共通の属性 */
 type TypeAttribute = {
     "annotation": (@annotation [ReifiedAnnotation*])?,
     "options": object?,
-    "docstring": string?
+    "document": Doc?
+};
+
+/** ドキュメンテーションコメント */
+type Doc = {
+ /** 短い簡潔な記述 */
+ "description": string,
+ /** より詳しい説明 */
+ "moreDescription" : string(remark="Wikiテキスト")?   
 };
 
 type ReifiedAnnotation = {
@@ -215,7 +243,6 @@ type RTag = @_tag (TypeAttribute ++ {
     "body": RTypeDef,
 });
 type ROptional = @_optional (TypeAttribute ++ {"body": RTypeDef});
-type ReifiedAction = @action object;
 type ReifiedKind = @kind object;
 
 type ReifiedCommand = @command (RHostLangCommand | RScriptCommand | RStubCommand);
@@ -224,7 +251,7 @@ type CommandAttribute = {
     "name": string,
     "annotation": @annotation [ReifiedAnnotation*],
     "typeParams": [RTypeParam*]?,
-    "docstring": string?,
+    "document": Doc?,
     "profiles": [RProfile*],
     "exception": [RTypeDef*]?,
     "resource": [FacilityUsage*]?,
@@ -321,7 +348,7 @@ type RIndexArg = @_iarg {
 type RGlobArg = @_garg {
 };
 
-type RScalarVal = @_scalar string|binary|integer|number|null;
+type RScalarVal = @_scalar (string|binary|integer|number|null);
 
 type RListBuilder = @_list [ReifiedScript*];
 
@@ -376,7 +403,69 @@ type RVarStore = @_store {"name": string};
 type RVarRef = @_varref {"name": string, "optional": boolean};
 type RArgRef = @_argref {"name": string, "optional": boolean};
 
-type ReifiedConst = deferred;
+type ReifiedConst = @const (TypeAttribute ++ {"name": string, "constBody": string|binary|number|integer|null|boolean|array|object|undefined|@*! (any|undefined)});
 type ReifiedClass = deferred;
+type ReifiedResource = @_res {
+    "name": string,
+    "document": Doc,
+    "annotation": (@annotation [ReifiedAnnotation*])?,
+    "filetype": {"contentType": string, "isText": boolean}?,
+    "actions": {
+        *: ReifiedAction,
+    },
+    "url": string,
+};
+
+type ReifiedAction = @_act {
+    "name": string,
+    "document": Doc,
+    "annotation": (@annotation [ReifiedAnnotation*])?,
+    "profiles": [ReifiedActionProfile*],
+    "invoker": string,
+    "script": ReifiedScript,
+    "lock": ReifiedScript?,
+};
+
+type ReifiedActionProfile = {
+    "name": string?,
+    "io_type": ("in" | "out" | "io")?,
+    "input_type": (RTypeDef | "_")?,
+    "output_type": (RTypeDef | "_")?,
+    "produces": [string*],
+    "relays": [string*],
+    "redirects": [string*],
+};
+
+type ReifiedUserRole = {
+    "name": string,
+    "document": Doc,
+    "annotation": (@annotation [ReifiedAnnotation*])?,
+};
+
+type ReifiedPort = {
+    "name": string,
+    "document": Doc,
+    "annotation": (@annotation [ReifiedAnnotation*])?,
+};
+
+type ReifiedState = {
+    "name": string,
+    "document": Doc,
+    "annotation": (@annotation [ReifiedAnnotation*])?,
+    "actors": [string*],
+    "linkName": string|null,
+    "modifier": string|null,
+    "isBaseobject": boolean,
+    "links": [RLink*],
+    "type": RTypeDef,
+};
+
+type RLink = {
+    "trigger": string | null,
+    "type": "embeded" | "no-care" | "additional",
+    "appearance": "*" | "+" | "!" | "?",
+    "links-to": [[string, (string|null)]*],
+    "path": string|null,
+};
 
 """

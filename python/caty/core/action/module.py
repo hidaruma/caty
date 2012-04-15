@@ -135,7 +135,8 @@ class ResourceModule(Module):
                             ActionEnvelope(script), 
                             act.docstring, 
                             act.annotations, 
-                            [])
+                            [],
+                            u'action')
             c.declare(self)
 
     def add_state(self, st):
@@ -175,6 +176,24 @@ class ResourceModule(Module):
             resourceName=name,
             moduleName=self.name
         )
+
+    def reify(self):
+        import caty.jsontools as json
+        r = Module.reify(self)
+        o = json.untagged(r)
+        o['resources'] = {}
+        o['states'] = {}
+        o['userroles'] = {}
+        o['ports'] = {}
+        for rc in self._resources:
+            o['resources'][rc.name] = rc.reify()
+        for st in self._states:
+            o['states'][st.name] = st.reify()
+        for ur in self._userroles:
+            o['userroles'][ur.name] = ur.reify()
+        for p in self._ports:
+            o['ports'][p.name] = p.reify()
+        return json.tagged('cara', o)
 
     @property
     def states(self):

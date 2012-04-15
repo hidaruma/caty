@@ -13,6 +13,7 @@ from caty.core.casm.language import schemaparser, commandparser
 from caty.core.casm.language.ast import ASTRoot, CommandNode
 from caty.util import bind2nd
 from caty.core.exception import throw_caty_exception
+from caty.core.language.util import make_structured_doc
 
 class ResourceActionDescriptorParser(Parser):
     def __init__(self, module_name, facility, lit=False):
@@ -53,7 +54,7 @@ class ResourceActionDescriptorParser(Parser):
     def userrole(self, seq):
         ds = seq.parse(option(docstring, u''))
         ann = seq.parse(option(annotation, Annotations([])))
-        return UserRole()(seq)
+        return UserRole(ds, ann)(seq)
 
     def resourceclass(self, seq):
         ds = seq.parse(option(docstring, u''))
@@ -243,11 +244,11 @@ class ActionBlock(Parser):
         name = fragment_name(seq)
         if 'in' in ann:
             if 'out' in ann:
-                pf = 'io'
+                pf = u'io'
             else:
-                pf = 'in'
+                pf = u'in'
         elif 'out' in ann:
-            pf = 'out'
+            pf = u'out'
         else:
             return None, name
         return pf, name
@@ -324,11 +325,13 @@ class StateBlock(Parser):
             else:
                 self.actor_names = [u'']
             seq.parse('::')
-            type = typedef(seq)
+            self.type = typedef(seq)
             if option(keyword('as'))(seq):
                 self.modifier = name(seq)
             elif option(keyword('baseobject'))(seq):
                 self.merge = True
+                self.link_name = None
+                self.modifier = None
             links = option(self.link_block, [])(seq)
             seq.parse(';')
             self.name = state_name
@@ -337,8 +340,9 @@ class StateBlock(Parser):
 
     def link_block(self, seq):
         seq.parse(keyword('links'))
-        if option(keyword('as'))(seq):
-            self.link_name = name(seq)
+        if self.merge == False:
+            if option(keyword('as'))(seq):
+                self.link_name = name(seq)
         seq.parse('{')
         r = many(self.link_item)(seq)
         seq.parse('}')
@@ -354,22 +358,22 @@ class StateBlock(Parser):
         else:
             dest = [self.action_ref(seq)]
         S(';')(seq)
-        return Link(trigger, dest, isembed)
+        return Link(trigger, dest, isembed, occ, path)
 
     def trigger(self, seq):
         if option(S('+'))(seq):
             n = option(name)(seq)
-            o = option(choice([u'+', u'*', u'!', u'?'], u'*'))(seq)
+            o = option(choice([u'+', u'*', u'!', u'?']), u'*')(seq)
             p = None
             t = u'additional'
         elif option(S('-'))(seq):
             n = option(name)(seq)
-            o = option(choice([u'+', u'*', u'!', u'?'], u'*'))(seq)
+            o = option(choice([u'+', u'*', u'!', u'?']), u'*')(seq)
             p = None
             t = u'no-care'
         else:
             n = option(name)(seq)
-            o = option(choice([u'+', u'*', u'!', u'?'], u'*'))(seq)
+            o = option(choice([u'+', u'*', u'!', u'?']), u'*')(seq)
             p = option(self.embed_trigger, n)(seq)
             t = u'embed' 
         return t, n, o, p
@@ -409,23 +413,59 @@ class StateBlock(Parser):
     def actor_name(self):
         return u', '.join(self.actor_names)
 
+    def reify(self):
+        return {
+            "name": self.name,
+            "document": make_structured_doc(self.docstr),
+            "annotation": self.annotations.reify(),
+            "actors": self.actor_names,
+            "modifier": self.modifier,
+            "isBaseobject": self.merge,
+            "linkName": self.link_name,
+            "links": [l.reify() for l in self.links],
+            "type": self.type.reify()
+        }
+
 class UserRole(Parser):
+    def __init__(self, ds, ann):
+        self.docstring = ds
+        self.annotations = ann
+
     def __call__(self, seq):
         keyword('userrole')(seq)
         self.name = name(seq)
         S(';')(seq)
         return self
 
+    def reify(self):
+        return {
+            "name": self.name,
+            "document": make_structured_doc(self.docstring),
+            "annotation": self.annotations.reify(),
+        }
+
+
 class Link(object):
-    def __init__(self, trigger, dest, type):
+    def __init__(self, trigger, dest, type, appearance, path):
         self.link_to_list = dest
         self.trigger = trigger
+        self.path = path
+        self.appearance = appearance
         if type == 'embed':
             self.type = u'embeded-link'
         elif type == 'no-care':
             self.type = u'no-care-link'
         else:
             self.type = u'additional-link'
+
+    def reify(self):
+        return {
+            'trigger': self.trigger,
+            'appearance': self.appearance,
+            'links-to': self.link_to_list,
+            'path': self.path,
+            'type': self.type.replace('-link', '')
+        }
 
 def is_doc_str(seq):
     _ = seq.parse(option(docstring))
@@ -543,5 +583,12 @@ class Port(object):
     def docstring(self):
         return self._doc
     
+
+    def reify(self):
+        return {
+            "name": self.name,
+            "document": make_structured_doc(self.docstring),
+            "annotation": self.annotations.reify(),
+        }
 
 

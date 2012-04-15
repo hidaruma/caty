@@ -119,6 +119,12 @@ class Expand(Builtin, MafsMixin, PbcObject):
             template.context['_APP_PATH'] = self.env.get('APP_PATH')
             template.context['_HOST_URL'] = self.env.get('HOST_URL')
             template.context['_CATY_VERSION'] = self.env.get('CATY_VERSION')
+            template.context['FILE_PATH'] = self.env.get('FILE_PATH')
+            if self.env.exists('PATH_INFO'):
+                template.context['PATH_INFO'] = self.env.get('PATH_INFO')
+            template.context['APP_PATH'] = self.env.get('APP_PATH')
+            template.context['HOST_URL'] = self.env.get('HOST_URL')
+            template.context['CATY_VERSION'] = self.env.get('CATY_VERSION')
             encoding = fo.encoding if fo.encoding else self.env.get('APP_ENCODING')
             is_text = fo.is_text
             outfile = codecs.getwriter(encoding)(StringIO())
