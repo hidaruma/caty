@@ -9,6 +9,8 @@ Hello, world.
 
 === !schema:/t.casm
 
+以下のスキーマはファイルとしては存在しない。
+
 {{{
 module t;
 type t = string;
@@ -19,10 +21,7 @@ type t = string;
 
 |= !command |= !params       |= !output  |
 |file:read  | /t.txt         |"Hello, world." |
+|file:exists| /t.txt         |@OK "/t.txt" |
+|file:exists|schemata@this:/t.casm |@NG "schemata@this:/t.casm"|
 
-
-|= !command  |= !params             |= !output  |
-| file:list  |schemata@this:/ .casm ||
-| file:exists|schemata@this:/t.casm ||
-| file:read  |schemata@this:/t.casm ||
 
