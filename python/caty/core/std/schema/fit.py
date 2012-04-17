@@ -54,7 +54,7 @@ command run {
     "all-apps": boolean?,
   }
   [string? path] :: void -> void
-        reads [env, behaviors]
+        reads [env, behaviors, sysfiles]
         uses [pub, interpreter, stream]
         refers python:caty.core.std.command.fit.Run;
 

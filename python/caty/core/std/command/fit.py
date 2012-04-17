@@ -50,7 +50,7 @@ class Run(Internal, MafsMixin):
             r(self)
 
     def _list_test(self):
-        d = self.opendir('/')
+        d = self.opendir('/', default='behaviors')
         r = []
         for e in d.read(True):
             if e.path.endswith(self._ext):
@@ -91,7 +91,7 @@ class Run(Internal, MafsMixin):
         elif self._out_dir:
             path = '%s%s' % (self._out_dir, path.rsplit('.', 1)[0] + '.fit')
         else:
-            path = 'fit-view:/%s%s' % (app, path.rsplit('.', 1)[0] + '.fit')
+            path = 'pub@fit-view:/%s%s' % (app, path.rsplit('.', 1)[0] + '.fit')
         f = self.open(path, 'wb', default='behaviors')
         json.dump(result, f)
         f.close()
