@@ -1,6 +1,6 @@
 <<ignore  -*- coding: utf-8 -*- >>
 
-= 新FIT仕様 (1)
+= 新FIT仕様 (1) fit:runコマンド
 
 現状のCatyFITにはいくつかの問題点があるが、作り直すのではなくて、
 少しずつ修正することにより、スキーマ記述、ドキュメンテーション、テストの融合を図る。
@@ -31,7 +31,7 @@
 （この方式はあまり有用ではないかもしれないので、変更の可能性がある。）
 
 {{{
-type mafsPath = string("プレース修飾を許すパス名、末尾がスラッシュならディレクトリ");
+type mafsPath = string(remark="プレース修飾を許すパス名、末尾がスラッシュならディレクトリ");
 
 type behExt = (
   ".beh"|".wiki"|".lit" |
@@ -54,7 +54,7 @@ command run
    "ext" : behExt?,
    /** ファイルの検索を再帰的に行うかどうか */
    @[default(false)]
-   "rec" : boolean?
+   "rec" : boolean?,
    /** 処理結果の出力ファイル */
    @[without("outdir")]
    "out" : mafsPath?,

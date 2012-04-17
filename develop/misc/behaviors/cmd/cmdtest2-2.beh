@@ -41,3 +41,4 @@ class T002(Command):
 | tc:t002 | 10 20   |         |Exception   | UnexpectedArg |
 | tc:t002 | 10      | 10     |            |1つの引数は認められるはず |
 
+仕様ファイル： ./develop/misc/behaviors/fit-output.beh:1:= FIT 出力条件が空の時
