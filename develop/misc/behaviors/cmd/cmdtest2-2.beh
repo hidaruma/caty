@@ -40,4 +40,3 @@ class T002(Command):
 | tc:t002 | --foo   |         |Exception   | UnexpectedOption |
 | tc:t002 | 10 20   |         |Exception   | UnexpectedArg |
 | tc:t002 | 10      | 10     |            |1つの引数は認められるはず |
-
