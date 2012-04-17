@@ -15,7 +15,7 @@ command zerofile [string] :: void -> @OK string
  * 引数で指定したファイルが存在するかどうかを返す。
  */
 command exists {@[default(false)]"pred": boolean?} [string] :: void -> @OK string | @NG string | boolean
-    uses [data, include, pub]
+    reads [data, include, pub, behaviors, scripts, sysfiles]
     refers python:caty.core.std.command.file.Exists;
 
 /**
