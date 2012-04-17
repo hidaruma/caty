@@ -25,22 +25,22 @@ class MafsMixin(object):
     place が省略された場合は pub が使われ、 app が省略された場合は this が使われる。
     """
 
-    def open(self, path, mode='rb'):
-        p, mafs = self.parse_canonical_path(path)
+    def open(self, path, mode='rb', default='pub'):
+        p, mafs = self.parse_canonical_path(path, default)
         return mafs.open(p, mode)
 
-    def opendir(self, path):
-        p, mafs = self.parse_canonical_path(path)
+    def opendir(self, path, default='pub'):
+        p, mafs = self.parse_canonical_path(path, default)
         return mafs.opendir(p)
 
-    def parse_canonical_path(self, path):
+    def parse_canonical_path(self, path, default='pub'):
         u"""パス名をパースして place を削除したパス名と place に対応した mafs ファシリティを返す。
         app の指定が this だった場合、それも結果のパス名からは削除される。
         """
         if '@' in path:
             place, path = path.split('@', 1)
         else:
-            place = 'pub'
+            place = default
         if path.startswith('this:'):
             path = path.replace('this:', '')
 

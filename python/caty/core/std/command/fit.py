@@ -7,7 +7,8 @@ name = u'fit'
 schema = u"""
 """
 import caty
-class Run(Internal):
+from caty.command import MafsMixin
+class Run(Internal, MafsMixin):
 
     def setup(self, opts, path=None):
         self._path = path.strip() if path else path
@@ -15,6 +16,11 @@ class Run(Internal):
         self._force = opts.get('force', caty.UNDEFINED)
         self._no_dry_run = opts.get('no-dry-run', caty.UNDEFINED)
         self._debug = opts.get('debug', caty.UNDEFINED)
+        self._ext = opts.get('ext', '.beh')
+        self._out_dir = opts.get('outdir')
+        self._out_file = opts.get('out')
+        if not self._ext.startswith('.'):
+            self._ext = '.' + self._ext
         if not path:
             self._all = opts.get('all-apps', caty.UNDEFINED)
         else:
@@ -24,12 +30,13 @@ class Run(Internal):
         if self._path:
             if self._path[-1] in ('/', '*'):
                 results = []
-                d = self.behaviors.opendir(self._path.rstrip('*'))
+                p, place = self.parse_canonical_path(self._path.strip('*'), default='behaviors')
+                d = place.opendir(p)
                 for e in d.read(True):
-                    if e.path.endswith('.beh'):
-                        results.append(self._test(e))
+                    if e.path.endswith(self._ext):
+                        results.append(self._test(place.open(e.path)))
             else:
-                results = [self._test(self.behaviors.open(self._path))]
+                results = [self._test(self.open(self._path, default='behaviors'))]
         else:
             if self._all:
                 return self.run_all()
@@ -43,10 +50,10 @@ class Run(Internal):
             r(self)
 
     def _list_test(self):
-        d = self.behaviors.opendir('/')
+        d = self.opendir('/')
         r = []
         for e in d.read(True):
-            if e.path.endswith('.beh'):
+            if e.path.endswith(self._ext):
                 r.append(e)
         return r
 
@@ -56,7 +63,7 @@ class Run(Internal):
         runner = FitRunner(fo, self.interpreter.clone(), self._force, self._no_dry_run, self._debug)
         runner.run()
         report = runner.report
-        #report['tests'] = self._list_summary(self.behaviors.opendir('/'))
+        #report['tests'] = self._list_summary(self.opendir('/'))
         report['app'] = self._get_app_name()
         path = fo.path
         def _(o):
@@ -67,19 +74,25 @@ class Run(Internal):
         return _
 
     def _create_target_dir(self, path):
-        app = self._get_app_name()
-        base_dir = 'fit-view:/%s' % app
-        l = path.split('/')[:-1]
-        dirs = ['/'.join(l[:i+1]) for i in range(len(l))]
-        for d in dirs:
-            target = self.pub.opendir(base_dir+d)
-            if not target.exists:
-                target.create()
+        if not self._out_dir:
+            app = self._get_app_name()
+            base_dir = 'fit-view:/%s' % app
+            l = path.split('/')[:-1]
+            dirs = ['/'.join(l[:i+1]) for i in range(len(l))]
+            for d in dirs:
+                target = self.pub.opendir(base_dir+d)
+                if not target.exists:
+                    target.create()
 
     def _write_result(self, result, path):
         app = self._get_app_name()
-        path = 'fit-view:/%s%s' % (app, path.replace('.beh', '.fit'))
-        f = self.pub.open(path, 'wb')
+        if self._out_file:
+            path = self._out_file
+        elif self._out_dir:
+            path = '%s%s' % (self._out_dir, path.rsplit('.', 1)[0] + '.fit')
+        else:
+            path = 'fit-view:/%s%s' % (app, path.rsplit('.', 1)[0] + '.fit')
+        f = self.open(path, 'wb', default='behaviors')
         json.dump(result, f)
         f.close()
 

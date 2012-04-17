@@ -17,19 +17,53 @@ schema = u"""
  * 実際にファイルシステムやデータベースへの書き込みを行ったテストを行いたい場合、
  * no-dry-runオプションを付けて実行すること。
  */
-command run 
-         {"verbose": boolean?, 
-          "force": boolean?, 
-          "debug": boolean?,
-          "no-dry-run": boolean?,
-          "all-apps": boolean?} :: void -> void
-         {"verbose": boolean?, 
-         "force": boolean?, 
-          "debug": boolean?,
-         "no-dry-run": boolean?} [string] :: void -> void
+command run {
+    @[default(false)]
+    "debug": boolean?,
+
+    @[default(false)]
+    "force": boolean?,
+
+    @[default(false)]
+    "verbose": boolean?,
+
+    @[default(false)]
+    "no-dry-run": boolean?,
+
+    /** 検索するファイルの拡張子 */
+    @[default(".beh")]
+    "ext" : behExt?,
+
+    /** ファイルの検索を再帰的に行うかどうか */
+    @[default(false)]
+    "rec" : boolean?,
+
+    /** 処理結果の出力ファイル */
+    @[without("outdir")]
+    "out" : mafsPath?,
+
+    /** 処理結果の出力ディレクトリ */
+    @[without("out")]
+    "outdir" : mafsPath?,
+
+    /** すべてのアプリケーションを対象にする
+     * このオプションを指定するときは、
+     * 引数と、ext/rec/out/outdirオプションは指定できない。
+     */
+    @[default(false), without(["out", "ext", "outdir"])]
+    "all-apps": boolean?,
+  }
+  [string? path] :: void -> void
         reads [env, behaviors]
         uses [pub, interpreter, stream]
         refers python:caty.core.std.command.fit.Run;
+
+type mafsPath = string(remark="プレース修飾を許すパス名、末尾がスラッシュならディレクトリ");
+
+type behExt = (
+  ".beh"|".wiki"|".lit" |
+  "beh" |"wiki" |"lit" |
+);
 
 /**
  * ビヘイビアファイル一覧の出力。
@@ -67,4 +101,5 @@ command clean {"all": boolean?, "all-apps":boolean?} [string?] :: void -> void
 command report {"all": boolean?} :: void -> void
     reads [env, pub]
     refers python:caty.core.std.command.fit.SendReport;
+
 """
