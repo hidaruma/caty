@@ -1,0 +1,35 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= NewFITのFITテスト
+
+== !setup
+
+=== !file:/test.beh
+
+{{{
+ = FITテスト
+ 
+ == !exec
+  
+ |= !input |= !command   |= !output |
+ |"hello"  | text:toupper|"HELLO"   |
+
+}}}
+
+== !exec
+
+|= !command  |= !params                                 |= !output | 
+| fit:run --out=pub@this:/test.fit | pub@this:/test.beh |  null    |
+
+== !postCond
+
+|= !command    |= !params           |= !output | 
+| file:exists  | pub@this:/test.fit | @OK "pub@this:/test.fit" |
+| %succ        |                    | 1 |
+
+
+=== !name:succ
+
+{{{
+json:read /test.fit  | pv succ
+}}}

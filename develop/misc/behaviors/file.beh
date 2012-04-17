@@ -1,4 +1,4 @@
-= FITで仮想的にファイルを作る (動いた)
+= FITで仮想的にファイルを作り操作する
 
 == !setup
 
@@ -7,15 +7,22 @@
 Hello, world.
 }}}
 
+=== !schema:/t.casm
+
+{{{
+module t;
+type t = string;
+}}}
+
+
 == !exec //ファイルを読み出してみる
 
-|= command |= params       |= output  |
-|file:read | /t.txt        |"Hello, world." |
+|= !command |= !params       |= !output  |
+|file:read  | /t.txt         |"Hello, world." |
 
 
-== 説明、問題点
-
-現状、なぜか動いてない。なぜだ？
-
-動いたよーー。
+|= !command  |= !params             |= !output  |
+| file:list  |schemata@this:/ .casm ||
+| file:exists|schemata@this:/t.casm ||
+| file:read  |schemata@this:/t.casm ||
 
