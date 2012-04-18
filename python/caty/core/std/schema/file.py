@@ -88,7 +88,7 @@ command mkdir [string] :: void -> void
  */
 command list {"long":boolean?, "kind":string?, "rec": boolean?} [string, string?] :: 
     void -> [DirectoryEntry*]
-    reads [pub, data, scripts, include, sysfiles]
+    reads [pub, data, scripts, include, sysfiles, behaviors]
     refers python:caty.core.std.command.file.LsDir;
 
 

@@ -91,7 +91,12 @@ class Run(Internal, MafsMixin):
         elif self._out_dir:
             path = '%s%s' % (self._out_dir, path.rsplit('.', 1)[0] + '.fit')
         else:
-            path = 'pub@fit-view:/%s%s' % (app, path.rsplit('.', 1)[0] + '.fit')
+            _path = 'pub@fit-view:/%s%s' % (app, path.rsplit('.', 1)[0] + '.fit')
+            if self._path:
+                _p, opener = self.parse_canonical_path(self._path, 'behaviors')
+                if opener != self.behaviors:
+                    _path = path
+            path = _path
         f = self.open(path, 'wb', default='behaviors')
         json.dump(result, f)
         f.close()
