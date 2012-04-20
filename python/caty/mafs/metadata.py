@@ -184,13 +184,13 @@ default_types = {
         u"isText": False, 
         u"contentType": u"image/jpeg"
     }, 
-    u".xml": {
-        u"isText": True, 
-        u"contentType": u"text/xml"
-    }, 
     u".jpeg": {
         u"isText": False, 
         u"contentType": u"image/jpeg"
+    }, 
+    u".xml": {
+        u"isText": True, 
+        u"contentType": u"text/xml"
     }, 
     u".ps": {
         u"isText": False, 
@@ -200,10 +200,6 @@ default_types = {
         u"isText": True, 
         u"contentType": u"text/tab-separated-values"
     }, 
-    u".caty": {
-        u"isText": True, 
-        u"contentType": u"application/x-tex"
-    }, 
     u".gif": {
         u"isText": False, 
         u"contentType": u"image/gif"
@@ -212,22 +208,25 @@ default_types = {
         u"isText": True, 
         u"contentType": u"text/html"
     }, 
+    u".htm": {
+        u"isText": True, 
+        u"contentType": u"text/html"
+    }, 
+    u".xhtml": {
+        u"isText": True, 
+        u"contentType": u"text/html"
+    }, 
     u".txt": {
         u"isText": True, 
         u"contentType": u"text/plain"
-    }, 
-    u".mpeg": {
-        u"isText": False, 
-        u"contentType": u"video/mpeg"
     }, 
     u".rdf": {
         u"isText": True, 
         u"contentType": u"application/rdf+xml"
     }, 
-    u".wav": {
-         
+    u".mpeg": {
         u"isText": False, 
-        u"contentType": u"audio/x-wav"
+        u"contentType": u"video/mpeg"
     }, 
     u".mpg": {
         u"isText": False, 
@@ -237,13 +236,9 @@ default_types = {
         u"isText": False, 
         u"contentType": u"video/mpeg"
     }, 
-    u".htm": {
-        u"isText": True, 
-        u"contentType": u"text/html"
-    }, 
-    u".xhtml": {
-        u"isText": True, 
-        u"contentType": u"text/html"
+    u".wav": {
+        u"isText": False, 
+        u"contentType": u"audio/x-wav"
     }, 
     u".zip": {
         u"isText": False, 
@@ -267,11 +262,15 @@ default_types = {
     }, 
     u".caty": {
         u"isText": True,
-        u"contentType": u""
+        u"contentType": u"text/x-catyscript"
     },
     u".icaty": {
         u"isText": True,
-        u"contentType": u""
+        u"contentType": u"text/x-catyscript"
+    },
+    u".wiki": {
+        u"isText": True,
+        u"contentType": u"text/x-wiki"
     },
     u".json": {
         u"isText": True,
@@ -336,7 +335,7 @@ default_types = {
     },
     u".tex": {
         u"isText": True,
-        u"contentType": u"text/plain"
+        u"contentType": u"application/x-tex"
     },
     # これがないと一部システムが正常に動作しない
     u".py": {
