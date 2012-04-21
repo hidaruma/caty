@@ -1,0 +1,37 @@
+{
+ "home@wiki" : {
+   "baseDir" : "./",
+   "pattern" : "/**",
+   "excludePattern" : ["**.tmp", "**.log", "**.orig"]
+ },
+
+ "pub@wiki" :  {
+   "baseDir" : "./pub/",
+   "pattern" : "**",
+   "excludePattern" : ["**.tmp", "**.orig"]
+ },
+ "include@wiki" : {
+   "baseDir" : "./include/",
+   "pattern" : "**",
+   "excludePattern" : ["**.tmp", "**.orig"]
+ },
+ "actions@wiki" : {
+   "baseDir" : "./actions/",
+   "pattern" : "**",
+   "excludePattern" : ["**.tmp", "**.orig"]
+ },
+ "schemata@wiki" : {
+   "baseDir" : "./schemata/",
+   "pattern" : "**",
+   "excludePattern" : ["**.tmp", "**.orig"]
+ },
+ "scripts@wiki" : {
+   "baseDir" : "./scripts/",
+   "pattern" : "*.caty"
+ },
+
+ "messages@wiki" : {
+   "baseDir" : "./messages/",
+   "pattern" : "*.xjson"
+ }
+}

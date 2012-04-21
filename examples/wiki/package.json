@@ -1,0 +1,36 @@
+{
+   "name": "caty-example-Wiki",
+   "version": "0.2.0",
+   "uuid" : "2e964d8e-0bcc-4dd6-8cbd-1dd05c864aea",
+   "maintainers": [
+       {
+           "name": "Kuwata, Chikara",
+           "email": "chikara.kuwata@gmail.com",
+           "web": "website: http://return0.info" 
+       }
+   ],
+   "bugs": {
+       "web": "https://bitbucket.org/project_caty/dev/issues"
+   },
+   "licenses": [
+       {
+           "type": "MIT",
+           "url": "http://www.opensource.org/licenses/mit-license.php" 
+       } 
+   ],
+   "repositories": [
+       {
+           "type": "hg",
+           "url": "https://bitbucket.org/project_caty/dev/" 
+       } 
+   ],
+  "dependencies": {
+       "caty-core": "0.2.0"
+   },
+   "os": ["linux", "macos", "win"],
+   "cpu": ["x86", "ppc", "x86_64"],
+   "engines": ["python2.5", "python2.6"],
+   "scripts": {
+       "install": "./install.py"
+   }
+}

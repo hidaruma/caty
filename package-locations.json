@@ -1,3 +1,4 @@
 {
-  "caty-core" : "./"
+  "caty-core" : "./",
+  "caty-example-Wiki" : "./examples/wiki/"
 }
