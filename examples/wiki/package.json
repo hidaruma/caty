@@ -1,12 +1,12 @@
 {
-   "name": "caty-example-Wiki",
+   "name": "caty-example-wiki",
    "version": "0.2.0",
    "uuid" : "2e964d8e-0bcc-4dd6-8cbd-1dd05c864aea",
    "maintainers": [
        {
            "name": "Kuwata, Chikara",
            "email": "chikara.kuwata@gmail.com",
-           "web": "website: http://return0.info" 
+           "web": "http://return0.info" 
        }
    ],
    "bugs": {
