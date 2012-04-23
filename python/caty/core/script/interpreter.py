@@ -426,9 +426,9 @@ class CommandExecutor(BaseInterpreter):
 
     def __truth(self, v, node):
         if node.indef:
-            return v == True or tag(v) == 'True' or tag(v) == 'OK' or tag(v) == 'Indef'
+            return (v == True and isinstance(v, bool)) or tag(v) == 'True' or tag(v) == 'OK' or tag(v) == 'Indef'
         else:
-            return v == True or tag(v) == 'True' or tag(v) == 'OK'
+            return (v == True and isinstance(v, bool)) or tag(v) == 'True' or tag(v) == 'OK'
 
     def visit_start(self, node):
         from caty.core.facility import TransactionAdaptor
