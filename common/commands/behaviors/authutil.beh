@@ -24,7 +24,7 @@
 === !name: diff
 
 {{{
-eq --boolean
+eq --boolean | filter:not
 }}}
 
 == authutil:check-token
