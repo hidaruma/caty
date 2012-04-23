@@ -709,12 +709,19 @@ command findpv<T default any> [string] :: object -> @EXISTS T | @NO null
     
 /**
  * 二つの入力値の比較を行う。
- * 両者が同じであれば @Same タグ付きで値が返り、そうでなければ @Diff タグ付きで返る。
- *
  */
-command eq :: [any, any] -> @Same any | @Diff [any, any]
+command eq 
+ {
+   @[default(false)]
+   "boolean": boolean? 
+ }
+:: [univ, univ] -> (
+     // --taggedオプションが指定されたとき
+     @True univ | @False [univ, univ] |
+     // --booleanオプションが指定されたとき
+     boolean
+   )
     refers python:caty.core.std.command.builtin.Equals;
-
 /**
  * 入力値二つのうち第一要素を Caty スクリプトの式、第二要素をその入力として実行する。
  * このコマンドはテストモードでしか動作しないため、通常は使う必要はない。

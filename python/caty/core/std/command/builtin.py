@@ -547,12 +547,20 @@ class FindPV(Builtin):
             return tagged(u'NO', None)
 
 class Equals(Builtin):
-    
+    def setup(self, opts):
+        self._boolean = opts['boolean']
+
     def execute(self, input):
         if input[0] == input[1]:
-            return tagged(u'Same', input[0])
+            if self._boolean:
+                return True
+            else:
+                return tagged(u'True', input[0])
         else:
-            return tagged(u'Diff', input)
+            if self._boolean:
+                return False
+            else:
+                return tagged(u'False', input)
 
 class Eval(Builtin):
     
