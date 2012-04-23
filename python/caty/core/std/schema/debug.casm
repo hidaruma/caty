@@ -1,7 +1,8 @@
-#coding: utf-8
+/**
+ * デバッグのためのユーティリティ
+ */
+module debug in casm;
 
-name = u'debug'
-schema = u"""
 /**
  * 入力値を標準出力に書き出す。それ以外の動作は pass と同じ。
  */
@@ -70,8 +71,9 @@ command annotate [string path] :: void -> string
 
 /**
  * デバッガを起動する。
+ * このデバッガはCatyランタイムのデバッグのためのものであり、
+ * CatyScriptのデバッグには使用できない。
  */
 command debugger :: void -> void
     refers python:caty.core.std.command.debug.Debugger;
 
-    """

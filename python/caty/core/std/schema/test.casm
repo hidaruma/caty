@@ -1,7 +1,4 @@
-#coding: utf-8
-
-name = 'test'
-schema = u"""
+module test;
 @[test] command list-testfiles [string] :: void -> [string*]
 reads testfiles
 refers python:caty.core.std.command.test.ListTestFiles;
@@ -18,4 +15,3 @@ refers python:caty.core.std.command.test.PP;
 @[test] command write-file [string] :: string -> void
 updates testfiles
 refers python:caty.core.std.command.test.WriteFile;
-"""

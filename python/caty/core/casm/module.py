@@ -550,18 +550,18 @@ class CoreModule(Module):
         self.filepath = u''
         self.compiled = False
 
-    def compile(self, schema_string, module):
+    def compile(self, schema_string, name):
         if self.is_root:
-            if module is None:
+            if name is None:
                 self._name = u'builtin'
                 for t in parse(schema_string):
                     t.declare(self)
             else:
                 mod = self.__class__(self._app, self)
-                mod.compile(schema_string, module)
+                mod.compile(schema_string, name)
                 self.sub_modules[mod.name] = mod
         else:
-            self._name = unicode(module.name)
+            self._name = name
             for t in parse(schema_string):
                 t.declare(self)
 

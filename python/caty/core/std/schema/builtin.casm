@@ -1,6 +1,8 @@
-#coding: utf-8
+/**
+ * 組み込みのコマンド/型
+ */
+module builtin in casm; 
 
-schema = u"""
 type CatyExecMode = [string*];
 
 type DirectoryEntry = {"name":string, "isDir":boolean, *:any};
@@ -1101,4 +1103,3 @@ command to-string :: any -> string
     refers python:caty.core.std.command.builtin.ToString;
    
 
-"""

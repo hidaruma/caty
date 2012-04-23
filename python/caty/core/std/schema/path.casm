@@ -1,6 +1,7 @@
-#coding:utf-8
-name = u'path'
-schema = u"""
+/**
+ * ファイルパス操作のユーティリティ
+ */
+module path in casm;
 
 type ext  = deferred string;
 
@@ -43,4 +44,3 @@ command matches
   [string] 
   :: string -> (@True string | @False string) | boolean
   refers python:caty.core.std.command.path.Matches;
-"""

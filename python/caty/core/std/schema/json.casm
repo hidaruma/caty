@@ -1,7 +1,8 @@
-#coding: utf-8
+/**
+ * JSON操作のコマンド群
+ */
+module json in casm;
 
-name = 'json'
-schema = u"""
 type AnyObject = {*:any};
 type StandardJson = string | integer | number | null | boolean | array | object;
 
@@ -68,4 +69,3 @@ command fix-on-selection :: any -> any
     throws BadSelection
     refers python:caty.core.std.command.jsonlib.FixOnSelection;
 
-"""

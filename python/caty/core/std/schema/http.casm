@@ -1,7 +1,8 @@
-#coding: utf-8
+/**
+ * HTTPレスポンス処理のコマンド群
+ */
+module http in casm;
 
-name='http'
-schema = u"""
 /**
  * 与えられたパスに対しての302 Foundレスポンスを出力する。
  */
@@ -31,4 +32,3 @@ command bad-request [string path, string method] :: void -> never
  */
 command not-allowed [string path, string method] :: void -> never
     refers python:caty.core.std.command.http.NotAllowed;
-"""

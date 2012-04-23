@@ -1,18 +1,41 @@
 #coding:utf-8
 from caty.core.casm.module import IntegratedModule
 from caty.core.command import Builtin, Internal, Syntax, Command
+import os
+import sys
 import types
 
-def initialize(system, builtins, std_modules):
-    builtin_schema = create_builtin_schema(builtins)
+def initialize(system, interpreter_module):
+    builtin_schema = create_builtin_schema(interpreter_module)
+    std_modules = ['authutil',
+                   'debug',
+                   'file',
+                   'filter',
+                   'fit',
+                   'gen',
+                   'http',
+                   'inspect',
+                   'json',
+                   'list',
+                   'logging',
+                   'os',
+                   'path',
+                   'set',
+                   'strg',
+                   'test',
+                   'text',
+                   'user',
+                   'viva',
+                   'xjson',
+    ]
     std_schema = map(lambda m:(m, create_std_schema(m)), std_modules)
     module = IntegratedModule(system)
     module.compile(builtin_schema, None)
-    for mod, schema in std_schema:
+    for name, schema in std_schema:
         try:
-            module.compile(schema, mod)
+            module.compile(schema, name)
         except:
-            print mod
+            print name
             raise
     return module
 
@@ -27,21 +50,28 @@ def filter_command(mod):
 
 @join
 @tolist
-def create_builtin_schema(modules):
-    u"""ビルトインモジュールのスキーマ定義の生成。
-    builtin.py の他、Caty スクリプトの内部で使われるコマンドの宣言、
-    Catyシステム全体に関わるスキーマの定義を行う。
-    """
-    yield 'module builtin;'
-    yield modules[0].schema
-    yield modules[1].schema
-    for s in filter_command(modules[1]):
+def create_builtin_schema(module):
+    yield import_caty_system_schema('builtin')
+    yield module.schema
+    for s in filter_command(module):
         yield s
+
 
 @join
 @tolist
-def create_std_schema(module):
-    yield u'module %s;' % module.name
-    yield module.schema
+def create_std_schema(name):
+    yield import_caty_system_schema(name)
     #for s in filter_command(module):
     #    yield s
+
+def import_caty_system_schema(name):
+    import caty
+    if hasattr(caty, '__loader__'):
+        loader = caty.__loader__
+        if hasattr(loader, 'zipfile'):
+            return unicode(loader.get_data(os.path.join(loader.prefix, 'caty/core/std/schema', (name+'.casm'))), 'utf-8')
+    return unicode(
+        open(os.path.join(os.path.dirname(sys.argv[0]), 'python/caty/core/std/schema', (name+'.casm'))).read(),
+        'utf-8')
+
+

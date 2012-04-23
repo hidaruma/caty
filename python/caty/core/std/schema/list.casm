@@ -1,7 +1,8 @@
-#coding: utf-8
+/**
+ * リスト操作のコマンド群
+ */
+module list in casm;
 
-name = 'list'
-schema = u"""
 /**
  * 二つのリストを入力として受け取り、それらの各要素をタプルにしたもののリストを返す。
  * 例えば [1,2,3] と ["a", "b", "c"] というデータに対しては、 [[1, "a"], [2, "b"], [3, "c"]] というデータを返す。
@@ -104,5 +105,4 @@ command range [integer start, integer end] :: void  -> [integer*]
  */
 command reverse<T default any> :: [T*] -> [T*]
     refers python:caty.core.std.command.listlib.Reverse;
-"""
 

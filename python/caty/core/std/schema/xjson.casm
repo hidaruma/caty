@@ -1,7 +1,8 @@
-#coding: utf-8
+/**
+ * XJSON操作のコマンド群
+ */
+module xjson in casm;
 
-name = 'xjson'
-schema = u"""
 type AnyObject = {*:any};
 
 /**
@@ -67,4 +68,3 @@ command put
 throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist, ConsistencyViolation ]
 refers python:caty.core.std.command.xjsonlib.Put;
 
-"""

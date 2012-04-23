@@ -1,7 +1,8 @@
-#coding: utf-8
+/**
+ * 組み込みのユーザ管理機能
+ */
+module user in casm;
 
-name = 'user'
-schema = u"""
 type UserInfo = {
     "userid": string,    // ID。この値は一意でなければならない。
     "username": string?, // 名前。必須ではない
@@ -98,5 +99,4 @@ command logout :: string -> Redirect
     uses [user, session]
     refers python:caty.core.std.command.user.Logout;
 
-"""
 

@@ -1,7 +1,8 @@
-#coding: utf-8
+/**
+ * テンプレートで使われるフィルターコマンド群
+ */
+module filter in casm;
 
-name = u'filter'
-schema = u"""
 /**
  * 入力値がnullまたは未定義でなければtrue, nullであればfalseを返す。
  *
@@ -97,4 +98,3 @@ command json :: univ -> string {json:pretty};
 @[filter]
 command javascript :: univ -> univ {json:pretty|noescape};
 
-"""

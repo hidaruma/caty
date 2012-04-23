@@ -1,7 +1,8 @@
-#coding: utf-8
+/**
+ * システム情報の視覚化処理
+ */
+module viva in casm;
 
-name = u'viva'
-schema = u"""
 /** 
  * アクションモジュール（.caraファイル）を視覚化する。
  */
@@ -120,4 +121,3 @@ command draw-scenarios {
      uses pub
     refers python:caty.core.std.command.viva.cara.Scenarios;
 
-"""

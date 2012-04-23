@@ -4,27 +4,6 @@ from caty.core.application import *
 from caty.core.applicationgroup import *
 from caty.util.path import join
 from caty.core.script import node
-from caty.core.std.schema import (builtin, 
-                                  authutil,
-                                  debug, 
-                                  file, 
-                                  filtercmd, 
-                                  jsonlib, 
-                                  listlib, 
-                                  inspect,
-                                  logginglib,
-                                  strg, 
-                                  test, 
-                                  text, 
-                                  user, 
-                                  fit, 
-                                  gen,
-                                  oslib,
-                                  path, 
-                                  xjsonlib, 
-                                  setlib, 
-                                  viva,
-                                  http)
 
 from pbc import PbcObject, Contract
 
@@ -72,28 +51,7 @@ class System(PbcObject):
         # catyアプリケーション
         self._core_app = CoreApplication(self)
         self.__cout.writeln(self.i18n.get('Loading system data'))
-        self._casm = casm.initialize(self,
-                                     [builtin, node],
-                                     [
-                                     authutil,
-                                     debug, 
-                                     file, 
-                                     filtercmd, 
-                                     jsonlib, 
-                                     inspect,
-                                     listlib, 
-                                     logginglib,
-                                     strg, 
-                                     test, 
-                                     text, 
-                                     user, 
-                                     fit, 
-                                     gen,
-                                     oslib, 
-                                     xjsonlib, 
-                                     path,
-                                     viva,
-                                     http])
+        self._casm = casm.initialize(self, node)
 
         self._core_app._init()
         gag = ApplicationGroup('', self._global_config, no_ambient, no_app, app_names, self)

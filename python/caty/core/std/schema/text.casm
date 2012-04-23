@@ -1,7 +1,8 @@
-#coding: utf-8
+/**
+ * 文字列処理
+ */
+module text in casm;
 
-name = 'text'
-schema = u"""
 type RegexpMatch = {
     "src": string,
     "group": string,
@@ -110,5 +111,4 @@ command verify-chars
   "max" : integer(minimum=0)?
 } :: (string|binary) -> (@OK [] | @NG [IllegalCharReport, IllegalCharReport*])
 refers python:caty.core.std.command.text.VerifyChars;
-"""
 
