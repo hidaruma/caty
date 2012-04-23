@@ -24,10 +24,7 @@
 === !name: diff
 
 {{{
-eq | when {
-    Same => false,
-    Diff => true
-}
+eq --boolean
 }}}
 
 == authutil:check-token

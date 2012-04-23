@@ -31,10 +31,7 @@
 === !name:userids
 
 {{{
-each {pv userid} | [pass, ["foo", "bar"]] | eq | when {
-    Same => true,
-    Diff => false,
-}
+each {pv userid} | [pass, ["foo", "bar"]] | eq --boolean
 }}}
 
 == user:delete
