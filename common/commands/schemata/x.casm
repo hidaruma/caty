@@ -1,0 +1,48 @@
+module x in casm;
+
+command a :: void -> string {
+  "x"
+};
+
+command b :: string -> string {
+  text:toupper
+};
+
+command c :: string -> [string, string] {
+  [$, $]
+};
+
+command d :: [string*] -> [string*] {
+  [$, ["a"]] | list:concat
+};
+command show 
+ {
+   "font" : string?,
+ } 
+:: any -> void 
+{
+  pass > in;
+  %font? |
+  when {
+   undefind => dump --prefix="2" ,
+   *        => dump --prefix="3" ,
+  }
+};
+
+const pi = 3.14;
+const indef = @Indef;
+const nothing = undefined;
+type OK = @OK (null | nothing);
+const htmlDesc = '''
+<p>これは<strong>定数</strong>定義のテストです。</p>
+''';
+
+type Result = {
+ "resultCode" : ("OK" | "NG"),
+ "message" : string,
+  * : any?
+};
+type ResultOK = @?(resultCode: "OK") Result;
+type ResultNG = @?(resultCode: "NG") Result;
+
+type OKorNG = ResultOK | ResultNG;
