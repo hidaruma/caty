@@ -1,0 +1,32 @@
+{
+ "home@caty" : {
+   "descriptiton" : "Caty toplevel dir",
+   "baseDir" : "./",
+   "pattern" : "/**",
+   "excludePattern" : ["**.tmp", "**.log", "**.orig"]
+ },
+
+ "caty@caty" :  {
+   "baseDir" : "./python/caty/",
+   "pattern" : ["*.py", "*.txt"],
+   "excludePattern" : ["**.orig"]
+ },
+ "lib@caty" : {
+   "baseDir" : "./lib/",
+   "pattern" : "*.py"
+ },
+ "thirdparty@caty" : {
+   "baseDir" : "./python/lib/",
+   "pattern" : ["*.py", "*.txt", "*.c"],
+   "files" : ["PKG-INFO", "README", "LICENSE"],
+   "excludePattern" : ["**.orig"]
+ },
+ "tools@caty" : {
+   "baseDir" : "./tools/",
+   "pattern" : ["**.py", "**.sh", "**.bat", "**.cmd", "**.txt", "**.wiki"]
+ },
+ "messages@caty" : {
+   "baseDir" : "./messages/",
+   "pattern" : "*.xjson"
+ }
+}
