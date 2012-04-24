@@ -153,3 +153,28 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 
 
 余分な括弧を含む空オブジェクト {,} は認めてないのか？
+
+
+== eq (2)
+
+複合データの等値性を判定する。
+
+
+=== !exec
+
+
+|= input         |= command      |=output   |= 備考 |
+|[[], [,]]       | eq --boolean  | true     | | 
+|[[], [,,]]      | eq --boolean  | true     | | 
+|[[,1], [,1]]    | eq --boolean  | true     | | 
+|[[1,], [1,]]    | eq --boolean  | true     | | 
+|[[1,], [1]]     | eq --boolean  | true     | | 
+|[[1,,], [1]]    | eq --boolean  | true     | | 
+|[[1,,2], [1,,2,]]| eq --boolean  | true     | | 
+|[[1], [1,undefined]]| eq --boolean  | true     | | 
+|[[,1], [undefined,1]]| eq --boolean  | true     | | 
+|[{}, {"a":undefined}]| eq --boolean | true     | | 
+|[{"b":undefined}, {"a":undefined}]  | eq  --boolean | true     | | 
+|[{}, {"a":undefined,"b":undefined}] | eq --boolean  | true     | | 
+
+
