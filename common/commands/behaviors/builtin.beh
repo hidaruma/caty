@@ -107,3 +107,40 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 |undefined | typeof   | "undefined" | 未定義型 |
 |foreign   | typeof   | "foreign" | フォーリン型 |
 
+== eq
+
+データの等値性を判定する。
+
+
+=== !exec
+
+
+|= input         |= command      |=output   |= 備考 |
+|[1, 1.0]        | eq --boolean  | true     |数値は値で比較する |
+|[1.0, 1.01]     | eq --boolean  | false    | |
+|[1.0, 1.00]     | eq --boolean  | true     | |
+|[2E+3, 0.2e4]   | eq --boolean  | true     | |
+|[2E+3, 0.02e+5] | eq --boolean  | true     | |
+|[2E+3, 2000]    | eq --boolean  | true     | |
+|[2.1e3, 2100]   | eq --boolean  | true     | |
+|[2.1e3, 2.10e3] | eq --boolean  | true     | |
+|[1, true]       | eq --boolean  | false    |1とtrueは別物 |
+|[0, false]      | eq --boolean  | false    |0とfalseは別物 |
+|["true", true]  | eq --boolean  | false    |"true"とtrueは別物 |
+|["false", false] | eq --boolean  | false    |"false"とfalseは別物 |
+|[null, false]   | eq --boolean  | false    |nullとfalseは別物 |
+|["null", null]  | eq --boolean  | false    |"null"とnullは別物 |
+|["", false]     | eq --boolean  | false    |""とfalseは別物 |
+|["", null]      | eq --boolean  | false    |""とnullは別物 |
+|[[], false]     | eq --boolean  | false    |[]とfalseは別物 |
+|[{}, false]     | eq --boolean  | false    |{}とfalseは別物 |
+|[[], {}]        | eq --boolean  | false    |[]と{}は別物 |
+|[[undefined], []] | eq --boolean | true    |undefineがあっても空配列 |
+|[{"a":undefined}, {}] | eq --boolean | true|undefineがあっても空オブジェクト |
+|[foreign, null] | eq --boolean  | false    |foreignとnullは別物 |
+|[undefined, foreign]|eq --boolean| false   |undefinedとforeingは別物 |
+|[foreign, foreign]|eq --boolean | true     |2つのforeingは同じ |
+|[undefined, null]|eq --boolean  | false    |undefinedとnullは違う |
+|[null, undefined]|eq --boolean  | false    |等号は対称 |
+|[undefined, undefined]|eq --boolean  | true|2つのundefinedは等しい |
+
