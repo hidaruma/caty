@@ -54,22 +54,6 @@ class Command(object):
         self.__facility_names = []
         self.__i18n = None
         self.__pos = pos
-        _ta = []
-        schema = self.profile_container.module.schema_finder
-        l = len(self.__type_args)
-        for i, p in enumerate(self.profile_container.type_params):
-            if i < l:
-                t = self.__type_args[i]
-                s = schema[t]
-                x = p.clone(set())
-                x._schema = s
-                _ta.append(x)
-        self.__type_params = _ta
-        if self.type_params:
-            self._in_schema, self._out_schema = self.profile.apply(self, self.profile_container.module)
-        else:
-            self._in_schema = self.profile.in_schema
-            self._out_schema = self.profile.out_schema
 
     def get_command_id(self):
         return self._id
@@ -126,6 +110,22 @@ class Command(object):
         """
         _set = set()
         self.__current_application = facilities.app
+        _ta = []
+        schema = facilities['schema'].read_mode
+        l = len(self.__type_args)
+        for i, p in enumerate(self.profile_container.type_params):
+            if i < l:
+                t = self.__type_args[i]
+                s = schema[t]
+                x = p.clone(set())
+                x._schema = s
+                _ta.append(x)
+        self.__type_params = _ta
+        if self.type_params:
+            self._in_schema, self._out_schema = self.profile.apply(self, self.profile_container.module)
+        else:
+            self._in_schema = self.profile.in_schema
+            self._out_schema = self.profile.out_schema
         self.__i18n = I18nMessageWrapper(self._defined_application.i18n, facilities['env'])
         for mode, decl in self.profile.facilities:
             name = decl.name

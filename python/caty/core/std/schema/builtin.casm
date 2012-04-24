@@ -367,7 +367,6 @@ type Exception = @*! {
 
 type Positive = (true  | @True univ  | @OK univ);
 type Negative = (false | @False univ | @NG univ);
-type Indef    = @Indef univ;
 
 const indef = @Indef;
 
