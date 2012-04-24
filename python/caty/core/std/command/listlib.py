@@ -1,6 +1,7 @@
 # coding: utf-8
 from caty.core.command import Builtin
 from caty import UNDEFINED
+from caty.core.spectypes import reduce_undefined
 
 name = 'list'
 schema =''
@@ -40,7 +41,7 @@ class UnZip3(Builtin):
 class Length(Builtin):
 
     def execute(self, input):
-        return len(input)
+        return len(reduce_undefined(input))
 
 class Cycle(Builtin):
 
