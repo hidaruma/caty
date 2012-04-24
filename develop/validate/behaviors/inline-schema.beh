@@ -18,6 +18,6 @@ type max10 = integer(maximum =10);
 == !exec;
 
 |= command        |= input  |= params   |= output  |= 理由 |
-| validate --pred | 0       |  integer  | true     | |
-| validate --pred | ""      |  integer  | false    |BAD_TYPE, integer |
-| validate --pred | 0       |  local:min1  | false   | VIOLATE_MINIMUM, 1|
+| validate --boolean | 0       |  integer  | true     | |
+| validate --boolean | ""      |  integer  | false    |BAD_TYPE, integer |
+| validate --boolean | 0       |  local:min1  | false   | VIOLATE_MINIMUM, 1|

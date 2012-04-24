@@ -36,32 +36,32 @@ type t2 = {[
 
 
 |= input       |= command                  |= output |
-|[]            | validate --pred bag:t1    | true    |
-|[1]           | validate --pred bag:t1    | true    |
-|[1,2]         | validate --pred bag:t1    | true    |
-|[0,1,2]       | validate --pred bag:t1    | true    |
-|[{"a":1}]     | validate --pred bag:t1    | true    |
-|[{"a":1},-1]  | validate --pred bag:t1    | true    |
-|[{"a":1},-1,0]| validate --pred bag:t1    | true    |
-|[@bar{"x":""}]| validate --pred bag:t1    | true    |
-|[@bar{"x":""},0]| validate --pred bag:t1  | true    |
-|[@bar{"x":""},{"a":1}]| validate --pred bag:t1  | true    |
-|[@bar{},{"a":1}]| validate --pred bag:t1  | true    |
-|[{"a":1,"b":2}]| validate --pred bag:t1   | true    |
+|[]            | validate --boolean bag:t1    | true    |
+|[1]           | validate --boolean bag:t1    | true    |
+|[1,2]         | validate --boolean bag:t1    | true    |
+|[0,1,2]       | validate --boolean bag:t1    | true    |
+|[{"a":1}]     | validate --boolean bag:t1    | true    |
+|[{"a":1},-1]  | validate --boolean bag:t1    | true    |
+|[{"a":1},-1,0]| validate --boolean bag:t1    | true    |
+|[@bar{"x":""}]| validate --boolean bag:t1    | true    |
+|[@bar{"x":""},0]| validate --boolean bag:t1  | true    |
+|[@bar{"x":""},{"a":1}]| validate --boolean bag:t1  | true    |
+|[@bar{},{"a":1}]| validate --boolean bag:t1  | true    |
+|[{"a":1,"b":2}]| validate --boolean bag:t1   | true    |
 
 
 |= input       |= command                  |= output |
-|[]            | validate --pred bag:t2    | true    |
-|[1]           | validate --pred bag:t2    | true    |
-|[1,2]         | validate --pred bag:t2    | false   |
-|[0,1,2]       | validate --pred bag:t2    | false   |
-|[{"a":1}]     | validate --pred bag:t2    | true    |
-|[{"a":1},-1]  | validate --pred bag:t2    | true    |
-|[{"a":1},-1,0]| validate --pred bag:t2    | false   |
-|[@bar{"x":""}]| validate --pred bag:t2    | true    |
-|[@bar{"x":""},0]| validate --pred bag:t2  | true    |
-|[@bar{"x":""},{"a":1}]| validate --pred bag:t2  | true    |
-|[@bar{},{"a":1}]| validate --pred bag:t2  | true    |
-|[{"a":1,"b":2}]| validate --pred bag:t2   | true    |
+|[]            | validate --boolean bag:t2    | true    |
+|[1]           | validate --boolean bag:t2    | true    |
+|[1,2]         | validate --boolean bag:t2    | false   |
+|[0,1,2]       | validate --boolean bag:t2    | false   |
+|[{"a":1}]     | validate --boolean bag:t2    | true    |
+|[{"a":1},-1]  | validate --boolean bag:t2    | true    |
+|[{"a":1},-1,0]| validate --boolean bag:t2    | false   |
+|[@bar{"x":""}]| validate --boolean bag:t2    | true    |
+|[@bar{"x":""},0]| validate --boolean bag:t2  | true    |
+|[@bar{"x":""},{"a":1}]| validate --boolean bag:t2  | true    |
+|[@bar{},{"a":1}]| validate --boolean bag:t2  | true    |
+|[{"a":1,"b":2}]| validate --boolean bag:t2   | true    |
 
 

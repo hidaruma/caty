@@ -34,7 +34,7 @@ class T002(Command):
 == !exec
 
 |= input |= command        |= params |= output |= exception |= 備考  |
-| 10     | validate --pred | integer | true    |            | 10は整数か？       |
+| 10     | validate --boolean | integer | true    |            | 10は整数か？       |
 
 
 |= command |= params |= output |= exception |= 備考  |

@@ -364,6 +364,15 @@ type Exception = @*! {
   *: any?
 };
 
+
+type Positive = (true  | @True univ  | @OK univ);
+type Negative = (false | @False univ | @NG univ);
+type Indef    = @Indef univ;
+
+const indef = @Indef;
+
+type triboolean = (true | false | indef);
+
 /**********************
  ******** 例外 ********
  **********************/
@@ -644,7 +653,7 @@ command translate [string] :: WebInput -> @OK any | @NG MiniErrorInfo
 /**
  * 引数で指定された型で入力値を検証する。
  */
-command validate {"pred":boolean?} [string] :: univ -> @OK univ | @NG MiniErrorInfo | boolean
+command validate {"boolean": boolean?} [string] :: univ -> @OK univ | @NG MiniErrorInfo | boolean
     reads schema
     refers python:caty.core.std.command.builtin.Validate;
 

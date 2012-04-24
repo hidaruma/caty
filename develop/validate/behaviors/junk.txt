@@ -2,23 +2,23 @@
 
 
 |= command        |= input       |= params      |= output  |= 理由 |= パス |
-| validate --pred |[0,1,""]      | t03.iis      | true     | | |
-| validate --pred |[0,1,"", 2]   | t03.iis      | false    | UNEXPECTED_PROPERTY, object, 3| |
-| validate --pred |[0,1,"", 2]   | t03.iis      | false    | UNEXPECTED_PROPERTY, object, 3| |
-| validate --pred |[0, 1, 2]     | t03.iis      | false    | BAD_TYPE, string  | 2 |
-| validate --pred |["", 1, ""]   | t03.iis      | false    | BAD_TYPE, integer | 0 |
-| validate --pred |["", 1, ""]   | t03.iis      | false    | BAD_TYPE, integer | 0 |
-| validate --pred |["", "", ""]  | t03.ssStar   | true     | | |
-| validate --pred |["", "", "", ""]| t03.ssStar   | true   | | |
-| validate --pred |[""]          | t03.ssStar   | true     | | |
-| validate --pred |[]            | t03.ssStar   | false    | MISSING_PROPERTY, object, 0| |
-| validate --pred |["", 1]       | t03.ssStar   | false    | BAD_TYPE, string | 1 |
-| validate --pred |[1, ""]       | t03.isOpt    | true     | | |
-| validate --pred |[1, "", 0]    | t03.isOpt    | false    | UNEXPECTED_PROPERTY, object, 2| |
-| validate --pred |[1,  0]       | t03.isOpt    | false    | BAD_TYPE, string | 1 |
-| validate --pred |[1]           | t03.isOpt    | true     | | |
-| validate --pred |[""]          | t03.isOpt    | false    | BAD_TYPE, integer | 0 |
-| validate --pred |[]            | t03.isOpt    | true     | | |
+| validate --boolean |[0,1,""]      | t03.iis      | true     | | |
+| validate --boolean |[0,1,"", 2]   | t03.iis      | false    | UNEXPECTED_PROPERTY, object, 3| |
+| validate --boolean |[0,1,"", 2]   | t03.iis      | false    | UNEXPECTED_PROPERTY, object, 3| |
+| validate --boolean |[0, 1, 2]     | t03.iis      | false    | BAD_TYPE, string  | 2 |
+| validate --boolean |["", 1, ""]   | t03.iis      | false    | BAD_TYPE, integer | 0 |
+| validate --boolean |["", 1, ""]   | t03.iis      | false    | BAD_TYPE, integer | 0 |
+| validate --boolean |["", "", ""]  | t03.ssStar   | true     | | |
+| validate --boolean |["", "", "", ""]| t03.ssStar   | true   | | |
+| validate --boolean |[""]          | t03.ssStar   | true     | | |
+| validate --boolean |[]            | t03.ssStar   | false    | MISSING_PROPERTY, object, 0| |
+| validate --boolean |["", 1]       | t03.ssStar   | false    | BAD_TYPE, string | 1 |
+| validate --boolean |[1, ""]       | t03.isOpt    | true     | | |
+| validate --boolean |[1, "", 0]    | t03.isOpt    | false    | UNEXPECTED_PROPERTY, object, 2| |
+| validate --boolean |[1,  0]       | t03.isOpt    | false    | BAD_TYPE, string | 1 |
+| validate --boolean |[1]           | t03.isOpt    | true     | | |
+| validate --boolean |[""]          | t03.isOpt    | false    | BAD_TYPE, integer | 0 |
+| validate --boolean |[]            | t03.isOpt    | true     | | |
 
 
 
@@ -43,10 +43,10 @@ type int_max10 = integer(maximum =10);
 
 
 
-/ validate --pred | ""      |  integer       | false    |
+/ validate --boolean | ""      |  integer       | false    |
 
 
- validate --pred | 0       |  int.int_min1  | false   |VIOLATE_MINIMUM, integer, 0 |
+ validate --boolean | 0       |  int.int_min1  | false   |VIOLATE_MINIMUM, integer, 0 |
 
  理由 
 

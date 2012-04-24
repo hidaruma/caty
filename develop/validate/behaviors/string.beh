@@ -3,9 +3,9 @@
 == !exec
 
 |= input   |= command       |= params    |= output   |= 備考 |
-| "hello" |validate --pred  | htw:Text  | true | |
-| 12      |validate --pred  | htw:Text  | false | number |
-| -5      |validate --pred  | htw:Text  | false | number |
+| "hello" |validate --boolean  | htw:Text  | true | |
+| 12      |validate --boolean  | htw:Text  | false | number |
+| -5      |validate --boolean  | htw:Text  | false | number |
 
 
 == 説明

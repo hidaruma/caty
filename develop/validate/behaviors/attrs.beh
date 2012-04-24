@@ -74,36 +74,36 @@ type isOpt = [integer?, string?];
 == !exec;
 
 |= command        |= input  |= params      |= output  |= NG 理由 |
-| validate --pred | 0       |  integer     | true     | |
-| validate --pred | ""      |  integer     | false    |BAD_TYPE string, integer |
-| validate --pred | 0       |  t01:min1    | false    |VIOLATE_ATTR minimum =  1 |
-| validate --pred | 11      |  t01:max10   | false    |VIOLATE_ATTR maximum =  10 |
-| validate --pred | -1      |  t01:min1max10 | false  |VIOLATE_ATTR minimum =  1 |
-| validate --pred | 100     |  t01:min1max10 | false  |VIOLATE_ATTR maximum =  10 |
+| validate --boolean | 0       |  integer     | true     | |
+| validate --boolean | ""      |  integer     | false    |BAD_TYPE string, integer |
+| validate --boolean | 0       |  t01:min1    | false    |VIOLATE_ATTR minimum =  1 |
+| validate --boolean | 11      |  t01:max10   | false    |VIOLATE_ATTR maximum =  10 |
+| validate --boolean | -1      |  t01:min1max10 | false  |VIOLATE_ATTR minimum =  1 |
+| validate --boolean | 100     |  t01:min1max10 | false  |VIOLATE_ATTR maximum =  10 |
 
 |= command        |= input  |= params      |= output  |= NG 理由 |
-| validate --pred | "hello" |  string      | true     | |
-| validate --pred | [1, 2]  |  string      | false    |BAD_TYPE array, string |
-| validate --pred | "one"   |  t01:minL5 | false      |VIOLATE_ATTR minLegth = 5 |
-| validate --pred | "hello" |  t01:minL5 | true       | |
-| validate --pred | {}      |  t01:minL5 | false      |BAD_TYPE object, string |
-| validate --pred | "hello,"|  t01:maxL8 | true       | |
-| validate --pred | "hello, world"| t01:maxL8 | false |VIOLATE_ATTR maxlegth =  8 |
-| validate --pred | ""      |  t01:minL5maxL8 | false |VIOLATE_ATTR minLegth = 5 |
-| validate --pred | "longlongword"| t01:minL5maxL8 | false |VIOLATE_ATTR maxLegth = 8 |
+| validate --boolean | "hello" |  string      | true     | |
+| validate --boolean | [1, 2]  |  string      | false    |BAD_TYPE array, string |
+| validate --boolean | "one"   |  t01:minL5 | false      |VIOLATE_ATTR minLegth = 5 |
+| validate --boolean | "hello" |  t01:minL5 | true       | |
+| validate --boolean | {}      |  t01:minL5 | false      |BAD_TYPE object, string |
+| validate --boolean | "hello,"|  t01:maxL8 | true       | |
+| validate --boolean | "hello, world"| t01:maxL8 | false |VIOLATE_ATTR maxlegth =  8 |
+| validate --boolean | ""      |  t01:minL5maxL8 | false |VIOLATE_ATTR minLegth = 5 |
+| validate --boolean | "longlongword"| t01:minL5maxL8 | false |VIOLATE_ATTR maxLegth = 8 |
 
 
 |= command        |= input  |= params      |= output  |= NG 理由 |
-| validate --pred | []      | array        | true     | |
-| validate --pred | [1,2, ""]| array       | true     | |
-| validate --pred | "a"     | t01:minI2    | false    |BAD_TYPE string, array |
-| validate --pred | [1,2]   | t01:minI2    | true     | |
-| validate --pred | [1]     | t01:minI2    | false    |VIOLATE_ATTR minItems =  2 |
-| validate --pred | []      | t01:minI2    | false    |VIOLATE_ATTR minItems =  2 |
-| validate --pred | [1,2,3] | t01:maxI4    | true     | |
-| validate --pred | [1,2,3,4,5] | t01:maxI4| false    |VIOLATE_ATTR maxItems =  4 |
-| validate --pred | ["a"]   | t01:minI2maxI4| false   |VIOLATE_ATTR minItems =  2 |
-| validate --pred | ["", ""]| t01:minI2maxI4| true    | |
-| validate --pred | [0,1,2,3,4]| t01:minI2maxI4| false|VIOLATE_ATTR maxItems =  4 |
+| validate --boolean | []      | array        | true     | |
+| validate --boolean | [1,2, ""]| array       | true     | |
+| validate --boolean | "a"     | t01:minI2    | false    |BAD_TYPE string, array |
+| validate --boolean | [1,2]   | t01:minI2    | true     | |
+| validate --boolean | [1]     | t01:minI2    | false    |VIOLATE_ATTR minItems =  2 |
+| validate --boolean | []      | t01:minI2    | false    |VIOLATE_ATTR minItems =  2 |
+| validate --boolean | [1,2,3] | t01:maxI4    | true     | |
+| validate --boolean | [1,2,3,4,5] | t01:maxI4| false    |VIOLATE_ATTR maxItems =  4 |
+| validate --boolean | ["a"]   | t01:minI2maxI4| false   |VIOLATE_ATTR minItems =  2 |
+| validate --boolean | ["", ""]| t01:minI2maxI4| true    | |
+| validate --boolean | [0,1,2,3,4]| t01:minI2maxI4| false|VIOLATE_ATTR maxItems =  4 |
 
 

@@ -52,41 +52,41 @@ See schemata@this:/t05.casm, schemata@this:/t06.casm .
 == !exec
 
 |= command        |= params  |=  input   |= output   |= 備考   |
-| validate --pred | t06:Tree | null      | true      | nullは空木を表す |
-| validate --pred | t06:Tree | @leaf 12  | true      | リーフだけでもツリー |
-| validate --pred | t06:Tree | %t01      | true      | |
-| validate --pred | t06:Tree | %t02      | true      | |
-| validate --pred | t06:Tree | %t03      | true      | |
-| validate --pred | t06:Tree | %t04      | true      |ネスト |
-| validate --pred | t06:Tree | %t05      | false     |rightの省略は許されてない |
-| validate --pred | t06:Tree | %t06      | false     | @leafが常に必要 |
+| validate --boolean | t06:Tree | null      | true      | nullは空木を表す |
+| validate --boolean | t06:Tree | @leaf 12  | true      | リーフだけでもツリー |
+| validate --boolean | t06:Tree | %t01      | true      | |
+| validate --boolean | t06:Tree | %t02      | true      | |
+| validate --boolean | t06:Tree | %t03      | true      | |
+| validate --boolean | t06:Tree | %t04      | true      |ネスト |
+| validate --boolean | t06:Tree | %t05      | false     |rightの省略は許されてない |
+| validate --boolean | t06:Tree | %t06      | false     | @leafが常に必要 |
 
 
 
 |= command        |= params    |=  input   |= output   |= 備考   |
-| validate --pred | t05:NEData | null      | false     | null は空 |
-| validate --pred | t05:NEData | ""        | false     | "" は空 |
-| validate --pred | t05:NEData | []        | false     | [] は空 |
-| validate --pred | t05:NEData | {}        | false     | {}は空 |
-| validate --pred | t05:NEData | 23        | false     | 整数はお呼びじゃない |
-| validate --pred | t05:NEData | "hello"   | true      | |
-| validate --pred | t05:NEData | ["a"]     | true      | |
-| validate --pred | t05:NEData | [23]      | false     | |
+| validate --boolean | t05:NEData | null      | false     | null は空 |
+| validate --boolean | t05:NEData | ""        | false     | "" は空 |
+| validate --boolean | t05:NEData | []        | false     | [] は空 |
+| validate --boolean | t05:NEData | {}        | false     | {}は空 |
+| validate --boolean | t05:NEData | 23        | false     | 整数はお呼びじゃない |
+| validate --boolean | t05:NEData | "hello"   | true      | |
+| validate --boolean | t05:NEData | ["a"]     | true      | |
+| validate --boolean | t05:NEData | [23]      | false     | |
 
 
 |= command        |= params       |=  input      |= output   |= 備考   |
-| validate --pred | t05:NEObject  | {}           | false     | |
-| validate --pred | t05:NEObject  | {"a":"1"}      | true      | |
-| validate --pred | t05:NEObject  | {"a":"1", "b":"2"} | true    | |
-| validate --pred | t05:NEData  | {}           | false     | |
-| validate --pred | t05:NEData  | {"a":"1"}      | true      | |
-| validate --pred | t05:NEData  | {"a":"1", "b":"2"} | true    | |
+| validate --boolean | t05:NEObject  | {}           | false     | |
+| validate --boolean | t05:NEObject  | {"a":"1"}      | true      | |
+| validate --boolean | t05:NEObject  | {"a":"1", "b":"2"} | true    | |
+| validate --boolean | t05:NEData  | {}           | false     | |
+| validate --boolean | t05:NEData  | {"a":"1"}      | true      | |
+| validate --boolean | t05:NEData  | {"a":"1", "b":"2"} | true    | |
 
 
 |= command        |= params    |=  input      |= output   |= 備考   |
-| validate --pred | t04:em     | null         | false     | null は要素ではない |
-| validate --pred | t04:em     | @em {"":[]}  | true     | 空内容はOK |
-| validate --pred | t04:em     | @em {"":["hello"]}  | true     | テキスト内容はOK |
-| validate --pred | t04:em     | @en {"":["hello"]}  | false     | タグ名が違う |
+| validate --boolean | t04:em     | null         | false     | null は要素ではない |
+| validate --boolean | t04:em     | @em {"":[]}  | true     | 空内容はOK |
+| validate --boolean | t04:em     | @em {"":["hello"]}  | true     | テキスト内容はOK |
+| validate --boolean | t04:em     | @en {"":["hello"]}  | false     | タグ名が違う |
 
 

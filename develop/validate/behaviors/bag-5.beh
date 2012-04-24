@@ -25,22 +25,22 @@ type t2 = {[
 == !exec
 
 |= input       |= command                  |= output |
-|[1]           | validate --pred bag:t1    | true    |
-|[1,""]        | validate --pred bag:t1    | true    |
-|[1.1,""]      | validate --pred bag:t1    | false   |
-|[1.0,""]      | validate --pred bag:t1    | true   |
-|["a", -1]     | validate --pred bag:t1    | true    |
-|["a", "b",0]  | validate --pred bag:t1    | true    |
-|[1, 2]        | validate --pred bag:t1    | true    |
+|[1]           | validate --boolean bag:t1    | true    |
+|[1,""]        | validate --boolean bag:t1    | true    |
+|[1.1,""]      | validate --boolean bag:t1    | false   |
+|[1.0,""]      | validate --boolean bag:t1    | true   |
+|["a", -1]     | validate --boolean bag:t1    | true    |
+|["a", "b",0]  | validate --boolean bag:t1    | true    |
+|[1, 2]        | validate --boolean bag:t1    | true    |
 
 
 
 |= input       |= command                  |= output |
-|[@foo 1]      | validate --pred bag:t2    | true    |
-|[@foo 1,""]   | validate --pred bag:t2    | true    |
-|[@bar 1,""]   | validate --pred bag:t2    | false   |
-|[1,""]        | validate --pred bag:t2    | false   |
-|["a", @foo null]| validate --pred bag:t2  | true    |
-|["a", "b",@foo null]| validate --pred bag:t2| true  |
-|[@foo 1, @foo 2]| validate --pred bag:t2  | true    |
+|[@foo 1]      | validate --boolean bag:t2    | true    |
+|[@foo 1,""]   | validate --boolean bag:t2    | true    |
+|[@bar 1,""]   | validate --boolean bag:t2    | false   |
+|[1,""]        | validate --boolean bag:t2    | false   |
+|["a", @foo null]| validate --boolean bag:t2  | true    |
+|["a", "b",@foo null]| validate --boolean bag:t2| true  |
+|[@foo 1, @foo 2]| validate --boolean bag:t2  | true    |
 

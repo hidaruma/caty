@@ -3,23 +3,23 @@
 == !exec; パスについては後述
 
 |= command        |= input  |= params      |= output  |= 理由 |= パス |
-|= validate --pred|@t true  | t01:ta       | true     |
-|= validate --pred|   true  | t01:ta       | false    |MISSING_TAG, tagged, t|
-|= validate --pred|@s true  | t01:ta       | false    |UNEXPECTED_TAG, tagged, t|
-|= validate --pred|@t 2     | t01:ti       | true     |
-|= validate --pred|@t "hi"  | t01:ti       | false    |BAD_TYPE, integer|^t |
-|= validate --pred|@t @t 2  | t01:tti      | true     |
-|= validate --pred|@t 2     | t01:tti      | false    |MISSING_TAG, tagged, t|^t エラーは内側で|
-|= validate --pred|@t @s 2  | t01:tti      | false    |UNEXPECTED_TAG, tagged, t|^t エラーは内側で|
-|= validate --pred| 2       | t01:tti      | false    |MISSING_TAG, tagged, t| エラーは外側で|
-|= validate --pred|@s 2     | t01:tti      | false    |UNEXPECTED_TAG, tagged, t| エラーは外側で|
-|= validate --pred|@t 2     | t01:ts       | false    |BAD_TYPE, string | ^t |
-|= validate --pred|@t []    | t01:tl       | true     |
-|= validate --pred|@t [1, 2, ""]| t01:tl   | true     |
-|= validate --pred|@t "hi"  | t01:tl       | false    |BAD_TYPE, array |^t |
-|= validate --pred|[@t "hi", @t 2] |t01:lt | true     |
-|= validate --pred|[@t "hi", 2] |t01:lt    | false    |MISSING_TAG, tagged, t| 1 |
-|= validate --pred|["hi", @t 2] |t01:lt    | false    |MISSING_TAG, tagged, t| 0 |
+|= validate --boolean|@t true  | t01:ta       | true     |
+|= validate --boolean|   true  | t01:ta       | false    |MISSING_TAG, tagged, t|
+|= validate --boolean|@s true  | t01:ta       | false    |UNEXPECTED_TAG, tagged, t|
+|= validate --boolean|@t 2     | t01:ti       | true     |
+|= validate --boolean|@t "hi"  | t01:ti       | false    |BAD_TYPE, integer|^t |
+|= validate --boolean|@t @t 2  | t01:tti      | true     |
+|= validate --boolean|@t 2     | t01:tti      | false    |MISSING_TAG, tagged, t|^t エラーは内側で|
+|= validate --boolean|@t @s 2  | t01:tti      | false    |UNEXPECTED_TAG, tagged, t|^t エラーは内側で|
+|= validate --boolean| 2       | t01:tti      | false    |MISSING_TAG, tagged, t| エラーは外側で|
+|= validate --boolean|@s 2     | t01:tti      | false    |UNEXPECTED_TAG, tagged, t| エラーは外側で|
+|= validate --boolean|@t 2     | t01:ts       | false    |BAD_TYPE, string | ^t |
+|= validate --boolean|@t []    | t01:tl       | true     |
+|= validate --boolean|@t [1, 2, ""]| t01:tl   | true     |
+|= validate --boolean|@t "hi"  | t01:tl       | false    |BAD_TYPE, array |^t |
+|= validate --boolean|[@t "hi", @t 2] |t01:lt | true     |
+|= validate --boolean|[@t "hi", 2] |t01:lt    | false    |MISSING_TAG, tagged, t| 1 |
+|= validate --boolean|["hi", @t 2] |t01:lt    | false    |MISSING_TAG, tagged, t| 0 |
 
 == スキーマモジュール
 

@@ -454,7 +454,7 @@ class Translate(Builtin, TypeCalculator):
 class Validate(Builtin, TypeCalculator):
     
     def setup(self, opts, schema_name):
-        self.pred = opts.get('pred', caty.UNDEFINED)
+        self.pred = opts.get('boolean', caty.UNDEFINED)
         self.schema_name = schema_name
         self.set_schema(schema_name)
 

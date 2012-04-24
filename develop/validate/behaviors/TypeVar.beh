@@ -26,45 +26,45 @@ type AOne = A<1>;
 == !exec
 
 |= command       |= params   |= input   |= output   |= 備考 |
-|validate --pred | t:FooBar  | "foo"    | true      ||
-|validate --pred | t:FooBar  | "bar"    | true      ||
-|validate --pred | t:FooBar  | "baz"    | false     ||
-|validate --pred | t:FooBar  | "zot"    | false     ||
-|validate --pred | t:FooBar  | 1        | false     ||
-|validate --pred | t:FooBar  | 0        | false     ||
+|validate --boolean | t:FooBar  | "foo"    | true      ||
+|validate --boolean | t:FooBar  | "bar"    | true      ||
+|validate --boolean | t:FooBar  | "baz"    | false     ||
+|validate --boolean | t:FooBar  | "zot"    | false     ||
+|validate --boolean | t:FooBar  | 1        | false     ||
+|validate --boolean | t:FooBar  | 0        | false     ||
 
 |= command       |= params   |= input   |= output   |= 備考 |
-|validate --pred | t:FooBarBaz| "foo"    | true      ||
-|validate --pred | t:FooBarBaz| "bar"    | true      ||
-|validate --pred | t:FooBarBaz| "baz"    | true      ||
-|validate --pred | t:FooBarBaz| "zot"    | false     ||
-|validate --pred | t:FooBarBaz| 1        | false     ||
-|validate --pred | t:FooBarBaz| 0        | false     ||
+|validate --boolean | t:FooBarBaz| "foo"    | true      ||
+|validate --boolean | t:FooBarBaz| "bar"    | true      ||
+|validate --boolean | t:FooBarBaz| "baz"    | true      ||
+|validate --boolean | t:FooBarBaz| "zot"    | false     ||
+|validate --boolean | t:FooBarBaz| 1        | false     ||
+|validate --boolean | t:FooBarBaz| 0        | false     ||
 
 |= command       |= params   |= input   |= output   |= 備考 |
-|validate --pred | t:AInt     |{"a": 1}  | true     ||
-|validate --pred | t:AInt     |{"a": 2}  | true     ||
-|validate --pred | t:AInt     |{"a": 3}  | true     ||
-|validate --pred | t:AInt     |{"a": 0}  | true     ||
-|validate --pred | t:AInt     |{"a": null}| false   ||
-|validate --pred | t:AInt     |{"a": true}| false   ||
-|validate --pred | t:AInt     |{"a": false }| false   ||
-|validate --pred | t:AInt     |{"a": "" }| false   ||
-|validate --pred | t:AInt     |{"a": [] }| false   ||
-|validate --pred | t:AInt     |{"a": {} }| false   ||
+|validate --boolean | t:AInt     |{"a": 1}  | true     ||
+|validate --boolean | t:AInt     |{"a": 2}  | true     ||
+|validate --boolean | t:AInt     |{"a": 3}  | true     ||
+|validate --boolean | t:AInt     |{"a": 0}  | true     ||
+|validate --boolean | t:AInt     |{"a": null}| false   ||
+|validate --boolean | t:AInt     |{"a": true}| false   ||
+|validate --boolean | t:AInt     |{"a": false }| false   ||
+|validate --boolean | t:AInt     |{"a": "" }| false   ||
+|validate --boolean | t:AInt     |{"a": [] }| false   ||
+|validate --boolean | t:AInt     |{"a": {} }| false   ||
 
 |= command       |= params   |= input   |= output   |= 備考 |
-|validate --pred | t:AZero     |{"a": 1}  | false     ||
-|validate --pred | t:AZero     |{"a": 2}  | false     ||
-|validate --pred | t:AZero     |{"a": 0}  | true      ||
-|validate --pred | t:AZero     |{"a": null}  | false  ||
-|validate --pred | t:AZero     |{"a": false}  | false ||
+|validate --boolean | t:AZero     |{"a": 1}  | false     ||
+|validate --boolean | t:AZero     |{"a": 2}  | false     ||
+|validate --boolean | t:AZero     |{"a": 0}  | true      ||
+|validate --boolean | t:AZero     |{"a": null}  | false  ||
+|validate --boolean | t:AZero     |{"a": false}  | false ||
 
 |= command       |= params   |= input   |= output   |= 備考 |
-|validate --pred | t:AOne     |{"a": 1}  | true    ||
-|validate --pred | t:AOne     |{"a": 2}  | false    ||
-|validate --pred | t:AOne     |{"a": 0}  | false     ||
-|validate --pred | t:AOne     |{"a": null}  | false   ||
-|validate --pred | t:AOne     |{"a": true}  | false   ||
+|validate --boolean | t:AOne     |{"a": 1}  | true    ||
+|validate --boolean | t:AOne     |{"a": 2}  | false    ||
+|validate --boolean | t:AOne     |{"a": 0}  | false     ||
+|validate --boolean | t:AOne     |{"a": null}  | false   ||
+|validate --boolean | t:AOne     |{"a": true}  | false   ||
 
 

@@ -36,115 +36,115 @@ type OKorNG = ResultOK | ResultNG;
 uni:scalar 
 
 |= command       |= params    |= input    |= output |
-|validate --pred |uni:scalar  |  null     | true     |
-|validate --pred |uni:scalar  |  123      | true     |
-|validate --pred |uni:scalar  |  3.14     | true     |
-|validate --pred |uni:scalar  |  false    | true     |
-|validate --pred |uni:scalar  | "hello"   | true     |
-|validate --pred |uni:scalar  | {}        | false    |
-|validate --pred |uni:scalar  | [1, 2]    | false    |
-|validate --pred |uni:scalar  | @foo null | false    |
-|validate --pred |uni:scalar  | @price 100  | false    |
-|validate --pred |uni:scalar  | @integer 100| true   |
+|validate --boolean |uni:scalar  |  null     | true     |
+|validate --boolean |uni:scalar  |  123      | true     |
+|validate --boolean |uni:scalar  |  3.14     | true     |
+|validate --boolean |uni:scalar  |  false    | true     |
+|validate --boolean |uni:scalar  | "hello"   | true     |
+|validate --boolean |uni:scalar  | {}        | false    |
+|validate --boolean |uni:scalar  | [1, 2]    | false    |
+|validate --boolean |uni:scalar  | @foo null | false    |
+|validate --boolean |uni:scalar  | @price 100  | false    |
+|validate --boolean |uni:scalar  | @integer 100| true   |
 
 uni:xinteger
 
 |= command       |= params    |= input    |= output |
-|validate --pred |uni:xinteger|  null     | true     |
-|validate --pred |uni:xinteger|  123      | true     |
-|validate --pred |uni:xinteger|  -9       | true     |
-|validate --pred |uni:xinteger|  3.14     | false    |
-|validate --pred |uni:xinteger|  "hello"  | false    |
-|validate --pred |uni:xinteger|  "inf"    | true     |
-|validate --pred |uni:xinteger|  "infini" | false    |
-|validate --pred |uni:xinteger|  {"a": 1} | false    |
-|validate --pred |uni:xinteger|  []       | false    |
+|validate --boolean |uni:xinteger|  null     | true     |
+|validate --boolean |uni:xinteger|  123      | true     |
+|validate --boolean |uni:xinteger|  -9       | true     |
+|validate --boolean |uni:xinteger|  3.14     | false    |
+|validate --boolean |uni:xinteger|  "hello"  | false    |
+|validate --boolean |uni:xinteger|  "inf"    | true     |
+|validate --boolean |uni:xinteger|  "infini" | false    |
+|validate --boolean |uni:xinteger|  {"a": 1} | false    |
+|validate --boolean |uni:xinteger|  []       | false    |
 
 uni:compound
 
 |= command       |= params    |= input    |= output |
-|validate --pred |uni:compound|  null     | false    |
-|validate --pred |uni:compound|  123      | false    |
-|validate --pred |uni:compound|  "hello"  | false    |
-|validate --pred |uni:compound|  []       | true    |
-|validate --pred |uni:compound|  ["hello"]| true    |
-|validate --pred |uni:compound|  [1, 2, 3]| true    |
-|validate --pred |uni:compound|  [1, 2, "hello"] | true    |
-|validate --pred |uni:compound| {"a":1}   | true    |
-|validate --pred |uni:compound| {}        | true    |
-|validate --pred |uni:compound| {"a":1,"b":2}| true    |
+|validate --boolean |uni:compound|  null     | false    |
+|validate --boolean |uni:compound|  123      | false    |
+|validate --boolean |uni:compound|  "hello"  | false    |
+|validate --boolean |uni:compound|  []       | true    |
+|validate --boolean |uni:compound|  ["hello"]| true    |
+|validate --boolean |uni:compound|  [1, 2, 3]| true    |
+|validate --boolean |uni:compound|  [1, 2, "hello"] | true    |
+|validate --boolean |uni:compound| {"a":1}   | true    |
+|validate --boolean |uni:compound| {}        | true    |
+|validate --boolean |uni:compound| {"a":1,"b":2}| true    |
 
 uni:scoreVal 確認の意味で
 
 |= command       |= params     |= input    |= output |
-|validate --pred |uni:scoreVal |  null     | false    |
-|validate --pred |uni:scoreVal |  "hello"  | false    |
-|validate --pred |uni:scoreVal |  -1       | false    |
-|validate --pred |uni:scoreVal |  0        | false    |
-|validate --pred |uni:scoreVal |  1        | true     |
-|validate --pred |uni:scoreVal |  1.5      | false    |
-|validate --pred |uni:scoreVal |  5        | true     |
-|validate --pred |uni:scoreVal |  6        | false    |
-|validate --pred |uni:scoreVal |  [1]      | false    |
-|validate --pred |uni:scoreVal |  {}       | false    |
+|validate --boolean |uni:scoreVal |  null     | false    |
+|validate --boolean |uni:scoreVal |  "hello"  | false    |
+|validate --boolean |uni:scoreVal |  -1       | false    |
+|validate --boolean |uni:scoreVal |  0        | false    |
+|validate --boolean |uni:scoreVal |  1        | true     |
+|validate --boolean |uni:scoreVal |  1.5      | false    |
+|validate --boolean |uni:scoreVal |  5        | true     |
+|validate --boolean |uni:scoreVal |  6        | false    |
+|validate --boolean |uni:scoreVal |  [1]      | false    |
+|validate --boolean |uni:scoreVal |  {}       | false    |
 
 uni:score 裸の整数でもタグがついてもどっちでもいい
 
 |= command       |= params    |= input    |= output |
-|validate --pred |uni:score   |  null     | false    |
-|validate --pred |uni:score   |  "hello"  | false    |
-|validate --pred |uni:score   |  -1       | false    |
-|validate --pred |uni:score   |  0        | false    |
-|validate --pred |uni:score   |  1        | true     |
-|validate --pred |uni:score   |  1.5      | false    |
-|validate --pred |uni:score   |  5        | true     |
-|validate --pred |uni:score   |  6        | false    |
-|validate --pred |uni:score   |  [1]      | false    |
-|validate --pred |uni:score   |  {}       | false    |
-|validate --pred |uni:score   |  @score null     | false    |
-|validate --pred |uni:score   |  @score "hello"  | false    |
-|validate --pred |uni:score   |  @score -1       | false    |
-|validate --pred |uni:score   |  @score 0        | false    |
-|validate --pred |uni:score   |  @score 1        | true     |
-|validate --pred |uni:score   |  @score 1.5      | false    |
-|validate --pred |uni:score   |  @score 5        | true     |
-|validate --pred |uni:score   |  @score 6        | false    |
-|validate --pred |uni:score   |  @score [1]      | false    |
-|validate --pred |uni:score   |  @score {}       | false    |
-|validate --pred |uni:score   |  @foo null     | false    |
-|validate --pred |uni:score   |  @foo "hello"  | false    |
-|validate --pred |uni:score   |  @foo -1       | false    |
-|validate --pred |uni:score   |  @foo 0        | false    |
-|validate --pred |uni:score   |  @foo 1        | false    |
-|validate --pred |uni:score   |  @foo 1.5      | false    |
-|validate --pred |uni:score   |  @foo 5        | false    |
-|validate --pred |uni:score   |  @foo 6        | false    |
-|validate --pred |uni:score   |  @foo [1]      | false    |
-|validate --pred |uni:score   |  @foo {}       | false    |
+|validate --boolean |uni:score   |  null     | false    |
+|validate --boolean |uni:score   |  "hello"  | false    |
+|validate --boolean |uni:score   |  -1       | false    |
+|validate --boolean |uni:score   |  0        | false    |
+|validate --boolean |uni:score   |  1        | true     |
+|validate --boolean |uni:score   |  1.5      | false    |
+|validate --boolean |uni:score   |  5        | true     |
+|validate --boolean |uni:score   |  6        | false    |
+|validate --boolean |uni:score   |  [1]      | false    |
+|validate --boolean |uni:score   |  {}       | false    |
+|validate --boolean |uni:score   |  @score null     | false    |
+|validate --boolean |uni:score   |  @score "hello"  | false    |
+|validate --boolean |uni:score   |  @score -1       | false    |
+|validate --boolean |uni:score   |  @score 0        | false    |
+|validate --boolean |uni:score   |  @score 1        | true     |
+|validate --boolean |uni:score   |  @score 1.5      | false    |
+|validate --boolean |uni:score   |  @score 5        | true     |
+|validate --boolean |uni:score   |  @score 6        | false    |
+|validate --boolean |uni:score   |  @score [1]      | false    |
+|validate --boolean |uni:score   |  @score {}       | false    |
+|validate --boolean |uni:score   |  @foo null     | false    |
+|validate --boolean |uni:score   |  @foo "hello"  | false    |
+|validate --boolean |uni:score   |  @foo -1       | false    |
+|validate --boolean |uni:score   |  @foo 0        | false    |
+|validate --boolean |uni:score   |  @foo 1        | false    |
+|validate --boolean |uni:score   |  @foo 1.5      | false    |
+|validate --boolean |uni:score   |  @foo 5        | false    |
+|validate --boolean |uni:score   |  @foo 6        | false    |
+|validate --boolean |uni:score   |  @foo [1]      | false    |
+|validate --boolean |uni:score   |  @foo {}       | false    |
 
 uni:Empha
 
 |= command       |= params    |= input    |= output |= 備考 |
-|validate --pred |uni:Empha   |  null     | false    |
-|validate --pred |uni:Empha   | @em {}    | false    |ショートハンドはダメ |
-|validate --pred |uni:Empha   | @em %emp  | true  | 空内容要素 |
-|validate --pred |uni:Empha   | @strong %emp| true  | 空内容要素 |
-|validate --pred |uni:Empha   | @p %emp| false  | タグが違う |
-|validate --pred |uni:Empha   | @em %hello  | true  | テキスト内容要素 |
-|validate --pred |uni:Empha   | @strong %hello| true  | テキスト内容要素 |
-|validate --pred |uni:Empha   | @p %hello| false  | タグが違う |
-|validate --pred |uni:Empha   | %hello| false  | タグがない |
-|validate --pred |uni:Empha   | @em  "hello" | false  |
-|validate --pred |uni:Empha   | @strong 123 | false  |
-|validate --pred |uni:Empha   | @strong null | false  |
-|validate --pred |uni:Empha   | @em [] | false  |
-|validate --pred |uni:Empha   | [] | false  |
+|validate --boolean |uni:Empha   |  null     | false    |
+|validate --boolean |uni:Empha   | @em {}    | false    |ショートハンドはダメ |
+|validate --boolean |uni:Empha   | @em %emp  | true  | 空内容要素 |
+|validate --boolean |uni:Empha   | @strong %emp| true  | 空内容要素 |
+|validate --boolean |uni:Empha   | @p %emp| false  | タグが違う |
+|validate --boolean |uni:Empha   | @em %hello  | true  | テキスト内容要素 |
+|validate --boolean |uni:Empha   | @strong %hello| true  | テキスト内容要素 |
+|validate --boolean |uni:Empha   | @p %hello| false  | タグが違う |
+|validate --boolean |uni:Empha   | %hello| false  | タグがない |
+|validate --boolean |uni:Empha   | @em  "hello" | false  |
+|validate --boolean |uni:Empha   | @strong 123 | false  |
+|validate --boolean |uni:Empha   | @strong null | false  |
+|validate --boolean |uni:Empha   | @em [] | false  |
+|validate --boolean |uni:Empha   | [] | false  |
 
 uni:Result
 
 |= command       |= params    |= input    |= output |= 備考 |
-|validate --pred |uni:OKorNG  | {"message": "a", "resultCode": "OK"} | true    |
-|validate --pred |uni:OKorNG  | {"message": "a", "resultCode": "NG"} | true    |
+|validate --boolean |uni:OKorNG  | {"message": "a", "resultCode": "OK"} | true    |
+|validate --boolean |uni:OKorNG  | {"message": "a", "resultCode": "NG"} | true    |
 
 === !name:emp
 

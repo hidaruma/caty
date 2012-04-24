@@ -28,21 +28,21 @@ def is_integer(n):
 == !exec
 
 |= command              |= output |= input  |
-|validate --pred integer| true   | 1 |
-|validate --pred integer| true   | 1.0 |
-|validate --pred integer| true   | 1.00 |
-|validate --pred integer| false  | 1.1 |
-|validate --pred integer| false  | 1.01 |
-|validate --pred integer| true   | 0.0 |
-|validate --pred integer| false  | -0.0003 |
+|validate --boolean integer| true   | 1 |
+|validate --boolean integer| true   | 1.0 |
+|validate --boolean integer| true   | 1.00 |
+|validate --boolean integer| false  | 1.1 |
+|validate --boolean integer| false  | 1.01 |
+|validate --boolean integer| true   | 0.0 |
+|validate --boolean integer| false  | -0.0003 |
 
 
 |= command             |= output |= input  |
-|validate --pred number| true   | 1 |
-|validate --pred number| true   | 1.0 |
-|validate --pred number| true   | 1.00 |
-|validate --pred number| true   | 1.1 |
-|validate --pred number| true   | 1.01 |
-|validate --pred number| true   | 0.0 |
-|validate --pred number| true   | -0.0003 |
+|validate --boolean number| true   | 1 |
+|validate --boolean number| true   | 1.0 |
+|validate --boolean number| true   | 1.00 |
+|validate --boolean number| true   | 1.1 |
+|validate --boolean number| true   | 1.01 |
+|validate --boolean number| true   | 0.0 |
+|validate --boolean number| true   | -0.0003 |
 

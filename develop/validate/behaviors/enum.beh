@@ -79,50 +79,50 @@ type card = ("jack" | 11 | "queen" | 12 | "king" | 13); // mixed enum, NG, 仕�
 == !exec
 
 |= command       |= params    |= input    |= output |
-|validate --pred | enum:col    | "r"       | true    |
-|validate --pred | enum:col    | "g"       | true    |
-|validate --pred | enum:col    | "b"       | true    |
-|validate --pred | enum:col    | 0         | false   |
-|validate --pred | enum:col    | 255       | false   |
-|validate --pred | enum:col    | "red"     | false   |
-|validate --pred | enum:col    | "R"       | false   |
-|validate --pred | enum:col    | null      | false   |
-|validate --pred | enum:col    | ["g"]     | false   |
+|validate --boolean | enum:col    | "r"       | true    |
+|validate --boolean | enum:col    | "g"       | true    |
+|validate --boolean | enum:col    | "b"       | true    |
+|validate --boolean | enum:col    | 0         | false   |
+|validate --boolean | enum:col    | 255       | false   |
+|validate --boolean | enum:col    | "red"     | false   |
+|validate --boolean | enum:col    | "R"       | false   |
+|validate --boolean | enum:col    | null      | false   |
+|validate --boolean | enum:col    | ["g"]     | false   |
 
 
 |= command       |= params    |= input    |= output |= 備考 |
-|validate --pred | enum:rank   | -1        | false   |
-|validate --pred | enum:rank   | 0         | false   |
-|validate --pred | enum:rank   | 1         | true    |
-|validate --pred | enum:rank   | 2         | true    |
-|validate --pred | enum:rank   | 3         | true    |
-|validate --pred | enum:rank   | 4         | true    |
-|validate --pred | enum:rank   | 5         | true    |
-|validate --pred | enum:rank   | 6         | false   |
-|validate --pred | enum:rank   | 1.0       | true    | 1 == 1.0 とする！ |
-|validate --pred | enum:rank   | 1.2       | false   |
-|validate --pred | enum:rank   | "r"       | false   |
-|validate --pred | enum:rank   | "g"       | false   |
-|validate --pred | enum:rank   | "b"       | false   |
-|validate --pred | enum:rank   | 255       | false   |
-|validate --pred | enum:rank   | "red"     | false   |
-|validate --pred | enum:rank   | "R"       | false   |
-|validate --pred | enum:rank   | null      | false   |
-|validate --pred | enum:rank   | ["g"]     | false   |
+|validate --boolean | enum:rank   | -1        | false   |
+|validate --boolean | enum:rank   | 0         | false   |
+|validate --boolean | enum:rank   | 1         | true    |
+|validate --boolean | enum:rank   | 2         | true    |
+|validate --boolean | enum:rank   | 3         | true    |
+|validate --boolean | enum:rank   | 4         | true    |
+|validate --boolean | enum:rank   | 5         | true    |
+|validate --boolean | enum:rank   | 6         | false   |
+|validate --boolean | enum:rank   | 1.0       | true    | 1 == 1.0 とする！ |
+|validate --boolean | enum:rank   | 1.2       | false   |
+|validate --boolean | enum:rank   | "r"       | false   |
+|validate --boolean | enum:rank   | "g"       | false   |
+|validate --boolean | enum:rank   | "b"       | false   |
+|validate --boolean | enum:rank   | 255       | false   |
+|validate --boolean | enum:rank   | "red"     | false   |
+|validate --boolean | enum:rank   | "R"       | false   |
+|validate --boolean | enum:rank   | null      | false   |
+|validate --boolean | enum:rank   | ["g"]     | false   |
 
 
 enum:foobar 現状 foobar の定義 (@foo 1 | @bar 2) がうまくできない。
 
 |= command       |= params    |= input    |= output |
-|validate --pred |enum:foobar  |  null     | false    |
-|validate --pred |enum:foobar  |  1        | false    |
-|validate --pred |enum:foobar  |  2        | false    |
-|validate --pred |enum:foobar  |  @foo 1   | true     |
-|validate --pred |enum:foobar  |  @foo 2   | false    |
-|validate --pred |enum:foobar  |  @bar 2   | true     |
-|validate --pred |enum:foobar  |  @bar 1   | false    |
-|validate --pred |enum:foobar  |  @baz 1   | false    |
-|validate --pred |enum:foobar  |  @baz 2   | false    |
-|validate --pred |enum:foobar  |  "hello"  | false    |
+|validate --boolean |enum:foobar  |  null     | false    |
+|validate --boolean |enum:foobar  |  1        | false    |
+|validate --boolean |enum:foobar  |  2        | false    |
+|validate --boolean |enum:foobar  |  @foo 1   | true     |
+|validate --boolean |enum:foobar  |  @foo 2   | false    |
+|validate --boolean |enum:foobar  |  @bar 2   | true     |
+|validate --boolean |enum:foobar  |  @bar 1   | false    |
+|validate --boolean |enum:foobar  |  @baz 1   | false    |
+|validate --boolean |enum:foobar  |  @baz 2   | false    |
+|validate --boolean |enum:foobar  |  "hello"  | false    |
 
 

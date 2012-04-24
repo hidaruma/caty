@@ -31,40 +31,40 @@ type isOpt = [integer?, string?];
 == !exec
 
 |= command        |= input  |= params      |= output  |= 理由 |
-| validate --pred | 0       |  array       | false    |BAD_TYPE, array |
-| validate --pred | ""      |  array       | false    |BAD_TYPE, array |
-| validate --pred | {"a":1} |  array       | false    |BAD_TYPE, array |
+| validate --boolean | 0       |  array       | false    |BAD_TYPE, array |
+| validate --boolean | ""      |  array       | false    |BAD_TYPE, array |
+| validate --boolean | {"a":1} |  array       | false    |BAD_TYPE, array |
 
 |= command        |= input  |= params      |= output  |= 理由 |
-| validate --pred | []      | t02:empA     | true     | |
-| validate --pred | [1]     | t02:empA     | false    | UNEXPECTED_ITEM, array, 0|
-| validate --pred | []      | t02:empA2    | true     | |
-| validate --pred | [1]     | t02:empA2    | false    | |
-| validate --pred | ["hello", "world"]| t02:empA | false    | UNEXPECTED_ITEM, array, 0|
-| validate --pred | []      | t02:singA    | false    | MISSING_ITEM, array, 0|
-| validate --pred | [ [] ]  | t02:singA     | true    | |
-| validate --pred | [ 0 ]   | t02:singA     | true    | |
-| validate --pred | [0, 1]  | t02:singA     | false   | UNEXPECTED_ITEM, array, 1|
-| validate --pred | [0, 1]  | t02:aa        | true    | |
-| validate --pred | [0,1,2] | t02:aa        | false   | UNEXPECTED_ITEM, array, 2|
+| validate --boolean | []      | t02:empA     | true     | |
+| validate --boolean | [1]     | t02:empA     | false    | UNEXPECTED_ITEM, array, 0|
+| validate --boolean | []      | t02:empA2    | true     | |
+| validate --boolean | [1]     | t02:empA2    | false    | |
+| validate --boolean | ["hello", "world"]| t02:empA | false    | UNEXPECTED_ITEM, array, 0|
+| validate --boolean | []      | t02:singA    | false    | MISSING_ITEM, array, 0|
+| validate --boolean | [ [] ]  | t02:singA     | true    | |
+| validate --boolean | [ 0 ]   | t02:singA     | true    | |
+| validate --boolean | [0, 1]  | t02:singA     | false   | UNEXPECTED_ITEM, array, 1|
+| validate --boolean | [0, 1]  | t02:aa        | true    | |
+| validate --boolean | [0,1,2] | t02:aa        | false   | UNEXPECTED_ITEM, array, 2|
 
 
 |= command        |= input       |= params      |= output  |= 理由 |= パス |
-| validate --pred |[0,1,""]      | t02:iis      | true     | | |
-| validate --pred |[0,1,"", 2]   | t02:iis      | false    | UNEXPECTED_ITEM, array, 3| |
-| validate --pred |[0,1,"", 2]   | t02:iis      | false    | UNEXPECTED_ITEM, array, 3| |
-| validate --pred |[0, 1, 2]     | t02:iis      | false    | BAD_TYPE, string  | 2 |
-| validate --pred |["", 1, ""]   | t02:iis      | false    | BAD_TYPE, integer | 0 |
-| validate --pred |["", 1, ""]   | t02:iis      | false    | BAD_TYPE, integer | 0 |
-| validate --pred |["", "", ""]  | t02:ssStar   | true     | | |
-| validate --pred |["", "", "", ""]| t02:ssStar   | true   | | |
-| validate --pred |[""]          | t02:ssStar   | true     | | |
-| validate --pred |[]            | t02:ssStar   | false    | MISSING_ITEM, array, 0| |
-| validate --pred |["", 1]       | t02:ssStar   | false    | BAD_TYPE, string | 1 |
-| validate --pred |[1, ""]       | t02:isOpt    | true     | | |
-| validate --pred |[1, "", 0]    | t02:isOpt    | false    | UNEXPECTED_ITEM, array, 2| |
-| validate --pred |[1,  0]       | t02:isOpt    | false    | BAD_TYPE, string | 1 |
-| validate --pred |[1]           | t02:isOpt    | true     | | |
-| validate --pred |[""]          | t02:isOpt    | false    | BAD_TYPE, integer | 0 |
-| validate --pred |[]            | t02:isOpt    | true     | | |
+| validate --boolean |[0,1,""]      | t02:iis      | true     | | |
+| validate --boolean |[0,1,"", 2]   | t02:iis      | false    | UNEXPECTED_ITEM, array, 3| |
+| validate --boolean |[0,1,"", 2]   | t02:iis      | false    | UNEXPECTED_ITEM, array, 3| |
+| validate --boolean |[0, 1, 2]     | t02:iis      | false    | BAD_TYPE, string  | 2 |
+| validate --boolean |["", 1, ""]   | t02:iis      | false    | BAD_TYPE, integer | 0 |
+| validate --boolean |["", 1, ""]   | t02:iis      | false    | BAD_TYPE, integer | 0 |
+| validate --boolean |["", "", ""]  | t02:ssStar   | true     | | |
+| validate --boolean |["", "", "", ""]| t02:ssStar   | true   | | |
+| validate --boolean |[""]          | t02:ssStar   | true     | | |
+| validate --boolean |[]            | t02:ssStar   | false    | MISSING_ITEM, array, 0| |
+| validate --boolean |["", 1]       | t02:ssStar   | false    | BAD_TYPE, string | 1 |
+| validate --boolean |[1, ""]       | t02:isOpt    | true     | | |
+| validate --boolean |[1, "", 0]    | t02:isOpt    | false    | UNEXPECTED_ITEM, array, 2| |
+| validate --boolean |[1,  0]       | t02:isOpt    | false    | BAD_TYPE, string | 1 |
+| validate --boolean |[1]           | t02:isOpt    | true     | | |
+| validate --boolean |[""]          | t02:isOpt    | false    | BAD_TYPE, integer | 0 |
+| validate --boolean |[]            | t02:isOpt    | true     | | |
 

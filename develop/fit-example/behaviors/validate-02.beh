@@ -31,12 +31,12 @@ type person = {
 == !exec; テスト実行指示
 
 |=command        |= params    |= input  |= output   |= 備考 |
-|validate --pred |t02:strlist1| []      | false     | 空リストは strlist1 ではない |
-|validate --pred |t02:person  |  {"name":"hoge", "hobbies":[]} | false      | hobbies は空だから |
-|validate --pred |t02:person  |  %person                       | false      | マクロを使用 |
-|validate --pred |t02:person  |  {"name":"hoge"} | true      | hobbies を書かない |
-|validate --pred |t02:person  |  {"name":"hoge", "hobbies":["a", "b"]} | true      |  |
-|validate --pred |t02:person  |  {"name":"hoge", "hobbies":["a"]} | true      |  |
+|validate --boolean |t02:strlist1| []      | false     | 空リストは strlist1 ではない |
+|validate --boolean |t02:person  |  {"name":"hoge", "hobbies":[]} | false      | hobbies は空だから |
+|validate --boolean |t02:person  |  %person                       | false      | マクロを使用 |
+|validate --boolean |t02:person  |  {"name":"hoge"} | true      | hobbies を書かない |
+|validate --boolean |t02:person  |  {"name":"hoge", "hobbies":["a", "b"]} | true      |  |
+|validate --boolean |t02:person  |  {"name":"hoge", "hobbies":["a"]} | true      |  |
 
 
 

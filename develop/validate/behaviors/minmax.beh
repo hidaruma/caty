@@ -20,22 +20,22 @@ type nonPositive = integer(maximum=0);
 
 
 |= input|= command                   |= output |
-|  1    | validate --pred mm:positive| true    |
-|  2    | validate --pred mm:positive| true    |
-|  0    | validate --pred mm:positive| false   |
-|  -1   | validate --pred mm:positive| false   |
-|  -1   | validate --pred mm:negative| true    |
-|  -2   | validate --pred mm:negative| true    |
-|  0    | validate --pred mm:negative| false   |
-|  1    | validate --pred mm:negative| false   |
-|  1    | validate --pred mm:nonPositive| false   |
-|  2    | validate --pred mm:nonPositive| false   |
-|  0    | validate --pred mm:nonPositive| true    |
-|  -1   | validate --pred mm:nonPositive| true    |
-|  -1   | validate --pred mm:nonNegative| false   |
-|  -2   | validate --pred mm:nonNegative| false   |
-|  0    | validate --pred mm:nonNegative| true    |
-|  1    | validate --pred mm:nonNegative| true    |
+|  1    | validate --boolean mm:positive| true    |
+|  2    | validate --boolean mm:positive| true    |
+|  0    | validate --boolean mm:positive| false   |
+|  -1   | validate --boolean mm:positive| false   |
+|  -1   | validate --boolean mm:negative| true    |
+|  -2   | validate --boolean mm:negative| true    |
+|  0    | validate --boolean mm:negative| false   |
+|  1    | validate --boolean mm:negative| false   |
+|  1    | validate --boolean mm:nonPositive| false   |
+|  2    | validate --boolean mm:nonPositive| false   |
+|  0    | validate --boolean mm:nonPositive| true    |
+|  -1   | validate --boolean mm:nonPositive| true    |
+|  -1   | validate --boolean mm:nonNegative| false   |
+|  -2   | validate --boolean mm:nonNegative| false   |
+|  0    | validate --boolean mm:nonNegative| true    |
+|  1    | validate --boolean mm:nonNegative| true    |
 
 
 |= input|= command             |= output |= judge |

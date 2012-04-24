@@ -27,43 +27,43 @@ type t2 = {[
 整数 1 が出ると具合が悪いのか？
 
 |= input       |= command                  |= output |
-|[1,"a",true]  | validate --pred bag:t1    | true    |
-|[true,"a",1]  | validate --pred bag:t1    | true    |
-|[true,"a",-1] | validate --pred bag:t1    | true    |
-|[true,"a",0]  | validate --pred bag:t1    | true    |
-|[true,"a",10] | validate --pred bag:t1    | true    |
-|[1,"",true]   | validate --pred bag:t1    | true    |
-|[2,"",true]   | validate --pred bag:t1    | true    |
-|[1,"a",true]  | validate --pred bag:t1    | true    |
-|[2,"a",true]  | validate --pred bag:t1    | true    |
-|[-1,"a",true] | validate --pred bag:t1    | true    |
-|[0,"a",true]  | validate --pred bag:t1    | true    |
-|[1,1,true]    | validate --pred bag:t1    | false   |
-|[true,"",1]   | validate --pred bag:t1    | true    |
-|[true,"a",1]  | validate --pred bag:t1    | true    |
-|[true,"",""]  | validate --pred bag:t1    | false   |
-|[true,"a","a"]| validate --pred bag:t1    | false   |
-|[true,"a",-1] | validate --pred bag:t1    | true    |
-|[false,"a",-1] | validate --pred bag:t1   | false   |
-|[true,"a","b"] | validate --pred bag:t1   | false   |
-|[true,10,"b"] | validate --pred bag:t1    | true   |
-|[true,0,"b"]  | validate --pred bag:t1    | true   |
+|[1,"a",true]  | validate --boolean bag:t1    | true    |
+|[true,"a",1]  | validate --boolean bag:t1    | true    |
+|[true,"a",-1] | validate --boolean bag:t1    | true    |
+|[true,"a",0]  | validate --boolean bag:t1    | true    |
+|[true,"a",10] | validate --boolean bag:t1    | true    |
+|[1,"",true]   | validate --boolean bag:t1    | true    |
+|[2,"",true]   | validate --boolean bag:t1    | true    |
+|[1,"a",true]  | validate --boolean bag:t1    | true    |
+|[2,"a",true]  | validate --boolean bag:t1    | true    |
+|[-1,"a",true] | validate --boolean bag:t1    | true    |
+|[0,"a",true]  | validate --boolean bag:t1    | true    |
+|[1,1,true]    | validate --boolean bag:t1    | false   |
+|[true,"",1]   | validate --boolean bag:t1    | true    |
+|[true,"a",1]  | validate --boolean bag:t1    | true    |
+|[true,"",""]  | validate --boolean bag:t1    | false   |
+|[true,"a","a"]| validate --boolean bag:t1    | false   |
+|[true,"a",-1] | validate --boolean bag:t1    | true    |
+|[false,"a",-1] | validate --boolean bag:t1   | false   |
+|[true,"a","b"] | validate --boolean bag:t1   | false   |
+|[true,10,"b"] | validate --boolean bag:t1    | true   |
+|[true,0,"b"]  | validate --boolean bag:t1    | true   |
 
 
 |= input    |= command                  |= output |
-|[1,2]      | validate --pred bag:t2    | true    |
-|[1,2,2]    | validate --pred bag:t2    | false   |
-|[1,1,2]    | validate --pred bag:t2    | true    |
-|[1,1,2,"hi"]| validate --pred bag:t2   | false   |
-|[1,2,"hello"]  | validate --pred bag:t2| true    |
-|[1,2,true]  | validate --pred bag:t2   | true    |
-|[1,2,false]  | validate --pred bag:t2  | true    |
-|[2,false]    | validate --pred bag:t2  | false   |
-|[1,1,2,true] | validate --pred bag:t2  | true    |
-|[1,2,2,true] | validate --pred bag:t2  | false    |
-|[1,2,true,true,true]|validate --pred bag:t2| true    |
-|[1,1,2,true,"hello"]|validate --pred bag:t2| true    |
-|[1,2,2,true,"hello"]|validate --pred bag:t2| false   |
+|[1,2]      | validate --boolean bag:t2    | true    |
+|[1,2,2]    | validate --boolean bag:t2    | false   |
+|[1,1,2]    | validate --boolean bag:t2    | true    |
+|[1,1,2,"hi"]| validate --boolean bag:t2   | false   |
+|[1,2,"hello"]  | validate --boolean bag:t2| true    |
+|[1,2,true]  | validate --boolean bag:t2   | true    |
+|[1,2,false]  | validate --boolean bag:t2  | true    |
+|[2,false]    | validate --boolean bag:t2  | false   |
+|[1,1,2,true] | validate --boolean bag:t2  | true    |
+|[1,2,2,true] | validate --boolean bag:t2  | false    |
+|[1,2,true,true,true]|validate --boolean bag:t2| true    |
+|[1,1,2,true,"hello"]|validate --boolean bag:t2| true    |
+|[1,2,2,true,"hello"]|validate --boolean bag:t2| false   |
 
 
 

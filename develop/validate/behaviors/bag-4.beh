@@ -29,41 +29,41 @@ type t3 = {[
 
 
 |= input       |= command                  |= output |
-|[1,2]         | validate --pred bag:t1    | true    |
-|[0,1]         | validate --pred bag:t1    | true    |
-|[1,-1]        | validate --pred bag:t1    | true    |
-|[1,1]         | validate --pred bag:t1    | true    |
-|[1]           | validate --pred bag:t1    | false   |
-|[]            | validate --pred bag:t1    | false   |
-|[0,0,""]      | validate --pred bag:t1    | true    |
-|[0,0,"a","b"] | validate --pred bag:t1    | true    |
-|[1,"a","b"]   | validate --pred bag:t1    | false   |
-|[1,true, "a"] | validate --pred bag:t1    | false   |
-|[1,2.5,"a"]   | validate --pred bag:t1    | false   |
-|[1,2,"a"]     | validate --pred bag:t1    | true    |
+|[1,2]         | validate --boolean bag:t1    | true    |
+|[0,1]         | validate --boolean bag:t1    | true    |
+|[1,-1]        | validate --boolean bag:t1    | true    |
+|[1,1]         | validate --boolean bag:t1    | true    |
+|[1]           | validate --boolean bag:t1    | false   |
+|[]            | validate --boolean bag:t1    | false   |
+|[0,0,""]      | validate --boolean bag:t1    | true    |
+|[0,0,"a","b"] | validate --boolean bag:t1    | true    |
+|[1,"a","b"]   | validate --boolean bag:t1    | false   |
+|[1,true, "a"] | validate --boolean bag:t1    | false   |
+|[1,2.5,"a"]   | validate --boolean bag:t1    | false   |
+|[1,2,"a"]     | validate --boolean bag:t1    | true    |
 
 
 |= input       |= command                  |= output |
-|[{},"",1,2]   | validate --pred bag:t2    | true    |
-|[{},{},1,2]   | validate --pred bag:t2    | false   |
-|[{},{},1,2,"a"]| validate --pred bag:t2   | true    |
-|[{},0.5,2,""] | validate --pred bag:t2    | true    |
-|[0.5,2,""]    | validate --pred bag:t2    | false   |
-|[0.5,2,"",{}] | validate --pred bag:t2    | true    |
+|[{},"",1,2]   | validate --boolean bag:t2    | true    |
+|[{},{},1,2]   | validate --boolean bag:t2    | false   |
+|[{},{},1,2,"a"]| validate --boolean bag:t2   | true    |
+|[{},0.5,2,""] | validate --boolean bag:t2    | true    |
+|[0.5,2,""]    | validate --boolean bag:t2    | false   |
+|[0.5,2,"",{}] | validate --boolean bag:t2    | true    |
 
 
 |= input       |= command                  |= output |
-|[1,"a"]       | validate --pred bag:t3    | true    |
-|[1,2,"a"]     | validate --pred bag:t3    | false   |
-|[2,"a","b"]   | validate --pred bag:t3    | true    |
-|["a"]         | validate --pred bag:t3    | false   |
-|[4,"b"]       | validate --pred bag:t3    | false   |
-|[3,"b"]       | validate --pred bag:t3    | true    |
-|[3,"b","b"]   | validate --pred bag:t3    | true    |
-|[1]           | validate --pred bag:t3    | true    |
-|[2]           | validate --pred bag:t3    | true    |
-|[2, "b"]      | validate --pred bag:t3    | true    |
-|[1, "b"]      | validate --pred bag:t3    | true    |
-|[]            | validate --pred bag:t3    | false   |
+|[1,"a"]       | validate --boolean bag:t3    | true    |
+|[1,2,"a"]     | validate --boolean bag:t3    | false   |
+|[2,"a","b"]   | validate --boolean bag:t3    | true    |
+|["a"]         | validate --boolean bag:t3    | false   |
+|[4,"b"]       | validate --boolean bag:t3    | false   |
+|[3,"b"]       | validate --boolean bag:t3    | true    |
+|[3,"b","b"]   | validate --boolean bag:t3    | true    |
+|[1]           | validate --boolean bag:t3    | true    |
+|[2]           | validate --boolean bag:t3    | true    |
+|[2, "b"]      | validate --boolean bag:t3    | true    |
+|[1, "b"]      | validate --boolean bag:t3    | true    |
+|[]            | validate --boolean bag:t3    | false   |
 
 

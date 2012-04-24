@@ -29,9 +29,9 @@ type person = {
 == !exec; テスト実行指示
 
 |=command        |= params    |= input  |= output   |= 備考 |
-|validate --pred |ttt:strlist1| []      | false     | 空リストは strlist1 ではない |
-|validate --pred |ttt:person  |  {"name":"hoge", "hobbies":[]} | false      | hobbies は空だから |
-|validate --pred |ttt:person  |  %person                       | false      | マクロ参照、hobbies は空だから |
+|validate --boolean |ttt:strlist1| []      | false     | 空リストは strlist1 ではない |
+|validate --boolean |ttt:person  |  {"name":"hoge", "hobbies":[]} | false      | hobbies は空だから |
+|validate --boolean |ttt:person  |  %person                       | false      | マクロ参照、hobbies は空だから |
 
 == 説明
 

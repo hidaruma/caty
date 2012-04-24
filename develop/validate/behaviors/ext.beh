@@ -4,12 +4,12 @@
 
 
 |= input   |= command        |= params          |= output   |= 備考 |
-| 1       |validate --pred  | extBase:xnumber  | true      | |
-| 2       |validate --pred  | extBase:xnumber  | true      | |
-| 100     |validate --pred  | extBase:xnumber  | true      | |
-| "inf"   |validate --pred  | extBase:xnumber  | true      | |
-| "hello" |validate --pred  | extBase:xnumber  | false     | |
-| []      |validate --pred  | extBase:xnumber  | false     | |
+| 1       |validate --boolean  | extBase:xnumber  | true      | |
+| 2       |validate --boolean  | extBase:xnumber  | true      | |
+| 100     |validate --boolean  | extBase:xnumber  | true      | |
+| "inf"   |validate --boolean  | extBase:xnumber  | true      | |
+| "hello" |validate --boolean  | extBase:xnumber  | false     | |
+| []      |validate --boolean  | extBase:xnumber  | false     | |
 
 
 ----

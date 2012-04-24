@@ -47,30 +47,30 @@ type issStar = {
 == !exec;
 
 |= command        |= input  |= params      |= output  |= 理由 |
-| validate --pred | 0       |  object      | false    |BAD_TYPE, object |
-| validate --pred | ""      |  object      | false    |BAD_TYPE, object |
-| validate --pred | [1, 2]  |  object      | false    |BAD_TYPE, object |
+| validate --boolean | 0       |  object      | false    |BAD_TYPE, object |
+| validate --boolean | ""      |  object      | false    |BAD_TYPE, object |
+| validate --boolean | [1, 2]  |  object      | false    |BAD_TYPE, object |
 
 |= command        |= input  |= params      |= output  |= 理由 |
-| validate --pred | {}      | t03:empO     | true     | |
-| validate --pred | {"a":1} | t03:empO     | false    | UNEXPECTED_PROPERTY, object, "a"|
-| validate --pred | {"a":1} | t03:i        | false    | UNEXPECTED_PROPERTY, object, "a"|
-| validate --pred | {}      | t03:i        | false    | MISSING_PROPERTY, object, "i"|
-| validate --pred | {"i":3} | t03:i        | true    | |
-| validate --pred | {"i":-1}| t03:i        | true    | |
-| validate --pred | {"i":1, "b":0}| t03:i  | false   | UNEXPECTED_PROPERTY, object, "b"|
-| validate --pred | {"i":0,"s":""} | t03:is        | true    | |
-| validate --pred | {"i":0,"s":"","x":0} | t03:is  | false   | UNEXPECTED_PROPERTY, object, "x"|
+| validate --boolean | {}      | t03:empO     | true     | |
+| validate --boolean | {"a":1} | t03:empO     | false    | UNEXPECTED_PROPERTY, object, "a"|
+| validate --boolean | {"a":1} | t03:i        | false    | UNEXPECTED_PROPERTY, object, "a"|
+| validate --boolean | {}      | t03:i        | false    | MISSING_PROPERTY, object, "i"|
+| validate --boolean | {"i":3} | t03:i        | true    | |
+| validate --boolean | {"i":-1}| t03:i        | true    | |
+| validate --boolean | {"i":1, "b":0}| t03:i  | false   | UNEXPECTED_PROPERTY, object, "b"|
+| validate --boolean | {"i":0,"s":""} | t03:is        | true    | |
+| validate --boolean | {"i":0,"s":"","x":0} | t03:is  | false   | UNEXPECTED_PROPERTY, object, "x"|
 
 |= command        |= input          |= params      |= output  |= 理由 |= パス |
-| validate --pred |{"i":0,  "s":1} | t03:is       | false    | BAD_TYPE, string  | s |
-| validate --pred |{"i":"", "s":""}| t03:is       | false    | BAD_TYPE, integer | i |
-| validate --pred |{"i":0, "s":"", "x":[]}  | t03:isaStar   | true   | | |
-| validate --pred |{"i":0, "s":"", "x":""}  | t03:issStar   | true   | | |
-| validate --pred |{"s":"", "x":""}         | t03:issStar   | false  | MISSING_PROPERTY, object, "i" | |
-| validate --pred |{"i":"", "s":""}         | t03:issStar   | false  | BAD_TYPE, integer | i |
-| validate --pred |{"i":0, "s":"", "x":1}   | t03:is        | false  | UNEXPECTED_PROPERTY, object, "x"| |
-| validate --pred |{"i":0, "s":0}           | t03:is        | false  | BAD_TYPE, string | s |
-| validate --pred |{}                       | t03:anyO      | true     | | |
-| validate --pred |{"x":{}}                 | t03:anyO      | true     | | |
+| validate --boolean |{"i":0,  "s":1} | t03:is       | false    | BAD_TYPE, string  | s |
+| validate --boolean |{"i":"", "s":""}| t03:is       | false    | BAD_TYPE, integer | i |
+| validate --boolean |{"i":0, "s":"", "x":[]}  | t03:isaStar   | true   | | |
+| validate --boolean |{"i":0, "s":"", "x":""}  | t03:issStar   | true   | | |
+| validate --boolean |{"s":"", "x":""}         | t03:issStar   | false  | MISSING_PROPERTY, object, "i" | |
+| validate --boolean |{"i":"", "s":""}         | t03:issStar   | false  | BAD_TYPE, integer | i |
+| validate --boolean |{"i":0, "s":"", "x":1}   | t03:is        | false  | UNEXPECTED_PROPERTY, object, "x"| |
+| validate --boolean |{"i":0, "s":0}           | t03:is        | false  | BAD_TYPE, string | s |
+| validate --boolean |{}                       | t03:anyO      | true     | | |
+| validate --boolean |{"x":{}}                 | t03:anyO      | true     | | |
 

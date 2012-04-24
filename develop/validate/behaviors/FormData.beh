@@ -33,8 +33,8 @@ type FormData = {* : NEData?};
 == !exec
 
 |= command       |= params     |= input       |= output  |= 備考 |
-| validate --pred |sys:WebInput |{"a":["123"]} | true     | |
-| validate --pred |sys:WebInput |{"a":[]}      | false    |空リストはダメ |
-| validate --pred |sys:WebInput |{"a":[""]}    | false    |空文字列はダメ |
-| validate --pred |sys:WebInput |{"a":123}     | false    |配列じゃない   |
-| validate --pred |sys:WebInput |{}            | true     |空オブジェクトはOK   |
+| validate --boolean |sys:WebInput |{"a":["123"]} | true     | |
+| validate --boolean |sys:WebInput |{"a":[]}      | false    |空リストはダメ |
+| validate --boolean |sys:WebInput |{"a":[""]}    | false    |空文字列はダメ |
+| validate --boolean |sys:WebInput |{"a":123}     | false    |配列じゃない   |
+| validate --boolean |sys:WebInput |{}            | true     |空オブジェクトはOK   |

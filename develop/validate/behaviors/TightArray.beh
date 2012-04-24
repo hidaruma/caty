@@ -22,7 +22,7 @@ type taa = [integer*](tight=true);
 === !name:vali
 
 {{{
- validate --pred
+ validate --boolean
 }}}
 
 == !exec

@@ -89,6 +89,6 @@ file モジュール以外のコマンドも例外ではない。以下、パス
 時刻の関わるテストなので、完全一致は無理。エラーが発生しないことのみを確認する。
 
 |=command|=params|=outputCond|
-|file:lastmodified|/foo.txt|validate --pred string|
+|file:lastmodified|/foo.txt|validate --boolean string|
 
 
