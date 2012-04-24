@@ -124,7 +124,9 @@ class PPEncoder(CatyEncoder):
 
     def __erase_undef(self, r):
         from caty import UNDEFINED
-        return [(a if a is not UNDEFINED else _empty) for a in r]
+        import itertools
+        l = itertools.dropwhile(lambda x: x==UNDEFINED, reversed(r))
+        return [(self.__normalize(a) if a is not UNDEFINED else _empty) for a in reversed(list(l))]
 
     def __reduce_undef(self, o):
         r = {}

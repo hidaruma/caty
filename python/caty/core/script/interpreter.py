@@ -16,6 +16,7 @@ import caty
 import caty.core.schema as schema
 import types
 import time
+from caty.core.spectypes import reduce_undefined
 
 class BaseInterpreter(object):
     def visit(self, node):
@@ -176,9 +177,6 @@ class CommandExecutor(BaseInterpreter):
             if 'commit-point' in node.profile_container.get_annotations():
                 for n in node.facility_names:
                     getattr(node, n).commit()
-            if isinstance(r, list):
-                while r and r[-1] is UNDEFINED:
-                    r.pop(-1)
             return r
         except ContinuationSignal as e:
             raise
@@ -218,8 +216,6 @@ class CommandExecutor(BaseInterpreter):
             prev_input = self.input
             r.append(v.accept(self))
             self.input = prev_input
-        while r and r[-1] is UNDEFINED:
-            r.pop(-1)
         return r
 
     def visit_object(self, node):

@@ -349,14 +349,15 @@ class ScriptParser(Parser):
         from itertools import dropwhile
         seq.parse('[')
         values = seq.parse(split(self.listitem, self.comma, True))
-        actual = list(reversed(list(dropwhile(lambda x: isinstance(x, CommandProxy) and x.name == 'undefined', reversed(values)))))
         seq.parse(']')
         l = ListBuilder()
-        l.set_values(anything(actual))
+        l.set_values(anything(values))
         return l
 
     def listitem(self, seq):
-        if seq.current == ']': return CommandProxy(u'undefined', [], {}, [], (seq.col, seq.line))
+        if seq.current == ']': 
+            return None
+            #return CommandProxy(u'undefined', [], {}, [], (seq.col, seq.line))
         try:
             return seq.parse([self.make_pipeline, self.loose_item])
         except NothingTodo:

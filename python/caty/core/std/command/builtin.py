@@ -16,6 +16,7 @@ from caty.core.facility import PEND
 from caty.template.core.renderer import *
 from caty.command import MafsMixin
 import caty.core.runtimeobject as ro
+from caty.core.spectypes import reduce_undefined
 
 import os
 import sys
@@ -551,7 +552,7 @@ class Equals(Builtin):
         self._boolean = opts['boolean']
 
     def execute(self, input):
-        if input[0] == input[1]:
+        if self.__eq(*input):
             if self._boolean:
                 return True
             else:
@@ -561,6 +562,15 @@ class Equals(Builtin):
                 return False
             else:
                 return tagged(u'False', input)
+
+    def __eq(self, a, b):
+        a = reduce_undefined(a)
+        b = reduce_undefined(b)
+        if a == b:
+            if (isinstance(a, bool) and not isinstance(b, bool)) or (isinstance(b, bool) and not isinstance(a, bool)):
+                return False
+            return True
+        return False
 
 class Eval(Builtin):
     

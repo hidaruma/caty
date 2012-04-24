@@ -4,29 +4,11 @@ __version__ = 'pp-2.0.0'
 DEBUG = True
 
 
-class _Undefined(object):
-    def __nonzero__(self):
-        return False
-
-    def __iter__(self):
-        return iter([self])
-
-    def __repr__(self):
-        return '#undefined'
-
-
-class ForeignObject(object):
-    def __repr__(self):
-        return 'python: <object at' + hex(id(self)) + '>'
-
-    def __eq__(self, another):
-        return True
-
-UNDEFINED = _Undefined()  # singleton
+from caty.core.spectypes import * #XXX:互換性のため。後で直す。
+from caty.core.spectypes import _Undefined
 import sys
 from caty.front import console, web, profiler
 from caty.util import OptPrinter
-
 
 def main(raw_argv):
     opts, argv = getopt(raw_argv)
