@@ -4,6 +4,7 @@ import caty.core.runtimeobject as ro
 from caty.core.typeinterface import Array
 import random
 import types
+from caty.core.spectypes import reduce_undefined
 
 class ArraySchema(SchemaBase, Array):
     
@@ -51,9 +52,11 @@ class ArraySchema(SchemaBase, Array):
         while count < len(value):
             v = value[count]
             if v is caty.UNDEFINED:
-                count += 1
-                s_count += 1
-                continue
+                if (s_count < len(self.schema_list) and self.schema_list[s_count].optional or
+                    s_count >= (len(self.schema_list) -1) and self.repeat):
+                    count += 1
+                    s_count += 1
+                    continue
             if s_count >= len(self.schema_list):
                 if not self.repeat:
                     errors.append(JsonSchemaError(dict(msg=u'$type can not appear at tail of this type', type=type(v))))
