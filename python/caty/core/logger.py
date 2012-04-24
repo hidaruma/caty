@@ -14,6 +14,7 @@ def init(app, type):
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)
     log.addHandler(handler)
+    handler.doRollover()
 
 def get(name, type):
     return logging.getLogger('Caty.%s.%s' % (name, type))
@@ -24,6 +25,7 @@ class TimedRotatingFileHandlerWithLock(logging.handlers.TimedRotatingFileHandler
             logging.handlers.TimedRotatingFileHandler.emit(self, record)
 
     def doRollover(self):
+        import os, time
         if self.stream:
             self.stream.close()
         t = self.rolloverAt - self.interval
