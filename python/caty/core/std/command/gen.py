@@ -1,10 +1,11 @@
 #coding:utf-8
 from caty.core.command import Builtin
 from caty.core.typeinterface import TreeCursor, Union, Tag
-from caty.core.schema import TagSchema, StringSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference
+from caty.core.schema import TagSchema, StringSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema
 import caty.jsontools as json
 import random
 from string import printable
+from caty import ForeignObject
 
 class Sample(Builtin):
    
@@ -40,6 +41,8 @@ class DataGenerator(TreeCursor):
                 return self.__rand_number(node)
         elif isinstance(node, TypeReference):
             return node.body.accept(self)
+        elif isinstance(node, ForeignSchema):
+            return ForeignObject()
         return None
 
     def __rand_int(self, node):

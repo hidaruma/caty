@@ -1131,11 +1131,9 @@ class ToString(Builtin):
             return v
         else:
             return unicode(str(v))
-class _Foreign(object):
-    def __repr__(self):
-        return 'foreign'
-_foreign = _Foreign()
+
+from caty import ForeignObject
 class Foreign(Builtin):
     def execute(self):
-        return _foreign
+        return ForeignObject()
 
