@@ -81,6 +81,7 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 |{}      | tag      | "object" |
 |@foo    | tag      | "foo"    |
 |@bar    | tag      | "bar"    |
+|@"foo bar"| tag    | "foo bar"|
 
 
 == untagged
@@ -94,6 +95,7 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 |1       | untagged | 1       ||タグ型でない場合passと同様|
 |@number 1|untagged | 1       ||暗黙タグがあっても同じ|
 |@foo    | untagged |undefined|||
+|@foo foreign | untagged | foreign|||
 
 == typeof
 
@@ -107,6 +109,7 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 |undefined | typeof   | "undefined" | 未定義型 |
 |foreign   | typeof   | "foreign" | フォーリン型 |
 
+
 == eq
 
 データの等値性を判定する。
@@ -115,7 +118,7 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 === !exec
 
 
-|= input         |= command      |=output   |= 備考 |
+|= input         |= command      |=output   |= 備考 |= judge|
 |[1, 1.0]        | eq --boolean  | true     |数値は値で比較する |
 |[1.0, 1.01]     | eq --boolean  | false    | |
 |[1.0, 1.00]     | eq --boolean  | true     | |
@@ -135,8 +138,12 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 |[[], false]     | eq --boolean  | false    |[]とfalseは別物 |
 |[{}, false]     | eq --boolean  | false    |{}とfalseは別物 |
 |[[], {}]        | eq --boolean  | false    |[]と{}は別物 |
-|[[undefined], []] | eq --boolean | true    |undefineがあっても空配列 |
+|[[undefined], []] | eq --boolean| true     |undefineがあっても空配列 |
 |[{"a":undefined}, {}] | eq --boolean | true|undefineがあっても空オブジェクト |
+|[[,], []]       | eq --boolean  | true     |括弧があっても空配列 |
+|[{,}, {}]       | eq --boolean  | true     |括弧があっても空オブジェクト |ignore|
+|[[1,], [1]]     | eq --boolean  | true     |配列に余分な括弧は影響ない |
+|[{"a":1,}, {"a":1}] | eq --boolean| true   |オブジェクトに余分な括弧は影響ない |
 |[foreign, null] | eq --boolean  | false    |foreignとnullは別物 |
 |[undefined, foreign]|eq --boolean| false   |undefinedとforeingは別物 |
 |[foreign, foreign]|eq --boolean | true     |2つのforeingは同じ |
@@ -144,3 +151,5 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 |[null, undefined]|eq --boolean  | false    |等号は対称 |
 |[undefined, undefined]|eq --boolean  | true|2つのundefinedは等しい |
 
+
+余分な括弧を含む空オブジェクト {,} は認めてないのか？
