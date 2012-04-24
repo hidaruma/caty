@@ -4,6 +4,7 @@ import logging.handlers
 from caty.core.async import DLock
 from caty.core.facility import FakeFacility
 from caty.util.path import join
+import os, time
 
 def init(app, type):
     log = logging.getLogger('Caty.%s.%s' % (str(app.name), type))
@@ -14,7 +15,6 @@ def init(app, type):
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)
     log.addHandler(handler)
-    handler.doRollover()
 
 def get(name, type):
     return logging.getLogger('Caty.%s.%s' % (name, type))
@@ -25,7 +25,6 @@ class TimedRotatingFileHandlerWithLock(logging.handlers.TimedRotatingFileHandler
             logging.handlers.TimedRotatingFileHandler.emit(self, record)
 
     def doRollover(self):
-        import os, time
         if self.stream:
             self.stream.close()
         t = self.rolloverAt - self.interval
@@ -56,6 +55,24 @@ class TimedRotatingFileHandlerWithLock(logging.handlers.TimedRotatingFileHandler
                     newRolloverAt = newRolloverAt + 3600
         self.rolloverAt = newRolloverAt
 
+
+    def getFilesToDelete(self):
+        dirName, baseName = os.path.split(self.baseFilename)
+        fileNames = os.listdir(dirName)
+        result = []
+        prefix = baseName.replace('.log', '') + "."
+        plen = len(prefix)
+        for fileName in fileNames:
+            if fileName[:plen] == prefix:
+                suffix = fileName[plen:]
+                if self.extMatch.match(suffix):
+                    result.append(os.path.join(dirName, fileName))
+        result.sort()
+        if len(result) < self.backupCount:
+            result = []
+        else:
+            result = result[:len(result) - self.backupCount]
+        return result
 
 class Logger(FakeFacility):
     def __init__(self, app):
