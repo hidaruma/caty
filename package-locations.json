@@ -1,5 +1,6 @@
 {
   "caty-core" : "/",
-  "cap" : "/cap.pivot/",
+  "cap" : "/package-pivots/cap.pivot/",
+  "win32util" : "/package-pivots/win32util.pivot/",
   "caty-example-wiki" : "/examples/wiki/"
 }
