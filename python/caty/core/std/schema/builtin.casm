@@ -680,7 +680,7 @@ command lsdir {"long":boolean?, "kind":string?} [string, string?] ::
  * 入力をそのまま出力にコピーする。
  *
  */
-command pass<T default any> :: T -> T
+command pass<T default univ> :: T -> T
     refers python:caty.core.std.command.builtin.PassData;
 
 /**
