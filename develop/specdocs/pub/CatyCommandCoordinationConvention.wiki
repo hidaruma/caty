@@ -1,0 +1,59 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= Caty Command Coordination Convention (CCCC)
+
+
+== 真偽値または類似の結果を出力するコマンド
+
+真偽、YES/NO、成功/失敗を結果とするコマンドは、
+
+# 真、YES、成功のときは、次の型のデータを返す： (true | @True univ | @OK univ)
+# 偽、NO、失敗のときは、次の型のデータを返す： (false | @False univ | @NG univ)
+# 不明、不確定、未定のときは、@Indef univ を返す。
+
+@Indef（tag-only）は、通常次のように定義しておく。
+
+{{{
+const indef = @Indef;
+}}}
+
+デフォルトがbooleanかtaggedかはコマンドごとに決定してよいが：
+
+# デフォルトがbooleanなら、--taggedオプションを設ける。
+# デフォルトがtaggedなら、--booleanオプションを設ける。
+# --boolean が指定されたときでも、tag-onlyの@Indef（indefと定義される）を出力してよい。
+  このときは三値論理値（true, false, indefの論理）とみなす。
+# --taggedが、OK/NG か True/False のどちらを意味するかは規定しない。
+
+
+参考の型定義：
+
+{{{
+type Positive = (true  | @True univ  | @OK univ);
+type Negative = (false | @False univ | @NG univ);
+type Indef    = @Indef univ;
+
+const indef = @Indef;
+
+type triboolean = (true | false | indef);
+}}}
+
+
+<<ignore
+
+* ファシリティのインターフェースを実現しているネイティブコマンドを除いて、
+  ファイル名のようなストレージ識別子を引数に持つネイティブコマンドを作るべきではない。
+
+>>
+
+== 未定義値か例外を出すコマンド
+
+* 参考： [[https://bitbucket.org/project_caty/dev/issue/13/|undefine値の扱い方]]
+
+# 未定義値がデフォルトのときは、--strict オプションを付けると例外を出す。
+# 例外発生がデフォルトのときは、--safe オプションを付けると未定義を出力する。
+
+例：
+
+* xjson:get
+

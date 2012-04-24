@@ -33,6 +33,12 @@
    "os": ["linux", "macos", "win"],
    "cpu": ["x86", "ppc", "x86_64"],
    "engines": ["python2.5", "python2.6"],
+   "documents": {
+      "readme" : ["README.txt"],
+      "license" : ["LICENSE.txt", "LICENSE.ja-utf8.txt"],
+      "install" : ["INSTALL.txt"],
+      "otherDocs":["CONTRIBUTORS.txt", "TROUBLES.txt", "EXCUSE.txt", "RELEASE.txt", "HISTORY.txt"]
+   },
    "scripts": {
        "install": "./tools/install.py"
    },
