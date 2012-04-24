@@ -9,7 +9,7 @@ module gen in casm;
 command sample {
     @[default("var")] "occur":("var"|"once"|"min")?, 
     @[default("rand")]"string": ("rand"|"empty"|"implied")?
-  } [string typename] :: void -> any
+  } [string typename] :: void -> univ
   reads schema
   refers python:caty.core.std.command.gen.Sample;
 

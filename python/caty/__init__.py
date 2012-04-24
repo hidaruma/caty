@@ -14,6 +14,14 @@ class _Undefined(object):
     def __repr__(self):
         return '#undefined'
 
+
+class ForeignObject(object):
+    def __repr__(self):
+        return 'python: <object at' + hex(id(self)) + '>'
+
+    def __eq__(self, another):
+        return True
+
 UNDEFINED = _Undefined()  # singleton
 import sys
 from caty.front import console, web, profiler
