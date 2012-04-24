@@ -95,3 +95,10 @@ command app-graph :: void -> gv:Digraph
  } | gv:graph --label=applications --bgcolor=gainsboro --rankdir=BT
 };
 
+type Positive = (true  | @True univ  | @OK univ);
+type Negative = (false | @False univ | @NG univ);
+type Indef    = @Indef univ;
+
+const indef = @Indef;
+
+type triboolean = (true | false | indef);
