@@ -30,15 +30,14 @@ command add-tag [string tag] :: any -> @* any {
   [%1 , pass] | tagged
 };
 
-/*{{{
 
 /** 画面をクリア */
 command cls :: void -> void
     refers python:cls.Clear;
-}}}*/
+
 
 /** 画面をクリア */
-command cls :: void -> void {x:cmd cls | void}; // win32clsが壊れたので一時的にOSコマンドを使う */
+// command cls :: void -> void {x:cmd cls | void}; // win32clsが壊れたので一時的にOSコマンドを使う */
 
 /** モジュールの描画表示 */
 command showmo [string moduleName] :: void -> void {
