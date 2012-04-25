@@ -94,11 +94,15 @@ class Concat(Builtin):
 
 from caty.jsontools import tagged
 class Contains(Builtin):
+    def setup(self, opts):
+        self._boolean = opts['boolean']
 
     def execute(self, input):
         v = input[1] in input[0]
-        return tagged(u'True' if v else u'False', input)
-
+        if self._boolean:
+            return v
+        else:
+            return tagged(u'True' if v else u'False', input)
 
 class Tighten(Builtin):
     def execute(self, input):

@@ -18,7 +18,7 @@
 === !name: insession
 
 {{{
-[debug:get-session $_CATY_SECURE_TOKEN_KEY, pass] | list:contains | untagged
+[debug:get-session $_CATY_SECURE_TOKEN_KEY, pass] | list:contains --boolean
 }}}
 
 === !name: diff
