@@ -10,7 +10,7 @@ from caty.core.i18n import I18nMessageWrapper
 import types
 import caty.util as util
 from caty.core.exception import InternalException
-from caty.util.collection import OverlayedDict
+from caty.util.collection import OverlayedDict, MultiMap
 from caty import UNDEFINED
 
 __all__ = ['Command', 'Builtin', 'ScriptError', 'PipelineInterruption', 'PipelineErrorExit', 'compile_builtin']
@@ -435,7 +435,7 @@ class VarLoader(object):
         return opts, args
 
     def _load_opts(self, opts):
-        o = {}
+        o = MultiMap()
         for opt in self.opts:
             if opt.type == 'option':
                 if opt.value != UNDEFINED:
@@ -456,7 +456,7 @@ class VarLoader(object):
                 else:
                     if not opt.optional:
                         raise InternalException(u'Option des not suffice: $opt', opt=opt.key)
-        return o
+        return o.to_dict()
 
     def _load_args(self, opts, args):
         a = []

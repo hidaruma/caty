@@ -78,6 +78,15 @@ class MultiMap(object):
     def __init__(self):
         self.__dict = {}
 
+    def to_dict(self):
+        r = {}
+        for k, v in self.__dict.items():
+            if len(v) == 1:
+                r[k] = v[0]
+            else:
+                r[k] = v
+        return r
+
     def __setitem__(self, k, v):
         if not k in self.__dict:
             self.__dict[k] = [v]
