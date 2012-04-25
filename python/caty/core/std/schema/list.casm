@@ -85,7 +85,7 @@ command concat :: [[any*], [any*]] -> [any*]
 /**
  * 入力値の第一要素が、第二要素を含むかどうか返す。
  */
-command contains :: [[any*], any] -> @Contains boolean | @Not boolean
+command contains :: [[any*], any] -> @True [[any*], any] | @False [[any*], any]
     refers python:caty.core.std.command.listlib.Contains;
 
 /**

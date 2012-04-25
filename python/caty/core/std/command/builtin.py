@@ -556,7 +556,7 @@ class Equals(Builtin):
             if self._boolean:
                 return True
             else:
-                return tagged(u'True', input[0])
+                return tagged(u'True', input)
         else:
             if self._boolean:
                 return False

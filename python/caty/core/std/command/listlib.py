@@ -97,7 +97,7 @@ class Contains(Builtin):
 
     def execute(self, input):
         v = input[1] in input[0]
-        return tagged(u'Contains' if v else u'Not', v)
+        return tagged(u'True' if v else u'False', input)
 
 
 class Tighten(Builtin):

@@ -364,13 +364,19 @@ type Exception = @*! {
   *: any?
 };
 
-
+/** 真、YES、成功などを表す型 */
 type Positive = (true  | @True univ  | @OK univ);
+/** 偽、NO、失敗などを表す型 */
 type Negative = (false | @False univ | @NG univ);
 
+/** 不明、不定、未知などを表す */
 const indef = @Indef;
 
+/** 三値の真偽値型 */
 type triboolean = (true | false | indef);
+
+/** コマンドに複数回オプションを許すときにこの型を使う */
+type multiOpt<T> = (T | [T, T, T*]);
 
 /**********************
  ******** 例外 ********
@@ -727,11 +733,12 @@ command eq
  }
 :: [univ, univ] -> (
      // --taggedオプションが指定されたとき
-     @True univ | @False [univ, univ] |
+     @True [univ, univ] | @False [univ, univ] |
      // --booleanオプションが指定されたとき
      boolean
    )
     refers python:caty.core.std.command.builtin.Equals;
+
 /**
  * 入力値二つのうち第一要素を Caty スクリプトの式、第二要素をその入力として実行する。
  * このコマンドはテストモードでしか動作しないため、通常は使う必要はない。
