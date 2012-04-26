@@ -685,6 +685,7 @@ command version :: void -> string
  * 通常はファイル名とファイルかディレクトリの種別のみが買えされるが、
  * --long オプションが指定された場合は最終更新時刻なども返される。
  */
+@[deprecated]
 command lsdir {"long":boolean?, "kind":string?} [string, string?] :: 
     void -> [DirectoryEntry*]
     reads pub
@@ -720,6 +721,7 @@ command pv<T default any> [string] :: @* object -> T
  * JSON オブジェクトから引数で与えられた名前のプロパティの値を取得する。
  * 値が存在した場合 @EXISTS タグがついた値が返り、そうでなければ @NO タグのついた null が返る。
  */
+@[deprecated]
 command findpv<T default any> [string] :: object -> @EXISTS T | @NO null
         refers python:caty.core.std.command.builtin.FindPV;
     
@@ -955,6 +957,7 @@ command select-action {
 type _trace = [(string|null|boolean)*](minItems=1);
 
 /** リクエストに対してマッチしたリソースクラス名を試行した順番に出力する */
+@[deprecated]
 command trace-dispatch
 {
   @[default("GET")]

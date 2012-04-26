@@ -81,6 +81,7 @@ command correct-html :: string | {*:any} -> string | {*:any}
  * 合致していれば @matched タグの付いたオブジェクトが返り、
  * 合致していなければ @fail タグの付いた入力文字列が返る。
  */
+@[deprecated]
 command regmatch [string] :: string -> @match RegexpMatch | @fail string
     refers python:caty.core.std.command.text.RegMatch;
 
