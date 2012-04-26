@@ -375,8 +375,13 @@ const indef = @Indef;
 /** 三値の真偽値型 */
 type triboolean = (true | false | indef);
 
-/** コマンドに複数回オプションを許すときにこの型を使う */
-type multiOpt<T> = (T | [T, T, T*]);
+/** 単一指定はT型データ、複数指定はT型項目の配列を使う型 */
+type multiItem<T> = (T | [T, T, T*]);
+
+/** コマンドに複数回オプションを許すときにこの型を使う 
+ * multiItem<T> とまったく同じ。
+*/
+type multiOpt<T> = multiItem<T>;
 
 /**********************
  ******** 例外 ********
