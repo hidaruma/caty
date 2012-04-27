@@ -584,8 +584,8 @@ class Eval(Builtin):
         
 class DirIndex(Internal):
     
-    def __init__(self, opt_list, arg_list, type_args=[], pos=(None, None)):
-        Internal.__init__(self, None, arg_list, type_args, pos)
+    def __init__(self, opt_list, arg_list, type_args=[], pos=(None, None), module=None):
+        Internal.__init__(self, None, arg_list, type_args, pos, module)
         self.__opts = opt_list
 
     def setup(self, path, method):

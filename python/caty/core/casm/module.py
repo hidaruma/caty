@@ -3,6 +3,7 @@ from __future__ import with_statement
 from caty.core.casm.finder import SchemaFinder, CommandFinder
 from caty.core.casm.loader import CommandLoader, BuiltinLoader
 from caty.core.schema import schemata
+from caty.core.schema.base import Annotations
 from caty.core.casm.language.casmparser import parse, parse_literate
 from caty.core.casm.language import xcasmparser as xcasm
 from caty.core.casm.cursor import (SchemaBuilder, 
@@ -40,6 +41,7 @@ class Module(object):
         self.compiled = False
         self.docstring = u'undocumented'
         self.last_modified = 0
+        self.annotations = Annotations([])
 
     @property
     def type(self):
@@ -66,7 +68,7 @@ class Module(object):
                                                       module=m,
                                                       app=a))
 
-        if 'register-public' in ref.annotations:
+        if 'register-public' in ref.annotations or 'register-public' in self.annotations:
             if not self.is_root:
                 self.parent.add_ast(ref)
         self.ast_ns[ref.name] = ref
@@ -118,7 +120,7 @@ class Module(object):
                                                       this=self.name+'.'+self.type,
                                                       module=m,
                                                       app=a))
-        if 'register-public' in annotations:
+        if 'register-public' in annotations or 'register-public' in self.annotations:
             if not self.is_root:
                 self.parent.add_schema(name, member, annotations)
         member.annotations = annotations
@@ -145,7 +147,7 @@ class Module(object):
                                                        this=self.name+'.'+self.type,
                                                        module=m,
                                                        app=a))
-        if 'register-public' in profile.annotations:
+        if 'register-public' in profile.annotations or 'register-public' in self.annotations:
             if not self.is_root:
                 self.parent.add_command(name, profile)
         if 'filter' in profile.annotations:

@@ -1,5 +1,5 @@
 @[register-public]
-module mypublic; // -*- coding: utf-8 -*-
+module default; // -*- coding: utf-8 -*-
 
 /** 実行環境をダンプする */
 command dump-closure {* : any?} [any* args] 
