@@ -5,7 +5,7 @@ class CommandBuilder(object):
         self.facilities = facilities
         self.namespace = namespace
 
-    def build(self, proxy, type_args, opts_ref, args_ref, pos):
+    def build(self, proxy, type_args, opts_ref, args_ref, pos, module):
         u"""コマンド文字のチャンクをコマンド名と引数のリストに分割し、呼び出し可能なコマンドオブジェクトを返す。
         """
         from caty.core.script.proxy import Proxy
@@ -18,9 +18,9 @@ class CommandBuilder(object):
             profile = self.namespace[proxy.name]
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
-            cmd = scriptwrapper(profile, cls.instantiate(self))(opts_ref, args_ref, type_args, pos)
+            cmd = scriptwrapper(profile, cls.instantiate(self))(opts_ref, args_ref, type_args, pos, module)
         else:
-            cmd = cls(opts_ref, args_ref, type_args, pos)
+            cmd = cls(opts_ref, args_ref, type_args, pos, module)
         return cmd
 
     def set_facility_to(self, c):

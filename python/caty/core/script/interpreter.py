@@ -495,8 +495,8 @@ class CommandExecutor(BaseInterpreter):
 
 from caty.command import MafsMixin
 class _CallCommand(MafsMixin, Internal):
-    def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None)):
-        Internal.__init__(self, [], [args_ref[0]], type_args, pos)
+    def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None), module=None):
+        Internal.__init__(self, [], [args_ref[0]], type_args, pos, module)
         self.__opts_ref = opts_ref
         self.__args_ref = args_ref[1:]
 

@@ -42,7 +42,7 @@ class CommandProxy(Proxy):
         self.module = module
 
     def instantiate(self, builder):
-        return builder.build(self, self.type_args, self.opts, self.args, self.pos)
+        return builder.build(self, self.type_args, self.opts, self.args, self.pos, self.module)
 
     def _reify(self):
         return {

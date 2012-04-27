@@ -39,7 +39,8 @@ class Module(object):
         self.const_ns = {}
         self.compiled = False
         self.docstring = u'undocumented'
-    
+        self.last_modified = 0
+
     @property
     def type(self):
         return self._type
@@ -626,6 +627,7 @@ class AppModule(Module):
                                                name=mod._name))
                 mod._compile(e.path)
                 self.sub_modules[mod.name] = mod
+                mod.last_modified = e.last_modified
             elif e.path == u'/formats.xjson':
                 o = self.fs.open(e.path)
                 self._plugin.feed(o.read())

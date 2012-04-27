@@ -13,7 +13,7 @@ import types
 schema = u''
 
 class ScalarBuilder(Syntax):
-    command_decl = u"""command scalar-builder<T default any> :: void -> T
+    command_decl = u"""command __scalar-builder<T default any> :: void -> T
                         reads schema
                         refers python:caty.core.script.node.ScalarBuilder;
     """
@@ -29,7 +29,7 @@ class ScalarBuilder(Syntax):
         return visitor.visit_scalar(self)
 
 class ListBuilder(Syntax):
-    command_decl = u"""command list-builder<T default any> :: T -> array
+    command_decl = u"""command __list-builder<T default any> :: T -> array
                         refers python:caty.core.script.node.ListBuilder;
     """
     def __init__(self, *args, **kwds):
@@ -126,7 +126,7 @@ class VarRef(Syntax):
 
     @property
     def optional(self):
-            return self.__optional
+        return self.__optional
 
 class ArgRef(Syntax):
     command_decl = u"""command __arg-ref<T default any> :: void -> T

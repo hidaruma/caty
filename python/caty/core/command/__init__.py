@@ -35,7 +35,7 @@ class Command(object):
     基づいてインジェクトされる。型宣言に記述の無い Caty ファシリティにはアクセスできない。
     """
 
-    def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None)):
+    def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None), module=None):
         assert type_args != None
         if opts_ref:
             self._opt_names = set([o.key for o in opts_ref])
@@ -54,6 +54,23 @@ class Command(object):
         self.__facility_names = []
         self.__i18n = None
         self.__pos = pos
+        _ta = []
+        if module:
+            schema = module.schema_finder
+            l = len(self.__type_args)
+            for i, p in enumerate(self.profile_container.type_params):
+                if i < l:
+                    t = self.__type_args[i]
+                    s = schema[t]
+                    x = p.clone(set())
+                    x._schema = s
+                    _ta.append(x)
+        self.__type_params = _ta
+        if self.type_params:
+            self._in_schema, self._out_schema = self.profile.apply(self, self.profile_container.module)
+        else:
+            self._in_schema = self.profile.in_schema
+            self._out_schema = self.profile.out_schema
 
     def get_command_id(self):
         return self._id
@@ -110,22 +127,6 @@ class Command(object):
         """
         _set = set()
         self.__current_application = facilities.app
-        _ta = []
-        schema = facilities['schema'].read_mode
-        l = len(self.__type_args)
-        for i, p in enumerate(self.profile_container.type_params):
-            if i < l:
-                t = self.__type_args[i]
-                s = schema[t]
-                x = p.clone(set())
-                x._schema = s
-                _ta.append(x)
-        self.__type_params = _ta
-        if self.type_params:
-            self._in_schema, self._out_schema = self.profile.apply(self, self.profile_container.module)
-        else:
-            self._in_schema = self.profile.in_schema
-            self._out_schema = self.profile.out_schema
         self.__i18n = I18nMessageWrapper(self._defined_application.i18n, facilities['env'])
         for mode, decl in self.profile.facilities:
             name = decl.name
@@ -302,8 +303,8 @@ class Syntax(Builtin):
     それらのコマンドは通常とは異なったインスタンス化の経路を必要とするため、
     このクラスで必要な処理を提供する。
     """
-    def __init__(self, opts_ref=None, args_ref=None, pos=(None, None)):
-        Builtin.__init__(self, opts_ref or [], args_ref or [], [])
+    def __init__(self, opts_ref=None, args_ref=None, pos=(None, None), module=None):
+        Builtin.__init__(self, opts_ref or [], args_ref or [], [], module)
         self._in_schema = self.profile.in_schema
         self._out_schema = self.profile.out_schema
 
@@ -324,10 +325,10 @@ def new_dummy():
 
 def scriptwrapper(profile, script):
     class Wrapper(Command):
-        def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None)):
+        def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None), module=None):
             self.profile_container = profile
             self.script = script
-            Command.__init__(self, opts_ref, args_ref, type_args, pos)
+            Command.__init__(self, opts_ref, args_ref, type_args, pos, module)
 
 
         def execute(self, input=None):
