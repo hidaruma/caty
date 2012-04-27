@@ -93,7 +93,7 @@ class Application(PbcObject):
         PbcObject.__init__(self)
         self._lock_set = set()
 
-    def reload(self):
+    def reload(self, module_name=None):
         self._no_ambient = False
         self._system.reload_library()
         self._system.reload_global()
