@@ -1,4 +1,5 @@
-module public;
+@[register-public]
+module mypublic;
 
 type FitResult = {
     "name": string,

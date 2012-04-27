@@ -95,9 +95,16 @@ state 編集 for 不明なユーザー :: WikiSkele links {
 
 state 原稿 for 読者 :: Response;
  
-type foobar = 1;
 
-command x [string arg] :: void -> void {
-    %1 | cout
+type NewWiki = {
+    "filename": string(pattern="[a-zA-Z_][a-zA-Z0-9_-]*"),
 };
 
+type WikiSkele = {
+    "title": string,
+    "body": string,
+};
+
+type WikiFile = {
+    "body": string,
+};

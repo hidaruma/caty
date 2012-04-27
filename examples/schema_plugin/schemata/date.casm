@@ -1,2 +1,2 @@
-module public;
+module date;
 type date = string(format="YMD");

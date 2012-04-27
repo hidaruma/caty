@@ -1,9 +1,0 @@
-secure:loggedin | when {
-    OK => {
-        "files": list-files,
-        "message": pass,
-        "token": secure:gen-token
-    },
-    NG => redirect /security/login.html
-}
-
