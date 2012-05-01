@@ -1,0 +1,196 @@
+// -*- coding: utf-8 -*-
+
+/** 
+ * 数値に関する演算と述語 
+ */
+module num;
+
+/** 数値を文字列にする */
+command to-string :: number -> string
+{
+  public:to-string
+};
+
+/** 文字列を数値と解釈する */
+command from-string :: string -> number
+  refers python:numcmd.FromString
+;
+
+
+/** 数値を真偽値にする
+ * 0はfalse、それ以外はtrueとなる。
+ */
+command to-boolean :: number -> boolean
+{
+  [pass, 0] | eq |
+  when {
+    True  => false,
+    False => true,
+  }
+};
+
+/** 足し算 
+ * 任意の長さの配列を扱える。
+ */
+command add :: [number*] -> number
+  refers python:numcmd.Add
+;
+
+/** 掛け算 
+ * 任意の長さの配列を扱える。
+ */
+command mul :: [number*] -> number
+  refers python:numcmd.Mul
+;
+
+/** 引き算 */
+command sub :: [number, number] -> number
+  refers python:numcmd.Sub
+;
+
+/** 割り算 
+ * integerオプションを指定すると整除
+ */
+command div
+ {
+   @[default(false)]
+   "integer" : boolean?,
+ }
+ :: [number, number] -> univ
+  refers python:numcmd.Div
+;
+
+/** 余り */
+command mod :: [number, number] -> number
+  refers python:numcmd.Mod
+;
+
+/** 1を足す */
+command inc :: number -> number
+{
+  [pass, 1] | add
+};
+
+/** 1を引く */
+command dec :: number -> number
+{
+  [pass, 1] | sub
+};
+
+
+/** ゼロと比較する 
+ * 第1引数に比較演算コマンドの修飾名を指定する。
+ */
+command compare-with-zero
+ {
+   @[default(false)]
+   "boolean" : boolean?,
+ }
+ [
+   /** 比較演算コマンドの修飾名 */
+   string op
+ ]
+ :: number -> Logical<number>
+{
+  pass > in;
+  %1 > op;
+
+  %boolean? |
+  case {
+   true => [%in, 0] | call %op --boolean,
+   (undefined|false) => 
+     [%in, 0] | call %op |
+     when {
+       True  => @True  %in, 
+       False => @False %in
+     }
+  }
+};
+
+/** 正の数かどうか */
+command is-positive 
+ {
+   @[default(false)]
+   "boolean" : boolean?,
+ }
+ :: number -> Logical<number>
+{
+  compare-with-zero %--boolean num:gt
+};
+
+/** 負の数かどうか */
+command is-negative
+ {
+   @[default(false)]
+   "boolean" : boolean?,
+ }
+ :: number -> Logical<number>
+{
+  compare-with-zero %--boolean num:lt
+};
+
+/** 零かどうか */
+command is-zero 
+ {
+   @[default(false)]
+   "boolean" : boolean?,
+ }
+ :: number -> Logical<number>
+{
+  compare-with-zero %--boolean public:eq
+};
+
+/** 大なりイコール */
+command ge 
+ {
+   @[default(false)]
+   "boolean" : boolean?,
+ }
+ :: [number, number] -> Logical<[number, number]>
+  refers python:numcmd.Ge
+;
+
+/** 大なり */
+command gt
+ {
+   @[default(false)]
+   "boolean" : boolean?,
+ }
+ :: [number, number] -> Logical<[number, number]>
+  refers python:numcmd.Gt
+;
+
+/** 小なりイコール */
+command le
+ {
+   @[default(false)]
+   "boolean" : boolean?,
+ }
+ :: [number, number] -> Logical<[number, number]>
+;
+
+/** 小なり */
+command lt
+ {
+   @[default(false)]
+   "boolean" : boolean?,
+ }
+ :: [number, number] -> Logical<[number, number]>
+;
+
+/*
+
+command ceil
+command floor
+command round
+command abs 
+command max 
+command min 
+command pow 
+
+
+command random ??
+
+*/
+
+// End of Module
