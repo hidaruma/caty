@@ -11,7 +11,7 @@ class _Undefined(object):
 
 class ForeignObject(object):
     def __repr__(self):
-        return 'python: <object at' + hex(id(self)) + '>'
+        return 'python:<object at ' + hex(id(self)) + '>'
 
     def __eq__(self, another):
         return isinstance(another, ForeignObject)
