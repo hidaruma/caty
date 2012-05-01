@@ -6,7 +6,7 @@ import sys
 import threading
 from wsgiref.simple_server import make_server
 from caty.core.system import System
-from caty.front.console import CatyShell, get_encoding
+from caty.front.console import CatyShell
 from caty.front.web.console import HTTPConsoleThread
 from caty.util import init_writer
 from caty.util.syslog import init_log, get_start_log
@@ -28,7 +28,9 @@ def main(args):
     while terminator.continue_process == Terminator.CONTINUE:
         try:
             system, is_debug, port, hcon_port = setup(args)
-        except:
+        except Exception, e:
+            import traceback
+            traceback.print_exc()
             return 1
         if not system:
             return 0
@@ -75,65 +77,36 @@ def build_server(system, is_debug, port=8000):
     server = CatyServerFacade(server_module, system, is_debug, port)
     return server
 
+def check_hcon(option, opt_str, value, parser):
+    from optparse import OptionValueError
+    if opt_str in ('--hcon-port', '--hcon-name'):
+        if parser.values.hcon:
+            raise OptionValueError('--hcon-port and --hcon-name is exclusive')
+    setattr(parser.values, option.dest, value)
+
+def make_server_opt_parser():
+    from caty.front.util import make_base_opt_parser
+    parser = make_base_opt_parser('server')
+    parser.add_option('-p', '--port', type='int', help=u'サーバーの動作するポート番号')
+    parser.add_option('--pid', help=u'サーバーのプロセスIDファイル')
+    parser.add_option('--hcon-port', dest='hcon', type='string', action='callback', callback=check_hcon, help=u'hconの動作するポート(uwsgi動作時には無効, hcon-nameと排他)')
+    parser.add_option('--hcon-name', dest='hcon', type='string', action='callback', callback=check_hcon, help=u'hconアプリケーション名(uwsgi動作時のみ有効, hcon-portと排他)')
+    return parser
+
 def setup(args):
-    from getopt import getopt
-    import locale
-    opts, args = getopt(args, 'sq:dp:h', ['system-encoding=', 'quiet', 'debug', 'port=', 'help', 'pid=', 'hcon-port=', 'hcon-name=', 'goodbye='])
-    debug = False
-    system_encoding = locale.getpreferredencoding()
-    use_shell = False
+    parser = make_server_opt_parser()
+    options, _ = parser.parse_args(args)
     port = 8000
-    hcon_port = None
-    _encoding = get_encoding()
-    init_writer(_encoding)
+    init_writer(options.system_encoding)
     _help = False
-    exit = False
-    quiet = False
-    for o, v in opts:
-        if o in ('-d', '--debug'):
-            debug = True
-        elif o in ('-s', '--system-encoding'):
-            system_encoding = v
-            init_writer(system_encoding)
-        elif o in ('-p', '--port'):
-            port = int(v)
-        elif o in ('-h', '--help'):
-            _help = True
-        elif o == '--pid':
-            ro.PID_FILE = v
-        elif o == '--hcon-port' or o == '--hcon-name':
-            hcon_port = v
-        elif o == '--goodbye':
-            exit = v
-        elif o in ('-q', '--quiet'):
-            quiet = True
     if os.path.exists(ro.PID_FILE):
         os.unlink(ro.PID_FILE)
-    if _help:
-        help()
-        return None, None, None, None
-    system = System(system_encoding, debug, quiet)
-    if exit:
+    system = System(options.system_encoding, options.debug, options.quiet, options.no_ambient, options.no_app, options.apps or ['root'], options.force_app)
+    if options.goodbye:
         print
-        print exit
+        print options.goodbye
         return None, None, None, None
-    return system, debug, port, hcon_port
-
-def help():
-    from caty.util import OptPrinter
-    op = OptPrinter()
-    op.add(u'Catyサーバ')
-    op.add(u'Usage: python stdcaty.py server [opts]')
-    op.add(u'\n起動オプション:')
-    op.add(u'-s, --system-encoding', 
-u"""コンソール出力時の文字エンコーディング
-デフォルト値は環境変数から取得する
-取得出来なかった場合はutf-8が使われる""")
-    op.add(u'-p, --port', u'ポート番号を指定する（デフォルト:8000）')
-    op.add(u'--hcon-port', u'サーバ起動と同時に指定されたポートでHTTPコンソールを起動する(スタンドアローンでのみ有効)。オプション未指定時はHTTPコンソールなし')
-    op.add(u'--hcon-name', u'サーバ起動と同時に指定された名前のHTTPコンソールアプリケーションを起動する(uWSGIでのみ有効)。オプション未指定時はHTTPコンソールなし')
-    op.show()
-    print 
+    return system, options.debug, options.port, options.hcon
 
 class ConsoleThread(threading.Thread):
     def __init__(self, shell, server):

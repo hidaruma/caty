@@ -20,21 +20,6 @@ import time
 if sys.platform == 'win32':
     from ctypes import windll
 
-def get_encoding():
-    try:
-        l = locale.getpreferredencoding()
-        try:
-            ''.decode(l)
-            return l
-        except Exception, e:
-            init_writer('utf-8')
-            debug.write(e)
-            return 'utf-8'
-    except Exception, e:
-        init_writer('utf-8')
-        debug.write(e)
-        return 'utf-8'
-
 def catch(f):
     def _(*args, **kwds):
         try:
@@ -464,113 +449,38 @@ def exc_wrapper(f):
             return -1
     return wrapped
 
-_encoding = get_encoding()
-from caty.util import OptPrinter
+def make_console_opt_parser():
+    from caty.front.util import make_base_opt_parser
+    parser = make_base_opt_parser('console')
+    parser.add_option('-e', '--eval', dest='script', help=u'SCRIPTをCatyScriptと解釈して実行し、プロセスを終了する')
+    parser.add_option('-f', '--file', dest='file', action='append', help=u'FILEの中身をCatyScriptと解釈して実行し、プロセスを終了する')
+    parser.add_option('--drible', action='store_true', help=u'コンソール操作の履歴をファイルに書き出す。(ファイル名のフォーマット: console.[YYYYmmddHHMMSS].log')
+    parser.add_option('-u', '--unleash-wildcats', action='store_true', help=u'')
+    return parser
+
 def setup_shell(args, cls=CatyShell):
-    opts, args = getopt(args, 
-                        'e:s:dua:qhf:', 
-                        ['eval=', 
-                         'system-encoding=', 
-                         'app=', 
-                         'unleash-wildcats', 
-                         'debug', 
-                         'quiet', 
-                         'help', 
-                         'dribble',
-                         'file=',
-                         'no-ambient',
-                         'goodbye=',
-                         'force-app=',
-                         'no-app'])
     sitename = []
     wildcat = False
-    system_encoding = locale.getpreferredencoding()
     script = ''
     quiet = False
-    global _encoding
     debug = False
-    _encoding = get_encoding()
-    init_writer(_encoding)
-    _help = False
-    files = []
-    no_ambient = False
-    no_app = False
-    force_app = None
-    dribble = False
-    exit = False
-    for o, v in opts:
-        if o in ('-a', '--app'):
-            sitename.append(v)
-        elif o in ('-u', '--unleash-wildcats'):
-            wildcat = True
-        elif o in ('-d', '--debug'):
-            debug = True
-        elif o in ('-s', '--system-encoding'):
-            system_encoding = v
-            _encoding = v
-            init_writer(_encoding)
-        elif o in ('-e', '--eval'):
-            script = v
-        elif o in ('-q', '--quiet'):
-            quiet = True
-        elif o in ('-h', '--help'):
-            _help = True
-        elif o in ('-f', '--file'):
-            files = [v]
-        elif o == '--no-ambient':
-            no_ambient = True
-        elif o == '--no-app':
-            no_app = True
-        elif o == '--dribble':
-            dribble = True
-        elif o == '--goodbye':
-            exit = v
-        elif o == '--force-app':
-            force_app = v
-    if not sitename:
-        sitename = ['root']
-    if args:
-        help(u'不明な引数です: %s' % ', '.join(args))
-        return None, None, None
-    if _help:
-        help()
-        return None, None, None
-    system = System(_encoding, debug, quiet, no_ambient, no_app, sitename, force_app)
-    if exit:
+    parser = make_console_opt_parser()
+    options, _ = parser.parse_args(args)
+    init_writer(options.system_encoding)
+    system = System(options.system_encoding, options.debug, options.quiet, options.no_ambient, options.no_app, options.apps or ['root'], options.force_app)
+    if options.goodbye:
         print
-        print exit
+        print options.goodbye
         return None, None, None
-    site = system.get_app(sitename[0])
-    shell = cls(site, wildcat, debug, system, dribble, ' '.join(args))
+    site = system.get_app(options.apps[0])
+    shell = cls(site, options.unleash_wildcats, options.debug, system, options.dribble, ' '.join(args))
     return shell, files, script
 
-def help(msg=None):
-    op = OptPrinter()
-    if msg:
-        op.add(msg)
-    op.add(u'Catyコンソール')
-    op.add(u'Usage: python stdcaty.py console [opts]')
-    op.add(u'\n起動オプション:')
-    op.add(u'-a, --app APP_NAME', 
-u"""--no-appと同時に使用。APP_NAMEを例外的に起動する
--a APP1 -a APP2などと複数指定可能
-デフォルトアプリケーションは最初に指定した物""")
-    op.add(u'-s, --system-encoding', 
-u"""コンソール出力時の文字エンコーディング
-デフォルト値は環境変数から取得する
-取得出来なかった場合はutf-8が使われる""")
-    op.add(u'-e, --eval SCRIPT', u'起動時にSCRIPTをCatyスクリプトだとして実行する')
-    op.add(u'-f, --file SCRIPT_FILE', u'起動時にSCRIPT_FILEを読み込み実行する')
-    op.add(u'-q, --quiet', u'起動メッセージを省略')
-    op.add(u'--no-app', u'-aで指定しなかったアプリケーションを読み込まない\n-aが未指定の場合rootのみが読み込まれる')
-    op.add(u'--no-ambient', u'global以外のアプリケーションのスキーマを読み込まない')
-    op.show()
 
 @exc_wrapper
 def main(args):
-    global _encoding
+    from caty.util.optionparser import HelpFound
     init_log()
-    _encoding = get_encoding()
     code = 0
     try:
         import readline
@@ -582,6 +492,8 @@ def main(args):
     readline.set_completer_delims(newdelims)
     try:
         sh, args, script= setup_shell(args)
+    except HelpFound:
+        return 0
     except:
         import traceback
         traceback.print_exc()
