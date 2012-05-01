@@ -623,7 +623,7 @@ class Application(PbcObject):
 
     @property
     def enabled(self):
-        return not self._disabled
+        return not self._disabled or self.name == self._system.force_app
 
     @property
     def verb_dispatcher(self):
