@@ -1,6 +1,11 @@
 {
   "caty-core" : "/",
-  "cap" : "/package-pivots/cap.pivot/",
+  "caty-example-wiki" : "/examples/wiki/",
+
+  "cap"       : "/package-pivots/cap.pivot/",
   "win32util" : "/package-pivots/win32util.pivot/",
-  "caty-example-wiki" : "/examples/wiki/"
+  "networkx"  : "/package-pivots/networkx.pivot/",
+  "webreqresp": "/package-pivots/webreqresp.pivot/",
+
+  "" : ""
 }

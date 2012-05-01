@@ -15,6 +15,12 @@ command app-names :: void -> void {
   apps | each { pv name | cout } | void
 };
 
+@[register-public]
+type Logical<X> =(boolean | @True X | @False X );
+
+@[register-public]
+type Trilogical<X> =(triboolean | @True X | @False X | @Indef X);
+
 // End of Module
 
 
