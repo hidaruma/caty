@@ -32,3 +32,12 @@ command bad-request [string path, string method] :: void -> never
  */
 command not-allowed [string path, string method] :: void -> never
     refers python:caty.core.std.command.http.NotAllowed;
+
+/**
+ * application/x-www-form-urlencodedへの変換
+ * 入力値をパス形式に直し、その後空値を全て除去する。
+ * またboolean値は全て文字列となる仕様である。
+ */
+command urlencode {@[default("utf-8")]"encoding": string?} :: object -> string
+    refers python:caty.core.std.command.http.URLEncode;
+

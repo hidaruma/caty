@@ -3,14 +3,14 @@
 == !exec; スキーマは下に記述
 
 |=command  |= input                 |= params |= output        |=exception |= 備考 |
-|translate |@form {"i": ["0"]}            | t02:i   | @OK {"i" : 0}  | |
-|translate |@form {"i": ["0"],"s":["s"] } | t02:is  | @OK {"i" : 0, "s":"s"}  | |
-|translate |@form {"i": ["0"]}            | t02:iOpt| @OK {"i" : 0}  | |
-|translate |@form {}                      | t02:iOpt| @OK {}  | | トップレベルで空なオブジェクトは認める |
-|translate |@form {"i":[5], "s":["hi"]}   | t02:isOpt| @OK {"i":5, "s":"hi"}  | |
-|translate |@form {"i":[5]}               | t02:isOpt| @OK {"i":5}  | |
-|translate |@form {"i":[5], "s":[]}       | t02:isOpt|              | Exception | 空列を許してもいいか？ |
-|translate |@form {"i":[5], "s":[""]}     | t02:isOpt| @OK {"i":5, "s":""}  |   | 空文字列を許すか？ 通常空文字は来ないけどね|
+|translate | {"i": 0} ~| json:pretty           | t02:i   | @OK {"i" : 0}  | |
+|translate | {"i": 0, "s": "s" }~|json:pretty | t02:is  | @OK {"i" : 0, "s":"s"}  | |
+|translate | {"i": 0} ~|json:pretty     | t02:iOpt| @OK {"i" : 0}  | |
+|translate  --content-type="application/x-www-form-urlencoded"| {}       ~|http:urlencode    | t02:iOpt| @OK {}  | | トップレベルで空なオブジェクトは認める |
+|translate | {"i":5, "s":"hi"} ~|json:pretty   | t02:isOpt| @OK {"i":5, "s":"hi"}  | |
+|translate | {"i":5} ~|json:pretty            | t02:isOpt| @OK {"i":5}  | |
+|translate --content-type="application/x-www-form-urlencoded" | {"i":5, "s":[]} ~|http:urlencode     | t02:isOpt| @OK {"i": 5}   | | 空列はフォームからは来ない |
+|translate  --content-type="application/x-www-form-urlencoded" | {"i":5, "s":""} ~|http:urlencode     | t02:isOpt| @OK {"i":5}  |   | 空文字列はフォームからは来ない|
 
 == スキーマモジュール
 
@@ -56,17 +56,17 @@ type xl = {
 == !exec; 入れ子のオブジェクト
 
 |=command  |= input                 |= params   |= output        |=exception |= 備考 |
-|translate |@form {"x.i": ["0"]}          | t02:xy    | @OK {"x":{"i" : 0}}|       | yはなくてもいいはず|
+|translate | {"x": {"i":0}} ~| json:pretty    | t02:xy    | @OK {"x":{"i" : 0}}|       | yはなくてもいいはず|
 |validate --boolean|{"x":{"i" : 0}}    | t02:xy    | true   | |バリデーションしてみる |
 |validate --boolean|{"i" : 0}          | t02:isOpt | true   | |バリデーションしてみる |
 |validate --boolean|{"x" : 0}          | t02:xz    | false   | |参考のために |
 |validate --boolean|{"i" : 0}          | t02:isOpt | true   | |参考のために、sは不要 |
-|translate |@form {"x.i": ["0"], "y.i":["2"]}| t02:xy| @OK {"x":{"i" : 0}, "y":{"i":2}}  | | |
-|translate |@form {"x.i": ["0"], "y.i":["2"], "y.s":["s"]}| t02:xy| @OK {"x":{"i" : 0}, "y":{"i":2, "s":"s"}}  | | |
-|translate |@form {"x.i": ["0"], "l":["1", "2"]}| t02:xl   | @OK {"x":{"i" : 0}, "l":[1, 2]}  | | |
-|translate |@form {"x.i": ["0"], "l":["1"]}| t02:xl   | @OK {"x":{"i":0}, "l":[1]}  | | |
-|translate |@form {"l":["1"]}              | t02:xl   |   | | 微妙ではある、後述の「問題点」参照 |
-|translate |@form {"x.i":[], "l":["1"]}      | t02:xl   |   |Exception | @OK {"x":{}, "l":[1]} 空列を非存在とすればツジツマはあうが、これは送れない |
+|translate --content-type="application/x-www-form-urlencoded"| {"x":{"i" : 0}, "y": {"i": 2}} ~|http:urlencode| t02:xy| @OK {"x":{"i" : 0}, "y":{"i":2}}  | | |
+|translate --content-type="application/x-www-form-urlencoded" |  {"x":{"i" : 0}, "y": {"i": 2, "s": "s"}} ~|http:urlencode| t02:xy| @OK {"x":{"i" : 0}, "y":{"i":2, "s":"s"}}  | | |
+|translate --content-type="application/x-www-form-urlencoded"| {"x":{"i" : 0}, "l": [1,2]} ~|http:urlencode| t02:xl   | @OK {"x":{"i" : 0}, "l":[1, 2]}  | | |
+|translate --content-type="application/x-www-form-urlencoded"| {"x":{"i" : 0}, "l": [1]} ~|http:urlencode | t02:xl   | @OK {"x":{"i":0}, "l":[1]}  | | |
+|translate --content-type="application/x-www-form-urlencoded"| {"l": [1]} ~|http:urlencode | t02:xl   |   | | 微妙ではある、後述の「問題点」参照 |
+|translate --content-type="application/x-www-form-urlencoded"|{"x": {"i": None}, "l": [1]} ~|http:urlencode | t02:xl   |   |Exception | @OK {"x":{}, "l":[1]} 空列を非存在とすればツジツマはあうが、これは送れない |
 
 
 == 代替のエクスペクテーション

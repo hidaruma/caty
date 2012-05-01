@@ -424,13 +424,18 @@ class TypeCalculator(object):
 
 class Translate(Builtin, TypeCalculator):
     
-    def setup(self, schema_name):
+    def setup(self, opts, schema_name):
         self.schema_name = schema_name
+        self.__content_type = opts.get('content-type', None)
         self.set_schema(schema_name)
 
     def execute(self, raw_input):
         try:
-            input = WebInputParser(self.env._dict, self.env['APP_ENCODING'], raw_input).read()
+            e = self.env._dict
+            if self.__content_type:
+                e = dict(e)
+                e['CONTENT_TYPE'] = self.__content_type
+            input = WebInputParser(e, self.env['APP_ENCODING'], raw_input).read()
             t, v = split_tag(input)
             scm = self.converter
             if t == 'form' or t == 'object':

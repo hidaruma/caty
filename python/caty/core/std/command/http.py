@@ -68,5 +68,21 @@ class NotAllowed(Builtin):
             path=self._path
             )
 
+class URLEncode(Builtin):
+    def setup(self, opts):
+        self._encoding = opts['encoding']
 
-
+    def execute(self, input):
+        import caty.jsontools as json
+        import urllib
+        o = {}
+        for k, v in json.obj2path(input).items():
+            k = k.replace('$.', '')
+            if v is None:
+                continue
+            if isinstance(v, unicode):
+                v = v.encode(self._encoding)
+            elif not isinstance(v, str):
+                v = json.stdjson.dumps(v).encode(self._encoding)
+            o[k] = v
+        return unicode(urllib.urlencode(o))

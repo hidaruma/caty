@@ -356,7 +356,7 @@ class WebInputParser(object):
         from StringIO import StringIO
         method = environ.get('REQUEST_METHOD')
         content_type = environ.get('CONTENT_TYPE', u'')
-        if not input:
+        if input is None:
             input = environ['wsgi.input']
         else:
             input = StringIO(input)
@@ -404,7 +404,7 @@ class WebInputParser(object):
         return self
 
     def _to_unicode(self, seq):
-        return [unicode(v, self.encoding) for v in seq]
+        return [unicode(v, self.encoding) if not isinstance(v, unicode) else v for v in seq]
 
 
 

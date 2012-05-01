@@ -654,7 +654,7 @@ command request {
 /**
  * 引数で指定された型に入力値を変換して返す。
  */
-command translate [string] :: WebInput -> @OK any | @NG MiniErrorInfo
+command translate {"content-type": string?} [string] :: WebInput -> @OK any | @NG MiniErrorInfo
     reads schema
     refers python:caty.core.std.command.builtin.Translate;
 
