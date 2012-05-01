@@ -7,10 +7,10 @@ thisfile = behaviors@misc:/script.beh
 == !exec
 
 |= command     |= params     |= output  |= 備考 |
-| const.caty   |             | "hello"  | |
-| concat.caty  | a  b        | "ab"     | |
-| echo.caty    | hello       | "hello"  | |
-| cout.caty    |             | null     |画面表示はする |
+| call /const.caty   |             | "hello"  | |
+| call /concat.caty  | a  b        | "ab"     | |
+| call /echo.caty    | hello       | "hello"  | |
+| call /cout.caty    |             | null     |画面表示はする |
 
 
 

@@ -35,7 +35,7 @@ import os
 import sys
 import time
 import tempfile
-RC_SCRIPT = u'rc.caty'
+RC_SCRIPT = u'/rc.caty'
 RC_ONCE_SCRIPT = u'rc-once'
 RC_DONE = u'rc-done'
 RESERVED = set(['this', u'global', u'caty'])
@@ -109,7 +109,7 @@ class Application(PbcObject):
         scripts = self._scripts.start()
         if isinstance(scripts, FakeFacility):
             return
-        if not scripts.open('/' + RC_SCRIPT).exists:
+        if not scripts.open(RC_SCRIPT).exists:
             return
         self.cout.writeln(self.i18n.get("Running init script of $name", name=self.name))
         facilities = self.create_facilities()
@@ -117,7 +117,7 @@ class Application(PbcObject):
         modes = [unicode('console')]
         self.init_env(facilities, self._system.debug, modes, self._system, {'PATH_INFO': u'/'})
         try:
-            interpreter.build(RC_SCRIPT)(None)
+            interpreter.build(u'call ' + RC_SCRIPT)(None)
         except Exception, e:
             import traceback
             self.cout.writeln(traceback.format_exc())
@@ -144,8 +144,8 @@ class Application(PbcObject):
             modes = [unicode('console')]
             self.init_env(facilities, self._system.debug, modes, self._system, {'PATH_INFO': u'/'})
             try:
-                self.i18n.write("Running $path of $name", path=f.path.lstrip('/'), name=self.name)
-                interpreter.build(f.path.lstrip('/'))(None)
+                self.i18n.write("Running $path of $name", path=f.path, name=self.name)
+                interpreter.build('call ' + f.path)(None)
             except Exception, e:
                 import traceback
                 self.cout.writeln(traceback.format_exc())

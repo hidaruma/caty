@@ -16,12 +16,12 @@
 {foreach from=$CONTEXT item=it}{$it}+{foreachelse}*else*{/foreach}
 }}}
 
-=== script:/foreach.caty
+=== script:/call /foreach.caty
 {{{
 expand /foreach.txt | text:chop
 }}}
 
-=== script:/foreachelse.caty
+=== script:/call /foreachelse.caty
 {{{
 expand /foreachelse.txt | text:chop
 }}}
@@ -33,12 +33,12 @@ expand /foreachelse.txt | text:chop
 == !exec
 
 |= command         |=input   |= output |=  備考 |
-|foreach.caty      |[1, 2]   |"1+2+"   | |
-|foreach.caty      |["a", "b"]   |"a+b+"   | |
-|foreach.caty      |["hello", "world"]   |"hello+world+"   | |
-|foreach.caty      |["", "", ""]     |"+++"   | |
-|foreach.caty      |["", null, ""]   |"+++"   | |
-|foreach.caty      |{"a":1, "b":2}   |"1+2+"  |値がitに代入される。 |
+|call /foreach.caty      |[1, 2]   |"1+2+"   | |
+|call /foreach.caty      |["a", "b"]   |"a+b+"   | |
+|call /foreach.caty      |["hello", "world"]   |"hello+world+"   | |
+|call /foreach.caty      |["", "", ""]     |"+++"   | |
+|call /foreach.caty      |["", null, ""]   |"+++"   | |
+|call /foreach.caty      |{"a":1, "b":2}   |"1+2+"  |値がitに代入される。 |
 
 
 == !exec
@@ -46,15 +46,15 @@ expand /foreachelse.txt | text:chop
 ここが実行されない。
 
 |= command         |=input    |= output |=exception |=  備考 |
-|foreachelse.caty  |[1, 2, 3] |"1+2+3+" |||
-|foreachelse.caty  |[]        |"*else*" |||
-|foreachelse.caty  |null      |         |Exception|nullは空リスト扱いもあるかも  |
-|foreachelse.caty  |0         |         |Exception| |
-|foreachelse.caty  |-100      |         |Exception| |
-|foreachelse.caty  |{}        |"*else*" |         | 空オブジェクトは空リストと同じ扱い | 
-|foreachelse.caty  |false     |         |Exception| |
-|foreachelse.caty  |true      |         |Exception| |
-|foreachelse.caty  |"hello"   |         |Exception| これは例外のほうがいいと思う。 |
+|call /foreachelse.caty  |[1, 2, 3] |"1+2+3+" |||
+|call /foreachelse.caty  |[]        |"*else*" |||
+|call /foreachelse.caty  |null      |         |Exception|nullは空リスト扱いもあるかも  |
+|call /foreachelse.caty  |0         |         |Exception| |
+|call /foreachelse.caty  |-100      |         |Exception| |
+|call /foreachelse.caty  |{}        |"*else*" |         | 空オブジェクトは空リストと同じ扱い | 
+|call /foreachelse.caty  |false     |         |Exception| |
+|call /foreachelse.caty  |true      |         |Exception| |
+|call /foreachelse.caty  |"hello"   |         |Exception| これは例外のほうがいいと思う。 |
 
 
 

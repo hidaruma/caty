@@ -7,7 +7,7 @@
 <?caty-meta template="smarty" ?>{$CONTEXT}
 }}}
 
-=== script:/echo.caty
+=== script:/call /echo.caty
 {{{
 expand /echo.txt | text:chop
 }}}
@@ -21,22 +21,22 @@ expand /echo.txt | text:chop
 == !exec;
 
 |= command         |=input   |= output |=exception |=  備考 |
-| echo.caty        | "hello" |"hello" ||
-| echo.caty        | 12      |"12" ||
-| echo.caty        | 0       |"0" ||
-| echo.caty        | 3.14    |"3.14" ||
-| echo.caty        | 0.0     |"0.0" ||
-| echo.caty        | 0.00    |"0.00" || "0", "0.0", "0.00" は違うのか？ |
-| echo.caty        | 0.000   |"0.000" ||
-| echo.caty        | 12     |"12" |||
-| echo.caty        | null    |"" | null は空になる |
-| echo.caty        | true    |"true" |小文字|
-| echo.caty        | false   |"false" |小文字|
+| call /echo.caty        | "hello" |"hello" ||
+| call /echo.caty        | 12      |"12" ||
+| call /echo.caty        | 0       |"0" ||
+| call /echo.caty        | 3.14    |"3.14" ||
+| call /echo.caty        | 0.0     |"0.0" ||
+| call /echo.caty        | 0.00    |"0.00" || "0", "0.0", "0.00" は違うのか？ |
+| call /echo.caty        | 0.000   |"0.000" ||
+| call /echo.caty        | 12     |"12" |||
+| call /echo.caty        | null    |"" | null は空になる |
+| call /echo.caty        | true    |"true" |小文字|
+| call /echo.caty        | false   |"false" |小文字|
 
 |= command         |=input   |= output |=  備考 |
-| echo.caty        |[1, 2]   |"[1,2]" |
-| echo.caty        |{"a":1, "b":2} |'''{"a":1,"b":2}''' |引用符はどう扱う？ |
-| echo.caty        |["a", "b"] |'''["a","b"]''' |引用符はどう扱う？ |
+| call /echo.caty        |[1, 2]   |"[1,2]" |
+| call /echo.caty        |{"a":1, "b":2} |'''{"a":1,"b":2}''' |引用符はどう扱う？ |
+| call /echo.caty        |["a", "b"] |'''["a","b"]''' |引用符はどう扱う？ |
 
 
 

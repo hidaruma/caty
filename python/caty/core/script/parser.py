@@ -110,8 +110,8 @@ class ScriptParser(Parser):
         if option(peek('$'))(seq):
             return self.xjson_path(seq)
         name = self.name(seq)
-        if name.endswith('.caty') and name[0] != '/':
-            return self.__make_exec_script(name, seq)
+        #if name.endswith('.caty') and name[0] != '/':
+        #    return self.__make_exec_script(name, seq)
         pos = (seq.col-len(name), seq.line)
         type_args = option(self.type_args, [])(seq)
         if not no_opt:
@@ -126,11 +126,13 @@ class ScriptParser(Parser):
         name = choice(keyword(u'call'), keyword(u'forward'))(seq)
         pos = (seq.col-len(name), seq.line)
         type_args = option(self.type_args, [])(seq)
-        opts = self.options(seq)
-        args = self.arguments(seq)
-        if not args or (args[-1].type == 'arg' and not isinstance(args[-1].value, unicode)):
+        cmd = self.unquoted_maybe_num(seq)
+        if not isinstance(cmd, unicode):
             raise ParseError(seq, self.call_forward)
+        opts = self.options(seq)
+        args = [Argument(cmd)] + self.arguments(seq)
         return CommandProxy(name, type_args, opts, args, pos)
+
 
     def xjson_path(self, seq):
         pos = (seq.col-1, seq.line)
