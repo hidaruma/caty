@@ -13,7 +13,10 @@ command to-string :: number -> string
 
 /** 文字列を数値と解釈する */
 command from-string :: string -> number
-  refers python:numcmd.FromString
+{
+  xjson:parse
+}
+//  refers python:numcmd.FromString
 ;
 
 
