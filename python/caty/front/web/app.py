@@ -112,7 +112,7 @@ class CatyApp(object):
     def main(self, environ):
         path = environ['PATH_INFO']
         query = self._get_query(environ)
-        raw_input = self.create_input(environ)
+        raw_input = environ['wsgi.input'].read(int(environ['CONTENT_LENGTH'] or 0))
         input, options, method, environ = self._process_env(raw_input, query, environ)
         
         facilities = self._app.create_facilities(lambda : self.create_session(environ))
@@ -143,9 +143,9 @@ class CatyApp(object):
         from StringIO import StringIO
         new_env = {}
         new_env.update(environ)
-        input = {}
         method = environ['REQUEST_METHOD']
         if '_method' in query and self._system.enable_http_method_tunneling:
+            raw_input =  WebInputParser(environ, self._app.encoding).read()
             method = query['_method']
             del query['_method']
             for k, v in raw_input.items():
@@ -153,7 +153,8 @@ class CatyApp(object):
                     new_env[k.replace('header.', '').replace('-', '_').upper()] = v[0]
             body = raw_input.get('body', [u''])[0].encode(self._app.encoding)
             new_env['wsgi.input'] = StringIO(body)
-            input = self.create_input(new_env)
+            new_env['REQUEST_METHOD'] = method
+            input = body
         else:
             new_env = environ
             input = raw_input
@@ -166,10 +167,6 @@ class CatyApp(object):
             return input
         else:
             return input
-
-    def create_input(self, environ):
-        input_object = WebStream(environ, self._app.encoding).read()
-        return input_object if input_object else {}
 
     def create_header(self, h):
         for k, v in h.iteritems():
@@ -265,62 +262,6 @@ class CatyApp(object):
         m['expires'] = session.storage.expire
         m['path'] = '/'
         return m.OutputString()
-
-class WebStream(object):
-    def __init__(self, environ, encoding):
-        self.encoding = encoding
-        self.input = self._create_input(environ)
-
-    def _create_input(self, environ):
-        u"""クエリの処理。
-        """
-        method = environ['REQUEST_METHOD']
-        content_type = environ.get('CONTENT_TYPE', u'')
-        cs = self.encoding
-        if ';' in content_type:
-            content_type, rest = map(str.strip, content_type.split(';', 1))
-            if rest.startswith('charset'):
-                cs = rest.split('=').pop(1)
-        if method not in ('POST', 'PUT'):
-            return {}
-        if content_type in ('application/www-form-urlencoded', 'application/x-www-form-urlencoded', 'multipart/form-data'):
-            _env = dict(environ)
-            if 'QUERY_STRING' in _env:
-                del _env['QUERY_STRING']
-            fs = cgi.FieldStorage(fp=environ['wsgi.input'], environ=_env)
-            o = {}
-            for k in fs.keys():
-                v = fs[k]
-                if isinstance(v.value, (list, tuple)):
-                    o[k] = self._to_unicode(v.value)
-                elif hasattr(v, 'filename') and v.filename:
-                    o[k + ".filename"] = [unicode(v.filename)]
-                    o[k + ".data"] = [v.file.read()]
-                else:
-                    o[k] = self._to_unicode([v.value])
-            return  json.tagged(u'form', o)
-        elif content_type == 'application/json':
-            r = json.tagged(u'json', 
-                xjson.loads(
-                    unicode(
-                        environ['wsgi.input'].read(int(environ['CONTENT_LENGTH'] or 0)),
-                        cs)
-                    )
-                )
-            return r
-        else:
-            return environ['wsgi.input'].read(int(environ['CONTENT_LENGTH']))
-    
-
-    def read(self):
-        return self.input
-
-    @property
-    def read_mode(self):
-        return self
-
-    def _to_unicode(self, seq):
-        return [unicode(v, self.encoding) for v in seq]
 
 class NotFound(Exception):
     def __init__(self, path):

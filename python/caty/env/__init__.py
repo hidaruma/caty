@@ -16,8 +16,8 @@ class Env(Facility):
     am = AccessManager()
 
     @am.read
-    def get(self, name):
-        return self._dict[name]
+    def get(self, name, default=None):
+        return self._dict.get(name, default)
 
     @am.update
     def put(self, name, value):

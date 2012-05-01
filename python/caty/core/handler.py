@@ -72,7 +72,7 @@ class RequestHandler(object):
     def make_cmd(self, path, opts, method, transaction=COMMIT):
         path, vpath = self._create_path_and_vpath(path)
         self._env.put('PATH_INFO', vpath)
-        self._env.put('REQUEST_METHOD', method)
+        # self._env.put('REQUEST_METHOD', method)
         if '_verb' in opts:
             verb = opts['_verb']
             del opts['_verb']
@@ -341,4 +341,70 @@ class ErrorLogHandler(object):
     monthname = [None,
                  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+class WebInputParser(object):
+    def __init__(self, environ, encoding, input=None):
+        self.encoding = encoding
+        self.input = self._create_input(environ, input)
+
+    def _create_input(self, environ, input=None):
+        u"""クエリの処理。
+        """
+        import cgi
+        import caty.jsontools as json
+        from caty.jsontools import stdjson
+        from StringIO import StringIO
+        method = environ.get('REQUEST_METHOD')
+        content_type = environ.get('CONTENT_TYPE', u'')
+        if not input:
+            input = environ['wsgi.input']
+        else:
+            input = StringIO(input)
+        cs = self.encoding
+        if ';' in content_type:
+            content_type, rest = map(str.strip, content_type.split(';', 1))
+            if rest.startswith('charset'):
+                cs = rest.split('=').pop(1)
+        if method not in ('POST', 'PUT'):
+            return None
+        if content_type in ('application/www-form-urlencoded', 'application/x-www-form-urlencoded', 'multipart/form-data'):
+            _env = dict(environ)
+            if 'QUERY_STRING' in _env:
+                del _env['QUERY_STRING']
+            fs = cgi.FieldStorage(fp=input, environ=_env)
+            o = {}
+            for k in fs.keys():
+                v = fs[k]
+                if isinstance(v.value, (list, tuple)):
+                    o[k] = self._to_unicode(v.value)
+                elif hasattr(v, 'filename') and v.filename:
+                    o[k + ".filename"] = [unicode(v.filename)]
+                    o[k + ".data"] = [v.file.read()]
+                else:
+                    o[k] = self._to_unicode([v.value])
+            return  json.tagged(u'form', o)
+        elif content_type == 'application/json':
+            src = input.read(int(environ['CONTENT_LENGTH'] or 0))
+            if isinstance(src, str):
+                src = unicode(src, cs)
+            r = json.tagged(u'json', stdjson.loads(src))
+            return r
+        else:
+            if 'text' in content_type:
+                return input.read(int(environ['CONTENT_LENGTH'] or 0))
+            else:
+                return input.read(int(environ['CONTENT_LENGTH'] or 0))
+    
+
+    def read(self):
+        return self.input or {}
+
+    @property
+    def read_mode(self):
+        return self
+
+    def _to_unicode(self, seq):
+        return [unicode(v, self.encoding) for v in seq]
+
+
 

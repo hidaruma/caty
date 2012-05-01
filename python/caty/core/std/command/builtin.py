@@ -17,6 +17,7 @@ from caty.template.core.renderer import *
 from caty.command import MafsMixin
 import caty.core.runtimeobject as ro
 from caty.core.spectypes import reduce_undefined
+from caty.core.handler import WebInputParser
 
 import os
 import sys
@@ -427,8 +428,9 @@ class Translate(Builtin, TypeCalculator):
         self.schema_name = schema_name
         self.set_schema(schema_name)
 
-    def execute(self, input):
+    def execute(self, raw_input):
         try:
+            input = WebInputParser(self.env._dict, self.env['APP_ENCODING'], raw_input).read()
             t, v = split_tag(input)
             scm = self.converter
             if t == 'form' or t == 'object':

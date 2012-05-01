@@ -1,6 +1,6 @@
-== Wiki 記法
+== Wiki記法
 
-Wiki 標準文法プロジェクトである [[http://www.wikicreole.org/wiki/Creole1.0|Creole のバージョン 1.0]] の多くの文法と[[http://www.wikicreole.org/wiki/CreoleAdditions|一部の拡張文法]]をサポートしています。ここでは Creole と差異のある部分だけを記述します。
+Wiki標準文法プロジェクトである [[http://www.wikicreole.org/wiki/Creole1.0|Creole のバージョン 1.0]] の多くの文法と[[http://www.wikicreole.org/wiki/CreoleAdditions|一部の拡張文法]]をサポートしています。ここでは Creole と差異のある部分だけを記述します。
 
 === ハイパーリンク
 

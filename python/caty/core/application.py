@@ -535,13 +535,15 @@ class Application(PbcObject):
         if 'CONTENT_TYPE' in environ:
             env.put('CONTENT_TYPE', unicode(environ['CONTENT_TYPE']))
         else:
-            env.put('CONTENT_TYPE', u'text/plain')
+            env.put('CONTENT_TYPE', u'application/json')
         if 'PATH_INFO' in environ:
             env.put('PATH_INFO', unicode(environ['PATH_INFO']))
         if 'LANGUAGE' in environ:
             env.put('LANGUAGE', unicode(environ['LANGUAGE']))
         else:
             env.put('LANGUAGE', unicode(self._system._global_config.language))
+        env.put('REQUEST_METHOD', environ.get('REQUEST_METHOD', 'POST'))
+        env.put('CONTENT_LENGTH', environ.get('CONTENT_LENGTH', -1))
 
     @property
     def cout(self):

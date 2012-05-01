@@ -2,7 +2,7 @@
 import caty.jsontools as json
 import caty.jsontools.stdjson as stdjson
 from caty.util import error_to_ustr
-from caty.front.web.app import WebStream
+from caty.core.handler import WebInputParser
 import threading
 from wsgiref.simple_server import make_server, WSGIRequestHandler
 
@@ -64,10 +64,10 @@ class HTTPConsoleApp(object):
             encoding = self._system.sysencoding
         if content_type == 'text/plain':
             app_name = environ.get('HTTP_X_CATY_TARGET_APP', 'root')
-            input = WebStream(environ, encoding).read()
+            input = WebInputParser(environ, encoding).read()
         else:
             try:
-                req = json.untagged(WebStream(environ, encoding).read())
+                req = json.untagged(WebInputParser(environ, encoding).read())
                 if content_type != 'application/json':
                     for k, v in req.items():
                         req[k] = v[0]
