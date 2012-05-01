@@ -496,19 +496,22 @@ class CommandExecutor(BaseInterpreter):
 from caty.command import MafsMixin
 class _CallCommand(MafsMixin, Internal):
     def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None), module=None):
-        Internal.__init__(self, [], [args_ref[0]], type_args, pos, module)
+        Internal.__init__(self, [], [args_ref[-1]], type_args, pos, module)
         self.__opts_ref = opts_ref
-        self.__args_ref = args_ref[1:]
+        self.__args_ref = args_ref[:-1]
+        self.__is_file = False
 
     def setup(self, cmd_name):
         self._cmd_name = cmd_name
-        if self._cmd_name.endswith('.caty') and self._cmd_name[0] != u'/':
-            self._cmd_name = 'scripts@this:/' + self._cmd_name
+        if self._cmd_name[0] == u'/':
+            if '@' not in self._cmd_name:
+                self._cmd_name = 'scripts@this:' + self._cmd_name
+            self.__is_file = True
 
     def _make_cmd(self):
         n = self._facilities['env'].get('CATY_APP')['name']
         app = self._system.get_app(n)
-        if self._cmd_name.endswith('.caty') or any(map(lambda x: self._cmd_name.endswith(x), app.web_config.get('script_ext'))):
+        if self.__is_file:
             return self.__script()
         else:
             return self.__make_cmd()

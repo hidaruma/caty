@@ -125,10 +125,11 @@ class ScriptParser(Parser):
     def call_forward(self, seq):
         name = choice(keyword(u'call'), keyword(u'forward'))(seq)
         pos = (seq.col-len(name), seq.line)
-        cmd = self.name(seq)
         type_args = option(self.type_args, [])(seq)
         opts = self.options(seq)
-        args = [Argument(cmd)] + self.arguments(seq)
+        args = self.arguments(seq)
+        if not args or (args[-1].type == 'arg' and not isinstance(args[-1].value, unicode)):
+            raise ParseError(seq, self.call_forward)
         return CommandProxy(name, type_args, opts, args, pos)
 
     def xjson_path(self, seq):
