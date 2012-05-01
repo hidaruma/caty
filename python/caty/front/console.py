@@ -453,8 +453,8 @@ def make_console_opt_parser():
     from caty.front.util import make_base_opt_parser
     parser = make_base_opt_parser('console')
     parser.add_option('-e', '--eval', dest='script', help=u'SCRIPTをCatyScriptと解釈して実行し、プロセスを終了する')
-    parser.add_option('-f', '--file', dest='file', action='append', help=u'FILEの中身をCatyScriptと解釈して実行し、プロセスを終了する')
-    parser.add_option('--drible', action='store_true', help=u'コンソール操作の履歴をファイルに書き出す。(ファイル名のフォーマット: console.[YYYYmmddHHMMSS].log')
+    parser.add_option('-f', '--file', dest='files', action='append', help=u'FILEの中身をCatyScriptと解釈して実行し、プロセスを終了する')
+    parser.add_option('--dribble', action='store_true', help=u'コンソール操作の履歴をファイルに書き出す。(ファイル名のフォーマット: console.[YYYYmmddHHMMSS].log')
     parser.add_option('-u', '--unleash-wildcats', action='store_true', help=u'')
     return parser
 
@@ -474,7 +474,7 @@ def setup_shell(args, cls=CatyShell):
         return None, None, None
     site = system.get_app(options.apps[0])
     shell = cls(site, options.unleash_wildcats, options.debug, system, options.dribble, ' '.join(args))
-    return shell, files, script
+    return shell, options.files, script
 
 
 @exc_wrapper
