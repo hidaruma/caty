@@ -472,7 +472,7 @@ def setup_shell(args, cls=CatyShell):
         print
         print options.goodbye
         return None, None, None
-    site = system.get_app(options.apps[0])
+    site = system.get_app(options.apps[0] if options.apps else 'root')
     shell = cls(site, options.unleash_wildcats, options.debug, system, options.dribble, ' '.join(args))
     return shell, options.files, script
 
