@@ -1,0 +1,14 @@
+// -*- coding: utf-8 -*-
+module base64; 
+
+/** バイナリデータをBase64エンコードしてテキストにする 
+ * 入力が文字列の場合も、バイナリ（バイト列）とみなしてエンコードする。
+ */
+command encode :: (string|binary) -> string
+ refers python:base64cmd.Encode;
+
+/** Base64エンコードされたバイナリデータをもとに戻す */
+command decode :: string -> binary
+ refers python:base64cmd.Decode;
+
+// End of Module
