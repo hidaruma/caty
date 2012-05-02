@@ -66,6 +66,12 @@ class CatyEncoder(json.encoder.JSONEncoder):
         else:
             return json.encoder.JSONEncoder.default(self, o)
 
+    def encode(self, o):
+        if isinstance(o, str):
+            return 'b"%s"' % repr(o)[1:-1]
+        else:
+            return json.encoder.JSONEncoder.encode(self, o)
+
 class InternalDecimal(float):
     u"""simplejson の JSONEncoder は、 default をオーバーライドした結果をさらにエンコードするようになっている。
     そのため、 Decimal 型をエンコードしようとするときに default メソッド内部で文字列にすると、
@@ -90,7 +96,6 @@ class PPEncoder(CatyEncoder):
             return o
         elif isinstance(o, TagOnly):
             return u'@%s' % (o.tag)
-
         else:
             return CatyEncoder.default(self, o)
     

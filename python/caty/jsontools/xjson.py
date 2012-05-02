@@ -212,12 +212,40 @@ def tag(seq):
     value = seq.parse(parsers)
     return json.TaggedValue(name, value)
 
+ascii = set(list("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&'()*+,-./:;<=>?@[]^_`{|}~ \t\n\r"))
+def binary(seq):
+    seq.parse('b"')
+    with strict():
+        cs = []
+        while not seq.eof:
+            if seq.current in ascii:
+                cs.append(str(seq.current))
+                seq.next()
+            elif seq.current == '\\':
+                seq.next()
+                c = choice('x', '"', '\\')(seq)
+                if c != 'x':
+                    cs.append(c)
+                else:
+                    a = seq.current
+                    seq.next()
+                    b = seq.current
+                    seq.next()
+                    cs.append(chr(int(a+b, 16)))
+            elif seq.current == '"':
+                seq.next()
+                break
+            else:
+                raise ParseError(seq, binary)
+        return ''.join(cs)
+
 parsers = [
     tag,
     bind2nd(number, True), 
     bind2nd(integer, True), 
     string, 
     multiline_string, 
+    binary,
     bind2nd(boolean, True), 
     bind2nd(null, True), 
     array, 

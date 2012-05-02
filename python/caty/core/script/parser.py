@@ -70,6 +70,7 @@ class ScriptParser(Parser):
 
     def value(self, cs):
         v = cs.parse([xjson.string, 
+                      xjson.binary,
                       xjson.multiline_string,
                       bind2nd(xjson.null, True), 
                       bind2nd(xjson.number, True), 

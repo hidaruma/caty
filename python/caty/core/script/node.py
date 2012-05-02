@@ -19,10 +19,7 @@ class ScalarBuilder(Syntax):
     """
 
     def set_value(self, value):
-        if isinstance(value, str):
-            v = unicode(value)
-        else:
-            v = value
+        v = value
         self.value = v
 
     def accept(self, visitor):
