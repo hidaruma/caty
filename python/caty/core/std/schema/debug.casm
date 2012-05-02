@@ -6,7 +6,7 @@ module debug in casm;
 /**
  * 入力値を標準出力に書き出す。それ以外の動作は pass と同じ。
  */
-command dump<T default any> 
+command dump<T default univ> 
  {
   /** debugフラグに関わらず表示を強制する */
   @[default(false)]
