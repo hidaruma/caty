@@ -10,6 +10,7 @@ from caty.front.console import CatyShell
 from caty.front.web.console import HTTPConsoleThread
 from caty.util import init_writer
 from caty.util.syslog import init_log, get_start_log
+from caty.util.optionparser import HelpFound
 import caty.core.runtimeobject as ro
 
 def main(args):
@@ -28,6 +29,8 @@ def main(args):
     while terminator.continue_process == Terminator.CONTINUE:
         try:
             system, is_debug, port, hcon_port = setup(args)
+        except HelpFound:
+            return 0
         except Exception, e:
             import traceback
             traceback.print_exc()
