@@ -38,11 +38,10 @@ def main(args):
         if not system:
             return 0
         try:
+            http_console = None
             server = build_server(system, is_debug, port)
             if hcon_port:
                 http_console = HTTPConsoleThread(system, hcon_port)
-            else:
-                http_console = None
             terminator.set_server(server)
             if http_console:
                 http_console.start()
@@ -90,7 +89,7 @@ def check_hcon(option, opt_str, value, parser):
 def make_server_opt_parser():
     from caty.front.util import make_base_opt_parser
     parser = make_base_opt_parser('server')
-    parser.add_option('-p', '--port', type='int', help=u'サーバーの動作するポート番号')
+    parser.add_option('-p', '--port', type='int', default=8000, help=u'サーバーの動作するポート番号')
     parser.add_option('--pid', help=u'サーバーのプロセスIDファイル')
     parser.add_option('--hcon-port', dest='hcon', type='string', action='callback', callback=check_hcon, help=u'hconの動作するポート(uwsgi動作時には無効, hcon-nameと排他)')
     parser.add_option('--hcon-name', dest='hcon', type='string', action='callback', callback=check_hcon, help=u'hconアプリケーション名(uwsgi動作時のみ有効, hcon-portと排他)')
@@ -99,7 +98,6 @@ def make_server_opt_parser():
 def setup(args):
     parser = make_server_opt_parser()
     options, _ = parser.parse_args(args)
-    port = 8000
     init_writer(options.system_encoding)
     _help = False
     if os.path.exists(ro.PID_FILE):
