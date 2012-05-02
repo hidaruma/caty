@@ -432,15 +432,18 @@ class Translate(Builtin, TypeCalculator):
     def execute(self, raw_input):
         try:
             e = self.env._dict
+            if raw_input is None:
+                n = None
+                scm = self.converter
+                scm.validate(n)
+                return tagged(u'OK', n)
             if self.__content_type:
                 e = dict(e)
                 e['CONTENT_TYPE'] = self.__content_type
             input = WebInputParser(e, self.env['APP_ENCODING'], raw_input).read()
             t, v = split_tag(input)
             scm = self.converter
-            if t == 'form' or t == 'object':
-                if t == 'object':
-                    self.i18n.write(u'Plain object type is deprecated. Use with @form tag instead')
+            if t == 'form':
                 return tagged(u'OK', scm.convert(self._to_nested(v)))
             elif t == 'json':
                 try:
