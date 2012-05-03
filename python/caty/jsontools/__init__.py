@@ -66,11 +66,12 @@ class CatyEncoder(json.encoder.JSONEncoder):
         else:
             return json.encoder.JSONEncoder.default(self, o)
 
-    def encode(self, o):
+    def _iterencode(self, o, markers=None):
         if isinstance(o, str):
-            return 'b"%s"' % repr(o)[1:-1]
+            yield u'b"%s"' % repr(o)[1:-1]
         else:
-            return json.encoder.JSONEncoder.encode(self, o)
+            for v in json.encoder.JSONEncoder._iterencode(self, o, markers):
+                yield v
 
 class InternalDecimal(float):
     u"""simplejson の JSONEncoder は、 default をオーバーライドした結果をさらにエンコードするようになっている。
