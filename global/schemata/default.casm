@@ -96,3 +96,47 @@ command app-graph :: void -> gv:Digraph
  } | gv:graph --label=applications --bgcolor=gainsboro --rankdir=BT
 };
 
+
+/** grepコマンド：文字列リストから正規表現マッチした項目を抜き出す */
+command grep 
+ {
+   /** 行番号を付けるか */
+   @[default(false)]
+   "line-no" : boolean?,
+ }
+ [string pattern] 
+:: [string*] -> [string*]
+{
+ pass > in;
+
+ %line-no? | 
+ case {
+  (undefined|false) => 
+    %in | take {text:regmatch %1}
+    ,
+  true =>
+   %in |
+   each {
+    text:regmatch %1 |
+    when {
+     OK => [%_key | to-string, " :", pv src] | text:concat,
+     NG => undefined,
+    }
+   } | list:tighten
+   ,
+ }
+};
+
+/** ファイルをgrepする */
+command file-grep 
+ {
+   /** 行番号を付けるか */
+   @[default(false)]
+   "line-no" : boolean?,
+ }
+ [string pattern, string filename] 
+:: void -> [string*]
+{
+  file:read %2 | text:split "\n" | grep %1
+};
+

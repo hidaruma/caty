@@ -181,12 +181,23 @@ command lt
  :: [number, number] -> Logical<[number, number]>
 ;
 
+/** 絶対値 */
+command abs :: number -> number 
+{
+  is-positive |
+  when {
+   True  => pass,
+   False => [pass, -1] | mul,
+  }
+};
+
+
 /*
 
 command ceil
 command floor
 command round
-command abs 
+
 command max 
 command min 
 command pow 
