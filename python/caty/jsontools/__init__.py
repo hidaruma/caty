@@ -60,7 +60,6 @@ def dumps(obj, **kwds):
 
 class CatyEncoder(json.encoder.JSONEncoder):
     def default(self, o):
-        from caty import UNDEFINED
         if isinstance(o, decimal.Decimal):
             return InternalDecimal(o)
         else:
@@ -69,6 +68,8 @@ class CatyEncoder(json.encoder.JSONEncoder):
     def _iterencode(self, o, markers=None):
         if isinstance(o, str):
             yield u'b"%s"' % repr(o)[1:-1]
+        elif o is UNDEFINED:
+            pass
         else:
             for v in json.encoder.JSONEncoder._iterencode(self, o, markers):
                 yield v
