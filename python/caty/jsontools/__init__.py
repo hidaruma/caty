@@ -71,7 +71,6 @@ class CatyEncoder(json.encoder.JSONEncoder):
         else:
             return json.encoder.JSONEncoder.encode(self, o)
 
-
     def _iterencode(self, o, markers=None):
         if isinstance(o, str):
             yield u'b"%s"' % repr(o)[1:-1]

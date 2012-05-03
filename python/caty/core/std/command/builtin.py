@@ -579,6 +579,8 @@ class Equals(Builtin):
         if a == b:
             if (isinstance(a, bool) and not isinstance(b, bool)) or (isinstance(b, bool) and not isinstance(a, bool)):
                 return False
+            if (isinstance(a, str) and not isinstance(b, str)) or (isinstance(b, str) and not isinstance(a, str)):
+                return False
             return True
         return False
 

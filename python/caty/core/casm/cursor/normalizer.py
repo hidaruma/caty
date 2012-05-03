@@ -219,13 +219,19 @@ class TypeCalcurator(_SubNormalizer):
                     n = (self._dereference(l, True) & r).accept(self)
                     res = n
                 else:
-                    res = NeverSchema()
+                    if '@' + rt == lt:
+                        res = (self._dereference(l, True) & r).accept(self)
+                    else:
+                        res = NeverSchema()
         elif rt.startswith('@'):
             if rt == u'@*!':
                 n = (l & self._dereference(r, True)).accept(self)
                 res = n
             else:
-                res = NeverSchema()
+                if '@' + lt == rt:
+                    res = (l & self._dereference(r, True)).accept(self)
+                else:
+                    res = NeverSchema()
         else:
             # どちらもタグ型でない場合
             if lt == rt or (lt in ('number', 'integer') and rt in ('number', 'integer')):
