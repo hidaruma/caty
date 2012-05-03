@@ -64,6 +64,13 @@ class CatyEncoder(json.encoder.JSONEncoder):
             return InternalDecimal(o)
         else:
             return json.encoder.JSONEncoder.default(self, o)
+    
+    def encode(self, o):
+        if isinstance(o, str):
+            return u'b"%s"' % repr(o)[1:-1]
+        else:
+            return json.encoder.JSONEncoder.encode(self, o)
+
 
     def _iterencode(self, o, markers=None):
         if isinstance(o, str):
