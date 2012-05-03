@@ -26,6 +26,7 @@ type aa = [any, any];
 type iis = [integer, integer, string];
 type ssStar = [string, string*];
 type isOpt = [integer?, string?];
+type univTuple = [univ, univ];
 }}}
 
 == !exec
@@ -67,4 +68,6 @@ type isOpt = [integer?, string?];
 | validate --boolean |[1]           | t02:isOpt    | true     | | |
 | validate --boolean |[""]          | t02:isOpt    | false    | BAD_TYPE, integer | 0 |
 | validate --boolean |[]            | t02:isOpt    | true     | | |
+| validate --boolean | [null]       | t02:univTuple | true | | |
+| validate --boolean | []       | t02:univTuple | true | | |
 

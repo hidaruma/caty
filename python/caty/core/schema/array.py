@@ -41,8 +41,8 @@ class ArraySchema(SchemaBase, Array):
             if s.optional:
                 mandatory -= 1
         l = len(value)
-        if l < mandatory:
-            raise JsonSchemaError(dict(msg=u'This type must contain $min elements or more', min=mandatory))
+        #if l < mandatory:
+        #    raise JsonSchemaError(dict(msg=u'This type must contain $min elements or more', min=mandatory))
         if l > len(self.schema_list) and not self.repeat:
             raise JsonSchemaError(dict(msg=u'This type can contain only $max elements or less', max=len(self.schema_list)))
         errors = []
@@ -75,6 +75,13 @@ class ArraySchema(SchemaBase, Array):
                 s_count += 1
             else:
                 count += 1
+                s_count += 1
+        if s_count < mandatory:
+            while s_count < mandatory:
+                try:
+                    self.schema_list[s_count].validate(caty.UNDEFINED)
+                except JsonSchemaError, e:
+                    raise JsonSchemaError(dict(msg=u'This type must contain $min elements or more', min=mandatory))
                 s_count += 1
         if is_error:
             e = JsonSchemaErrorList({u'msg': u'Failed to validate array type:'}, errors)
