@@ -100,9 +100,9 @@ class RegMatch(Builtin):
     def execute(self, input):
         m = self.regexp.search(input)
         if not m:
-            return tagged(u'fail', input)
+            return tagged(u'NG', input)
         else:
-            return tagged(u'match', 
+            return tagged(u'OK', 
                 {
                     'src': input,
                     'group': m.group(),

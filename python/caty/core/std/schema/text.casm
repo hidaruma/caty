@@ -82,7 +82,7 @@ command correct-html :: string | {*:any} -> string | {*:any}
  * 合致していなければ @fail タグの付いた入力文字列が返る。
  */
 @[deprecated]
-command regmatch [string] :: string -> @match RegexpMatch | @fail string
+command regmatch [string] :: string -> @OK RegexpMatch | @NG string
     refers python:caty.core.std.command.text.RegMatch;
 
 /** 不正文字（非文字）の報告
