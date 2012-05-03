@@ -146,6 +146,16 @@ uni:Result
 |validate --boolean |uni:OKorNG  | {"message": "a", "resultCode": "OK"} | true    |
 |validate --boolean |uni:OKorNG  | {"message": "a", "resultCode": "NG"} | true    |
 
+
+== !exec
+
+排他性のチェック
+
+|= command      |= input    |= Exception |= 備考 |
+| define-local-schema | "module a; type x=string~|string;"| Exception||
+| define-local-schema | "module a; type x=integer~|number;"| Exception||
+
+
 === !name:emp
 
 {{{

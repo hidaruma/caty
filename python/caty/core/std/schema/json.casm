@@ -4,7 +4,7 @@
 module json in casm;
 
 type AnyObject = {*:any};
-type StandardJson = string | integer | number | null | boolean | array | object;
+type StandardJson = string | number | null | boolean | array | object;
 
 /** selectionのフォーマットや値に間違いがある */
 exception BadSelection = object;

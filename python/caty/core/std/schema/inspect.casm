@@ -225,7 +225,7 @@ type RObject = @_object (
 type RPseudoTag = @_pseudoTag ([string, any] | [null, null]);
 type RArray = @_array (TypeAttribute ++ {"items": [RTypeDef*]});
 type RBag = @_bag (TypeAttribute ++ {"items": [RTypeDef*]});
-type REnum = @_enum (TypeAttribute ++ {"enum": [(string|integer|number|boolean|null)*]});
+type REnum = @_enum (TypeAttribute ++ {"enum": [(string|number|boolean|null)*]});
 type RUnion = @_union (TypeAttribute ++ {"left": RTypeDef, "right": RTypeDef});
 type RIntersection = @_intersection (TypeAttribute ++ {"left": RTypeDef, "right": RTypeDef});
 type RUpdator = @_updator (TypeAttribute ++ {"left": RTypeDef, "right": RTypeDef});
@@ -350,7 +350,7 @@ type RIndexArg = @_iarg {
 type RGlobArg = @_garg {
 };
 
-type RScalarVal = @_scalar (string|binary|integer|number|null);
+type RScalarVal = @_scalar (string|binary|number|null);
 
 type RListBuilder = @_list [ReifiedScript*];
 

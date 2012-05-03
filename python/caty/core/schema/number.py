@@ -7,13 +7,13 @@ import random
 class NumberSchema(ScalarSchema):
     minimum = attribute('minimum')
     maximum = attribute('maximum')
-    is_integer = False
-    __options__ = SchemaBase.__options__ | set(['minimum', 'maximum', 'is_integer'])
+    __options__ = SchemaBase.__options__ | set(['minimum', 'maximum'])
 
     def __init__(self, *args, **kwds):
         ScalarSchema.__init__(self, *args, **kwds)
         if self.minimum > self.maximum and self.maximum is not None:
             raise JsonSchemaError(dict(msg='minmum($min) is bigger than maximum($max)', min=self.minimum, max=self.maximum))
+        self.is_integer = False
 
     def _validate(self, value):
         if not self.optional and value == None:
@@ -44,9 +44,10 @@ class NumberSchema(ScalarSchema):
         opts = {
             'minimum': minimum,
             'maximum': maximum,
-            'is_integer': is_integer
         }
-        return self.clone(opts)
+        r = self.clone(opts)
+        r.is_integer = is_integer
+        return r
 
     def _convert(self, value):
         try:
@@ -79,5 +80,6 @@ class NumberSchema(ScalarSchema):
         return u'number'
 
 class IntegerSchema(NumberSchema):
-    is_integer = True
-
+    def __init__(self, *args, **kwds):
+        NumberSchema.__init__(self, *args, **kwds)
+        self.is_integer = True

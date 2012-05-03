@@ -197,7 +197,7 @@ class TypeCalcurator(_SubNormalizer):
             else:
                 res = comb[0] | comb[1]
         elif lt.startswith('@'): # タグ型の場合はタグ名一致時は中身を計算
-            if rt.startswith('@'):
+            if rt.startswith('@'): # 右辺がタグ型
                 if lt != rt:
                     if lt == '@*!' or lt == '@*': 
                         # ワイルドカードタグ & 通常タグ
@@ -413,12 +413,9 @@ class NeverChecker(_SubNormalizer):
             if c.optional:
                 c = c.body
             is_never = truth(c.accept(self))
-            if c.type in ('integer', 'number') and (u[0].type in ('integer', 'number') or u[1].type in ('integer', 'number')):
-                is_never = True
             if is_never:
                 pass
             else:
-                print TreeDumper().visit(c)
                 throw_caty_exception('CompileError', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
             a = u[0].accept(self)
             b = u[1].accept(self)
