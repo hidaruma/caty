@@ -1,0 +1,19 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= 空集合の検出
+
+=== !exec
+
+|= !command         |= !input                             |=!exception|=!output |
+|define-local-schema| "module a; type x=string& integer;" | Exception ||
+|define-local-schema| "module a; type x=string~|integer;" |           |null|
+|define-local-schema| "module a; type x=string&never;"    | Exception ||
+|define-local-schema| "module a; type x=never;"           | Exception ||
+|define-local-schema| "module a; type x=[never];"         | Exception ||
+|define-local-schema| "module a; type x={\"a\":never};"   | Exception ||
+|define-local-schema| "module a; type x={\"a\":null};"    |           |null|
+|define-local-schema| "module a; type x={\"a\":1}&{\"b\":1};"|Exception ||
+
+
+
+

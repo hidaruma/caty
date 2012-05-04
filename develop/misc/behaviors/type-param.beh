@@ -1,0 +1,38 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= 型パラメータ
+
+== !setup
+
+=== !schema
+
+{{{
+module tt;
+
+type Int = integer;
+
+//const Emp = {};
+
+}}}
+
+== !exec
+
+|= !input |= !command   |= !output |= !exception |
+| 12      | pass        | 12       |             |
+| 12      | pass<string>|          |Exception    |
+| "hello" | pass<string>| "hello"  |             |
+| 12      | pass<tt:Int>| 12       |             |
+| "hello" | pass<tt:int>|          |Exception    |
+| 12      | pass<tt:Emp>|          |Exception    |
+| "hello" | pass<tt:Emp>|          |Exception    |
+| {}      | pass<tt:Emp>| {}       |             |
+
+== 問題点
+
+# FITで、ローカルにconst定義が（command定義が）できない。
+# コメントアウトによりtt:Empが未定義はハズだが、12 | pass<tt:Emp> の型チェックが行われているようだ。
+# しかし、{} | pass<tt:Emp> はエラーしている。
+
+
+
+

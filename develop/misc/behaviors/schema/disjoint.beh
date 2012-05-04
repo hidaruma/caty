@@ -1,0 +1,17 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= 型の排他性
+
+=== !exec
+
+type foo = 
+
+|= !command         |= !input                            |=!exception |= 備考 |
+|define-local-schema| "module a; type x=string~|string;" | Exception  ||
+|define-local-schema| "module a; type x=integer~|number;"| Exception  ||
+|define-local-schema| "module a; type x=@binary binary~|binary;"| Exception  ||
+|define-local-schema| "module a; type x=number~|@number number;"| Exception  ||
+|define-local-schema| "module a; type x=string~|@string string;"| Exception  ||
+|define-local-schema| "module a; type x=@number integer~|number;"| Exception  ||
+|define-local-schema| "module a; type x=integer~|@number number;"| Exception  ||
+
