@@ -74,6 +74,10 @@ class FitExpectation(FitSection):
     def indefined(self):
         return any([x.indefined for x in self._node_list if isinstance(x, FitMatrix)])
 
+    @property
+    def invalid(self):
+        return any([x.invalid for x in self._node_list if isinstance(x, FitMatrix)])
+
 class FitPreCond(FitExpectation):
     type = 'preCond'
 
@@ -93,6 +97,7 @@ class EmptyExpectation(object):
     fail = False
     error = False
     indefined = False
+    invalid = False
 
 class FitMatrix(FitTable):
     def __init__(self, node, node_maker, command_section=None):
@@ -122,10 +127,15 @@ class FitMatrix(FitTable):
         title_row = self.items[0]
         cases = self.items[1:]
         for c in cases:
-            c.set_column_type(title_row)
+            try:
+                c.set_column_type(title_row)
+            except:
+                c.invalid()
+                break
             c.run(runner)
-        if any(map(lambda c: c.actual_added, cases)):
-            title_row.add_actual_header()
+        else:
+            if any(map(lambda c: c.actual_added, cases)):
+                title_row.add_actual_header()
 
     @property
     def fail(self):
@@ -134,6 +144,10 @@ class FitMatrix(FitTable):
     @property
     def indefined(self):
         return any(map(lambda x: x.succeed is None, self.items[1:]))
+
+    @property
+    def invalid(self):
+        return any(map(lambda x: x.succeed is INVALID, self.items[1:]))
 
     @property
     def cases(self):
@@ -160,6 +174,11 @@ class FitExpectationType(FitRow):
         if t.startswith('!') and t.strip('!') not in CELL_TYPES:
             r.text = ro.i18n.get(u'Unknown directive: $type', type=t)
             r.style = u'syntactic_error'
+            r.error = True
+            self.error = True
+        else:
+            r.error = False
+            self.error = False
         return r
 
     @property
@@ -256,6 +275,8 @@ class FitCase(FitRow):
             n.apply_macro(macro)
 
     def set_column_type(self, title_row):
+        if title_row.error:
+            raise Exception('syntactic error')
         self.command_num = title_row.command_num
         self.input_num = title_row.input_num
         self.output_num = title_row.output_num
@@ -276,26 +297,30 @@ class FitCase(FitRow):
 
     def run(self, test_runner):
         assert self.initialized, FitRow.to_html(self)
-        testcase = test_runner.make_testcase()
-        testcase.command = self.command
-        testcase.input = self.input
-        testcase.output = self.output
-        testcase.exception = self.exception
-        testcase.signal = self.signal
-        testcase.params = self.params
-        testcase.session = self.session
-        testcase.sessionAfter = self.sessionAfter
-        testcase.env = self.env
-        testcase.outputCond = self.outputCond
-        testcase.outputMatch = self.outputMatch
-        testcase.orElse = self.orElse
-        testcase.judge = self.judge
-        testcase.test(self, self.output_opts)
-        if self.judge == 'abandon':
-            self.result = 'Indef'
-            return
-        if self.result == 'Error' and not test_runner.force and not self.judge == 'ignore':
-            raise RuntimeError('エラーを検出')
+        try:
+            testcase = test_runner.make_testcase()
+            testcase.command = self.command
+            testcase.input = self.input
+            testcase.output = self.output
+            testcase.exception = self.exception
+            testcase.signal = self.signal
+            testcase.params = self.params
+            testcase.session = self.session
+            testcase.sessionAfter = self.sessionAfter
+            testcase.env = self.env
+            testcase.outputCond = self.outputCond
+            testcase.outputMatch = self.outputMatch
+            testcase.orElse = self.orElse
+            testcase.judge = self.judge
+        except:
+            self.result = 'Inval'
+        else:
+            testcase.test(self, self.output_opts)
+            if self.judge == 'abandon':
+                self.result = 'Indef'
+                return
+            if self.result == 'Error' and not test_runner.force and not self.judge == 'ignore':
+                raise RuntimeError('エラーを検出')
 
     def ok(self):
         self.result = 'OK'
@@ -436,6 +461,8 @@ class FitCase(FitRow):
 
     @property
     def succeed(self):
+        if self.result == 'Inval':
+            return INVALID
         assert self.judge in ('', 'negate', 'ignore', 'accept', 'abandon'), ro.i18n.get(u'judge column must be one of negate/ignore/accept/abandon or blank: $actual', actual=self.judge)
         if self.judge == '' or self.judge == 'accept':
             return self.result in ('OK', 'NotYet')
@@ -445,4 +472,6 @@ class FitCase(FitRow):
             return True
         elif self.judge == 'abandon':
             return None
+
+INVALID = 3
 

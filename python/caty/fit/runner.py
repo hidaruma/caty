@@ -179,6 +179,9 @@ class FitRunner(object):
         if t.precond.indefined:
             self._indef += 1
             succ = False
+        if t.precond.invalid:
+            self._invalid += 1
+            return
         t.body.run(self)
         if t.body.fail:
             self._fail += 1
@@ -186,6 +189,10 @@ class FitRunner(object):
         if t.body.indefined:
             self._indef += 1
             succ = False
+
+        if t.body.invalid:
+            self._invalid += 1
+            return
         t.postcond.run(self)
         if t.postcond.fail:
             self._fail += 1
@@ -193,6 +200,8 @@ class FitRunner(object):
         if t.postcond.indefined:
             self._indef += 1
             succ = False
+        if t.precond.invalid:
+            self._invalid += 1
         else:
             if succ:
                 self._succ += 1

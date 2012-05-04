@@ -39,4 +39,3 @@ const Emp = {};
 
 現状のFITではdefine-local-schemaで.beh固有の型定義をしているが、これは実行時の型定義である。そのためコンパイル時に型解決を行う型パラメータにはdefine-local-schemaで定義した型が使えない。
 
-
