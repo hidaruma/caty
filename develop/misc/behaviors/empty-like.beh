@@ -1,0 +1,22 @@
+<<ignore -*- coding: utf-8 -*- >>
+
+= 空のようなもの
+
+== !exec
+
+|= !command  |=!output |= !input     |
+|eq --boolean| false   |[null, ""]   |
+|eq --boolean| false   |[null, false]|
+|eq --boolean| false   |[null, undefined] |
+|eq --boolean| false   |[null, foreign] |
+|eq --boolean| false   |[undefined, foreign] |
+|eq --boolean| false   |[null, []] |
+|eq --boolean| false   |[null, {}] |
+|eq --boolean| false   |["", []]   |
+|eq --boolean| false   |[false, 0] |
+|eq --boolean| false   |[[], {}]   |
+|eq --boolean| false   |[b"", ""]  |
+|eq --boolean| false   |[b"", []]  |
+
+
+

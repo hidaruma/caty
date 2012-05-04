@@ -1,0 +1,22 @@
+<<ignore -*- coding: utf-8 -*- >>
+= eqのアリティ
+
+
+== !exec
+
+|= !command  |=!output|= !input     |
+|eq --boolean| true   |[1,  1] |
+|eq --boolean| true   |[undefined, undefined] |
+|eq --boolean| true   |[undefined, ] |
+|eq --boolean| true   |[, undefined] |
+|eq --boolean| true   |[,] |
+|eq --boolean| true   |[] |
+|eq --boolean| true   |[1, 1,] |
+|eq --boolean| true   |[1, 1, ,] |
+|eq --boolean| true   |[1, 1, undefined] |
+|eq --boolean| true   |[1, 1, undefined, ] |
+|eq --boolean| true   |[1, 1, undefined, undefined] |
+|eq --boolean| true   |[undefined, undefined, undefined] |
+
+
+
