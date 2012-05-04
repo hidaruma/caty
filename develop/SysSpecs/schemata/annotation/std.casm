@@ -133,6 +133,12 @@ type experimental = {};
 @[annotation, target(["TYPE_DECL", "COMMAND_DECL", "MODULE_DECL"])]
 type abstract-spec = {};
 
+/** サンプルである
+ */
+@[annotation, target(["TYPE_DECL", "COMMAND_DECL", "MODULE_DECL"])]
+type sample = {};
+
+
 
 /** フィルター
  * テンプレートで使用するフィルターである。
