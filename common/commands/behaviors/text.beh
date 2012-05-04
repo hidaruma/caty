@@ -43,13 +43,13 @@
 |= input |=command       |= params   |= output      |
 | "abc"  | text:regmatch | "a"       | %reg1        |
 | "abc"  | text:regmatch |"(a).*"    | %reg2        |
-| "abc"  | text:regmatch |"bcd"      | @fail "abc"  |
+| "abc"  | text:regmatch |"bcd"      | @NG "abc"  |
 | "abc"  | text:regmatch |"(a)(b).*" | %reg3        |
 
 === !name: reg1
 
 {{{
-@match {
+@OK {
     "src": "abc",
     "groups": [],
     "group": "a"
@@ -59,7 +59,7 @@
 === !name: reg2
 
 {{{
-@match {
+@OK {
     "src": "abc",
     "groups": ["a"],
     "group": "abc"
@@ -70,7 +70,7 @@
 === !name: reg3
 
 {{{
-@match {
+@OK {
     "src": "abc",
     "groups": ["a", "b"],
     "group": "abc"

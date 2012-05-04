@@ -40,6 +40,7 @@ class ArraySchema(SchemaBase, Array):
         for s in self.schema_list:
             if s.optional:
                 mandatory -= 1
+        value = reduce_undefined(value)
         l = len(value)
         #if l < mandatory:
         #    raise JsonSchemaError(dict(msg=u'This type must contain $min elements or more', min=mandatory))
