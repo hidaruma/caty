@@ -170,6 +170,7 @@ command le
    "boolean" : boolean?,
  }
  :: [number, number] -> Logical<[number, number]>
+  refers python:numcmd.Le
 ;
 
 /** 小なり */
@@ -179,6 +180,7 @@ command lt
    "boolean" : boolean?,
  }
  :: [number, number] -> Logical<[number, number]>
+  refers python:numcmd.Lt
 ;
 
 /** 絶対値 */

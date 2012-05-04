@@ -65,19 +65,23 @@ class Ge(Command):
         else:
             return False if self.boolean else xjson.tagged(u'False', input)
 
-# 以下、まだやってない
-
 class Le(Command):
     def setup(self, opts):
         self.boolean = opts.get('boolean')
 
     def execute(self, input):
-        pass
+        if input[0] <= input[1]:
+            return True if self.boolean else xjson.tagged(u'True', input)
+        else:
+            return False if self.boolean else xjson.tagged(u'False', input)
 
 class Lt(Command):
     def setup(self, opts):
         self.boolean = opts.get('boolean')
 
     def execute(self, input):
-        pass
+        if input[0] < input[1]:
+            return True if self.boolean else xjson.tagged(u'True', input)
+        else:
+            return False if self.boolean else xjson.tagged(u'False', input)
 

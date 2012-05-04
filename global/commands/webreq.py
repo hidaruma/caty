@@ -3,8 +3,10 @@
 #
 import caty
 from caty.command import Command
-import requests
-
+try:
+    import requests
+except:
+    print '[Warning] requests is not installed.'
 
 def make_response(resp):
     u"requests.Responseオブジェクトから、CatyのResposeデータを作る"
