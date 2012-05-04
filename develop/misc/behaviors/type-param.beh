@@ -21,6 +21,10 @@ const Emp = {};
 | 12      | pass        | 12       |             |
 | 12      | pass<string>|          |Exception    |
 | "hello" | pass<string>| "hello"  |             |
+
+以下は保留。
+
+|= |= |= |= |
 | 12      | pass<tt:Int>| 12       |             |
 | "hello" | pass<tt:int>|          |Exception    |
 | 12      | pass<tt:Emp>|          |Exception    |
@@ -33,6 +37,6 @@ const Emp = {};
 # コメントアウトによりtt:Empが未定義はハズだが、12 | pass<tt:Emp> の型チェックが行われているようだ。
 # しかし、{} | pass<tt:Emp> はエラーしている。
 
-
+現状のFITではdefine-local-schemaで.beh固有の型定義をしているが、これは実行時の型定義である。そのためコンパイル時に型解決を行う型パラメータにはdefine-local-schemaで定義した型が使えない。
 
 
