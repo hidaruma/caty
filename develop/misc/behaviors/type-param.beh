@@ -11,7 +11,7 @@ module tt;
 
 type Int = integer;
 
-//const Emp = {};
+const Emp = {};
 
 }}}
 

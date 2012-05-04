@@ -19,9 +19,11 @@ from caty.jsontools.path.validator import to_decl_style
 from caty.core.exception import throw_caty_exception
 from threading import RLock
 from StringIO import StringIO
+from caty.core.facility import Facility
 
-class Module(object):
+class Module(Facility):
     def __init__(self, app):
+        self._app = app
         self.kind_ns = {}
         self.schema_ns = {}
         self.command_ns = {}
@@ -29,7 +31,6 @@ class Module(object):
         self.sub_modules = {}
         self.parent = None
         self._name = u'public' # デフォルト値
-        self._app = app
         self._system = app._system
         self._lazy_resolve = []
         self._plugin = PluginMap()
@@ -42,14 +43,10 @@ class Module(object):
         self.docstring = u'undocumented'
         self.last_modified = 0
         self.annotations = Annotations([])
-
+    
     @property
     def type(self):
         return self._type
-
-    @property
-    def application(self):
-        return self._app
 
     @property
     def system(self):
@@ -348,7 +345,7 @@ class Module(object):
 
     @property
     def schema_finder(self):
-        return SchemaFinder(self, self._app, self._system)
+        return SchemaFinder(self, self._app, self._system, LocalModule)
 
     @property
     def command_finder(self):
@@ -788,3 +785,53 @@ class IntegratedModule(object):
 
 
 
+class LocalModule(Module):
+    def __init__(self, finder):
+        Module.__init__(self, finder._module._app)
+        self.parent = finder._module
+        self.parent_finder = finder
+        
+    @property
+    def schema_finder(self):
+        return OverlayedFinder(self, self.parent_finder)
+
+    def compile(self, schema_string):
+        u"""組み込みコマンドの型指定など、オンザフライでスキーマを構築するためのメソッド。
+        """
+
+        self.compiled = False
+        from topdown import until, many, as_parser
+        def modname(cs):
+            cs.parse(until('m'))
+            cs.parse('module')
+            cs.parse(many(' '))
+            n = cs.parse(until(';'))
+            return n.strip()
+
+        self.ast_ns = {}
+        self.proto_ns = {}
+        self.saved_st = {}
+        self.const_ns = {}
+        self.kind_ns = {}
+        self.schema_ns = {}
+        self.command_ns = {}
+
+        self._name = as_parser(modname).run(schema_string)
+        for t in parse(schema_string):
+            t.declare(self)
+            
+        self.resolve()
+
+class OverlayedFinder(object):
+    
+    def __init__(self, module, finder):
+        self.module = module
+        self.finder = finder
+
+    def __getitem__(self, key):
+        if self.module.has_schema(key):
+            return self.module.get_schema(key)
+        else:
+            return self.finder[key]
+
+    __call__ = __getitem__

@@ -562,7 +562,7 @@ class Equals(Builtin):
         self._boolean = opts['boolean']
 
     def execute(self, input):
-        input = input[:]
+        input = reduce_undefined(input)
         while len(input) < 2:
             input.append(caty.UNDEFINED)
         if self.__eq(*input):

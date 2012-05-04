@@ -14,7 +14,7 @@ class SchemaFinder(ResourceFinder, ReadOnlyFacility):
     u"""スキーマ検索オブジェクト。
     通常のコマンドクラスから参照されるので、ファシリティとして扱う。
     """
-    def __init__(self, module, app, system):
+    def __init__(self, module, app, system, LocalModule):
         self._module = module
         ResourceFinder.__init__(self, app, system)
         self._local = LocalModule(self)
@@ -62,11 +62,11 @@ class SchemaFinder(ResourceFinder, ReadOnlyFacility):
         else:
             if key.startswith(self._local.name+':'):
                 k = key.split(':')[1]
-                if self._local.get_ast(k):
-                    return True
+                if self._local.has_syntax_tree(k):
+                    return self._local.get_syntax_tree(key)
             elif self._local.name == 'public':
-                if self._local.get_syntax_tree(key):
-                    return True
+                if self._local.has_syntax_tree(key):
+                    return self._local.get_syntax_tree(key)
             return self._module.get_syntax_tree(key)
 
 
@@ -102,160 +102,7 @@ class SchemaFinder(ResourceFinder, ReadOnlyFacility):
     def to_name_tree(self):
         return self._module.to_name_tree()
 
-class LocalModule(ResourceFinder):
-    def __init__(self, finder):
-        self.schema_ns = {}
-        self.name = u''
-        self.ast_ns = {}
-        self.saved_st = {}
-        self.schema_finder = OverlayedFinder(self, finder)
-        ResourceFinder.__init__(self, finder.application, finder.system)
-        self.parent = finder._module
 
-    def add_ast(self, ref):
-        if ref in self.ast_ns:
-            m, a = self._get_mod_and_app(ref)
-            raise Exception(self.application.i18n.get('Type $name of $this is already defined in $module of $app', 
-                                                      name=ref.name, 
-                                                      this=self.name+'.casm',
-                                                      module=m,
-                                                      app=a))
-
-        self.ast_ns[ref.name] = ref
-
-    def get_ast(self, name, tracked=None):
-        if not tracked:
-            tracked = set([self])
-        else:
-            if self in tracked:
-                raise KeyError(name)
-            else:
-                tracked.add(self)
-        if name in self.ast_ns:
-            return self.ast_ns[name]
-        else:
-            if ':' in name:
-                m, n = name.rsplit(':', 1)
-                if m == 'public':
-                    return self.get_ast(n)
-        if self.parent:
-            return self.parent.get_ast(name)
-        raise KeyError(name)
-
-    def has_ast(self, name, tracked=None):
-        if not tracked:
-            tracked = []
-        if self in tracked:
-            return False
-        t = list(tracked ) + [self]
-        if name in self.ast_ns:
-            return True
-        else:
-            if ':' in name:
-                m, n = name.rsplit(':', 1)
-                if m == 'public':
-                    return self.has_ast(n)
-            if self.parent:
-                return self.parent.has_ast(name, t)
-            else:
-                return False
-
-    def add_lazy_resolve(self, f):
-        self._lazy_resolvers.append(f)
-
-    def has_schema(self, name, tracked=()):
-        if self in tracked:
-            return False
-        t = list(tracked ) + [self]
-        if name in self.schema_ns:
-            return True
-        else:
-            if ':' in name:
-                m, n = name.rsplit(':', 1)
-                if m == 'public':
-                    return self.has_schema(n)
-            if self.parent:
-                return self.parent.has_schema(name, t)
-            else:
-                return False
-
-    def get_schema(self, name, check_queue=None):
-        if not self.has_schema(name):
-            raise KeyError(name)
-        if name in self.schema_ns:
-            r = self.schema_ns[name]
-            return r
-        else:
-            if ':' in name:
-                m, n = name.rsplit(':', 1)
-                if m == 'public':
-                    return self.get_schema(n)
-        return self.parent.get_schema(name)
-
-    def compile(self, schema_string):
-        u"""組み込みコマンドの型指定など、オンザフライでスキーマを構築するためのメソッド。
-        """
-        def modname(cs):
-            cs.parse(until('m'))
-            cs.parse('module')
-            cs.parse(many(' '))
-            n = cs.parse(until(';'))
-            return n.strip()
-        self.ast_ns = {}
-        self.saved_st = {}
-        self.schema_ns = {}
-        self.name = as_parser(modname).run(schema_string)
-        for t in parse(schema_string):
-            t.declare(self)
-            
-        self._build_schema_tree()
-        self._resolve_reference()
-        self._apply_type_var()
-        self._normalize()
-
-    def _build_schema_tree(self):
-        self.saved_st.update(self.ast_ns)
-        self._loop_exec(self.ast_ns, SchemaBuilder(self), lambda k, v:self.add_schema(v))
-    
-    def _resolve_reference(self):
-        self._loop_exec(self.schema_ns, ReferenceResolver(self), lambda k, v:self.schema_ns.__setitem__(k, v))
-
-    def _apply_type_var(self):
-        self._loop_exec(self.schema_ns, TypeVarApplier(self), lambda k, v:self.schema_ns.__setitem__(k, v))
-
-    def _normalize(self):
-        self._loop_exec(self.schema_ns, TypeNormalizer(self), lambda k, v:self.schema_ns.__setitem__(k, v))
-
-    def _loop_exec(self, target, cursor, callback):
-        try:
-            for k, v in target.items():
-                try:
-                    callback(k, cursor.visit(v))
-                except:
-                    print '[DEBUG]', k
-                    raise
-
-        except:
-            print '[ERROR]', u'Application:%s, module:%s' % (self.application.name, self.name)
-            raise
-
-
-    def add_schema(self, schema):
-        self.schema_ns[schema.name] = schema
-
-class OverlayedFinder(object):
-    
-    def __init__(self, module, finder):
-        self.module = module
-        self.finder = finder
-
-    def __getitem__(self, key):
-        if self.module.has_schema(key):
-            return self.module.get_schema(key)
-        else:
-            return self.finder[key]
-
-    __call__ = __getitem__
 
 class CommandFinder(dict, ResourceFinder, ReadOnlyFacility):
     u"""コマンド検索オブジェクト。

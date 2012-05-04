@@ -126,12 +126,12 @@ class TypeCalcurator(_SubNormalizer):
             d = self._dereference(l)._default_schema
             if d:
                 lt = d.type
-                l = self._dereference(l)
+                l = self._dereference(d)
         if rt == '__variable__':
             d = self._dereference(r)._default_schema
             if d:
                 rt = d.type
-                r = self._dereference(r)
+                r = self._dereference(d)
         # 一方がneverであれば演算結果はnever
         if lt == 'never' or rt == 'never':
             res = NeverSchema()
@@ -219,6 +219,8 @@ class TypeCalcurator(_SubNormalizer):
                     n = (self._dereference(l, True) & r).accept(self)
                     res = n
                 else:
+                    if lt == 'integer': lt = 'number'
+                    if rt == 'integer': rt = 'number'
                     if '@' + rt == lt:
                         res = (self._dereference(l, True) & r).accept(self)
                     else:
@@ -228,6 +230,8 @@ class TypeCalcurator(_SubNormalizer):
                 n = (l & self._dereference(r, True)).accept(self)
                 res = n
             else:
+                if lt == 'integer': lt = 'number'
+                if rt == 'integer': rt = 'number'
                 if '@' + lt == rt:
                     res = (l & self._dereference(r, True)).accept(self)
                 else:
@@ -241,8 +245,9 @@ class TypeCalcurator(_SubNormalizer):
                 if isinstance(r, TypeVariable):
                     return r
                 # 同じ型であればそのまま計算(numberとintegerも)
-                if self.__exclusive_pseudotag(l, r):
-                    return NeverSchema()
+                if lt == rt == 'object':
+                    if self.__exclusive_pseudotag(l, r):
+                        return NeverSchema()
                 res = l.intersect(r).accept(self)
             elif lt == 'enum' and isinstance(r, Scalar):
                 res = self._intersect_enum_and_scalar(self._dereference(l), r)
