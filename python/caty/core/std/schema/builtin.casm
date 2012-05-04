@@ -52,15 +52,19 @@ type FormInput = {
 
 type WebItem = any;
 
-type Response = {
-    "status": integer(minimum=200, maximum=299),
+type CommonResponsePart = {
     "header": {
         "content-type": string?,
-        "content-length": integer?,
+        "content-length": (string|integer)?,
         *: string
     },
     "body": string | binary,
-    "encoding": string? // テキストデータを返すときは必ずこれを追加
+    "encoding": string?, // テキストデータを返すときは必ずこれを追加
+    "responseOriginalEncoding" : string?,
+};
+
+type Response = CommonResponsePart ++ {
+    "status": integer(minimum=200, maximum=299),
 };
 
 type Redirect = {
@@ -71,15 +75,8 @@ type Redirect = {
     }
 };
 
-type ErrorResponse = {
-    "status": integer(minimum=400),
-    "header": {
-        "content-type": string?,
-        "content-length": integer?,
-        *: string
-    },
-    "body": string | binary,
-    "encoding": string? // テキストデータを返すときは必ずこれを追加
+type ErrorResponse = CommonResponsePart ++ {
+    "status": integer(minimum=400, maximum=599),
 };
 
 type WebOutput = Response | Redirect | ErrorResponse;

@@ -1,0 +1,148 @@
+// -*- coding: utf-8 -*-
+module webreq; 
+
+//
+// webreq:Resp = Response
+//
+/** レスポンス */
+type Resp = WebOutput;
+
+/** URL */
+type url = common:uri;
+
+/** ヘッダの指定 */
+type Headers = {*: (integer|string)?};
+
+/** エンティティボディのデータ */
+type bodyContent = (null|string|binary);
+
+
+/** HEADリクエスト */
+command head 
+ {
+   /** リクエストタイムアウト時間（秒数、小数可能）*/
+   "timeout" : number?,
+ }
+ [url] :: void -> Resp
+  refers python:webreq.Head
+;
+
+
+/** GETリクエスト */
+command get 
+ {
+   /** リクエストタイムアウト時間（秒数、小数可能）*/
+   "timeout" : number?,
+ }
+ [url] :: void -> Resp
+  refers python:webreq.Get
+;
+
+/** POSTリクエスト */
+command post
+ {
+   "content-type": string?,
+   /** リクエストタイムアウト時間（秒数、小数可能）*/
+   "timeout" : number?,
+ }
+ [url] :: bodyContent -> Resp
+  refers python:webreq.Post
+;
+
+/** PUTリクエスト */
+command put 
+ {
+   "content-type": string?,
+   /** リクエストタイムアウト時間（秒数、小数可能）*/
+   "timeout" : number?,
+ }
+ [url] :: bodyContent -> Resp
+  refers python:webreq.Put
+;
+
+/** DELETEリクエスト */
+command delete
+ {
+   /** リクエストタイムアウト時間（秒数、小数可能）*/
+   "timeout" : number?,
+ }
+ [url] :: void -> Resp
+//  refers python:webreq.Delete
+;
+
+
+/* == */
+
+type UrlEncodable = {
+ * : (string|number)?
+};
+
+type UrlDecoded = {
+ * : (string | [string*])?
+};
+
+
+/** JSONオブジェクトのurlエンコード */
+command urlencode :: UrlEncodable -> string
+  refers python:webreq.UrlEncode
+;
+
+/** urlエンコードされたJSONオブジェクトのデコード */
+command urldecode
+ {
+   @[default(false)]
+   "flat" : boolean?,
+   @[default(false)]
+   "keep-illegal" : boolean?
+ }
+ :: string -> UrlDecoded
+  refers python:webreq.UrlDecode
+;
+
+/** クエリ文字列のパーズ 
+ * 先頭の'?'を許す以外は、urldecodeと同じ処理
+ */
+command parse-qs 
+ {
+   @[default(false)]
+   "flat" : boolean?,
+   @[default(false)]
+   "keep-illegal" : boolean?
+ }
+ :: string -> UrlDecoded
+  refers python:webreq.ParseQS
+;
+
+
+/** Content-Type のパーズ */
+command parse-content-type :: string -> object
+  refers python:webreq.ParseContentType
+;
+
+/** Catyの動詞をURLに付加する
+ * 既に動詞があるときは上書きされる。
+ * 引数が指定されない場合は何もしない
+ */
+command push-verb [string? verb] :: uri -> uri
+ refers python:webreq.PushVerb;
+
+
+/*
+type Response = {
+    "status": integer(minimum=200, maximum=299),
+    "header": {
+        "content-length": integer?,
+        "content-type": string?,
+        *: string?    ?
+    },
+    "body": string | binary,
+    "encoding": string?,
+    *: never?
+};
+*/
+
+
+
+// End of Module
+
+
