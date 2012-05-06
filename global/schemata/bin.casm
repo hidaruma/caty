@@ -1,0 +1,44 @@
+// -*- coding: utf-8 -*-
+/** バイナリデータの操作 */
+module bin; 
+
+
+/** CatyのPython実装において使用可能な文字符号化の名前一覧
+ * このコマンドの出力が完全に信用できる保証はない。
+ */
+command python-encodings :: void -> [string*]
+ refers python:strcmd.Encodings;
+
+/** バイナリデータのバイトサイズ */
+command length :: binary -> integer(minimum=0)
+ refers python:bincmd.Length;
+
+/** バイナリデータのスライスを返す（終端位置を含めない） */
+command slice [integer start, integer? end] :: binary -> binary
+ refers python:bincmd.Slice;
+
+/** バイナリデータのスライスを返す（終端位置を含める） */
+command slice-to [integer start, integer? end] :: binary -> binary
+ refers python:bincmd.SliceTo;
+
+/** 引数で指定された文字符号化方式により、バイナリデータから文字列を作る */
+command decode-to-string [string encoding] :: binary -> string
+ refers python:bincmd.DecodeToString;
+
+/** 引数で指定された文字符号化方式により、文字列からバイナリデータを作る */
+command encode-from-string [string encoding]:: string -> binary
+ refers python:bincmd.EncodeFromString;
+
+/** バイナリデータをBase64符号化する */
+command to-base64 :: binary -> string
+{
+  base64:encode
+};
+
+/** Base64符号化された文字列をもとのバイナリデータに戻す */
+command from-base64 :: string -> binary
+{
+  base64:decode
+};
+
+// End of Module
