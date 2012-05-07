@@ -134,7 +134,7 @@ class CatyEncoder(json.encoder.JSONEncoder):
                 self.skipkeys, _one_shot, self._iterencode)
             return _iterencode(o, 0)
 
-        def _iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict, markers):
+        def _iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
             if isinstance(o, unicode):
                 yield _encoder(o)
             elif isinstance(o, str):
@@ -318,7 +318,8 @@ class CatyEncoder(json.encoder.JSONEncoder):
                                                            _current_indent_level, 
                                                            _iterencode_list, 
                                                            _iterencode_dict,
-                                                           markers)
+                                                           markers,
+                                                           _encoder)
         return _iterencode
 
 
@@ -371,11 +372,11 @@ class PPEncoder(CatyEncoder):
                 for e in CatyEncoder._iterencode(self, self.__normalize(o), markers):
                     yield e
     else:
-        def _iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict, markers):
+        def _iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
             if isinstance(o, TaggedValue):
                 t, v = split_tag(o)
                 yield u'@%s ' % t
-                for e in self._iterencode(v, _current_indent_level, _iterencode_list, _iterencode_dict, markers):
+                for e in self._iterencode(v, _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
                     yield e
             elif isinstance(o, TagOnly):
                 yield u'@%s' % (o.tag)
@@ -388,7 +389,7 @@ class PPEncoder(CatyEncoder):
                 else:
                     yield u'#<foreign %s>' % repr(o)
             else:
-                for e in CatyEncoder._iterencode(self, self.__normalize(o), _current_indent_level, _iterencode_list, _iterencode_dict, markers):
+                for e in CatyEncoder._iterencode(self, self.__normalize(o), _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
                     yield e
 
     def __normalize(self, o):
