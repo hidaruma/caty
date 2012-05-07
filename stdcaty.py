@@ -1,10 +1,7 @@
 #!/usr/bin/python
 import sys
 sys.path.insert(0, './python')
-sys.path.insert(1, './python/lib/BeautifulSoup')
-sys.path.insert(1, './python/lib/antlr')
 sys.path.insert(1, './python/lib/topdown')
-sys.path.insert(1, './python/lib/simplejson')
 sys.path.insert(1, './python/lib/csslib')
 sys.path.insert(1, './python/lib/pbc')
 sys.path.insert(1, './python/lib/creole')
