@@ -84,6 +84,30 @@ class CatyEncoder(json.encoder.JSONEncoder):
                     yield v
     else:
 
+        from json.encoder import FLOAT_REPR, INFINITY
+        def _floatstr(self, o, allow_nan=None,
+                _repr=FLOAT_REPR, _inf=INFINITY, _neginf=-INFINITY):
+            # Check for specials.  Note that this type of test is processor
+            # and/or platform-specific, so do tests which don't depend on the
+            # internals.
+            if allow_nan is None:
+                allow_nan = self.allow_nan
+            if o != o:
+                text = 'NaN'
+            elif o == _inf:
+                text = 'Infinity'
+            elif o == _neginf:
+                text = '-Infinity'
+            else:
+                return _repr(o)
+
+            if not allow_nan:
+                raise ValueError(
+                    "Out of range float values are not JSON compliant: " +
+                    repr(o))
+
+            return text
+
         def iterencode(self, o, _one_shot=False):
             """Encode the given object and yield each string
             representation as available.
@@ -94,7 +118,7 @@ class CatyEncoder(json.encoder.JSONEncoder):
                     mysocket.write(chunk)
 
             """
-            from json.encoder import FLOAT_REPR, INFINITY, encode_basestring, encode_basestring_ascii
+            from json.encoder import encode_basestring, encode_basestring_ascii
             if self.check_circular:
                 markers = {}
             else:
@@ -103,36 +127,14 @@ class CatyEncoder(json.encoder.JSONEncoder):
                 _encoder = encode_basestring_ascii
             else:
                 _encoder = encode_basestring
-            def floatstr(o, allow_nan=self.allow_nan,
-                    _repr=FLOAT_REPR, _inf=INFINITY, _neginf=-INFINITY):
-                # Check for specials.  Note that this type of test is processor
-                # and/or platform-specific, so do tests which don't depend on the
-                # internals.
-
-                if o != o:
-                    text = 'NaN'
-                elif o == _inf:
-                    text = 'Infinity'
-                elif o == _neginf:
-                    text = '-Infinity'
-                else:
-                    return _repr(o)
-
-                if not allow_nan:
-                    raise ValueError(
-                        "Out of range float values are not JSON compliant: " +
-                        repr(o))
-
-                return text
-
 
             _iterencode = self._make_iterencode(
-                markers, self.default, _encoder, self.indent, floatstr,
+                markers, self.default, _encoder, self.indent, self._floatstr,
                 self.key_separator, self.item_separator, self.sort_keys,
                 self.skipkeys, _one_shot, self._iterencode)
             return _iterencode(o, 0)
 
-        def _iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict):
+        def _iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict, markers):
             if isinstance(o, unicode):
                 yield _encoder(o)
             elif isinstance(o, str):
@@ -145,15 +147,15 @@ class CatyEncoder(json.encoder.JSONEncoder):
                 yield 'false'
             elif isinstance(o, (int, long)):
                 yield str(o)
-            elif isinstance(o, float):
-                yield _floatstr(o)
+            elif isinstance(o, (InternalDecimal, float)):
+                yield self._floatstr(o)
             elif isinstance(o, (list, tuple)):
                 for chunk in _iterencode_list(o, _current_indent_level):
                     yield chunk
             elif isinstance(o, dict):
                 for chunk in _iterencode_dict(o, _current_indent_level):
                     yield chunk
-            elif isinstance(o, UNDEFINED):
+            elif o is UNDEFINED:
                 pass
             else:
                 if markers is not None:
@@ -161,8 +163,8 @@ class CatyEncoder(json.encoder.JSONEncoder):
                     if markerid in markers:
                         raise ValueError("Circular reference detected")
                     markers[markerid] = o
-                o = _default(o)
-                for chunk in _iterencode(o, _current_indent_level):
+                o = self.default(o)
+                for chunk in self._iterencode(o, _current_indent_level, _iterencode_list, _iterencode_dict, markers):
                     yield chunk
                 if markers is not None:
                     del markers[markerid]
@@ -207,7 +209,7 @@ class CatyEncoder(json.encoder.JSONEncoder):
                     first = False
                 else:
                     buf = separator
-                if isinstance(value, basestring):
+                if isinstance(value, unicode):
                     yield buf + _encoder(value)
                 elif value is None:
                     yield buf + 'null'
@@ -284,7 +286,7 @@ class CatyEncoder(json.encoder.JSONEncoder):
                     yield item_separator
                 yield _encoder(key)
                 yield _key_separator
-                if isinstance(value, basestring):
+                if isinstance(value, unicode):
                     yield _encoder(value)
                 elif value is None:
                     yield 'null'
@@ -315,7 +317,8 @@ class CatyEncoder(json.encoder.JSONEncoder):
         _iterencode = lambda o, _current_indent_level: iterencode(o, 
                                                            _current_indent_level, 
                                                            _iterencode_list, 
-                                                           _iterencode_dict)
+                                                           _iterencode_dict,
+                                                           markers)
         return _iterencode
 
 
@@ -368,11 +371,11 @@ class PPEncoder(CatyEncoder):
                 for e in CatyEncoder._iterencode(self, self.__normalize(o), markers):
                     yield e
     else:
-        def _iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict):
+        def _iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict, markers):
             if isinstance(o, TaggedValue):
                 t, v = split_tag(o)
                 yield u'@%s ' % t
-                for e in self._iterencode(v, _current_indent_level, _iterencode_list, _iterencode_dict):
+                for e in self._iterencode(v, _current_indent_level, _iterencode_list, _iterencode_dict, markers):
                     yield e
             elif isinstance(o, TagOnly):
                 yield u'@%s' % (o.tag)
@@ -385,7 +388,7 @@ class PPEncoder(CatyEncoder):
                 else:
                     yield u'#<foreign %s>' % repr(o)
             else:
-                for e in CatyEncoder._iterencode(self, self.__normalize(o), _current_indent_level, _iterencode_list, _iterencode_dict):
+                for e in CatyEncoder._iterencode(self, self.__normalize(o), _current_indent_level, _iterencode_list, _iterencode_dict, markers):
                     yield e
 
     def __normalize(self, o):
