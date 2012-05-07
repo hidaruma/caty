@@ -148,7 +148,12 @@ class CommandExecutor(BaseInterpreter):
             util.cout.writeln(u'[DEBUG] Deprecated: %s' % node.name)
             try:
                 name = self.__get_name(node)
-                msg = '{0} at {1}:{2} Line {3}, Col {4}'.format(name, self.app.name, self.__get_name(self.cmd), self.cmd.col, self.cmd.line)
+                if isinstance(self.cmd, ActionEnvelope) or hasattr(self.cmd, 'script'): #アクションかスクリプトから呼ばれた。
+                    msg = '{0} at {1}:{2} Line {3}, Col {4}'.format(name, self.app.name, self.__get_name(self.cmd), self.cmd.col, self.cmd.line)
+                elif isinstance(self.cmd, _CallCommand):
+                    msg = '{0} at {1}:{2} Line {3}, Col {4}'.format(name, self.app.name, self.cmd._cmd_name, self.cmd.col, self.cmd.line)
+                else: # コンソール
+                    msg = '{0}'.format(name)
                 self.app._system.depreacte_logger.debug(msg)
             except Exception, e:
                 import traceback
