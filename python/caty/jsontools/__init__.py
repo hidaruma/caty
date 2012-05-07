@@ -164,7 +164,7 @@ class CatyEncoder(json.encoder.JSONEncoder):
                         raise ValueError("Circular reference detected")
                     markers[markerid] = o
                 o = self.default(o)
-                for chunk in self._iterencode(o, _current_indent_level, _iterencode_list, _iterencode_dict, markers):
+                for chunk in self._iterencode(o, _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
                     yield chunk
                 if markers is not None:
                     del markers[markerid]
