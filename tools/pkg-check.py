@@ -9,7 +9,7 @@ def main():
             a, b = l.split('==')
             pkgmap[a] = b
     f = sys.argv[1]
-    ng = False
+    ok = True
     for l in open(f):
         l = l.strip()
         if l:
@@ -17,17 +17,17 @@ def main():
             if pkg in pkgmap:
                 if newer(version, pkgmap[pkg]):
                     continue
-            ng = True
+            ok = False
             print pkg, version, 'is not installed.'
-    return ng
+    return ok
 
 def newer(v1, v2):
     for a, b in zip(v1.split('.'), v2.split('.')):
         if a == b:
             continue
-        if len(b) != len(a):
-            return cmp(len(b), len(a))
-        return cmp(b, a)
+        if len(a) != len(b):
+            return cmp(len(a), len(b))
+        return cmp(a, b)
     return 1
 
 if __name__ == '__main__':
