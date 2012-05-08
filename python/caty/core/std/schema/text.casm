@@ -69,14 +69,6 @@ command rsplit [string, integer?] :: string -> [string*]
     refers python:caty.core.std.command.text.RSplit;
 
 /**
- * 入力値の HTML を整形式の XHTML に修正する。
- *
- */
-command correct-html :: string | {*:any} -> string | {*:any}
-    reads env
-    refers python:caty.core.std.command.text.CorrectHTML;
-
-/**
  * 入力文字列が引数の正規表現パターンに合致するかどうかを返す。
  * 合致していれば @matched タグの付いたオブジェクトが返り、
  * 合致していなければ @fail タグの付いた入力文字列が返る。

@@ -77,20 +77,6 @@ class RSplit(Builtin):
         else:
             return input.rsplit(self.sep)
 
-from caty.template.genshi.htmlverifier import convert
-from caty.util import get_charset
-class CorrectHTML(Builtin):
-
-    def execute(self, input):
-        if isinstance(input, unicode):
-            return unicode(convert(input), self.env.get('APP_ENCODING'))
-        else:
-            cs = get_charset(input)
-            input['body'] = unicode(convert(input['body']), cs or self.env.get('APP_ENCODING'))
-            if 'content-length' in input['header']:
-                input['header']['content-length'] = len(input['body'].encode(cs) if cs else input['body'])
-            return input
-
 from caty.jsontools import tagged
 class RegMatch(Builtin):
     def setup(self, pattern):

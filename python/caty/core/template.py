@@ -12,7 +12,6 @@ from caty.template.core.io import IResourceIO
 from caty.template.builder import build_template
 from caty.template import smarty
 from caty.template import smartymx
-from caty.template import genshi
 
 class MafsResourceIO(IResourceIO):
     def __init__(self, fs):
@@ -43,7 +42,6 @@ class CompilerAndPreprocessor(object):
         self._compilers = {
             'smarty': smartymx.SmartyMXCompiler(),
             'smarty-mx': smartymx.SmartyMXCompiler(),
-            'genshi': genshi.build_compiler(),
             }
         self._io = io
 
