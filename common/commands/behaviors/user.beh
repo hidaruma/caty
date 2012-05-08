@@ -25,8 +25,9 @@
 
 === !postCond
 
-|=input|=command|=params|=outputCond|
-|{"userid": @_OR ["foo", "bar"]}|strg:select|user|%userids|
+|=input|=command|=params|=outputCond|=output|=備考|
+|      | sleep  |       | | null      |タイミングの問題でFITが失敗する?|
+|{"userid": @_OR ["foo", "bar"]}|strg:select|user|%userids|||
 
 === !name:userids
 
