@@ -4,6 +4,7 @@ import logging.handlers
 from caty.core.async import DLock
 from caty.core.facility import FakeFacility
 from caty.util.path import join
+from caty.util.syslog import TimedRotatingFileHandlerWithLock
 import os, time
 
 def init(app, type):
