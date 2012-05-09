@@ -51,7 +51,9 @@ type mediaType = common:mediaType;
 type Raw = (string | binary);
 
 /** フォームを表現するオブジェクト */
-type FormObj = deferred object;
+type FormObj = {
+    *: [(string|binary), (string|binary)*],
+};
 
 
 /** generic階層に属するデータ、フォーマットで分類されてる
@@ -121,7 +123,7 @@ command untranslate
    "format" : GenericFormatName,
  }
 :: any -> Generic throws [webio_InsufficientMetainfo, webio_ConversionError]
-;
+    refers python:webio.Untranslate;
 
 /** genericデータをrawデータにdownward変換する 
 
