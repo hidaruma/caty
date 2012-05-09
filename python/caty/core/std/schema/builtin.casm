@@ -447,6 +447,14 @@ exception MalformedData = object;
 /** 構文エラーが存在する。パーシングが失敗した。*/
 exception SyntaxError = object;
 
+/** データの変換に失敗した */
+exception ConversionError = {
+    "errorObj": MiniErrorInfo,
+    "source": univ,
+    "type": string?,
+    *: any?
+};
+
 /** 型の妥当性検証に失敗した。*/
 exception ValidatatonFailed = object;
 

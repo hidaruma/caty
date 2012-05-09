@@ -37,11 +37,6 @@ module webio;
 /** 与えられたメタ情報が少なすぎるので、変換ができない */
 exception webio_InsufficientMetainfo = Exception;
 
-/** 変換中になんらかのエラーが発生した 
- * -- これは一般的なエラーとすべきか？
- */
-exception webio_ConversionError = Exception;
-
 /* === データ型 === */
 
 /** MIMEメディア型の名前 */
@@ -122,7 +117,7 @@ command untranslate
     */
    "format" : GenericFormatName,
  }
-:: any -> Generic throws [webio_InsufficientMetainfo, webio_ConversionError]
+:: any -> Generic throws [webio_InsufficientMetainfo, ConversionError]
     refers python:webio.Untranslate;
 
 /** genericデータをrawデータにdownward変換する 
@@ -139,7 +134,7 @@ command unparse
    /** MIMEメディア型 */
    "content-type" : mediaType?,
  }
-:: Generic -> Raw throws [webio_InsufficientMetainfo, webio_ConversionError]
+:: Generic -> Raw throws [webio_InsufficientMetainfo, ConversionError]
 ;
 
 /** rawデータをgenericデータにupward変換する 
@@ -162,7 +157,7 @@ command parse
     */
    "format" : GenericFormatName?,
  }
-:: Raw -> Generic throws [webio_InsufficientMetainfo, webio_ConversionError]
+:: Raw -> Generic throws [webio_InsufficientMetainfo, ConversionError]
 ;
 
 /** genericデータをsemanticデータにupward変換する 
@@ -179,8 +174,8 @@ command translate
    /** Caty型システムの型名 */
    "type" : typeName?,
  }
-:: Generic -> any throws [webio_InsufficientMetainfo, webio_ConversionError]
-;
+:: Generic -> any throws [webio_InsufficientMetainfo, ConversionError]
+    refers python:webio.Translate;
 
 
 /* == リクエスト発行 == 

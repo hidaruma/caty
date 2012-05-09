@@ -31,9 +31,19 @@ class I18nMessage(object):
                 tmpl = {'en':Template(msg)} #フォールバック
         t = tmpl.get(l, tmpl['en'])
         if message_dict:
-            return t.safe_substitute(message_dict)
+            return t.safe_substitute(self._obj_array_to_str(message_dict))
         else:
-            return t.safe_substitute(kwds)
+            return t.safe_substitute(self._obj_array_to_str(kwds))
+
+    def _obj_array_to_str(self, o):
+        import caty.jsontools as json
+        r = {}
+        for k, v in o.items():
+            if not isinstance(v, basestring):
+                r[k] = json.prettyprint(v)
+            else:
+                r[k] = v
+        return r
 
     def write(self, *args, **kwds):
         if 'nobreak' in kwds:

@@ -158,7 +158,7 @@ class CommandExecutor(BaseInterpreter):
             except Exception, e:
                 import traceback
                 traceback.print_exc()
-                msg = u'[DEBUG] %s (other infomation is lacking)' % node.name
+                msg = u'%s (other infomation is lacking)' % node.name
                 self.app._system.depreacte_logger.debug(msg)
         if node._mode: # @console など、特定のモードでしか動かしてはいけないコマンドのチェック処理
             mode = node.env.get('CATY_EXEC_MODE')
