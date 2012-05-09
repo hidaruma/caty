@@ -30,10 +30,10 @@ class Untranslate(Command):
             else:
                 if k.rstrip('0123456789').endswith('.'):
                     # 配列項目は一つにまとめ直す。
-                    k = k.rstrip('0123456789')
+                    k = k.rstrip('0123456789.')
                 if not isinstance(v, basestring):
                     v = str(v)
-                if k not in r:
+                if k[2:] not in r:
                     r[k[2:]] = [v]
                 else:
                     r[k[2:]].append(v)
