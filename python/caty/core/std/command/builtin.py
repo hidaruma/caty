@@ -502,47 +502,58 @@ class PassData(Builtin):
 
 class Nth(Builtin):
     
-    def setup(self, n):
+    def setup(self, opts, n):
         self.num = n
+        self.safe = opts['safe']
 
     def execute(self, input):
         n = self.num
-        if n < 1:
-            throw_caty_exception(u'IndexOutOfRange', unicode(str(n)))
-        try:
-            x = json.untagged(input)[n - 1] # 1始まり
-        except:
-            throw_caty_exception(u'IndexOutOfRange', unicode(str(n)))
-        if x is caty.UNDEFINED:
-            throw_caty_exception(u'Undefined', unicode(str(n)))
+        d = json.untagged(input)
+        if n < 1 or n > len(d):
+            if not self.safe:
+                throw_caty_exception(u'IndexOutOfRange', unicode(str(n)))
+            else:
+                x = caty.UNDEFINED
+        else:
+            x = d[n - 1] # 1始まり
+            if x == caty.UNDEFINED and not self.safe:
+                throw_caty_exception(u'Undefined', unicode(str(n)))
         return x
 
 class Item(Builtin):
     
-    def setup(self, n):
+    def setup(self, opts, n):
         self.num = n
+        self.safe = opts['safe']
 
     def execute(self, input):
         n = self.num
         try:
             x = json.untagged(input)[self.num] # 0 はじまり
         except:
-            throw_caty_exception(u'IndexOutOfRange', unicode(str(n)))
-        if x is caty.UNDEFINED:
+            if not self.safe:
+                throw_caty_exception(u'IndexOutOfRange', unicode(str(n)))
+            else:
+                x = caty.UNDEFINED
+        if x is caty.UNDEFINED and not self.safe:
             throw_caty_exception(u'Undefined', unicode(str(n)))
         return x
 
 class GetPV(Builtin):
     
-    def setup(self, key):
+    def setup(self, opts, key):
         self.key = key
+        self.safe = opts['safe']
 
     def execute(self, input):
         try:
             x = json.untagged(input)[self.key]
         except:
-            throw_caty_exception(u'PropertyNotExist', self.key)
-        if x is caty.UNDEFINED:
+            if not self.safe:
+                throw_caty_exception(u'PropertyNotExist', self.key)
+            else:
+                x = caty.UNDEFINED
+        if x is caty.UNDEFINED and not self.safe:
             throw_caty_exception(u'Undefined', self.key)
         return x
 

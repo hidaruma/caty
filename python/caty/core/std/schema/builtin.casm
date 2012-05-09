@@ -708,22 +708,48 @@ command pass<T default univ> :: T -> T
 
 /**
  * 配列の n 番目のデータを返す。 item との違いはこちらは 1 始まりということである。
+ * 値が存在しなかった場合は：\\
+ * safeオプションが指定されてないなら、実行時エラーとなる。\\
+ * safeオプションが指定されていれば、undefined値を返す。
  */
-command nth<T default any> [integer] :: @* [T*] -> T
+command nth<T default any>
+ {
+   @[default(false)]
+   "safe": boolean?,
+ }
+ [integer n]
+ :: @* [T*] -> T?
     refers python:caty.core.std.command.builtin.Nth;
 
 /**
  * 配列の添字 n のデータを返す。 nth との違いはこちらは 0 始まりということである。
+ * 値が存在しなかった場合は：\\
+ * safeオプションが指定されてないなら、実行時エラーとなる。\\
+ * safeオプションが指定されていれば、undefined値を返す。
  */
-command item<T default any> [integer] :: @* [T*] -> T
+command item<T default any>
+ {
+   @[default(false)]
+   "safe": boolean?,
+ }
+ [integer i] 
+ :: @* [T*] -> T?
     refers python:caty.core.std.command.builtin.Item;
 
 /**
  * JSON オブジェクトから引数で与えられた名前のプロパティの値を取得する。
- * 値が存在しなかった場合は実行時エラーとなる。
+ * 値が存在しなかった場合は：\\
+ * safeオプションが指定されてないなら、実行時エラーとなる。\\
+ * safeオプションが指定されていれば、undefined値を返す。
  */
-command pv<T default any> [string] :: @* object -> T
-    refers python:caty.core.std.command.builtin.GetPV;
+command pv<T default any> 
+ {
+   @[default(false)]
+   "safe": boolean?,
+ }
+ [string propName] 
+:: @* object -> T?
+   refers python:caty.core.std.command.builtin.GetPV;
 
 /**
  * JSON オブジェクトから引数で与えられた名前のプロパティの値を取得する。
