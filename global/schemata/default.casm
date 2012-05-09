@@ -137,6 +137,17 @@ command file-grep
  [string pattern, string filename] 
 :: void -> [string*]
 {
-  file:read %2 | text:split "\n" | grep %1
+  file:read %2 | text:split "\n" | grep %--line-no? %1
 };
 
+/** 拡張子からメディア型を求める */
+command ext-content-type [string ext] :: void -> (null | string)
+{
+  %1 > ext;
+
+  filetype | pv --safe %ext | dump --prefix="ext" |
+  when {
+   undefined => null,
+   object    => pv contentType,
+  }
+};
