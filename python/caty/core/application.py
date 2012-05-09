@@ -542,8 +542,13 @@ class Application(PbcObject):
             env.put('LANGUAGE', unicode(environ['LANGUAGE']))
         else:
             env.put('LANGUAGE', unicode(self._system._global_config.language))
-        env.put('REQUEST_METHOD', environ.get('REQUEST_METHOD', 'POST'))
-        env.put('CONTENT_LENGTH', environ.get('CONTENT_LENGTH', -1))
+        if environ.get('QUERY_STRING'):
+            env.put('QUERY_STRING', u'?' + environ['QUERY_STRING'])
+        if 'SERVER_SOFTWARE' in environ:
+            env.put('SERVER_SOFTWARE', unicode(environ['SERVER_SOFTWARE']))
+        env.put('SERVER_MODULE', self._system.server_module_name)
+        env.put('REQUEST_METHOD', unicode(environ.get('REQUEST_METHOD', 'POST')))
+        env.put('CONTENT_LENGTH', unicode(environ.get('CONTENT_LENGTH', '-1')))
 
     @property
     def cout(self):

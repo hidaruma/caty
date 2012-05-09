@@ -1,8 +1,6 @@
 <?caty-meta template="smarty"?>
 <?caty-script
-{
-    "a": "foo"
-}
+    env
 ?>
 <html>
     <head>
@@ -14,10 +12,10 @@
 
         <p>Caty のサイトにようこそ。(UTF-8 encoded Text)</p>
 <pre>
-{$a|json}
+{$CONTEXT|json}
 </pre>
 <pre>
-{$a|javascript}
+{$CONTEXT|javascript}
 </pre>
     </body>
 </html>

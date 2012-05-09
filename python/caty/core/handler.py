@@ -384,7 +384,10 @@ class WebInputParser(object):
                     o[k] = self._to_unicode([v.value])
             return  json.tagged(u'form', o)
         elif content_type == 'application/json':
-            src = input.read(int(environ['CONTENT_LENGTH'] or 0))
+            cl = environ['CONTENT_LENGTH']
+            if not cl:
+                cl = 0
+            src = input.read(int(cl))
             if isinstance(src, str):
                 src = unicode(src, cs)
             r = json.tagged(u'json', stdjson.loads(src))
