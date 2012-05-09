@@ -70,7 +70,7 @@ class Translate(Command, TypeCalculator):
                 scm.validate(v)
                 return v
             except JsonSchemaError, e:
-                er = self.error_report(e)
+                er = untagged(self.error_report(e))
                 if self.__type:
                     throw_caty_exception('ConversionError', u'failed to convert data to $type:\n$errorObj\nsource:$source', errorObj=er, source=generic_data, type=self.__type)
                 else:
