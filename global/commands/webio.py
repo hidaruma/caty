@@ -2,9 +2,16 @@ from decimal import Decimal
 
 from caty.command import Command
 from caty.core.exception import throw_caty_exception
-from caty.jsontools import tagged, obj2path, untagged, split_tag, path2obj, prettyprint
+from caty.jsontools import tagged, obj2path, untagged, split_tag, path2obj, prettyprint, stdjson
 from caty.core.std.command.builtin import TypeCalculator
 from caty.core.schema import JsonSchemaError
+
+CT_JSON = u'application/json'
+CT_FORM = u'application/x-www-form-urlencoded'
+CT_MULTI = u'multipart/form-data'
+CT_TEXT = u'text/plain'
+CT_BIN = u'application/octet-stream'
+
 
 class Untranslate(Command):
     def setup(self, opts):
@@ -92,21 +99,21 @@ class Unparse(Command):
         tag, data = split_tag(generic_data)
         if self.__content_type is None:
             if tag == 'form':
-                self.__content_type = 'application/x-www-form-urlencoded'
+                self.__content_type = CT_FORM
             elif tag == 'json':
-                self.__content_type = 'application/json'
+                self.__content_type = CT_JSON
             elif tag == 'text':
-                self.__content_type = 'text/plain'
+                self.__content_type = CT_TEXT
             else:
-                self.__content_type = 'application/octet-stream'
-        if self.__content_type == 'application/x-www-form-urlencoded':
+                self.__content_type = CT_BIN
+        if self.__content_type == CT_FORM:
             if isinstance(data, object):
                 return self._encode_to_form(data)
             else:
                 raise
         elif self.__content_type == 'multipart/form-data':
             raise NotImplementedError()
-        elif self.__content_type == 'application/json':
+        elif self.__content_type == CT_JSON:
             return prettyprint(data)
         elif self.__content_type.startswith('text/'):
             if isinstance(data, basestring):
@@ -138,4 +145,69 @@ class Unparse(Command):
                     i = i.encode(self.env.get('APP_ENCODING', 'utf-8'))
                 r.append(urllib.urlencode({k: i}))
         return ''.join(r)
+
+class Parse(Command):
+    def setup(self, opts):
+        self.__content_type = opts.get('content-type', self.env.get('CONTENT_TYPE', CT_JSON))
+        self.__format = opts.get('format')
+
+    def execute(self, raw_data):
+        type = self.__content_type
+        if self.__format is not None:
+            if self.__format == 'json':
+                type = CT_JSON
+            elif self.__format == 'text':
+                type = CT_TEXT
+            elif self.__format == 'form':
+                type = CT_FORM
+            else:
+                type = CT_BIN
+        if ';' in type:
+            type, rest = map(str.strip, type.split(';', 1))
+            if rest.startswith('charset'):
+                cs = rest.split('=').pop(1)
+        else:
+            cs = self.env.get('APP_ENCODING', 'utf-8')
+        if type == CT_BIN:
+            return tagged('binary', raw_data)
+        elif type.startswith('text/'):
+            if isinstance(raw_data, str):
+                return tagged('text', unicode(raw_data, cs))
+            else:
+                return tagged('text', raw_data)
+        elif type == CT_JSON:
+            if isinstance(raw_data, str):
+                data = unicode(raw_data, cs)
+            else:
+                data = raw_data
+            return tagged('text', stdjson.loads(dara))
+        elif type == CT_FORM or type == CT_MULTI:
+            import cgi
+            from StringIO import StringIO
+            input = StringIO(raw_data)
+            input.seek(0)
+            env = {}
+            env.update(self.env._dict)
+            env['REQUEST_METHOD'] = 'POST'
+            env['CONTENT_LENGTH'] = len(raw_data)
+            env['CONTENT_TYPE'] = type
+            fs = cgi.FieldStorage(fp=input, environ=env)
+            o = {}
+            for k in fs.keys():
+                v = fs[k]
+                if isinstance(v.value, (list, tuple)):
+                    o[k] = self._to_unicode(v.value, cs)
+                elif hasattr(v, 'filename') and v.filename:
+                    o[k + ".filename"] = [unicode(v.filename, cs)]
+                    o[k + ".data"] = [v.file.read()]
+                else:
+                    o[k] = self._to_unicode([v.value], cs)
+            return  tagged(u'form', o)
+        else:
+            return tagged('binary', raw_data)
+
+    def _to_unicode(self, seq, cs):
+        return [unicode(v, cs) if not isinstance(v, unicode) else v for v in seq]
+
+
 

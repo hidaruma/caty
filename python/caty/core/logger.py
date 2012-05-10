@@ -20,61 +20,6 @@ def init(app, type):
 def get(name, type):
     return logging.getLogger('Caty.%s.%s' % (name, type))
 
-class TimedRotatingFileHandlerWithLock(logging.handlers.TimedRotatingFileHandler):
-    def emit(self, record):
-        with DLock(self.baseFilename):
-            logging.handlers.TimedRotatingFileHandler.emit(self, record)
-
-    def doRollover(self):
-        if self.stream:
-            self.stream.close()
-        t = self.rolloverAt - self.interval
-        if self.utc:
-            timeTuple = time.gmtime(t)
-        else:
-            timeTuple = time.localtime(t)
-        dfn = self.baseFilename.replace('.log', '') + "." + time.strftime(self.suffix, timeTuple) + '.log'
-        if os.path.exists(dfn):
-            os.remove(dfn)
-        os.rename(self.baseFilename, dfn)
-        if self.backupCount > 0:
-            for s in self.getFilesToDelete():
-                os.remove(s)
-        self.mode = 'w'
-        self.stream = self._open()
-        currentTime = int(time.time())
-        newRolloverAt = self.computeRollover(currentTime)
-        while newRolloverAt <= currentTime:
-            newRolloverAt = newRolloverAt + self.interval
-        if (self.when == 'MIDNIGHT' or self.when.startswith('W')) and not self.utc:
-            dstNow = time.localtime(currentTime)[-1]
-            dstAtRollover = time.localtime(newRolloverAt)[-1]
-            if dstNow != dstAtRollover:
-                if not dstNow:  # DST kicks in before next rollover, so we need to deduct an hour
-                    newRolloverAt = newRolloverAt - 3600
-                else:           # DST bows out before next rollover, so we need to add an hour
-                    newRolloverAt = newRolloverAt + 3600
-        self.rolloverAt = newRolloverAt
-
-
-    def getFilesToDelete(self):
-        dirName, baseName = os.path.split(self.baseFilename)
-        fileNames = os.listdir(dirName)
-        result = []
-        prefix = baseName.replace('.log', '') + "."
-        plen = len(prefix)
-        for fileName in fileNames:
-            if fileName[:plen] == prefix:
-                suffix = fileName[plen:]
-                if self.extMatch.match(suffix):
-                    result.append(os.path.join(dirName, fileName))
-        result.sort()
-        if len(result) < self.backupCount:
-            result = []
-        else:
-            result = result[:len(result) - self.backupCount]
-        return result
-
 class Logger(FakeFacility):
     def __init__(self, app):
         self._app = app

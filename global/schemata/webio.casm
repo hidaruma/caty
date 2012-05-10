@@ -158,7 +158,7 @@ command parse
    "format" : GenericFormatName?,
  }
 :: Raw -> Generic throws [webio_InsufficientMetainfo, ConversionError]
-;
+    refers python:webio.Parse;
 
 /** genericデータをsemanticデータにupward変換する 
 
