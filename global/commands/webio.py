@@ -23,9 +23,9 @@ class Untranslate(Command):
             conv = self.__convert_to_form(data)
             return tagged(self.__format, conv)
         elif self.__format == 'text':
-            return tagged(u'text', conv)
+            return tagged(u'text', data)
         elif self.__format == 'bytes':
-            return tagged(u'bytes', conv)
+            return tagged(u'bytes', data)
         else:
             return tagged(self.__format, data)
 
