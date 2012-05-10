@@ -180,3 +180,112 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 |[{}, {"a":undefined,"b":undefined}] | eq --boolean  | true     | | 
 
 
+== nth
+
+配列から、1始まりで勘定してn番目の項目を取り出す。
+
+=== !exec
+
+|= !command |= !input  |= !output|= !exception |
+| nth -2    |[1, ,3,4] |         | Exception |
+| nth -1    |[1, ,3,4] |         | Exception |
+| nth 0     |[1, ,3,4] |         | Exception |
+| nth 1     |[1, ,3,4] |1        ||
+| nth 2     |[1, ,3,4] |         | Exception |
+| nth 3     |[1, ,3,4] |3        ||
+| nth 4     |[1, ,3,4] |4        ||
+| nth 5     |[1, ,3,4] |         | Exception |
+| nth 6     |[1, ,3,4] |         | Exception |
+
+|= !command |= !input   |= !output|= !exception |
+| nth -2    |[1, ,3,4,] |         | Exception |
+| nth -1    |[1, ,3,4,] |         | Exception |
+| nth 0     |[1, ,3,4,] |         | Exception |
+| nth 1     |[1, ,3,4,] |1        ||
+| nth 2     |[1, ,3,4,] |         | Exception |
+| nth 3     |[1, ,3,4,] |3        ||
+| nth 4     |[1, ,3,4,] |4        ||
+| nth 5     |[1, ,3,4,] |         | Exception |
+| nth 6     |[1, ,3,4,] |         | Exception |
+
+--safeを付ければ例外は起きない。
+
+|= !command    |= !input  |= !output|= !exception |
+| nth --safe -2|[1, ,3,4] |undefined||
+| nth --safe -1|[1, ,3,4] |undefined||
+| nth --safe 0 |[1, ,3,4] |undefined||
+| nth --safe 1 |[1, ,3,4] |1        ||
+| nth --safe 2 |[1, ,3,4] |undefined||
+| nth --safe 3 |[1, ,3,4] |3        ||
+| nth --safe 4 |[1, ,3,4] |4        ||
+| nth --safe 5 |[1, ,3,4] |undefined||
+| nth --safe 6 |[1, ,3,4] |undefined||
+
+|= !command    |= !input   |= !output|= !exception |
+| nth --safe -2|[1, ,3,4,] |undefined||
+| nth --safe -1|[1, ,3,4,] |undefined||
+| nth --safe 0 |[1, ,3,4,] |undefined||
+| nth --safe 1 |[1, ,3,4,] |1        ||
+| nth --safe 2 |[1, ,3,4,] |undefined||
+| nth --safe 3 |[1, ,3,4,] |3        ||
+| nth --safe 4 |[1, ,3,4,] |4        ||
+| nth --safe 5 |[1, ,3,4,] |undefined||
+| nth --safe 6 |[1, ,3,4,] |undefined||
+
+
+== item
+
+配列から、0始まりで勘定してn番目の項目を取り出す。
+負の数のインデックスを扱える。
+
+=== !exec
+
+|= !command |= !input  |= !output|= !exception |
+| item -2    |[1, ,3,4] |3        ||
+| item -1    |[1, ,3,4] |4        ||
+| item 0     |[1, ,3,4] |1        ||
+| item 1     |[1, ,3,4] |         | Exception |
+| item 2     |[1, ,3,4] |3        ||
+| item 3     |[1, ,3,4] |4        ||
+| item 4     |[1, ,3,4] |         | Exception |
+| item 5     |[1, ,3,4] |         | Exception |
+| item 6     |[1, ,3,4] |         | Exception |
+
+|= !command |= !input   |= !output|= !exception |
+| item -2    |[1, ,3,4,] |3        ||
+| item -1    |[1, ,3,4,] |4        ||
+| item 0     |[1, ,3,4,] |1        ||
+| item 1     |[1, ,3,4,] |         | Exception |
+| item 2     |[1, ,3,4,] |3        ||
+| item 3     |[1, ,3,4,] |4        ||
+| item 4     |[1, ,3,4,] |         | Exception |
+| item 5     |[1, ,3,4,] |         | Exception |
+| item 6     |[1, ,3,4,] |         | Exception |
+
+--safeを付ければ例外は起きない。
+
+|= !command    |= !input  |= !output|= !exception |
+| item --safe -2|[1, ,3,4] |3        ||
+| item --safe -1|[1, ,3,4] |4        ||
+| item --safe 0 |[1, ,3,4] |1        ||
+| item --safe 1 |[1, ,3,4] |undefined||
+| item --safe 2 |[1, ,3,4] |3        ||
+| item --safe 3 |[1, ,3,4] |4        ||
+| item --safe 4 |[1, ,3,4] |undefined||
+| item --safe 5 |[1, ,3,4] |undefined||
+| item --safe 6 |[1, ,3,4] |undefined||
+
+
+|= !command    |= !input  |= !output|= !exception |
+| item --safe -2|[1, ,3,4,] |3        ||
+| item --safe -1|[1, ,3,4,] |4        ||
+| item --safe 0 |[1, ,3,4,] |1        ||
+| item --safe 1 |[1, ,3,4,] |undefined||
+| item --safe 2 |[1, ,3,4,] |3        ||
+| item --safe 3 |[1, ,3,4,] |4        ||
+| item --safe 4 |[1, ,3,4,] |undefined||
+| item --safe 5 |[1, ,3,4,] |undefined||
+| item --safe 6 |[1, ,3,4,] |undefined||
+
+
+
