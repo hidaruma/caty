@@ -269,7 +269,7 @@ class Request(RequestTool):
             elif isinstance(input, TaggedValue):
                 content_type = 'application/json'
             else:
-                content_type = 'application/octed-stream'
+                content_type = 'application/octet-stream'
         app, path = self.find_app_and_path()
         f = app.create_facilities(lambda: self._facilities['session'])
         app.init_env(f, caty.DEBUG, [u'web'], self._system, {'CONTENT_TYPE': content_type})

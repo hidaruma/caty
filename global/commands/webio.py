@@ -188,9 +188,13 @@ class Parse(Command):
             input.seek(0)
             env = {}
             env.update(self.env._dict)
-            env['REQUEST_METHOD'] = 'POST'
+            if 'REQUEST_METHOD' not in env:
+                env['REQUEST_METHOD'] = 'POST'
             env['CONTENT_LENGTH'] = len(raw_data)
             env['CONTENT_TYPE'] = type
+
+            if 'QUERY_STRING' in env:
+                del env['QUERY_STRING']
             fs = cgi.FieldStorage(fp=input, environ=env)
             o = {}
             for k in fs.keys():
