@@ -171,10 +171,7 @@ class Parse(Command):
         if type == CT_BIN:
             return tagged('binary', raw_data)
         elif type.startswith('text/'):
-            if isinstance(raw_data, str):
-                return tagged('text', unicode(raw_data, cs))
-            else:
-                return tagged('text', raw_data)
+            return tagged('text', raw_data)
         elif type == CT_JSON:
             if isinstance(raw_data, str):
                 data = unicode(raw_data, cs)
