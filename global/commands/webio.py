@@ -163,7 +163,7 @@ class Parse(Command):
             else:
                 type = CT_BIN
         if ';' in type:
-            type, rest = map(str.strip, type.split(';', 1))
+            type, rest = map(unicode.strip, type.split(';', 1))
             if rest.startswith('charset'):
                 cs = rest.split('=').pop(1)
         else:
