@@ -145,7 +145,7 @@ command ext-content-type [string ext] :: void -> (null | string)
 {
   %1 > ext;
 
-  filetype | pv --safe %ext | dump --prefix="ext" |
+  filetype | pv --safe %ext |
   when {
    undefined => null,
    object    => pv contentType,
