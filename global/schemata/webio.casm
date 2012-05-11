@@ -100,7 +100,7 @@ type GenericFormatName = (
 
 /** semanticデータをgenericデータにdownward変換する 
 
---formatは必須である。--formatの値により変換アルゴリズムを選択する。
+--formatの値により変換アルゴリズムを選択する。
 --typeが指定されていれば、型情報を変換に利用するかもしれない。
 --typeが指定されていないときは、型情報なしで行える変換を試みる。
 
@@ -115,7 +115,8 @@ command untranslate
    /** フォーマット名（タグ名）
     * 有限個の候補から選ぶ。
     */
-   "format" : GenericFormatName,
+   @[default("form")]
+   "format" : GenericFormatName?,
  }
 :: any -> Generic throws [webio_InsufficientMetainfo, ConversionError]
     refers python:webio.Untranslate;
