@@ -84,6 +84,14 @@ class ScriptParser(Parser):
     def name(self, seq):
         return identifier_token_a(seq)
 
+    def exception_handle(self, seq):
+        keyword(u'try')(seq)
+        with strict():
+            S(u'{')
+            cmd  = self.make_pipeline(seq)
+            S(u'}')
+            
+
     def functor(self, seq):
         import string as str_mod
         k = lambda s: keyword(s, str_mod.ascii_letters + '_.')
@@ -509,6 +517,7 @@ class ScriptParser(Parser):
             raise HashNotationFound('undefined')
         name = seq.parse(Regex(ur'[a-zA-Z_]+[a-zA-Z0-9_-]*'))
         parsers = map(try_, [
+                    self.exception_handle,
                     self.functor,
                     self.tag,
                     self.type_case,

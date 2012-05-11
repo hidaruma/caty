@@ -144,7 +144,7 @@ class Unparse(Command):
                 if isinstance(i, unicode):
                     i = i.encode(self.env.get('APP_ENCODING', 'utf-8'))
                 r.append(urllib.urlencode({k: i}))
-        return ''.join(r)
+        return '&'.join(r)
 
 class Parse(Command):
     def setup(self, opts):
