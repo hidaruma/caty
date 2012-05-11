@@ -23,11 +23,21 @@ class Untranslate(Command):
             conv = self.__convert_to_form(data)
             return tagged(self.__format, conv)
         elif self.__format == 'text':
+            if not isinstance(data, unicode):
+                self.__throw(u'not a string', data)
             return tagged(u'text', data)
         elif self.__format == 'bytes':
+            if not isinstance(data, str):
+                self.__throw(u'not a binary', data)
             return tagged(u'bytes', data)
         else:
             return tagged(self.__format, data)
+
+    def __throw(self, er, data):
+        if self.__type:
+            throw_caty_exception('ConversionError', u'failed to untranslate $type:\n$errorObj\nsource:$source', errorObj=er, source=data, type=self.__type)
+        else:
+            throw_caty_exception('ConversionError', u'failed to convert:\n$errorObj\nsource:$source', errorObj=er, source=data)
 
     def __convert_to_form(self, data):
         r = {}
