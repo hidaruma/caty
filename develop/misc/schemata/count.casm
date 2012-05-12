@@ -1,0 +1,106 @@
+/* -*- coding: utf-8 -*- */
+module count;
+
+/** エラー情報（今は詳細保留） */
+type Error = deferred;
+
+/** ファシリティのモード */
+type mode = ("read"|"update"|"use");
+
+
+/** カウンターの設定情報 */
+type Config = {
+ /** カウンターの基準値 */
+ @[default(0)]
+ "baseValue" : integer?,
+
+ /** カウンターのステップ値 */
+ @[default(1)]
+ "stepValue" : integer?,
+};
+
+/** カウンタの実体 */
+type Counter = foreign;
+
+/** カウンタークラス（ファシリティ） */
+//class Counter(Counter) conforms Facility<Config, void, Counter> {
+
+/* @[static]が付いているコマンドには、arg0にnullが入る。
+ * つまり、arg0は事実上使えない。
+ *
+ * @[managemement]が付いているコマンドは、シェルからコールバックされる。
+ */
+
+ /** システムの起動時にコールバックされる */
+ @[static, management]
+ command _initialize :: Config -> (@OK null | @NG Error)
+  refers python:count.MgInitialize
+ ;
+ 
+ /** システムの終了時にコールバックされる */
+ @[static, management]
+ command _finalize :: void -> void
+  refers python:count.MgFinalize
+ ;
+
+ /** シングルトンインスタンスのカウンターを取得する */
+ @[static, management]
+ command _create :: [mode, void] -> Counter
+  refers python:count.MgCreate
+ ;
+
+
+/* 以下のコマンドのarg0には、Counterがセットされる  */
+
+ /** カウンターの値を取得する */
+ @[accessor]
+ command value [Counter] :: void -> integer
+  refers python:count.Value
+ ;
+
+ /** カウンターをインクリメントする */
+ @[mutator]
+ command inc [Counter] :: void -> Counter
+  refers python:count.Inc
+ ;
+
+ /** カウンターをデクリメントする */
+ @[mutator]
+ command dec [Counter] :: void -> Counter
+  refers python:count.Dec
+ ;
+
+ /** カウンターをリセットする */
+ @[mutator]
+ command reset [Counter] :: void -> Counter
+  refers python:count.Reset
+ ;
+
+ /** トランザクションを開始する */
+ @[management]
+ command _begin [Counter] :: void -> Counter
+  refers python:count.MgBegin
+ ;
+
+ /** トランザクションをコミットする */
+ @[management]
+ command _commit [Counter] :: void -> Counter
+  refers python:count.MgCommit
+ ;
+
+ /** トランザクションをキャンセルする */
+ @[management]
+ command _cancel [Counter] :: void -> Counter
+  refers python:count.MgCancel
+ ;
+
+ /** カウンターを破棄する */
+ @[management]
+ command _dispose [Counter] :: void -> void
+  refers python:count.MgDispose
+ ;
+
+
+//};
+
+/* End */
