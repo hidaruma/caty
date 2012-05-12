@@ -104,3 +104,7 @@ command verify-chars
 } :: (string|binary) -> (@OK [] | @NG [IllegalCharReport, IllegalCharReport*])
 refers python:caty.core.std.command.text.VerifyChars;
 
+
+/** 文字列から、引数で与えられた接頭辞を取り除く */
+command rest [string prefix] :: string -> (string|null)
+  refers python:caty.core.std.command.text.Rest;
