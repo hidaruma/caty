@@ -1,0 +1,544 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= ファシリティをどうするか：計画と実験
+
+
+== 目標
+
+現状において、「ある程度のPythonスキルがあれば、コマンド（のPython実装）は誰でも作れる」は実現されている。
+同様に、「ある程度のPythonスキルがあれば、**ファシリティは誰でも作れる**」ようにしたい。
+コマンドとファシリティで、要求するPythonスキルも大差ないようにしたい。
+つまり、ファシリティ作成が極端に難しい状況は打開したい。
+
+ファシリティの機能にコマンドラインからアクセスしたい。
+これにより、ファシリティのテストをFITエクスペクテーションによって行える。
+テストが容易になることにより、ファシリティ作成の敷居も下がる。
+
+== 原則
+
+ファシリティは、メイヤーの「Command-Query分離の原則」を厳守しなくてはならない。
+（参考：http://d.hatena.ne.jp/m-hiyama/20101216/1292469108 ）
+
+メイヤーの原則を守ってないものは、システムを破綻させるので、Caty内で存在を許されない。
+
+Catyでは、Commandを**ミューテータ**、Queryを**アクセッサ**と呼ぶ。
+
+== 方針
+
+新しい概念やメカニズムは導入せずに、可能な限り**アリモノを組み合わせて**実現したい。
+
+ファシリティのPython APIとコマンドAPIを100%一致させる。
+これにより、Pythonから利用できる機能はすべてコマンドとしても利用できることになる。
+CatyScriptでファシリティを完全に利用できるので、テストもすべてCatyScriptで書ける。
+当然に、FITでテスト可能。
+
+ファシリティの振る舞いの記述は、主に**コマンドAPIを使って行う**（後述のconforms宣言も参照）。
+シェルは、効率化の目的で、コマンドレイヤーをバイパスして直接Python APIを使ってよい。
+「Python APIとコマンドAPIは100%一致」しているので、どちらを使っても**セマンティックスは同じ**。
+
+
+== 例題
+
+「#633: arg0計画とforeignとclass：簡単な実験」の
+
+> ある程度の永続性を持つ（ディスクに保存はしないが）カウンターの例。
+
+を例題に使う。ファシリティとしての名前は "count" にした。
+
+例題は実際に動くようにしている（miscにある、push済み）が、次の点がナンチャッテになっている。
+
+# arg0によりインスタンスを渡す予定だ（#634 ）が、arg1を使って代用している。
+# class構文が使えないので、そこはコメントアウト（'/~/'を使用）になっている。
+# ミューテータの戻り値をインスタンスにしているが、どうするかは未定。
+
+最後に、この例題を使った実験が書いてあるので、それを試すとよい。
+
+スキーマ：
+
+{{{
+/* -*- coding: utf-8 -*- */
+module count;
+
+/** エラー情報（今は詳細保留） */
+type Error = deferred;
+
+/** ファシリティのモード */
+type mode = ("read"|"update"|"use");
+
+
+/** カウンターの設定情報 */
+type Config = {
+ /** カウンターの基準値 */
+ @[default(0)]
+ "baseValue" : integer?,
+
+ /** カウンターのステップ値 */
+ @[default(1)]
+ "stepValue" : integer?,
+};
+
+/** カウンタの実体 */
+type Counter = foreign;
+
+/** カウンタークラス（ファシリティ） */
+//class Counter(Counter) conforms Facility<Config, void, Counter> {
+
+/* @[static]が付いているコマンドには、arg0にnullが入る。
+ * つまり、arg0は事実上使えない。
+ *
+ * @[managemement]が付いているコマンドは、シェルからコールバックされる。
+ */
+
+ /** システムの起動時にコールバックされる */
+ @[static, management]
+ command _initialize :: Config -> (@OK null | @NG Error)
+  refers python:count.MgInitialize
+ ;
+ 
+ /** システムの終了時にコールバックされる */
+ @[static, management]
+ command _finalize :: void -> void
+  refers python:count.MgFinalize
+ ;
+
+ /** シングルトンインスタンスのカウンターを取得する */
+ @[static, management]
+ command _create :: [mode, void] -> Counter
+  refers python:count.MgCreate
+ ;
+
+
+/* 以下のコマンドのarg0には、Counterがセットされる  */
+
+ /** カウンターの値を取得する */
+ @[accessor]
+ command value [Counter] :: void -> integer
+  refers python:count.Value
+ ;
+
+ /** カウンターをインクリメントする */
+ @[mutator]
+ command inc [Counter] :: void -> Counter
+  refers python:count.Inc
+ ;
+
+ /** カウンターをデクリメントする */
+ @[mutator]
+ command dec [Counter] :: void -> Counter
+  refers python:count.Dec
+ ;
+
+ /** カウンターをリセットする */
+ @[mutator]
+ command reset [Counter] :: void -> Counter
+  refers python:count.Reset
+ ;
+
+ /** トランザクションを開始する */
+ @[management]
+ command _begin [Counter] :: void -> Counter
+  refers python:count.MgBegin
+ ;
+
+ /** トランザクションをコミットする */
+ @[management]
+ command _commit [Counter] :: void -> Counter
+  refers python:count.MgCommit
+ ;
+
+ /** トランザクションをキャンセルする */
+ @[management]
+ command _cancel [Counter] :: void -> Counter
+  refers python:count.MgCancel
+ ;
+
+ /** カウンターを破棄する */
+ @[management]
+ command _dispose [Counter] :: void -> void
+  refers python:count.MgDispose
+ ;
+
+
+//};
+
+/* End */
+}}}
+
+コマンド：
+
+{{{
+# -*- coding: utf-8 -*- 
+# 
+#
+from caty.command import Command
+from caty.jsontools import tagged
+
+def _print_value(val):
+    print u"value=" + unicode(val)
+
+class Counter(object):
+    the_counter = None
+    base_value = 0
+    step_value = 1
+
+    @classmethod
+    def _initialize(cls, config):
+        cls.base_value = config.get('baseValue', 0)
+        cls.step_value = config.get('stepValue', 1)
+
+    @classmethod
+    def _finalize(cls):
+        # 特にやることはない
+        pass
+
+    @classmethod
+    def _create(cls, mode, param):
+        # mode, paramは無視
+        if cls.the_counter is None:
+            cls.the_counter = Counter()
+        return cls.the_counter
+        
+    def __init__(self):
+        self._value = self.base_value
+
+    def value(self):
+        return self._value
+
+    def inc(self):
+        self._value += self.step_value
+        _print_value(self._value)
+
+    def dec(self):
+        self._value -= self.step_value
+        _print_value(self._value)
+
+    def reset(self):
+        self._value = self.base_value
+        _print_value(self._value)
+        
+    def _begin(self):
+        # 省略
+        pass
+
+    def _commit(self):
+        # 省略
+        pass
+
+    def _cancel(self):
+        # 省略
+        pass
+
+    def _dispose(self):
+        pass
+
+       
+class MgInitialize(Command):
+    def execute(self, config):
+        Counter._initialize(config)
+        return tagged(u'OK', None)
+
+class MgFinalize(Command):
+    def execute(self):
+        Counter._finalize()
+        return None
+
+class MgCreate(Command):
+    def execute(self, mode_param):
+        mode, param = mode_param
+        return Counter._create(mode, param)
+
+class Value(Command):
+    def setup(self, arg0):
+        self.arg0 = arg0
+
+    def execute(self):
+        counter = self.arg0
+        return counter.value()
+
+class Inc(Command):
+    def setup(self, arg0):
+        self.arg0 = arg0
+
+    def execute(self):
+        counter = self.arg0
+        counter.inc()
+        return counter
+
+class Dec(Command):
+    def setup(self, arg0):
+        self.arg0 = arg0
+
+    def execute(self):
+        counter = self.arg0
+        counter.dec()
+        return counter
+
+class Reset(Command):
+    def setup(self, arg0):
+        self.arg0 = arg0
+
+    def execute(self):
+        counter = self.arg0
+        counter.reset()
+        return counter
+
+class MgBegin(Command):
+    def setup(self, arg0):
+        self.arg0 = arg0
+
+    def execute(self):
+        counter = self.arg0
+        counter._begin()
+        return counter
+
+class MgCommit(Command):
+    def setup(self, arg0):
+        self.arg0 = arg0
+
+    def execute(self):
+        counter = self.arg0
+        counter._commit()
+        return counter
+
+class MgCancel(Command):
+    def setup(self, arg0):
+        self.arg0 = arg0
+
+    def execute(self):
+        counter = self.arg0
+        counter._cancel()
+        return counter
+
+class MgDispose(Command):
+    def setup(self, arg0):
+        self.arg0 = arg0
+
+    def execute(self):
+        counter = self.arg0
+        counter._dispose()
+        return counter
+}}}
+
+== 指標クラスとconforms宣言
+
+参考：
+
+* 「#285: arg0 計画」
+* 「#302: [ゆる] @[signature], @[profile-only]とか、Liskov順序とか」
+
+コマンドに、@[profile-only] と付けると（アノテーション名は変えるかも）、実装を書けなくなる。
+つまり、純粋に宣言だけ。モジュール／クラスに@[signature]を付けると、
+すべてのコマンドに@[profile-only]を付けた効果がある。
+
+@[signature]を付けたモジュールとクラスは、**指標モジュール**、**指標クラス**と呼ぶ。
+これはインターフェースに相当する。
+
+module A conforms B、class A conforms B と書くと、名前の違いを除いて「Bの代わりにAを使ってもよい」ことを意味する。
+特にBが指標モジュール／クラスのときは、conformsはJavaなどのimplementsに相当する。
+ただし、comformsはLiskov置換可能性による**Liskov順序の宣言**なので、Bが指標でなくてもよい。
+
+指標でもそうでなくても、モジュール／クラス／コマンドは**振る舞い制約**（behavior constraints）を持つ。
+振る舞い制約はホーア式で書かれるが、CatyではCatyFITを使って記述する。
+将来、振る舞い制約記述言語を追加するかもしれない。
+
+A conforms B のとき、Aは、Bが持つすべての振る舞い制約を満たさなくてはならない（must satisfy）。
+自動テストシステムは、conforms宣言を見て、必要なテストをかき集めて実行する（そうすべき）。
+conforms宣言の現実的な意味は「//Aは、Bに付随するすべてのテストを通らなくてはならない//」となる。
+
+== Facility指標クラス
+
+以下がFacility指標クラス。
+
+# クラス定義は型変数を持てるとする。
+# Configはファシリティ初期化時の設定情報
+# Paramはインスタンス生成時のパラメータ
+# Instanceはインスタンスの型（実際は常にforeign）
+# ミューテータの戻り値をインスタンスにしているが、どうするかは未定。
+
+{{{
+/** エラー情報（今は詳細保留） */
+type Error = deferred;
+
+/** ファシリティのモード */
+type mode = ("read"|"update"|"use");
+
+@[signature]
+class Facility<Config, Param, Instance> {
+
+/* @[static]が付いているコマンドには、arg0にnullが入る。
+ * つまり、arg0は事実上使えない。
+ *
+ * @[managemement]が付いているコマンドは、シェルからコールバックされる。
+ */
+
+ /** システムの起動時にコールバックされる */
+ @[static, management]
+ command _initialize :: Config -> (@OK null | @NG Error)
+ ;
+ 
+ /** システムの終了時にコールバックされる */
+ @[static, management]
+ command _finalize :: void -> void
+ ;
+
+ /** リクエスタインスタンスを生成する */
+ @[static, management]
+ command _create :: [mode, Param] -> Instance
+ ;
+
+/* 以下のコマンドのarg0には、Instanceがセットされる  */
+
+
+ /** トランザクションを開始する */
+ @[management]
+ command _begin :: void -> Instance
+ ;
+
+ /** トランザクションをコミットする */
+ @[management]
+ command _commit :: void -> Instance
+ ;
+
+ /** トランザクションをキャンセルする */
+ @[management]
+ command _cancel :: void -> Instance
+ ;
+
+ /** リクエスタインスタンスを破棄する */
+ @[management]
+ command _dispose :: void -> void
+ ;
+
+};
+}}}
+
+== ファシリティとは何か
+
+# Facility指標クラスにconformsするCatyのクラスである。
+# 完全に一致する「Python APIとコマンドAPI」を持つ。
+  2つのAPIの同一性の保証は当面はプログラマの責任だが、
+  将来的にはシステムが保証する。
+# クラス名とは別に、ファシリティ名を持ち、フラット名前空間に登録される。
+# 登録されたファシリティは、シェルにより管理される。
+
+ファシリティ名・名前空間に登録する方法の候補は：
+
+# @[register-facility(ファシリティ名)] というアノテーション
+# facilty ファシリティ名 = クラス名; のような宣言
+
+ファシリティ名・名前空間がフラットなので、ファシリティ名は容易に変更できたほうがよい。
+ファシリティ相互の以前関係もどこかに書かなくてはならない。
+
+ファシリティ名・名前空間に登録されていないファシリティ（//野良ファシリティ//）は、
+シェルから見えないので、シェルに管理されることもない。
+開発試験中のファシリティは登録しないでテストすることができる。
+
+== シェルはファシリティをどのように管理するか
+
+ロードと初期化／終期化は、システムコアが行う。
+
+# 通常のモジュールと同様にロードする。
+# ファシリティ名前空間を見て、ファシリティを認識する。
+# ファシリティごとの設定情報を取得する。ここで、
+  ファシリティ名から設定情報の格納場所は決まるとする。
+  設定情報はXJSONデータである。
+# 設定情報を引数にして、_initialize(config) を呼ぶ。
+# 初期化が失敗したら、そのファシリティはシステム内から削除（の扱いと）する。
+# システムの終了時に、_finalize() を呼ぶ。
+
+初期化と終期化の順序の決定には、ファシリティ相互の以前関係情報が必要となる（別途考える）。
+
+REPごとの管理はシェルが行う。
+
+# REPごとに、そこで使用するファシリティを列挙する。
+# インスタンスを _create(mode, param) により生成する。
+# 生成したインスタンスをファシリティ変数（後述）にセットする。
+# トランザクション制御のため、_begin(), _commit(), _cancel() を適宜呼び出す。
+# REPが終わったら（成功でも失敗でも）、_dispose() によりファシリティのインスタンスを破棄する。
+
+**ファシリティ変数**とは、
+インジェクションに使われる変数で：
+
+* Pythonで実装されたコマンドでは、Pythonのオブジェクト属性
+* CatyScriptで実装されたコマンドでは、環境変数
+
+名前の綴りは、どちらもまったく同じ。（環境変数でも大文字とは限らない。）
+
+ファシリティ使用宣言が、reads foo("hello") as myfoo だった場合は：
+
+# 使用するファシリティは foo
+# モードは "read"
+# パラメータは "hello"
+# したがって、インスタンス生成は _create("read", "hello")
+# ファシリティ変数名は myfoo
+# 代入は、例えば cmdobj.myfoo = Foo._create("read", "hello")
+
+
+
+== 環境変数インジェクションとメソッドコール
+
+CatyScriptで実装されたコマンドも、read, updates, usesでファシリティを要求できる。
+要求すると、そのコマンドの実行時にファシリティ変数が環境変数として見える。
+uses count と要求すると、countファシリティが %count  として見える。
+
+%countの値は、インスタンスモニカーであって、{"$class":"myapp:count:Counter", "$state": #<foreigin ...>} のようになる（プロパティ名はドルを付けることにした）。
+
+ダブルドット記法でメソッドを呼び出せる。なお、シングルドットはXJSONパスによる成分アクセスに使う予定。
+
+* %count..value -- カウンターの値を得る。
+* %couut..inc -- カウンターの値をインクリメントする。
+
+
+
+ミューテータの実行で、内部的には破壊的代入が発生する。
+破壊的代入は禁止されているが、$stateプロパティの値はforeignのため、
+Caty型システムは関与できないので合法的に許容される。
+（これはトリックではなく、まっとうで正確な意味論を構成できる。）
+
+ダブルドットはシェルにより展開される。
+メソッドコールの手順は：（%cout..inc の場合で説明）
+
+# %countの$classの値から、コマンド名 myapp:count:Counter.inc を知る。
+# %countの$stateの値を --0 に渡してメソッドのコマンドを呼び出す。\\
+  {{{myapp:count:Counter.inc --0=%count.'$state'}}} \\
+ （変数にXJSONパスが使えると仮定している。）
+# 出力はそのまま返す。
+
+
+== 実験
+
+# arg0の代わりにarg1を使う。
+# 環境変数ではなく、普通の変数を使う。
+# コマンド名の特定は手動（手で実際のコマンド名を書く）。
+
+インスタンス（リクエスタ）の生成とメソッド呼び出し：
+
+{{{
+caty:misc> ["use", void] | count:_create >c; count:inc %c; count:inc %c
+value=1
+value=2
+#<foreign <Counter object at 0x077168D0>>
+caty:misc> ["use", void] | count:_create >c; count:value %c
+2
+caty:misc> ["use", void] | count:_create >c; count:reset %c; count:value %c
+value=0
+0
+caty:misc>
+}}}
+
+初期化の効果：
+
+{{{
+caty:misc> {"baseValue":100, "stepValue":10} | count:_initialize
+@OK null
+caty:misc> ["use", void] | count:_create >c; count:value %c
+100
+caty:misc> ["use", void] | count:_create >c; count:inc %c; count:inc %c
+value=110
+value=120
+#<foreign <Counter object at 0x08FFB290>>
+caty:misc>
+}}}
+
+
+
