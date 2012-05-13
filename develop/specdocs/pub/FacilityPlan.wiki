@@ -17,17 +17,18 @@
 == 原則
 
 ファシリティは、メイヤーの「Command-Query分離の原則」を厳守しなくてはならない。
-（参考：http://d.hatena.ne.jp/m-hiyama/20101216/1292469108 ）
+（参考：http://d.hatena.ne.jp/m-hiyama/20101216/1292469108 
+http://d.hatena.ne.jp/m-hiyama/20120406/1333681648 ）
 
 メイヤーの原則を守ってないものは、システムを破綻させるので、Caty内で存在を許されない。
 
-Catyでは、Commandを**ミューテータ**、Queryを**アクセッサ**と呼ぶ。
+Catyでは、Commandを**ミューテータ**（mutator）、Queryを**アクセッサ**（accessor）と呼ぶ。
 
 == 方針
 
 新しい概念やメカニズムは導入せずに、可能な限り**アリモノを組み合わせて**実現したい。
 
-ファシリティのPython APIとコマンドAPIを100%一致させる。
+ファシリティのPython APIとコマンドAPIを**100%一致させる**。
 これにより、Pythonから利用できる機能はすべてコマンドとしても利用できることになる。
 CatyScriptでファシリティを完全に利用できるので、テストもすべてCatyScriptで書ける。
 当然に、FITでテスト可能。
@@ -86,7 +87,7 @@ type Counter = foreign;
 /* @[static]が付いているコマンドには、arg0にnullが入る。
  * つまり、arg0は事実上使えない。
  *
- * @[managemement]が付いているコマンドは、シェルからコールバックされる。
+ * @[managemement]が付いているコマンドは、システムコア／シェルからコールバックされる。
  */
 
  /** システムの起動時にコールバックされる */
@@ -152,10 +153,15 @@ type Counter = foreign;
   refers python:count.MgCancel
  ;
 
- /** カウンターを破棄する */
+ /** 現在のリクエスタの状態をバックエンドと同期させる */
  @[management]
- command _dispose [Counter] :: void -> void
-  refers python:count.MgDispose
+ command _sync :: void -> void
+ ;
+
+ /** カウンターの使用を終了する */
+ @[management]
+ command _close [Counter] :: void -> void
+  refers python:count.MgClose
  ;
 
 
@@ -228,7 +234,10 @@ class Counter(object):
         # 省略
         pass
 
-    def _dispose(self):
+    def _sync(self):
+        pass
+
+    def _close(self):
         pass
 
        
@@ -309,13 +318,22 @@ class MgCancel(Command):
         counter._cancel()
         return counter
 
-class MgDispose(Command):
+class MgSync(Command):
     def setup(self, arg0):
         self.arg0 = arg0
 
     def execute(self):
         counter = self.arg0
-        counter._dispose()
+        counter._sync()
+        return counter
+
+class MgClose(Command):
+    def setup(self, arg0):
+        self.arg0 = arg0
+
+    def execute(self):
+        counter = self.arg0
+        counter._close()
         return counter
 }}}
 
@@ -338,7 +356,7 @@ module A conforms B、class A conforms B と書くと、名前の違いを除い
 ただし、comformsはLiskov置換可能性による**Liskov順序の宣言**なので、Bが指標でなくてもよい。
 
 指標でもそうでなくても、モジュール／クラス／コマンドは**振る舞い制約**（behavior constraints）を持つ。
-振る舞い制約はホーア式で書かれるが、CatyではCatyFITを使って記述する。
+振る舞い制約は[[>http://d.hatena.ne.jp/m-hiyama/20100308/1268011444|ホーア式]]で書かれるが、CatyではCatyFITを使って記述する。
 将来、振る舞い制約記述言語を追加するかもしれない。
 
 A conforms B のとき、Aは、Bが持つすべての振る舞い制約を満たさなくてはならない（must satisfy）。
@@ -368,7 +386,7 @@ class Facility<Config, Param, Instance> {
 /* @[static]が付いているコマンドには、arg0にnullが入る。
  * つまり、arg0は事実上使えない。
  *
- * @[managemement]が付いているコマンドは、シェルからコールバックされる。
+ * @[managemement]が付いているコマンドは、システムコア／シェルからコールバックされる。
  */
 
  /** システムの起動時にコールバックされる */
@@ -404,9 +422,14 @@ class Facility<Config, Param, Instance> {
  command _cancel :: void -> Instance
  ;
 
- /** リクエスタインスタンスを破棄する */
+ /** 現在のリクエスタの状態をバックエンドと同期させる */
  @[management]
- command _dispose :: void -> void
+ command _sync :: void -> void
+ ;
+
+ /** リクエスタインスタンスの使用を終了する */
+ @[management]
+ command _close :: void -> void
  ;
 
 };
@@ -419,7 +442,7 @@ class Facility<Config, Param, Instance> {
   2つのAPIの同一性の保証は当面はプログラマの責任だが、
   将来的にはシステムが保証する。
 # クラス名とは別に、ファシリティ名を持ち、フラット名前空間に登録される。
-# 登録されたファシリティは、シェルにより管理される。
+# 登録されたファシリティは、システムコア／シェルにより管理される。
 
 ファシリティ名・名前空間に登録する方法の候補は：
 
@@ -430,10 +453,10 @@ class Facility<Config, Param, Instance> {
 ファシリティ相互の以前関係もどこかに書かなくてはならない。
 
 ファシリティ名・名前空間に登録されていないファシリティ（//野良ファシリティ//）は、
-シェルから見えないので、シェルに管理されることもない。
+システムコア／シェルから見えないので、システムコア／シェルに管理されることもない。
 開発試験中のファシリティは登録しないでテストすることができる。
 
-== シェルはファシリティをどのように管理するか
+== システムコア／シェルはファシリティをどのように管理するのか
 
 ロードと初期化／終期化は、システムコアが行う。
 
@@ -454,7 +477,8 @@ REPごとの管理はシェルが行う。
 # インスタンスを _create(mode, param) により生成する。
 # 生成したインスタンスをファシリティ変数（後述）にセットする。
 # トランザクション制御のため、_begin(), _commit(), _cancel() を適宜呼び出す。
-# REPが終わったら（成功でも失敗でも）、_dispose() によりファシリティのインスタンスを破棄する。
+# REPの中間でもバックエンドと同期したいときは、_sync() を呼び出す。
+# REPが終わったら（成功でも失敗でも）、_close() によりファシリティのインスタンスの使用を終了する。
 
 **ファシリティ変数**とは、
 インジェクションに使われる変数で：
