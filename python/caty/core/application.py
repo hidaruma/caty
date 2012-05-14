@@ -15,6 +15,8 @@ from caty.core.facility import (Facility,
 from caty.core.memory import AppMemory
 from caty.core.std.command.authutil import (RequestToken,
                                             CATY_USER_INFO_KEY)
+
+from caty.core.customimporter import AppSpecLibraryLoader
 from caty.core.std.command.user import User
 from caty.core.exception import throw_caty_exception
 from caty.util.collection import ImmutableDict
@@ -70,6 +72,7 @@ class Application(PbcObject):
         self._group = group
         self._finished = False
         self._physical_path = join(group.name, name)
+        sys.meta_path.append(AppSpecLibraryLoader(os.path.abspath(self._physical_path))) # {$apDir}/libの読み込みに使う
         self._app_map = {name: self}
         self._global_config = group.global_config
         system.cout.writeln(system.i18n.get("Loading $name", name=self._path))

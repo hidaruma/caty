@@ -115,6 +115,7 @@ import types
 def dynamic_load(pm, g_dict):
     code = pm.code
     obj = compile(code, pm.path, 'exec')
+    g_dict['__file__'] = pm.abspath
     exec obj in g_dict
     module = types.ModuleType(pm.name)
     module.__dict__.update(g_dict)
@@ -142,6 +143,7 @@ class PseudoModule(object):
         self.raw_code = fo.read().replace('\r\n', '\n').replace('\r', '\n')
         if type(self.raw_code) == unicode:
             self.raw_code = self.raw_code.encode(self._find_encoding(self.raw_code))
+        self.abspath = fo.real_path
         self.path = fo.path
         #self.ast = compile(self.raw_code, '', 'exec', _ast.PyCF_ONLY_AST)
         path = fo.path[1:]
