@@ -77,6 +77,17 @@ class RSplit(Builtin):
         else:
             return input.rsplit(self.sep)
 
+class Rest(Builtin):
+    def setup(self, prefix):
+        self.prefix = prefix
+
+    def execute(self, path):
+        if path.startswith(self.prefix):
+            return path[len(self.prefix):]
+        else:
+            return None
+
+
 from caty.jsontools import tagged
 class RegMatch(Builtin):
     def setup(self, pattern):

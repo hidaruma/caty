@@ -1,0 +1,148 @@
+/* -*- coding: utf-8 -*- */
+/** 一時ファイルを扱うファシリティ */
+module tempfile;
+
+type Error = deferred;
+
+/** tempfileの設定情報 */
+type Config = null | 
+{
+  /** 一時ファイルを収めるディレクトリ名
+   * パス名の区切り文字を含まない単純な名前（例："foo"）を指定する。
+   */
+  "catyDirName" : string?
+};
+
+
+/** 一時ファイルを管理するファシリティのリクエスター */
+type TempFile = foreign;
+
+// class TempFile(TempFile) conforms Facility<Config, void, TempFile> {
+
+/* ファシリティクラス管理用コールバック */
+
+ @[static, management]
+ command _initialize :: Config -> (@OK null | @NG Error)
+  refers python:tempfilecmd.MgmntInitialize
+ ;
+
+ @[static, management]
+ command _finalize :: void -> void
+  refers python:tempfilecmd.MgmntFinalize
+ ;
+
+ @[static, management]
+ command _create :: ["use", void] -> TempFile
+  refers python:tempfilecmd.MgmntCreate
+ ;
+
+/* リクエスターインスタンス管理用のコールバック */
+
+ @[management] 
+ command _begin [TempFile] :: void -> TempFile
+  refers python:tempfilecmd.MgmntBegin
+ ;
+
+ @[management] 
+ command _commit [TempFile] :: void ->  TempFile
+  refers python:tempfilecmd.MgmntCommit
+ ;
+
+ @[management] 
+ command _cancel [TempFile] :: void ->  TempFile
+  refers python:tempfilecmd.MgmntCancel
+ ;
+
+ @[management] 
+ command _sync [TempFile] :: void ->  TempFile
+  refers python:tempfilecmd.MgmntSync
+ ;
+
+ @[management]
+ command _close [TempFile] :: void ->  TempFile
+  refers python:tempfilecmd.MgmntClose
+ ;
+
+/* このファシリティ固有のコマンド */
+
+ /** 一時ファイルが置かれるディレクトリのOSフルパス */ 
+ @[accessor]
+ command os-dir-path [TempFile] :: void -> (string|binary)
+  refers python:tempfilecmd.OsDirPath
+ ;
+ /** 名前で指定された一時ファイルのOSフルパス */ 
+ @[accessor]
+ command os-path [TempFile name] :: void -> (string|binary)
+  refers python:tempfilecmd.OsPath
+ ;
+ /** 一時ファイル名のリスト */
+ @[accessor]
+ command list [TempFile] :: void -> [(string|binary)*]
+  refers python:tempfilecmd.List
+ ;
+
+ /** 名前で指定された一時ファイルの内容を読み込む */
+ @[accessor]
+ command read [TempFile, (string|binary) name] :: void -> (string|binary)
+  refers python:tempfilecmd.Read
+ ;
+
+ /** 名前で指定された一時ファイルに内容を書き込む */
+ @[mutator]
+ command write [TempFile, (string|binary) name] :: (string|binary) -> TempFile
+  refers python:tempfilecmd.Write
+ ;
+
+ /** 名前で指定された一時ファイルを消す */
+ @[mutator]
+ command remove [TempFile, (string|binary) name] :: void -> TempFile
+  refers python:tempfilecmd.Remove
+ ;
+
+// }; // TempFile
+
+/** listユーティリティ */
+command u-list :: void -> [string*]
+{
+  ["use", void]| tempfile:_create > x;
+  tempfile:list %x
+};
+
+/** writeユーティリティ */
+command u-write [string name] :: void -> void
+{
+  pass > in;
+  %1 > name;
+  ["use", void]| tempfile:_create > x;
+  %in | tempfile:write %x %name;
+  void
+};
+
+/** readユーティリティ */
+command u-read [string name] :: void -> (binary|string)
+{
+  %1 > name;
+  ["use", void]| tempfile:_create > x;
+  tempfile:read %x %name
+};
+
+/** removeユーティリティ */
+command u-remove [string name] :: void -> void
+{
+  %1 > name;
+  ["use", void]| tempfile:_create > x;
+  tempfile:remove %x %name
+};
+
+/** 指定された名前の一時ファイルを作る。内容は空。
+ */
+command u-touch [string name] :: void -> TempFile
+{
+  %1 > name;
+
+  ["use", void] | tempfile:_create > x;
+  b"" | tempfile:write %x %name
+};
+
+
+/* End of Module */
