@@ -72,7 +72,7 @@ type TempFile = foreign;
  ;
  /** 名前で指定された一時ファイルのOSフルパス */ 
  @[accessor]
- command os-path [TempFile name] :: void -> (string|binary)
+ command os-path [TempFile, string name] :: void -> (string|binary)
   refers python:tempfilecmd.OsPath
  ;
  /** 一時ファイル名のリスト */

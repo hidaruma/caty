@@ -1,0 +1,21 @@
+module browser; // -*- coding: utf-8 -*-
+
+/** 引数で指定されたURLをブラウザでオープンする */
+command open [uri uri] :: void -> void
+ refers python:browser.Open
+;
+
+/** 標準入力を一時ファイルにして、それをブラウザでオープンする */
+command show :: string -> void
+{
+  pass > in;
+  tempfile:_initialize; // 自前で初期化
+  ["use", void] | tempfile:_create > tmpf; // リクエスタを取得
+  %in | tempfile:write %tmpf tmp_show.html;
+  ["file:", tempfile:os-path %tmpf tmp_show.html] | text:concat > file-url;
+  browser:open %file-url
+};
+
+// End of Module
+
+
