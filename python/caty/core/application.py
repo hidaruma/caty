@@ -16,7 +16,7 @@ from caty.core.memory import AppMemory
 from caty.core.std.command.authutil import (RequestToken,
                                             CATY_USER_INFO_KEY)
 
-from caty.core.customimporter import AppSpecLibraryLoader
+from caty.core.customimporter import AppSpecLibraryImporter
 from caty.core.std.command.user import User
 from caty.core.exception import throw_caty_exception
 from caty.util.collection import ImmutableDict
@@ -72,11 +72,13 @@ class Application(PbcObject):
         self._group = group
         self._finished = False
         self._physical_path = join(group.name, name)
-        sys.meta_path.append(AppSpecLibraryLoader(os.path.abspath(self._physical_path))) # {$apDir}/libの読み込みに使う
+        self.importer = AppSpecLibraryImporter(os.path.abspath(self._physical_path))
+        sys.meta_path.append(self.importer) # {$apDir}/libの読み込みに使う
         self._app_map = {name: self}
         self._global_config = group.global_config
         system.cout.writeln(system.i18n.get("Loading $name", name=self._path))
         self._configure()
+        self.set_parent(system)
         if not self._disabled or system.force_app == name:
             self._init_filetype()
             self._init_mafs()
@@ -95,6 +97,9 @@ class Application(PbcObject):
         self.async_queue = AsyncQueue(self)
         PbcObject.__init__(self)
         self._lock_set = set()
+
+    def set_parent(self, system):
+        system._global_app.importer.add_child(self)
 
     def reload(self, module_name=None):
         self._no_ambient = False
@@ -785,3 +790,7 @@ class GlobalApplication(Application):
         self._initialize(self._name, self._group, self._system)
         self.finish_setup()
         self.exec_rc_script()
+
+
+    def set_parent(self, system):
+        pass
