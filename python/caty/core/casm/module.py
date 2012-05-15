@@ -22,14 +22,15 @@ from StringIO import StringIO
 from caty.core.facility import Facility
 
 class Module(Facility):
-    def __init__(self, app):
+    def __init__(self, app, parent=None):
         self._app = app
         self.kind_ns = {}
         self.schema_ns = {}
         self.command_ns = {}
+        self.class_ns = {}
         self.command_loader = None
         self.sub_modules = {}
-        self.parent = None
+        self.parent = parent
         self._name = u'public' # デフォルト値
         self._system = app._system
         self._lazy_resolve = []
@@ -56,6 +57,16 @@ class Module(Facility):
     def name(self):
         return self._name
  
+    def add_class(self, clsobj):
+        if clsobj.name in self.class_ns:
+            m, a = self._get_mod_and_app(ref)
+            raise Exception(self.application.i18n.get(u'Class $name of $this is already defined in $module of $app', 
+                                                      name=ref.name, 
+                                                      this=self.name+'.'+self.type,
+                                                      module=m,
+                                                      app=a))
+        self.class_ns[clsobj.name] = ClassModule(self._app, self, clsobj)
+
     def add_ast(self, ref):
         if ref.name in self.ast_ns:
             m, a = self._get_mod_and_app(ref)
@@ -532,6 +543,17 @@ class Module(Facility):
     def doc_object(self):
         from caty.core.language.util import make_structured_doc
         return make_structured_doc(self.docstring or u'undocumented')
+
+class ClassModule(Module):
+    u"""
+    クラスは名前空間を構成するというその機能においてモジュールに近い。
+    そのため、実装はモジュールとほぼ同等とする。
+    """
+    def __init__(self, app, parent, clsobj):
+        Module.__init__(self, app, parent)
+        self._name = clsobj.name
+        for m in clsobj.member:
+            m.declare(self)
 
 
 class CoreModule(Module):

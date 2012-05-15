@@ -7,8 +7,10 @@ from caty.core.casm.language.schemaparser import schema
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.commandparser import command
 from caty.core.casm.language.constparser import const
+from caty.core.casm.language.classparser import catyclass
 from caty.core.casm.language.kindparser import kind
 import sys
+
 def parse(t):
     try:
         return as_parser(casm).run(t, hook=remove_comment, auto_remove_ws=True)
@@ -21,6 +23,8 @@ def parse_literate(t):
     except ParseFailed, e:
         raise SchemaSyntaxError(e)
 
+_top_level = [try_(schema), try_(command), try_(syntax), try_(kind), try_(const), try_(catyclass)]
+
 def casm(seq):
     s = []
     #p = option(provides)(seq)
@@ -30,7 +34,7 @@ def casm(seq):
     #if p:
     #    s.append(p)
     while not seq.eof:
-        n = seq.parse([try_(schema), try_(command), try_(syntax), try_(kind), try_(const)])
+        n = seq.parse(_top_level)
         if n is not IGNORE:
             s.append(n)
     remove_comment(seq)
@@ -51,7 +55,7 @@ def literate_casm(seq):
     m = module_decl(seq)
     s.append(m)
     while not seq.eof:
-        n = seq.parse([try_(schema), try_(command), try_(syntax), try_(kind), try_(const), peek(S(u'}>>'))])
+        n = seq.parse(_top_level + [peek(S(u'}>>'))])
         if n == u'}>>':
             break
         if n is not IGNORE:
@@ -73,7 +77,7 @@ def literate_casm(seq):
         if seq.eof:
             break
         seq.ignore_hook = h
-        elems = seq.parse(many([try_(schema), try_(command), try_(syntax), try_(kind), try_(const)]))
+        elems = seq.parse(many(_top_level))
         for e in elems:
             if e is not IGNORE:
                 s.append(e)

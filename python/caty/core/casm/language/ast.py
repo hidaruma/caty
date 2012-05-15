@@ -94,6 +94,16 @@ class ASTRoot(Root):
             o.value['options'] = self.options
         return o
 
+class Class(object):
+    def __init__(self, name, member, doc, annotations):
+        self.name = name
+        self.member = member
+        self.annotations = annotations
+
+    def declare(self, module):
+        self.module = module
+        module.add_class(self)
+
 class Node(object):
     def __init__(self, options=None):
         self.options = {} if options is None else options
