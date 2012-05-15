@@ -57,7 +57,6 @@ class System(PbcObject):
         gag = ApplicationGroup('', self._global_config, no_ambient, no_app, app_names, self)
         self._global_app = gag._apps[0]
         self._global_app.finish_setup()
-        self._casm.set_global(self._global_app)
         #self._casm._core.schema_finder("GlobalConfig").validate(gcfg)
         # アプリケーショングループの順序は rc.caty の実行順序に関わる
         # common, main, extra, examples という順序は固定

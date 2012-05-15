@@ -200,6 +200,8 @@ class ProfileBuilder(SchemaBuilder):
             new_prof[1] = tn.visit(p[1].accept(tc))
             pat.decl.profile = tuple(new_prof)
             pc.add_profile(CommandProfile(pat.opt_schema, pat.arg_schema, pat.decl))
+        cmd = pc.get_command_class()
+        cmd.profile_container = pc
         return pc
 
     def _visit_profile(self, node):

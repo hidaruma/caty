@@ -16,10 +16,11 @@ from caty.core.casm.cursor import (SchemaBuilder,
                                    DependencyAnalizer)
 from caty.core.casm.plugin import PluginMap
 from caty.jsontools.path.validator import to_decl_style
-from caty.core.exception import throw_caty_exception
+from caty.core.exception import throw_caty_exception, CatyException
 from threading import RLock
 from StringIO import StringIO
 from caty.core.facility import Facility
+from functools import partial
 
 class Module(Facility):
     def __init__(self, app, parent=None):
@@ -44,6 +45,23 @@ class Module(Facility):
         self.docstring = u'undocumented'
         self.last_modified = 0
         self.annotations = Annotations([])
+        self.get_schema = partial(self.__get_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
+        self.has_schema = partial(self.__has_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
+
+        self.get_command_type = partial(self.__get_resource, scope_func=lambda x:x.command_ns, type=u'Command')
+        self.has_command_type = partial(self.__has_resource, scope_func=lambda x:x.command_ns, type=u'Command')
+        
+        self.get_proto_type = partial(self.__get_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
+        self.has_proto_type = partial(self.__has_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
+        
+        self.get_ast = partial(self.__get_resource, scope_func=lambda x:x.ast_ns, type=u'AST')
+        self.has_ast = partial(self.__has_resource, scope_func=lambda x:x.ast_ns, type=u'AST')
+        
+        self.get_syntax_tree = partial(self.__get_resource, scope_func=lambda x:x.saved_st, type=u'Type')
+        self.has_syntax_tree = partial(self.__has_resource, scope_func=lambda x:x.saved_st, type=u'Type')
+        
+        self.get_class = partial(self.__get_resource, scope_func=lambda x:x.class_ns, type=u'Class')
+        self.has_class = partial(self.__has_resource, scope_func=lambda x:x.class_ns, type=u'Class')
     
     @property
     def type(self):
@@ -80,27 +98,6 @@ class Module(Facility):
             if not self.is_root:
                 self.parent.add_ast(ref)
         self.ast_ns[ref.name] = ref
-
-    def get_ast(self, name, tracked=None):
-        if not tracked:
-            tracked = set([self])
-        else:
-            if self in tracked:
-                raise KeyError(name)
-            else:
-                tracked.add(self)
-        if name in self.ast_ns:
-            return self.ast_ns[name]
-        else:
-            if ':' in name:
-                m, n = name.rsplit(':', 1)
-                if m == 'public':
-                    return self.get_ast(n)
-                if m in self.sub_modules:
-                    return self.sub_modules[m].get_ast(n)
-        if self.parent:
-            return self.parent.get_ast(name)
-        raise KeyError(name)
 
     def add_schema(self, member):
         name = member.name
@@ -172,176 +169,47 @@ class Module(Facility):
             m = t.module.name + '.py'
         return m, a
 
-    def has_ast(self, name, tracked=()):
+    def __get_resource(self, name, tracked=(), scope_func=None, type=u''):
         if self in tracked:
-            return False
-        t = list(tracked ) + [self]
-        if name in self.ast_ns:
-            return True
-        else:
-            if ':' in name:
-                m, n = name.rsplit(':', 1)
-                if m == 'public':
-                    return self.has_ast(n)
-                if m in self.sub_modules and self.sub_modules[m].has_ast(n, t):
-                    return True
+            raise throw_caty_exception(u'%sNotFound', u'$name', name)
+        tracked = list(tracked) + [self]
+        scope = scope_func(self)
+        if name in scope:
+            return scope[name]
+        elif ':' in name:
+            m, n = name.split(':', 1)
+            if ':' in n:
+                if m == 'this' or m == 'global' or m == 'caty':
+                    m, n = n.split(':', 1)
+                else:
+                    throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s %s is forbidden' % type)
+            if m == 'public' and self.name not in ('public', 'builtin'):
+                return self.parent.__get_resource(n, tracked, scope_func, type)
+            if m == 'public' and self.name in ('public', 'builtin'):
+                return self.__get_resource(n, tracked, scope_func, type)
+            if m == self.name:
+                return self.__get_resource(n, tracked, scope_func, type)
+            if m in self.sub_modules:
+                return self.sub_modules[m].__get_resource(n, tracked, scope_func, type)
             if self.parent:
-                return self.parent.has_ast(name, t)
-            else:
-                return False
-
-    def has_schema(self, name, tracked=()):
-        if self in tracked:
-            return False
-        t = list(tracked ) + [self]
-        if name in self.schema_ns:
-            return True
+                return self.parent.__get_resource(name, tracked, scope_func, type)
+            raise throw_caty_exception(u'%sNotFound', u'$name', name=name)
+        elif '.' in name:
+            c, n = name.split('.', 1)
+            if c in self.class_ns:
+                return self.class_ns[c].__get_resource(n, tracked, scope_func, type)
+            raise throw_caty_exception(u'ClassNotFound', u'$name', name=c)
         else:
-            if ':' in name:
-                m, n = name.split(':', 1)
-                if ':' in n:
-                    if m == 'this' or m == 'global' or m == 'caty':
-                        m, n = n.split(':', 1)
-                    else:
-                        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s command is forbidden')
-                if m == 'public':
-                    return self.has_schema(n)
-                if m == self.name:
-                    return self.has_schema(n)
-                if m in self.sub_modules and self.sub_modules[m].has_schema(n, t):
-                    return True
             if self.parent:
-                return self.parent.has_schema(name, t)
-            else:
-                return False
+                return self.parent.__get_resource(name, tracked, scope_func, type)
+        raise throw_caty_exception(u'%sNotFound', u'$name', name=name)
 
-    def has_command(self, name, tracked=()):
-        if self in tracked:
+    def __has_resource(self, name, tracked=(), scope_func=None, type=u''):
+        try:
+            o = self.__get_resource(name, tracked, scope_func, type)
+        except CatyException as e:
             return False
-        t = list(tracked ) + [self]
-        if name in self.command_ns:
-            return True
-        else:
-            if ':' in name:
-                m, n = name.split(':', 1)
-                if ':' in n:
-                    if m == 'this' or m == 'global' or m == 'caty':
-                        m, n = n.split(':', 1)
-                    else:
-                        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s command is forbidden')
-                if m == 'public' and self.name != 'public':
-                    return self.parent.has_command(n)
-                if m == self.name:
-                    return self.has_command(n)
-                if m in self.sub_modules and self.sub_modules[m].has_command(n, t):
-                    return True
-            if self.parent:
-                return self.parent.has_command(name, t)
-            else:
-                return False
-
-    def has_kind(self, name, tracked=()):
-        if self in tracked:
-            return False
-        t = list(tracked ) + [self]
-        if name in self.kind_ns:
-            return True
-        else:
-            if ':' in name:
-                m, n = name.rsplit(':', 1)
-                if m == 'public':
-                    return self.has_kind(n)
-                if m == self.name:
-                    return self.has_kind(n)
-                if m in self.sub_modules and self.sub_modules[m].has_kind(n, t):
-                    return True
-            if self.parent:
-                return self.parent.has_kind(name, t)
-            else:
-                return False
-
-    def get_schema(self, name, check_queue=None):
-        if not self.has_schema(name):
-            raise KeyError(name)
-        if name in self.schema_ns:
-            r = self.schema_ns[name]
-            return r
-        else:
-            if ':' in name:
-                m, n = name.split(':', 1)
-                if ':' in n:
-                    if m == 'this' or m == 'global' or m == 'caty':
-                        m, n = n.split(':', 1)
-                    else:
-                        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s command is forbidden')
-                if m == 'public':
-                    return self.get_schema(n)
-                if m == self.name:
-                    return self.get_schema(n)
-                if m in self.sub_modules:
-                    return self.sub_modules[m].get_schema(n)
-        return self.parent.get_schema(name)
-
-    def get_command_type(self, name):
-        if not self.has_command(name):
-            raise KeyError(name)
-        if name in self.command_ns:
-            return self.command_ns[name]
-        else:
-            if ':' in name:
-                m, n = name.split(':', 1)
-                if ':' in n:
-                    if m == 'this' or m == 'global' or m == 'caty':
-                        m, n = n.split(':', 1)
-                    else:
-                        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s command is forbidden')
-                if m == 'public' and self.name != 'public':
-                    return self.parent.get_command_type(n)
-                if m == self.name:
-                    return self.get_command_type(n)
-                if m in self.sub_modules:
-                    return self.sub_modules[m].get_command_type(n)
-        return self.parent.get_command_type(name)
-
-    def get_kind(self, name):
-        if not self.has_kind(name):
-            raise KeyError(name)
-        if name in self.kind_ns:
-            return self.kind_ns[name]
-        else:
-            if ':' in name:
-                m, n = name.rsplit(':', 1)
-                if m == 'public':
-                    return self.get_kind(n)
-                if m == self.name:
-                    return self.get_kind(n)
-                if m in self.sub_modules:
-                    return self.sub_modules[m].get_kind(n)
-        return self.parent.get_kind(name)
-
-    def get_proto_type(self, name):
-        if name in self.proto_ns:
-            return self.proto_ns[name]
-        else:
-            if ':' in name:
-                m, n = name.split(':', 1)
-                if ':' in n:
-                    if m == 'this' or m == 'global' or m == 'caty':
-                        m, n = n.split(':', 1)
-                    else:
-                        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s command is forbidden')
-                if m == 'public' and self.name != 'public':
-                    return self.parent.get_proto_type(n)
-                if m == self.name:
-                    return self.get_proto_type(n)
-                if m in self.sub_modules:
-                    return self.sub_modules[m].get_proto_type(n)
-        if self._core:
-            try:
-                return self._core.get_proto_type(name)
-            except:
-                return self._global.get_proto_type(name)
-        return self.parent.get_proto_type(name)
+        return True
 
     @property
     def command_profiles(self):
@@ -367,11 +235,11 @@ class Module(Facility):
 
     def get_module(self, name, tracked=None):
         tracked = set() if tracked is None else tracked
-        if self.name in tracked: return
+        if self in tracked: return
         if name == self.name:
             return self
         else:
-            tracked.add(self.name)
+            tracked.add(self)
             for m in self.sub_modules.values():
                 r = m.get_module(name, tracked)
                 if r:
@@ -488,40 +356,6 @@ class Module(Facility):
             print '[ERROR]', u'Application:%s, module:%s' % (self._app.name, self._name)
             raise
 
-
-    def has_syntax_tree(self, name, tracked=[]):
-        if self in tracked:
-            return False
-        t = list(tracked ) + [self]
-        if name in self.saved_st:
-            return True
-        else:
-            if ':' in name:
-                m, n = name.rsplit(':', 1)
-                if m == 'public':
-                    return self.has_syntax_tree(n)
-                if m in self.sub_modules and self.sub_modules[m].has_syntax_tree(n, t):
-                    return True
-            if self.parent:
-                return self.parent.has_syntax_tree(name, t)
-            else:
-                return False
-
-    def get_syntax_tree(self, name):
-        if not self.has_syntax_tree(name):
-            raise KeyError(name)
-        if name in self.saved_st:
-            r = self.saved_st[name]
-            return r
-        else:
-            if ':' in name:
-                m, n = name.rsplit(':', 1)
-                if m == 'public':
-                    return self.get_syntax_tree(n)
-                if m in self.sub_modules:
-                    return self.sub_modules[m].get_syntax_tree(n)
-        return self.parent.get_syntax_tree(name)
-
     def reify(self):
         import caty.jsontools as json
         from caty.core.script.proxy import EnvelopeProxy
@@ -588,39 +422,16 @@ class CoreModule(Module):
                 t.declare(self)
 
 class AppModule(Module):
-    def __init__(self, app, parent, core=None, global_module=None, is_root=False):
+    def __init__(self, app, parent=None, is_root=False):
         Module.__init__(self, app)
         self.fs = app._schema_fs
         self.pcasm_cache = None
         self.parser_cache = None
-        self.command_loader = CommandLoader(app._command_fs, global_module.command_loader if global_module else None)
+        self.command_loader = CommandLoader(app._command_fs)
         self.parent = parent
         self.is_root= is_root
         self.is_builtin = False
         self._plugin.set_fs(app._command_fs)
-        self._core = core
-        self._global_module = global_module
-        if self.is_root:
-            if self._core:
-                core = self._core
-                for k, v in core.schema_ns.items():
-                    self.schema_ns[k] = v
-                for k, v in core.sub_modules.items():
-                    self.sub_modules[k] = v
-                for k, v in core.saved_st.items():
-                    self.saved_st[k] = v
-                for k, v in core.command_ns.items():
-                    self.command_ns[k] = v
-            if self._global_module:
-                global_module = self._global_module
-                for k, v in global_module.schema_ns.items():
-                    self.schema_ns[k] = v
-                for k, v in global_module.sub_modules.items():
-                    self.sub_modules[k] = v
-                for k, v in global_module.saved_st.items():
-                    self.saved_st[k] = v
-                for k, v in global_module.command_ns.items():
-                    self.command_ns[k] = v
 
     def _path_to_module(self, path):
         p = path[1:].rsplit('.')[0]
@@ -786,22 +597,16 @@ class IntegratedModule(object):
         self._system = system
         self._global = None
 
-    def set_global(self, global_app):
-        if global_app:
-            self._global = global_app._schema_module
-        else:
-            self._global = None
-
     def compile(self, *args):
         self._core.compile(*args)
         self._core.resolve()
     
     def make_blank_module(self, app):
-        app_module = AppModule(app, None, self._core, self._global, True)
+        app_module = AppModule(app, app.parent._schema_module, True)
         return app_module
 
     def make_app_module(self, app):
-        app_module = AppModule(app, None, self._core, self._global, True)
+        app_module = AppModule(app, app.parent._schema_module, True)
         app_module.compile()
         return app_module
 

@@ -100,6 +100,7 @@ class Application(PbcObject):
 
     def set_parent(self, system):
         system._global_app.importer.add_child(self)
+        self.parent = system._global_app
 
     def reload(self, module_name=None):
         self._no_ambient = False
@@ -793,4 +794,4 @@ class GlobalApplication(Application):
 
 
     def set_parent(self, system):
-        pass
+        self.parent = system._core_app

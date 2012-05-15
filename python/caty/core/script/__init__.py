@@ -29,12 +29,9 @@ class ScriptModule(object):
     def __init__(self, registrar, app, system):
         #namespace = {}
         filters = FilterModule(system)
-        for n, profile_container in registrar.command_profiles:
+        for n, profile_container in registrar.get_module('filter').command_profiles:
             try:
-                cmd = profile_container.get_command_class()
-                cmd.profile_container = profile_container
-                #namespace[n] = cmd
-                if 'filter' in cmd.profile_container.get_annotations():
+                if 'filter' in profile_container.get_annotations():
                     filters.command_ns[n.split(':')[-1]] = profile_container
             except Exception, e:
                 raise
