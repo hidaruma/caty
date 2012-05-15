@@ -1,0 +1,56 @@
+// -*- coding: utf-8 -*-
+/** OSの環境変数 */
+module osenv; 
+
+type Error = deferred;
+
+/** osenvの設定情報 */
+type Config = null; // 設定不要
+
+
+/** OS環境変数を参照するファシリティのリクエスター */
+type OsEnv = foreign;
+
+// class OsEnv(OsEnv) conforms Facility<Config, void, OsEnv> {
+
+ /** 初期化 */
+ @[static, management]
+ command _initialize :: null -> (@OK null | @NG string)
+  refers python:osenv.MgmntInitialize
+ ;
+
+ /** 終期化 */
+ @[static, management]
+ command _finalize :: void -> void
+  refers python:osenv.MgmntFinalize
+ ;
+
+ /** リクエスタ生成 */
+ @[static, management]
+ command _create :: ["read", void] -> OsEnv
+  refers python:osenv.MgmntCreate
+ ;
+
+ // arg0も代わりにarg1を使用 
+
+ /** 環境変数名を列挙 */
+ @[accessor]
+ command list [OsEnv] :: void -> [string*]
+  refers python:osenv.List
+ ;
+
+ /** 環境変数の存在を確認 */
+ @[accessor]
+ command exists [OsEnv, string name] :: void -> (@OK string | @NG string)
+  refers python:osenv.Exists
+ ;
+
+ /** 特定の環境変数の値を取得 */
+ @[accessor]
+ command get [OsEnv, string name] :: void -> (null | string)
+  refers python:osenv.Get
+ ;
+
+//}
+
+/* End of Module */
