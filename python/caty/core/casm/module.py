@@ -54,8 +54,8 @@ class Module(Facility):
         self.get_proto_type = partial(self.__get_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
         self.has_proto_type = partial(self.__has_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
         
-        self.get_ast = partial(self.__get_resource, scope_func=lambda x:x.ast_ns, type=u'AST')
-        self.has_ast = partial(self.__has_resource, scope_func=lambda x:x.ast_ns, type=u'AST')
+        self.get_ast = partial(self.__get_resource, scope_func=lambda x:x.ast_ns, type=u'Type')
+        self.has_ast = partial(self.__has_resource, scope_func=lambda x:x.ast_ns, type=u'Type')
         
         self.get_syntax_tree = partial(self.__get_resource, scope_func=lambda x:x.saved_st, type=u'Type')
         self.has_syntax_tree = partial(self.__has_resource, scope_func=lambda x:x.saved_st, type=u'Type')
@@ -171,7 +171,7 @@ class Module(Facility):
 
     def __get_resource(self, name, tracked=(), scope_func=None, type=u''):
         if self in tracked:
-            raise throw_caty_exception(u'%sNotFound', u'$name', name)
+            raise throw_caty_exception(u'%sNotFound'%type, u'$name', name=name)
         tracked = list(tracked) + [self]
         scope = scope_func(self)
         if name in scope:
@@ -193,7 +193,7 @@ class Module(Facility):
                 return self.sub_modules[m].__get_resource(n, tracked, scope_func, type)
             if self.parent:
                 return self.parent.__get_resource(name, tracked, scope_func, type)
-            raise throw_caty_exception(u'%sNotFound', u'$name', name=name)
+            raise throw_caty_exception(u'%sNotFound' % type, u'$name', name=name)
         elif '.' in name:
             c, n = name.split('.', 1)
             if c in self.class_ns:
@@ -202,7 +202,7 @@ class Module(Facility):
         else:
             if self.parent:
                 return self.parent.__get_resource(name, tracked, scope_func, type)
-        raise throw_caty_exception(u'%sNotFound', u'$name', name=name)
+        raise throw_caty_exception(u'%sNotFound' % type, u'$name', name=name)
 
     def __has_resource(self, name, tracked=(), scope_func=None, type=u''):
         try:
@@ -300,31 +300,31 @@ class Module(Facility):
         self.saved_st.update(self.ast_ns)
         if not self.compiled:
             self._loop_exec(self.ast_ns, self.make_schema_builder(), lambda k, v:self.add_schema(v))
-        for m in self.sub_modules.values():
+        for m in self.sub_modules.values() + self.class_ns.values():
             m._build_schema_tree()
 
     def _resolve_reference(self):
         if not self.compiled:
             self._loop_exec(self.schema_ns, self.make_reference_resolver(), lambda k, v:self.schema_ns.__setitem__(k, v))
-        for m in self.sub_modules.values():
+        for m in self.sub_modules.values() + self.class_ns.values():
             m._resolve_reference()
 
     def _apply_type_var(self):
         if not self.compiled:
             self._loop_exec(self.schema_ns, self.make_typevar_applier(), lambda k, v:self.schema_ns.__setitem__(k, v))
-        for m in self.sub_modules.values():
+        for m in self.sub_modules.values() + self.class_ns.values():
             m._apply_type_var()
 
     def _detect_cycle(self):
         if not self.compiled:
             self._loop_exec(self.schema_ns, self.make_cycle_detecter(), lambda k, v: v)
-        for m in self.sub_modules.values():
+        for m in self.sub_modules.values() + self.class_ns.values():
             m._detect_cycle()
 
     def _normalize(self):
         if not self.compiled:
             self._loop_exec(self.schema_ns, self.make_type_normalizer(), lambda k, v:self.schema_ns.__setitem__(k, v))
-        for m in self.sub_modules.values():
+        for m in self.sub_modules.values() + self.class_ns.values():
             m._normalize()
 
     def _check_dependency(self):
@@ -334,13 +334,13 @@ class Module(Facility):
             for a, b in graph:
                 if (b, a) in graph:
                     raise Exception(self.application.i18n.get(u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name))
-        for m in self.sub_modules.values():
+        for m in self.sub_modules.values() + self.class_ns.values():
             m._check_dependency()
     
     def _register_command(self):
         if not self.compiled:
             self._loop_exec(self.proto_ns, ProfileBuilder(self), lambda k, v:self.add_command(k, v))
-        for m in self.sub_modules.values():
+        for m in self.sub_modules.values() + self.class_ns.values():
             m._register_command()
 
     def _loop_exec(self, target, cursor, callback):
@@ -387,6 +387,7 @@ class ClassModule(Module):
         Module.__init__(self, app, parent)
         self._name = clsobj.name
         for m in clsobj.member:
+            print m
             m.declare(self)
 
 

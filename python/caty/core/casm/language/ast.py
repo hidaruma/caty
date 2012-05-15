@@ -98,6 +98,7 @@ class Class(object):
     def __init__(self, name, member, doc, annotations):
         self.name = name
         self.member = member
+        self.docstring = doc
         self.annotations = annotations
 
     def declare(self, module):
