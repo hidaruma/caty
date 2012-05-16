@@ -16,7 +16,6 @@ from caty.core.script import node
 from caty.core.std.command import builtin
 from caty.core.command import Builtin, Syntax, Command, VarStorage, PipelineInterruption, PipelineErrorExit, ScriptError
 from caty.core.command.profile import CommandUsageError
-from caty.core.command.usage import CommandUsage
 from caty.util.cache import memoize, Cache
 from caty.util import error_to_ustr
 from caty import util

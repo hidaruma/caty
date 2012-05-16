@@ -1,7 +1,7 @@
 #coding: utf-8
 from topdown import *
 
-from caty.core.casm.language.ast import Class
+from caty.core.casm.language.ast import ClassNode
 from caty.core.casm.language.schemaparser import schema, typedef
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.commandparser import command
@@ -19,7 +19,7 @@ def catyclass(seq):
         S(u'{')(seq)
         member = many([try_(schema), try_(syntax), try_(command), try_(const), try_(kind)])(seq)
         S(u'};')(seq)
-    return Class(classname, member, doc, annotation)
+    return ClassNode(classname, member, doc, annotation)
 
 def restriction(seq):
     S('(')

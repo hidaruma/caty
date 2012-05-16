@@ -2,9 +2,9 @@
 from caty.core.action.selector import *
 from caty.core.action.resource import *
 from caty.core.exception import *
-from caty.core.casm.language.ast import CommandNode
+from caty.core.casm.language.ast import CommandNode, ClassNode
 from caty.core.casm.language.commandparser import call_pattern
-from caty.core.casm.module import Module
+from caty.core.casm.module import Module, ClassModule
 from topdown import CharSeq, many1
 
 class ResourceModuleContainer(object):
@@ -127,17 +127,20 @@ class ResourceModule(Module):
 
 
         self._resources.append(res)
+        member = []
         for act in res.actions:
             script = act.instance
             ptn = many1(call_pattern)(CharSeq(u'{*: any} [string*]:: WebInput | void -> Response | Redirect', auto_remove_ws=True))
-            c = CommandNode(u'{0}.{1}'.format(res.name, act.name), 
+            c = CommandNode(act.name, 
                             map(lambda p:p([], []), ptn), 
                             ActionEnvelope(script), 
                             act.docstring, 
                             act.annotations, 
                             [],
                             u'action')
-            c.declare(self)
+            member.append(c)
+        clsnode = ClassNode(res.name, member, res.docstring, res.annotations)
+        clsnode.declare(self)
 
     def add_state(self, st):
         for r in self.states:

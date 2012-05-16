@@ -378,6 +378,18 @@ class Module(Facility):
         from caty.core.language.util import make_structured_doc
         return make_structured_doc(self.docstring or u'undocumented')
 
+    def find_root(self):
+        if not self.parent:
+            return self
+        else:
+            return self.parent.find_root()
+
+    def iter_parents(self):
+        if self.parent:
+            yield self.parent
+            for p in self.parent.iter_parents():
+                yield p
+
 class ClassModule(Module):
     u"""
     クラスは名前空間を構成するというその機能においてモジュールに近い。
