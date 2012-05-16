@@ -869,6 +869,7 @@ class Undef(Builtin):
     def execute(self):
         return caty.UNDEFINED
 
+import itertools
 class Help(Builtin):
     def setup(self, opts, line=''):
         self.json = opts['json']
@@ -1010,8 +1011,8 @@ class Help(Builtin):
         elif mode == 'list_modules':
             r1 = []
             r2 = []
-            for m in self.schema._module.get_modules():
-                if m.application.name not in ('builtin', 'global'):
+            for m in itertools.chain(self.schema._module.get_modules(), *[p.get_modules() for p in self.schema._module.iter_parents()]):
+                if m.application.name != 'caty':
                     r2.append((m.application.name + ':' + m.name))
                 else:
                     r1.append((m.name))
@@ -1031,6 +1032,14 @@ class Help(Builtin):
         st = self.schema._module.get_syntax_tree(t)
         td = TreeDumper()
         r = td.visit(st)
+        return r
+
+    def _get_command(self):
+        from caty.core.command.usage import CommandUsage
+        from caty.core.schema import types
+        t = self.__line.strip()
+        ct = self.schema._module.get_command_type(t)
+        r = CommandUsage(ct).get_usage()
         return r
 
     def _command_help(self):
@@ -1067,10 +1076,10 @@ class Help(Builtin):
                 else:
                     command = chunk[1]
         if mode == 'usage':
-            if interpreter.has_command(module, command):
-                return (interpreter.get_help(module, command))
-            else:
-                return (u'未知のコマンド: %s' % command)
+            try:
+                return self._get_command()
+            except KeyError:
+                return (u'未知のコマンド: %s' % self.__type_name)
         elif mode == 'list':
             r= []
             l = list(interpreter.get_commands(module))
@@ -1093,8 +1102,8 @@ class Help(Builtin):
         elif mode == 'list_modules':
             r1 = []
             r2 = []
-            for m in interpreter.get_modules():
-                if m.application.name not in ('builtin', 'global'):
+            for m in itertools.chain(self.schema._module.get_modules(), *[p.get_modules() for p in self.schema._module.iter_parents()]):
+                if m.application.name != 'caty':
                     r2.append((m.application.name + ':' + m.name))
                 else:
                     r1.append((m.name))
