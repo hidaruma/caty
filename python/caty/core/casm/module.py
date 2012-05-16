@@ -387,7 +387,6 @@ class ClassModule(Module):
         Module.__init__(self, app, parent)
         self._name = clsobj.name
         for m in clsobj.member:
-            print m
             m.declare(self)
 
 
