@@ -77,9 +77,9 @@ command slice<T default any> [integer, integer?] :: [T*] -> [T*]
     refers python:caty.core.std.command.listlib.Slice;
 
 /**
- * 二つの配列を結合した新しい配列を返す。
+ * いくつかの配列を結合した新しい配列を返す。
  */
-command concat :: [[any*], [any*]] -> [any*]
+command concat :: [[any*]*] -> [any*]
     refers python:caty.core.std.command.listlib.Concat;
 
 /**

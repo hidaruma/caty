@@ -1,0 +1,21 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= concat
+
+== !exec
+
+concatの仕様は一致させたい。
+
+|= !command   |= !input        |= !output |
+| text:concat | []             | ""        |
+| text:concat | ["a"]          | "a"       |
+| text:concat | ["a", "b"]     | "ab"      |
+| text:concat | ["a", "b", "c"]| "abc"     |
+
+
+|= !command   |= !input              |= !output       |
+| list:concat | []                   | []             |
+| list:concat | [["a"]]              | ["a"]          |
+| list:concat | [["a"], ["b"]]       | ["a", "b"]     |
+| list:concat | [["a"], ["b"], ["c"]]| ["a", "b", "c"]|
+

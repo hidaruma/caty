@@ -88,9 +88,11 @@ class Slice(Builtin):
 
 
 class Concat(Builtin):
-
     def execute(self, input):
-        return input[0] + input[1]
+        l = []
+        for item in input:
+            l[len(l):] = item
+        return l
 
 from caty.jsontools import tagged
 class Contains(Builtin):
