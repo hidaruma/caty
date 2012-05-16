@@ -164,7 +164,7 @@ type RCara = @cara (ModuleAttribute ++ {
     "ports": {*: ReifiedPort},
     });
 
-type ModuleAttribute = {
+type NSAttribute = {
     "name": string,
     "document": Doc?,
     "types": {
@@ -173,6 +173,9 @@ type ModuleAttribute = {
     "commands": {
         *: ReifiedCommand
     },
+};
+
+type ModuleAttribute = NSAttribute ++ {
     "classes": {
         *: ReifiedClass
     },
@@ -376,7 +379,7 @@ type RTypeCond = @_cond {
 };
 
 type RCaseNode = {
-    "type": RTypeDef,
+    "type": RTypeDef | @_wildcard,
     "body": ReifiedScript
 };
 
@@ -406,7 +409,7 @@ type RVarRef = @_varref {"name": string, "optional": boolean};
 type RArgRef = @_argref {"name": string, "optional": boolean};
 
 type ReifiedConst = @const (TypeAttribute ++ {"name": string, "constBody": string|binary|number|integer|null|boolean|array|object|undefined|@*! (any|undefined)});
-type ReifiedClass = deferred;
+type ReifiedClass = @_class NSAttribute;
 type ReifiedResource = @_res {
     "name": string,
     "document": Doc,

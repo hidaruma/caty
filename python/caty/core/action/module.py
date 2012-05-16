@@ -190,6 +190,8 @@ class ResourceModule(Module):
         o['ports'] = {}
         for rc in self._resources:
             o['resources'][rc.name] = rc.reify()
+            if rc.name in o['classes']:
+                del o['classes'][rc.name]
         for st in self._states:
             o['states'][st.name] = st.reify()
         for ur in self._userroles:

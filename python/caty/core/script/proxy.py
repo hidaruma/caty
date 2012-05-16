@@ -275,7 +275,7 @@ class BranchProxy(Proxy):
         
     def reify(self):
         return {
-            'type': self.typedef.reify(),
+            'type': self.typedef.reify() if self.typedef != u'*' else json.TagOnly(u'_wildcard'),
             'body': self.cmdproxy.reify()
         }
     

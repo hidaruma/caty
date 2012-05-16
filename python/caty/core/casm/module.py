@@ -361,6 +361,8 @@ class Module(Facility):
         from caty.core.script.proxy import EnvelopeProxy
         o = {'name': self.name, 'document': self.doc_object, 'types': {}, 'commands': {}}
         o['classes'] = {}
+        for k, v in self.class_ns.items():
+            o['classes'][k] = v.reify()
         for k, v in self.ast_ns.items():
             if '__const' in v.annotations:
                 o['types'][k] = self.const_ns[k].reify()
@@ -369,8 +371,7 @@ class Module(Facility):
         for k, v in self.proto_ns.items():
             if '__const' in v.annotation:
                 continue
-            if not v.command_type == u'action': 
-                o['commands'][k] = v.reify()
+            o['commands'][k] = v.reify()
         return json.tagged('casm', o)
 
     @property
@@ -401,6 +402,13 @@ class ClassModule(Module):
         for m in clsobj.member:
             m.declare(self)
 
+    def reify(self):
+        import caty.jsontools as json
+        r = Module.reify(self)
+        t, v = json.split_tag(r)
+        if 'classes' in v:
+            del v['classes']
+        return json.tagged(u'_class', v)
 
 class CoreModule(Module):
     u"""Caty付属のモジュール。
