@@ -151,7 +151,7 @@ class ProfileBuilder(SchemaBuilder):
         from caty.core.exception import CatyException
         self._root_name = node.name
         if node.profile_container:
-            return node
+            return node.profile_container
         if node.uri:
             pc = ProfileContainer(node.name, 
                                   node.uri, 
@@ -202,6 +202,7 @@ class ProfileBuilder(SchemaBuilder):
             pc.add_profile(CommandProfile(pat.opt_schema, pat.arg_schema, pat.decl))
         cmd = pc.get_command_class()
         cmd.profile_container = pc
+        node.profile_container = pc
         return pc
 
     def _visit_profile(self, node):

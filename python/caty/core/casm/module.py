@@ -279,7 +279,7 @@ class Module(Facility):
         self._normalize()
         self._register_command()
         self.compiled = True
-        for m in self.sub_modules.values():
+        for m in self.sub_modules.values() + self.class_ns.values():
             m.compiled = True
 
     def make_schema_builder(self):
