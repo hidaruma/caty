@@ -1,0 +1,34 @@
+// -*- coding: utf-8 -*-
+@[register-public]
+module monad;
+
+/** リスト型構成子 */
+type List<T default any> = [T*];
+
+/** リストのリスト */
+type lislis = List<List<any>>;
+
+/** リスト総称コマンド群 */
+class List (univ) {
+
+ command map<S default any, T default any> [string code] :: List<S> -> List<T>
+ {
+   each {[pass, %1] | eval}
+ };
+
+ command flatten<T default any> :: List<List<T>> -> any//List<T>
+ {
+   dump --prefix="flatten" | list:concat
+ };
+
+ command unit<T default any> :: T -> List<T>
+ {
+   [pass]
+ };
+
+};
+
+// End of Module
+
+
+
