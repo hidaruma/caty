@@ -22,7 +22,7 @@ def catyclass(seq):
     return ClassNode(classname, member, doc, annotations)
 
 def restriction(seq):
-    S('(')
+    S('(')(seq)
     r = typedef(seq)
-    S(')')
+    S(')')(seq)
     return r
