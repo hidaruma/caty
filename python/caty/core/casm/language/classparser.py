@@ -19,7 +19,7 @@ def catyclass(seq):
         S(u'{')(seq)
         member = many([try_(schema), try_(syntax), try_(command), try_(const), try_(kind)])(seq)
         S(u'};')(seq)
-    return ClassNode(classname, member, doc, annotation)
+    return ClassNode(classname, member, doc, annotations)
 
 def restriction(seq):
     S('(')

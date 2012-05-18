@@ -83,6 +83,10 @@ class Module(Facility):
                                                       this=self.name+'.'+self.type,
                                                       module=m,
                                                       app=a))
+
+        if 'register-public' in clsobj.annotations or 'register-public' in self.annotations:
+            if not self.is_root:
+                self.parent.add_class(clsobj)
         self.class_ns[clsobj.name] = ClassModule(self._app, self, clsobj)
 
     def add_ast(self, ref):
