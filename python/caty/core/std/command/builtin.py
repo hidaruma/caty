@@ -1082,14 +1082,14 @@ class Help(Builtin):
                 return (u'未知のコマンド: %s' % self.__type_name)
         elif mode == 'list':
             r= []
-            l = list(interpreter.get_commands(module))
             if self.query:
                 query = 'filter'
             else:
                 query = None
-            commands = [(x.name, x.doc.splitlines()[0].strip()) 
-                         for x in l
-                         if not query or query in x.annotations]
+            commands = [(s.name, s.doc.splitlines()[0].strip()) 
+                     for s in self.schema._module.get_module(module).command_ns.values()
+                     if (not query) or (query in s.annotations)
+                    ]
             commands.sort(cmp=lambda x, y:cmp(x[0], y[0]))
             if commands:
                 max_width = max(map(lambda a:len(a[0]), commands))
