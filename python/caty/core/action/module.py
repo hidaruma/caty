@@ -198,7 +198,7 @@ class ResourceModule(Module):
             o['userroles'][ur.name] = ur.reify()
         for p in self._ports:
             o['ports'][p.name] = p.reify()
-        return json.tagged('cara', o)
+        return json.tagged(u'cara', o)
 
     @property
     def states(self):

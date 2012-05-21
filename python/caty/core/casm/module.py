@@ -376,7 +376,7 @@ class Module(Facility):
             if '__const' in v.annotation:
                 continue
             o['commands'][k] = v.reify()
-        return json.tagged('casm', o)
+        return json.tagged(u'casm', o)
 
     @property
     def doc_object(self):

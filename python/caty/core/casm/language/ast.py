@@ -83,7 +83,7 @@ class ASTRoot(Root):
         module.add_ast(self)
 
     def reify(self):
-        o = json.tagged('type', {
+        o = json.tagged(u'type', {
             'name': self._name, 
             'typeParams': [p.reify() for p in self._type_params],
             'typeBody': self.body.reify(),
@@ -206,7 +206,7 @@ class PseudoTaggedNode(Node, PseudoTag):
     def reify(self):
         o = self.body.reify()
         t, v = json.split_tag(o)
-        p =  json.tagged('_pseudoTag', [self._name, self._value])
+        p =  json.tagged(u'_pseudoTag', [self._name, self._value])
         if t == '_object':
             v['pseudoTag'] = p
         else:
@@ -525,7 +525,7 @@ class TypeParam(object):
         return self.var_name + ":" + str(self.kind)
 
     def reify(self):
-        return json.tagged('_typeparam', 
+        return json.tagged(u'_typeparam', 
         {
             'var_name': self.var_name,
             'kind': self.kind,
@@ -563,7 +563,7 @@ class ConstDecl(object):
         module.const_ns[self.name] = self
 
     def reify(self):
-        o = json.tagged('const', {
+        o = json.tagged(u'const', {
             'name': self.name, 
             'constBody': self.value,
             'annotation': self.annotations.reify(),
