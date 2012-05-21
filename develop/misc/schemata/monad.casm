@@ -1,4 +1,8 @@
 // -*- coding: utf-8 -*-
+/**
+ *  Listモナドを定義してみる
+ */
+
 @[register-public]
 module monad;
 
@@ -9,18 +13,21 @@ type List<T default any> = [T*];
 type lislis = List<List<any>>;
 
 /** リスト総称コマンド群 */
-class List (univ) {
+class List {
 
+ /** Listのmap関数（持ち上げ） */
  command map<S default any, T default any> [string code] :: List<S> -> List<T>
  {
    each {[pass, %1] | eval}
  };
 
- command flatten<T default any> :: List<List<T>> -> any//List<T>
+ /** Listのモナド乗法 */
+ command flatten<T default any> :: List<List<T>> -> List<T>
  {
-   dump --prefix="flatten" | list:concat
+   list:concat
  };
 
+ /** Listのモナド単位 */
  command unit<T default any> :: T -> List<T>
  {
    [pass]
@@ -29,6 +36,3 @@ class List (univ) {
 };
 
 // End of Module
-
-
-
