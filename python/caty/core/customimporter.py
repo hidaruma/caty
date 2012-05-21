@@ -1,5 +1,8 @@
-import pkgutil
+#coding:utf-8
 import os
+import pkgutil
+import sys
+
 class AppSpecLibraryImporter(object):
     def __init__(self, app_path):
         self.app_path = os.path.abspath(app_path)
@@ -10,9 +13,8 @@ class AppSpecLibraryImporter(object):
         self.child_path.add(app.importer.app_path)
 
     def find_module(self, fullname, path=None):
-        import sys
-        mod = self.finder.find_module(fullname, path)
-        if mod:
+        loader = self.finder.find_module(fullname, path)
+        if loader:
             frame = sys._getframe(1)
             srcpath = os.path.abspath(frame.f_globals['__file__'])
             if not srcpath.startswith(self.app_path):
@@ -21,4 +23,15 @@ class AppSpecLibraryImporter(object):
                         break
                 else:
                     raise ImportError(fullname)
-        return mod
+            return LoaderWrapper(loader)
+
+class LoaderWrapper(object):
+    def __init__(self, loader):
+        self.loader = loader
+
+    def load_module(self, fullname):
+        m = self.loader.load_module(fullname)
+        if fullname in sys.modules:
+            del sys.modules[fullname]
+        return m
+
