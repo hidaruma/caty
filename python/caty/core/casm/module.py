@@ -403,8 +403,35 @@ class ClassModule(Module):
     def __init__(self, app, parent, clsobj):
         Module.__init__(self, app, parent)
         self._name = clsobj.name
+        self._clsobj = clsobj
+        self._clsrestriction = clsobj.restriction
         for m in clsobj.member:
             m.declare(self)
+
+    def _build_schema_tree(self):
+        Module._build_schema_tree(self)
+        self._clsrestriction = self.make_schema_builder().visit(self._clsrestriction)
+
+    def _resolve_reference(self):
+        Module._resolve_reference(self)
+        self._clsrestriction = self.make_reference_resolver().visit(self._clsrestriction)
+
+    def _apply_type_var(self):
+        Module._apply_type_var(self)
+        self._clsrestriction = self.make_typevar_applier().visit(self._clsrestriction)
+
+    def _detect_cycle(self):
+        Module._detect_cycle(self)
+        self.make_cycle_detecter().visit(self._clsrestriction)
+
+    def _normalize(self):
+        Module._normalize(self)
+        self._clsrestriction = self.make_type_normalizer().visit(self._clsrestriction)
+
+    def _register_command(self):
+        Module._register_command(self)
+        for v in self.command_ns.values():
+            v.set_arg0_type(self._clsrestriction)
 
     def reify(self):
         import caty.jsontools as json

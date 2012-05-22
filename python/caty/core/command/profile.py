@@ -69,6 +69,9 @@ class ProfileContainer(object):
         if msg:
             raise JsonSchemaError('\n'.join(msg))
 
+    def set_arg0_type(self, type):
+        pass
+
     def resolve(self, module):
         for p in self.profiles:
             p.resolve()

@@ -95,11 +95,13 @@ class ASTRoot(Root):
         return o
 
 class ClassNode(object):
-    def __init__(self, name, member, doc, annotations):
+    def __init__(self, name, member, restriction, uri, doc, annotations):
         self.name = name
         self.member = member
         self.docstring = doc
         self.annotations = annotations
+        self.restriction = restriction
+        self.uri = uri
 
     def declare(self, module):
         self.module = module

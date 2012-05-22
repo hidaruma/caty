@@ -2,7 +2,7 @@
 from caty.core.action.selector import *
 from caty.core.action.resource import *
 from caty.core.exception import *
-from caty.core.casm.language.ast import CommandNode, ClassNode
+from caty.core.casm.language.ast import CommandNode, ClassNode, ScalarNode, CommandURI
 from caty.core.casm.language.commandparser import call_pattern
 from caty.core.casm.module import Module, ClassModule
 from topdown import CharSeq, many1
@@ -139,7 +139,7 @@ class ResourceModule(Module):
                             [],
                             u'action')
             member.append(c)
-        clsnode = ClassNode(res.name, member, res.docstring, res.annotations)
+        clsnode = ClassNode(res.name, member, ScalarNode(u'univ'), CommandURI([(u'python', u'')]), res.docstring, res.annotations)
         clsnode.declare(self)
 
     def add_state(self, st):
