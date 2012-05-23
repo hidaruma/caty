@@ -410,19 +410,13 @@ class ClassModule(Module):
 
     def _build_schema_tree(self):
         Module._build_schema_tree(self)
-        self._clsrestriction = self.make_schema_builder().visit(self._clsrestriction)
+        b = self.make_schema_builder()
+        b._type_params = []
+        self._clsrestriction = b.visit(self._clsrestriction)
 
     def _resolve_reference(self):
         Module._resolve_reference(self)
         self._clsrestriction = self.make_reference_resolver().visit(self._clsrestriction)
-
-    def _apply_type_var(self):
-        Module._apply_type_var(self)
-        self._clsrestriction = self.make_typevar_applier().visit(self._clsrestriction)
-
-    def _detect_cycle(self):
-        Module._detect_cycle(self)
-        self.make_cycle_detecter().visit(self._clsrestriction)
 
     def _normalize(self):
         Module._normalize(self)
