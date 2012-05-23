@@ -391,40 +391,37 @@ class Facility<Config, Param, Instance> {
 
  /** システムの起動時にコールバックされる */
  @[static, management]
- command _initialize :: Config -> (@OK null | @NG Error)
+ command _initialize [Config] :: AppInstance -> (@OK null | @NG Error)
  ;
  
  /** システムの終了時にコールバックされる */
  @[static, management]
- command _finalize :: void -> void
+ command _finalize :: AppInstance -> void
  ;
 
- /** リクエスタインスタンスを生成する */
+ /** リクエスターインスタンスを生成する */
  @[static, management]
- command _create :: [mode, Param] -> Instance
+ command _create [SystemParam, mode, UserParam] :: AppInstance -> Instance
  ;
 
 /* 以下のコマンドのarg0には、Instanceがセットされる  */
 
 
- /** トランザクションを開始する */
+ /** トランザクションを開始する
+  * 新しいインスタンスを生成する。
+  */
  @[management]
  command _begin :: void -> Instance
  ;
 
  /** トランザクションをコミットする */
  @[management]
- command _commit :: void -> Instance
+ command _commit :: void -> void
  ;
 
  /** トランザクションをキャンセルする */
  @[management]
- command _cancel :: void -> Instance
- ;
-
- /** 現在のリクエスタの状態をバックエンドと同期させる */
- @[management]
- command _sync :: void -> void
+ command _cancel :: void -> void
  ;
 
  /** リクエスタインスタンスの使用を終了する */
@@ -450,7 +447,6 @@ class Facility<Config, Param, Instance> {
 # facilty ファシリティ名 = クラス名; のような宣言
 
 ファシリティ名・名前空間がフラットなので、ファシリティ名は容易に変更できたほうがよい。
-ファシリティ相互の以前関係もどこかに書かなくてはならない。
 
 ファシリティ名・名前空間に登録されていないファシリティ（//野良ファシリティ//）は、
 システムコア／シェルから見えないので、システムコア／シェルに管理されることもない。
