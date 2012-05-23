@@ -45,7 +45,6 @@ ROOT = 'root'
 USER = 'main'
 LOG_TYPES = ['app', 'performance', 'exec']
 
-
 class Application(PbcObject):
     u"""Caty アプリケーションオブジェクト。
     Caty アプリケーションは自身に特有なファイルシステム、スキーマ、コマンドなどを格納し、

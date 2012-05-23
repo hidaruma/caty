@@ -4,6 +4,7 @@ from caty.core.application import *
 from caty.core.applicationgroup import *
 from caty.util.path import join
 from caty.core.script import node
+from customimporter import make_custom_import
 
 from pbc import PbcObject, Contract
 
@@ -23,6 +24,7 @@ class System(PbcObject):
                  no_app=False, 
                  app_names=(u'root',),
                  force_app=None):
+        make_custom_import()
         caty.core.runtimeobject.i18n = I18nMessage({}, writer=cout, lang='en') # フォールバック
         self.force_app = force_app
         if quiet:
