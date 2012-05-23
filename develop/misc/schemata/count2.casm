@@ -1,0 +1,120 @@
+/* -*- coding: utf-8 -*- */
+module count2;
+
+/** エラー情報 */
+type Error = fcl:Error;
+
+/** ファシリティのモード */
+type mode = fcl:mode;
+
+
+/** カウンターの設定情報 */
+type Config = null | {
+ /** カウンターの基準値 */
+ @[default(0)]
+ "baseValue" : integer?,
+
+ /** カウンターのステップ値 */
+ @[default(1)]
+ "stepValue" : integer?,
+};
+
+/** アプリケーションインスタンス */
+type AppInstance = fcl:AppInstance;
+
+/** カウンタの実体 */
+type Counter = foreign;
+
+/*/* カウンタークラス（ファシリティ） */
+//class Counter (Counter) {
+
+/* @[static]が付いているコマンドには、arg0にnullが入る。
+ * つまり、arg0は事実上使えない。
+ *
+ * @[managemement]が付いているコマンドは、シェルからコールバックされる。
+ */
+
+ /** システムの起動時にコールバックされる */
+ @[static, management]
+ command initialize [Config?]
+ :: AppInstance -> null | Error
+  refers python:count2.Initialize
+ ;
+
+ /** システムの終了時にコールバックされる */
+ @[static, management]
+ command finalize 
+ :: AppInstance -> void
+  refers python:count2.Finalize
+ ;
+
+
+ /** カウンターを取得する */
+ @[static, management, creator]
+ command create [null, "use", string name]
+ :: AppInstance -> Counter
+  refers python:count2.Create
+ ;
+
+ /** カウンタの名前をリストする */
+ @[static, reader]
+ command list
+ :: void -> [string*]
+  refers python:count2.List
+ ;
+
+/* 以下のコマンドのarg0には、Counterがセットされる  
+ * 暫定的にarg1を使う。
+ */
+
+ /** カウンターの値を取得する */
+ @[reader]
+ command value [Counter] :: void -> integer
+  refers python:count2.Value
+ ;
+
+ /** カウンターをインクリメントする */
+ @[updater]
+ command inc [Counter] :: void -> void
+  refers python:count2.Inc
+ ;
+
+ /** カウンターをデクリメントする */
+ @[updater]
+ command dec [Counter] :: void -> void
+  refers python:count2.Dec
+ ;
+
+ /** カウンターをリセットする */
+ @[updater]
+ command reset [Counter] :: void -> void
+  refers python:count2.Reset
+ ;
+
+ /** トランザクションを開始する */
+ @[management, creator]
+ command start [Counter] :: void -> Counter
+  refers python:count2.Start
+ ;
+
+ /** トランザクションをコミットする */
+ @[management]
+ command commit [Counter] :: void -> void
+  refers python:count2.Commit
+ ;
+
+ /** トランザクションをキャンセルする */
+ @[management]
+ command cancel [Counter] :: void -> void
+  refers python:count2.Cancel
+ ;
+
+ /** カウンターを後始末する */
+ @[management]
+ command cleanup [Counter] :: void -> void
+  refers python:count2.Cleanup
+ ;
+
+//};
+
+/* End */
