@@ -8,7 +8,7 @@ type Error = fcl:Error;
 /** osenvの設定情報 */
 type Config = null; // 設定不要
 
-
+/*{{{
 /** OS環境変数を参照するファシリティのリクエスター */
 type OsEnv = foreign;
 
@@ -53,5 +53,7 @@ type OsEnv = foreign;
  ;
 
 //}
+
+}}}*/
 
 /* End of Module */
