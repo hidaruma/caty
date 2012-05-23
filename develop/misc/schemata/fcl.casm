@@ -1,0 +1,65 @@
+// -*- coding: utf-8 -*-
+module fcl;
+
+type AppInstance = (null | foreign);
+type Config = deferred;
+type Instance = deferred;
+
+
+/** エラー情報 */
+type Error = (string | {"message":string, *:any?});
+
+/** ファシリティのモード */
+type mode = ("read"|"update"|"use"); // useはなくなるかも
+
+/**
+ * ファシリティの管理のコマンドインターフェイス
+ * これらのコマンドに対応するPythonメソッドが
+ * Catyコア／シェルから自動的に呼ばれる。
+ */
+@[signature]
+class ManageableAsFacility (Instance) {
+
+ /** システムの起動時にコールバックされる */
+ @[static, management]
+ command initialize [Config? conf]
+ :: AppInstance -> null | Error
+ ;
+
+ /** システムの終了時にコールバックされる */
+ @[static, management]
+ command finalize 
+ :: AppInstance -> void
+ ;
+
+ /** リクエスターを生成・取得する */
+ @[static, management, creator]
+ command create [any system_param, mode mode, any? user_param]
+ :: AppInstance -> Instance
+ ;
+
+/* 以下のコマンドのarg0には、Instanceがセットされる  */
+
+
+ /** トランザクションを開始する */
+ @[management, creator]
+ command start :: void -> Instance
+ ;
+
+ /** トランザクションをコミットする */
+ @[management]
+ command commit :: void -> void
+ ;
+
+ /** トランザクションをキャンセルする */
+ @[management]
+ command cancel :: void -> void
+ ;
+
+ /** リクエスタインスタンスの後始末 */
+ @[management]
+ command cleanup :: void -> void
+ ;
+
+};
+
