@@ -23,15 +23,15 @@ class AppSpecLibraryImporter(object):
                         break
                 else:
                     raise ImportError(fullname)
-            return LoaderWrapper(loader)
+            return loader
 
-class LoaderWrapper(object):
-    def __init__(self, loader):
-        self.loader = loader
-
-    def load_module(self, fullname):
-        m = self.loader.load_module(fullname)
-        if fullname in sys.modules:
-            del sys.modules[fullname]
-        return m
+#class LoaderWrapper(object):
+#    def __init__(self, loader):
+#        self.loader = loader
+#
+#    def load_module(self, fullname):
+#        m = self.loader.load_module(fullname)
+        #if fullname in sys.modules:
+        #    del sys.modules[fullname]
+#        return m
 
