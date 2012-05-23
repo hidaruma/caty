@@ -2,7 +2,7 @@
 import os
 import pkgutil
 import sys
-
+_importers__cache = {}
 class AppSpecLibraryImporter(object):
     def __init__(self, app_path):
         self.app_path = os.path.abspath(app_path)
@@ -15,23 +15,30 @@ class AppSpecLibraryImporter(object):
     def find_module(self, fullname, path=None):
         loader = self.finder.find_module(fullname, path)
         if loader:
-            frame = sys._getframe(1)
-            srcpath = os.path.abspath(frame.f_globals['__file__'])
-            if not srcpath.startswith(self.app_path):
-                for c in self.child_path:
-                    if srcpath.startswith(c):
-                        break
-                else:
-                    raise ImportError(fullname)
+            self._check_path(fullname)
+            _importers__cache[fullname] = self
             return loader
 
-#class LoaderWrapper(object):
-#    def __init__(self, loader):
-#        self.loader = loader
-#
-#    def load_module(self, fullname):
-#        m = self.loader.load_module(fullname)
-        #if fullname in sys.modules:
-        #    del sys.modules[fullname]
-#        return m
+    def _check_path(self, fullname, level=3):
+        frame = sys._getframe(level)
+        srcpath = os.path.abspath(frame.f_globals['__file__'])
+        if not srcpath.startswith(self.app_path):
+            for c in self.child_path:
+                if srcpath.startswith(c):
+                    break
+            else:
+                raise ImportError(fullname)
+
+def make_custom_import():
+    import __builtin__
+    import functools
+    origin = __builtin__.__import__
+    __builtin__.__import__ = functools.partial(custom_import, importer=origin)
+    
+def custom_import(name, globals={}, locals={}, fromlist=[], level=-1, importer=None):
+    if name in _importers__cache:
+        _importers__cache[name]._check_path(name, 2)
+    return importer(name, globals, locals, fromlist, level)
+
+
 
