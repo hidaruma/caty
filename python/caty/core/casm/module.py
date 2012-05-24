@@ -402,6 +402,7 @@ class ClassModule(Module):
     """
     def __init__(self, app, parent, clsobj):
         Module.__init__(self, app, parent)
+        self.command_loader = CommandLoader(app._command_fs)
         self._name = clsobj.name
         self._clsobj = clsobj
         self._clsrestriction = clsobj.restriction

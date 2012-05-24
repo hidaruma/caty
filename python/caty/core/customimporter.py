@@ -7,6 +7,8 @@ class AppSpecLibraryImporter(object):
     def __init__(self, app_path):
         self.app_path = os.path.abspath(app_path)
         self.finder = pkgutil.ImpImporter(os.path.join(app_path, 'lib'))
+        frame = sys._getframe(0)
+        self.caty_core_path = os.path.dirname(os.path.abspath(frame.f_globals['__file__']))
         self.child_path = set()
     
     def add_child(self, app):
@@ -22,7 +24,7 @@ class AppSpecLibraryImporter(object):
     def _check_path(self, fullname, level=3):
         frame = sys._getframe(level)
         srcpath = os.path.abspath(frame.f_globals['__file__'])
-        if not srcpath.startswith(self.app_path):
+        if not (srcpath.startswith(self.app_path) or srcpath.startswith(self.caty_core_path)):
             for c in self.child_path:
                 if srcpath.startswith(c):
                     break

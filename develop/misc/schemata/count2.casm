@@ -26,7 +26,7 @@ type AppInstance = fcl:AppInstance;
 type Counter = foreign;
 
 /*/* カウンタークラス（ファシリティ） */
-//class Counter (Counter) {
+class Counter (Counter) {
 
 /* @[static]が付いているコマンドには、arg0にnullが入る。
  * つまり、arg0は事実上使えない。
@@ -115,6 +115,6 @@ type Counter = foreign;
   refers python:count2.Cleanup
  ;
 
-//};
+};
 
 /* End */
