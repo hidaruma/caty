@@ -153,7 +153,7 @@ class Module(Facility):
             m, a = self._get_mod_and_app(t)
             raise Exception(self.application.i18n.get(u'Command $name of $this is already defined in $module of $app', 
                                                        name=name, 
-                                                       this=self.name+'.'+self.type,
+                                                       this=self._get_full_name(),
                                                        module=m,
                                                        app=a))
         if 'register-public' in profile.annotations or 'register-public' in self.annotations:
@@ -165,12 +165,12 @@ class Module(Facility):
                 fm.add_command(name, profile)
         self.command_ns[name] = profile
 
+    def _get_full_name(self):
+        return self.name+'.'+self.type
+
     def _get_mod_and_app(self, t):
         a = t.module.application.name
-        if a != 'caty':
-            m = t.module.name + t.module.type
-        else:
-            m = t.module.name + '.py'
+        m = t.module.name + '.' + t.module.type
         return m, a
 
     def __get_resource(self, name, tracked=(), scope_func=None, type=u''):
@@ -344,7 +344,7 @@ class Module(Facility):
     def _register_command(self):
         if not self.compiled:
             self._loop_exec(self.proto_ns, ProfileBuilder(self), lambda k, v:self.add_command(k, v))
-        for m in self.sub_modules.values() + self.class_ns.values():
+        for m in self.class_ns.values() + self.sub_modules.values():
             m._register_command()
 
     def _loop_exec(self, target, cursor, callback):
@@ -402,12 +402,22 @@ class ClassModule(Module):
     """
     def __init__(self, app, parent, clsobj):
         Module.__init__(self, app, parent)
-        self.command_loader = CommandLoader(app._command_fs)
+        self._type = u'class'
+        self.command_loader = parent.command_loader
         self._name = clsobj.name
         self._clsobj = clsobj
         self._clsrestriction = clsobj.restriction
         for m in clsobj.member:
             m.declare(self)
+        self.count = 0
+
+    def _get_full_name(self):
+        return u'class ' + self.name
+
+    def _get_mod_and_app(self, t):
+        a = t.module.application.name
+        m = self.parent.name + '.' + t.module.name
+        return m, a
 
     def _build_schema_tree(self):
         Module._build_schema_tree(self)
@@ -645,6 +655,8 @@ class IntegratedModule(object):
 
     def compile(self, *args):
         self._core.compile(*args)
+
+    def resolve(self):
         self._core.resolve()
     
     def make_blank_module(self, app):

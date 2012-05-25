@@ -20,6 +20,7 @@ def initialize(system, interpreter_module):
                    u'logging',
                    u'os',
                    u'path',
+                   u'runtime',
                    u'set',
                    u'strg',
                    u'test',
@@ -37,6 +38,7 @@ def initialize(system, interpreter_module):
         except:
             print name
             raise
+    module.resolve()
     return module
 
 join = lambda f: lambda *args: u'\n'.join(f(*args))
