@@ -20,7 +20,7 @@ type Config = null | {
 };
 
 /** アプリケーションインスタンス */
-type AppInstance = fcl:AppInstance;
+type _AppInstance = fcl:_AppInstance;
 
 /** カウンタの実体 */
 type Counter = foreign;
@@ -37,14 +37,14 @@ class Counter (Counter) {
  /** システムの起動時にコールバックされる */
  @[static, management]
  command initialize [Config?]
- :: AppInstance -> null | Error
+ :: _AppInstance -> null | Error
   refers python:count2.Initialize
  ;
 
  /** システムの終了時にコールバックされる */
  @[static, management]
  command finalize 
- :: AppInstance -> void
+ :: _AppInstance -> void
   refers python:count2.Finalize
  ;
 
@@ -52,7 +52,7 @@ class Counter (Counter) {
  /** カウンターを取得する */
  @[static, management, creator]
  command create [null, "use", string name]
- :: AppInstance -> Counter
+ :: _AppInstance -> Counter
   refers python:count2.Create
  ;
 
