@@ -257,11 +257,12 @@ class Application(PbcObject):
         try:
             base = xjson.loads(default_file.read()) if default_file.exists else []
         except Exception, e:
-            self.i18n.write(u'Failed to parse JSON: $path\n$error', path='/default.xjson', error=error_to_ustr(e))
-            raise
+           self.i18n.write(u'Failed to parse JSON: $path\n$error', path='/default.xjson', error=error_to_ustr(e))
+           raise
         msg = {}
         for m in base:
             msg[m] = {}
+        languages = set([])
         for f in self._messages_fs.opendir('/').read():
             if not (f.path.endswith('.xjson') and f.path != '/default.xjson'):
                 continue
@@ -272,12 +273,19 @@ class Application(PbcObject):
                 raise
 
             lang = f.path.split('/')[-1].split('.')[0]
+            languages.add(lang)
             for e_msg, trans in messages.items():
                 if e_msg not in msg:
+                    if self._system.debug:
+                        print '[DEBUG]', self._system.i18n.get('this message is not contained default.xjson: $message($lang)', message=e_msg, lang=lang)
                     msg[e_msg] = {lang: trans}
                 else:
                     msg[e_msg][lang] = trans
-
+                    
+        for k, v in msg.items():
+            for l in languages:
+                if l not in v and self._system.debug:
+                    print '[DEBUG]', self._system.i18n.get('this message is not translated: $message($lang)', message=k, lang=l)
         return msg
 
     def default_conf(self):
