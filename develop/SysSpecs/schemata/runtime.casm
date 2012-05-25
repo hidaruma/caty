@@ -26,11 +26,14 @@ command class-moniker [string clsName] :: foreign -> ClassMoniker<string, foreig
 
 /* == 定数 == */
 
+/** SysInstanceクラス名の文字列 */
 const SysInstanceCLASS :: string = "runtime:SysInstance";
+
+/** AppInstanceクラス名の文字列 */
 const AppInstanceCLASS :: string = "runtime:AppInstance";
 
-/* == システム == */
 
+/* == システム == */
 
 /** 生のシステムインスタンス */
 type _SysInstance = foreign;
@@ -59,6 +62,29 @@ class SysInstance (_SysInstance) {
  command name :: void -> string
  ;
 
+ /** アプリケーションの列挙
+  * appsコマンドで得られる情報と同じ
+  */
+ @[reader]
+ command list-apps :: void -> [AppInfo*]
+ ;
+
+ /** アプリケーション名の列挙
+  * 
+  */
+ @[reader]
+ command list-app-names :: void -> [string*]
+ ;
+
+ /** 指定した名前のアプリケーションオブジェクトを得る
+  * その名前のアプリケーションがないときは null を返す。
+  */
+ @[reader]
+ command gett-app [string name] :: void -> _AppInstance | null
+ ;
+
+
+
 };
 
 
@@ -78,7 +104,9 @@ type AppInstance = ClassMoniker<AppInstanceCLASS, _AppInstance>;
 @[class-spec-for("python:caty.core.application.ApplicationWrapper")]
 class AppInstance (_AppInstance) {
 
- /** 親のアプリケーションを取得する */
+ /** 親のアプリケーションを取得する 
+  * ルートアプリケーションの場合は親がないので null が返る。
+  */
  @[reader]
  command parent :: void -> _AppInstance | null
  ;

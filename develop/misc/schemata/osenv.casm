@@ -2,7 +2,7 @@
 /** OSの環境変数 */
 module osenv; 
 
-type AppInstace = fcl:AppInstance;
+type _AppInstace = fcl:_AppInstance;
 type Error = fcl:Error;
 
 /** osenvの設定情報 */
