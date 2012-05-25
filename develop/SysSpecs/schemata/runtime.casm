@@ -1,0 +1,147 @@
+// -*- coding: utf-8 -*-
+
+/**
+ * ランタイムの情報を取得するためのAPI
+ * アプリケーションとCatyシステムにアクセスする。
+ */
+module runtime; 
+
+/** クラスモニカー
+ * 今（2012-05-254）こんなんを考えている
+ */
+type ClassMoniker<Cls default string, Instance default foreign> = @__classMoniker {
+  "$class" : Cls,
+  "$instance" : Instance
+};
+
+/** クラスモニカーを作る 
+ */
+command class-moniker [string clsName] :: foreign -> ClassMoniker<string, foreign> {
+  @__classMoniker {
+    "$class" : %1,
+    "$instance" : pass
+  }
+};
+
+
+/* == 定数 == */
+
+const SysInstanceCLASS :: string = "runtime:SysInstance";
+const AppInstanceCLASS :: string = "runtime:AppInstance";
+
+/* == システム == */
+
+
+/** 生のシステムインスタンス */
+type _SysInstance = foreign;
+
+/** システムインスタンスのモニカー */
+type SysInstance = ClassMoniker<SysInstanceCLASS, _SysInstance>;
+
+
+/** 
+ * Catyのランタイムシステムを表現するシングルトンオブジェクト 
+ */
+@[class-spec-for("python:caty.core.system.SystemWrapper")]
+class SysInstance (_SysInstance) {
+
+ /** プロジェクトが配置されたディレクトリのOSパス
+  * locationコマンドで得られる情報と同じ
+  */
+ @[reader]
+ command location :: void -> string
+ ;
+
+ /** プロジェクトの名前
+  * projコマンドで得られる情報と同じ
+  */
+ @[reader]
+ command name :: void -> string
+ ;
+
+};
+
+
+/* == アプリケーション == */
+
+
+/** 生のアプリケーションインスタンス */
+type _AppInstance = foreign;
+
+/** アプリケーションインスタンスのモニカー */
+type AppInstance = ClassMoniker<AppInstanceCLASS, _AppInstance>;
+
+
+/**
+ * Catyのアプリケーションを表現するオブジェクト
+ */
+@[class-spec-for("python:caty.core.application.ApplicationWrapper")]
+class AppInstance (_AppInstance) {
+
+ /** 親のアプリケーションを取得する */
+ @[reader]
+ command parent :: void -> _AppInstance | null
+ ;
+
+ /** システムインスタンスを取得する */
+ @[reader]
+ command system :: void -> _SysInstance
+ ;
+
+ /** プリケーションが配置されたディレクトリのOSパス
+  */
+ @[reader]
+ command location :: void -> string
+ ;
+
+ /** アプリケーションの情報オブジェクトを返す
+  * appコマンドの出力と同じ
+  */
+ @[reader]
+ command info :: void -> AppInfo
+ ;
+
+ /** プレースの割り当てオブジェクトを返す
+  */
+ @[reader]
+ command assign :: void -> {*: string?}
+ ;
+
+};
+
+/* == コマンド == */
+
+
+/** 生のシステムインスタンスを返す
+ */
+command _sys-instance :: void -> _SysInstance
+// Python実装が必要
+;
+
+
+/** システムインスタンスのモニカーを返す
+ */
+command sys-instance :: void -> SysInstance {
+ SysInstanceCLASS > cls;
+
+ _sys-instance | class-moniker %cls
+};
+
+/** 生のアプリケーションインスタンスを返す
+ * 引数が指定されなかったときは、カレントのアプリケーションが指定されたとみなす。
+ */
+command _app-instance [string? name] :: void -> _AppInstance
+// Python実装が必要
+;
+
+/** アプリケーションインスタンスのモニカーを返す
+ * 引数が指定されなかったときは、カレントのアプリケーションが指定されたとみなす。
+ */
+command app-instance :: void -> AppInstance {
+ AppInstanceCLASS > cls;
+
+ _app-instance | class-moniker %cls
+};
+
+
+// End of Module

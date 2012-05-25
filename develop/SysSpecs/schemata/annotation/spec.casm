@@ -1,0 +1,21 @@
+module annotation.spec; // -*- coding: utf-8 -*-
+
+/** 実装言語クラスのスペック
+ */
+@[annotation, target("CLASS_DECL")]
+type class-spec-for = {
+  "value" : string(remark="実装言語のクラスを指す識別子")
+};
+
+/** ファシリティのスペック
+ */
+@[annotation, target("CLASS_DECL")]
+type facility-spec-for = {
+  "value" : string(remark="実装言語のクラスを指す識別子")
+};
+
+
+
+// End of Module
+
+
