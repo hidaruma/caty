@@ -20,7 +20,6 @@ def initialize(system, interpreter_module):
                    u'logging',
                    u'os',
                    u'path',
-                   u'runtime',
                    u'set',
                    u'strg',
                    u'test',
