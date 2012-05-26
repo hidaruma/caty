@@ -360,7 +360,7 @@ class option(Parser):
                 raise
 
 import string
-_KEYWORD_CHARS = set(string.ascii_letters + '_')
+_KEYWORD_CHARS = set(string.ascii_letters + '_-')
 class keyword(Parser):
     def __init__(self, s, chars=_KEYWORD_CHARS):
         self._token = s
