@@ -143,7 +143,7 @@ class AppInstance (_AppInstance) {
 /** 生のシステムインスタンスを返す
  */
 command _sys-instance :: void -> _SysInstance
-    refers python:caty.core.std.command.runtime.SysInstance;
+    refers python:runtime.SysInstance;
 
 
 /** システムインスタンスのモニカーを返す
@@ -158,7 +158,7 @@ command sys-instance :: void -> SysInstance {
  * 引数が指定されなかったときは、カレントのアプリケーションが指定されたとみなす。
  */
 command _app-instance [string? name] :: void -> _AppInstance
-    refers python:caty.core.std.command.runtime.AppInstance;
+    refers python:runtime.AppInstance;
 
 /** アプリケーションインスタンスのモニカーを返す
  * 引数が指定されなかったときは、カレントのアプリケーションが指定されたとみなす。
