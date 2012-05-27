@@ -539,6 +539,8 @@ class _CallCommand(MafsMixin, Internal):
 
     def __script(self):
         from copy import deepcopy
+        self.var_loader.opts = self.__opts_ref
+        self.var_loader.args = self.__args_ref
         opts = self.var_loader._load_opts(self.var_storage.opts)
         args = [self._cmd_name] + self.var_loader._load_args(self.var_storage.opts, self.var_storage.args)
         cmd = self.interpreter.build(self.open(self._cmd_name).read(),
