@@ -103,8 +103,7 @@ class Application(PbcObject):
 
     def reload(self, module_name=None):
         self._no_ambient = False
-        self._system.reload_library()
-        self._system.reload_global()
+        self.importer.discard()
         self._initialize(self._name, self._group, self._system)
         self.finish_setup()
         self.exec_rc_script()
@@ -790,15 +789,18 @@ class GlobalApplication(Application):
     def __init__(self, name, no_ambient, group, system):
         self._initialized = False
         self._no_ambient = False  # 常にFalse
+        self._physical_path = join(group.name, name)
+        self.importer = AppSpecLibraryImporter(os.path.abspath(self._physical_path))
+        sys.meta_path.append(self.importer) # {$apDir}/libの読み込みに使う
         self._initialize(name, group, system)
         self._initialized = True
 
     def reload(self):
         self._no_ambient = False
+        self.importer.discard()
         self._initialize(self._name, self._group, self._system)
         self.finish_setup()
         self.exec_rc_script()
-
 
     def set_parent(self, system):
         self.parent = system._core_app

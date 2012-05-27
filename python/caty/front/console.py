@@ -167,10 +167,13 @@ Alias: ch, cd
     @catch
     def do_reload(self, line):
         u"""
-Usage: reload
+Usage: reload [--this]
 Alias: l
-commands, schemata などの再読み込み
+commands, schemata などの再読み込みを行う。
+--thisオプションを付けると親アプリケーションの再読み込みを行わない。
         """
+        if line.strip() != u'--this':
+            self.app.parent.reload()
         self.app.reload()
         self.set_prompt()
         self.interpreter = None

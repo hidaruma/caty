@@ -9,6 +9,7 @@ class AppSpecLibraryImporter(object):
         self.finder = pkgutil.ImpImporter(os.path.join(app_path, 'lib'))
         frame = sys._getframe(0)
         self.child_path = set()
+        self.imported_modules = set()
     
     def add_child(self, app):
         self.child_path.add(app.importer.app_path)
@@ -16,9 +17,23 @@ class AppSpecLibraryImporter(object):
     def find_module(self, fullname, path=None):
         loader = self.finder.find_module(fullname, path)
         if loader:
-            self._check_path(fullname)
+            try:
+                self._check_path(fullname)
+            except ImportError:
+                return None
             _importers__cache[fullname] = self
+            self.imported_modules.add(fullname)
             return loader
+
+    def discard(self):
+        for n in self.imported_modules:
+            try:
+                del sys.modules[n]
+                del _importers__cache[n]
+            except Exception as e:
+                print (e)
+                pass
+        self.imported_modules = set()
 
     def _check_path(self, fullname, level=3):
         frame = sys._getframe(level)
