@@ -61,6 +61,9 @@ class Application(PbcObject):
         """
         self._initialized = False
         self._no_ambient = no_ambient
+        self._physical_path = join(group.name, name)
+        self.importer = AppSpecLibraryImporter(os.path.abspath(self._physical_path))
+        sys.meta_path.append(self.importer) # {$apDir}/libの読み込みに使う
         self._initialize(name, group, system)
         self._initialized = True
 
@@ -70,9 +73,6 @@ class Application(PbcObject):
         self._path = unicode(name)
         self._group = group
         self._finished = False
-        self._physical_path = join(group.name, name)
-        self.importer = AppSpecLibraryImporter(os.path.abspath(self._physical_path))
-        sys.meta_path.append(self.importer) # {$apDir}/libの読み込みに使う
         self._app_map = {name: self}
         self._global_config = group.global_config
         system.cout.writeln(system.i18n.get("Loading $name", name=self._path))

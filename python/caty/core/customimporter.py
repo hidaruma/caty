@@ -28,8 +28,10 @@ class AppSpecLibraryImporter(object):
     def discard(self):
         for n in self.imported_modules:
             try:
-                del sys.modules[n]
-                del _importers__cache[n]
+                if n in sys.modules:
+                    del sys.modules[n]
+                if n in _importers__cache:
+                    del _importers__cache[n]
             except Exception as e:
                 print (e)
                 pass
