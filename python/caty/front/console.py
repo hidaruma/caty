@@ -48,6 +48,8 @@ class CatyShell(cmd.Cmd):
         self.server = None
         self.hcon = None
         self.system = system
+        self.env = {}
+        self.continue_setenv = None
         if dribble:
             import time
             self.dribble_file = open(time.strftime('console.%Y%m%d%H%M%S.log'), 'wb')
@@ -72,6 +74,10 @@ class CatyShell(cmd.Cmd):
         else:
             modes = [unicode('console'), unicode('test')]
         self.app.init_env(facilities, self.debug, modes, self.system, {'PATH_INFO': u'/'})
+        e = facilities['env'].update_mode
+        for k, v in self.env.items():
+            e._dict[k] = v
+        facilities._facilities['env'] = e.read_mode
         return facilities
 
     def change_app(self, line):
@@ -191,7 +197,7 @@ Usage: debug [on|off]
         elif mode == 'off':
             self.app._system.debug_off()
         else:
-            self._echo(u'on' if self.app._system.debug else u'off')
+            self._echo(u'on' if self.env.get('DEBUG', self.app._system.debug) else u'off')
         self.set_prompt()
         return False
 
@@ -298,6 +304,8 @@ Web サーバの起動・停止を行う
     do_l = do_reload
 
     def default(self, line):
+        if self.continue_setenv:
+            return self.do_setenv(line)
         if line == 'EOF':
             print 'bye'
             return True
@@ -417,6 +425,57 @@ Web サーバの起動・停止を行う
         if self.hcon is not None:
             self.hcon.shutdown()
             self.hcon.stop()
+
+    def do_setenv(self, line):
+        from caty.core.language.util import name_token, CharSeq, option, S, ParseFailed
+        from caty.core.script.parser import ScriptParser, NothingTodo
+        import string
+        if not self.continue_setenv:
+            self.continue_setenv = u''
+        self.continue_setenv += line
+        seq = CharSeq(self.continue_setenv, auto_remove_ws=True)
+        force = option(S('--force'))(seq)
+        try:
+            facilities = self.start_pipeline()
+            name = name_token(seq)
+            if name[0] in string.ascii_uppercase + '_' and not force:
+                self._echo('Invalid env name: %s' % name)
+                self.continue_setenv = u''
+                return
+            seq.parse('{')
+            parser = ScriptParser(facilities)
+            proxy = parser(seq)
+        except NothingTodo:
+            self.prompt = '> '
+            return
+        except ParseFailed as e:
+            self._echo(u'Syntax error')
+            self.continue_setenv = u''
+            return
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            self._echo(u'Some error occuered')
+            self.continue_setenv = u''
+            return
+        try:
+            seq.parse('}')
+        except:
+            self.prompt = '> '
+        else:
+            if not proxy:
+                return
+            cmd = self.interpreter._instantiate(proxy)
+            self.env[name] = cmd(None)
+            self.continue_setenv = None
+            self._echo(u'set: %s => %s' % (pp(self.env[name]), name))
+            self.set_prompt()
+
+    def do_unsetenv(self, line):
+        n = line.strip()
+        if n in self.env:
+            del self.env[n]
+
 
 import threading
 class ServerThread(threading.Thread):

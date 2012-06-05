@@ -188,7 +188,7 @@ class CommandExecutor(BaseInterpreter):
         except Exception as e:
             if isinstance(e, PipelineInterruption) or isinstance(e, PipelineErrorExit):
                 raise
-            if self.app._system.debug:
+            if self.facility_set['env'].get('DEBUG'):
                 msg = u'[DEBUG] {0}: Col {1}, Line {2}'.format(node.name, node.col, node.line)
                 util.cout.writeln(msg)
             raise
