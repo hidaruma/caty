@@ -49,6 +49,7 @@ class CatyShell(cmd.Cmd):
         self.hcon = None
         self.system = system
         self.env = {}
+        self.deleted_env = set([])
         self.continue_setenv = None
         if dribble:
             import time
@@ -77,6 +78,9 @@ class CatyShell(cmd.Cmd):
         e = facilities['env'].update_mode
         for k, v in self.env.items():
             e._dict[k] = v
+        for k in self.deleted_env:
+            if k in e._dict:
+                del e._dict[k]
         facilities._facilities['env'] = e.read_mode
         return facilities
 
@@ -449,6 +453,8 @@ Web サーバの起動・停止を行う
             self.prompt = '> '
             return
         except ParseFailed as e:
+            import traceback
+            traceback.print_exc()
             self._echo(u'Syntax error')
             self.continue_setenv = u''
             return
@@ -467,15 +473,25 @@ Web サーバの起動・停止を行う
                 return
             cmd = self.interpreter._instantiate(proxy)
             self.env[name] = cmd(None)
+            if name in self.deleted_env:
+                self.deleted_env.remove(name)
             self.continue_setenv = None
             self._echo(u'set: %s => %s' % (pp(self.env[name]), name))
             self.set_prompt()
 
     def do_unsetenv(self, line):
-        n = line.strip()
-        if n in self.env:
-            del self.env[n]
-
+        from caty.core.language.util import name_token, CharSeq, option, S, ParseFailed
+        from caty.core.script.parser import ScriptParser, NothingTodo
+        import string
+        seq = CharSeq(line, auto_remove_ws=True)
+        force = option(S('--force'))(seq)
+        name = name_token(seq)
+        if name[0] in string.ascii_uppercase + '_' and not force:
+            self._echo('Invalid env name: %s' % name)
+            return
+        if name in self.env:
+            del self.env[name]
+        self.deleted_env.add(name)
 
 import threading
 class ServerThread(threading.Thread):
