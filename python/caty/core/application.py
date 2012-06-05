@@ -530,40 +530,40 @@ class Application(PbcObject):
 
     def init_env(self, facilities, is_debug, modes, system, environ={}):
         env = facilities['env']
-        env.put('APP_ENCODING', unicode(self.encoding))
-        env.put('SYSTEM_ENCODING', unicode(self.sysencoding))
-        env.put('APP_PATH', unicode(self.web_path))
-        env.put('CATY_APP', {'group': self._group.name, 'description':self.description, 'name':self.name, 'path': unicode(self.web_path)})
-        env.put('DEBUG', system.debug)
+        env.put(u'APP_ENCODING', unicode(self.encoding))
+        env.put(u'SYSTEM_ENCODING', unicode(self.sysencoding))
+        env.put(u'APP_PATH', unicode(self.web_path))
+        env.put(u'CATY_APP', {'group': self._group.name, 'description':self.description, 'name':self.name, 'path': unicode(self.web_path)})
+        env.put(u'DEBUG', system.debug)
         siteInfoList= []
         for n in system.app_names:
             s = system.get_app(n)
             siteInfoList.append({'group': s._group.name, 'description': s.description, 'name': s.name, 'path': unicode(s.web_path)})
-        env.put('CATY_APPS', siteInfoList)
-        env.put('HOST_URL', unicode(self.host_url))
-        env.put('CATY_VERSION', unicode(caty.__version__))
-        env.put('CATY_EXEC_MODE', modes)
-        env.put('CATY_HOME', unicode(os.getcwd(), self._system.sysencoding))
-        env.put('CATY_PROJECT', self._system.project_name)
-        env.put('APP_MANIFEST', self._manifest)
+        env.put(u'CATY_APPS', siteInfoList)
+        env.put(u'HOST_URL', unicode(self.host_url))
+        env.put(u'CATY_VERSION', unicode(caty.__version__))
+        env.put(u'CATY_EXEC_MODE', modes)
+        env.put(u'CATY_HOME', unicode(os.getcwd(), self._system.sysencoding))
+        env.put(u'CATY_PROJECT', self._system.project_name)
+        env.put(u'APP_MANIFEST', self._manifest)
   #env.put('FILE_ASSOC', self._raw_associations)
         if 'CONTENT_TYPE' in environ:
-            env.put('CONTENT_TYPE', unicode(environ['CONTENT_TYPE']))
+            env.put(u'CONTENT_TYPE', unicode(environ['CONTENT_TYPE']))
         else:
-            env.put('CONTENT_TYPE', u'application/json')
+            env.put(u'CONTENT_TYPE', u'application/json')
         if 'PATH_INFO' in environ:
-            env.put('PATH_INFO', unicode(environ['PATH_INFO']))
+            env.put(u'PATH_INFO', unicode(environ['PATH_INFO']))
         if 'LANGUAGE' in environ:
-            env.put('LANGUAGE', unicode(environ['LANGUAGE']))
+            env.put(u'LANGUAGE', unicode(environ['LANGUAGE']))
         else:
-            env.put('LANGUAGE', unicode(self._system._global_config.language))
+            env.put(u'LANGUAGE', unicode(self._system._global_config.language))
         if environ.get('QUERY_STRING'):
-            env.put('QUERY_STRING', u'?' + environ['QUERY_STRING'])
+            env.put(u'QUERY_STRING', u'?' + environ['QUERY_STRING'])
         if 'SERVER_SOFTWARE' in environ:
-            env.put('SERVER_SOFTWARE', unicode(environ['SERVER_SOFTWARE']))
-        env.put('SERVER_MODULE', self._system.server_module_name)
-        env.put('REQUEST_METHOD', unicode(environ.get('REQUEST_METHOD', 'POST')))
-        env.put('CONTENT_LENGTH', unicode(environ.get('CONTENT_LENGTH', '-1')))
+            env.put(u'SERVER_SOFTWARE', unicode(environ['SERVER_SOFTWARE']))
+        env.put(u'SERVER_MODULE', self._system.server_module_name)
+        env.put(u'REQUEST_METHOD', unicode(environ.get('REQUEST_METHOD', 'POST')))
+        env.put(u'CONTENT_LENGTH', unicode(environ.get('CONTENT_LENGTH', '-1')))
 
     @property
     def cout(self):
