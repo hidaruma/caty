@@ -124,11 +124,11 @@ class CommandExecutor(BaseInterpreter):
             for k, v in opts.items():
                 node.var_storage.opts[k] = v
         if args:
-            node.var_storage.opts['_ARGV'] = [u""] + args
-            node.var_storage.args = [u""] + args
+            node.var_storage.opts['_ARGV'] = [node.arg0] + args
+            node.var_storage.args = [node.arg0] + args
         else:
-            node.var_storage.opts['_ARGV'] = [u""]
-            node.var_storage.args = [u""]
+            node.var_storage.opts['_ARGV'] = [node.arg0]
+            node.var_storage.args = [node.arg0]
         if opts:
             node.var_storage.opts['_OPTS'] = o
         else:

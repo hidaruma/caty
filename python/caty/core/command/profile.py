@@ -6,7 +6,7 @@ from caty.util.optionparser import OptionParser, OptionParseFailed
 import caty.core.runtimeobject as ro
 from caty.core.command.param import Option
 from caty.core.command import new_dummy, Syntax
-from caty.core.schema.base import UndefinedSchema
+from caty.core.schema.base import UnivSchema
 import types
 from itertools import *
 from functools import *
@@ -100,7 +100,7 @@ class CommandProfile(object):
         self.declobj = declobj
         self.resolved = False
         self._in_schema, self._out_schema = declobj.profile
-        self.__arg0_schema = UndefinedSchema()
+        self.__arg0_schema = UnivSchema()
     
     def clone(self):
         n = CommandProfile(self.opts_schema, self.args_schema, self.declobj)

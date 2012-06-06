@@ -38,7 +38,7 @@ class Command(object):
     def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None), module=None):
         assert type_args != None
         self._opt_names = []
-        self.__arg0 = UNDEFINED
+        self.__arg0 = None
         self.__arg0_ref = None
         if opts_ref:
             for o in opts_ref:
