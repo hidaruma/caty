@@ -6,6 +6,7 @@ from caty.util.optionparser import OptionParser, OptionParseFailed
 import caty.core.runtimeobject as ro
 from caty.core.command.param import Option
 from caty.core.command import new_dummy, Syntax
+from caty.core.schema.base import UndefinedSchema
 import types
 from itertools import *
 from functools import *
@@ -70,7 +71,9 @@ class ProfileContainer(object):
             raise JsonSchemaError('\n'.join(msg))
 
     def set_arg0_type(self, type):
-        pass
+        for p in self.profiles:
+            if not u'static' in self._annotations:
+                p.set_arg0_type(type)
 
     def resolve(self, module):
         for p in self.profiles:
@@ -97,9 +100,11 @@ class CommandProfile(object):
         self.declobj = declobj
         self.resolved = False
         self._in_schema, self._out_schema = declobj.profile
+        self.__arg0_schema = UndefinedSchema()
     
     def clone(self):
         n = CommandProfile(self.opts_schema, self.args_schema, self.declobj)
+        n.set_arg0_type(self.__arg0_schema)
         return n
 
     @property
@@ -109,6 +114,13 @@ class CommandProfile(object):
     @property
     def out_schema(self):
         return self._out_schema
+
+    @property
+    def arg0_schema(self):
+        return self.__arg0_schema
+
+    def set_arg0_type(self, type):
+        self.__arg0_schema = type
 
     def convert(self, value):
         u"""型変換処理。

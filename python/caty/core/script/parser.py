@@ -271,7 +271,7 @@ class ScriptParser(Parser):
     def opt(self, seq):
         seq.ignore_hook = True
         try:
-            o = seq.parse([self.longopt, self.parameter_opt])
+            o = seq.parse([self.longopt, self.parameter_opt, self.arg0])
             skip_ws(seq)
             return o
         finally:
@@ -289,6 +289,24 @@ class ScriptParser(Parser):
 
     def longopt(self, seq):
         o = seq.parse(Regex(ur'--[a-zA-Z]+[-a-zA-Z0-9_]*'))
+        try:
+            seq.parse('=')
+            v = choice(
+                      bind2nd(xjson.null, True), 
+                      bind2nd(xjson.boolean, True),
+                      xjson.string, 
+                      xjson.multiline_string,
+                      self.unquoted_maybe_num, 
+                      self.var_ref
+                      )(seq)
+            if isinstance(v, VarRef):
+                return OptionVarLoader(o, v, v.optional)
+            return Option(o, v)
+        except:
+            return Option(o, True)
+
+    def arg0(self, seq):
+        o = seq.parse(Regex(ur'--0'))
         try:
             seq.parse('=')
             v = choice(

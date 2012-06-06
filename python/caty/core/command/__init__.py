@@ -37,10 +37,17 @@ class Command(object):
 
     def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None), module=None):
         assert type_args != None
+        self._opt_names = []
+        self.__arg0 = UNDEFINED
+        self.__arg0_ref = None
         if opts_ref:
-            self._opt_names = set([o.key for o in opts_ref])
-        else:
-            self._opt_names = []
+            for o in opts_ref:
+                if o.key == '0':
+                    self.__arg0_ref = o
+                else:
+                    self._opt_names.append(o.key)
+        if self.__arg0_ref:
+            opts_ref.remove(self.__arg0_ref)
         self._profile = self.profile_container.determine_profile(opts_ref, args_ref)
         self.__type_args = type_args
         self.__var_loader = VarLoader(opts_ref, args_ref, self._profile)
@@ -71,6 +78,7 @@ class Command(object):
         else:
             self._in_schema = self.profile.in_schema
             self._out_schema = self.profile.out_schema
+        self.__arg0_schema = self.profile.arg0_schema
 
     def get_command_id(self):
         return self._id
@@ -120,6 +128,10 @@ class Command(object):
     @property
     def current_app(self):
         return self.__current_application
+
+    @property
+    def arg0(self):
+        return self.__arg0
 
     def set_facility(self, facilities):
         u"""ファシリティの設定。
@@ -194,9 +206,9 @@ class Command(object):
             for k, v in opts.items():
                 self.__var_storage.opts[k] = v
         if args:
-            self.__var_storage.opts['_ARGV'] = [u""] + args
+            self.__var_storage.opts['_ARGV'] = [self.__arg0] + args
         else:
-            self.__var_storage.opts['_ARGV'] = [u""]
+            self.__var_storage.opts['_ARGV'] = [self.__arg0]
         if opts:
             self.__var_storage.opts['_OPTS'] = opts
         else:
@@ -212,6 +224,9 @@ class Command(object):
 
     def _init_opts(self):
         self._opts, self._args = self.__var_loader.load(self.__var_storage)
+        if self.__arg0_ref and not u'static' in self._annotations:
+            self.__arg0 = self.__var_loader.load_arg0(self.__arg0_ref, self.__var_storage)
+        self.__arg0_schema.validate(self.__arg0)
 
     def setup(self, *args, **kwds): pass
 
@@ -421,6 +436,28 @@ class VarLoader(object):
         self.opts = opts_ref
         self.args = args_ref
         self.profile = profile
+
+    def load_arg0(self, opt, storage):
+        opts = storage.opts
+        if opt.type == 'option':
+            if opt.value != UNDEFINED:
+                return opt.value
+            else:
+                return True
+        elif opt.type == 'var':
+            if opt.value.name in opts:
+                return opts[opt.value.name]
+            else:
+                if not opt.optional:
+                    raise KeyError(opt.value.name)
+        elif opt.type == 'glob':
+            return opts['_OPTS']
+        else:
+            if opt.key in opts:
+                return opts[opt.key]
+            else:
+                if not opt.optional:
+                    raise InternalException(u'Option des not suffice: $opt', opt=opt.key)
 
     def load(self, storage):
         if self.profile.opts_schema.type == 'object':

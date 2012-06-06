@@ -38,72 +38,72 @@ class List(Command):
 
 
 class Value(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
+    def setup(self, arg1):
+        self.arg1 = arg1
 
     def execute(self):
-        counter = self.arg0
+        counter = self.arg1
         return counter.value()
 
 class Inc(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
+    def setup(self, arg1):
+        self.arg1 = arg1
 
     def execute(self):
-        counter = self.arg0
+        counter = self.arg1
         counter.inc()
         return counter
 
 class Dec(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
+    def setup(self, arg1):
+        self.arg1 = arg1
 
     def execute(self):
-        counter = self.arg0
+        counter = self.arg1
         counter.dec()
         return counter
 
 class Reset(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
+    def setup(self, arg1):
+        self.arg1 = arg1
 
     def execute(self):
-        counter = self.arg0
+        counter = self.arg1
         counter.reset()
         return counter
 
 class Start(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
+    def setup(self, arg1):
+        self.arg1 = arg1
 
     def execute(self):
-        counter = self.arg0
+        counter = self.arg1
         return counter.start()
 
 
 class Commit(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
+    def setup(self, arg1):
+        self.arg1 = arg1
 
     def execute(self):
-        counter = self.arg0
+        counter = self.arg1
         counter.commit()
         return counter
 
 class Cancel(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
+    def setup(self, arg1):
+        self.arg1 = arg1
 
     def execute(self):
-        counter = self.arg0
+        counter = self.arg1
         counter.cancel()
         return counter
 
 class Cleanup(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
+    def setup(self, arg1):
+        self.arg1 = arg1
 
     def execute(self):
-        counter = self.arg0
+        counter = self.arg1
         counter.cleanup()
         return counter
