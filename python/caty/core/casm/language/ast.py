@@ -107,6 +107,17 @@ class ClassNode(object):
         self.module = module
         module.add_class(self)
 
+class FacilityNode(object):
+    def __init__(self, name, clsname, value, doc, annotations):
+        self.name= name
+        self.clsname= clsname
+        self.value = value
+        self.docstring = doc
+        self.annotations = annotations
+
+    def declare(self, module):
+        pass
+
 class Node(object):
     def __init__(self, options=None):
         self.options = {} if options is None else options

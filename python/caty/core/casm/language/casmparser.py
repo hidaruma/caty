@@ -9,6 +9,7 @@ from caty.core.casm.language.commandparser import command
 from caty.core.casm.language.constparser import const
 from caty.core.casm.language.classparser import catyclass
 from caty.core.casm.language.kindparser import kind
+from caty.core.casm.language.facilityparser import facility
 import sys
 
 def parse(t):
@@ -23,7 +24,7 @@ def parse_literate(t):
     except ParseFailed, e:
         raise SchemaSyntaxError(e)
 
-_top_level = [try_(schema), try_(command), try_(syntax), try_(kind), try_(const), try_(catyclass)]
+_top_level = [try_(schema), try_(command), try_(syntax), try_(kind), try_(const), try_(catyclass), try_(facility)]
 
 def casm(seq):
     s = []

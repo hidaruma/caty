@@ -206,11 +206,16 @@ def loose_item(seq):
         raise ParseFailed(seq, array)
     return UNDEFINED
 
+class _nothing(object):pass
+
 def tag(seq):
     _ = seq.parse('@')
     name = seq.parse([string, Regex(r'[-0-9a-zA-Z_]+')])
-    value = seq.parse(parsers)
-    return json.TaggedValue(name, value)
+    value = seq.parse(option(parsers, _nothing))
+    if value is _nothing:
+        return json.TagOnly(name)
+    else:
+        return json.TaggedValue(name, value)
 
 ascii = set(list("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&'()*+,-./:;<=>?@[]^_`{|}~ \t\n\r"))
 def binary(seq):
