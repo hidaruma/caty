@@ -471,8 +471,8 @@ Web サーバの起動・停止を行う
         else:
             if not proxy:
                 return
-            cmd = self.interpreter._instantiate(proxy)
             try:
+                cmd = self.interpreter._instantiate(proxy)
                 self.env[name] = cmd(None)
                 if name in self.deleted_env:
                     self.deleted_env.remove(name)
