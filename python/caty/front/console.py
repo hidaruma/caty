@@ -472,12 +472,19 @@ Web サーバの起動・停止を行う
             if not proxy:
                 return
             cmd = self.interpreter._instantiate(proxy)
-            self.env[name] = cmd(None)
-            if name in self.deleted_env:
-                self.deleted_env.remove(name)
-            self.continue_setenv = None
-            self._echo(u'set: %s => %s' % (pp(self.env[name]), name))
-            self.set_prompt()
+            try:
+                self.env[name] = cmd(None)
+                if name in self.deleted_env:
+                    self.deleted_env.remove(name)
+                self._echo(u'set: %s => %s' % (pp(self.env[name]), name))
+            except:
+                import traceback
+                traceback.print_exc()
+                self._echo(u'Some error occuered')
+                self.continue_setenv = u''
+            finally:
+                self.continue_setenv = None
+                self.set_prompt()
 
     def do_unsetenv(self, line):
         from caty.core.language.util import name_token, CharSeq, option, S, ParseFailed
