@@ -116,7 +116,7 @@ class FacilityNode(object):
         self.annotations = annotations
 
     def declare(self, module):
-        pass
+        module.add_facility(self)
 
 class Node(object):
     def __init__(self, options=None):
@@ -510,17 +510,13 @@ class CommandURI(object):
             setattr(self, tp, val)
 
 class KindReference(object):
-    def __init__(self, name, annotation, docstring):
-        self._name = name
-        self.__annotation = annotation
-
-    @property
-    def name(self):
-        return self._name
+    def __init__(self, name, annotations, docstring):
+        self.name = name
+        self.annotations = annotations
 
     def declare(self, module):
         self.module = module
-        module.add_kind(self._name, self, self.__annotation)
+        module.add_kind(self)
 
 class TypeParam(object):
     def __init__(self, name, kind, default_type):

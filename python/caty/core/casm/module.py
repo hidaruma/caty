@@ -29,6 +29,7 @@ class Module(Facility):
         self.schema_ns = {}
         self.command_ns = {}
         self.class_ns = {}
+        self.facility_ns = {}
         self.command_loader = None
         self.sub_modules = {}
         self.parent = parent
@@ -38,6 +39,7 @@ class Module(Facility):
         self._plugin = PluginMap()
         self._type = u'casm'
         self.ast_ns = {}
+        self.kind_ns = {}
         self.proto_ns = {}
         self.saved_st = {}
         self.const_ns = {}
@@ -45,24 +47,38 @@ class Module(Facility):
         self.docstring = u'undocumented'
         self.last_modified = 0
         self.annotations = Annotations([])
-        self.get_schema = partial(self.__get_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
-        self.has_schema = partial(self.__has_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
 
-        self.get_command_type = partial(self.__get_resource, scope_func=lambda x:x.command_ns, type=u'Command')
-        self.has_command_type = partial(self.__has_resource, scope_func=lambda x:x.command_ns, type=u'Command')
+        self.add_schema = partial(self._add_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
+        self.get_schema = partial(self._get_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
+        self.has_schema = partial(self._has_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
+
+        self.add_kind = partial(self._add_resource, scope_func=lambda x:x.kind_ns, type=u'Kind', see_register_public=True)
+        self.get_kind = partial(self._get_resource, scope_func=lambda x:x.kind_ns, type=u'Kind')
+        self.has_kind = partial(self._has_resource, scope_func=lambda x:x.kind_ns, type=u'Kind')
+
+        self.add_command = partial(self._add_resource, scope_func=lambda x:x.command_ns, type=u'Command', see_register_public=True, see_filter=True)
+        self.get_command_type = partial(self._get_resource, scope_func=lambda x:x.command_ns, type=u'Command')
+        self.has_command_type = partial(self._has_resource, scope_func=lambda x:x.command_ns, type=u'Command')
         
-        self.get_proto_type = partial(self.__get_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
-        self.has_proto_type = partial(self.__has_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
+        self.add_proto_type = partial(self._add_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
+        self.get_proto_type = partial(self._get_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
+        self.has_proto_type = partial(self._has_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
         
-        self.get_ast = partial(self.__get_resource, scope_func=lambda x:x.ast_ns, type=u'Type')
-        self.has_ast = partial(self.__has_resource, scope_func=lambda x:x.ast_ns, type=u'Type')
+        self.add_ast = partial(self._add_resource, scope_func=lambda x:x.ast_ns, type=u'Type', see_register_public=True)
+        self.get_ast = partial(self._get_resource, scope_func=lambda x:x.ast_ns, type=u'Type')
+        self.has_ast = partial(self._has_resource, scope_func=lambda x:x.ast_ns, type=u'Type')
         
-        self.get_syntax_tree = partial(self.__get_resource, scope_func=lambda x:x.saved_st, type=u'Type')
-        self.has_syntax_tree = partial(self.__has_resource, scope_func=lambda x:x.saved_st, type=u'Type')
+        self.get_syntax_tree = partial(self._get_resource, scope_func=lambda x:x.saved_st, type=u'Type')
+        self.has_syntax_tree = partial(self._has_resource, scope_func=lambda x:x.saved_st, type=u'Type')
         
-        self.get_class = partial(self.__get_resource, scope_func=lambda x:x.class_ns, type=u'Class')
-        self.has_class = partial(self.__has_resource, scope_func=lambda x:x.class_ns, type=u'Class')
-    
+        self.add_class = partial(self._add_resource, scope_func=lambda x:x.class_ns, type=u'Class', see_register_public=True, callback=lambda target: ClassModule(self._app, self, target))
+        self.get_class = partial(self._get_resource, scope_func=lambda x:x.class_ns, type=u'Class')
+        self.has_class = partial(self._has_resource, scope_func=lambda x:x.class_ns, type=u'Class')
+ 
+        self.add_facility = partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
+        self.get_facility = partial(self._get_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
+        self.has_facility = partial(self._has_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
+
     @property
     def type(self):
         return self._type
@@ -75,96 +91,6 @@ class Module(Facility):
     def name(self):
         return self._name
  
-    def add_class(self, clsobj):
-        if clsobj.name in self.class_ns:
-            m, a = self._get_mod_and_app(ref)
-            raise Exception(self.application.i18n.get(u'Class $name of $this is already defined in $module of $app', 
-                                                      name=ref.name, 
-                                                      this=self.name+'.'+self.type,
-                                                      module=m,
-                                                      app=a))
-
-        if 'register-public' in clsobj.annotations or 'register-public' in self.annotations:
-            if not self.is_root:
-                self.parent.add_class(clsobj)
-        self.class_ns[clsobj.name] = ClassModule(self._app, self, clsobj)
-
-    def add_ast(self, ref):
-        if ref.name in self.ast_ns:
-            m, a = self._get_mod_and_app(ref)
-            raise Exception(self.application.i18n.get(u'Type $name of $this is already defined in $module of $app', 
-                                                      name=ref.name, 
-                                                      this=self.name+'.'+self.type,
-                                                      module=m,
-                                                      app=a))
-
-        if 'register-public' in ref.annotations or 'register-public' in self.annotations:
-            if not self.is_root:
-                self.parent.add_ast(ref)
-        self.ast_ns[ref.name] = ref
-
-    def add_schema(self, member):
-        name = member.name
-        annotations = member.annotations
-        if name in self.schema_ns:
-            t = self.schema_ns[name]
-            m, a = self._get_mod_and_app(t)
-            raise Exception(self.application.i18n.get(u'Type $name of $this is already defined in $module of $app', 
-                                                      name=name, 
-                                                      this=self.name+'.'+self.type,
-                                                      module=m,
-                                                      app=a))
-        #if 'register-public' in annotations:
-        #    if not self.is_root:
-        #        self.parent.add_schema(member)
-        member.annotations = annotations
-        self.schema_ns[name] = member
-
-    def add_kind(self, name, member, annotations):
-        if name in self.kind_ns:
-            t = self.kind_ns[name]
-            m, a = self._get_mod_and_app(t)
-            raise Exception(self.application.i18n.get(u'Kind $name of $this is already defined in $module.casm of $app', 
-                                                      name=name, 
-                                                      this=self.name+'.'+self.type,
-                                                      module=m,
-                                                      app=a))
-        if 'register-public' in annotations or 'register-public' in self.annotations:
-            if not self.is_root:
-                self.parent.add_schema(name, member, annotations)
-        member.annotations = annotations
-        self.kind_ns[name] = member
-
-    def add_proto_type(self, proto):
-        name = proto.name
-        if name in self.proto_ns:
-            t = self.proto_ns[name]
-            m, a = self._get_mod_and_app(t)
-            raise Exception(self.application.i18n.get(u'Command $name of $this is already defined in $module of $app', 
-                                                       name=name, 
-                                                       this=self.name+'.'+self.type,
-                                                       module=m,
-                                                       app=a))
-        self.proto_ns[name] = proto
-
-    def add_command(self, name, profile):
-        if name in self.command_ns:
-            t = self.command_ns[name]
-            m, a = self._get_mod_and_app(t)
-            raise Exception(self.application.i18n.get(u'Command $name of $this is already defined in $module of $app', 
-                                                       name=name, 
-                                                       this=self._get_full_name(),
-                                                       module=m,
-                                                       app=a))
-        if 'register-public' in profile.annotations or 'register-public' in self.annotations:
-            if not self.is_root:
-                self.parent.add_command(name, profile)
-        if 'filter' in profile.annotations:
-            if self.name != 'filter':
-                fm = self.get_module('filter')
-                fm.add_command(name, profile)
-        self.command_ns[name] = profile
-
     def _get_full_name(self):
         return self.name+'.'+self.type
 
@@ -173,7 +99,30 @@ class Module(Facility):
         m = t.module.name + '.' + t.module.type
         return m, a
 
-    def __get_resource(self, name, tracked=(), scope_func=None, type=u''):
+    def _add_resource(self, target, scope_func=None, type=u'', see_register_public=False, see_filter=False, callback=None):
+        scope = scope_func(self)
+        name = target.name
+        if name in scope:
+            t = scope[name]
+            m, a = self._get_mod_and_app(t)
+            raise Exception(self.application.i18n.get(u'%s $name of $this is already defined in $module of $app' % type, 
+                                                       name=name, 
+                                                       this=self._get_full_name(),
+                                                       module=m,
+                                                       app=a))
+        if see_register_public and ('register-public' in target.annotations or 'register-public' in self.annotations):
+            if not self.is_root:
+                self.parent._add_resource(target, scope_func, type, see_register_public=False, see_filter=False, callback=callback)
+        if see_filter and 'filter' in target.annotations:
+            if self.name != 'filter':
+                fm = self.get_module('filter')
+                fm._add_resource(target, scope_func, type, see_register_public=False, see_filter=False)
+        if not callback:
+            scope[name] = target
+        else:
+            scope[name] = callback(target)
+
+    def _get_resource(self, name, tracked=(), scope_func=None, type=u''):
         if self in tracked:
             raise throw_caty_exception(u'%sNotFound'%type, u'$name', name=name)
         tracked = list(tracked) + [self]
@@ -188,29 +137,29 @@ class Module(Facility):
                 else:
                     throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s %s is forbidden' % type)
             if m == 'public' and self.name not in ('public', 'builtin'):
-                return self.parent.__get_resource(n, tracked, scope_func, type)
+                return self.parent._get_resource(n, tracked, scope_func, type)
             if m == 'public' and self.name in ('public', 'builtin'):
-                return self.__get_resource(n, tracked, scope_func, type)
+                return self._get_resource(n, tracked, scope_func, type)
             if m == self.name:
-                return self.__get_resource(n, tracked, scope_func, type)
+                return self._get_resource(n, tracked, scope_func, type)
             if m in self.sub_modules:
-                return self.sub_modules[m].__get_resource(n, tracked, scope_func, type)
+                return self.sub_modules[m]._get_resource(n, tracked, scope_func, type)
             if self.parent:
-                return self.parent.__get_resource(name, tracked, scope_func, type)
+                return self.parent._get_resource(name, tracked, scope_func, type)
             raise throw_caty_exception(u'%sNotFound' % type, u'$name', name=name)
         elif '.' in name:
             c, n = name.split('.', 1)
             if c in self.class_ns:
-                return self.class_ns[c].__get_resource(n, tracked, scope_func, type)
+                return self.class_ns[c]._get_resource(n, tracked, scope_func, type)
             raise throw_caty_exception(u'ClassNotFound', u'$name', name=c)
         else:
             if self.parent:
-                return self.parent.__get_resource(name, tracked, scope_func, type)
+                return self.parent._get_resource(name, tracked, scope_func, type)
         raise throw_caty_exception(u'%sNotFound' % type, u'$name', name=name)
 
-    def __has_resource(self, name, tracked=(), scope_func=None, type=u''):
+    def _has_resource(self, name, tracked=(), scope_func=None, type=u''):
         try:
-            o = self.__get_resource(name, tracked, scope_func, type)
+            o = self._get_resource(name, tracked, scope_func, type)
         except CatyException as e:
             return False
         return True
@@ -278,6 +227,7 @@ class Module(Facility):
         self._apply_type_var()
         self._normalize()
         self._register_command()
+        self._register_facility()
         self.compiled = True
         for m in self.sub_modules.values() + self.class_ns.values():
             m.compiled = True
@@ -343,9 +293,29 @@ class Module(Facility):
     
     def _register_command(self):
         if not self.compiled:
-            self._loop_exec(self.proto_ns, ProfileBuilder(self), lambda k, v:self.add_command(k, v))
+            self._loop_exec(self.proto_ns, ProfileBuilder(self), lambda k, v:self.add_command(v))
         for m in self.class_ns.values() + self.sub_modules.values():
             m._register_command()
+
+    def _register_facility(self):
+        if not self.compiled:
+            for k, v in self.facility_ns.items():
+                cls = self.get_class(v.clsname)
+                if u'facility-spec-for' not in cls.annotations:
+                    raise Exception(self.application.i18n.get(u'Facility class is not specified: $name, $mod', name=v.clsname, mod=self.name))
+
+                facilty_class = self._load_facility_class(k, cls.annotations['facility-spec-for'].value)
+                self._app.register_facility(k, facilty_class)
+        for m in self.sub_modules.values():
+            m._register_facility()
+
+    def _load_facility_class(self, name, uri):
+        from caty.core.casm.loader import dynamic_load
+        if not uri.startswith(u'python:'):
+            raise Exception(self.application.i18n.get(u'Invalid reference: $ref, $name, $mod', ref=uri, name=name, mod=self.name))
+        uri = uri.replace('python:', '')
+        loader = _FaciltyLoader(uri, name, self)
+        return loader.load()
 
     def _loop_exec(self, target, cursor, callback):
         try:
@@ -395,6 +365,25 @@ class Module(Facility):
             for p in self.parent.iter_parents():
                 yield p
 
+class _FaciltyLoader(object):
+    def __init__(self, clsref, facility_name, module):
+        from caty.util.path import join
+        self.path = facility_name + '.py'
+        self.abspath = join(module._app._physical_path, module.name, self.path)
+        self.name = facility_name
+        self.modname, self.clsname = clsref.rsplit('.', 1)
+        self.code = 'from %s import %s' % (self.modname, self.clsname)
+
+    def load(self):
+        import types
+        g_dict = {}
+        code = self.code
+        obj = compile(code, self.path, 'exec')
+        g_dict['__file__'] = self.abspath
+        exec obj in g_dict
+        return g_dict[self.clsname]
+        
+
 class ClassModule(Module):
     u"""
     クラスは名前空間を構成するというその機能においてモジュールに近い。
@@ -407,6 +396,7 @@ class ClassModule(Module):
         self._name = clsobj.name
         self._clsobj = clsobj
         self._clsrestriction = clsobj.restriction
+        self.annotations = clsobj.annotations
         for m in clsobj.member:
             m.declare(self)
         self.count = 0

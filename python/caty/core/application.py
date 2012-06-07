@@ -71,6 +71,7 @@ class Application(PbcObject):
         self._name = unicode(name)
         self._system = system
         self._path = unicode(name)
+        self._facilities = {}
         self._group = group
         self._finished = False
         self._app_map = {name: self}
@@ -91,6 +92,7 @@ class Application(PbcObject):
             self._init_log()
             self._init_interpreter()
             self._init_action()
+            self._init_facilities()
         else:
             self.cout.writeln(u'* ' + system.i18n.get("$name is set not to start", name=self._name))
         self.async_queue = AsyncQueue(self)
@@ -403,6 +405,14 @@ class Application(PbcObject):
         if not self._initialized:
             for tp in LOG_TYPES:
                 logger.init(self, tp)
+
+    def register_facility(self, name, cls):
+        if name in self._facilities:
+            raise Exception(self.i18n.get("Facility name conflicted: $name at $app", name=name, app=app.name))
+        self._facilities[name] = cls
+
+    def _init_facilities(self):
+        pass
 
     def get_logger(self, type):
         assert type in LOG_TYPES
