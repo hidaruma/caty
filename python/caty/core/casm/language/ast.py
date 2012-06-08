@@ -111,7 +111,7 @@ class FacilityNode(object):
     def __init__(self, name, clsname, value, doc, annotations):
         self.name= name
         self.clsname= clsname
-        self.value = value
+        self.system_param = value
         self.docstring = doc
         self.annotations = annotations
 

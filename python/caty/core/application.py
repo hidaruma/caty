@@ -71,6 +71,7 @@ class Application(PbcObject):
         self._name = unicode(name)
         self._system = system
         self._path = unicode(name)
+        self._facility_classes = {}
         self._facilities = {}
         self._group = group
         self._finished = False
@@ -92,7 +93,6 @@ class Application(PbcObject):
             self._init_log()
             self._init_interpreter()
             self._init_action()
-            self._init_facilities()
         else:
             self.cout.writeln(u'* ' + system.i18n.get("$name is set not to start", name=self._name))
         self.async_queue = AsyncQueue(self)
@@ -406,13 +406,15 @@ class Application(PbcObject):
             for tp in LOG_TYPES:
                 logger.init(self, tp)
 
-    def register_facility(self, name, cls):
-        if name in self._facilities:
+    def register_facility(self, name, cls, system_param):
+        if name in self._facility_classes:
             raise Exception(self.i18n.get("Facility name conflicted: $name at $app", name=name, app=app.name))
-        self._facilities[name] = cls
+        self._facility_classes[name] = (cls, system_param)
 
     def _init_facilities(self):
-        pass
+        for k, v in self._facility_classes.items():
+            v[0].initialize(self, None)
+            self._facilities[k] = v[0].create(self, v[1])
 
     def get_logger(self, type):
         assert type in LOG_TYPES
@@ -435,6 +437,7 @@ class Application(PbcObject):
         try:
             if not self._no_ambient:
                 self._schema_module.resolve()  # 型参照は最終的にここで解決される。
+                self._init_facilities()        # カスタムファシリティの初期化
         except Exception, e:
   #msg = error_to_ustr(e)
   #cout.writeln(e)
@@ -520,6 +523,8 @@ class Application(PbcObject):
             'logger': logger.Logger(self).start(),
             'sysfiles': self._create_sysfiles(),
         }
+        for k, v in self._facilities.items():
+            facilities[k] = v.start()
         vcs = self._vcs(self, facilities['pub'], facilities['data'])
         facilities['vcs'] = vcs
         facilities['token'] = RequestToken(facilities['session'])
@@ -703,7 +708,7 @@ class Application(PbcObject):
   #    'logger': logger.Logger(self).start(),
   #    'sysfiles': self._create_sysfiles(),
         for k, v in f.items():
-            v.rollback()
+            v.cancel()
         return r
 
 

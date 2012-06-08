@@ -25,26 +25,31 @@ class Facility(PbcObject):
     ファシリティがどのモードで宣言されたかの情報と、あらゆるファシリティが実装しなければならない、
     あるいは適宜オーバーライドすべきいくつかの抽象メソッドを宣言するのみである。
 
-    == 実装必須の抽象メソッド
+    == ファシリティクラスのクラスメソッド
 
-    === clone()
+    ファシリティクラスはすべて以下のクラスメソッドを持つ。
+    これらのメソッドはCatyコアより呼び出される。
 
-    ファシリティにおける唯一必須の抽象メソッドがこの clone() である。
-    このメソッドはファシリティがコマンドにセットされる度に呼ばれ、
-    必ず自身と同じクラスのインスタンスを返さなければならない。
-    不変クラスに関しては自身と同じインスタンスを返してもよいが、
-    その場合は ReadOnlyFacility クラスを使うことを検討するべきである。
+    === initialize(app_instance, config)
 
-    == オーバーライドしても良いメソッド
+    ファシリティクラスの初期化を行う。
+    システム起動時にただ一度だけ呼ばれる。
 
-    === start()
+    === create(app_instance, [system_param])
 
-    start() メソッドはパイプラインの最初に各ファシリティについてただ一度ずつ呼ばれる。
-    このメソッドではファシリティの使用前のセットアップのような事を行うことが想定されており、
-    例えばデータベースアクセスのファシリティでコネクションを取得するなどが該当する。
-    このメソッドも clone() 同様、自身と同じクラスのインスタンスを返すものとする。
+    ファシリティインスタンスのマスターオブジェクトを生成する。
+    パイプラインの開始時にファシリティ毎に一度呼ばれる。
+    system_paramが同一のファシリティはトランザクションを同じくする。
+    createが呼ばれた後はCatyコアによりトランザクションが開始される。
 
-    === commit(), rollback()
+    == リクエスターインスタンスのメソッド
+
+    === start([user_param])
+
+    明示的にトランザクションを開始する。
+    トランザクションは入れ子になってもよい。
+
+    === commit(), cancel()
 
     ストレージアクセスを行うファシリティは、基本的にトランザクションをサポートしなければならない。
     ここでのトランザクションとは、あるパイプラインが成功した場合（例外を創出せず終了した場合）にのみ
@@ -55,6 +60,18 @@ class Facility(PbcObject):
     === cleanup()
 
     一連の処理で利用し、解放していないリソースの解放していないリソースの解放などを行う。
+
+    === clone()
+
+    ファシリティにおける唯一必須の抽象メソッドがこの clone() である。
+    このメソッドはファシリティがコマンドにセットされる度に呼ばれ、
+    必ず自身と同じクラスのインスタンスを返さなければならない。
+    不変クラスに関しては自身と同じインスタンスを返してもよいが、
+    その場合は ReadOnlyFacility クラスを使うことを検討するべきである。
+
+    === merge(facility_instance)
+
+    入れ子になったトランザクションのマージを行う。
 
     """
 
@@ -73,7 +90,7 @@ class Facility(PbcObject):
     def commit(self):
         pass
 
-    def rollback(self):
+    def cancel(self):
         pass
 
 
@@ -239,7 +256,7 @@ class TransactionalAccessManager(AccessManager):
     class Foo(Facility):
         tam = TransactionalAccessManager()
         commit = tam.commit
-        rollback = tam.rollback
+        cancel = tam.cancel
     }}}
     """
 
@@ -267,7 +284,7 @@ class TransactionalAccessManager(AccessManager):
     def commit(self):
         raise NotImplementedError()
 
-    def rollback(self):
+    def cancel(self):
         raise NotImplementedError()
 
 
@@ -312,7 +329,7 @@ class TransactionAdaptor(Command):
             self.commit()
             raise
         except:
-            self.rollback()
+            self.cancel()
             raise
         finally:
             self.cleanup()
@@ -327,9 +344,9 @@ class TransactionAdaptor(Command):
         if vcs:
             vcs.commit()
 
-    def rollback(self):
+    def cancel(self):
         for k, v in self._facilities.items():
-            v.rollback()
+            v.cancel()
 
     def cleanup(self):
         for k, v in self._facilities.items():
@@ -362,13 +379,13 @@ class TransactionDiscardAdaptor(TransactionAdaptor):
     def __call__(self, input):
         try:
             r = self._command(input)
-            self.rollback()
+            self.cancel()
             return r
         except PipelineInterruption, e:
-            self.rollback()
+            self.cancel()
             raise
         except:
-            self.rollback()
+            self.cancel()
             raise
     
 class TransactionPendingAdaptor(TransactionAdaptor):
@@ -383,7 +400,7 @@ class TransactionPendingAdaptor(TransactionAdaptor):
     def commit(self):
         pass
     
-    def rollback(self):
+    def cancel(self):
         pass
 
 import caty

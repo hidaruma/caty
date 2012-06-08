@@ -41,9 +41,9 @@ class BaseClient(Facility):
         if self._access_manager:
             self._access_manager.commit()
 
-    def rollback(self):
+    def cancel(self):
         if self._access_manager:
-            self._access_manager.rollback()
+            self._access_manager.cancel()
 
     def __call__(self, path):
         return self.__class__(self._app, self.wc_fs, self.repos_fs, self._access_manager, path)
@@ -110,7 +110,7 @@ class VCSTransactionManager(TransactionalAccessManager):
             fun(obj, *args, **kwds)
         self._queue = []
 
-    def rollback(self):
+    def cancel(self):
         self._queue = []
 
     def merge(self, another):

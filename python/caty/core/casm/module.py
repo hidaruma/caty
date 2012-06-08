@@ -305,7 +305,7 @@ class Module(Facility):
                     raise Exception(self.application.i18n.get(u'Facility class is not specified: $name, $mod', name=v.clsname, mod=self.name))
 
                 facilty_class = self._load_facility_class(k, cls.annotations['facility-spec-for'].value)
-                self._app.register_facility(k, facilty_class)
+                self._app.register_facility(k, facilty_class, v.system_param)
         for m in self.sub_modules.values():
             m._register_facility()
 
