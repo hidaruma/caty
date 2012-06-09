@@ -10,30 +10,31 @@ class OsEnv(object):
     os_env = None
 
     @classmethod
-    def _initialize(cls, conf):
-        # confは無視
+    def initialize(cls, app_instance, config):
+        # app_instance, configは無視
         if cls.initialized:
-            return tagged(u'OK', None)
+            return None
         e = os.environ
         f = {}
         for k in e:
             f[unicode(k)] = unicode(e[k])
         cls.os_env = f
-        return tagged(u'OK', None)
+        cls.the_instance = OsEnv()
+        cls.initialized = True
+        print "initialized"
 
     @classmethod
-    def _finalize(cls):
+    def finalize(cls, app_instance):
         if cls.initialized:
+            os_env = None
+            cls.the_instance = None
             cls.initialized = False
-        return None
+            print "finalized"
 
     @classmethod
-    def _create(cls, mode_param):
-        mode, param = mode_param
+    def create(cls, app_instance, sys_param=None, mode="read", usr_param=None):
         if not mode == "read":
-            raise Error("bad mode")
-        if cls.the_instance is None:
-            cls.the_instance = OsEnv()
+            raise Exception("bad mode")
         return cls.the_instance
 
     def __init__(self):
@@ -54,55 +55,48 @@ class OsEnv(object):
 
     # トランザクション管理は不要
 
-    def _sync(self):
-        pass
-    def _close(self):
-        pass
-    def _begin(self):
-        pass
-    def _commit(self):
-        pass
-    def _cancel(self):
-        pass
-
+# 以下はブリッジングコマンド
 
 
 from caty.command import Command
 
 Facility = OsEnv
 
-class MgmntInitialize(Command):
-    def execute(self, config):
-        return Facility._initialize(config)
+class Initialize(Command):
+    def setup(self, config=None):
+        self.config = config
 
-class MgmntFinalize(Command):
-    def execute(self):
-        return Facility._finalize()
+    def execute(self, app_instance):
+        return Facility.initialize(app_instance, self.config)
 
-class MgmntCreate(Command):
-    def execute(self, mod_param):
-        return Facility._create(mod_param)
+class Finalize(Command):
+    def execute(self, app_instance):
+        return Facility.finalize(app_instance)
+
+class Create(Command):
+    def setup(self, sys_param=None, mode="read", usr_param=None):
+        self.sys_param = sys_param
+        self.mode = mode
+        self.usr_param = usr_param
+
+    def execute(self, app_instance):
+        return Facility.create(app_instance, self.sys_param, self.mode, self.usr_param)
 
 # リクエスタのメソッド、すべてアクセッサ
 
 class List(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
-
     def execute(self):
         return self.arg0.list()
 
 class Get(Command):
-    def setup(self, arg0, name):
-        self.arg0 = arg0
+    def setup(self, name):
         self._name = name
 
     def execute(self):
         return self.arg0.get(self._name)
 
 class Exists(Command):
-    def setup(self, arg0, name):
-        self.arg0 = arg0
+    def setup(self, name):
         self._name = name
 
     def execute(self):
