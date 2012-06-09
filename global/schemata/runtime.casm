@@ -2,7 +2,7 @@
 
 /**
  * ランタイムの情報を取得するためのAPI
- * アプリケーションとCatyシステムにアクセスする。
+ * Catyシステムコアとアプリケーションの内部データにアクセスする。
  */
 module runtime; 
 
@@ -163,10 +163,10 @@ command _app-instance [string? name] :: void -> _AppInstance
 /** アプリケーションインスタンスのモニカーを返す
  * 引数が指定されなかったときは、カレントのアプリケーションが指定されたとみなす。
  */
-command app-instance :: void -> AppInstance {
+command app-instance [string? name] :: void -> AppInstance {
  AppInstanceCLASS > cls;
 
- _app-instance | class-moniker %cls
+ _app-instance %1? | class-moniker %cls
 };
 
 

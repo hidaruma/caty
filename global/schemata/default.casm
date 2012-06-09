@@ -151,3 +151,43 @@ command ext-content-type [string ext] :: void -> (null | string)
    object    => pv contentType,
   }
 };
+
+/** クラスモニカー
+ * 今（2012-05-254）こんなんを考えている
+ */
+type ClassMoniker<Cls default string, Instance default foreign> = @__classMoniker {
+  "$class" : Cls,
+  "$instance" : Instance
+};
+
+
+/** クラスモニカーを作る 
+ */
+command class-moniker [string clsName] :: foreign -> ClassMoniker<string, foreign> {
+  @__classMoniker {
+    "$class" : %1,
+    "$instance" : pass
+  }
+};
+
+/** メソッドを呼び出す、ただしパラメータを渡せない */
+command call-method [string cls, foreign instance, string name] :: univ -> univ {
+ pass > in; // 標準入力を保存
+ %1 > cls;
+ %2 > instance;
+ %3 > name;
+
+ [%cls, ".", %name] | text:concat > fullname;
+ %in | call %fullname %instance
+};
+
+/** モニカーを使ってメソッドを呼び出す、ただしパラメータを渡せない */
+command call-moniker [ClassMoniker moniker, string name] :: univ -> univ {
+ pass > in; // 標準入力を保存
+ %1 | pv "$class"    > cls;
+ %1 | pv "$instance" > instance;
+ 
+
+ [%cls, ".", %name] | text:concat > fullname;
+ %in | call %fullname %instance
+};
