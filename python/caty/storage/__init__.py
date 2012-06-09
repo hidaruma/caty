@@ -46,8 +46,8 @@ class StorageModuleWrapper(Facility):
     def commit(self):
         self._conn.commit()
 
-    def rollback(self):
-        self._conn.rollback()
+    def cancel(self):
+        self._conn.cancel()
 
     def __call__(self, collection_name, app_name=''):
         current_app_name = self.application.name
@@ -121,5 +121,5 @@ class NullStorage(object):
     def commit(self):
         pass
 
-    def rollback(self):
+    def cancel(self):
         pass

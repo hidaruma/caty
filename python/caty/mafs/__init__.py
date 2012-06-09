@@ -68,8 +68,8 @@ class MafsFactory(Facility, ResourceFinder, PbcObject):
     def cleanup(self):
         self._access_manager.clear()
 
-    def rollback(self):
-        self._access_manager.rollback()
+    def cancel(self):
+        self._access_manager.cancel()
 
     def merge_transaction(self, another):
         self._access_manager.merge(another._access_manager)

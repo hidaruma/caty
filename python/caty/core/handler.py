@@ -66,7 +66,7 @@ class RequestHandler(object):
                                                     str(_end - _start)))
         
     def __del__(self):
-        self._file.rollback()
+        self._file.cancel()
 
 
     def make_cmd(self, path, opts, method, transaction=COMMIT):

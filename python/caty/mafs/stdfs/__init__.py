@@ -290,7 +290,7 @@ class FileTransactionAccessManager(TransactionalAccessManager):
         self._clear_queue()
         self._detach()
 
-    def rollback(self):
+    def cancel(self):
         self._transaction_queue[:] = []
         self._write_queue.clear()
         self._delete_queue.clear()
