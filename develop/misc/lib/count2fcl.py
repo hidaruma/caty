@@ -18,6 +18,7 @@ class Counter(object):
             config={}
         cls.base_value = config.get('baseValue', 0)
         cls.step_value = config.get('stepValue', 1)
+        print u"Hello, Initialized"
         return None # 成功のときはNone（Catyではnull）
 
     @classmethod

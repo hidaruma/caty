@@ -17,39 +17,42 @@ type Config = null |
 /** 一時ファイルを管理するファシリティのリクエスター */
 type TempFile = foreign;
 
-// class TempFile(TempFile) conforms Facility<Config, void, TempFile> {
 
-/* ファシリティクラス管理用コールバック */
+/*{{{
+
+class TempFile(_TempFile) {
+
+ /* ファシリティクラス管理用コールバック */
 
  @[static, management]
- command _initialize :: Config -> (@OK null | @NG Error)
+ command initialize :: Config -> (@OK null | @NG Error)
   refers python:tempfilecmd.MgmntInitialize
  ;
 
  @[static, management]
- command _finalize :: void -> void
+ command finalize :: runtime:_AppInstance -> void
   refers python:tempfilecmd.MgmntFinalize
  ;
 
  @[static, management]
- command _create :: ["use", void] -> TempFile
+ command create :: ["use", void] -> _TempFile
   refers python:tempfilecmd.MgmntCreate
  ;
 
-/* リクエスターインスタンス管理用のコールバック */
+ /* リクエスターインスタンス管理用のコールバック */
 
  @[management] 
- command _begin [TempFile] :: void -> TempFile
+ command _begin [TempFile] :: void -> _TempFile
   refers python:tempfilecmd.MgmntBegin
  ;
 
  @[management] 
- command _commit [TempFile] :: void ->  TempFile
+ command _commit [TempFile] :: void ->  void
   refers python:tempfilecmd.MgmntCommit
  ;
 
  @[management] 
- command _cancel [TempFile] :: void ->  TempFile
+ command _cancel [TempFile] :: void ->  void
   refers python:tempfilecmd.MgmntCancel
  ;
 
@@ -99,7 +102,10 @@ type TempFile = foreign;
   refers python:tempfilecmd.Remove
  ;
 
-// }; // TempFile
+}; // TempFile
+
+}}}*/
+
 
 /** listユーティリティ */
 command u-list :: void -> [string*]

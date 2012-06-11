@@ -2,58 +2,56 @@
 /** OSの環境変数 */
 module osenv; 
 
-type _AppInstace = fcl:_AppInstance;
+type _AppInstance = fcl:_AppInstance;
 type Error = fcl:Error;
 
 /** osenvの設定情報 */
 type Config = null; // 設定不要
 
-/*{{{
-/** OS環境変数を参照するファシリティのリクエスター */
-type OsEnv = foreign;
 
-// class OsEnv(OsEnv) {
+/** OS環境変数を参照するファシリティのリクエスター */
+type _OsEnv = foreign;
+
+@[facility-spec-for("python:osenv")]
+class OsEnv(_OsEnv) {
 
  /** 初期化 */
  @[static, management]
- command initialize [Config?] :: AppInstance -> (null | Error)
+ command initialize [Config?] :: _AppInstance -> void
   refers python:osenv.Initialize
  ;
 
  /** 終期化 */
  @[static, management]
- command _finalize :: void -> void
+ command finalize :: _AppInstance -> void
   refers python:osenv.Finalize
  ;
 
  /** リクエスタ生成 */
  @[static, management]
- command _create :: ["read", void] -> OsEnv
+ command create [null, string /*"read"*/, null] :: _AppInstance -> _OsEnv
   refers python:osenv.Create
  ;
 
- // arg0も代わりにarg1を使用 
 
  /** 環境変数名を列挙 */
  @[reader]
- command list [OsEnv] :: void -> [string*]
+ command list :: void -> [string*]
   refers python:osenv.List
  ;
 
  /** 環境変数の存在を確認 */
  @[reader]
- command exists [OsEnv, string name] :: void -> (@OK string | @NG string)
+ command exists [string name] :: void -> (@OK string | @NG string)
   refers python:osenv.Exists
  ;
 
  /** 特定の環境変数の値を取得 */
  @[reader]
- command get [OsEnv, string name] :: void -> (null | string)
+ command get [string name] :: void -> (null | string)
   refers python:osenv.Get
  ;
 
-//}
-
-}}}*/
+};
 
 /* End of Module */

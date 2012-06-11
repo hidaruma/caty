@@ -1,0 +1,23 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= FITのoutputCond
+
+条件が真であるとは、値が次の型であること。
+
+{{{
+type TrueValue = (true | @True univ | @OK univ);
+}}}
+
+
+== !exec
+
+|= !command |= !outputCond                     |= !judge |
+| "hello"   | [pass, "hello" ] ~| eq --boolean | abandon |
+| "hello"   | typeis string                    | abandon |
+| "hello"   | [pass, "hello" ] ~| eq           | abandon |
+| void      | true                             | abandon |
+| void      | @True null                       | abandon |
+| void      | @OK null                         | abandon |
+
+
+
