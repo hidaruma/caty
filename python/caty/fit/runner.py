@@ -341,7 +341,7 @@ class TestCase(object):
         facilities['session'] = SessionInfoWrapper(SessionInfo(orig_s['key'], storage, default=new_s))
         orig_e = dict(facilities['env'].items())
         new_e = merge_dict(orig_e, env)
-        facilities['env'] = Env().dual_mode
+        facilities['env'] = Env().create('uses')
         for k, v in new_e.items():
             facilities['env'].put(k, v)
         self._interpreter.facilities = FacilitySet(facilities, app)

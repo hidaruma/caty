@@ -114,7 +114,7 @@ command select1<T default object> [string] :: any -> T | @Error string
  * 
  */
 command insert<T default object> {@[default(false)]"allow-dup": boolean?} [string] :: T -> @OK null | @NG null
-    updates storage
+    uses storage
     refers python:caty.core.std.command.strg.Insert;
 
 /**
@@ -122,7 +122,7 @@ command insert<T default object> {@[default(false)]"allow-dup": boolean?} [strin
  * 入力値の最初の要素で JSON ストレージを検索し、その結果を第二の入力値で更新する。
  */
 command update [string] :: [any, any] -> null
-    updates storage
+    uses storage
     refers python:caty.core.std.command.strg.Update;
 
 /**

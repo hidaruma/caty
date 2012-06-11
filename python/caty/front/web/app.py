@@ -226,8 +226,8 @@ class CatyApp(object):
         return json
 
     def read_error_page(self, path, e, env, msg):
-        u = self._app.include.read_mode
-        c = self._app.common_files.include.read_mode
+        u = self._app.include.create(u'reads')
+        c = self._app.common_files.include.create(u'reads')
         f = u.open('/'+path)
         if f.exists:
             return self.create_command(env, path, e.path)
@@ -252,7 +252,7 @@ class CatyApp(object):
             cookie.load(c)
             if 'sessionid' in cookie:
                 session = self._app.session_storage.restore(cookie['sessionid'].value)
-                session.update_mode.update_time()
+                session.create(u'updates').update_time()
             else:
                 return ''
         else:

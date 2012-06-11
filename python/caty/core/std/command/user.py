@@ -135,7 +135,7 @@ class Login(Builtin):
         except:
             succ = False
         if succ:
-            session = self.session.storage.create().dual_mode
+            session = self.session.storage.create().create(u'uses')
             self.session = session
             del user['password']
             self.user.set_user_info(user)

@@ -1,18 +1,22 @@
 #coding: utf-8
-READ = 0
-UPDATE = 1
-DUAL = 2
+READ = 'reads'
+UPDATE = 'updates'
+DUAL = 'uses'
 
 COMMIT = 0
 ROLLBACK = 1
 PEND = 2
 
 import caty
-from caty.core.exception import InternalException
-from pbc import PbcObject, Contract
+from caty.core.exception import *
 import weakref
+_mode_map = {
+    'reads': READ,
+    'updates': UPDATE,
+    'uses': DUAL,
+}
 
-class Facility(PbcObject):
+class Facility(object):
     u"""あらゆるファシリティの基底クラス。
     Caty におけるファシリティとは、主にファイル、データベース、セッションなどのストレージを指す概念である。
     Caty のコマンドはファシリティを用いない限りあらゆるストレージへのアクセス手段を持つことができない。
@@ -24,54 +28,6 @@ class Facility(PbcObject):
     具体的なストレージへのアクセス手段の宣言・定義は個々のサブクラスで行うものとし、このクラスでは
     ファシリティがどのモードで宣言されたかの情報と、あらゆるファシリティが実装しなければならない、
     あるいは適宜オーバーライドすべきいくつかの抽象メソッドを宣言するのみである。
-
-    == ファシリティクラスのクラスメソッド
-
-    ファシリティクラスはすべて以下のクラスメソッドを持つ。
-    これらのメソッドはCatyコアより呼び出される。
-
-    === initialize(app_instance, config)
-
-    ファシリティクラスの初期化を行う。
-    システム起動時にただ一度だけ呼ばれる。
-
-    === create(app_instance, [system_param])
-
-    ファシリティインスタンスのマスターオブジェクトを生成する。
-    パイプラインの開始時にファシリティ毎に一度呼ばれる。
-    system_paramが同一のファシリティはトランザクションを同じくする。
-    createが呼ばれた後はCatyコアによりトランザクションが開始される。
-
-    == リクエスターインスタンスのメソッド
-
-    === start([user_param])
-
-    明示的にトランザクションを開始する。
-    トランザクションは入れ子になってもよい。
-
-    === commit(), cancel()
-
-    ストレージアクセスを行うファシリティは、基本的にトランザクションをサポートしなければならない。
-    ここでのトランザクションとは、あるパイプラインが成功した場合（例外を創出せず終了した場合）にのみ
-    ストレージへの書き込みが行われ、そうでない場合は書き込みが一切行われないことを言う。
-
-    トランザクションの分離レベルは READ COMMITTED であればよい。
-
-    === cleanup()
-
-    一連の処理で利用し、解放していないリソースの解放していないリソースの解放などを行う。
-
-    === clone()
-
-    ファシリティにおける唯一必須の抽象メソッドがこの clone() である。
-    このメソッドはファシリティがコマンドにセットされる度に呼ばれ、
-    必ず自身と同じクラスのインスタンスを返さなければならない。
-    不変クラスに関しては自身と同じインスタンスを返してもよいが、
-    その場合は ReadOnlyFacility クラスを使うことを検討するべきである。
-
-    === merge(facility_instance)
-
-    入れ子になったトランザクションのマージを行う。
 
     """
 
@@ -93,6 +49,11 @@ class Facility(PbcObject):
     def cancel(self):
         pass
 
+    def dispose(self):
+        pass
+
+    def conflicts(self, param1, param2):
+        pass
 
     def merge_transaction(self, another):
         u"""同一ファシリティの別インスタンスのトランザクション情報をマージする。
@@ -100,22 +61,9 @@ class Facility(PbcObject):
         """
         pass
 
-    @property
-    def read_mode(self):
-        obj = self.__clone()
-        obj._mode = READ
-        return obj
-
-    @property
-    def update_mode(self):
-        obj = self.__clone()
-        obj._mode = DUAL
-        return obj
-
-    @property
-    def dual_mode(self):
-        obj = self.__clone()
-        obj._mode = DUAL
+    def create(self, mode, user_param=None):
+        obj = self.clone()
+        obj._mode = mode
         return obj
 
     @property
@@ -136,47 +84,21 @@ class Facility(PbcObject):
     def clone(self):
         raise NotImplementedError(repr(self))
 
-    if caty.DEBUG:
-        def __invariant__(self):
-            assert self.mode in (READ, UPDATE, DUAL)
-
-        def _is_same_class(self, r, old, *args, **kwds):
-            assert type(self) == type(r)
-
-        def _is_not_same_instance(self, r, old, *args, **kwds):
-            if self.mode == READ and r.mode == READ:
-                return
-            assert self is not r
-
-        __clone = Contract(__clone)
-        __clone.ensure += _is_same_class
-        __clone.ensure += _is_not_same_instance
-
 class ReadOnlyFacility(Facility):
     _mode = READ
-    @property
-    def update_mode(self):
-        raise InternalException(u'Read only facility')
-
-    @property
-    def dual_mode(self):
-        raise InternalException(u'Read only facility')
+    def create(self, mode, user_param=None):
+        if mode != READ:
+            throw_caty_exception('InvalidResourceUseMode', u'Read only facility')
+        return self
 
     def clone(self):
         return self
 
 class FakeFacility(Facility):
     u"""便宜上ファシリティとして扱うオブジェクトのための擬似ファシリティクラス。
-    FakeFacility を継承した場合、 (read|update|dual)_mode プロパティ及び clone は
-    単に自身を戻すだけの実装が与えられる。
     """
-
-    @property
-    def read_mode(self):
+    def create(self, mode, user_param=None):
         return self
-    update_mode = read_mode
-    dual_mode = read_mode
-    clone = read_mode
 
 class AccessManager(property):
     u"""
@@ -424,6 +346,9 @@ class FacilitySet(object):
     @property
     def app(self):
         return self._app
+
+    def __contains__(self, k):
+        return k in self._facilities
 
     def __getitem__(self, k):
         return self._facilities[k]

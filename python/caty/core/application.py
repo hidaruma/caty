@@ -217,7 +217,7 @@ class Application(PbcObject):
 
     def _read_config(self):
         app_dir = self._group._make_super_root(join(self._group.name, self.name)).start()
-        f = app_dir.read_mode.open('/_manifest.xjson')
+        f = app_dir.create(u'reads').open('/_manifest.xjson')
         if f.exists:
             try:
                 cfg = xjson.loads(f.read())
@@ -229,7 +229,7 @@ class Application(PbcObject):
         manifest_type = self._system._casm._core.schema_finder('AppManifest')
         manifest_type.validate(cfg)
         cfg = manifest_type.fill_default(cfg)
-        ft = app_dir.read_mode.open('/_filetypes.xjson')
+        ft = app_dir.create(u'reads').open('/_filetypes.xjson')
         if ft.exists:
             try:
                 ft = xjson.loads(ft.read())
@@ -312,7 +312,7 @@ class Application(PbcObject):
 
     def _init_appdirs(self):
         app_mafs = self._group._make_super_root(join(self._group.name, self._path)).start()
-        app_dir = app_mafs.dual_mode
+        app_dir = app_mafs.create(u'uses')
         generated = []
         for k in self._assgin.values():
             d = app_dir.opendir('/' + k)
@@ -358,9 +358,9 @@ class Application(PbcObject):
         self._actions = mafs_init('actions', assign['actions'])
         self._data = mafs_init('data', assign['data'])
         self._behaviors = mafs_init('behaviors', assign['behaviors'])
-        self._command_fs = mafs_init('commands', assign['commands']).start().read_mode
-        self._schema_fs = mafs_init('schemata', assign['schemata']).start().read_mode
-        self._messages_fs = mafs_init('messages', assign['messages']).start().read_mode
+        self._command_fs = mafs_init('commands', assign['commands']).start().create(u'reads')
+        self._schema_fs = mafs_init('schemata', assign['schemata']).start().create('reads')
+        self._messages_fs = mafs_init('messages', assign['messages']).start().create(u'reads')
 
   # スクリプトファイル
         _scripts = mafs_init('scripts', assign['scripts'])
@@ -414,7 +414,6 @@ class Application(PbcObject):
     def _init_facilities(self):
         for k, v in self._facility_classes.items():
             v[0].initialize(self, None)
-            self._facilities[k] = v[0].create(self, v[1])
 
     def get_logger(self, type):
         assert type in LOG_TYPES
@@ -465,7 +464,7 @@ class Application(PbcObject):
     def _create_dispatcher(self):
         from caty.core.action import create_resource_action_dispatcher
         facilities = self.create_facilities()
-        dispatcher = create_resource_action_dispatcher(self._actions.start().read_mode, facilities, self)
+        dispatcher = create_resource_action_dispatcher(self._actions.start().create(u'reads'), facilities, self)
         filetype_classes = resource_class_from_assocs(self._raw_associations, facilities, self)
         for c in filetype_classes:
             dispatcher.add_resource(c)
@@ -473,7 +472,7 @@ class Application(PbcObject):
 
     def _create_bindings(self):
         from caty.core.camb import create_bindings
-        create_bindings(self._actions.start().read_mode, self)
+        create_bindings(self._actions.start().create(u'reads'), self)
 
     def _extract_casm_from_cara(self):
         for mod in self._dispatcher.get_modules():
@@ -501,15 +500,13 @@ class Application(PbcObject):
     def create_facilities(self, session_maker=None):
         from caty.session.value import create_variable
         from caty.env import Env
-        env = Env().dual_mode
-        var = create_variable().dual_mode
+        env = Env().create(u'uses')
         stream = StreamWrapper(StdStream(self.sysencoding))
         finder = self._schema_module.schema_finder.start()
         facilities = {
             'pub': self._pub.start(),
-            'env': env.start().dual_mode,
+            'env': env.start().create(u'uses'),
             'stream': stream.start(),
-            'var': var.start(),
             'session': session_maker().start() if session_maker else self._session_storage.create().start(),
             'scripts': self._scripts.start(),
             'include': self._include.start(),
@@ -523,8 +520,8 @@ class Application(PbcObject):
             'logger': logger.Logger(self).start(),
             'sysfiles': self._create_sysfiles(),
         }
-        for k, v in self._facilities.items():
-            facilities[k] = v.start()
+        for k, v in self._facility_classes.items():
+            facilities[k] = v[0].instance(self, v[1])
         vcs = self._vcs(self, facilities['pub'], facilities['data'])
         facilities['vcs'] = vcs
         facilities['token'] = RequestToken(facilities['session'])
@@ -539,8 +536,8 @@ class Application(PbcObject):
 
     def _create_sysfiles(self):
         return SysFiles(
-            actions=self._actions.start().read_mode,
-            schemata=self._schema_fs.start().read_mode,
+            actions=self._actions.start().create(u'reads'),
+            schemata=self._schema_fs.start().create(u'reads'),
         )
 
     def init_env(self, facilities, is_debug, modes, system, environ={}):

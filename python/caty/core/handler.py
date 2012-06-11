@@ -46,7 +46,7 @@ class RequestHandler(object):
         self._config = app.web_config
         self._interpreter = interpreter
         self._verb_dispatcher = app.verb_dispatcher
-        self._file = interpreter._facilities['pub'].start().read_mode
+        self._file = interpreter._facilities['pub'].start().create(u'reads')
         self._encoding = app.encoding
         self._env = env
         self._app = app
@@ -401,10 +401,6 @@ class WebInputParser(object):
 
     def read(self):
         return self.input or {}
-
-    @property
-    def read_mode(self):
-        return self
 
     def _to_unicode(self, seq):
         return [unicode(v, self.encoding) if not isinstance(v, unicode) else v for v in seq]

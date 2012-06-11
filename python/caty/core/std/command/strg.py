@@ -39,7 +39,7 @@ class CreateCollection(Builtin):
         self._global = opts['as-global']
 
     def execute(self):
-        self.storage(self._collection_name).create(self._schema_name, self._global)
+        self.storage(self._collection_name).create_collection(self._schema_name, self._global)
 
 class DropCollection(Builtin, StorageAccessor):
 
@@ -173,7 +173,7 @@ class Restore(Builtin):
     def execute(self, input):
         storage = self.storage(input['collectionName'])
         storage.drop()
-        storage.create(input['schema'])
+        storage.create_collection(input['schema'])
         storage = self.storage(input['collectionName'])
         storage.restore(input['data'])
 

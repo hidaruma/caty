@@ -47,11 +47,6 @@ class HashNotationFound(Exception):
 class ScriptParser(Parser):
     def __init__(self, facilities=None):
         pass
-        #self.mafs = facilities['pub'].read_mode
-        #scripts = facilities.get('scripts', None)
-        #if scripts:
-        #    self.scripts = scripts
-        #self.facilities = facilities
 
     def parse(self, text):
         if not text:

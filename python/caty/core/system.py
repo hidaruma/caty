@@ -296,11 +296,10 @@ class CoreApplication(Application):
     def create_facilities(self, session_maker=None):
         from caty.session.value import create_variable
         from caty.env import Env
-        env = Env().dual_mode
-        var = create_variable().dual_mode
+        env = Env().create('uses')
         finder = self._schema_module.schema_finder.start()
         facilities = {
-            'env': env.start().dual_mode,
+            'env': env,
             'schema': finder,
         }
         fset = FacilitySet(facilities, self)

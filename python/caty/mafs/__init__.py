@@ -196,11 +196,11 @@ class MafsFactory(Facility, ResourceFinder, PbcObject):
                            self._type,
                            self._access_manager)
         if self.mode == READ:
-            return mf.read_mode
+            return mf.create(u'reads')
         elif self.mode == UPDATE:
-            return mf.update_mode
+            return mf.create(u'updates')
         else:
-            return mf.dual_mode
+            return mf.create(u'uses')
 
     def _apply_access_manager_to_file(self, fo):
         Facility.__init__(fo, self.mode)

@@ -33,18 +33,18 @@ class ApplicationGroup(PbcObject):
         self._name = unicode(group_name)
         self._global_config = global_config
         self._system = system
-        self._exists = self._make_super_root(self.name).start().read_mode.opendir('/').exists
+        self._exists = self._make_super_root(self.name).start().create(u'reads').opendir('/').exists
         self.i18n = system.i18n
         if not self.exists:
             if self._name in (USER):
                 self.i18n.write("Application gourp '$name' not exists, auto-generating", name=self._name)
                 d = self._make_super_root('').start()
-                d.dual_mode.opendir('/'+self.name).create()
+                d.create(u'uses').opendir('/'+self.name).create()
                 d.commit()
                 self._exists = True
         if self._name == USER:
             d = self._make_super_root(self.name).start()
-            r = d.dual_mode.opendir('/root')
+            r = d.create(u'uses').opendir('/root')
             if not r.exists:
                 self.i18nt.write("Root application not exists, auto-generating")
                 r.create()
@@ -60,7 +60,7 @@ class ApplicationGroup(PbcObject):
                 yield a
         elif self.exists:
             app_group_root = self._make_super_root(self.name)
-            for d in app_group_root.start().read_mode.opendir('/').read():
+            for d in app_group_root.start().create(u'reads').opendir('/').read():
                 if d.is_dir and not d.basename[0] in ('.', '_') and not d.basename in self._system.ignore_names:
                     name = d.path.strip('/')
                     if name not in app_names and no_app and self._system.force_app != name:

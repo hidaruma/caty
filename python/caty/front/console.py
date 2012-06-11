@@ -38,7 +38,7 @@ class CatyShell(cmd.Cmd):
         self.intro = """Caty interactive shell
         """
         stream = StreamWrapper(StdStream(site.sysencoding))
-        self.stream = stream.dual_mode
+        self.stream = stream.create(u'uses')
         self.app = site
         self.interpreter = None
         self.wildcat = wildcat
@@ -75,13 +75,13 @@ class CatyShell(cmd.Cmd):
         else:
             modes = [unicode('console'), unicode('test')]
         self.app.init_env(facilities, self.debug, modes, self.system, {'PATH_INFO': u'/'})
-        e = facilities['env'].update_mode
+        e = facilities['env'].create(u'updates')
         for k, v in self.env.items():
             e._dict[k] = v
         for k in self.deleted_env:
             if k in e._dict:
                 del e._dict[k]
-        facilities._facilities['env'] = e.read_mode
+        facilities._facilities['env'] = e.create(u'reads')
         return facilities
 
     def change_app(self, line):

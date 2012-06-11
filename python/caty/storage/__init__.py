@@ -47,7 +47,7 @@ class StorageModuleWrapper(Facility):
         self._conn.commit()
 
     def cancel(self):
-        self._conn.cancel()
+        self._conn.rollback()
 
     def __call__(self, collection_name, app_name=''):
         current_app_name = self.application.name
@@ -59,7 +59,7 @@ class StorageModuleWrapper(Facility):
     am = AccessManager()
 
     @am.update
-    def create(self, schema_name, global_collection=False):
+    def create_collection(self, schema_name, global_collection=False):
         return self._storage.factory.create(schema_name, global_collection)
 
     @am.update
@@ -103,16 +103,7 @@ class StorageModuleWrapper(Facility):
         return list(self._storage_class.collections(self._conn))
 
 class NullStorage(object):
-    @property
-    def read_mode(self):
-        raise InternalException(u'JSON storage is not configured')
-
-    @property
-    def update_mode(self):
-        raise InternalException(u'JSON storage is not configured')
-
-    @property
-    def dual_mode(self):
+    def create(self, mode, user_param):
         raise InternalException(u'JSON storage is not configured')
 
     def connect(self):

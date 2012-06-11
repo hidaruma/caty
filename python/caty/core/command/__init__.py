@@ -143,13 +143,10 @@ class Command(object):
         for mode, decl in self.profile.facilities:
             name = decl.name
             key = decl.alias if decl.alias else name
-            facility = facilities[name]
-            if mode == 'reads':
-                facility = facility.read_mode
-            elif mode == 'updates':
-                facility = facility.update_mode
-            elif mode == 'uses':
-                facility = facility.dual_mode
+            param = None#decl.param
+            if name not in facilities:
+                throw_caty_exception('FacilityNotDefined', u'Facility $name is not defined', name=name)
+            facility = facilities[name].create(mode, param)
             # Dummy で定義されてない（=ユーザ定義）ファシリティは、
             # 定義元のアプリケーションへの参照に差し替える
             if self._defined_application.name not in ('caty', 'global') and not 'volatile' in self._annotations:
@@ -161,20 +158,20 @@ class Command(object):
             _set.add(name)
         # 互換性維持のため、envとschemaを追加
         if not 'env' in _set:
-            setattr(self, 'env', facilities['env'].read_mode)
+            setattr(self, 'env', facilities['env'].create(u'reads'))
             _set.add('env')
         if not 'schema' in _set:
-            setattr(self, 'schema', facilities['schema'].read_mode)
+            setattr(self, 'schema', facilities['schema'].create(u'reads'))
             _set.add('schema')
         
         # アプリケーション固有設定はすべてのコマンドから読み取り可能
         if not 'config' in _set:
-            setattr(self, 'config', facilities['config'].read_mode)
+            setattr(self, 'config', facilities['config'].create(u'reads'))
             _set.add('config')
 
         # ロギング機能は常にセットする
         if not 'logger' in _set:
-            setattr(self, 'logger', facilities['logger'].read_mode)
+            setattr(self, 'logger', facilities['logger'].create(u'reads'))
             _set.add('logger')
         self.__facility_names = _set
 
