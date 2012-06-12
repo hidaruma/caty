@@ -1,0 +1,86 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= Undefinedの扱い
+
+https://bitbucket.org/project_caty/dev/issue/13/undefined より：
+
+オブジェクトも配列も概念上はまったく同じ構造になっている。
+
+* オブジェクトのプロパティ値が#'undefinedである事と、そのプロパティが存在しないことは**完全に同値**である。
+* 配列の項目が#'undefinedである事と、その項目がが存在しないことは**完全に同値**である。 
+  （特にルーズ配列では、配列の途中でも存在しない項目が許される。） 
+
+
+== !exec
+
+|=!input                               |=!command     |=!output |
+| [{"a":undefined}, {}]                | eq --boolean | true |
+| [{"a":undefined, "b":undefined}, {}] | eq --boolean | true |
+| [{"a":1, "b":undefined}, {"a":1}]    | eq --boolean |  true |
+
+|=!input                               |=!command     |=!output |
+|[ [undefined], [] ]                   | eq --boolean |  true |
+|[ [1, undefined], [1] ]               | eq --boolean |  true |
+|[ [undefined, undefined], [] ]        | eq --boolean |  true |
+|[ [undefined, 1], [, 1]]              | eq --boolean |  true |
+|[ [1, undefined, 2], [1, ,2] ]        | eq --boolean |  true |
+|[ [1, undefined, 2, undefined], [1, ,2] ]| eq --boolean |  true |
+
+
+上のeqを使ったテストとまったく同じはずだが？（↓）
+目視では失敗している理由がまったく分からない。
+
+
+|=!command                       |=!output |
+| {"a":undefined}                | {} |
+| {"a":undefined, "b":undefined} | {} |
+| {"a":1, "b":undefined}         | {"a":1} |
+
+|=!command                       |=!output |
+| [undefined]                    |[] |
+| [1, undefined]                 |[1] |
+| [undefined, undefined]         |[] |
+| [undefined, 1]                 |[, 1] |
+| [1, undefined, 2]              |[1, ,2]|
+| [1, undefined, 2, undefined]   |[1, ,2]|
+
+
+==== !name:hello-ref
+
+{{{
+  %hello
+}}}
+
+==== !name:hello-safe-ref
+
+{{{
+  %hello?
+}}}
+
+
+=== !exec
+
+|=!command                            |=!output      |=!exception |=  備考 |
+| %hello-ref                          |              |Exception   | |
+| %hello-safe-ref                     |undefined     |            | |
+| "hello" > hello ;   %hello-ref      |"hello"       |            | |
+| "hello" > hello ;   %hello-safe-ref |"hello"       |            | |
+| undefined > hello ; %hello-ref      |              |Exception   | |
+| undefined > hello ; %hello-safe-ref | undefined    |            | |
+
+
+=== !exec
+
+オブジェクトのプロパティでもトップレベルの値でも、挙動は同じになるべき。
+
+|=!input          |=!command      |=!output        |=!exception |=  備考 |
+| {"a":undefined} | xjson:get $.a |                | Exceptoin  | 例外となる |
+| {"a":undefined} |xjson:get --safe $.a |undefined |            | safeオプション |
+| {"a":undefined} |xjson:get --default=null $.a| null|          | defaultが指定されている |
+
+
+|=!input          |=!command      |=!output        |=!exception |=  備考 |
+| undefined       |xjson:get $    |                | Exceptoin  | 例外となる |
+| undefined       |xjson:get --safe $| undefined   |            | safeオプション |
+| undefined       |xjson:get --default=null $| null|            |defaultが指定されている |
+
