@@ -40,8 +40,9 @@ class ListCommands(Internal):
             o['output'] = td.visit(p.decl.profile[1])
             o['deprecated'] = 'deprecated' in proto_type.annotation
             o['throws'] = []
+            o['signals'] = []
             o['typeVars'] = [v.var_name for v in proto_type.type_params]
-            for ls in p.decl.jump:
+            for ls in p.decl.throws:
                 for node in ls:
                     o['throws'].append(td.visit(node))
             if not self._short:

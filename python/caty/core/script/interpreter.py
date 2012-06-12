@@ -8,8 +8,8 @@ from caty import UNDEFINED
 from caty.jsontools.path import build_query
 from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettyprint
 from caty.jsontools import jstypes
-from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, ContinuationSignal, Internal, scriptwrapper
-from caty.core.exception import throw_caty_exception
+from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Internal, scriptwrapper
+from caty.core.exception import throw_caty_exception, ContinuationSignal
 from caty.core.script.node import *
 from caty.core.exception import *
 import caty
@@ -91,9 +91,9 @@ class CommandExecutor(BaseInterpreter):
             try:
                 return self.cmd.accept(self)
             except ContinuationSignal as e:
-                self.cmd = e.cont
-                if self.cmd is None:
+                if e.cont is None:
                     return e.data
+                self.cmd = e.cont
                 self.data = e.data
             except KeyboardInterrupt as e:
                 print e
@@ -184,7 +184,18 @@ class CommandExecutor(BaseInterpreter):
                     getattr(node, n).commit()
             return r
         except ContinuationSignal as e:
+            node.signal_schema.validate(e.data)
             raise
+        except CatyException as e:
+            try:
+                node.throw_schema.validate(e.to_json())
+            except Exception:
+                import traceback
+                traceback.print_exc()
+                import sys
+                raise CatyException(u'RuntimeError', u'Unexpected exception: $name', name=e.tag), None, sys.exc_info()[2]
+            else:
+                raise
         except Exception as e:
             if isinstance(e, PipelineInterruption) or isinstance(e, PipelineErrorExit):
                 raise

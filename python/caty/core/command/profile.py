@@ -122,6 +122,15 @@ class CommandProfile(object):
     def set_arg0_type(self, type):
         self.__arg0_schema = type
 
+
+    @property
+    def throw_schema(self):
+        return self.declobj.throws
+
+    @property
+    def signal_schema(self):
+        return self.declobj.signals
+
     def convert(self, value):
         u"""型変換処理。
         Caty のコマンドオブジェクトは複数のプロファイルを持ちうるため、

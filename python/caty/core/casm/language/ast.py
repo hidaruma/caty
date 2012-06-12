@@ -460,6 +460,8 @@ class CommandDecl(object):
                 yield t, r
 
     def build(self, cursors):
+        from caty.core.casm.language.ast import UnionNode
+        from caty.core.schema import NeverSchema
         if self.__initialized:
             return
         i, o = self.profile_ast
@@ -468,15 +470,19 @@ class CommandDecl(object):
             o = o.accept(cursor)
         self.profile = (i, o)
 
-        j = []
+        self.throws = NeverSchema()
+        self.signals = NeverSchema()
         for t, ls in self.jump_decl:
-            l = []
-            for node in ls:
+            if t == u'throws':
+                node = reduce(lambda a, b: UnionNode(a, b), ls)
                 for cursor in cursors:
                     node = node.accept(cursor)
-                l.append(node)
-            j.append(l)
-        self.jump = j
+                self.throws = node
+            else:
+                node = reduce(lambda a, b: UnionNode(a, b), ls)
+                for cursor in cursors:
+                    node = node.accept(cursor)
+                self.signals = node
         self.__initialized = True
 
     def verify_type_var(self, names):

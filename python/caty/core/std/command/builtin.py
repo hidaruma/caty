@@ -781,7 +781,7 @@ class Redirect(Builtin):
             path = input
         else:
             path = self.path
-        self.exit({
+        raise ContinuationSignal({
             'header': {
                 'Location': unicode(join(self.env.get('HOST_URL'), path)),
             },

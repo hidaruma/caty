@@ -61,3 +61,8 @@ class UnableToAccess(SubCatyException):
     error_type = 'UnableToAccess'
     error_message = u'Can not access to $path'
 
+class ContinuationSignal(BaseException):
+    def __init__(self, data, cont=None):
+        self.cont = cont
+        self.data = data
+

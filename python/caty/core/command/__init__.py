@@ -239,6 +239,18 @@ class Command(object):
         """
         return self._out_schema
 
+    @property
+    def throw_schema(self):
+        u"""例外スキーマ
+        """
+        return self._profile.throw_schema
+
+    @property
+    def signal_schema(self):
+        u"""シグナルスキーマ
+        """
+        return self._profile.signal_schema
+
     def accept(self, visitor):
         return visitor.visit_command(self)
 
@@ -247,18 +259,6 @@ class Command(object):
             'NotImplemented',
             self.name
         )
-
-    def error(self, json_obj):
-        u"""コマンドをエラーとして終了させる。
-        このメソッドが呼ばれた後はエラーハンドラーに処理が委譲され、
-        後のパイプラインは一切処理されなくなる。
-        """
-        raise PipelineErrorExit(json_obj)
-
-    def exit(self, json_obj):
-        u"""コマンドを json_obj を出力にして終了する。
-        """
-        raise PipelineInterruption(json_obj)
 
     def clone(self):
         raise NotImplementedError()
