@@ -9,7 +9,7 @@ for r, d, fs in os.walk(BASE_DIR):
         if f.endswith('.fit'):
             c = open(os.path.join(r, f)).read()
             o = json.loads(unicode(c, 'utf-8'))
-            if o['total'] != o['succ']:
+            if o['total'] != o['succ'] + o['indef']:
                 path = os.path.join(r, f)
                 app, name = path.replace(BASE_DIR, '').split(os.path.sep, 1)
                 app = r.split(os.path.sep)[-1]
