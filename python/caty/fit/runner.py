@@ -296,8 +296,9 @@ class TestCase(object):
         if self.runner._debug:
             print self.input, '|', self.command, self.params
         try:
+            from caty.jsontools import normalize
             i = self._interpreter.build(self.input, transaction=self.runner.transaction)
-            result = cmd(i(None))
+            result = normalize(cmd(i(None)))
             if self.output:
                 self._compare(case, result, self.output, opts)
             elif self.outputCond:
