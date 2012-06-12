@@ -168,7 +168,7 @@ class ClearReport(Internal):
     def setup(self, opts, dir_or_file=None):
         self.__all = opts.get('all', caty.UNDEFINED)
         self.__path = dir_or_file
-        self.__all_apps = opts.get('all_apps', caty.UNDEFINED)
+        self.__all_apps = opts.get('all-apps', caty.UNDEFINED)
 
     def execute(self):
         app = self.env.get('CATY_APP')['name']
