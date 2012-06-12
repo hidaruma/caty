@@ -1,0 +1,182 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= count モジュール
+
+countは、ファシリティのサンプルであるカウンター実装。
+
+次の機能をテストする。
+
+# 初期化と終期化
+# マスターインスタンスの管理
+# リクエスターインスタンスの生成
+# インクリメントとcommit
+
+
+**finalizeは何度でも実行でき、初期化されてない状態に戻す効果があるので最初に実行しておく。**
+
+
+== 初期化と終期化
+
+=== !exec
+
+|= !command                  |=!output|= 備考 |
+| count:Counter.finalize    | void   | 白紙に戻す |
+| count:Counter.is-ready    | false  | 最初は準備できてない |
+| count:Counter.initialize  | void   | 初期化実行 |
+| count:Counter.is-ready    | true   | 準備ができた |
+| count:Counter.list-names  | []     | 最初は何もない |
+| count:Counter.instance A  |        | カウンタAを作る |
+| count:Counter.list-names  | ["A"]  | カウンタAができている |
+| count:Counter.dump        | {"A":0}| カウンタAの値は0 |
+| count:Counter.is-ready    | true   | もう一度状態を確認 |
+| count:Counter.finalize    | void   | 終期化実行 |
+| count:Counter.is-ready    | false  | 準備できてない状態に戻る |
+| count:Counter.list-names  | []     | カウンタはない |
+
+== マスターインスタンスの管理
+
+
+=== !name:set-countA
+
+countA という変数に、カウンタAのマスターインスタンスを代入する。
+
+{{{
+  count:Counter.instance A>countA
+}}}
+
+=== !name:countA
+
+カウンタAのマスターインスタンスのarg0
+
+{{{
+ --0=%countA
+}}}
+
+=== !name:set-countB
+
+countB という変数に、カウンタBのマスターインスタンスを代入する。
+
+{{{
+  count:Counter.instance B>countB
+}}}
+
+=== !name:countB
+
+カウンタBのマスターインスタンスのarg0
+
+{{{
+ --0=%countB
+}}}
+
+
+=== !preCond
+
+テストで使用する変数が環境変数にあるとテストが失敗するのでチェック。
+
+
+|= !command            |=!outputCond                                 |= !judge |
+| env  ~|properties    | [pass, "countA"] ~|list:contains --boolean  | negate |
+| env  ~|properties    | [pass, "countB"] ~|list:contains --boolean  | negate |
+
+=== !exec
+
+
+|= !command                  |=!output|= 備考 |
+| count:Counter.finalize    | void   | 白紙に戻す |
+| count:Counter.is-ready    | false  | 準備できてない |
+| count:Counter.initialize  | void   | 初期化実行 |
+| count:Counter.instance A  |        | カウンタAを作る |
+| count:Counter.list-names  | ["A"]  | カウンタAができている |
+| count:Counter.instance B  |        | カウンタBを作る |
+| count:Counter.list-names  | ["A","B"]| カウンタBができている |
+| count:Counter.instance A  |        | カウンタAを再度作る |
+| count:Counter.list-names  | ["A","B"]| 変化はない |
+
+
+|= !command                              |=!output         |= 備考 |
+|%set-countA; count:Counter.who %countA |["master", "A"]  | マスターインスタンスを確認 A |
+|%set-countB; count:Counter.who %countB |["master", "B"]  | マスターインスタンスを確認 B |
+
+
+== リクエスターインスタンスの生成
+
+=== !name:make-reqA
+
+カウンタAのリクエスタインスタンスをreqAに代入する
+
+{{{
+ count:Counter.create --0=%countA > reqA
+}}}
+
+=== !name:reqA
+
+カウンタAのリクエスタインスタンスのarg0	
+
+{{{
+ --0=%reqA
+}}}
+
+=== !preCond
+
+テストで使用する変数が環境変数にあるとテストが失敗するのでチェック。
+
+
+|= !command            |=!outputCond                                 |= !judge |
+| env  ~|properties    | [pass, "reqA"]   ~|list:contains --boolean  | negate |
+
+
+=== !exec
+
+
+|= !command                  |=!output|= 備考 |
+| count:Counter.finalize    | void   | 白紙に戻す |
+| count:Counter.is-ready    | false  | 準備できてない |
+| count:Counter.initialize  | void   | 初期化実行 |
+| count:Counter.instance A  |        | カウンタAを作る |
+| count:Counter.list-names  | ["A"]  | カウンタAができている |
+
+リクエスタインスタンスは、createごとに別なオブジェクトが返る。目視確認できる。
+
+|= !command                                      |=!output        |= 備考 |
+|%set-countA; count:Counter.who %countA         |["master", "A"] | マスターインスタンスを確認 A |
+|%set-countA; %make-reqA                         |                | リクエスタインスタンスを生成 |
+|%set-countA; %make-reqA                         |                | リクエスタインスタンスを生成 |
+|%set-countA; %make-reqA;count:Counter.who %reqA|["requester","A"]| リクエスタインスタンスを確認 |
+
+== インクリメントとcommit
+
+=== !name:inc
+
+{{{
+ count:CounterRequester.inc
+}}}
+
+=== !name:value
+
+{{{
+ count:CounterRequester.value
+}}}
+
+
+=== !exec
+
+
+|= !command                  |=!output|= 備考 |
+| count:Counter.finalize    | void   | 白紙に戻す |
+| count:Counter.is-ready    | false  | 準備できてない |
+| count:Counter.initialize  | void   | 初期化実行 |
+| count:Counter.instance A  |        | カウンタAを作る |
+| count:Counter.list-names  | ["A"]  | カウンタAができている |
+
+
+|= !command                                        |=!output      |= 備考 |
+|%set-countA; %make-reqA; %inc %reqA; %value %reqA | 1            | リクエスタでインクリメント |
+| count:Counter.dump                             |{"A":0}         | マスターは変わってない |
+|%set-countA; %make-reqA; %inc %reqA; %value %reqA | 2            | リクエスタでインクリメント |
+| count:Counter.dump                             |{"A":0}         | マスターは変わってない |
+|%set-countA; count:Counter.commit %countA       | void           | commit |
+| count:Counter.dump                             |{"A":2}         | マスターは変わっている |
+
+
+
+

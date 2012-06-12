@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*- 
 #
-#  count3cmd
+#  countcmd
 #
 from caty.command import Command
 from caty.jsontools import tagged
-from count3fcl import *
+from count4fcl import *
 
        
 class Initialize(Command):
@@ -54,25 +54,26 @@ class Who(Command):
         return counter.who()
 
 
+
 class Start(Command):
     def execute(self):
-        counter_req = self.arg0
-        return counter_req.start()
+        counter = self.arg0
+        return counter.start()
 
 class Commit(Command):
     def execute(self):
-        counter_req = self.arg0
-        counter_req.commit()
+        counter = self.arg0
+        counter.commit()
 
 class Cancel(Command):
     def execute(self):
-        counter_req = self.arg0
-        counter_req.cancel()
+        counter = self.arg0
+        counter.cancel()
 
 class Cleanup(Command):
     def execute(self):
-        counter_req = self.arg0
-        counter_req.cleanup()
+        counter = self.arg0
+        counter.cleanup()
 
 # 固有コマンド
 

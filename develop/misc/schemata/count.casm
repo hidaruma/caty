@@ -1,15 +1,11 @@
 /* -*- coding: utf-8 -*- */
 module count;
 
-/** エラー情報（今は詳細保留） */
-type Error = deferred;
-
 /** ファシリティのモード */
-type mode = ("read"|"update"|"use");
-
+type mode = fcl:mode;
 
 /** カウンターの設定情報 */
-type Config = {
+type Config = null | {
  /** カウンターの基準値 */
  @[default(0)]
  "baseValue" : integer?,
@@ -19,88 +15,155 @@ type Config = {
  "stepValue" : integer?,
 };
 
-/** カウンタの実体 */
-type Counter = foreign;
+/** アプリケーションインスタンス */
+type _AppInstance = fcl:_AppInstance;
 
-/** カウンタークラス（ファシリティ） */
-//class Counter(Counter) conforms Facility<Config, void, Counter> {
+/** カウンタファシリティ、マスターインスタンス */
+type _Counter = foreign;
 
-/* @[static]が付いているコマンドには、arg0にnullが入る。
- * つまり、arg0は事実上使えない。
- *
- * @[managemement]が付いているコマンドは、シェルからコールバックされる。
- */
+/** リクエスタインスタンス */
+type _CounterRequester = foreign;
 
- /** システムの起動時にコールバックされる */
- @[static, management]
- command _initialize :: Config -> (@OK null | @NG Error)
-  refers python:count.MgInitialize
- ;
- 
- /** システムの終了時にコールバックされる */
- @[static, management]
- command _finalize :: void -> void
-  refers python:count.MgFinalize
- ;
+/** カウンター ファシリティクラス */
+@[facility-spec-for("python:count4fcl.Counter")]
+class Counter (_Counter) {
 
- /** シングルトンインスタンスのカウンターを取得する */
- @[static, management]
- command _create :: [mode, void] -> Counter
-  refers python:count.MgCreate
- ;
+  /* @[static]が付いているコマンドには、arg0にnullが入る。
+   * つまり、arg0は事実上使えない。
+   *
+   * @[managemement]が付いているコマンドは、シェルからコールバックされる。
+   */
+
+   /** システムの起動時にコールバックされる */
+   @[static, management]
+   command initialize [Config?]
+   :: _AppInstance|null -> void
+    refers python:countcmd.Initialize
+   ;
+  
+   /** システムの終了時にコールバックされる */
+   @[static, management]
+   command finalize 
+   :: _AppInstance|null -> void
+    refers python:countcmd.Finalize
+   ;
+  
+   /** マスターインスタンスーを生成・取得する */
+   @[static, management, creator]
+   command instance [(null|string)? name]
+   :: _AppInstance|null -> _Counter
+    refers python:countcmd.Instance
+   ;
+  
+   /** 役割と名前の問い合わせ
+    * テスト・確認用
+    */
+   @[reader]
+   command who :: void -> [string, string]
+    refers python:countcmd.Who
+   ;
+  
+   /** カウンタの名前をリストする 
+    * テスト・確認用
+    */
+   @[static, reader]
+   command list-names
+   :: void -> [string*]
+    refers python:countcmd.ListNames
+   ;
+  
+   /** クラスが初期化されているかどうか
+    * テスト・確認用
+    */
+   @[static, reader]
+   command is-ready
+   :: void -> boolean
+    refers python:countcmd.IsReady
+   ;
+
+   /** カウンターの名前と値をダンプする
+    * テスト・確認用
+    */
+   @[static, reader]
+   command dump
+   :: void -> {* : integer?}
+    refers python:countcmd.Dump
+   ;
+
+   /** トランザクションを開始する */
+   @[management, creator]
+   command start :: void -> _Counter
+    refers python:countcmd.Start
+   ;
+  
+   /** トランザクションをコミットする */
+   @[management]
+   command commit :: void -> void
+    refers python:countcmd.Commit
+   ;
+  
+   /** トランザクションをキャンセルする */
+   @[management]
+   command cancel :: void -> void
+    refers python:countcmd.Cancel
+   ;
+  
+   /** マスターインスタンスを後始末する */
+   @[management]
+   command cleanup :: void -> void
+    refers python:countcmd.Cleanup
+   ;
 
 
-/* 以下のコマンドのarg0には、Counterがセットされる  */
+   /** リクエスタインスタンスを生成・取得する */
+   @[management, creator]
+   command create ["use"?, null?]
+   :: void -> _CounterRequester
+    refers python:countcmd.Create
+   ;
 
- /** カウンターの値を取得する */
- @[accessor]
- command value [Counter] :: void -> integer
-  refers python:count.Value
- ;
+};
 
- /** カウンターをインクリメントする */
- @[mutator]
- command inc [Counter] :: void -> Counter
-  refers python:count.Inc
- ;
+//facility countA = Counter with "A";
 
- /** カウンターをデクリメントする */
- @[mutator]
- command dec [Counter] :: void -> Counter
-  refers python:count.Dec
- ;
+/** リクエスタクラス */
+class CounterRequester (_CounterRequester) {
+  /* 以下のコマンドのarg0には、_CounterRequesterがセットされる  
+   */
 
- /** カウンターをリセットする */
- @[mutator]
- command reset [Counter] :: void -> Counter
-  refers python:count.Reset
- ;
+   /** 役割と名前の問い合わせ
+    * テスト・確認用
+    */
+   @[reader]
+   command who :: void -> [string, string]
+    refers python:countcmd.Who
+   ;
+  
+ // 以下、固有なコマンド
 
- /** トランザクションを開始する */
- @[management]
- command _begin [Counter] :: void -> Counter
-  refers python:count.MgBegin
- ;
-
- /** トランザクションをコミットする */
- @[management]
- command _commit [Counter] :: void -> Counter
-  refers python:count.MgCommit
- ;
-
- /** トランザクションをキャンセルする */
- @[management]
- command _cancel [Counter] :: void -> Counter
-  refers python:count.MgCancel
- ;
-
- /** カウンターを破棄する */
- @[management]
- command _dispose [Counter] :: void -> void
-  refers python:count.MgDispose
- ;
-
-
-//};
+   /** カウンターの値を取得する */
+   @[reader]
+   command value :: void -> integer
+    refers python:countcmd.Value
+   ;
+  
+   /** カウンターをインクリメントする */
+   @[updater]
+   command inc :: void -> void
+    refers python:countcmd.Inc
+   ;
+  
+   /** カウンターをデクリメントする */
+   @[updater]
+   command dec :: void -> void
+    refers python:countcmd.Dec
+   ;
+  
+   /** カウンターをリセットする */
+   @[updater]
+   command reset :: void -> void
+    refers python:countcmd.Reset
+   ;
+};
 
 /* End */
