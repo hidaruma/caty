@@ -25,7 +25,7 @@ type _Counter = foreign;
 type _CounterRequester = foreign;
 
 /** カウンター ファシリティクラス */
-//@[facility-spec-for("python:count4fcl.Counter")]
+@[facility-spec-for("python:count4fcl.Counter")]
 class Counter (_Counter) {
 
   /* @[static]が付いているコマンドには、arg0にnullが入る。

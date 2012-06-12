@@ -53,10 +53,8 @@ class Counter(object):
         print u"Counter facility finalized."
 
     @classmethod
-    def instance(cls, app_instance, system_param=None):
+    def instance(cls, app_instance, system_param=u"default"):
         # システムパラメータがカウンターの名前となる
-        if system_param is None:
-            system_param = u"default"
         name = system_param
         c = cls.counters.get(name, None)
         if not c:
