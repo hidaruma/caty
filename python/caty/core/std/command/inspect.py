@@ -42,9 +42,12 @@ class ListCommands(Internal):
             o['throws'] = []
             o['signals'] = []
             o['typeVars'] = [v.var_name for v in proto_type.type_params]
-            for ls in p.decl.throws:
-                for node in ls:
+            if p.decl.throws.type != u'never':
+                for node in self.__divide_union(p.decl.throws):
                     o['throws'].append(td.visit(node))
+            if p.decl.signals.type != u'never':
+                for node in self.__divide_union(p.decl.signals):
+                    o['signals'].append(td.visit(node))
             if not self._short:
                 o['facilityUsages'] = []
                 for mode, decl in p.decl.get_all_resources():
@@ -52,6 +55,16 @@ class ListCommands(Internal):
             profiles.append(o)
         return profiles
         
+    def __divide_union(self, o):
+        from caty.core.schema import UnionSchema
+        if isinstance(o, UnionSchema):
+            for x in self.__divide_union(o.left):
+                yield x
+            for x in self.__divide_union(o.right):
+                yield x
+        else:
+            yield o
+
 class ListModules(Internal):
     def setup(self, app_name):
         self.app_name = app_name

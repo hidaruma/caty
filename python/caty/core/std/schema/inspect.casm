@@ -37,6 +37,7 @@ type ShortProfile = {
 
  /** 例外の型 */
  "throws" : ([exceptionName*] | @only [exceptionName*])?,
+ "signals" : ([exceptionName*] | @only [exceptionName*])?,
 
  /** deprecatedか否か */
  "deprecated" : boolean,
