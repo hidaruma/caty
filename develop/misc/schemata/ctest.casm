@@ -1,0 +1,15 @@
+// -*- coding: utf-8 -*-
+module ctest; 
+
+command val :: void -> integer
+ uses countA
+ refers python:ctest.Val
+;
+
+command up :: void -> void
+ uses countA
+ refers python:ctest.Up
+;
+// End of Module
+
+

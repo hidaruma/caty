@@ -124,7 +124,7 @@ class Counter (_Counter) {
 
 };
 
-//facility countA = Counter with "A";
+facility countA = Counter with "A";
 
 /** リクエスタクラス */
 class CounterRequester (_CounterRequester) {

@@ -37,20 +37,20 @@ class Counter(object):
         cls.base_value = config.get('baseValue', 0)
         cls.step_value = config.get('stepValue', 1)
         cls.initialized = True
-        print u"Counter facility initialized."
+        print u"\nCounter facility initialized.\n"
 
     @classmethod
     def finalize(cls, app_instance):
         if not cls.initialized:
             # テスト用に、
-            # 複数回繰り返し初期化しても弊害がないようにしておく
+            # 複数回繰り返し終期化しても弊害がないようにしておく
             return
         # マスターインスタンスをクリア
         for name in cls.counters:
             cls.counters[name].cleanup()
         cls.counters = {}
         cls.initialized = False
-        print u"Counter facility finalized."
+        print u"\nCounter facility finalized.\n"
 
     @classmethod
     def instance(cls, app_instance, system_param=u"default"):
@@ -59,7 +59,8 @@ class Counter(object):
         c = cls.counters.get(name, None)
         if not c:
             # マスターインスタンスを新規生成
-            c = cls.counters[name] = Counter(app_instance, name)
+            c = cls.counters[name] = Counter(app_instance, None, Counter.base_value, name)
+        print u'Counter facility %s: instantiated.' % name
         return c
 
     @classmethod
@@ -77,15 +78,16 @@ class Counter(object):
             d[name] = cls.counters[name]._value
         return d
 
-    def __init__(self, app_instance, name):
+
+    def __init__(self, app_instance, parent, value, name):
         # 引数を保存。app は使ってない。
         self.app = app_instance
         self.name = name
         # この値がNoneならマスターインスタンス
         # そうでなければサブトランザクション用のインスタンス
-        self.parent = None
+        self.parent = parent
         # 保持するカウンター値
-        self._value = Counter.base_value
+        self._value = value
         # トランザクションの書き込み対象のカウンター
         self._tmp_value = self._value
 
@@ -99,7 +101,7 @@ class Counter(object):
         return CounterRequester(self, self.name)
 
     def cleanup(self):
-        print "Good bye from " + self.name
+        print u'Counter facility %s: cleanup.' % self.name
 
     def conflicts(self, param1, parm2):
         # 引数チェックは不要だが、念のため
@@ -110,10 +112,8 @@ class Counter(object):
 
     def start(self):
         # 自分を親にして、値をそのまま引き継がせる
-        c = Counter(self, self._value, self.name)
-        c._value = self._tmp_value
-        c._tmp_value = self._tmp_value
-        c.parent = self
+        c = Counter(None, self, self._tmp_value, self.name)
+        print u'Counter facility %s: started.' % self.name
         return c
 
     def commit(self):
