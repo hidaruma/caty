@@ -190,12 +190,11 @@ class CommandExecutor(BaseInterpreter):
             try:
                 node.throw_schema.validate(e.to_json())
             except Exception:
-                import traceback
-                traceback.print_exc()
                 import sys
-                raise CatyException(u'RuntimeError', u'Unexpected exception: $name', name=e.tag), None, sys.exc_info()[2]
-            else:
-                raise
+                pass
+                # TODO: onlyが付いていたら例外を付け直すように後で修正
+                #raise CatyException(u'RuntimeError', u'Unexpected exception: $name', name=e.tag), None, sys.exc_info()[2]
+            raise e, None, sys.exc_info()[2]
         except Exception as e:
             if isinstance(e, PipelineInterruption) or isinstance(e, PipelineErrorExit):
                 raise
