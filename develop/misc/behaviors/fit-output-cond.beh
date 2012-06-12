@@ -12,12 +12,12 @@ type TrueValue = (true | @True univ | @OK univ);
 == !exec
 
 |= !command |= !outputCond                     |= !judge |
-| "hello"   | [pass, "hello" ] ~| eq --boolean | abandon |
-| "hello"   | typeis string                    | abandon |
-| "hello"   | [pass, "hello" ] ~| eq           | abandon |
-| void      | true                             | abandon |
-| void      | @True null                       | abandon |
-| void      | @OK null                         | abandon |
+| "hello"   | [pass, "hello" ] ~| eq --boolean | suspend |
+| "hello"   | typeis string                    | suspend |
+| "hello"   | [pass, "hello" ] ~| eq           | suspend |
+| void      | true                             | suspend |
+| void      | @True null                       | suspend |
+| void      | @OK null                         | suspend |
 
 
 

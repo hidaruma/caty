@@ -316,7 +316,7 @@ class FitCase(FitRow):
             self.result = 'Inval'
         else:
             testcase.test(self, self.output_opts)
-            if self.judge == 'abandon':
+            if self.judge == 'suspend':
                 self.result = 'Indef'
                 return
             if self.result == 'Error' and not test_runner.force and not self.judge == 'ignore':
@@ -463,14 +463,14 @@ class FitCase(FitRow):
     def succeed(self):
         if self.result == 'Inval':
             return INVALID
-        assert self.judge in ('', 'negate', 'ignore', 'accept', 'abandon'), ro.i18n.get(u'judge column must be one of negate/ignore/accept/abandon or blank: $actual', actual=self.judge)
+        assert self.judge in ('', 'negate', 'ignore', 'accept', 'suspend'), ro.i18n.get(u'judge column must be one of negate/ignore/accept/suspend or blank: $actual', actual=self.judge)
         if self.judge == '' or self.judge == 'accept':
             return self.result in ('OK', 'NotYet')
         elif self.judge == 'negate':
             return self.result not in ('OK', 'NotYet')
         elif self.judge == 'ignore':
             return True
-        elif self.judge == 'abandon':
+        elif self.judge == 'suspend':
             return None
 
 INVALID = 3
