@@ -154,12 +154,12 @@ class CommandExecutor(BaseInterpreter):
                     msg = '{0} at {1}:{2} Line {3}, Col {4}'.format(name, self.app.name, self.cmd._cmd_name, self.cmd.col, self.cmd.line)
                 else: # コンソール
                     msg = '{0}'.format(name)
-                self.app._system.depreacte_logger.debug(msg)
+                self.app._system.deprecate_logger.debug(msg)
             except Exception, e:
                 import traceback
                 traceback.print_exc()
                 msg = u'%s (other infomation is lacking)' % node.name
-                self.app._system.depreacte_logger.debug(msg)
+                self.app._system.deprecate_logger.debug(msg)
         if node._mode: # @console など、特定のモードでしか動かしてはいけないコマンドのチェック処理
             mode = node.env.get('CATY_EXEC_MODE')
             if not node._mode.intersection(set(mode)):

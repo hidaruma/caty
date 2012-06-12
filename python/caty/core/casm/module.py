@@ -492,7 +492,7 @@ class AppModule(Module):
             if self.is_root and e.path == u'/public.casm':
                 self.filepath = e.path
                 self.application.i18n.write(u'[WARNING] public.casm is obsolete')
-                self.application._system.depreacte_logger.warning(u'public.casm is obsolete: %s' % self.application.name)
+                self.application._system.deprecate_logger.warning(u'public.casm is obsolete: %s' % self.application.name)
                 # self._compile(e.path)
             elif e.path.endswith(u'.casm') or e.path.endswith(u'.pcasm') or e.path.endswith(u'.casm.lit'):
                 mod = self.__class__(self._app, self)

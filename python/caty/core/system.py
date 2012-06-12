@@ -136,7 +136,7 @@ class System(PbcObject):
         return self._error_logger
 
     @property
-    def depreacte_logger(self):
+    def deprecate_logger(self):
         return self._deprecate_logger
 
     @property
