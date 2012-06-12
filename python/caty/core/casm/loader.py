@@ -182,11 +182,12 @@ class PseudoModule(object):
 
     def _find_encoding(self, text):
         import re
-        line = text.splitlines()[0]
-        c = re.compile('coding *: *(.+)')
-        m = c.search(line)
-        if m:
-            return m.group(1)
+        if text:
+            line = text.splitlines()[0]
+            c = re.compile('coding *: *(.+)')
+            m = c.search(line)
+            if m:
+                return m.group(1)
         return 'utf-8'
 
     def __str__(self):
