@@ -332,7 +332,7 @@ class FacilitySet(object):
     """
     def __init__(self, dictionaly, app):
         for v in dictionaly.values():
-            assert isinstance(v, Facility)
+            #assert isinstance(v, Facility)
             # 呼び出し元のアプリケーションをセット
             v.application = app
         self._facilities = dictionaly
