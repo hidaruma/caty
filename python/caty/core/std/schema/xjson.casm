@@ -54,7 +54,7 @@ command get
     @[default(false)]
     "safe" : boolean?,
     "default": (integer|null|boolean|number|string)?,
-} [pathExpr? path_expr] :: any -> (any | undefined)
+} [pathExpr? path_expr] :: univ -> univ
 throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist ]
 refers python:caty.core.std.command.xjsonlib.Get;
 
@@ -64,7 +64,7 @@ command put
     /** ルーズ配列を許す */
     @[default(false)]
     "allow-loose" : boolean?
-} [pathExpr path_expr] :: [any data, any val] -> any
+} [pathExpr path_expr] :: [univ data, univ val] -> univ
 throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist, ConsistencyViolation ]
 refers python:caty.core.std.command.xjsonlib.Put;
 
