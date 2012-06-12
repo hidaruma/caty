@@ -37,14 +37,14 @@ class Counter (Counter) {
  /** システムの起動時にコールバックされる */
  @[static, management]
  command initialize [Config?]
- :: _AppInstance -> null | Error
+ :: _AppInstance|null -> null | Error
   refers python:count2.Initialize
  ;
 
  /** システムの終了時にコールバックされる */
  @[static, management]
  command finalize 
- :: _AppInstance -> void
+ :: _AppInstance|null -> void
   refers python:count2.Finalize
  ;
 
@@ -52,7 +52,7 @@ class Counter (Counter) {
  /** カウンターを取得する */
  @[static, management, creator]
  command create [null, "use", string name]
- :: _AppInstance -> Counter
+ :: _AppInstance|null -> Counter
   refers python:count2.Create
  ;
 

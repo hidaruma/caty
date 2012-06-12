@@ -1,4 +1,8 @@
-module tc; // -*- coding: utf-8 -*-
+// -*- coding: utf-8 -*-
+/** 
+ * テスト コマンド 
+ */
+module tc; 
 
 /** 001 引数なし、オプションなし */
 command t001

@@ -30,7 +30,7 @@ class TempFile(_TempFile) {
  ;
 
  @[static, management]
- command finalize :: runtime:_AppInstance -> void
+ command finalize :: runtime:_AppInstance|null -> void
   refers python:tempfilecmd.MgmntFinalize
  ;
 

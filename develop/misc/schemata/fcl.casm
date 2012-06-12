@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 module fcl;
 
-type _AppInstance = (null | foreign);
+type _AppInstance = foreign;
 
 
 
@@ -10,6 +10,7 @@ type _Instance = foreign;
 
 
 /** エラー情報 */
+@[deprecated]
 type Error = (string | {"message":string, *:any?});
 
 /** ファシリティのモード */
@@ -27,13 +28,13 @@ class ManageableAsFacility (_Instance) {
  /** システムの起動時にコールバックされる */
  @[static, management]
  command initialize [Config? conf]
- :: _AppInstance -> void  throws Exception
+ :: _AppInstance|null -> void  throws Exception
  ;
 
  /** システムの終了時にコールバックされる */
  @[static, management]
  command finalize 
- :: _AppInstance -> void
+ :: _AppInstance|null -> void
  ;
 
  /** リクエスターを生成・取得する 
@@ -41,7 +42,7 @@ class ManageableAsFacility (_Instance) {
   */
  @[static, management, creator]
  command create [any system_param, mode mode, any? user_param]
- :: _AppInstance -> _Instance throws Exception
+ :: _AppInstance|null -> _Instance throws Exception
  ;
 
 /* 以下のコマンドのarg0には、_Instanceがセットされる  */
