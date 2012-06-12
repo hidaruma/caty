@@ -1,24 +1,14 @@
+@[register-public]
 module predefined;// -*- coding: utf-8 -*-
 
-@[register-public]
 type list<X default any> = [X*];
 
-@[register-public]
 type record<X default any> = {*: X?};
 
-@[register-public]
 type scalar  = null|boolean|number|string|binary;
 
-@[register-public]
-command app-names :: void -> void {
-  // print app names
-  apps | each { pv name | cout } | void
-};
-
-@[register-public]
 type Logical<X> =(boolean | @True X | @False X );
 
-@[register-public]
 type Trilogical<X> =(triboolean | @True X | @False X | @Indef X);
 
 // End of Module

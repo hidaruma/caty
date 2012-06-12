@@ -36,5 +36,3 @@ type typeName = string(remark = "type name");
 
 
 // End of Module
-
-

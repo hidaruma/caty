@@ -1,6 +1,18 @@
 @[register-public]
 module default; // -*- coding: utf-8 -*-
 
+/** アプリケーションの名前一覧 */
+command app-names :: void -> void {
+  // print app names
+  apps | each { pv name} | list:sort | each{ cout } | void
+};
+
+
+/** 環境変数の名前一覧 */
+command env-names :: void -> void {
+  env | properties | list:sort | each { cout } | void
+};
+
 /** 実行環境をダンプする */
 command dump-closure {* : any?} [any* args] 
 :: any -> {"opts":object, "arg0":any, "args":array, "input": any?, "env": object}
