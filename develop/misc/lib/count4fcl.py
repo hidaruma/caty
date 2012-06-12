@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 #
-#  count3fcl
+#  count4fcl -- count3fclから修正
 # 
 # 名前で識別される複数のカウンター・インスタンスを持てる。
 # カウンターインスタンスが状態として保持するのは単一の整数値。
@@ -17,7 +17,7 @@ def _print_value(val):
 
 class Counter(object):
     # 生成済みのマスターインスタンス達
-    # カウンター値はマスターインスタンスによってCaty終了まで保持される
+    # カウンター値はマスターインスタンスによってCaty終了時まで保持される
     counters = {}
     # 設定値
     base_value = 0
@@ -47,7 +47,7 @@ class Counter(object):
             return
         # マスターインスタンスをクリア
         for name in cls.counters:
-            cls.counters[name].dispose()
+            cls.counters[name].cleanup()
         cls.counters = {}
         cls.initialized = False
         print u"Counter facility finalized."
@@ -55,6 +55,8 @@ class Counter(object):
     @classmethod
     def instance(cls, app_instance, system_param=None):
         # システムパラメータがカウンターの名前となる
+        if system_param is None:
+            system_param = u"default"
         name = system_param
         c = cls.counters.get(name, None)
         if not c:
@@ -91,15 +93,22 @@ class Counter(object):
 
     # デバッグ・テスト用
     def who(self):
-        print 'I am the master of "%s"' % self.name
+        print 'I am a master of "%s"' % self.name
         return [u'master', self.name]
 
     def create(self, mode, user_param=None):
         # mode, user_paramは使ってない、つうか、とりあえず無視
         return CounterRequester(self, self.name)
 
-    def dispose(self):
+    def cleanup(self):
         print "Good bye from " + self.name
+
+    def conflicts(self, param1, parm2):
+        # 引数チェックは不要だが、念のため
+        if not (param is None and param2 is None):
+            # ユーザーパラメータはnullしかない
+            raise Exception("bad args")
+        return False # 同じ名前＆ユーザーパラメータであっても競合は起きない
 
     def start(self):
         # 自分を親にして、値をそのまま引き継がせる
@@ -121,8 +130,6 @@ class Counter(object):
         # 自分の値を初期値に戻す
         self._tmp_value = self._value
 
-    def cleanup(self):
-        pass
 
 class CounterRequester(object):
 
@@ -143,13 +150,14 @@ class CounterRequester(object):
 
     def inc(self):
         self.master._tmp_value += Counter.step_value
-        _print_value(self.value)
+        _print_value(self.master._tmp_value)
 
     def dec(self):
         self.master._tmp_value -= Counter.step_value
-        _print_value(self.value)
+        _print_value(self.master._tmp_value)
 
     def reset(self):
         self.master._tmp_value = Counter.base_value
-        _print_value(self.value)
+        _print_value(self.master._tmp_value)
+
 
