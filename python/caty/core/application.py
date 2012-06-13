@@ -708,6 +708,9 @@ class Application(PbcObject):
             v.cancel()
         return r
 
+    def finalize(self):
+        for f in set([v[0] for v in self._facility_classes.values()]):
+            f.finalize(self)
 
 class StdStream(object):
     def __init__(self, encoding):

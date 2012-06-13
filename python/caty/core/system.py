@@ -267,6 +267,10 @@ class System(PbcObject):
             }
         }
 
+    def finalize(self):
+        for app in self._apps:
+            app.finalize()
+
 class CoreApplication(Application):
     def __init__(self, system):
         self._name = 'caty'
@@ -310,6 +314,10 @@ class CoreApplication(Application):
         pass
 
     def __invariant__(self):
+        pass
+
+
+    def finalize(self):
         pass
 
 class DummyGroup(object):

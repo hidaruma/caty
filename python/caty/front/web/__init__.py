@@ -61,6 +61,7 @@ def main(args):
         sl.info(ro.i18n.get('Caty server ended'))
     else:
         sl.error(ro.i18n.get('Caty server ended'))
+    system.finalize()
     return 0
 
 def unlink_pid():

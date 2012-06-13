@@ -429,6 +429,7 @@ Web サーバの起動・停止を行う
         if self.hcon is not None:
             self.hcon.shutdown()
             self.hcon.stop()
+        self.system.finalize()
 
     def do_setenv(self, line):
         from caty.core.language.util import name_token, CharSeq, option, S, ParseFailed
