@@ -21,12 +21,12 @@
 
    "createStuff" : {
        "files" : ["_global.xjson", "stdcaty.py"],
-       "dirs" : ["python", "main"]
+       "dirs" : ["python", "main", "messages"]
    },
 
    "updateStuff" : {
      "files" : ["stdcaty.py"],
-     "dirs"  : ["python"]
+     "dirs"  : ["python", "messages"]
    },
 
    "compareStuff" :{
