@@ -124,7 +124,8 @@ class Counter (_Counter) {
 
 };
 
-facility countA = Counter with "A";
+// 他のFITテストを失敗させるのでコメントアウト
+// facility countA = Counter with "A";
 
 /** リクエスタクラス */
 class CounterRequester (_CounterRequester) {

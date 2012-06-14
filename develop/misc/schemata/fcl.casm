@@ -1,17 +1,47 @@
 // -*- coding: utf-8 -*-
 module fcl;
 
+/** 設定情報（任意） */
+type Config = any;
+
+/** アプリケーションインスタンス */
 type _AppInstance = foreign;
 
+/** マスターインスタンス */
+type _MasterInstance = foreign;
 
+/** リクエスターインスタンス */
+type _RequesterInstance = foreign;
 
-type Config = deferred;
-type _Instance = foreign;
+/** トランザクションのサポート状況 */
+type TransactionSupport = (
+  /** サポートされている */
+  "supported"   |
+  /** （サポートすべきだが）サポートされてない */
+  "unsupported" |
+  /** 不要である（したがって、サポートされてない） */
+  "notNeeded"   |
+  /** メソッドが揃っているが、ダミーのメソッドが含まれる */
+  "dummy"       |
+  /** サポート状況が不明 */
+  "unknown"     |
+);
 
+/** ファシリティに関する情報 
+ */
+type About = {
+  /** 表示名 */
+  "displayName" : string?,
+  /** ライセンスを記述する文書を参照するURI */
+  "license" : common:uri?,
+  /** 著作権を明示する人間可読なテキスト */
+  "copyright" : string?,
+  /** トランザクションのサポート状況 */
+  "transaction" : TransactionSupport?,
+  
+   * : any?
+};
 
-/** エラー情報 */
-@[deprecated]
-type Error = (string | {"message":string, *:any?});
 
 /** ファシリティのモード */
 type mode = ("read"|"update"|"use"); // useはなくなるかも
@@ -23,34 +53,55 @@ type mode = ("read"|"update"|"use"); // useはなくなるかも
  * 初期化に失敗したときは例外を投げる
  */
 @[signature]
-class ManageableAsFacility (_Instance) {
+class FacilityClass {
 
  /** システムの起動時にコールバックされる */
  @[static, management]
  command initialize [Config? conf]
- :: _AppInstance|null -> void  throws Exception
+ :: _AppInstance|null -> (null | string)
  ;
 
  /** システムの終了時にコールバックされる */
- @[static, management]
+ @[static, management, optional]
  command finalize 
- :: _AppInstance|null -> void
+ :: _AppInstance|null ->  (null | string)
  ;
+
+ /** ファシリティクラスに関する情報を返す
+  */
+ @[static, management, reade, optional]
+ command about 
+ :: void -> About
+ ;
+
+};
+
+
+@[signature]
+class MasterInstance (_MasterInstance) {
 
  /** リクエスターを生成・取得する 
   * 生成に失敗したときは例外を投げる
   */
- @[static, management, creator]
- command create [any system_param, mode mode, any? user_param]
- :: _AppInstance|null -> _Instance throws Exception
+ @[management, creator]
+ command create [mode mode, any? user_param]
+ :: void -> _RequesterInstance
  ;
 
-/* 以下のコマンドのarg0には、_Instanceがセットされる  */
+ /** マスターインスタンスの後始末 */
+ @[managemen, optional]
+ command cleanup :: void -> void
+ ;
 
+};
+
+@[signature]
+// class UpdatableMasterInstance = arg0(_MasterInstance) MasterInstance & {
+class UpdatableMasterInstance (_MasterInstance) {
 
  /** トランザクションを開始する */
  @[management, creator]
- command start :: void -> _Instance
+ command start :: void -> _MasterInstance
  ;
 
  /** トランザクションをコミットする */
@@ -63,10 +114,9 @@ class ManageableAsFacility (_Instance) {
  command cancel :: void -> void
  ;
 
- /** リクエスタインスタンスの後始末 */
- @[management]
- command cleanup :: void -> void
- ;
-
 };
 
+@[signature]
+class ReqesterInstance (_RequesterInstance) {
+
+};

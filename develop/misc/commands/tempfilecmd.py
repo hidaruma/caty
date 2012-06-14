@@ -11,131 +11,108 @@
 # 
 
 from caty.command import Command
-from caty.jsontools import tagged
 from tempfilefcl import TempFile # ファシリティ実装クラス
 
 Facility = TempFile
 
 # 全体の管理用コールバック
 
-class MgmntInitialize(Command):
-    def execute(self, config):
-        r = Facility._initialize(config)
-        if r is None:
-            return tagged(u'OK', None)
-        else:
-            return tagged(u'NG', r)
+class Initialize(Command):
+    def setup(self, config=None):
+        self.config = config
 
-class MgmntFinalize(Command):
-    def execute(self):
-        Facility._finalize()
-        return None
+    def execute(self, app_instance):
+        return Facility.initialize(app_instance, 
+                                  self.config)
+class Finalize(Command):
+    def execute(self, app_instance):
+        return Facility.finalize(app_instance)
 
-class MgmntCreate(Command):
-    def execute(self, mode_param):
-        return Facility._create(mode_param)
 
-# インスタンスの管理用コールバック
+class Instance(Command):
+    def setup(self, system_param=None):
+        self.system_param = system_param
 
-class MgmntBegin(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
+    def execute(self, app_instance):
+        return Facility.instance(app_instance, self.system_param)
 
-    def execute(self):
-        reqtr = self.arg0
-        reqtr._begin()
-        return reqtr
 
-class MgmntCommit(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
+class Create(Command):
+    def setup(self, mode=u'use', user_param=None):
+        self.mode = mode
+        self.user_param = user_param
 
     def execute(self):
-        reqtr = self.arg0
-        reqtr._commit()
-        return reqtr
+        master = self.arg0
+        return master.create(self.mode, self.user_param)
 
-class MgmntCancel(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
+# トランザクション管理用コールバック
 
+class Start(Command):
     def execute(self):
-        reqtr = self.arg0
-        reqtr._cancel()
-        return reqtr
+        master = self.arg0
+        return master.start()
 
-class MgmntSync(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
-
+class Commit(Command):
     def execute(self):
-        reqtr = self.arg0
-        reqtr._sync()
-        return reqtr
+        master = self.arg0
+        master.commit()
 
-class MgmntClose(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
-
+class Cancel(Command):
     def execute(self):
-        reqtr = self.arg0
-        reqtr._close()
-        return reqtr
+        master = self.arg0
+        master.cancel()
+
+class Cleanup(Command):
+    def execute(self):
+        master = self.arg0
+        master.cleanup()
+
+
 
 # ファシリティ固有のコマンド
 
 class OsDirPath(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
-
     def execute(self):
-        reqtr = self.arg0
-        return reqtr.os_dir_path()
+        req = self.arg0
+        return req.os_dir_path()
 
 class OsPath(Command):
-    def setup(self, arg0, name):
-        self.arg0 = arg0
+    def setup(self, name):
         self._name = name
 
     def execute(self):
-        reqtr = self.arg0
-        return reqtr.os_path(self._name)
+        req = self.arg0
+        return req.os_path(self._name)
 
 class List(Command):
-    def setup(self, arg0):
-        self.arg0 = arg0
-
     def execute(self):
-        reqtr = self.arg0
-        return reqtr.list()
+        req = self.arg0
+        return req.list()
 
 class Read(Command):
-    def setup(self, arg0, name):
-        self.arg0 = arg0
+    def setup(self, name):
         self._name = name
 
     def execute(self):
-        reqtr = self.arg0
-        return reqtr.read(self._name)
+        req = self.arg0
+        return req.read(self._name)
 
 # ここからmutators
 
 class Write(Command):
-    def setup(self, arg0, name):
-        self.arg0 = arg0
+    def setup(self, name):
         self._name = name
 
     def execute(self, input):
-        reqtr = self.arg0
-        reqtr.write(input, self._name)
-        return reqtr
+        req = self.arg0
+        req.write(input, self._name)
+        return req
 
 class Remove(Command):
-    def setup(self, arg0, name):
-        self.arg0 = arg0
+    def setup(self, name):
         self._name = name
 
     def execute(self):
-        reqtr = self.arg0
-        reqtr.remove(self._name)
-        return reqtr
+        req = self.arg0
+        req.remove(self._name)

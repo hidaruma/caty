@@ -3,7 +3,7 @@
 module osenv; 
 
 type _AppInstance = fcl:_AppInstance;
-type Error = fcl:Error;
+
 
 /** osenvの設定情報 */
 type Config = null; // 設定不要

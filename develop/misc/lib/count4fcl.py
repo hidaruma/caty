@@ -60,7 +60,7 @@ class Counter(object):
         if not c:
             # マスターインスタンスを新規生成
             c = cls.counters[name] = Counter(app_instance, None, Counter.base_value, name)
-        print u'Counter facility %s: instantiated.' % name
+#        print u'Counter facility %s: instantiated.' % name
         return c
 
     @classmethod
@@ -101,7 +101,8 @@ class Counter(object):
         return CounterRequester(self, self.name)
 
     def cleanup(self):
-        print u'Counter facility %s: cleanup.' % self.name
+#        print u'Counter facility %s: cleanup.' % self.name
+        pass
 
     def conflicts(self, param1, parm2):
         # 引数チェックは不要だが、念のため
