@@ -2,12 +2,14 @@
 
 = Inspect
 
-== 全般の注意
+== 全般的な注意
 
-* 疑似タグについては、大幅に変更する予定なので、今はほっておく。
+* 疑似タグについては、大幅に変更する予定なので、今はほっておく。塩漬け。
 * 型名のネーミングは、新規追加と変更したところ以外はそのまま。ネーミングポリシーは揃ってない。
 * QualifierMixin というミクシンを使っているため、多くのオブジェクト型が open-constraintsになっている。
   いずれ制約を閉じることにして、開発中はopenとする。
+  よって今は、typoの検出ができない。
+* '/~/@' という文字列を検索してコメントを読むと、変更箇所がわかる。
 
 
 == 一般的定義（古い部分）
@@ -187,7 +189,7 @@ command reify-module [string modName] :: void -> ReifiedModule
   名前空間は、types, commands, classes など。\\
  名前空間コンテナと名前空間の構造を反映するように、モジュール／クラス／リソースの定義を変更。
 # 修正があった所に @~@ が付いている。
-# ScalartとEnum型が意味的におかしいので、BasicTypeとしてまとめた。
+# ScalarとEnum型が意味的におかしいので、BasicTypeとしてまとめた。
 # アットマーク1個のコメント /~/@ が変更に対する理由や疑問点など
 
 <<{
@@ -221,9 +223,11 @@ type QualifierMixin = { //@@
 
 /** モジュールの共通構造 */
 type ModuleStruct = QualifierMixin & { //@@
-    "name": string,
+    "name": string, //@ モジュール名は必須
 
-   // モジュールは3つの名前空間を持つ
+   //@ モジュールは3つの名前空間を持つ： types, commands, classes
+   //@ kindは、コマンド名と同じ生空間を使う、
+   //@ ただし、レイフィケーションとしては、kinds を入れるほうが使いやすいかもしれない。
     "types": {
         *: ReifiedTypeTerm | ReifiedKind | ReifiedConst,
     },
@@ -244,11 +248,15 @@ type ReifiedModule = RCasm | RCara;
 type RCasm = @casm ModuleStruct; //@@
 
 type RCara = @cara (ModuleStruct & { //@@ 
-    // caraの場合、さらに4つの名前空間が追加される
-    "resources": {*: ReifiedResource}, 
+    //@ caraの場合、さらに2つの名前空間が追加される： states, userroles
+    //@ リソースクラス名はクラスの名前空間に配置される。
+    //@ ポート名はコマンドの名前空間に配置される。
+    //@ だが、レイフィケーションとしては、resources, portsがあってもいいかもしれないので、そのまま残す。
+    //@ とりあえず、名前空間構造の忠実な反映より、利便性を取る。
+    "resources": {*: ReifiedResource}, //@ classesと名前空間は同じ
     "userroles": {*: ReifiedUserRole},
     "states": {*: ReifiedState},
-    "ports": {*: ReifiedPort},
+    "ports": {*: ReifiedPort}, //@ commandsと名前空間は同じ
 
     *: any? //@ open
     });
@@ -257,12 +265,12 @@ type RCara = @cara (ModuleStruct & { //@@
 type ReifiedClass = @_class (QualifierMixin & { //@@
     "name": string,
 
-   // クラスは名前空間コンテナだが、現状では1つだけの名前空間commandsを持つ
+   //@ クラスは名前空間コンテナだが、現状では1つだけの名前空間commandsを持つ
     "commands": {
         *: ReifiedCommand
     },
 
-    *: any?
+    *: any? //@ open
 });
 
 
@@ -272,24 +280,23 @@ type ReifiedClass = @_class (QualifierMixin & { //@@
 type TypeQualifierMixin = QualifierMixin & { //@@
      // スキーマ属性は名前（キー）で引けたほうが便利
     "attributes": object?,
-    *: any?
+    *: any?  //@ open
 };
 
-//@@ 旧 REnum
-//type REnum = @_enum (TypeQualifierMixin & {"enum": [(string|number|boolean|null)*]});
+//@@ REnum と RScalar を廃止して、BuiltinType, TypeVarとした。
 
-//@@ 旧RScalar
-//type RScalar = @_scalar (TypeQualifierMixin & {
-//    "name": string(remark="参照している型名"),
-//    "typeArgs": [RTypeDef*],
-//    }
-//);
-
-/** 組み込み型の名前 名前は予約されている 
- * どうせ名前をすべて排他的にはできないので
+/** 組み込み型の名前 -- こららの名前は予約されている 
+ * 組み込み型をすべて排他的にはできないので
  * void, intgerも入れておいた
  * void = null, integer⊂number
  * 組み込み型（名前が予約語）は、全体として順序構造を作る。
+ *
+ * 包含の基本関係式は以下のとおり（*は全てを表す）：
+ * # integer ⊂ number
+ * # void = null
+ * # null, boolean, number, binary ⊂ any
+ * # never ⊆ *
+ * # * ⊆ univ
  */
 type BuiltinTypeName = (
   "undefined"
@@ -301,39 +308,39 @@ type BuiltinTypeName = (
 | "binary"   
 | "any"      
 | "void"  // データ型としてはnullと同じ
-| "never"    
 | "foreign"  
-| "univn"    
+| "never"    
+| "univ"    
 );
 
 /** 組み込み型 */
 type BuiltinType = @_builtin (TypeQualifierMixin & {
   "typeName" : BuiltinTypeName,
 
-   *: any?
+   *: any? //@ open
 });
 
 /** ブーリアンシングルトン型  */
 type BooleanSingletonType = @_boolean (TypeQualifierMixin & {
   "value" : boolean,
 
-   *: any?
+   *: any? //@ open
 });
 
 /** 数値シングルトン型  */
 type NumberSingletonType  = @_number  (TypeQualifierMixin & {
   "value" : number,
 
-   *: any?
+   *: any? //@ open
 });
 
-type KindExpr = deferred (string|null);
+type KindExpr = deferred (string|null); //@ これは暫定的
 
 /** 文字列シングルトン型  */
 type StringSingletonType  = @_string  (TypeQualifierMixin & {
   "value" : string,
 
-   *: any?
+   *: any? //@ open
 });
 
 
@@ -350,6 +357,7 @@ type BasicType = (
 /** 型変数 
  * 型変数とユーザー定義型の名前は区別する必要がない。
  * 束縛環境のなかで評価される
+ * 束縛環境のなかで定義が見つからないとエラーとなる。
  */
 type TypeVar = @_var (TypeQualifierMixin & {
   //@ TypeQualifierMixinが必要かどうかは疑問
@@ -359,28 +367,42 @@ type TypeVar = @_var (TypeQualifierMixin & {
   /** カインド */
   "kind" : KindExpr?,
 
-   *: any?
+   *: any? //@ open
 });
 
 
-
+//@ ラムダ抽象された式（型表現）に相当する。
 type ReifiedTypeTerm = @type (TypeQualifierMixin & {
    // "name": string(remark="型名"), //@@ nameは、TypeQualifiedMixinに入っている（省略可能だが）
   "typeParams": [RTypeParam*] | null, //@ [] と null が冗長な気がするが、
   "typeBody": RTypeDef,
 
-  *: any?
+  *: any? //@ open
 });
 
-type RTypeDef = (RObject 
-                | RArray 
-                | BasicType //@@
-                | RBag
-                | RUnion
-                | RIntersection
-                | RUpdator
-                | ROptional
-                | RTag);
+//@ 用語法と概念に関しては、 https://bitbucket.org/project_caty/dev/issue/720/ を参照
+type RTypeDef = (
+  BasicType //@@ BasicTypeが型定数に相当する
+| TypeVar //@@ 型変数、あるいはユーザー定義型の名前を与える
+
+// 以下、型構成子により構成される型
+| RObject 
+| RArray 
+| RTag
+
+// 以下、型演算により構成される型
+| RUnion // '|'演算
+| ROptional // '?'演算
+| RIntersection// '&'演算
+| RUpdator // '++'演算
+// 特殊な構成法で作られる型、PER（or settoid）として解釈する
+| RBag
+
+);
+
+//@ object, array, taggedは、直積型の3つのバリアントである。
+//@ objectは名前付きタプル、arrayは名前なし（番号）タプルによる直積
+//@ tagged型は、文字列（＝タグ名）との直積となる
 
 type RObject = @_object (TypeQualifierMixin & { //@@
   "pseudoTag": RPseudoTag?, //@ 塩漬け
@@ -390,11 +412,8 @@ type RObject = @_object (TypeQualifierMixin & { //@@
   "specified": {*: RTypeDef}, 
   "additional": RTypeDef,
 
-  *: any?
+  *: any? //@ open
 });
-
-
-type RPseudoTag = @_pseudoTag ([string, any] | [null, null]); //@ 塩漬け
 
 type RArray = @_array (TypeQualifierMixin & { //@@
   //@ objectとarrayとunionをほぼ同じ構造とする
@@ -403,25 +422,40 @@ type RArray = @_array (TypeQualifierMixin & { //@@
   "specified": [RTypeDef*], 
   "additional": RTypeDef,
 
-  *: any?
+  *: any? //@ open
 });
+
+type RTag = @_tag (TypeQualifierMixin & { //@ タグは @_tagged がいいと思う
+    "tag": string,
+    "body": RTypeDef,
+
+   *: any? //@ open
+});
+
+
+//@ union型は直和（排他的合併）
 
 type RUnion = @_union (TypeQualifierMixin & { //@@
   //@ objectとarrayとunionをほぼ同じ構造とする
   //@ specified choices と additional choices
 
-  "specified": [RTypeDef*], 
-  "additional": RTypeDef,
+  "specified": [RTypeDef*], // 互いに排他的な型
+  "additional": RTypeDef, // その他
 
-   *: any?
+   *: any? //@ open
 });
 
-// mark
+type ROptional = @_optional (TypeQualifierMixin & {
+  "body": RTypeDef,
+
+   *: any? //@ open
+});
+
 
 type RBag = @_bag (TypeQualifierMixin & {
   "items": [RTypeDef*],
 
-   *: any?
+   *: any? //@ open
 });
 
 
@@ -429,36 +463,34 @@ type RIntersection = @_intersection (TypeQualifierMixin & {
   "left": RTypeDef, 
   "right": RTypeDef,
 
-   *: any?
+   *: any? //@ open
 });
 
 
-type RUpdator = @_updator (TypeQualifierMixin & {
+type RUpdator = @_updator (TypeQualifierMixin & { //@ 今は更新（破壊的変更）の意味は薄い
   "left": RTypeDef, 
   "right": RTypeDef,
 
-   *: any?
+   *: any? //@ open
 });
 
+
+type ReifiedConst = @const (TypeQualifierMixin & { //@@
+  "name": string, 
+  "constBody": string|binary|number|integer|null|boolean|array|object|undefined|@*! (any|undefined),
+
+   *: any? //@ open
+});
+
+//@ 以下は塩漬け
+
+type RPseudoTag = @_pseudoTag ([string, any] | [null, null]); //@ 塩漬け
 
 type RTypeParam = @_typeparam {
     "var_name": string,
     "kind": KindExpr,
     "default": string | null,
 };
-
-type RTag = @_tag (TypeQualifierMixin & {
-    "tag": string,
-    "body": RTypeDef,
-
-   *: any?
-});
-
-type ROptional = @_optional (TypeQualifierMixin & {
-  "body": RTypeDef,
-
-   *: any?
-});
 
 type ReifiedKind = deferred @kind object;
 
@@ -506,7 +538,6 @@ type RScriptCommand = @_script (CommandQualifier ++ {
 });
 
 }>>
-
 
 == スクリプト
 
@@ -646,13 +677,6 @@ type RArgRef = @_argref {"name": string, "optional": boolean};
 他は特に直していない。
 
 <<{
-type ReifiedConst = @const (TypeQualifierMixin & {
-  "name": string, 
-  "constBody": string|binary|number|integer|null|boolean|array|object|undefined|@*! (any|undefined),
-
-   *: any?
-});
-
 type ReifiedResource = @_res {
     "name": string,
     "document": Doc,
