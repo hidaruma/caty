@@ -11,7 +11,19 @@ type Logical<X> =(boolean | @True X | @False X );
 
 type Trilogical<X> =(triboolean | @True X | @False X | @Indef X);
 
+command not :: boolean -> boolean {
+ filter:not
+};
+
+command neq
+ {
+    @[default(false)]
+    "boolean": boolean?,
+ }
+:: [univ, univ] ->  @True [univ, univ] | @False [univ, univ] | boolean 
+{
+  eq %--bolean | filter:not
+};
+
+
 // End of Module
-
-
-
