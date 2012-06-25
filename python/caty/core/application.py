@@ -425,7 +425,7 @@ class Application(PbcObject):
 
     def finish_setup(self):
         self.cout.writeln(self.i18n.get("Initializing '$name'", name=self.name))
-        if self._disabled:
+        if self._disabled and self._system.force_app != self.name:
             return
         self._init_interpreter()  # 一旦インタープリターを初期化してスクリプトコンパイラが動くようにする
         c = {}
