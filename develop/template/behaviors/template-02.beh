@@ -1,27 +1,25 @@
 = テンプレートのテスト 2 foreach
 
-== !setup
+== 設定
 
-
-
-=== file:/foreach.txt
+=== pub@this:/foreach.txt
 {{{
 <?caty-meta template="smarty" ?>
 {foreach from=$CONTEXT item=it}{$it}+{/foreach}
 }}}
 
-=== file:/foreachelse.txt
+=== pub@this:/foreachelse.txt
 {{{
 <?caty-meta template="smarty" ?>
 {foreach from=$CONTEXT item=it}{$it}+{foreachelse}*else*{/foreach}
 }}}
 
-=== script:/call /foreach.caty
+=== scripts@this:/foreach.caty
 {{{
 expand /foreach.txt | text:chop
 }}}
 
-=== script:/call /foreachelse.caty
+=== scripts@this:/foreachelse.caty
 {{{
 expand /foreachelse.txt | text:chop
 }}}
@@ -31,6 +29,15 @@ expand /foreachelse.txt | text:chop
 上のsetupは効いてないようだ。ファイルシステムのファイルが使われる。
 
 == !exec
+
+目視確認用：
+
+|= !command   |= !params                  |= !output |
+| file:read   |     pub@this:/foreach.txt ||
+| file:read   |     pub@this:/foreachelse.txt ||
+| file:read   | scripts@this:/foreach.caty  ||
+| file:read   | scripts@this:/foreachelse.caty  ||
+
 
 |= command         |=input   |= output |=  備考 |
 |call /foreach.caty      |[1, 2]   |"1+2+"   | |

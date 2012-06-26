@@ -1,13 +1,13 @@
 = テンプレートのテスト 1 echo
 
-== !setup
+== 設定
 
-=== file:/echo.txt
+=== pub:/echo.txt
 {{{
 <?caty-meta template="smarty" ?>{$CONTEXT}
 }}}
 
-=== script:/call /echo.caty
+=== scripts@this:/echo.caty
 {{{
 expand /echo.txt | text:chop
 }}}
@@ -19,6 +19,13 @@ expand /echo.txt | text:chop
 鍬田コメント： script は scripts にファイルを書き込むわけではないです。 script に記述するのは setup 時に動かす Caty スクリプトです。
 
 == !exec;
+
+目視確認用：
+
+|= !command   |= !params                |= !output |
+| file:read   | pub@this:/echo.txt      ||
+| file:read   | scripts@this:/echo.caty  ||
+
 
 |= command         |=input   |= output |=exception |=  備考 |
 | call /echo.caty        | "hello" |"hello" ||
