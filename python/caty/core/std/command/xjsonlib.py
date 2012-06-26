@@ -79,22 +79,22 @@ class Put(Builtin):
 import caty
 class Get(Builtin):
     def setup(self, opts, pathexp=u'$'):
-        self._pathexp = pathexp.rstrip('?')
-        self._safe = opts['safe'] or pathexp.endswith('?')
+        self._pathexp = pathexp
+        self._safe = opts['safe']
         self._default = opts.get('default', caty.UNDEFINED)
 
     def execute(self, input):
-        stm = selector.compile(self._pathexp)
+        from caty.jsontools.selector.stm import Nothing
+        stm = selector.compile(self._pathexp, self._safe)
         try:
             r = stm.select(input).next()
-            if r == caty.UNDEFINED:
-                if not self._safe:
-                    throw_caty_exception(u'Undefined', json.prettyprint(r))
             return r
-        except:
+        except Nothing as e:
             if self._default != caty.UNDEFINED:
                 return self._default
             if not self._safe:
-                raise
+                
+                msg = '{0} Line {1}, Col {2}'.format(self._pathexp, self.line, self.col)
+                throw_caty_exception(u'Undefined', msg)
             else:
                 return caty.UNDEFINED

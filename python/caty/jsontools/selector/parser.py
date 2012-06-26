@@ -42,7 +42,9 @@ class JSONPathSelectorParser(Parser):
         return AllSelector()
 
     def name(self, seq):
-        return PropertySelector(seq.parse([self.namestr, lambda s:self.quoted(s, '"'), lambda s: self.quoted(s, "'")]))
+        key = seq.parse([self.namestr, lambda s:self.quoted(s, '"'), lambda s: self.quoted(s, "'")])
+        optional = option(u'?')(seq)
+        return PropertySelector(key, optional)
 
     def namestr(self, seq):
         return seq.parse(Regex(r'[a-z_A-Z][-a-zA-Z_0-9]*'))
@@ -70,7 +72,9 @@ class JSONPathSelectorParser(Parser):
             seq.ignore_hook = False
 
     def index(self, seq):
-        return ItemSelector(int(seq.parse(Regex(r'([0-9]|[1-9][0-9]+)'))))
+        idx = int(seq.parse(Regex(r'([0-9]|[1-9][0-9]+)')))
+        optional = option(u'?')(seq)
+        return ItemSelector(idx, optional)
 
     def namewildcard(self, seq):
         seq.parse('*')

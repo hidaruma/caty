@@ -316,7 +316,7 @@ class Syntax(Builtin):
     このクラスで必要な処理を提供する。
     """
     def __init__(self, opts_ref=None, args_ref=None, pos=(None, None), module=None):
-        Builtin.__init__(self, opts_ref or [], args_ref or [], [], module)
+        Builtin.__init__(self, opts_ref or [], args_ref or [], [], pos, module)
         self._in_schema = self.profile.in_schema
         self._out_schema = self.profile.out_schema
 

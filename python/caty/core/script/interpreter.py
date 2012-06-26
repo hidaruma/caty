@@ -187,10 +187,10 @@ class CommandExecutor(BaseInterpreter):
             node.signal_schema.validate(e.data)
             raise
         except CatyException as e:
+            import sys
             try:
                 node.throw_schema.validate(e.to_json())
             except Exception:
-                import sys
                 pass
                 # TODO: onlyが付いていたら例外を付け直すように後で修正
                 #raise CatyException(u'RuntimeError', u'Unexpected exception: $name', name=e.tag), None, sys.exc_info()[2]
@@ -479,13 +479,14 @@ class CommandExecutor(BaseInterpreter):
             return default.accept(self)
 
     def visit_json_path(self, node):
+        from caty.jsontools.selector.stm import Nothing
         stm = node.stm
         try:
             r = stm.select(self.input).next()
-            if r == caty.UNDEFINED:
-                msg = '{0} at {1}:{2} Line {3}, Col {4}'.format(node.path, self.app.name, self.__get_name(self.cmd), self.cmd.col, self.cmd.line)
-                throw_caty_exception(u'Undefined', msg)
             return r
+        except Nothing as e:
+            msg = '{0} at {1}, Col {2}'.format(node.path, node.line, node.col)
+            throw_caty_exception(u'Undefined', msg)
         except:
             raise
 
