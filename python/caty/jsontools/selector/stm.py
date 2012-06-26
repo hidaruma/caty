@@ -101,9 +101,10 @@ class PropertySelector(Selector):
         return self.property if ' ' not in self.property else '"%s"' % self.property
 
 class ItemSelector(Selector):
-    def __init__(self, prop):
+    def __init__(self, prop, optional=False):
         Selector.__init__(self)
         self.property = prop
+        self.is_optional = optional
 
     def run(self, obj, ignored=False):
         if isinstance(obj, (list, tuple)):
