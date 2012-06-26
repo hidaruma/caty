@@ -18,6 +18,8 @@ Catyで出会うトラブルの原因（あまり系統的ではない）。
 * オプショナル変数に'?'を忘れる。しかし、このミスはフロー解析で検出可能。
 * root/pub にアプリケーションと同じ名前のディレクトリを作ると見えなくなる。
 * コマンド引数宣言に [string foo, integer? bar] の代わりに
-  [string foo, integer bar?] と書いてしまう。
+  [string foo, integer bar?] と書いてしまう。これは多いなー。
+* string(remark="...") を  string("...") と書いてしまう。
+
 
 

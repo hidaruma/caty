@@ -203,3 +203,21 @@ command call-moniker [ClassMoniker moniker, string name] :: univ -> univ {
  [%cls, ".", %name] | text:concat > fullname;
  %in | call %fullname %instance
 };
+
+/** アプリケーションのモジュールをリストする */
+command mods [string? app] :: void -> [inspect:Module*] {
+  app | pv name > this-app; %this-app;
+
+  %1? | when {undefined => %this-app, *=>pass} > app-name;
+  inspect:list-mod %app-name
+};
+
+/** アプリケーションのcaraモジュールをリストする */
+command caras [string? app] :: void -> [inspect:Module*] {
+  mods | take {[pv syntax, "cara"] | eq}
+};
+
+/** オブジェクトのリストがあるとき、そのオブジェクト達の名前のリストを出力する */
+command names :: [object*] -> [string*] {
+ each {pv name}
+};

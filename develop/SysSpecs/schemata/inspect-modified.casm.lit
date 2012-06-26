@@ -226,7 +226,7 @@ type ModuleStruct = QualifierMixin & { //@@
     "name": string, //@ モジュール名は必須
 
    //@ モジュールは3つの名前空間を持つ： types, commands, classes
-   //@ kindは、コマンド名と同じ生空間を使う、
+   //@ kindは、型名と同じ名前空間を使う、
    //@ ただし、レイフィケーションとしては、kinds を入れるほうが使いやすいかもしれない。
     "types": {
         *: ReifiedTypeTerm | ReifiedKind | ReifiedConst,
