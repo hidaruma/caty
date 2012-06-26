@@ -1,0 +1,8 @@
+= Issue 751
+
+==!exec
+
+|=!command                                            |=!output|
+|gen:sample issue751:Foo ~|validate --boolean issue751:Foo| true |
+
+

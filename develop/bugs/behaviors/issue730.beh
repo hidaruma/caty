@@ -1,5 +1,7 @@
-= Issue732
+= Issue 730
 
-|=!command                                            |=!output|
+== !exec
+
+|= !command                                            |=!output|
 |gen:sample --string=implied issue730:MetascriptCtx ~|validate --boolean issue730:MetascriptCtx| true |
 

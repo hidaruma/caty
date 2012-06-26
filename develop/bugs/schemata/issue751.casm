@@ -1,0 +1,4 @@
+module issue751 in casm;
+type Foo = {
+  "a": number
+};
