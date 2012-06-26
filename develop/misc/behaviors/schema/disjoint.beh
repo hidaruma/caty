@@ -4,7 +4,6 @@
 
 === !exec
 
-type foo = 
 
 |= !command         |= !input                            |=!exception |= 備考 |
 |define-local-schema| "module a; type x=string~|string;" | Exception  ||
