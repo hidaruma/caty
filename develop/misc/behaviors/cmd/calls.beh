@@ -1,0 +1,81 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= クラス内外からのコール
+
+このベー自体が機能しないようだ（2012-06-27）。
+
+== !setup
+
+=== !schema:/t.casm
+
+{{{
+// -*- coding: utf-8 -*-
+module t;
+
+command cmd :: void -> string {
+ "hello form cmd"
+};
+
+command cmd1 :: void -> string {
+ cmd
+};
+
+command cmd2 :: void -> string {
+ Bar.cmd
+};
+
+class Foo {
+  command hello :: void -> string {
+   "hello from Foo"
+  };
+
+  command cmd1 :: void -> string {
+    // 外側のcmdを呼ぶ
+    cmd
+  };
+  command cmd2 :: void -> string {
+    // 同じクラス内のコマンドを呼ぶ
+    // そこから外側に行く
+    cmd1
+  };
+  command cmd3 :: void -> string {
+    // 別のクラス内のコマンドを呼ぶ
+    Bar.cmd // ** 現状、失敗 **
+  };
+  command cmd4 :: void -> string {
+   // 同じクラス内のコマンドを呼ぶ
+    hello
+  };
+};
+
+class Bar {
+  command cmd :: void -> string {
+    "hello from Bar.cmd"
+  };
+  
+  command cmd1 :: void -> string {
+    // 同じクラス内が優先
+    cmd
+  };
+
+  command cmd2 :: void -> string {
+    // 外側のcmdを呼ぶ
+    t:cmd // ** 現状、失敗 **
+  };
+};
+
+// End of Module
+}}}
+
+== !exec
+
+|= !command  |= !output |
+| t:cmd1     | |
+| t:cmd2     | |
+| t:Foo.cmd1 | |
+| t:Foo.cmd2 | |
+| t:Foo.cmd3 | |
+| t:Foo.cmd4 | |
+| t:Bar.cmd1 | |
+| t:Bar.cmd2 | |
+
