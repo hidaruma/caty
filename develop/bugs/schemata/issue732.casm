@@ -1,0 +1,8 @@
+module issue732 in casm;
+type Option = @option {
+  "name": string?,
+  "label": string?,
+  "selected" : boolean?,
+  "ui": string?,
+  "value" : (number|string|boolean)
+};

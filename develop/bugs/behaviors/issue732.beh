@@ -1,0 +1,6 @@
+= Issue732
+
+|=!command                                            |=!output|
+|gen:sample issue732:Option~|validate --boolean issue732:Option | true
+
+
