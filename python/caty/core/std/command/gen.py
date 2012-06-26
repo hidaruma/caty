@@ -57,7 +57,7 @@ class DataGenerator(TreeCursor):
     def __rand_number(self, node):
         min_i = node.minimum or 0
         max_i = node.maximum or 100.0
-        return Decimal(random.uniform(min_i, max_i))
+        return Decimal(str(random.uniform(min_i, max_i)))
     
     def __gen_string(self, node):
         import sys
