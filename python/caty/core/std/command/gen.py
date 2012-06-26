@@ -93,6 +93,11 @@ class DataGenerator(TreeCursor):
             return _EMPTY
         elif self.__occur == 'once':
             return node.body.accept(self)
+        else:
+            if random.choice([0, 1]) == 1:
+                return _EMPTY
+            else:
+                return node.body.accept(self)
 
     def _visit_enum(self, node):
         return random.choice(node.enum)

@@ -1,0 +1,10 @@
+module issue730 in casm;
+
+type MetascriptCtx = {
+  "isBaseObject" : boolean?,
+  "linksPropName": string?,
+  "statePropName": string?,
+
+
+  "embeddedLinks" : [{"name":string, "extractor":string}*],
+};
