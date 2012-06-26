@@ -1,0 +1,10 @@
+module issue748 in casm;
+
+type Foo = @* {
+   *: any?
+};
+
+type Bar = Foo & {
+  *: any?
+};
+

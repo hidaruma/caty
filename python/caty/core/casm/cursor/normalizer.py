@@ -214,7 +214,7 @@ class TypeCalcurator(_SubNormalizer):
                     n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
                     res = TagSchema(r.tag, n.accept(self))
             else:
-                if lt == '@*!': 
+                if lt == '@*': 
                     # ワイルドカードタグ
                     n = (self._dereference(l, True) & r).accept(self)
                     res = n
@@ -226,7 +226,7 @@ class TypeCalcurator(_SubNormalizer):
                     else:
                         res = NeverSchema()
         elif rt.startswith('@'):
-            if rt == u'@*!':
+            if rt == u'@*':
                 n = (l & self._dereference(r, True)).accept(self)
                 res = n
             else:
