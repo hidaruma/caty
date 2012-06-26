@@ -1,30 +1,23 @@
 #coding: utf-8
 from caty.jsontools import untagged, tag, tagged, TaggedValue
-class Nothing(object):
-    u"""{} | xjson:select $.aなど、該当プロパティのない非strictアクセス時に返すオブジェクト
+from caty import UNDEFINED
+
+class Nothing(Exception):
+    u"""未定義値の検出時に発生する例外
     """
-    def __init__(self):
-        self.__iterated = False
 
-    def __iter__(self):
-        return Nothing()
-
-    def next(self):
-        if not self.__iterated:
-            self.__iterated = True
-            return self
-        else:
-            raise StopIteration()
-            
 class Selector(object):
     def __init__(self):
         self.next = None
-        self.empty_when_error = False
+        self.is_optional = False
 
     def chain(self, next):
         if not self.next:
             self.next = next
-            self.next.empty_when_error = self.empty_when_error
+            if not self.next.is_optional:
+                self.next.is_optional = self.is_optional
+            else:
+                self.is_optional = self.next.is_optional
         else:
             self.next.chain(next)
         return self
@@ -34,11 +27,15 @@ class Selector(object):
         if self.next:
             for v in o:
                 for x in self.next.select(v):
-                    if not isinstance(x, Nothing):
+                    if x is UNDEFINED and not self.is_optional:
+                        raise Nothing()
+                    else:
                         yield x
         else:
             for v in o:
-                if not isinstance(v, Nothing):
+                if v is UNDEFINED and not self.is_optional:
+                    raise Nothing()
+                else:
                     yield v
 
     def run(self, obj):
@@ -71,25 +68,26 @@ class AllSelector(Selector):
         return '$'
 
 class PropertySelector(Selector):
-    def __init__(self, prop):
+    def __init__(self, prop, opt=False):
         Selector.__init__(self)
         self.property = prop
+        self.is_optional = opt
 
     def run(self, obj, ignored=False):
         if isinstance(obj, dict):
             if self.property in obj:
                 yield obj[self.property]
-            elif not self.empty_when_error:
-                raise KeyError(self.property)
+            elif self.is_optional:
+                yield UNDEFINED
             else:
-                yield Nothing()
-        elif isinstance(obj, Nothing):
-            yield Nothing()
+                raise KeyError(self.property)
+        elif obj is UNDEFINED:
+            yield UNDEFINED
         elif isinstance(obj, TaggedValue) and not ignored:
             for x in self.run(untagged(obj), True):
                 yield x
         else:
-            #if not self.empty_when_error:
+            #if not self.is_optional:
             raise Exception('not a object')
 
     def replace(self, obj, new, allow_loose):
@@ -112,17 +110,17 @@ class ItemSelector(Selector):
             if len(obj) > self.property:
                 yield obj[self.property]
             else:
-                if self.empty_when_error:
-                    yield Nothing()
+                if self.is_optional:
+                    yield UNDEFINED
                 else:
                     raise IndexError(str(self.property))
-        elif isinstance(obj, Nothing):
-            yield Nothing()
+        elif obj is UNDEFINED:
+            yield UNDEFINED
         elif isinstance(obj, TaggedValue) and not ignored:
             for x in self.run(untagged(obj), True):
                 yield x
         else:
-            if not self.empty_when_error:
+            if not self.is_optional:
                 raise Exception('not a array')
 
     def replace(self, obj, new, allow_loose):
@@ -153,8 +151,8 @@ class NameWildcardSelector(Selector):
         if isinstance(obj, dict):
             for v in obj.values():
                 yield v
-        elif isinstance(obj, Nothing):
-            yield Nothing()
+        elif obj is UNDEFINED:
+            yield UNDEFINED
         elif isinstance(obj, TaggedValue):
             for x in self.run(untagged(obj)):
                 yield x
@@ -173,8 +171,8 @@ class ItemWildcardSelector(Selector):
         if isinstance(obj, (tuple, list)):
             for v in obj:
                 yield v
-        elif isinstance(obj, Nothing):
-            yield Nothing()
+        elif obj is UNDEFINED:
+            yield UNDEFINED
         elif isinstance(obj, TaggedValue):
             for x in self.run(untagged(obj)):
                 yield x
