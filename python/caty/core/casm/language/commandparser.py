@@ -20,16 +20,17 @@ def command(seq):
         doc = option(docstring)(seq)
         a = seq.parse(annotation)
         _ = seq.parse(keyword(u'command'))
-        n = seq.parse(cmdname)
-        if n in RESERVED:
-            raise ParseFailed(seq, command, '%s is reserved.' % n)
-        t = seq.parse(option(type_arg, []))
-        patterns = many1(call_pattern)(seq)
-        j = seq.parse(jump)
-        r = seq.parse(many(resource))
-        rf = seq.parse(option([script, refers]))
-        _ = seq.parse(u';')
-        return CommandNode(n, map(lambda p:p(j, r), patterns), rf, doc, a, t)
+        with strict():
+            n = seq.parse(cmdname)
+            if n in RESERVED:
+                raise ParseFailed(seq, command, '%s is reserved.' % n)
+            t = seq.parse(option(type_arg, []))
+            patterns = many1(call_pattern)(seq)
+            j = seq.parse(jump)
+            r = seq.parse(many(resource))
+            rf = seq.parse(option([script, refers]))
+            _ = seq.parse(u';')
+            return CommandNode(n, map(lambda p:p(j, r), patterns), rf, doc, a, t)
     finally:
         seq.parser_hook = h
 
