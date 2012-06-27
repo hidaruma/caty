@@ -77,3 +77,9 @@ command annotate [string path] :: void -> string
 command debugger :: void -> void
     refers python:caty.core.std.command.debug.Debugger;
 
+/**
+ * コンパイル済みテンプレートのオブジェクトコードを命令コード名に変換する。
+ */
+command disasm-template :: string|binary -> string
+    refers python:caty.core.std.command.debug.DisasmTemplate;
+

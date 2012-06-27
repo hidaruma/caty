@@ -508,12 +508,6 @@ class VirtualMachine(object):
             if name in self._groups:
                 return
             i = bi.index
-            #while bi.current:
-            #    if bi.current.opcode == END_GROUP:
-            #        break
-            #    bi.next()
-            #else:
-            #    raise TemplateRuntimeError('Missing end of group definition: %s' % name)
             self._groups[name] = i
         opmap[GROUP_DEF] = def_group
 
@@ -530,7 +524,9 @@ class VirtualMachine(object):
         opmap[CALL_GROUP] = call_group
 
         def nop(*args):
-            pass
+            if not stack.is_empty():
+                bi.jump_to(stack.pop())
+            return
         opmap[END_GROUP] = nop
 
         def swap(ignore):

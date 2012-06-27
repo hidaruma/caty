@@ -120,3 +120,15 @@ class Debugger(Builtin):
         system = self._defined_application._system
         pdb.runcall(enter, system)
 
+class DisasmTemplate(Builtin):
+    def execute(self, src):
+        from caty.template.core.instructions import get_name
+        r = []
+        for l in src.split('\n')[1:]:
+            if ' ' in l:
+                code, rest = l.split(' ', 1)
+                name = get_name(int(code))
+                r.append(u'%s %s' % (name, rest))
+        return u'\n'.join(r)
+
+
