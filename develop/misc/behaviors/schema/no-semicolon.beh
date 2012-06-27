@@ -1,0 +1,22 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= セミコロン忘れを検出できない
+
+== !name:schema
+
+{{{
+'''module a;
+ class Foo {
+  command foo :: void -> null {
+    null
+  }
+};
+'''
+}}}
+
+== !exec
+
+|= !command         |= !input   |=!output |= !exception |= 備考 |
+|define-local-schema| %schema   |         |  Exception  | セミコロン忘れのエラー |
+
+

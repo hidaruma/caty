@@ -1,0 +1,17 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= 入れ子の列挙型
+
+列挙型は排他的ユニオンの特別なもの。
+
+== !name:schema
+
+{{{
+'''module a;type foobar = ("foo" | "bar");type zotfoobar = ("zot" | foobar);'''
+}}}
+
+== !exec
+
+|= !command         |= !input   |=!output |= !exception |= 備考 |
+|define-local-schema| %schema   |         |             | |
+
