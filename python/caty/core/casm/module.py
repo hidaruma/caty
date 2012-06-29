@@ -125,7 +125,6 @@ class Module(Facility):
     def _get_resource(self, name, tracked=(), scope_func=None, type=u''):
         if self in tracked:
             raise throw_caty_exception(u'%sNotFound'%type, u'$name', name=name)
-        tracked = list(tracked) + [self]
         scope = scope_func(self)
         if name in scope:
             return scope[name]
@@ -136,11 +135,12 @@ class Module(Facility):
                     m, n = n.split(':', 1)
                 else:
                     throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s %s is forbidden' % type)
+            if m == self.name:
+                return self._get_resource(n, tracked, scope_func, type)
+            tracked = list(tracked) + [self]
             if m == 'public' and self.name not in ('public', 'builtin'):
                 return self.parent._get_resource(n, tracked, scope_func, type)
             if m == 'public' and self.name in ('public', 'builtin'):
-                return self._get_resource(n, tracked, scope_func, type)
-            if m == self.name:
                 return self._get_resource(n, tracked, scope_func, type)
             if m in self.sub_modules:
                 return self.sub_modules[m]._get_resource(n, tracked, scope_func, type)
@@ -149,8 +149,13 @@ class Module(Facility):
             raise throw_caty_exception(u'%sNotFound' % type, u'$name', name=name)
         elif '.' in name:
             c, n = name.split('.', 1)
+            if c == self.name:
+                return self._get_resource(n, tracked, scope_func, type)
             if c in self.class_ns:
                 return self.class_ns[c]._get_resource(n, tracked, scope_func, type)
+            tracked = list(tracked) + [self]
+            if self.parent:
+                return self.parent._get_resource(name, tracked, scope_func, type)
             raise throw_caty_exception(u'ClassNotFound', u'$name', name=c)
         else:
             if self.parent:
