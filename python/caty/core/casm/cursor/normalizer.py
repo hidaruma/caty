@@ -106,7 +106,7 @@ class TypeCalcurator(_SubNormalizer):
         elif r.type == 'never':
             return l
         elif l.type == 'enum' and r.type == 'enum':
-            return l.union(r)
+            return l.union(self._dereference(r))
         else:
             return UnionSchema(l, r, node.options)
 
