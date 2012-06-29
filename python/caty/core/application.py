@@ -226,7 +226,7 @@ class Application(PbcObject):
                 raise
         else:
             cfg = self.default_conf()
-        manifest_type = self._system._casm._core.schema_finder('AppManifest')
+        manifest_type = self._system._casm._core.schema_finder.get_type('AppManifest')
         manifest_type.validate(cfg)
         cfg = manifest_type.fill_default(cfg)
         ft = app_dir.create(u'reads').open('/_filetypes.xjson')
@@ -383,7 +383,6 @@ class Application(PbcObject):
 
     def _init_interpreter(self):
         self._interpreter = script.initialize(self._schema_module, self, self._system)
-        self._command_finder = self._interpreter.finder
 
     def _init_session(self):
         self._session_storage = self._global_config.session_storage
@@ -451,7 +450,7 @@ class Application(PbcObject):
                 raise Exception(self.i18n.get("Schema for AppSpec is not specified: $app", app=self.name))
             tn = self._app_spec['$typename']
             cb = self._app_spec.get('$callback', None)
-            tp = self._schema_module.schema_finder.start()[tn]
+            tp = self._schema_module.schema_finder.start().get_type(tn)
             try:
                 tp.validate(self._app_spec)
                 self.__exec_callback(cb)
@@ -640,10 +639,6 @@ class Application(PbcObject):
     @property
     def scripts(self):
         return self._scripts
-
-    @property
-    def command_finder(self):
-        return self._command_finder
 
     @property
     def schema_finder(self):

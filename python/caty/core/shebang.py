@@ -23,6 +23,8 @@ def find_(s, t):
     st = s.find(t)
     if st == -1:
         return 0, 0, 0, 0
+    if st != 0 and s[st-1] not in ('\r', '\n', '\r\n'):
+        return 0, 0, 0, 0
     body_end = s.find('?>', st)
     if body_end == -1:
         raise InternalException(u'')

@@ -26,16 +26,16 @@ class SchemaFinder(ResourceFinder, ReadOnlyFacility):
         """
         self._local.compile(string)
 
-    def __getitem__(self, key):
+    def get_type(self, key):
         key = key.lstrip(':')
         c = key.count(':')
         if  c == 2:
             app_name, scm = key.split(':', 1)
             if app_name == self.application.name:
-                return self[scm]
+                return self.get_type(scm)
             if app_name in self.system.app_names:
                 app = self.system.get_app(app_name)
-                return app.schema_finder[scm]
+                return app.schema_finder.get_type(scm)
         else:
             if key.startswith(self._local.name+':'):
                 k = key.split(':')[1]
@@ -45,9 +45,6 @@ class SchemaFinder(ResourceFinder, ReadOnlyFacility):
                 if self._local.has_schema(key):
                     return self._local.get_schema(key)
             return self._module.get_schema(key)
-
-    def __call__(self, key):
-        return self[key]
 
     def get_ast(self, key):
         key = key.lstrip(':')
@@ -69,14 +66,10 @@ class SchemaFinder(ResourceFinder, ReadOnlyFacility):
                     return self._local.get_syntax_tree(key)
             return self._module.get_syntax_tree(key)
 
-
-    def get_schema(self, key):
-        return self[key]
-
     def has_schema(self, key):
         key = key.lstrip(':')
         c = key.count(':')
-        if  c == 2:
+        if c == 2:
             app_name, scm = key.split(':', 1)
             if app_name == self.application.name:
                 return self.has_schema(scm)
@@ -93,34 +86,28 @@ class SchemaFinder(ResourceFinder, ReadOnlyFacility):
                     return True
             return self._module.has_schema(key)
 
-    def __contains__(self, key):
-        return self.has_schema(key)
-
     def clone(self):
         return self
 
     def to_name_tree(self):
         return self._module.to_name_tree()
 
-
-
-class CommandFinder(dict, ResourceFinder, ReadOnlyFacility):
-    u"""コマンド検索オブジェクト。
-    こちらもコマンドから参照される。
-    """
-    def __init__(self, module, app, system):
-        dict.__init__(self)
-        ResourceFinder.__init__(self, app, system)
-        self._module = module
-
-    def __getitem__(self, key):
+    def get_command(self, key):
         c = key.count(':')
         if c == 2: #別のアプリケーションを参照している場合
             app_name, cmd = key.split(':', 1)
             if app_name in self.system.app_names:
                 app = self.system.get_app(app_name)
-                return app.command_finder[cmd]
+                return app.schema_finder.get_command(cmd)
         else:
+            if key.startswith(self._local.name+':'):
+                k = key.split(':')[1]
+                if self._local.has_command_type(k):
+                    return self._local.get_command_type(k)
+            elif self._local.name == 'public':
+                if self._local.has_command_type(key):
+                    return self._local.get_command_type(key)
+            print key, self._local.name
             return self._module.get_command_type(key)
         raise KeyError(key)
 
@@ -131,25 +118,31 @@ class CommandFinder(dict, ResourceFinder, ReadOnlyFacility):
             app_name, cmd = key.split(':', 1)
             if app_name in self.system.app_names:
                 app = self.system.get_app(app_name)
-                return app.command_finder.get_proto_type(cmd)
+                return app.schema_finder.get_proto_type(cmd)
         else:
             return self._module.get_proto_type(key)
         raise KeyError(key)
 
-    def __contains__(self, key):
+    def has_command(self, key):
         c = key.count(':')
         if c == 2: #別のアプリケーションを参照している場合
             app_name, cmd = key.split(':', 1)
             if app_name in self.system.app_names:
                 app = self.system.get_app(app_name)
-                return cmd in app.command_finder
+                return app.schema_finder.has_command(cmd)
         else:
+            if key.startswith(self._local.name+':'):
+                k = key.split(':')[1]
+                if self._local.has_command(k):
+                    return True
+            elif self._local.name == 'public':
+                if self._local.has_command(key):
+                    return True
             return self._module.has_command(key)
         return False
 
     def items(self):
         return self._module.command_ns.items()
-
 
     def __setitem__(self, key, value):
         raise Exception(ro.i18n.get('Uneable to add command at runtime: $name', name=key))

@@ -15,7 +15,7 @@ class Sample(Builtin):
         self._gen_options = opts
 
     def execute(self):
-        t = self.schema[self.__type_name]
+        t = self.schema.get_type(self.__type_name)
         return t.accept(DataGenerator(self._gen_options))
 
 class _EMPTY(object): pass # undefinedではない、存在しない事を表すアトム

@@ -48,7 +48,7 @@ class DumpSchema(Builtin):
         self.__schema_name = name
 
     def execute(self):
-        print TreeDumper(deep=True).visit(self.schema[self.__schema_name])
+        print TreeDumper(deep=True).visit(self.schema.get_type(self.__schema_name))
 
 class Profile(Builtin):
 

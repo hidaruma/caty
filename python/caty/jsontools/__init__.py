@@ -706,7 +706,7 @@ class SelectionFixer(object):
     def _fix(self, input):
         from caty.core.exception import CatyException, throw_caty_exception
         from caty.util import error_to_ustr
-        scm = self.schema['json:selection']
+        scm = self.schema.get_type('json:selection')
         if isinstance(input, dict):
             if '$selection' in input:
                 try:

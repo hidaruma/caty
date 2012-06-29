@@ -34,7 +34,7 @@ class CreateCollection(Builtin):
 
     def setup(self, opts, schema_name, collection_name=None):
         self._schema_name = schema_name
-        self.schema[schema_name]
+        self.schema.get_type(schema_name)
         self._collection_name = collection_name if collection_name else schema_name
         self._global = opts['as-global']
 

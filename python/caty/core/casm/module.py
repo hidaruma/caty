@@ -1,6 +1,6 @@
 #coding:utf-8
 from __future__ import with_statement
-from caty.core.casm.finder import SchemaFinder, CommandFinder
+from caty.core.casm.finder import SchemaFinder
 from caty.core.casm.loader import CommandLoader, BuiltinLoader
 from caty.core.schema import schemata
 from caty.core.schema.base import Annotations
@@ -183,10 +183,6 @@ class Module(Facility):
     @property
     def schema_finder(self):
         return SchemaFinder(self, self._app, self._system, LocalModule)
-
-    @property
-    def command_finder(self):
-        return CommandFinder(self, self._app, self._system)
 
     def get_plugin(self, name):
         return self._plugin.get_plugin(name)
@@ -690,6 +686,7 @@ class LocalModule(Module):
 
         self.ast_ns = {}
         self.proto_ns = {}
+        self.class_ns = {}
         self.saved_st = {}
         self.const_ns = {}
         self.kind_ns = {}
@@ -708,10 +705,16 @@ class OverlayedFinder(object):
         self.module = module
         self.finder = finder
 
-    def __getitem__(self, key):
+    def get_type(self, key):
         if self.module.has_schema(key):
             return self.module.get_schema(key)
         else:
-            return self.finder[key]
+            return self.finder.get_type(key)
 
-    __call__ = __getitem__
+    def get_command(self, key):
+        if self.module.has_command_type(key):
+            return self.module.get_command_type(key)
+        else:
+            return self.finder.get_command(key)
+
+

@@ -436,12 +436,12 @@ class CollectionManipulator(object):
                 sn = r['schema']
                 ap = r['app']
                 if not ap:
-                    return self._finder[sn]
+                    return self._finder.get_type(sn)
                 else:
                     if ':' in sn:
-                        return self._finder[ap + ':' + sn]
+                        return self._finder.get_type(ap + ':' + sn)
                     else:
-                        return self._finder[ap + '::' + sn] # public モジュールのスキーマを他のアプリケーションから参照するので
+                        return self._finder.get_type(ap + '::' + sn) # public モジュールのスキーマを他のアプリケーションから参照するので
             except KeyError:
                 return None
         else:

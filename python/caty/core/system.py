@@ -286,7 +286,6 @@ class CoreApplication(Application):
         self._schema_module = self._system._casm._core
         self._web_path = u''
         self._interpreter = script.initialize(self._schema_module, self, self._system)
-        self._command_finder = self._interpreter.finder
         self._dispatcher = self._create_system_dispatcher()
 
     def _create_system_dispatcher(self):

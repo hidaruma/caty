@@ -129,7 +129,7 @@ class ReifyCmd(Builtin):
         self._cmd_name = cmd_name
 
     def execute(self):
-        mod = self.schema._module.command_finder
+        mod = self.schema._module.schema_finder
         ast = mod.get_proto_type(self._cmd_name)
         return ast.reify()
 

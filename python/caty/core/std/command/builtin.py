@@ -386,7 +386,7 @@ class TypeCalculator(object):
         _ = seq.parse('@')
         n = seq.parse(self.tag_name)
         t = seq.parse(self.type_name)
-        return TagSchema(n, self.schema[n])
+        return TagSchema(n, self.schema.get_type(n))
 
     def group(self, seq):
         _ = seq.parse('(')
@@ -407,7 +407,7 @@ class TypeCalculator(object):
         return util.name(seq)
     
     def type(self, seq):
-        return self.schema[self.type_name(seq)]
+        return self.schema.get_type(self.type_name(seq))
 
     def type_name(self, seq):
         return schemaparser.typename(seq)
@@ -1137,7 +1137,7 @@ class Throw(Builtin, TypeCalculator):
         etype = json.tag(input)
         if not self.schema.has_schema(etype):
             return False
-        scm = self.schema[etype]
+        scm = self.schema.get_type(etype)
         if '__exception' not in scm.annotations:
             return False
         try:

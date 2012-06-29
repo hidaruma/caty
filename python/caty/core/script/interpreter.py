@@ -538,10 +538,10 @@ class _CallCommand(MafsMixin, Internal):
         from caty.core.command import VarStorage
         n = self._facilities['env'].get('CATY_APP')['name']
         app = self._system.get_app(n)
-        profile = app.command_finder[self._cmd_name]
+        profile = app.schema_finder.get_command(self._cmd_name)
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
-            c = scriptwrapper(profile, cls.instantiate(CommandBuilder(self._facilities, app.command_finder)))(self.__opts_ref, self.__args_ref)
+            c = scriptwrapper(profile, cls.instantiate(CommandBuilder(self._facilities, app.schema_finder)))(self.__opts_ref, self.__args_ref)
         else:
             c = cls(self.__opts_ref, self.__args_ref)
         c.set_facility(self._facilities)

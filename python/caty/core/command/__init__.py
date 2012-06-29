@@ -68,7 +68,7 @@ class Command(object):
             for i, p in enumerate(self.profile_container.type_params):
                 if i < l:
                     t = self.__type_args[i]
-                    s = schema[t]
+                    s = schema.get_type(t)
                     x = p.clone(set())
                     x._schema = s
                     _ta.append(x)

@@ -11,11 +11,11 @@ class CommandBuilder(object):
         from caty.core.script.proxy import Proxy
         if proxy.module:
             try:
-                profile = proxy.module.command_finder[proxy.name]
+                profile = proxy.module.schema_finder.get_command(proxy.name)
             except:
                 raise
         else:
-            profile = self.namespace[proxy.name]
+            profile = self.namespace.get_command(proxy.name)
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
             cmd = scriptwrapper(profile, cls.instantiate(self))(opts_ref, args_ref, type_args, pos, module)
