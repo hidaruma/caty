@@ -18,6 +18,10 @@ class SmartyParser(Parser):
         ts = seq.parse(many(self.term))
         return Template(ts)
 
+    def _smarty_template_without_grouping(self, seq):
+        ts = seq.parse(many(self.term))
+        return Template(ts, no_grouping=True)
+
     def term(self, seq, upcoming=None):
         if upcoming:
             s = seq.parse([try_(self.escape_pi), lambda s: self.literal(s, upcoming), self.delim, self.statement, try_(self.comment)])
@@ -38,7 +42,10 @@ class SmartyParser(Parser):
                 cp = ''.join(many('>')(seq))
                 if len(op) != len(cp) or len(op) < 1:
                     raise ParseFailed(seq, self.escape_pi)
-                return String(u'%s%s%s%s' % (rest, op[1:], cn, cp[1:]))
+                subtempl = as_parser(self._smarty_template_without_grouping).run(rest)
+                s = String(u'%s%s%s' % (op[1:], cn, cp[1:]))
+                subtempl.nodes.append(s)
+                return subtempl
         raise ParseFailed(seq, self.escape_pi)
 
     def literal(self, seq, upcoming=None):

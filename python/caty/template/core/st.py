@@ -17,8 +17,11 @@ class Null(ST):
         return iter([])
 
 class Template(ST):
-    def __init__(self, nodes):
-        self.nodes = self._make_default_group(nodes)
+    def __init__(self, nodes, no_grouping=False):
+        if no_grouping:
+            self.nodes = nodes
+        else:
+            self.nodes = self._make_default_group(nodes)
 
     def _make_default_group(self, nodes):
         r = []
@@ -33,6 +36,10 @@ class Template(ST):
                     series_of_func_or_group_end = True
                     default_group_node = None
                 r.append(n)
+        if default_group_node:
+            r.append(DefGroup(None, default_group_node))
+            series_of_func_or_group_end = True
+            default_group_node = None
         return r
 
     @property

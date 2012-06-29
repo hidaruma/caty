@@ -1,0 +1,31 @@
+<?caty-meta template="smarty-mx" ?>{*-- -*- coding: utf-8 -*- --*}
+{function name=seq}
+ {if $CONTEXT|notempty}{foreach from=$CONTEXT item=it}{$it},{/foreach}{/if}
+{/function}
+<<?caty-meta template="smarty-mx" ?>>
+<html>
+  <head>
+    <title>{$TITLE}</title>
+  </head>
+  <body>
+    <h1>{$TITLE}</h1>
+     {if $DOCUMENT}<p>このページの説明：{$DOCUMENT.description}</p>{/if}
+     <p>このページのデータ型： {$PAGE_DATATYPE}</p>
+
+     <ol>
+     {foreach from=$LINK_SPECS item=link}
+{*  以下の行の、関数呼び出し {call name=seq context=$link.target} でエラーしている *}
+       <li>リンク {$link.name} -->{$link.targets} ({call name=seq context=$link.target})</li>
+     {/foreach}
+     </ol>
+
+     <p>入力の型： {{$inputType}}</p>
+
+     <pre>{{$inputJson}}</pre>
+
+     <h2>バリデーションの結果</h2>
+
+     <pre>{{$validatetionResult}}</pre>
+
+  </body>
+</html>

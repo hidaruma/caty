@@ -441,6 +441,7 @@ class VirtualMachine(object):
         def call_template(name):
             tpl_index = self._functions.get(name, None)
             if not tpl_index:
+                print self._functions
                 raise TemplateRuntimeError('Function definition not found: %s' % name)
             # 引数と戻り先アドレスのスタック位置を交換
             a = stack.pop()
@@ -470,7 +471,7 @@ class VirtualMachine(object):
 
         def validate(type_name):
             try:
-                scm = self.schema_module[type_name]
+                scm = self.schema_module.get_type(type_name)
             except:
                 raise TemplateRuntimeError('Unkown type: %s' % type_name)
             scm.validate(stack.top())

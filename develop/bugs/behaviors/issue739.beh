@@ -1,0 +1,10 @@
+= Issue 739
+
+== !exec
+
+|=!input|=!command|=!params|
+|{"TITLE":"Foo", "PAGE_DATATYPE": "foo", "inputType": "bar", "LINK_SPECS": [{"targets": ["xyz"], "name": "l", "target": ["x"]}]}| expand  |/issue739.html |
+
+
+
+
