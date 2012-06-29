@@ -69,13 +69,14 @@ class Bar {
 
 == !exec
 
-|= !command  |= !output |
-| t:cmd1     | |
-| t:cmd2     | |
-| t:Foo.cmd1 | |
-| t:Foo.cmd2 | |
-| t:Foo.cmd3 | |
-| t:Foo.cmd4 | |
-| t:Bar.cmd1 | |
-| t:Bar.cmd2 | |
+|= !command  |= !output |=!judge|
+| t:cmd1     | |suspend|
+| t:cmd2     | |suspend|
+| t:Foo.cmd1 | |suspend|
+| t:Foo.cmd2 | |suspend|
+| t:Foo.cmd3 | |suspend|
+| t:Foo.cmd4 | |suspend|
+| t:Bar.cmd1 | |suspend|
+| t:Bar.cmd2 | |suspend|
 
+※FITの構造の問題でsetupで定義したコマンドが呼び出せないので、それが修正されるまでペンディング

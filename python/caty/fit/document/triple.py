@@ -313,6 +313,9 @@ class FitCase(FitRow):
             testcase.orElse = self.orElse
             testcase.judge = self.judge
         except:
+            if self.judge == 'suspend':
+                self.result = 'Indef'
+                return
             self.result = 'Inval'
         else:
             testcase.test(self, self.output_opts)

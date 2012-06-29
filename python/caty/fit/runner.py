@@ -287,6 +287,8 @@ class TestCase(object):
             if self.exception:
                 case.ok()
                 return
+            if self.judge == 'suspend':
+                return
             import traceback
             self.runner.error_msg = ''.join([error_to_ustr(e),
                                          unicode(traceback.format_exc(), 'utf-8')])
