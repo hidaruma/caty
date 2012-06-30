@@ -1314,7 +1314,7 @@ class NamedSchema(SchemaBase, Root):
     def __repr__(self):
         return 'NamedSchema:' + self.name + repr(self.body)
 
-class TypeReference(SchemaBase, Scalar):
+class TypeReference(SchemaBase, Scalar, Ref):
 
     # 参照先がオブジェクトの可能性もあるので擬似タグをサポート
     pseudoTag = attribute('pseudoTag', PseudoTag(None, None))

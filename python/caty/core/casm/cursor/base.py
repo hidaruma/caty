@@ -131,16 +131,4 @@ class SchemaBuilder(TreeCursor):
         return s
 
 
-    def _dereference(self, o, reduce_tag=False):
-        if reduce_tag:
-            types = (Root, Tag, TypeReference)
-        else:
-            types = (Root, TypeReference)
-        if isinstance(o, types):
-            return self._dereference(o.body, reduce_tag)
-        else:
-            return o
-
-
-
 

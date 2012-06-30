@@ -88,6 +88,9 @@ class Tag(AbsoluteNode):
     def tag(self):
         raise NotImplementedError
 
+class Ref(object):
+    pass
+
 class PseudoTag(AbsoluteNode):
     def accept(self, cursor):
         return cursor._visit_pseudo_tag(self)
@@ -142,4 +145,17 @@ class TreeCursor(object):
     @property
     def result(self):
         NotImplementedError
+
+    def _dereference(self, o, reduce_tag=False):
+        if reduce_tag:
+            types = (Root, Tag, Ref)
+        else:
+            types = (Root, Ref)
+        if isinstance(o, types):
+            return self._dereference(o.body, reduce_tag)
+        else:
+            return o
+
+
+
 

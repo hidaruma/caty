@@ -1,7 +1,8 @@
 #coding:utf-8
 from caty.core.command import Builtin
-from caty.core.typeinterface import TreeCursor, Union, Tag
-from caty.core.schema import TagSchema, StringSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema
+from caty.core.typeinterface import *
+from caty.core.schema import TagSchema, StringSchema, NamedSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema
+from caty.core.schema import types as reserved
 import caty.jsontools as json
 import random
 from string import printable
@@ -20,13 +21,65 @@ class Sample(Builtin):
 
 class _EMPTY(object): pass # undefinedではない、存在しない事を表すアトム
 
+class _MaximumRecursionError(Exception):pass
+
 class DataGenerator(TreeCursor):
     def __init__(self, gen_options):
         self.__gen_str = gen_options['string']
         self.__occur = gen_options['occur']
+        self.__max_depth = gen_options['max-depth']
+        self.cache = {}
         
+    def __has_loop_ref(self, node, cache):
+        types = (Root, Tag, Ref)
+        if isinstance(node, types):
+            if node in cache:
+                return True
+            else:
+                cache.add(node)
+            return self.__has_loop_ref(node.body, cache)
+        elif isinstance(node, Union):
+            return self.__has_loop_ref(node.left, cache) or self.__has_loop_ref(node.right, cache)
+        elif isinstance(node, Array):
+            for i in node:
+                if self.__has_loop_ref(i, cache):
+                    return True
+        elif isinstance(node, Object):
+            for k, v in node.items():
+                if sefl.__has_loop_ref(v, cache):
+                    return True
+        return False
+
+    def __reduce_loop(self, node, cache):
+        types = (Root, Tag, Ref)
+        if isinstance(node, types):
+            if node in cache:
+                raise _MaximumRecursionError()
+            else:
+                cache.add(node)
+            return self.__reduce_loop(node.body, cache)
+        elif isinstance(node, Union):
+            try:
+                return self.__reduce_loop(node.left, cache)
+            except:
+                return self.__reduce_loop(node.right, cache)
+        return node
+
     def _visit_root(self, node):
-        return node.body.accept(self)
+        if node not in self.cache:
+            self.cache[node] = 0
+        loop = self.__has_loop_ref(node, set())
+        if loop:
+            self.cache[node] += 1
+        try:
+            if self.cache[node] > self.__max_depth:
+                return self.__reduce_loop(node, set()).accept(self)
+            return node.body.accept(self)
+        except:
+            raise
+        else:
+            if loop:
+                self.cache[node] -= 1
 
     def _visit_scalar(self, node):
         if isinstance(node, StringSchema):
@@ -178,7 +231,15 @@ class DataGenerator(TreeCursor):
 
     def _visit_union(self, node):
         l = self.__flatten_union(node)
-        return random.choice(l).accept(self)
+        o = random.choice(l)
+        while True:
+            try:
+                return o.accept(self)
+            except _MaximumRecursionError:
+                if l == [o]:
+                    raise _MaximumRecursionError()
+                l.remove(o)
+                o = random.choice(l)
 
     def __flatten_union(self, s):
         o = [s.left, s.right]
