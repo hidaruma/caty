@@ -22,8 +22,11 @@ command neq
  }
 :: [univ, univ] ->  @True [univ, univ] | @False [univ, univ] | boolean 
 {
-  eq %--bolean | filter:not
+  eq %--boolean | filter:not
 };
 
+command content [string? tagName] :: univ -> univ {
+ untagged %1?
+};
 
 // End of Module
