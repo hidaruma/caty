@@ -496,9 +496,20 @@ class Version(Builtin):
 
 class PassData(Builtin):
     
-    
+   
     def execute(self, input):
         return input
+
+class Default(Builtin):
+
+    def setup(self, value):
+        self.value = value
+
+    def execute(self, input):
+        if input is caty.UNDEFINED:
+            return self.value
+        else:
+            return input
 
 class Nth(Builtin):
     
@@ -509,6 +520,12 @@ class Nth(Builtin):
     def execute(self, input):
         n = self.num
         d = json.untagged(input)
+        if d is caty.UNDEFINED:
+            if not self.safe:
+                throw_caty_exception(u'Undefined', unicode(str(n)))
+            else:
+                return caty.UNDEFINED
+        # d は配列
         if n < 1 or n > len(d):
             if not self.safe:
                 throw_caty_exception(u'IndexOutOfRange', unicode(str(n)))
