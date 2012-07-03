@@ -1,7 +1,7 @@
 #coding:utf-8
 from caty.core.command import Builtin
 from caty.core.typeinterface import *
-from caty.core.schema import TagSchema, StringSchema, NamedSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema
+from caty.core.schema import TagSchema, StringSchema, NamedSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema, NeverSchema, UndefinedSchema
 from caty.core.schema import types as reserved
 import caty.jsontools as json
 import random
@@ -51,13 +51,20 @@ class DataGenerator(TreeCursor):
         return False
 
     def __reduce_loop(self, node, cache):
-        types = (Root, Tag, Ref)
+        types = (Root, Ref)
         if isinstance(node, types):
             if node in cache:
                 raise _MaximumRecursionError()
             else:
                 cache.add(node)
-            return self.__reduce_loop(node.body, cache)
+                return self.__reduce_loop(node.body, cache)
+
+        elif isinstance(node, Tag):
+            pair = (node.tag, node.body)
+            if pair in cache:
+                raise _MaximumRecursionError()
+            cache.add(pair)
+            return node.__class__(node.tag, self.__reduce_loop(node.body, cache))
         elif isinstance(node, Union):
             try:
                 return self.__reduce_loop(node.left, cache)
@@ -77,7 +84,7 @@ class DataGenerator(TreeCursor):
             return node.body.accept(self)
         except:
             raise
-        else:
+        finally:
             if loop:
                 self.cache[node] -= 1
 
@@ -99,7 +106,10 @@ class DataGenerator(TreeCursor):
             return self.__union(node)
         elif isinstance(node, ForeignSchema):
             return ForeignObject()
+        elif isinstance(node, (NeverSchema, UndefinedSchema)):
+            return _EMPTY
         return None
+
 
     def __rand_int(self, node):
         import sys
@@ -158,18 +168,8 @@ class DataGenerator(TreeCursor):
     def _visit_object(self, node):
         r = {}
         for k, v in node.items():
-            if v.optional:
-                if self.__occur == 'var':
-                    i = random.randint(0, 1)
-                    if i == 0:
-                        r[k] = v.accept(self)
-                elif self.__occur == 'once':
-                    r[k] = v.accept(self)
-                else:
-                    pass
-            else:
-                r[k] = v.accept(self)
-            if (k in r and r[k] == u'string' 
+            r[k] = v.accept(self)
+            if (r[k] is not _EMPTY and r[k] == u'string' 
                 and v.type == 'string' 
                 and self.__gen_str == 'implied'
                 and 'default' not in v.annotations 
