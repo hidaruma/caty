@@ -107,7 +107,6 @@ class SchemaFinder(ResourceFinder, ReadOnlyFacility):
             elif self._local.name == 'public':
                 if self._local.has_command_type(key):
                     return self._local.get_command_type(key)
-            print key, self._local.name
             return self._module.get_command_type(key)
         raise KeyError(key)
 

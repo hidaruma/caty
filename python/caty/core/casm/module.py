@@ -666,6 +666,7 @@ class LocalModule(Module):
         Module.__init__(self, finder._module._app)
         self.parent = finder._module
         self.parent_finder = finder
+        self._name = u'$local$' # 絶対に使われない名前をデフォルトにしておく
         
     @property
     def schema_finder(self):
