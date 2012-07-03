@@ -1,0 +1,25 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= whenによる分岐
+
+== !exec
+
+|= !command           |= !input |= !output |
+| pass                | true    | true |
+
+
+|= !command           |= !input |= !output |
+|when{null=>pass}     | null | |
+|when{boolean=>pass}  | true | |
+|when{boolean=>pass}  | false | |
+|when{number=>pass}   | 2 | |
+|when{number=>pass}   | 3.14 | |
+|when{number=>pass}   | 0 | |
+|when{number=>pass}   | -2.005 | |
+|when{number=>pass}   | 3.14e-3 | |
+|when{string=>pass}   | "" | |
+|when{string=>pass}   | "hello" | |
+|when{binary=>pass}   | b"" | |
+|when{foreign=>pass}  | foreign | |
+
+
