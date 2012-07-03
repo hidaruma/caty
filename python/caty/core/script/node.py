@@ -176,9 +176,10 @@ class CommandNode(object):
     def accept(self, visitor):
         return self.cmd.accept(visitor)
 
+import decimal
 _scalar_tag_map = {
     types.IntType: ['integer', 'number'],
-    types.FloatType: ['number'],
+    decimal.Decimal: ['number'],
     types.UnicodeType: ['string'], 
     types.BooleanType: ['boolean'], 
     types.NoneType: ['null'], 
