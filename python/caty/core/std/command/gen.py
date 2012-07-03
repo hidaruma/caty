@@ -46,7 +46,7 @@ class DataGenerator(TreeCursor):
                     return True
         elif isinstance(node, Object):
             for k, v in node.items():
-                if sefl.__has_loop_ref(v, cache):
+                if self.__has_loop_ref(v, cache):
                     return True
         return False
 
