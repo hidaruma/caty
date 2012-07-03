@@ -148,6 +148,7 @@ CONTENT_TYPEもないときは、コマンドがメディア型を（なんら�
 例： webio:parse --format=json
 
 */
+@[register-public]
 command parse
  {
    /** MIMEメディア型 */

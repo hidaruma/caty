@@ -707,18 +707,26 @@ command pass<T default univ> :: T -> T
     refers python:caty.core.std.command.builtin.PassData;
 
 /**
+ * 入力がundefinedのとき、引数の値に置き換える。
+ */
+command default [any value] :: univ -> univ
+    refers python:caty.core.std.command.builtin.Default;
+
+/**
  * 配列の n 番目のデータを返す。 item との違いはこちらは 1 始まりということである。
  * 値が存在しなかった場合は：\\
  * safeオプションが指定されてないなら、実行時エラーとなる。\\
  * safeオプションが指定されていれば、undefined値を返す。
+ *
+ * safeオプションが指定されているなら、undefined値の入力をそのままpassする。
  */
 command nth<T default any>
  {
    @[default(false)]
    "safe": boolean?,
  }
- [integer n]
- :: @* [T*] -> T?
+ [integer(minimum=1) n]
+ :: (@* [T*] | undefined) -> T?
     refers python:caty.core.std.command.builtin.Nth;
 
 /**
@@ -726,6 +734,8 @@ command nth<T default any>
  * 値が存在しなかった場合は：\\
  * safeオプションが指定されてないなら、実行時エラーとなる。\\
  * safeオプションが指定されていれば、undefined値を返す。
+ *
+ * safeオプションが指定されているなら、undefined値の入力をそのままpassする。
  */
 command item<T default any>
  {
@@ -733,7 +743,7 @@ command item<T default any>
    "safe": boolean?,
  }
  [integer i] 
- :: @* [T*] -> T?
+ :: (@* [T*] | undefined) -> T?
     refers python:caty.core.std.command.builtin.Item;
 
 /**
@@ -741,6 +751,8 @@ command item<T default any>
  * 値が存在しなかった場合は：\\
  * safeオプションが指定されてないなら、実行時エラーとなる。\\
  * safeオプションが指定されていれば、undefined値を返す。
+ * 
+ * safeオプションが指定されているなら、undefined値の入力をそのままpassする。
  */
 command pv<T default any> 
  {
@@ -748,7 +760,7 @@ command pv<T default any>
    "safe": boolean?,
  }
  [string propName] 
-:: @* object -> T?
+:: (@* object | undefined) -> T?
    refers python:caty.core.std.command.builtin.GetPV;
 
 /**
