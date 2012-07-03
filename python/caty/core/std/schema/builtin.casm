@@ -725,7 +725,7 @@ command nth<T default any>
    @[default(false)]
    "safe": boolean?,
  }
- [integer(minimum=1) n]
+ [integer n]
  :: (@* [T*] | undefined) -> T?
     refers python:caty.core.std.command.builtin.Nth;
 
