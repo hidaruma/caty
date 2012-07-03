@@ -187,6 +187,7 @@ _scalar_tag_map = {
     types.DictType: ['object'],
     types.StringType: ['binary'],
     caty._Undefined: ['undefined'],
+    caty.ForeignObject: ['foreign'],
 }
 class Dispatch(Syntax):
     command_decl = u"""command __dispatch {"seq": boolean?, "multi": boolean?} :: any -> any
