@@ -113,15 +113,12 @@ class AccessorPair(Accessor):
 
     def find(self, obj):
         for j in self._prev.find(obj):
-            if j is None: 
-                yield j
-            else:
-                try:
-                    for o in self._next.find(j):
-                        yield o
-                except:
-                    self._next.error = True
-                    raise
+            try:
+                for o in self._next.find(j):
+                    yield o
+            except:
+                self._next.error = True
+                raise
     
     def error():
         def get(self):
