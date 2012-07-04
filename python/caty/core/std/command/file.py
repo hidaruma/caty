@@ -64,8 +64,18 @@ class ReadFileI(FileUtilMixin, Builtin):
 
 class WriteFile(FileUtilMixin, Builtin):
 
+
+    def setup(self, opts, path):
+        FileUtilMixin.setup(self, path)
+        self.__mkdir = opts['mkdir']
+
     def execute(self, input):
         with self.open('wb') as f:
+            if self.__mkdir:
+                for p in f.list_parents():
+                    d = f.opener.opendir(p)
+                    if not d.exists:
+                        d.create()
             f.write(input)
 
 class DeleteFile(FileUtilMixin, Builtin):

@@ -26,6 +26,9 @@ class FileObject(PbcObject):
     def __invariant__(self):
         assert self.__mode in ('rb', 'wb'), slef.__mode
 
+    def list_parents(self):
+        return list(path.list_hierarchy(self.__path))[:-1]
+
     @property
     def path(self):
         return self.__path
@@ -215,6 +218,9 @@ class DirectoryObject(PbcObject):
             return True
         except Exception, e:
             return False
+
+    def list_parents(self):
+        return list(path.list_hierarchy(self.__path))[:-1]
 
     def create(self):
         r"""ディレクトリを作成する。

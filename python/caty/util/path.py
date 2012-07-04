@@ -31,3 +31,10 @@ def split(path):
     if d == '':
         d = u'/'
     return d, b
+
+def list_hierarchy(path):
+    stack = [u'']
+    for p in path.lstrip(u'/').split(u'/'):
+        stack.append(p)
+        yield u'/'.join(stack)
+
