@@ -1,0 +1,66 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= セーフパスとデフォルト値
+
+セーフパスは、セーフチェーンとまったく同じ挙動。
+デフォルト値指定 '?=' も、セーフチェーンの後の default と同じ。
+
+xjson:get コマンドを使った場合も、コマンドショートカット文字 '$' を使った場合も同じ挙動。
+
+=== !name:data
+
+{{{
+{
+  "a": 1,
+  "b": 2,
+  "c": [0, 1, 2],
+  "d": {
+     "e": 3,
+   },
+}
+}}}
+
+
+== !exec
+
+|= !input |= !command                 |= !output  |= !exception |= 備考 |
+| %data   | pv --safe x               |           | | セーフ |
+| %data   | $.x?                      |           | | セーフ |
+| %data   | xjson:get --safe x        |           | | セーフ |
+| %data   | pv --safe b               |           | | セーフ |
+| %data   | $.b?                      |           | | セーフ |
+| %data   | xjson:get --safe b        |           | | セーフ |
+| %data   | pv --safe b~| pv --safe y |           | Exception   | これはセーフでも型で例外する |
+| %data   | $.b.y?                    |           | Exception   | これはセーフでも型で例外する |
+| %data   | xjson:get --safe b.y      |           | Exception   | これはセーフでも型で例外する |
+| %data   | pv --safe x~| pv --safe y |           | | セーフ |
+| %data   | $.x.y?                    |           | | セーフ |
+| %data   | xjson:get --safe .x.y     |           | | セーフ |
+| %data   | item --safe 1             |           | Exception   | これはセーフでも型で例外する |
+| %data   | $.1?                      |           | Exception   | これはセーフでも型で例外する |
+| %data   | xjson:get --safe 1        |           | Exception   | これはセーフでも型で例外する |
+| %data   | pv --safe x~| item --safe 5|          | |  セーフ |
+| %data   | $.x.5?                     |          | |  セーフ |
+| %data   | xjson:get --safe x.5       |          | |  セーフ |
+
+
+
+|= !input |= !command                              |= !output  |
+| %data   | pv --safe x                            |           |
+| %data   | $.x?                                   |           |
+| %data   | xjson:get --safe x                     |           |
+| %data   | pv --safe x~|default null              |           |
+| %data   | $.x?=null                              |           |
+| %data   | xjson:get --safe --default=null x      |           |
+| %data   | pv --safe x~|pv --safe y               |           |
+| %data   | $.x.y?                                 |           |
+| %data   | xjson:get --safe x.y                   |           |
+| %data   | pv --safe x~|pv --safe y~|default null |           |
+| %data   | $.x.y?=null                            |           |
+| %data   | xjson:get --safe --default=null x.y    |           |
+| %data   | pv --safe x~|item --safe 5              |          |
+| %data   | $.x.5?                                  |          |
+| %data   | xjson:get --safe x.5                    |          |
+| %data   | pv --safe x~|item --safe 5~|default null|          |
+| %data   | $.x.5?=null                             |          |
+| %data   | xjson:get --safe --default=null x.5     |          |
