@@ -89,11 +89,10 @@ class Get(Builtin):
         try:
             r = stm.select(input).next()
             return r
-        except Nothing as e:
+        except (KeyError, Nothing) as e:
             if self._default != caty.UNDEFINED:
                 return self._default
             if not self._safe:
-                
                 msg = '{0} Line {1}, Col {2}'.format(self._pathexp, self.line, self.col)
                 throw_caty_exception(u'Undefined', msg)
             else:
