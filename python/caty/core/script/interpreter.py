@@ -484,7 +484,7 @@ class CommandExecutor(BaseInterpreter):
         try:
             r = stm.select(self.input).next()
             return r
-        except Nothing as e:
+        except (KeyError, Nothing) as e:
             msg = '{0} at {1}, Col {2}'.format(node.path, node.line, node.col)
             throw_caty_exception(u'Undefined', msg)
         except:
