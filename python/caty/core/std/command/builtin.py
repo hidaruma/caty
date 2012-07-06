@@ -977,7 +977,7 @@ class Help(Builtin):
         line = self.__type_name.strip()
         if line == '':
             return u''
-        module = 'public'
+        module = ''
         mode = 'usage' # usage or list or module_usage oe list_modules
         chunk = line.split(':')
         if self.__exception:
@@ -1011,19 +1011,24 @@ class Help(Builtin):
                 return (u'未知の型: %s' % self.__type_name)
         elif mode == 'list':
             r= []
-            types = [(s.name, s.docstring) 
-                     for s in self.schema._module.get_module(module).schema_ns.values()
-                     if (not query) or (query in s.annotations)
-                    ]
-            types.sort(cmp=lambda x, y:cmp(x[0], y[0]))
-            if types:
-                max_width = max(map(lambda a:len(a[0]), types))
+            if module:
+                modules = [module]
             else:
-                max_width = 0
-            r.append((u'モジュール: %s' % module))
-            for c in types:
-                if c[0] in caty.core.schema.types and module != 'public': continue
-                r.append( (c[0].ljust(max_width + 1) + c[1]))
+                modules = [u'builtin', u'public']
+            for module in modules:
+                types = [(s.name, s.docstring) 
+                         for s in self.schema._module.get_module(module).schema_ns.values()
+                         if (not query) or (query in s.annotations)
+                        ]
+                types.sort(cmp=lambda x, y:cmp(x[0], y[0]))
+                if types:
+                    max_width = max(map(lambda a:len(a[0]), types))
+                else:
+                    max_width = 0
+                r.append((u'モジュール: %s' % module))
+                for c in types:
+                    if c[0] in caty.core.schema.types and module != 'public': continue
+                    r.append( (c[0].ljust(max_width + 1) + c[1]))
             return '\n'.join(r)
         elif mode == 'list_modules':
             r1 = []
@@ -1068,7 +1073,7 @@ class Help(Builtin):
             from caty.front.console import CatyShell
             h = getattr(CatyShell, 'do_%s' % line)
             return h.__doc__.strip()
-        module = 'builtin'
+        module = ''
         mode = 'usage' # usage or list or module_usage oe list_modules
         command = ''
         chunk = line.split(':')
@@ -1103,18 +1108,23 @@ class Help(Builtin):
                 query = 'filter'
             else:
                 query = None
-            commands = [(s.name, s.doc.splitlines()[0].strip()) 
-                     for s in self.schema._module.get_module(module).command_ns.values()
-                     if (not query) or (query in s.annotations)
-                    ]
-            commands.sort(cmp=lambda x, y:cmp(x[0], y[0]))
-            if commands:
-                max_width = max(map(lambda a:len(a[0]), commands))
+            if module:
+                modules = []
             else:
-                max_width = 0
-            r.append((u'モジュール: %s' % module))
-            for c in commands:
-                r.append( (c[0].ljust(max_width + 1) + c[1]))
+                modules = [u'builtin', u'public']
+            for module in modules:
+                commands = [(s.name, s.doc.splitlines()[0].strip()) 
+                         for s in self.schema._module.get_module(module).command_ns.values()
+                         if (not query) or (query in s.annotations)
+                        ]
+                commands.sort(cmp=lambda x, y:cmp(x[0], y[0]))
+                if commands:
+                    max_width = max(map(lambda a:len(a[0]), commands))
+                else:
+                    max_width = 0
+                r.append((u'モジュール: %s' % module))
+                for c in commands:
+                    r.append( (c[0].ljust(max_width + 1) + c[1]))
             return '\n'.join(r)
         elif mode == 'list_modules':
             r1 = []
