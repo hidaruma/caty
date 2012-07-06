@@ -1,5 +1,5 @@
 #coding: utf-8
-from caty.jsontools import untagged, tag, tagged, TaggedValue
+from caty.jsontools import untagged, tag, tagged, TaggedValue, split_tag
 from caty import UNDEFINED
 
 class Nothing(Exception):
@@ -92,9 +92,9 @@ class PropertySelector(Selector):
 
     def replace(self, obj, new, allow_loose):
         if self.next:
-            obj[self.property] = self.next.replace(obj[self.property], new, allow_loose)
+            untagged(obj)[self.property] = self.next.replace(untagged(obj)[self.property], new, allow_loose)
         else:
-            obj[self.property] = new
+            untagged(obj)[self.property] = new
             return obj
 
     def _to_str(self):
@@ -126,20 +126,24 @@ class ItemSelector(Selector):
 
     def replace(self, obj, new, allow_loose):
         import caty
-        if self.next:
-            obj[self.property] = self.next.replace(obj[self.property], new, allow_loose)
+        if isinstance(obj, TaggedValue):
+            tgt = untagged(obj)
         else:
-            if self.property < len(obj):
-                obj[self.property] = new
+            tgt = obj
+        if self.next:
+            tgt[self.property] = self.next.replace(tgt[self.property], new, allow_loose)
+        else:
+            if self.property < len(tgt):
+                tgt[self.property] = new
                 return obj
-            elif self.property == len(obj):
-                obj.append(new)
+            elif self.property == len(tgt):
+                tgt.append(new)
                 return obj
             else:
                 if allow_loose:
-                    while len(obj) < self.property:
-                        obj.append(caty.UNDEFINED)
-                    obj.append(new)
+                    while len(tgt) < self.property:
+                        tgt.append(caty.UNDEFINED)
+                    tgt.append(new)
                     return obj
                 else:
                     raise IndexError(self.property)
