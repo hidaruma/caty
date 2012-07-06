@@ -11,13 +11,14 @@ class Selector(object):
         self.next = None
         self.is_optional = False
 
+    def set_optional(self, o):
+        self.is_optional = o
+        if self.next:
+            self.next.set_optional(o)
+
     def chain(self, next):
         if not self.next:
             self.next = next
-            if not self.next.is_optional:
-                self.next.is_optional = self.is_optional
-            else:
-                self.is_optional = self.next.is_optional
         else:
             self.next.chain(next)
         return self
@@ -49,6 +50,27 @@ class Selector(object):
         if self.next:
             r = '%s.%s' % (r, self.next.to_str())
         return r
+
+class SelectorWrapper(object):
+    def __init__(self, selector):
+        self.selector = selector
+        self.default = UNDEFINED
+
+    def set_optional(self, o):
+        self.selector.set_optional(o)
+
+    def set_default(self, default):
+        self.default = default
+
+    def select(self, obj):
+        for r in self.selector.select(obj):
+            if r is UNDEFINED and self.default is not UNDEFINED:
+                yield self.default
+            else:
+                yield r
+
+    def to_str(self):
+        return self.selector.to_str()
 
 class AllSelector(Selector):
     def run(self, obj):

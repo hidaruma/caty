@@ -140,7 +140,7 @@ class ScriptParser(Parser):
 
     def xjson_path(self, seq):
         pos = (seq.col-1, seq.line)
-        stm = SelectorParserInScript(False)(seq)
+        stm = JSONPathSelectorParser(False, True)(seq)
         return JsonPath(stm, pos)
 
     def type_args(self, seq):
@@ -438,7 +438,7 @@ class ScriptParser(Parser):
 
     def type_case(self, seq):
         seq.parse(keyword('case'))
-        path = option(SelectorParserInScript(False))(seq)
+        path = option(JSONPathSelectorParser(False, True))(seq)
         if option(keyword('via'))(seq):
             seq.parse('{')
             via = self.make_pipeline(seq)
@@ -456,7 +456,7 @@ class ScriptParser(Parser):
 
     def type_cond(self, seq):
         seq.parse(keyword('cond'))
-        path = option(SelectorParserInScript(False))(seq)
+        path = option(JSONPathSelectorParser(False, True))(seq)
         seq.parse('{')
         name_set = set()
         cases = seq.parse(split(lambda s:self.type_case_branch(s, name_set), self.comma, allow_last_delim=True))
@@ -588,19 +588,4 @@ def _remove_comment(v):
     return _SINGLE.sub(u' ', _MULTI.sub(u' ', v))
 
 class ContinuedComment(Exception): pass
-
-class SelectorParserInScript(JSONPathSelectorParser):
-    def __call__(self, seq):
-        o = chainl([self.all, 
-                    self.tag,
-                    self.exp_tag,
-                    self.untagged,
-                    self.length,
-                    self.name, 
-                    self.index, 
-                    self.namewildcard, 
-                    self.itemwildcard, 
-                    try_(self.oldtag),
-                    ], self.dot)(seq)
-        return o
 

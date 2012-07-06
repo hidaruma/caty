@@ -2,6 +2,7 @@
 from topdown import *
 from caty.jsontools.selector.stm import *
 from caty.jsontools import stdjson
+from caty.jsontools import xjson
 
 class JSONPathSelectorParser(Parser):
     def __init__(self, empty_when_error=False, ignore_rest=False):
@@ -21,8 +22,16 @@ class JSONPathSelectorParser(Parser):
                     self.itemwildcard, 
                     try_(self.oldtag),
                     ], self.dot)(seq)
+        o = SelectorWrapper(o)
+        optional = option(u'?')(seq)
+        if optional and option('=')(seq):
+            d = xjson.parse(seq)
+        else:
+            d = UNDEFINED
         if not seq.eof and not self.ignore_rest:
             raise ParseFailed(seq, self)
+        o.set_optional(optional)
+        o.set_default(d)
         return o
 
     def apply_option(self, stm):
@@ -32,8 +41,8 @@ class JSONPathSelectorParser(Parser):
     def dot(self, seq):
         seq.parse('.')
         def _(a, b):
-            self.apply_option(a)
-            self.apply_option(b)
+            #self.apply_option(a)
+            #self.apply_option(b)
             return a.chain(b)
         return _
 
@@ -43,7 +52,8 @@ class JSONPathSelectorParser(Parser):
 
     def name(self, seq):
         key = seq.parse([self.namestr, lambda s:self.quoted(s, '"'), lambda s: self.quoted(s, "'")])
-        optional = option(u'?')(seq)
+        optional = False
+        #optional = option(u'?')(seq)
         return PropertySelector(key, optional)
 
     def namestr(self, seq):
@@ -73,7 +83,8 @@ class JSONPathSelectorParser(Parser):
 
     def index(self, seq):
         idx = int(seq.parse(Regex(r'([0-9]|[1-9][0-9]+)')))
-        optional = option(u'?')(seq)
+        optional = False
+        #optional = option(u'?')(seq)
         return ItemSelector(idx, optional)
 
     def namewildcard(self, seq):
