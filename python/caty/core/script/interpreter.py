@@ -184,7 +184,7 @@ class CommandExecutor(BaseInterpreter):
                     getattr(node, n).commit()
             return r
         except ContinuationSignal as e:
-            node.signal_schema.validate(e.data)
+            #node.signal_schema.validate(e.data)
             raise
         except CatyException as e:
             import sys
