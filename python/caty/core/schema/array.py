@@ -37,9 +37,11 @@ class ArraySchema(SchemaBase, Array):
         mandatory = len(self.schema_list)
         if self.repeat:
             mandatory -= 1
-        for s in self.schema_list:
+        for s in reversed(self.schema_list):
             if s.optional:
                 mandatory -= 1
+            else:
+                break
         value = reduce_undefined(value)
         l = len(value)
         #if l < mandatory:
