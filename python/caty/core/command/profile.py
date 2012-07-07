@@ -27,7 +27,7 @@ class ProfileContainer(object):
             pkgname, cmdname = path.rsplit('.', 1)
             self.command_class = commands.get(pkgname, cmdname)
         self._annotations = annotations or {}
-        self.doc = doc if doc else 'undocumented'
+        self.doc = doc if doc else u'undocumented'
         self.defined_application = app
         self.uri = uri
         self.module = module

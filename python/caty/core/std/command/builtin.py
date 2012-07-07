@@ -1029,7 +1029,7 @@ class Help(Builtin):
                 for c in types:
                     if c[0] in caty.core.schema.types and module != 'public': continue
                     r.append( (c[0].ljust(max_width + 1) + c[1]))
-            return '\n'.join(r)
+            return u'\n'.join(r)
         elif mode == 'list_modules':
             r1 = []
             r2 = []
@@ -1109,7 +1109,7 @@ class Help(Builtin):
             else:
                 query = None
             if module:
-                modules = []
+                modules = [module]
             else:
                 modules = [u'builtin', u'public']
             for module in modules:
@@ -1125,7 +1125,7 @@ class Help(Builtin):
                 r.append((u'モジュール: %s' % module))
                 for c in commands:
                     r.append( (c[0].ljust(max_width + 1) + c[1]))
-            return '\n'.join(r)
+            return u'\n'.join(r)
         elif mode == 'list_modules':
             r1 = []
             r2 = []
@@ -1137,7 +1137,7 @@ class Help(Builtin):
             r2.sort()
             r1.sort()
             r1.insert(0, (u'モジュール一覧'))
-            return '\n'.join(r1+r2)
+            return u'\n'.join(r1+r2)
         else:
             return u''
 
