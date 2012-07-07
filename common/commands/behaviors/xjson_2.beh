@@ -1,0 +1,121 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= xjsonモジュール その2
+
+
+
+
+
+=== !name:tag-o
+
+{{{
+@t {
+  "a": "hello",
+  "b": 1,
+  "c": [1, 2],
+  "d" :{"x":1, "y":2}
+}
+}}}
+
+=== !name:tag-o1
+
+{{{
+@t {
+  "a": "hello",
+  "b": 1,
+  "c": [1, 2],
+  "d": {"x":1, "y":2},
+  "e": 2,
+}
+}}}
+
+=== !name:tag-o2
+
+{{{
+@t {
+  "a": "hello",
+  "b": 2,
+  "c": [1, 2],
+  "d" :{"x":1, "y":2}
+}
+}}}
+
+=== !name:tag-o3
+
+{{{
+@t {
+  "a": "hello",
+  "b": 1,
+  "c": [2, 2],
+  "d" :{"x":1, "y":2}
+}
+}}}
+
+=== !name:tag-o4
+
+{{{
+@t {
+  "a": "hello",
+  "b": 1,
+  "c": [1, 2],
+  "d" :{"x":2, "y":2}
+}
+}}}
+
+=== !name:notag-o
+
+{{{
+{
+  "a": "hello",
+  "b": 1,
+  "c": [1, 2],
+  "d": {"x":1, "y":2}
+}
+}}}
+
+=== !name:notag-o1
+
+{{{
+{
+  "a": "hello",
+  "b": 1,
+  "c": [1, 2],
+  "d" :{"x":1, "y":2},
+  "e": 2,
+}
+}}}
+
+=== !name:notag-o2
+
+{{{
+{
+  "a": "hello",
+  "b": 2,
+  "c": [1, 2],
+  "d" :{"x":1, "y":2},
+}
+}}}
+
+
+== !exec
+
+Ignore-Tag-Once ルールが適用される。
+
+|= !input       |= !command       |= !output  |
+| %tag-o        | pass            | %tag-o    |
+| [%notag-o, 2] | xjson:put $.e   | %notag-o1 |
+| [%tag-o, 2]   | xjson:put $.e   | %tag-o1   |
+| [%tag-o, 2]   | xjson:put "$.content().e" |  %tag-o1   |
+| [%notag-o, 2] | xjson:put $.b   | %notag-o2 |
+| [%tag-o, 2]   | xjson:put $.b   | %tag-o2   |
+| [%tag-o, 2]   | xjson:put "$.content().b" |  %tag-o2   |
+
+その他の変更
+
+|= !input       |= !command       |= !output  |
+| %tag-o        | pass            | %tag-o    |
+| [%tag-o, 2]   | xjson:put $.c.0 | %tag-o3   |
+| [%tag-o, 2]   | xjson:put $.d.x | %tag-o4   |
+
+
+
