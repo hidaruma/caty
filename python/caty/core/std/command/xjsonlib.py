@@ -89,6 +89,7 @@ class Get(Builtin):
         if self._safe:
             stm.set_optional(self._safe)
         if self._default != caty.UNDEFINED:
+            stm.set_optional(True)
             stm.set_default(self._default)
         try:
             r = stm.select(input).next()

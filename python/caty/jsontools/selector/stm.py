@@ -1,5 +1,5 @@
 #coding: utf-8
-from caty.jsontools import untagged, tag, tagged, TaggedValue, split_tag
+from caty.jsontools import untagged, tag, tagged, TaggedValue, split_tag, xjson
 from caty import UNDEFINED
 
 class Nothing(Exception):
@@ -70,7 +70,16 @@ class SelectorWrapper(object):
                 yield r
 
     def to_str(self):
-        return self.selector.to_str()
+        return self._to_str()
+
+    def _to_str(self):
+        r = self.selector.to_str()
+        if self.selector.is_optional:
+            r += u'?'
+        if self.default is not UNDEFINED:
+            r += xjson.dumps(self.default)
+        return r
+
 
 class AllSelector(Selector):
     def run(self, obj):
