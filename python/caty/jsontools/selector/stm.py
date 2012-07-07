@@ -69,6 +69,9 @@ class SelectorWrapper(object):
             else:
                 yield r
 
+    def replace(self, src, new, allow_loose=False):
+        return self.selector.replace(src, new, allow_loose)
+
     def to_str(self):
         return self._to_str()
 
@@ -280,6 +283,14 @@ class TagContentSelector(Selector):
     def run(self, obj):
         v = untagged(obj)
         yield v
+
+
+    def replace(self, obj, new, allow_loose):
+        t, v = split_tag(obj)
+        if self.next:
+            return tagged(t, self.next.replace(v, new, allow_loose))
+        else:
+            assert False
 
     def _to_str(self):
         return self.src
