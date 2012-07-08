@@ -20,6 +20,7 @@ Catyで出会うトラブルの原因（あまり系統的ではない）。
 * コマンド引数宣言に [string foo, integer? bar] の代わりに
   [string foo, integer bar?] と書いてしまう。これは多いなー。
 * string(remark="...") を  string("...") と書いてしまう。
+* 出力の型宣言を void と書くと何も表示されないであわてる。
 
 
 
