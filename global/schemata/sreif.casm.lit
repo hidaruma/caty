@@ -1,0 +1,374 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= シャローレイフィケーション
+
+<<{
+/**
+ * シャローレイフィケーション
+ * Shallow Reification
+ */
+module sreif; 
+
+}>>
+
+ディープレイフィケーション（reif）とシャローレイフィケーション（sreif）は、
+単一のモジュールに統合される可能性がある。
+
+
+== モグラのノードと辺
+
+モグラ（MOGra = Metaobject Graph）のノードには、大別すると三種類がある。
+
+# 名前空間コンテナノード
+# 名前空間ノード
+# その他のメタオブジェクト（MO）ノード
+
+===  名前空間コンテナノード 
+
+|= コンテナの種別   |= 短縮形 |
+| projectコンテナ   | prj |
+| applicationコンテナ| app |
+| packageコンテナ   | pkg |
+| moduleコンテナ    | mod |
+| classコンテナ     | cls |
+
+=== 名前空間ノード 
+
+|= 名前空間種別  |= 短縮形 |
+| applications   |apps/ |
+| facilities     |fcls/ |
+| packages       |pkgs/ |
+| modules        |mods/ |
+| types          |typs/ |
+| commands       |cmds/ |
+| classes        |clsss/|
+| states         |stts/ |
+| userroles      |uros/ |
+
+=== その他のメタオブジェクトノード 
+
+|= ノード種別  |= 短縮形 |
+| facility     | fcl |
+| type         | typ |
+| command      | cmd |
+| state        | stt |
+| userrole     | uro |
+
+
+=== モグラの辺
+
+* 親子リンク辺
+** 「名前空間コンテナノード→名前空間ノード」、名前空間のソートで辺を識別する。
+** 「名前空間ノード→各種ノード」、束縛辺、名前空間内で名前と定義体を結ぶ。
+* 別名リンク辺：名前空間内、または外部の名前空間のあいだで、名前と名前を結びつける。
+
+=== モグラの構成
+
+それぞれのノードが、どの名前空間（NS)に所属し、さらにその名前空間がどのコンテナに属するかを示す。
+
+|= ノード種別 |= NS   |= コンテナ |= 意味 |
+| prj (Con)   | /     | なし      | システム |
+| app (Con)   | apps/ | prj       | アプリケーション |
+| fcl         | fcls/ | prj       | ファシリティ|
+| mod (Con)   | mods/ | app, pkg  | モジュール |
+| pkg (Con)   | pkgs/ | app, pkg  | パッケージ |
+| typ         | typs/ | mod, cls  | 型 |
+| cmd         | cmds/ | mod, cls  | コマンド |
+| stt         | stts/ | mod       | 状態 |
+| cls (Con)   | clss/ | mod       | クラス|
+| uro         | uros/ | mod       | ユーザーロール|
+
+== コマンドのネーミングパターン
+
+|= コマンド名のパターン |= 引数       |= 出力の型名のパターン |
+| reify-<種別>          | ColonDotパス| <種別> |
+| list-<種別複数形>     | ColonDotパス| [<種別>Summary*] |
+| show-<種別>           | ColonDotパス| <種別>Summary |
+
+== listコマンド
+
+|= コマンド         |= 第1引数                      |= 再帰構造 |
+| list-applications | なし（暗黙にプロジェクト）    | NO  |
+| list-facilities   | アプリケーション名            | NO  |
+| list-modules      | アプリケーション／パッケージ名| YES |
+| list-packages     | アプリケーション／パッケージ名| YES |
+| list-types        | モジュール／クラス名          | YES (1レベル)|
+| list-commands     | モジュール／クラス名          | YES (1レベル)|
+| list-states       | モジュール名                  | NO |
+| list-clsses       | モジュール名                  | NO |
+| list-userroles    | モジュール名                  | NO |
+
+次のコマンドも利便性から定義する。
+
+|= コマンド         |= 第1引数                      |= 再帰構造 |
+| list-resources    | モジュール名                  | NO |
+| list-actions      | モジュール／クラス名          | YES (1レベル)|
+| list-ports        | モジュール                    | NO |
+
+=== コマンドのオプション
+
+以下、名前空間ソートは短縮形を使う。
+
+* --rec ： 再帰的に検索する。このオプションが使用できるのは、名前空間が mods, pkgs, typs, cmds のとき。
+* --aliases ： 別名リンクも表示する。名前空間がtyps、 cmdsのとき。
+* --sub <部分名前空間名> : 指定された部分名前空間だけを対象とする。
+
+指定できる部分名前空間（subの値）は以下のとおり。他のオプションもこの表にまとめる。
+
+|= 検索対象NS|= rec |= aliases |= sub |
+| apps       | -    |  -        | - | 
+| mods       | YES  |  -        | - | 
+| pkgs       | YES  |  -        | - | 
+| typs       | YES  |  YES      | exceptions, annotations, kinds |
+| cmds       | YES  |  YES      | filters, ports, actions, formats |
+| stts       | -    |  -        | - | 
+| clss       | -    |  -        | resources | 
+| uros       | -    |  -        | - | 
+
+== showコマンド
+
+名前空間コンテナノード
+
+|= コマンド        |= 引数              |
+|show-application  | アプリケーション名 |
+|show-module      | モジュール名       |
+|show-package      | パッケージ名       |
+|show-class        | クラス名           |
+|show-resource     | クラス名（リソース名） |
+
+その他のノード
+
+|= コマンド      |= 引数         |
+| show-type      | 型名 |
+| show-command   | コマンド名 |
+| show-state     | 状態名 |
+| show-userrole  | ユーザーロール名 |
+| show-facility  | ファシリティ名 |
+
+|= コマンド      |= 引数         |
+| show-action    | コマンド名（アクション名） |
+| show-port      | コマンド名（ポート名） |
+
+
+== 型の定義
+
+サマリー型は、すべてreifで定義されている。
+
+<<{
+type cdpath = string(remark="cdpath");
+
+type typesSubnamespaceSort = (
+   "exceptions"
+ | "annotations"
+ | "kinds"
+);
+
+type commandsSubnamespaceSort = (
+   "actions"
+ | "filters"
+ | "formats"
+ | "ports"
+);
+
+type classesSubnamespaceSort = (
+ "resources"
+);
+
+type subnamespaceSort = (
+   typesSubnamespaceSort
+ | commandsSubnamespaceSort
+ | classesSubnamespaceSort
+);
+
+type ApplicationSummary = reif:ApplicationSummary;
+type ModuleSummary      = reif:ModuleSummary;
+type PackageSummary     = reif:PackageSummary;
+type ClassSummary       = reif:ClassSummary;
+type ResourceSummary    = reif:ResourceSummary;
+type TypeSummary        = reif:TypeSummary;
+type CommandSummary     = reif:CommandSummary;
+type ActionSummary      = reif:ActionSummary;
+type PortSummary        = reif:PortSummary;
+type StateSummary       = reif:StateSummary;
+type FacilitySummary    = reif:FacilitySummary;
+type ProjectSummary     = reif:ProjectSummary;
+type UserRoleSummary    = reif:UserRoleSummary;
+
+}>>
+
+== listコマンドの定義
+
+<<{
+command list-applications
+:: void -> [ApplicationSummary*]
+;
+
+/* 仕様未定 */
+command list-facilities
+  [cdpath app]
+:: void -> [FacilitySummary*]
+;
+
+command list-modules
+  {
+    @[default(false)]
+    "rec": boolean?,
+  }
+  [cdpath app-pkg]
+:: void -> [ModuleSummary*]
+;
+
+command list-packages
+  {
+    @[default(false)]
+    "rec": boolean?,
+  }
+  [cdpath app-pkg]
+:: void -> [PackageSummary*]
+;
+
+command list-types
+  {
+    @[default(false)]
+    "rec": boolean?,
+    @[default(false)]
+    "aliases": boolean?,
+    "sub": typesSubnamespaceSort?,
+  }
+  [cdpath mod-cls]
+:: void -> [TypeSummary*]
+;
+ 
+command list-commands
+  {
+    @[default(false)]
+    "rec": boolean?,
+    @[default(false)]
+    "aliases": boolean?,
+    "sub": commandsSubnamespaceSort?,
+  }
+  [cdpath mod-cls]
+:: void -> [CommandSummary*]
+;
+
+/* 優先 */
+command list-states
+  [cdpath mod]
+:: void -> [StateSummary*]
+;
+
+command list-classes
+  {
+    @[default(false)]
+    "aliases": boolean?,
+    "sub": classesSubnamespaceSort?,
+  }
+  [cdpath mod]
+:: void -> [ClassSummary*]
+;
+
+command list-userroles
+  [cdpath mod]
+:: void -> [UserRoleSummary*]
+;
+
+/* 優先 */
+command list-resources
+  {
+    @[default(false)]
+    "aliases": boolean?,
+  }
+  [cdpath mod]
+:: void -> [ResourceSummary*]
+;
+
+/* 優先 */
+command list-actions
+  {
+    @[default(false)]
+    "rec": boolean?,
+  }
+  [cdpath mod-cls]
+:: void -> [ActionSummary*]
+;
+
+command list-ports
+  [cdpath mod]
+:: void -> [PortSummary*]
+;
+
+
+}>>
+
+== showコマンドの定義
+
+<<{
+command show-project
+:: void -> ProjectSummary
+;
+
+command show-application
+  [cdpath app]
+:: void -> ApplicationSummary
+;
+
+/* 仕様未定 */
+command show-facility
+  [cdpath fcl]
+:: void -> FacilitySummary
+;
+
+command show-module
+  [cdpath mod]
+:: void -> ModuleSummary
+;
+
+command show-package
+  [cdpath pkg]
+:: void -> PackageSummary
+;
+
+command show-class
+  [cdpath cls]
+:: void -> ClassSummary
+;
+
+/* 優先 */
+command show-resource
+  [cdpath res]
+:: void -> ResourceSummary
+;
+
+command show-type
+  [cdpath typ]
+:: void -> TypeSummary
+;
+
+command show-command
+  [cdpath cmd]
+:: void -> CommandSummary
+;
+
+/* 優先 */
+command show-action
+  [cdpath act]
+:: void -> ActionSummary
+;
+
+command show-port
+  [cdpath prt]
+:: void -> PortSummary
+;
+
+/* 優先 */
+command show-state
+  [cdpath stt]
+:: void -> StateSummary
+;
+
+command show-userrole
+  [cdpath uro]
+:: void -> UserRoleSummary
+;
+
+}>>

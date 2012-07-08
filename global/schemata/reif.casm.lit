@@ -1,0 +1,1562 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= レイフィケーション
+
+<<{
+/** レイフィケーションされたメタオブジェクトを表現する型
+ *
+ */
+module reif; 
+
+}>>
+
+== 全般的な注意
+
+* 疑似タグについては、大幅に変更する予定なので、今はほっておく。塩漬け。
+* 開発途中段階でもエラーが出にくいように、オプショナル（'?'）な定義が多いが、後で必須とするものもある。
+  （その逆もあるだろう。）
+* QualifierMixin というミクシンを使っているため、多くのオブジェクト型が open-constraintsになっている。
+  いずれ制約を閉じることにして、開発中はopenとする。
+  よって今は、typoの検出ができない。
+  （QualifierMixin を使ってないところもある。）
+* const宣言された定数は、型とコマンドとして定義されるので、定数定義は独立したメタオブジェクトとは考えないことにした。
+  実際、constだけ特別扱いすると一様に扱えないために場合分けが必要になる弊害が出ている。
+  できるだけ概念は減らし、一様に扱うべき（特別扱いはなし）。
+* 名前グラフのルート（基点）はプロジェクトとした。runtimeメタオブジェクトは、
+  プロジェクトのプロパティとして生（foreign）で取れるようになっているが、これは変更されるだろう。
+* 名前空間であるプロパティには @[namespace] を付けた。
+* 他の名前空間の一部となるプロパティには @[subnamespace] を付けた。
+* namespaceContainerは長いので、プロパティ名は単にcontainerとした。
+* NamespaceInfoをどこに置くかは未定。
+* 型とコマンドの両方に共通のレイフィケーションルールを使うことを考慮して
+  シングルトン型は「値の表現」と解釈する。
+* 構文上は、object, arrayが予約語だが、レイフィケーションされたBuiltinType には入ってない。
+  objectとarrayはpredefinedな名前と考え、
+  レイフィケーション時は常に展開される。（展開形式は下。スキーマにも入っている。）
+
+{{{
+// object の展開形式
+
+@object-of {
+ "specified" : {},
+ "additional" : @builtin {"typeName": "univ"}
+}
+
+// array の展開形式
+
+@array-of {
+ "specified" : [],
+ "additional" : @builtin {"typeName": "univ"}
+}
+}}}
+ 
+
+== 実装優先度
+
+State, Resource, Actionを優先。これらは、プロトタイプサイト（モックアップ）作成に使う。
+
+型のレイフィケーションには型名（文字列）を併用する。名前を持つ型で、スキーマ属性と型パラメータを持たない型は
+その名前のみで識別できる。
+現状では、型名しか受け付けないコマンドを使う状況が多いので、型名としてのレイフィケーションを優先する。
+最後の方の get-name コマンドを参照。
+
+レイフィケーション・コマンドに、--type-name オプションを付けると、可能な限りtypeNameを使うようにする。
+型名（テキスト文字列）の使用は、今後も排除できないと思う。
+
+スクリプトコードのレイフィケーションの整備は先延ばし。
+
+
+== どうすべきか？（未定）
+
+# Docは必須とするか？
+#  "exception": [Type*], @ どうしよう?
+#  "signal": [Type*], @ どうしよう?
+
+
+=== こうしよう
+
+# Docは必須としてもよさそうだ。"undocumented" が既に入っているので。
+
+
+== ネーミングルール
+
+# 型名は大文字始まりのキャメルケース、ただしスカラー型のときは小文字始まり。
+# プロパティ名は小文字始まりのキャメルケース
+# タグ名は小文字のみ、ハイフン区切り
+# タグ名が予約語とかぶるときは、末尾に -of を付ける。
+  実際に使うのは、object-ofとarray-ofだけ。
+
+== スクリプトレイフィケーションとの共有
+
+次のレイフィケーション要素は、スクリプトのレイフィケーションでも使う。
+
+# @xxx-val というタグが付いているシングルトン型 → リテラル
+# @object-of, @array-of, @tagged → 複合コマンドの構成
+# @builtin も利用する可能性あり。
+# @type-refと@command-refを共用できないか？
+# AppliedType と type applied command を共通にできないか？
+
+== 共通の定義
+
+<<{
+/** ドキュメンテーションコメント */
+type Doc = {
+  /** 短い簡潔な記述 */
+  "description": string,
+  /** より詳しい説明（Wikiテキストと解釈する） */
+  "moreDescription" : string(remark="Wikiテキスト")?,
+};
+
+/** 共通の修飾情報 
+ *
+ * # 名前
+ * # Docコメント
+ * # アノテーション
+ * # 親となる名前空間コンテナ
+ */
+type QualifierMixin = {
+
+  /** 名前
+   * nameもこのミクシンに含まれる、ただし省略可能
+   * ミクシンを使用するときにnameを必須にすることもできる。
+   */
+  "name": string?,
+
+  // docコメントとアノテーションは、ほとんどどこにでも付けることができる
+
+  /** ドキュメンテーションコメント */
+  "document": Doc?,
+  /** アノテーション */
+  "annotations": object?,
+
+  /** メタオブジェクトが所属する名前空間のコンテナ
+   * コンテナのコロンドットパスが入る。
+   *
+   * 名前空間に登録された名前を持つメタオブジェクト（型、コマンドなど）は、
+   * その親である名前空間を取得できると便利なことが多い。
+   */
+  "container": string(remark="CDパス")?,
+
+   *: any?
+};
+}>>
+
+
+== 暫定的な定義
+
+KindExprの定義は済んでいる。kreif.casm.lit。
+
+<<{
+type KindExpr = deferred (string|null); // これは暫定的
+type Kind = deferred (string|null); // これは暫定的
+}>>
+
+== メタオブジェクト名前構造
+
+**名前空間**は、名前（文字列）と実体（値）のペアの集合である。
+名前空間はJSONオブジェクトにレイファイされる。名前はプロパティ名、実体がプロパティ値となる。
+名前空間はまた、**束縛**、**環境**、**コンテキスト**などと呼ばれるメタオブジェクトに相当する。
+Catyのレイフィケーションでは、束縛、環境、コンテキストなども一様に名前空間と呼ぶことにする。
+
+**名前空間コンテナ**は、いくつかの名前空間を保持するメタオブジェクトである。
+
+**メタオブジェクト名前構造**とは、名前空間コンテナ、名前空間、その他の実体から構成されるグラフ構造である。
+メタオブジェクト名前構造がグラフであることを強調するときは**メタオブジェクト名前グラフ**、
+または**メタオブジェクト・グラフ**とも呼ぶ。**MOGra** と略記する。
+
+メタオブジェクト・グラフのノードは、URL記法またはコロンドットパス（CDパス）で指し示すことができる。
+URL記法はノードを一意的に特定できるが、CDパスは一意的にノードを指せない。
+CDパスには、名前の種別（型かコマンドか、など）の情報が欠如しているからである。
+
+<<{
+/** 名前空間の種別 
+ * その名前空間に格納されている実体がなんであるかで、
+ * 名前空間の種別が決まる。
+ *
+ * cが名前空間コンテナ、sが名前空間の種別（ソート）であるとき、
+ * 当該の名前空間には、x.s でアクセスできる。
+ * 名前nに対する値（定義、実体）は、x.s.n でアクセスできる。
+ * 
+ * 次の実体は独自の名前空間を持たない点に注意。
+ *
+ * # 例外 （型）
+ * # カインド （型）
+ * # 構文 （型）
+ * # リソースクラス （クラス）
+ * # ポート （コマンド）
+ * # フィルター  （コマンド）
+ * # フォーマット （コマンド）
+ *
+ */
+type namespaceSort = (
+  "applications"
+| "facilities"
+| "packages"
+| "modules"
+| "types"
+| "commands"
+| "classes"
+| "states"
+| "userroles"
+);
+
+/** 名前空間のメタ情報 
+ * この情報があれば参考になるが、いつでも存在するとは期待できない。
+ */
+type NamespaceInfo = {
+   /** 再帰的な型定義を含むか */
+   @[default(@Indef)]
+   "recursive": triboolean?,
+   /** 依存している他のコンテナ */
+   "dependentContainers": [string(remark="コンテナのCDパス")*]?,
+   
+   *: any?
+};
+
+/** 値の型がTの名前空間 */
+type NamespaceOf<T> = @* {
+
+  */* 名前 */: T?,
+};
+}>>  
+
+=== 再帰
+
+再帰的な定義（参照・呼び出しのサイクル）を持つ可能性があるのは、型とコマンドだけである。
+
+Catyでは、モジュール／クラスをまたがった参照サイクルを許さないので、
+モジュールをノードとする参照グラフはDAGになる。
+したがって、他のモジュール／クラスへの参照があれば、この参照が自分自身に戻ることはないと仮定してよい。
+
+この特性により、型名前空間／コマンド名前空間ごとの分割コンパイルが可能となる。
+
+
+== 名前空間コンテナ
+
+プロジェクト、アプリケーション、パッケージ、モジュール、クラスは名前空間コンテナである。
+
+<<{
+
+type ProjectSummary = {
+  "document": Doc?,
+
+  /** プロジェクト名 
+   * プロジェクト名は任意の文字列で、ドメイン名のようにドットを含んでもよい。
+   */
+  "name": string,
+
+  /** Webサイトとしてのドメイン名
+   */
+  "domain" : string?,
+
+  /** 設定ファイルの deprecated の値をコピーする */
+  @[default(false)]
+  "deprecated": boolean?,
+
+   *: any?
+};
+
+/** 名前空間コンテナとしてのプロジェクト
+ * プロジェクトは1つの名前空間を持つ：
+ * * アプリケーションの名前空間 applications
+ */
+type Project = @project (QualifierMixin & ProjectSummary & {
+
+  /** アプリケーションの名前空間 */
+  @[namespace]
+  "applications": NamespaceOf<Application>,
+
+  /** 全てのファシリティの所在 
+   * プロジェクト全体でファシリティ名は一意的に保つ。
+   */
+  "facilityLocations": {*: string(remark="アプリケーション名")?},
+
+  /** ランタイム・メタオブジェクト 
+   * まだ未定
+   */
+  "runtime" : foreign?,
+
+  *: any?
+});
+
+
+type ApplicationSummary = {
+  "document": Doc?,
+
+  /** アプリケーション名 */
+  "name": string(remark="名前"),
+
+  /** 所属するグループ */
+  "group" : (string | null),
+
+  /** WebのURI空間にマウントされたときのパス */
+  "path" : string(remark="パス"),
+
+  /** 可視性関係（アプリケーション・ツリー構造）の親 */
+  @[default("global")]
+  "visibleParent" : string(remark="アプリケーション名")?,
+
+  /** 設定フィルの deprecated の値をコピーする */
+  @[default(false)]
+  "deprecated": boolean?,
+
+
+  *: any?
+};
+
+/** 名前空間コンテナとしてのアプリケーション 
+ * アプリケーションは2つの名前空間を持つ：
+ * # パッケージの名前空間 packages
+ * # モジュールの名前空間 modules
+ */
+type Application = @application (QualifierMixin & ApplicationSummary & {
+
+  /** パッケージの名前空間 */
+  @[namespace]
+  "packages": NamespaceOf<Package>,
+
+  /** モジュールの名前空間 */
+  @[namespace]
+  "modules": NamespaceOf<Module>,
+
+  /** ファシリティの名前空間 */
+  @[namespace]
+  "facilities": NamespaceOf<Facility>,
+
+  *: any?
+});
+
+/** コロンドットパスによるロケーションを含む修飾情報
+ */
+type LocatedQualifierMixin = QualifierMixin & {
+  /** このメタオブジェクトが所属する親コンテナのパス
+   * コロンドット区切りの名前列。
+   */
+  "parentPath": string(remark="コロンドットパス"),
+
+  * : any?
+};
+
+type FacilitySummary = {
+  "document": Doc?,
+
+  /** ファシリティの登録名 */
+  "name" : string,
+  /** スペッククラスのコロンドットパス */
+  "specClass": string(remark="CDパス"),
+  /** 実装クラスの実装言語依存の参照 */
+  "implClass": CodeRef,
+  /** システムパラメータ */
+  "systemParam" : any,
+
+  /** @[deprecated]アノテーションの値をコピーする */
+  @[default(false)]
+  "deprecated": boolean?,
+
+   *: any?
+};
+
+type Facility = @facility (LocatedQualifierMixin & FacilitySummary & {
+
+   *: any?
+});
+
+
+type PackageSummary = {
+  "document": Doc?,
+
+  /** パッケージ名 */
+  "name": string(remark="名前"),
+
+  /** 置かれているプレース */
+  "place" : ("schemata" | "actions"),
+
+  // 現状、deprecatedは指定できない
+
+  *: any?
+};
+
+/** パッケージ 
+ * パッケージは2つの名前空間を持つ：
+ * # パッケージの名前空間 packages
+ * # モジュールの名前空間 modules
+ */
+type Package = @package (LocatedQualifierMixin & PackageSummary &  {
+
+  /** パッケージの名前空間 */
+  @[namespace]
+  "packages": NamespaceOf<Package>,
+
+  /** モジュールの名前空間 */
+  @[namespace]
+  "modules": NamespaceOf<Module>,
+
+  *: any?
+});
+
+type ModuleSummary = {
+  "document": Doc?,
+
+  /** モジュール名 */
+  "name": string(remark="名前"),
+
+  /** 置かれているプレース */
+  "place" : ("schemata" | "actions"),
+
+  /** @[deprecated]アノテーションの値をコピーする */
+  @[default(false)]
+  "deprecated": boolean?,
+
+  *: any?
+};
+
+/** モジュールの共通構造 
+ * モジュールは3つの名前空間を持つ： 
+ * # 型の名前空間 types
+ * # コマンドの名前空間 commands
+ * # クラスの名前空間 classes
+ *
+ * kindは、型名と同じ名前空間を使う、
+ * ただし、レイフィケーションとしては、kinds を入れるほうが使いやすいかもしれない。
+ */
+type ModuleStruct = LocatedQualifierMixin & ModuleSummary & {
+
+  /** 型の名前空間 */
+  @[namespace]
+  "types": NamespaceOf<Type>,
+
+  /** コマンドの名前空間 */
+  @[namespace]
+  "commands": NamespaceOf<Command>,
+
+  /** クラスの名前空間 */
+  @[namespace]
+  "classes": NamespaceOf<Class>,
+
+//  /* * カインド */
+//  "kinds": {*: Kind?},
+
+
+  *: any?
+};
+
+/** モジュール */
+type Module = Casm | Cara;
+
+
+/** casmモジュール */
+type Casm = @casm ModuleStruct;
+
+
+/** caraモジュール
+ * caraの場合、さらに2つの名前空間が追加される： 
+ * # 状態の名前空間 states
+ * # ユーザーロールの名前空間 userroles
+ *
+ * リソースクラス名はクラスの名前空間に配置される。
+ * ポート名はコマンドの名前空間に配置される。
+ * だが、レイフィケーションとしては、resources, portsがあってもいいかもしれないので、そのまま残す。
+ * とりあえず、名前空間構造の忠実な反映より、利便性を取る。
+ */
+type Cara = @cara (ModuleStruct & {
+
+  /** リソースクラス 
+   * classesと名前空間は同じ
+   */
+  @[subnamespace]
+  "resources": NamespaceOf<Resource>, 
+
+  /** ユーザーロールの名前空間 */
+  @[namespace]
+  "userroles": NamespaceOf<UserRole>,
+
+  /** 状態の名前空間 */
+  @[namespace]
+  "states": NamespaceOf<State>,
+
+  /** ポート
+   * commandsと名前空間は同じ
+   */
+  @[subnamespace]
+  "ports": NamespaceOf<Port>,
+
+  *: any? // open
+});
+
+
+type ClassSummary = {
+  "document": Doc?,
+
+  /** クラス名 */
+  "name": string,
+
+  /** arg0 */
+  "arg0": Type?,
+
+  /** @[deprecated]アノテーションの値をコピーする */
+  @[default(false)]
+  "deprecated": boolean?,
+
+ *: any?
+};
+   
+
+/** クラス
+ * クラスは名前空間コンテナだが、現状では1つだけの名前空間commandsを持つ
+ * クラス表現（class expression）を導入すると、この定義は大幅に変更される。
+ */
+type Class = @class (LocatedQualifierMixin & ClassSummary & {
+
+  /** コマンドの名前空間 */
+  @[namespace]
+  "commands": NamespaceOf<Command>,
+
+  *: any?
+});
+}>>
+
+== 型
+
+* 参照 [[>http://d.hatena.ne.jp/m-hiyama/20070922/1190444423|「Erlangの型システムを定式化してみる」]]
+* 参照 [[>http://d.hatena.ne.jp/m-hiyama/20110430/1304128329|「Catyのカインド： やたらに簡単な高階の型」]]
+
+===  共通の定義
+
+<<{
+/** 型のレイフィケーションデータの修飾情報 
+ * スキーマ属性が付く
+ */
+type TypeQualifierMixin = QualifierMixin & {
+     /** スキーマ属性 */
+    "attributes": object?,
+
+    /** 型が名前空間（束縛セット、コンテキスト）内で名前に束縛されているとき、その名前が再帰的かどうか 
+     */
+    @[default(@Indef)]
+    "recursive": triboolean?,
+
+    *: any?  // open
+};
+
+type TypeSummary = {
+  "document": Doc?,
+
+  "name": string,
+
+  /** @[deprecated]アノテーションの値をコピーする */
+  @[default(false)]
+  "deprecated": boolean?,
+
+  *: any?
+};
+  
+/** コマンドのレイフィケーションデータの修飾情報 
+ */
+type CommandQualifierMixin = QualifierMixin & {
+
+    /** コマンドが名前空間（束縛セット、コンテキスト）内で名前に束縛されているとき、その名前が再帰的かどうか 
+     */
+    @[default(@Indef)]
+    "recursive": triboolean?,
+
+    *: any?  // open
+};
+
+}>>
+
+=== 基本型と型参照
+
+基本型（basic type）は、それ以上は分解できない型（＝単純型）、
+または頻繁に使う包括的な型（anyとuniv）を表現する。次が基本型である。
+
+# 予約された名前を持つ組み込み型（builtin type）
+# 組み込み型にスキーマ属性（schema attribute）で制約を加えたもの（例：整数区間）
+# シングルトン型（singleton type）
+
+* 参照 [[>http://return0.info/note/caty_type_hierarchy.html|Catyの型階層]]
+
+構文的には、object、arrayも予約
+
+
+<<{
+/** スカラー型の名前 */
+type scalarTypeName = (
+  "null"
+| "boolean"
+| "number"
+| "string"   
+| "binary"   
+);
+
+/** 組み込み型の名前 -- これらの名前は予約されている 
+ * 組み込み型をすべて排他的にはできないので、
+ * void, intgerも入れておく。
+ * void = null, integer⊂number
+ * 組み込み型（名前が予約語）は、全体として順序構造を作る。
+ *
+ * 包含の基本関係式は以下のとおり（*は全てを表す）：
+ * # integer ⊂ number
+ * # void = null
+ * # (undefined, foreign, univ以外) ⊆ any
+ * # * ⊆ univ
+ * # never ⊆ *
+ *
+ * さらに、スキーマ属性による絞込み条件を使い、集合が内包的に定義される。
+ */
+type builtinTypeName = (
+  "undefined"
+| scalarTypeName
+/* 
+|  "null"
+| "boolean"
+| "number"
+| "string"   
+| "binary"   
+*/
+
+| "integer" // numberの部分型
+| "void"    // データ型としてはnullと同じ
+
+// XJSONデータ以外
+| "foreign"  
+
+// 以下は、便宜的・一般的な型
+| "any"   // 包括的な型
+| "univ"  // より包括的な型、型階層の最上位
+| "never" // 空集合、データは一切なし
+);
+
+}>>
+
+{{http://static.return0.info/images/caty_type_hierarchy.png|type_hieracchy}}
+
+<<{
+
+kind STRING_ENUM_TYPE = lower string /* and finite */;
+
+/** 組み込み型の型関数 */
+type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE> = @builtin (QualifierMixin & {
+  "typeName" : TypeNameType,
+   *: any? // open
+});
+
+/** 組み込み型 
+ * スキーマ属性があるため、
+ * 内包的に定義された部分集合かもしれない点に注意。
+ */
+type BuiltinType = BuiltinTypeOf<builtinTypeName>;
+
+
+/* objectは構文上の予約語だが、レイフィケーションでは次の型にpredefineされている */
+/** 事前定義された object 型 */
+const PredefinedObjectType :: ObjectType = @object-of {
+ "specified" : {},
+ "additional" : @builtin {"typeName": "univ"}
+};
+
+/* arrayは構文上の予約語だが、レイフィケーションでは次の型にpredefineされている */
+/** 事前定義された array 型 */
+const PredefinedArrayType :: ArrayType = @array-of {
+ "specified" : [],
+ "additional" : @builtin {"typeName": "univ"}
+};
+
+/** ブーリアンシングルトン型  */
+type BooleanSingletonType = @boolean-val (QualifierMixin & {
+  "value" : boolean,
+
+   *: any? // open
+});
+
+/** 数値シングルトン型  */
+type NumberSingletonType  = @number-val  (QualifierMixin & {
+  "value" : number,
+
+   *: any? // open
+});
+
+/** 文字列シングルトン型  */
+type StringSingletonType  = @string-val  (QualifierMixin & {
+  "value" : string,
+
+   *: any? // open
+});
+
+/** バイナリシングルトン型  */
+type BinarySingletonType  = @binary-val  (QualifierMixin & {
+  "value" : binary,
+
+   *: any? // open
+});
+
+/** シングルトン型 */
+type SingletonType = (
+   BooleanSingletonType
+ | NumberSingletonType
+ | StringSingletonType
+ | BinarySingletonType
+);
+
+
+/** 基本型 
+
+基本型は、便宜的な包括的な型と単純型（simple type）とに分類される。次は包括的な型である。
+
+# any
+# univ
+
+単純型の（意味である）集合は次の特徴を持つ。
+
+# undefined, null, boolean, number, string, binary, foreign のいずれかの領域の部分集合である。
+# それが空でない集合であるなら、undefined, null, boolean, number, string, binary, foreign のどれか1つに含まれる。
+# スキーマ属性（絞込み条件）によっては空集合となることもある。例： integer(minimu=1, maximum=0)。
+  ただし、空集合は事前に検出されるはずである。
+# 概念的には無限集合も許す。例えば、integerは概念的には無限集合である。
+# 概念上は、すべての単純型に確定した集合が付随しているべきだが、
+  記述法の曖昧さ（例：remark）や処理系の能力により、集合への所属（∈）が判定できないことがある。
+
+*/
+type BasicType = (
+  BuiltinType
+| SingletonType
+);
+
+/** 参照（型名、型関数名）
+ * 型変数とユーザー定義型の名前は区別する必要はない。
+ * 同様に、型関数変数とユーザー定義型関数の名前は区別する必要はない。
+ * 
+ * ユーザーが使う「名前」を参照と呼ぶ。
+ * 
+ * 参照は束縛環境（コンテキスト）のなかで評価される。
+ * 束縛環境のなかで対応する定義が見つからないとエラーとなる。
+ *
+ * TypeRefオブジェクトに含まれるnameは型名／型関数名では**ない**ので注意
+ * 型名／型関数名は、refの値である。
+ *
+ */
+type TypeRef = @type-ref (TypeQualifierMixin & {
+  /** 参照先の名前
+   * 束縛コンテキストのキーである。
+   */
+  "ref" : string,
+  /** カインド */
+  "kind" : KindExpr?,
+  /** 名前が型関数であるときは、パラメータのカインドリスト
+   *
+   * paramKindsが未定義なら、参照先は型であり、
+   * paramKindsが定義されているなら、参照先は型関数である。
+   */
+  "paramKinds" : [KindExpr*]?,
+
+   *: any?
+});
+}>>
+
+=== 型表現
+
+型表現（type expression）は、次のように帰納的に構成される。
+
+# 型定数（type constant）は型表現である。
+# 型名＝型変数（type name, type variable）は型表現である。Catyでは、型名と型関数名をまとめて型参照と呼ぶ。
+# 型表現を型パラメータ（type parameter）でラムダ抽象（lambda abstraction）した式は型関数（無名型関数）でもある。
+# 型関数（type function）に型引数（type arguments）を渡した式（適用とも呼ぶ）は型表現である。
+
+組み込み型関数（builtin type function）を、
+その使用目的により、型構成子（type constructor）、型演算（type operator）とも呼ぶ。
+ただし、型関数／型構成子／型演算の区別は習慣的なもので、分類の理論的な根拠はない。
+例えば、タグ付き型の'@'は型演算記号とみなすこともできる。
+したがって、型関数／型構成子／型演算の区別に**拘るのはナンセンス**である。
+
+
+型構成子：
+
+# 配列型構成子
+# オブジェクト型構成子
+# タグ付き型構成子
+
+型演算：
+
+# ユニオン型演算（演算記号 '|'）
+# インターセクション型演算（演算記号 '&'）
+# オプショナル型演算（演算記号 '?'）
+# マージ型演算（演算記号 '++'）
+
+ユーザーにより定義された型関数は名前を持つ。
+ラムダ計算では、「変数と名前」は区別しない。文脈により、変数は束縛変数と自由変数に分類される。
+あるスコープにおける自由変数が、それより外側の環境内で定義を持つとき、それを名前と呼ぶ。
+
+参照（TypeRef）は、「型定数の名前」にも「型関数の名前」にも使える。
+構文上は、「型定数の名前」と「型関数の名前」を区別しない。
+
+<<{
+/** 型定数（type constant）
+ * 基本型のことである。
+ * 引数が0個の型関数とみなしてもよい。
+ * ただし、明示的に空引数を付けることはしない。
+ */
+type TypeConst = BasicType;
+
+/** 型抽象（type abstraction）
+ * 型パラメータ列によるラムダ抽象により得られた形式
+ * nameがあれば名前付き型関数、
+ * nameがなければ無名型関数を表現する。
+ * 空なパラメータリストも認める（意味的には型定数となる）。
+ */
+type TypeAbst = @type (TypeQualifierMixin & { //@ 旧 TypeTerm
+  /** 束縛に使う型パラメータリスト＝ラムダリスト */
+  "params": [TypeParam*],
+  /** 束縛され、ラムダ抽象される型表現 */
+  "expr": TypeExpr, 
+
+  *: any? // open
+});
+
+/** 型定義
+ * 名前付き型関数、
+ * 型抽象の名前を必須としたもので
+ * スタンドアロンで型定義として利用可能。
+ */
+type TypeDef = @type (TypeQualifierMixin & {
+  "name": string, // 名前は必須
+
+  "params": [TypeParam*],
+  "expr": TypeExpr,
+
+  *: any? // open
+});
+
+
+/** 型パラメータ（型関数の仮引数） 
+ * 型パラメータは、型表現内の参照を束縛する
+ * 束縛は、型パラメータのnameと参照のrefが文字列として一致するときに発生する。
+ */
+type TypeParam = @param {
+    "document" : Doc?,
+    "annotations" : object?,
+
+    "name": string,
+    "kind": KindExpr?,
+    "default": TypeExpr?,
+
+};
+
+
+/** 型関数
+ * 組み込み型関数は型構成子、型演算として別に扱うので、
+ * 型関数は型抽象かユーザー定義の型関数名を意味する。
+ * パラメータ付き型、総称型などとも呼ばれる。
+ */
+type TypeFunc = (TypeAbst | TypeRef);
+
+/** 適用
+ * 型関数に型引数（type arguments）を渡した形を適用と呼ぶ。
+ * 適用も型（型表現）の一種である。
+ * 適用形式は、ベータ変換の対象となる。
+ */
+type AppliedType = @apply {
+ "func" : TypeFunc,
+ "args" : [TypeExpr*]
+};
+
+/** 型の名前、これだけは特別扱い 
+ * 型の名前（文字列）を特別扱いしているが、これはたぶん避けられない
+ */
+type typeName = string(remark="型の名前");
+
+/** 型 
+ * 型の名前（文字列）も許す
+ */
+type Type = typeName|TypeExpr;
+
+/** 型表現 
+ */
+type TypeExpr = (
+  TypeConst // 組み込み型、シングルトン型
+| TypeRef // 型変数＝型名、型関数名
+| TypeAbst // 型のラムダ抽象
+| AppliedType // 引数を渡された型
+
+// 以下、型構成子により構成される型
+| ObjectType
+| ArrayType
+| TaggedType
+
+// 以下、型演算により構成される型
+| UnionType // '|'演算
+| OptionalType // '?'演算
+| IntersectionType// '&'演算
+| MergedType // '++'演算
+
+// 特殊な構成法で作られる型、PER（or settoid）として解釈する
+| BagType
+
+);
+}>>
+
+=== 複合的な型
+
+
+<<{
+// object, array, taggedは、直積型の3つのバリアントである。
+// objectは名前付きタプル、arrayは名前なし（番号）タプルによる直積
+// tagged型は、文字列（＝タグ名）との直積となる
+}>>
+
+
+=== 型関数
+
+<<{
+/** オブジェクト型を構成する型関数
+ * オブジェクト型は名前付きタプルの型
+ */
+type ObjectTypeOf<PropType, AdditionalType> = @object-of (TypeQualifierMixin & {
+  "pseudoTag": RPseudoTag?, //@ 塩漬け
+
+  "specified": {*: PropType}, 
+  "additional": AdditionalType,
+
+  *: any? // open
+});
+
+/** 配列型を構成する型関数
+ * 配列型は、名前なしタプルの型
+ */
+type ArrayTypeOf<ItemType, AdditionalType> = @array-of (TypeQualifierMixin & {
+
+  "specified": [ItemType*], 
+  "additional": AdditionalType,
+
+  *: any? // open
+});
+
+/** タグの型 */
+type Tag = string;
+
+/** タグ付き型を構成する型関数 */
+type TaggedTypeOf<ContentType> = @tagged (TypeQualifierMixin & {
+
+  // プロパティ名は、仮想プロパティにあわせる。
+
+  "tag": Tag,
+  "content": ContentType,
+
+  *: any? // open
+});
+
+/** undefined型
+ * 型定数 
+ */
+type UndefinedType = BuiltinTypeOf<"undefined">;
+
+/** 排他的ユニオン型を構成する型関数 */
+type UnionTypeOf<ChoiceType, AdditionalType> = @union (TypeQualifierMixin & {
+
+  "specified": [ChoiceType*], // 条件： 互いに排他的な型
+  "additional": AdditionalType, // その他
+
+   *: any? // open
+});
+
+/** 閉じたユニオン型の型関数 */
+type ClosedUnionTypeOf<ChoiceType> = UnionTypeOf<ChoiceType, UndefinedType>;
+
+
+
+}>>
+
+
+<<{
+/** オブジェクト型
+ * 名前付きタプルの型
+ */
+type ObjectType = ObjectTypeOf<TypeExpr, TypeExpr>;
+
+
+/*
+@object-of (TypeQualifierMixin & {
+  "pseudoTag": RPseudoTag?, //@ 塩漬け
+
+  "specified": {*: TypeExpr}, 
+  "additional": TypeExpr,
+
+  *: any? // open
+});
+*/
+
+/** 配列型
+ * 具体的な型
+ */
+type ArrayType = ArrayTypeOf<TypeExpr, TypeExpr>;
+
+
+
+/** タグ付き型 */
+type TaggedType = @tagged (TypeQualifierMixin & {
+
+  // プロパティ名は、仮想プロパティにあわせる。
+
+  "tag": Tag,
+  "content": TypeExpr,
+
+  *: any? // open
+});
+
+
+// 型演算
+
+
+
+/** 排他的ユニオン型 */
+type UnionType = UnionTypeOf<TypeExpr, TypeExpr>;
+
+/*
+@union (TypeQualifierMixin & {
+
+  "specified": [TypeExpr*], // 互いに排他的な型
+  "additional": TypeExpr, // その他
+
+   *: any? // open
+});
+*/
+
+
+/** オプショナル型 */
+type OptionalType = @optional (TypeQualifierMixin & {
+  "operand": TypeExpr,
+
+   *: any? // open
+});
+
+/** インターセクション型 */
+type IntersectionType = @intersection (TypeQualifierMixin & {
+  "operands": [TypeExpr*],
+
+   *: any? // open
+});
+
+/** マージされた型 */
+type MergedType = @merge (TypeQualifierMixin & {
+  "operands": [TypeExpr*],
+
+   *: any? // open
+});
+
+
+// bag型は特殊
+
+/** バッグ型の項目（の型） */
+type BagItem = @bag-item (TypeQualifierMixin & {
+ "minOccurs" : integer,
+ "maxOccurs" : (integer | "unbounded"),
+ "type" : TypeExpr,
+  *: any?
+});
+
+/** バッグ型 
+ * バッグ型は集合としては配列型と同じであることに注意。
+ */
+type BagType = @bag (TypeQualifierMixin & {
+  "items": [BagItem*],
+
+   *: any? // open
+});
+
+
+//@ 以下は塩漬け
+
+type RPseudoTag = @_pseudoTag ([string, any] | [null, null]); //@ 塩漬け
+
+
+type ReifiedKind = deferred @kind object;  //@ 塩漬け
+}>>
+
+== 便利な型／型関数
+
+<<{
+/** 列挙型 */
+type EnumType = ClosedUnionTypeOf<SingletonType>;
+
+/** 閉じたオブジェクト型の型関数 */
+type ClosedObjectTypeOf<PropType> = @object-of (TypeQualifierMixin & {
+
+  "specified": {*: PropType?},
+  "additional": @builtin {"typeName" : "undefined"},
+
+   *: any? // open
+});
+
+/** 閉じたオブジェクト型 */
+type ClosedObjectType = ClosedObjectTypeOf<TypeExpr>;
+
+
+/** データベースなどで使われている比較的標準的なスカラー型の名前 */
+type normalScalarTypeName = (
+  "null"
+| "boolean"
+| "integer"
+| "number"
+| "string" 
+| "binary"
+);
+
+/** データベースなどで使われている比較的標準的なスカラー型 */
+type NormalScalarType = BuiltinTypeOf<normalScalarTypeName>;
+
+/** データベースレコードのような型 */
+type FlatRecordType = ClosedObjectTypeOf<NormalScalarType>;
+
+/*{{{
+
+@object-of (TypeQualifierMixin & {
+
+  "specified": {*: NormalScalarType?},
+  "additional": @builtin {"typeName" : "undefined"},
+
+   *: any? // open
+});
+}}}*/
+
+
+}>>
+
+== 型let式、型letrec式
+
+
+<<{
+
+type LetExpr = @type-let (TypeQualifierMixin & {
+  /** let式は再帰を含んではならない */
+  "recursive": false,
+
+  "bindings": {*: (TypeExpr | LetrecExpr)?},
+  "expr": TypeExpr,
+
+  *: any?
+});
+
+type LetrecExpr = @type-letrec (TypeQualifierMixin & {
+
+  "bindings": {*: (TypeExpr | LetrecExpr)?},
+  "expr": TypeExpr,
+
+  *: any?
+});
+
+}>>
+
+
+== コマンド
+
+
+<<{
+/** 実装状況を示す値 
+ */
+type implemented = (
+  /** 実装はない、宣言されているだけ */
+  "none" |
+
+  /** Python実装を持つ */
+  "python" |
+
+  /** CatyScript実装を持つ */
+  "catyscript" |
+);
+
+/**
+ * ファシリティの利用宣言
+ */
+type FacilityUsage = {
+    /** ファシリティ名（登録名）
+     * キー（オブジェクトのプロパティ）としてはインジェクション名を使う
+     */
+    "registeredName": string,
+    /** インジェクションのときに使う名前
+     * キーとしてはインジェクション名を使う
+     * 同一の登録名のファシリティが異なるインジェクション名で使われることがある。
+     */
+    "name": string?,
+
+    /** アクセスのモード */
+    "mode": ("read" | "update" | "use"),
+    /** ファシリティのユーザーパラメータ */
+    @[default(null)]
+    "userParam": any?,
+};
+
+/** 実装 */
+type Implement = (Script | CodeRef);
+
+/** コード参照 */
+type CodeRef = @code-ref {
+  /** 実装言語 */
+  "implLang": string,
+  /** 参照 フォーマットは実装言語に依存 */
+  "ref": string,
+};
+
+/** スクリプトコード */
+type Script = deferred @script any;
+
+
+
+type CommandSummary = {
+  "document": Doc?,
+
+  /** コマンド名 */
+  "name": string?,
+
+  "typeParams": [TypeParam*]?,
+  "profile": Profile,
+
+  /** ファシリティの利用宣言
+   * オブジェクトのプロパティ名（キー）は、
+   * ファシリティの登録名ではなくてインジェクション名である点に注意
+   */
+  "facilityUsages": {*: FacilityUsage?}?, 
+
+  "implemented": implemented,
+
+  /** @[deprecated]アノテーションの値をコピーする */
+  @[default(false)]
+  "deprecated": boolean?,
+
+   * : any?
+};
+
+
+type Command = @command (CommandQualifierMixin & CommandSummary & {
+
+    "body": Implement?,
+    
+     *: any?
+});
+
+/** プロファイル
+ * コマンドの型変数（typeParams）のスコープは
+ * プロファイル全体になる。
+ */
+type Profile = {
+   /** クラスに属するときは、クラスのarg0をコピーする */
+   "arg0": Type,
+   /** オプションの型 */
+   "opts": ObjectType?,
+   /** 引数の型 */
+   "args": ArrayType?,
+   /** 入力の型 */
+   "input": Type,
+   /** 出力の型 */
+   "output": Type,
+   /** 例外の型 */
+   "exception": [Type*], //@ どうしよう?
+   /** シグナルの型 */
+   "signal": [Type*], //@ どうしよう?
+};
+
+}>>
+
+
+== リソース、アクション、状態
+
+* リソースクラスのパスパターンには ("/" | "*/") のような場合もあるので、[string*] とする。
+* パスパターンを持たないリソースクラスも認める。そのときのパスパターンは空リスト [] となる。
+
+
+<<{
+type ResourceSummary = {
+    "document": Doc,
+
+    /** リソースクラス名 */
+    "name": string,
+
+    /** パスパターン */
+    "pathPattern": [string*],
+
+    "filetype": {"contentType": string, "isText": boolean}?,
+
+  /** @[deprecated]アノテーションの値をコピーする */
+  @[default(false)]
+  "deprecated": boolean?,
+
+
+
+  *: any?
+};
+
+type Resource = @resource (ResourceSummary & {
+    "annotations": object?,
+
+    /** アクションの名前空間 */
+    @[subnamespace]
+    "actions": NamespaceOf<Action>,
+
+   *: any?
+
+});
+
+type Invoker = {
+  "verb": string,
+  "method": httpMethod,
+  "checkers": object?
+};
+
+
+type ActionSummary = {
+  "document": Doc,
+
+  /** アクション名 */
+  "name": string,
+
+  /** アクションは型パラメータを持てない。
+   * アクションはWebから呼び出されるため、
+   * 型パラメータを具体化するタイミングがない。
+   */
+  "typeParams": undefined,
+
+  /** コマンドとしてのプロファイル
+   * アクションはコマンドの一種なので、コマンドと同じ情報を持つ
+   * ただし、デフォルトが決まっているので省略可能である。
+   * 自由にプロファイルを定義することはできない。
+   */
+  "profile": Profile?,
+
+  /** 使用するファシリティ
+   * アクションがファシリティを使う可能性を否定はしない。
+   * 使用法と意味論はコマンドのときと同じ。
+   */
+  "facilityUsages": {*: FacilityUsage?}?, 
+
+  // implementedはコマンドと同じ
+  "implemented": implemented,
+
+  /** @[deprecated]アノテーションの値をコピーする */
+  @[default(false)]
+  "deprecated": boolean?,
+
+  // 以下はアクション特有
+
+  /** このアクションの起動方式 */
+  "invoker": Invoker, // アクション特有
+
+  /** 入り口フラグメント（inlet） 
+   * フラグメント検索の手間を省くため、
+   * 入り口フラグメント（高々1個）のコピーを保持する。
+   */
+  "inlet" : FragmentProfile?,
+
+   /** 出口フラグメント（outlet） 
+    * フラグメント検索の手間を省くため、
+    * 出口フラグメントのコピーを保持する。
+    */
+   "outlets": {*: FragmentProfile?}?,
+
+
+   *: any?
+};
+
+/** アクション
+ * 親リソースを参照することなく、
+ * アクションの情報だけでメタプログラミングが出来るようにする。
+ *
+ * リソースから独立したトップレベルアクションにも対応可能な定義としておく。
+ */
+type Action = @action (ActionSummary & {
+    "annotations": object?,
+
+    /** このアクションが所属する親リソースクラスのパス
+     * ドット・コロン区切りの名前列。
+     * 必要なら、このパスにより親の情報にアクセスできる。
+     */
+    "parentPath": string,
+
+    /** 所属するリソースのpathPatternのコピーを持つ */
+    "pathPattern": [string*],
+
+    /** アクション内に存在するフラグメントの情報 */
+    "fragmentProfiles" : {*: FragmentProfile?},
+
+    "body": Implement?,
+
+    "lock": Script?, //@ なんだっけ？
+
+    *: any?
+});
+
+
+/** 不定な型 
+ * 構文上は '_' で示される。
+ */
+type IndeterminateType = @indeterminate null; //@ tag-onlyがreifyできないようだ。
+
+/** フラグメントの情報 */
+type FragmentProfile = {
+    /** フラグメント名 */
+    "name": string,
+    /** フラグメントの境界特性 
+     * "" は in, out, io のどれでもないことを示す。
+     */
+    @[default("")]
+    "boundary": ("in" | "out" | "io" | "")?,
+    /** フラグメントへの入力型 */
+    "input": (Type | IndeterminateType)?,
+    /** フラグメントからの出力型 */
+    "output": (Type | IndeterminateType)?,
+
+    // アクションの構造グラフの辺情報
+
+    /** 生成する状態 */
+    "produces": [string*], 
+    /** アクション内の制御の遷移先 */
+    "relays": [string*],   
+    /** リダイレクト先アクション／ポート */
+    "redirects": [string*],
+    /** フォーワード先アクション／ポート  */
+    "forwards": [string*], 
+};
+
+type UserRoleSummary = {
+  "name": string,
+  "document": Doc,
+  
+  *: any?
+};
+
+/** ユーザーロール（アクター） */
+type UserRole = @userrole (UserRoleSummary & {
+  "annotations": object?,
+
+  *: any?
+});
+
+/** 半プロファイル */
+type HalfProfile = {
+   "opts": ObjectType?,
+   "args": ArrayType?,
+   "input": Type,
+};
+
+type PortSummary = {
+  "document": Doc,
+  "name": string,
+  "profile" : HalfProfile?,
+
+  *: any?
+};
+
+/** ポート */
+type Port = @port (PortSummary & {
+  "annotations": object?,
+
+  *: any?
+});
+
+type StateSummary = {
+  "name": string,
+  "document": Doc?,
+
+  "type": Type,
+
+  /** この状態に含まれる（可能性がある）ハイパーリンク */
+  "links": { *: Link?},
+
+  *: any?
+};
+
+/** 状態 */
+type State = @state (StateSummary & {
+
+  "annotations": object?,
+
+   /** この状態が所属する親モジュールのコロンドットパス
+    */
+   "parentPath": string?,
+
+  /** forの目的語のuserroles */
+  "forWhom": [string*]?, 
+
+  /** as で指定された名前 */
+  @[default("state")]
+  "statePropName": string?, 
+
+  /** links as で指定された名前 */
+  @[default("links")]
+  "linksPropName": string?,
+
+  /** baseobjctが指定されているかどうか  */
+  @[default("false")]
+  "isBaseObject": boolean?,
+  /** ハイパーリンクグラフのバックポインタ */
+  "producedBy" : [string(remark="アクション名")* ]?,
+
+  *:any?
+});
+
+/** ハイパーリンク 
+ */
+type Link = @link {
+ "annotations": object?,
+
+ "document":  Doc?,
+
+ /** リンクの種別を識別する名前 
+  * HTML要素のclass属性に使うことを想定している。
+  */
+ "name" : string,  // 構文的にはラベル
+
+ /** このリンク達がどのようにして作られるか */
+ "becoming": (
+    /** リンク情報が状態データに含まれる */
+    "embedded" 
+  |
+    /** リンクは状態データとは別に後から追加する必要がある */
+    "additional" 
+  | 
+    /** 未定、不明を意味する値 */
+    "indef"
+  ),
+
+  /** この種類のリンクが、状態インスタンス（ページ）内に何個出現できるか */
+  "occurrence":  ("*" | "+" | "!" | "?")?,
+  /** このリンクのリンク先アクション */
+  "target": string, // 文字列ではなく構造的データにするかも
+
+  /** 状態データからリンク情報を取り出す時に使うコマンド 
+   * リンク情報（トリガー）の型は、このコマンドの出力の型となる。
+   */
+  "extractor": string(remark="コマンド名")?,
+
+
+  *: any?
+};
+
+}>>
+
+== 型の名前
+
+<<{
+/** 型が名前を持つときは、その名前を取り出す 
+*/
+command get-name :: Type -> (string|null) {
+  // 組み込み型と型参照を選び出す
+  when {
+    builtin => [pass], 
+    ref     => [pass],
+    *       => [],
+  } | 
+  // スキーマ属性がないものを選び出す
+  take {pv --safe attributes | filter:empty} > taken;
+
+  %taken |
+  // refプロパティか、またはtyeNameプロパティを取り出す
+  // （この処理はちょっとトリッキー）
+  each {[xjson:get --safe --default="" ref, xjson:get --safe --default="" typeName]} | 
+  list:concat | text:concat > name-string;
+
+  // 名前が""だった場合はnullに置き換える
+  %name-string |
+  cond {
+    "" => null,
+    *  => pass,
+  }
+
+};
+}>>

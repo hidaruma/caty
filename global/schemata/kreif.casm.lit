@@ -1,0 +1,91 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= カインドのレイフィケーション
+
+<<{
+/** レイフィケーションされたカインドを表現する型
+ *
+ */
+module kreif; 
+
+}>>
+
+== カインド
+
+カインドは次のように構成される。
+
+# 具体的な型（型パラメータは不可）Tに対して、lower T はカインドである。
+# 具体的な型（型パラメータは不可）Tに対して、upper T はカインドである。
+# K, L がカインドのとき、K and L はカインドである。
+# K がカインドのとき K notnever はカインドである。
+
+構文的には、この他に丸括弧を自由に使ってよい。
+
+<<{
+
+syntax sTypeExpr ::= deferred ;
+
+syntax sKindExpr ::= (sUpper | sLower | sNotNever | sFinite | sIntersection | sParen) ;
+
+syntax sUpepr ::= 'upper' sTypeExpr ;
+
+syntax sLower ::= 'lower' sTypeExpr ;
+
+syntax sNotNever ::= 'notnever';
+
+syntax sFinite ::= 'finite';
+
+syntax sIntersection ::= sKindExpr 'and' sKindExpr ('and' sKindExpr)* ;
+
+syntax sParen ::= '(' sKindExpr ')' ;
+
+}>>
+
+
+カインドの意味論は型の包含順序構造を使って定義する。
+
+**TYPE**はすべての型の集合、《, 》をスコットブラケットの代わりに使うとして：
+
+
+# 《lower T》 = {X∈**TYPE** | X⊆T}
+# 《upper T》 = {X∈**TYPE** | T⊆X}
+# 《notnever》 = {X∈**TYPE** | Xは空ではない}
+# 《finite》 = {X∈**TYPE** | Xは有限集合}
+# 《K and L》 = 《K》∩《L》
+
+<<{
+type QualifierMixin = reif:QualifierMixin;
+
+type Type = reif:Type;
+
+/** カインドのレイフィケーションデータの修飾情報 
+ * 特に追加情報はない。
+ */
+type KindQualifierMixin = QualifierMixin & {
+
+   *: any?  // open
+};
+
+type KindExpr = (KindConstant | SimpleKind | IntersectionKind);
+
+
+/** カインド定数： notnever と finite */
+type KindConstant = (@kind-notnever null | @kind-finite null);
+
+/** 型から作られたカインド： upper と lower を一緒にしたカインド 
+ */
+type SimpleKind = @kind (KindQualifierMixin & {
+  "top": Type,
+  "bottom": Type,
+
+  *: any
+});
+
+/** カインド演算 and により構成されたカインド */
+type IntersectionKind = @kind-intersection (KindQualifierMixin & {
+  "operands": [KindExpr*],
+
+  *: any
+});
+
+}>>
