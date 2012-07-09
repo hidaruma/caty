@@ -111,6 +111,8 @@ class CatyShell(cmd.Cmd):
             self.dribble_file = None
         elif not l:
             self._echo('on' if self.dribble_file else 'off')
+        else:
+            self._echo(u'Unknown option: %s' % line)
 
     def _set_dribble(self):
         cout.streams.append(self.dribble_file)
@@ -183,6 +185,9 @@ commands, schemata などの再読み込みを行う。
 --thisオプションを付けると親アプリケーションの再読み込みを行わない。
         """
         if line.strip() != u'--this':
+            if line.strip():
+                self._echo(u'Unknown option: %s' % line)
+                return
             self.app.parent.reload()
         self.app.reload()
         self.set_prompt()
@@ -201,6 +206,9 @@ Usage: debug [on|off]
         elif mode == 'off':
             self.app._system.debug_off()
         else:
+            if line.strip():
+                self._echo(u'Unknown option: %s' % line)
+                return
             self._echo(u'on' if self.env.get('DEBUG', self.app._system.debug) else u'off')
         self.set_prompt()
         return False
