@@ -1,6 +1,5 @@
 #coding:utf-8
 from __future__ import with_statement
-from caty.core.casm.finder import SchemaFinder
 from caty.core.casm.loader import CommandLoader, BuiltinLoader
 from caty.core.language import split_colon_dot_path
 from caty.core.schema import schemata
@@ -50,7 +49,7 @@ class Module(Facility):
         self.annotations = Annotations([])
 
         self.add_schema = partial(self._add_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
-        self.get_schema = partial(self._get_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
+        self.get_type = partial(self._get_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
         self.has_schema = partial(self._has_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
 
         self.add_kind = partial(self._add_resource, scope_func=lambda x:x.kind_ns, type=u'Kind', see_register_public=True)
@@ -58,7 +57,7 @@ class Module(Facility):
         self.has_kind = partial(self._has_resource, scope_func=lambda x:x.kind_ns, type=u'Kind')
 
         self.add_command = partial(self._add_resource, scope_func=lambda x:x.command_ns, type=u'Command', see_register_public=True, see_filter=True)
-        self.get_command_type = partial(self._get_resource, scope_func=lambda x:x.command_ns, type=u'Command')
+        self.get_command = partial(self._get_resource, scope_func=lambda x:x.command_ns, type=u'Command')
         self.has_command_type = partial(self._has_resource, scope_func=lambda x:x.command_ns, type=u'Command')
         
         self.add_proto_type = partial(self._add_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
@@ -132,7 +131,7 @@ class Module(Facility):
             if app_name in ('this', 'global', 'caty', self._app.name):
                 pass
             else:
-                throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s %s is forbidden' % type)
+                return self._another_app_callback(rname, tracked, scope_func, type)
         if mod_name:
             if mod_name == self.name:
                 return self._get_resource(name, tracked, scope_func, type)
@@ -170,6 +169,9 @@ class Module(Facility):
             return False
         return True
 
+    def _another_app_callback(self, rname, tracked=(), scope_func=None, type=u''):
+        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s %s is forbidden at compile-time' % type)
+
     @property
     def command_profiles(self):
         for k, v in self.command_ns.iteritems():
@@ -183,7 +185,7 @@ class Module(Facility):
 
     @property
     def schema_finder(self):
-        return SchemaFinder(self, self._app, self._system, LocalModule)
+        return LocalModule(self)
 
     def get_plugin(self, name):
         return self._plugin.get_plugin(name)
@@ -663,15 +665,17 @@ class IntegratedModule(object):
 
 
 class LocalModule(Module):
-    def __init__(self, finder):
-        Module.__init__(self, finder._module._app)
-        self.parent = finder._module
-        self.parent_finder = finder
+    def __init__(self, parent):
+        Module.__init__(self, parent._app)
+        self.parent = parent
         self._name = u'$local$' # 絶対に使われない名前をデフォルトにしておく
         
     @property
     def schema_finder(self):
-        return OverlayedFinder(self, self.parent_finder)
+        return self
+
+    def add_local(self, schema_string):
+        self.compile(schema_string)
 
     def compile(self, schema_string):
         u"""組み込みコマンドの型指定など、オンザフライでスキーマを構築するためのメソッド。
@@ -701,22 +705,9 @@ class LocalModule(Module):
             
         self.resolve()
 
-class OverlayedFinder(object):
-    
-    def __init__(self, module, finder):
-        self.module = module
-        self.finder = finder
+    def _another_app_callback(self, rname, tracked=(), scope_func=None, type=u''):
+        return self._app._system.get_app(app_name).schema_finder._get_resource(rname, tracked, scope_func, type)
 
-    def get_type(self, key):
-        if self.module.has_schema(key):
-            return self.module.get_schema(key)
-        else:
-            return self.finder.get_type(key)
-
-    def get_command(self, key):
-        if self.module.has_command_type(key):
-            return self.module.get_command_type(key)
-        else:
-            return self.finder.get_command(key)
-
+    def clone(self):
+        return self
 

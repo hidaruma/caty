@@ -10,7 +10,7 @@ class ReferenceResolver(SchemaBuilder):
     @apply_annotation
     def _visit_scalar(self, node):
         if isinstance(node, TypeReference):
-            schema = node.module.get_schema(node.name)
+            schema = node.module.get_type(node.name)
             node.body = schema
             type_args = []
             for arg in node.type_args:
@@ -18,8 +18,8 @@ class ReferenceResolver(SchemaBuilder):
             node.type_args = type_args
         elif isinstance(node, TypeVariable):
             if self.module.has_schema(node.name):
-                return self.module.get_schema(node.name)
+                return self.module.get_type(node.name)
             if node.default and self.module.has_schema(node.default):
-                node.set_default(self.module.get_schema(node.default))
+                node.set_default(self.module.get_type(node.default))
         return node
 

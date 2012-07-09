@@ -1,6 +1,5 @@
 # coding:utf-8
 from caty.core.casm.module import FilterModule, LocalModule
-from caty.core.casm.finder import SchemaFinder
 from caty.core.facility import (FakeFacility, 
                                 TransactionAdaptor, 
                                 TransactionDiscardAdaptor, 
@@ -36,7 +35,7 @@ class ScriptModule(object):
             except Exception, e:
                 raise
         self._finder = registrar.schema_finder
-        self._filter_finder = SchemaFinder(filters, app, system, LocalModule)
+        self._filter_finder = LocalModule(filters)
         self._enable_cache = system.enable_script_cache
         self._cache = Cache(1000)
         self._app = app

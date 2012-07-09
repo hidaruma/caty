@@ -10,11 +10,13 @@ class ListCommands(Internal):
         self._module_name = module_name
 
     def execute(self):
-        app_name, mod_name, _ = split_colon_dot_path(self._module_name)
+        app_name, mod_name, name = split_colon_dot_path(self._module_name)
         if app_name == 'this':
             app_name = self.current_app.name
         elif not app_name:
             app_name = self.current_app.name
+        if not mod_name:
+            mod_name = name
         app = self._system.get_app(app_name)
         mod = app._schema_module.get_module(mod_name)
         r = []
@@ -126,7 +128,7 @@ class ReifyCmd(Builtin):
         self._cmd_name = cmd_name
 
     def execute(self):
-        mod = self.schema._module.schema_finder
+        mod = self.schema
         ast = mod.get_proto_type(self._cmd_name)
         return ast.reify()
 

@@ -228,7 +228,7 @@ class CDPSplitter(Parser):
     def __call__(self, seq):
         app_name = option(Regex(_name_token_ptn + '::', re.X))(seq)
         mod_name = option(Regex(_name_token_ptn + ':', re.X))(seq)
-        name = option(name_token)(seq)
+        name = option(identifier_token)(seq)
         if app_name:
             app_name = app_name.strip(':')
         if mod_name:

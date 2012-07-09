@@ -1060,7 +1060,7 @@ class Help(Builtin):
         from caty.core.command.usage import CommandUsage
         from caty.core.schema import types
         t = self.__line.strip()
-        ct = self.schema._module.get_command_type(t)
+        ct = self.schema._module.get_command(t)
         r = CommandUsage(ct).get_usage()
         return r
 
