@@ -1,6 +1,7 @@
 #coding: utf-8
 from caty.core.command import Internal, Builtin
 from caty.core.exception import *
+from caty.core.language import split_colon_dot_path
 import caty.jsontools as json
 
 class ListCommands(Internal):
@@ -9,13 +10,11 @@ class ListCommands(Internal):
         self._module_name = module_name
 
     def execute(self):
-        if ':' in self._module_name:
-            app_name, mod_name = self._module_name.split(':', 1)
-            if app_name == 'this':
-                app_name = self.current_app.name
-        else:
+        app_name, mod_name, _ = split_colon_dot_path(self._module_name)
+        if app_name == 'this':
             app_name = self.current_app.name
-            mod_name = self._module_name
+        elif not app_name:
+            app_name = self.current_app.name
         app = self._system.get_app(app_name)
         mod = app._schema_module.get_module(mod_name)
         r = []
@@ -89,13 +88,11 @@ class ModuleInfo(Internal):
         self._module_name = mod_name
 
     def execute(self):
-        if ':' in self._module_name:
-            app_name, mod_name = self._module_name.split(':', 1)
-            if app_name == 'this':
-                app_name = self.current_app.name
-        else:
+        app_name, mod_name, _ = split_colon_dot_path(self._module_name)
+        if app_name == 'this':
             app_name = self.current_app.name
-            mod_name = self._module_name
+        elif not app_name:
+            app_name = self.current_app.name
         app = self._system.get_app(app_name)
         mod = app._schema_module.get_module(mod_name)
         o = {

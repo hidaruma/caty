@@ -2,6 +2,7 @@
 from __future__ import with_statement
 from caty.core.casm.finder import SchemaFinder
 from caty.core.casm.loader import CommandLoader, BuiltinLoader
+from caty.core.language import split_colon_dot_path
 from caty.core.schema import schemata
 from caty.core.schema.base import Annotations
 from caty.core.casm.language.casmparser import parse, parse_literate
@@ -122,32 +123,30 @@ class Module(Facility):
         else:
             scope[name] = callback(target)
 
-    def _get_resource(self, name, tracked=(), scope_func=None, type=u''):
+    def _get_resource(self, rname, tracked=(), scope_func=None, type=u''):
         if self in tracked:
             raise throw_caty_exception(u'%sNotFound'%type, u'$name', name=name)
         scope = scope_func(self)
-        if name in scope:
-            return scope[name]
-        elif ':' in name:
-            m, n = name.split(':', 1)
-            if ':' in n:
-                if m == 'this' or m == 'global' or m == 'caty':
-                    m, n = n.split(':', 1)
-                else:
-                    throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s %s is forbidden' % type)
-            if m == self.name:
-                return self._get_resource(n, tracked, scope_func, type)
+        app_name, mod_name, name = split_colon_dot_path(rname)
+        if app_name:
+            if app_name in ('this', 'global', 'caty', self._app.name):
+                pass
+            else:
+                throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s %s is forbidden' % type)
+        if mod_name:
+            if mod_name == self.name:
+                return self._get_resource(name, tracked, scope_func, type)
             tracked = list(tracked) + [self]
-            if m == 'public' and self.name not in ('public', 'builtin'):
-                return self.parent._get_resource(n, tracked, scope_func, type)
-            if m == 'public' and self.name in ('public', 'builtin'):
-                return self._get_resource(n, tracked, scope_func, type)
-            if m in self.sub_modules:
-                return self.sub_modules[m]._get_resource(n, tracked, scope_func, type)
-            if self.parent:
+            if mod_name == 'public' and self.name not in ('public', 'builtin'):
                 return self.parent._get_resource(name, tracked, scope_func, type)
+            if mod_name == 'public' and self.name in ('public', 'builtin'):
+                return self._get_resource(name, tracked, scope_func, type)
+            if mod_name in self.sub_modules:
+                return self.sub_modules[mod_name]._get_resource(name, tracked, scope_func, type)
+            if self.parent:
+                return self.parent._get_resource(rname, tracked, scope_func, type)
             raise throw_caty_exception(u'%sNotFound' % type, u'$name', name=name)
-        elif '.' in name:
+        if '.' in name:
             c, n = name.split('.', 1)
             if c == self.name:
                 return self._get_resource(n, tracked, scope_func, type)
@@ -157,10 +156,12 @@ class Module(Facility):
             if self.parent:
                 return self.parent._get_resource(name, tracked, scope_func, type)
             raise throw_caty_exception(u'ClassNotFound', u'$name', name=c)
+        if name in scope:
+            return scope[name]
         else:
             if self.parent:
-                return self.parent._get_resource(name, tracked, scope_func, type)
-        raise throw_caty_exception(u'%sNotFound' % type, u'$name', name=name)
+                return self.parent._get_resource(rname, tracked, scope_func, type)
+        raise throw_caty_exception(u'%sNotFound' % type, u'$name', name=rname)
 
     def _has_resource(self, name, tracked=(), scope_func=None, type=u''):
         try:

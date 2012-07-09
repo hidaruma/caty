@@ -255,6 +255,7 @@ command list-commands
 command list-states
   [cdpath mod]
 :: void -> [StateSummary*]
+ //refers python:sreif.ListStates
 ;
 
 command list-classes
