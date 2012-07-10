@@ -362,17 +362,17 @@ class StateBlock(Parser):
 
     def trigger(self, seq):
         if option(S('+'))(seq):
-            n = option(name)(seq)
+            n = name(seq)
             o = option(choice([u'+', u'*', u'!', u'?']), u'*')(seq)
             p = None
             t = u'additional'
         elif option(S('-'))(seq):
-            n = option(name)(seq)
+            n = name(seq)
             o = option(choice([u'+', u'*', u'!', u'?']), u'*')(seq)
             p = None
             t = u'no-care'
         else:
-            n = option(name)(seq)
+            n = name(seq)
             o = option(choice([u'+', u'*', u'!', u'?']), u'*')(seq)
             p = option(self.embed_trigger, n)(seq)
             t = u'embed' 

@@ -23,7 +23,7 @@ class ListStates(Command):
         tmap = {
             'embeded-link':  u'embedded',
             'additional-link': u'additional',
-            'no-cara-link': u'indef'
+            'no-care-link': u'indef'
         }
         for s in module.states:
             links = {}
