@@ -1017,7 +1017,7 @@ class Help(Builtin):
                 modules = [u'builtin', u'public']
             for module in modules:
                 types = [(s.name, s.docstring) 
-                         for s in self.schema._module.get_module(module).schema_ns.values()
+                         for s in self.schema.get_module(module).schema_ns.values()
                          if (not query) or (query in s.annotations)
                         ]
                 types.sort(cmp=lambda x, y:cmp(x[0], y[0]))
@@ -1033,7 +1033,7 @@ class Help(Builtin):
         elif mode == 'list_modules':
             r1 = []
             r2 = []
-            for m in itertools.chain(self.schema._module.get_modules(), *[p.get_modules() for p in self.schema._module.iter_parents()]):
+            for m in itertools.chain(self.schema.get_modules(), *[p.get_modules() for p in self.schema.iter_parents()]):
                 if m.application.name != 'caty':
                     r2.append((m.application.name + ':' + m.name))
                 else:
@@ -1051,7 +1051,7 @@ class Help(Builtin):
         t = self.__type_name.strip()
         if t in types:
             return u'基本型: ' + t
-        st = self.schema._module.get_syntax_tree(t)
+        st = self.schema.get_syntax_tree(t)
         td = TreeDumper()
         r = td.visit(st)
         return r
@@ -1060,7 +1060,7 @@ class Help(Builtin):
         from caty.core.command.usage import CommandUsage
         from caty.core.schema import types
         t = self.__line.strip()
-        ct = self.schema._module.get_command(t)
+        ct = self.schema.get_command(t)
         r = CommandUsage(ct).get_usage()
         return r
 
@@ -1114,7 +1114,7 @@ class Help(Builtin):
                 modules = [u'builtin', u'public']
             for module in modules:
                 commands = [(s.name, s.doc.splitlines()[0].strip()) 
-                         for s in self.schema._module.get_module(module).command_ns.values()
+                         for s in self.schema.get_module(module).command_ns.values()
                          if (not query) or (query in s.annotations)
                         ]
                 commands.sort(cmp=lambda x, y:cmp(x[0], y[0]))
@@ -1129,7 +1129,7 @@ class Help(Builtin):
         elif mode == 'list_modules':
             r1 = []
             r2 = []
-            for m in itertools.chain(self.schema._module.get_modules(), *[p.get_modules() for p in self.schema._module.iter_parents()]):
+            for m in itertools.chain(self.schema.get_modules(), *[p.get_modules() for p in self.schema.iter_parents()]):
                 if m.application.name != 'caty':
                     r2.append((m.application.name + ':' + m.name))
                 else:
