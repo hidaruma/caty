@@ -32,7 +32,7 @@ class ListStates(Command):
                     'name': l.trigger,
                     'becoming': tmap[l.type],
                     'occurrence': l.appearance,
-                    'target': l.link_to_list[0][0]
+                    'target': map(lambda x:x[0], l.link_to_list)
                 })
             r.append({
                 'name': s.name,
