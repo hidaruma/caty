@@ -124,7 +124,7 @@ class Module(Facility):
 
     def _get_resource(self, rname, tracked=(), scope_func=None, type=u''):
         if self in tracked:
-            raise throw_caty_exception(u'%sNotFound'%type, u'$name', name=name)
+            raise throw_caty_exception(u'%sNotFound'%type, u'$name', name=rname)
         scope = scope_func(self)
         app_name, mod_name, name = split_colon_dot_path(rname)
         if app_name:
