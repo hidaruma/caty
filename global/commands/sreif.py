@@ -42,4 +42,56 @@ class ListStates(Command):
             })
         return r
 
+class ListResources(Command):
+    def setup(self, opts, cdpath):
+        self.__cdpath = cdpath
+
+    def execute(self):
+        system = self.current_app._system
+        app_name, module_name, _ = split_colon_dot_path(self.__cdpath)
+        if not app_name:
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        if not module_name:
+            module_name = _
+        module = app._schema_module.get_module(module_name)
+        if not module.type == u'cara':
+            return []
+        r = []
+        for s in module.resources:
+            r.append({
+                'name': s.name,
+                'document': make_structured_doc(s.docstring),
+                'pathPattern': s.url_patterns,
+                'deprecated': 'deprecated' in s.annotations
+            })
+        return r
+
+class ListActions(Command):
+    def setup(self, opts, cdpath):
+        self.__cdpath = cdpath
+
+    def execute(self):
+        system = self.current_app._system
+        app_name, module_name, res_name = split_colon_dot_path(self.__cdpath)
+        if not app_name:
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        module = app._schema_module.get_module(module_name)
+        if not module.type == u'cara':
+            return []
+        r = []
+        for s in module.get_resource(res_name).actions:
+            r.append({
+                'name': s.name,
+                'document': make_structured_doc(s.docstring),
+                'implemented': s.implemented,
+                'deprecated': 'deprecated' in s.annotations,
+                'invoker': s.invoker_obj,
+            })
+        return r
+
+
 

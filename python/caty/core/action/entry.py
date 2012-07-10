@@ -4,7 +4,7 @@ from caty.util import indent_lines, justify_messages
 from caty.core.exception import *
 
 class ResourceActionEntry(object):
-    def __init__(self, proxy, source, name=u'', docstring=u'undocumented', annotations=Annotations([]), resource_name=u'system', module_name=u'builtin', profiles=None, invoker=None):
+    def __init__(self, proxy, source, name=u'', docstring=u'undocumented', annotations=Annotations([]), resource_name=u'system', module_name=u'builtin', profiles=None, invoker=None, implemented=True):
         self.profiles = profiles if profiles else ActionProfiles([ActionProfile(None, None, None, None, [],  [], [])])
         self.instance = proxy
         self.source = source
@@ -14,7 +14,22 @@ class ResourceActionEntry(object):
         self.resource_name = resource_name
         self.module_name = module_name
         self.invoker = invoker
+        self.implemented = implemented
         self._lock_cmd = None
+
+    @property
+    def invoker_obj(self):
+        from caty.core.action.selector import verb_parser, PARENT, NO_CARE
+        v, m, e = verb_parser.run(self.invoker, auto_remove_ws=True)
+        return {
+            'verb': v,
+            'method': m,
+            'checkers': {
+                'exists-parent': e == PARENT,
+                'dont-care': e == NO_CARE,
+                'secure': False,
+            }
+        }
 
     def set_lock_cmd(self, lock_cmd):
         self._lock_cmd = lock_cmd

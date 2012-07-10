@@ -119,6 +119,8 @@ class ActionBlock(Parser):
         self.names = set()
         self._script_parser = script_parser
         self._module_name = module_name
+        self.implemented = u'none'
+        self._invoker = None
 
     def __call__(self, seq):
         option(self.filetype_)(seq)
@@ -163,7 +165,7 @@ class ActionBlock(Parser):
                 raise ParseError(seq, ';')
             seq.parse(';')
             source = seq.text[start:end].strip()
-
+            self.implemented = u'catyscript'
         rae = ResourceActionEntry(
                                   proxy, 
                                   source, 
@@ -173,7 +175,8 @@ class ActionBlock(Parser):
                                   self.rcname, 
                                   self._module_name,
                                   prof,
-                                  invoker)
+                                  invoker,
+                                  self.implemented)
         if lock:
             rae.set_lock_cmd(lock)
         generates = option(self.generates)(seq)
@@ -182,6 +185,7 @@ class ActionBlock(Parser):
                     u'CARA_PARSE_ERROR',
                     u'Duplicated action invoker: $invoker resource:$resource module: $module', 
                     invoker=invoker, resource=self.rcname, module=self._module_name)
+        self._invoker = invoker
         self.actions[invoker] = rae
 
     def invoker(self, seq):

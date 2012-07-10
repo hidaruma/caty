@@ -190,10 +190,10 @@ def verb_parser(seq):
     return v, m, e
 
 def verb(seq):
-    return seq.parse(Regex('[a-zA-Z0-9_-]*'))
+    return seq.parse(Regex(u'[a-zA-Z0-9_-]*'))
 
 def method(seq):
-    return seq.parse(['/GET', '/POST', '/PUT', '/DELETE'])[1:]
+    return seq.parse([u'/GET', u'/POST', u'/PUT', u'/DELETE'])[1:]
 
 def parent(seq):
     x = seq.parse(['#exists-parent', '#dont-care'])

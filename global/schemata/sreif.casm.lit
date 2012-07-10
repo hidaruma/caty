@@ -281,6 +281,7 @@ command list-resources
   }
   [cdpath mod]
 :: void -> [ResourceSummary*]
+ refers python:sreif.ListResources
 ;
 
 /* 優先 */
@@ -291,6 +292,7 @@ command list-actions
   }
   [cdpath mod-cls]
 :: void -> [ActionSummary*]
+ refers python:sreif.ListActions
 ;
 
 command list-ports
