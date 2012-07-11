@@ -130,8 +130,9 @@ module sreif;
 名前空間コンテナノード
 
 |= コマンド        |= 引数              |
+|show-projct       | なし               |
 |show-application  | アプリケーション名 |
-|show-module      | モジュール名       |
+|show-module       | モジュール名       |
 |show-package      | パッケージ名       |
 |show-class        | クラス名           |
 |show-resource     | クラス名（リソース名） |
@@ -180,9 +181,10 @@ type subnamespaceSort = (
  | classesSubnamespaceSort
 );
 
+type ProjectSummary     = reif:ProjectSummary;
 type ApplicationSummary = reif:ApplicationSummary;
-type ModuleSummary      = reif:ModuleSummary;
 type PackageSummary     = reif:PackageSummary;
+type ModuleSummary      = reif:ModuleSummary;
 type ClassSummary       = reif:ClassSummary;
 type ResourceSummary    = reif:ResourceSummary;
 type TypeSummary        = reif:TypeSummary;
@@ -191,7 +193,6 @@ type ActionSummary      = reif:ActionSummary;
 type PortSummary        = reif:PortSummary;
 type StateSummary       = reif:StateSummary;
 type FacilitySummary    = reif:FacilitySummary;
-type ProjectSummary     = reif:ProjectSummary;
 type UserRoleSummary    = reif:UserRoleSummary;
 
 }>>

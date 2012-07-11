@@ -12,27 +12,29 @@ module reif;
 
 == 全般的な注意
 
-* 疑似タグについては、大幅に変更する予定なので、今はほっておく。塩漬け。
-* 開発途中段階でもエラーが出にくいように、オプショナル（'?'）な定義が多いが、後で必須とするものもある。
+# 疑似タグについては、大幅に変更する予定なので、今はほっておく。塩漬け。
+# 開発途中段階でもエラーが出にくいように、オプショナル（'?'）な定義が多いが、後で必須とするものもある。
   （その逆もあるだろう。）
-* QualifierMixin というミクシンを使っているため、多くのオブジェクト型が open-constraintsになっている。
+# QualifierMixin というミクシンを使っているため、多くのオブジェクト型が open-constraintsになっている。
   いずれ制約を閉じることにして、開発中はopenとする。
   よって今は、typoの検出ができない。
   （QualifierMixin を使ってないところもある。）
-* const宣言された定数は、型とコマンドとして定義されるので、定数定義は独立したメタオブジェクトとは考えないことにした。
+# const宣言された定数は、型とコマンドとして定義されるので、定数定義は独立したメタオブジェクトとは考えないことにした。
   実際、constだけ特別扱いすると一様に扱えないために場合分けが必要になる弊害が出ている。
   できるだけ概念は減らし、一様に扱うべき（特別扱いはなし）。
-* 名前グラフのルート（基点）はプロジェクトとした。runtimeメタオブジェクトは、
+# 名前グラフのルート（基点）はプロジェクトとした。runtimeメタオブジェクトは、
   プロジェクトのプロパティとして生（foreign）で取れるようになっているが、これは変更されるだろう。
-* 名前空間であるプロパティには @[namespace] を付けた。
-* 他の名前空間の一部となるプロパティには @[subnamespace] を付けた。
-* namespaceContainerは長いので、プロパティ名は単にcontainerとした。
-* NamespaceInfoをどこに置くかは未定。
-* 型とコマンドの両方に共通のレイフィケーションルールを使うことを考慮して
+# 名前空間であるプロパティには @[namespace] を付けた。
+# 他の名前空間の一部となるプロパティには @[subnamespace] を付けた。
+# namespaceContainerは長いので、プロパティ名は単にcontainerとした。
+# NamespaceInfoをどこに置くかは未定。
+# 型とコマンドの両方に共通のレイフィケーションルールを使うことを考慮して
   シングルトン型は「値の表現」と解釈する。
-* 構文上は、object, arrayが予約語だが、レイフィケーションされたBuiltinType には入ってない。
+# 構文上は、object, arrayが予約語だが、レイフィケーションされたBuiltinType には入ってない。
   objectとarrayはpredefinedな名前と考え、
   レイフィケーション時は常に展開される。（展開形式は下。スキーマにも入っている。）
+# シャローレイフィケーションの当座の実装を容易にするため、
+  テキスト表現も許すTypeSpecという型を入れた。
 
 {{{
 // object の展開形式
@@ -491,7 +493,7 @@ type ClassSummary = {
   "name": string,
 
   /** arg0 */
-  "arg0": Type?,
+  "arg0": TypeSpec?,
 
   /** @[deprecated]アノテーションの値をコピーする */
   @[default(false)]
@@ -835,8 +837,8 @@ type TypeParam = @param {
     "annotations" : object?,
 
     "name": string,
-    "kind": KindExpr?,
-    "default": TypeExpr?,
+    "kind": KindExpr?, // KindExprは暫定
+    "default": TypeExpr?, // KindExprは暫定
 
 };
 
@@ -863,10 +865,23 @@ type AppliedType = @apply {
  */
 type typeName = string(remark="型の名前");
 
+/** 型のテキスト表現
+ * 暫定的に使う
+ */
+type typeText = string(remark="型のテキスト表現");
+
+
+
 /** 型 
  * 型の名前（文字列）も許す
  */
 type Type = typeName|TypeExpr;
+
+
+/** 型の仕様（テキストを許す）
+ */
+type TypeSpec = typeText|TypeExpr;
+
 
 /** 型表現 
  */
@@ -1170,6 +1185,7 @@ type FacilityUsage = {
      * キー（オブジェクトのプロパティ）としてはインジェクション名を使う
      */
     "registeredName": string,
+
     /** インジェクションのときに使う名前
      * キーとしてはインジェクション名を使う
      * 同一の登録名のファシリティが異なるインジェクション名で使われることがある。
@@ -1178,6 +1194,7 @@ type FacilityUsage = {
 
     /** アクセスのモード */
     "mode": ("read" | "update" | "use"),
+
     /** ファシリティのユーザーパラメータ */
     @[default(null)]
     "userParam": any?,
@@ -1188,7 +1205,9 @@ type Implement = (Script | CodeRef);
 
 /** コード参照 */
 type CodeRef = @code-ref {
-  /** 実装言語 */
+  /** 実装言語 
+   * Pythonのときは、"python"
+   */
   "implLang": string,
   /** 参照 フォーマットは実装言語に依存 */
   "ref": string,
@@ -1237,19 +1256,19 @@ type Command = @command (CommandQualifierMixin & CommandSummary & {
  */
 type Profile = {
    /** クラスに属するときは、クラスのarg0をコピーする */
-   "arg0": Type,
+   "arg0": TypeSpec,
    /** オプションの型 */
-   "opts": ObjectType?,
+   "opts": TypeSpec?, //ObjectType?,
    /** 引数の型 */
-   "args": ArrayType?,
+   "args": TypeSpec?, //ArrayType?,
    /** 入力の型 */
-   "input": Type,
+   "input": TypeSpec,
    /** 出力の型 */
-   "output": Type,
+   "output": TypeSpec,
    /** 例外の型 */
-   "exception": [Type*], //@ どうしよう?
+   "exception": [TypeSpec*], //@ どうしよう?
    /** シグナルの型 */
-   "signal": [Type*], //@ どうしよう?
+   "signal": [TypeSpec*], //@ どうしよう?
 };
 
 }>>
@@ -1397,9 +1416,9 @@ type FragmentProfile = {
     @[default("")]
     "boundary": ("in" | "out" | "io" | "")?,
     /** フラグメントへの入力型 */
-    "input": (Type | IndeterminateType)?,
+    "input": (TypeSpec | IndeterminateType)?,
     /** フラグメントからの出力型 */
-    "output": (Type | IndeterminateType)?,
+    "output": (TypeSpec | IndeterminateType)?,
 
     // アクションの構造グラフの辺情報
 
@@ -1429,9 +1448,9 @@ type UserRole = @userrole (UserRoleSummary & {
 
 /** 半プロファイル */
 type HalfProfile = {
-   "opts": ObjectType?,
-   "args": ArrayType?,
-   "input": Type,
+   "opts": TypeSpec?, //ObjectType?,
+   "args": TypeSpec?, //ArrayType?,
+   "input": TypeSpec,
 };
 
 type PortSummary = {
@@ -1453,9 +1472,10 @@ type StateSummary = {
   "name": string,
   "document": Doc?,
 
-  "type": Type,
+  "type": TypeSpec,
 
-  /** この状態に含まれる（可能性がある）ハイパーリンク */
+  /** この状態に含まれる（可能性がある）ハイパーリンク 
+   */
   "links": { *: Link?},
 
   *: any?
@@ -1491,6 +1511,7 @@ type State = @state (StateSummary & {
 });
 
 /** ハイパーリンク 
+ * ハイパーリンク辺の集合を表現する
  */
 type Link = @link {
  "annotations": object?,
@@ -1516,6 +1537,7 @@ type Link = @link {
 
   /** この種類のリンクが、状態インスタンス（ページ）内に何個出現できるか */
   "occurrence":  ("*" | "+" | "!" | "?")?,
+
   /** このリンクのリンク先アクション */
   "targets": [string, string*], // 文字列ではなく構造的データにするかも
 
@@ -1559,4 +1581,107 @@ command get-name :: Type -> (string|null) {
   }
 
 };
+}>>
+
+== reifyコマンド
+
+シャローレイフィケーションのshow-* と ディープレイフィケーションのreify-* で機能的にほとんど同じものもあるが、
+名前（動詞＋名詞）の組み合わせは例外なしに揃えることにする。
+
+<<{
+
+type cdpath = string(remark="CDPATH");
+
+/** プロジェクト全体をレイファイする
+ * 巨大なデータになることがあるので注意
+ */
+command reify-project
+:: void -> Project
+;
+
+/** 指定されたアプリケーションをレイファイする
+ */
+command reify-application
+  [cdpath app]
+:: void -> Application
+;
+
+/** 指定されたパッケージをレイファイする
+ */
+command reify-package
+  [cdpath pkg]
+:: void -> Package
+;
+
+/** 指定されたモジュールをレイファイする
+ */
+command reify-module
+  [cdpath mod]
+:: void -> Module
+;
+
+/** 指定されたクラスをレイファイする
+ */
+command reify-class
+  [cdpath cls]
+:: void -> Class
+;
+
+/** 指定されたリソースクラスをレイファイする
+ */
+command reify-resource
+  [cdpath res]
+:: void -> Resource
+;
+
+/** 指定された型をレイファイする
+ */
+command reify-type
+  [cdpath typ]
+:: void -> Type
+;
+
+/** 指定されたコマンドをレイファイする
+ */
+command reify-command
+  [cdpath cmd]
+:: void -> Command
+;
+
+/** 指定されたアクションをレイファイする
+ */
+command reify-action
+  [cdpath act]
+:: void -> Action
+;
+
+/** 指定されたポートをレイファイする
+ */
+command reify-port
+  [cdpath prt]
+:: void -> Port
+;
+
+/** 指定された状態をレイファイする
+ */
+command reify-state
+  [cdpath stt]
+:: void -> State
+;
+
+/** 指定されたファシリティをレイファイする
+ */
+command reify-facility
+  [cdpath fcl]
+:: void -> Facility
+;
+
+/** 指定されたユーザーロールをレイファイする
+ */
+command reify-userrole
+  [cdpath uro]
+:: void -> UserRole
+;
+
+
 }>>
