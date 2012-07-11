@@ -219,5 +219,5 @@ command caras [string? app] :: void -> [inspect:Module*] {
 
 /** オブジェクトのリストがあるとき、そのオブジェクト達の名前のリストを出力する */
 command names :: [object*] -> [string*] {
- each {pv name}
+ each {$.name}
 };

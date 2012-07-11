@@ -17,7 +17,7 @@ state Top :: any links {
 @[abstract]
 state other :: void links {
  // これエラーしない、ま、いいか
-  - --> Login.get;
+  - login --> Login.get;
 }; 
 
 
