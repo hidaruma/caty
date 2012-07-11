@@ -106,27 +106,26 @@ class ResourceModule(Module):
         Module.__init__(self, app)
         self._name = name
         self.docstring = docstring
-        self._resources = []
-        self._states = []
-        self._userroles = []
-        self._ports = []
+        self._resources = {}
+        self._states = {}
+        self._userroles = {}
+        self._ports = {}
         self._type = u'cara'
 
     @property
     def resources(self):
-        return self._resources
+        return self._resources.values()
 
     def add_resource(self, res):
         from caty.core.script.proxy import EnvelopeProxy as ActionEnvelope
-        for r in self.resources:
-            if r.name == res.name:
-                throw_caty_exception(
-                    u'CARA_COMPILE_ERROR',
-                    u'Duplicated resource name: $name module: $module', 
-                    name=res.name, module=self._name)
+        if res.name in self.resources:
+            throw_caty_exception(
+                u'CARA_COMPILE_ERROR',
+                u'Duplicated resource name: $name module: $module', 
+                name=res.name, module=self._name)
 
 
-        self._resources.append(res)
+        self._resources[res.name] = res
         member = []
         for act in res.actions:
             script = act.instance
@@ -143,36 +142,32 @@ class ResourceModule(Module):
         clsnode.declare(self)
 
     def add_state(self, st):
-        for r in self.states:
-            if r.name == st.name:
-                throw_caty_exception(
-                    u'CARA_COMPILE_ERROR',
-                    u'Duplicated state name: $name module: $module', 
-                    name=st.name, module=self._name)
-        self._states.append(st)
+        if st.name in self._states:
+            throw_caty_exception(
+                u'CARA_COMPILE_ERROR',
+                u'Duplicated state name: $name module: $module', 
+                name=st.name, module=self._name)
+        self._states[st.name] = st
 
     def add_userrole(self, ur):
-        for u in self.userroles:
-            if u.name == ur.name:
-                throw_caty_exception(
-                    u'CARA_COMPILE_ERROR',
-                    u'Duplicated userrole name: $name module: $module', 
-                    name=ur.name, module=self._name)
-        self._userroles.append(ur)
+        if ur.name in self._userroles:
+            throw_caty_exception(
+                u'CARA_COMPILE_ERROR',
+                u'Duplicated userrole name: $name module: $module', 
+                name=ur.name, module=self._name)
+        self._userroles[ur.name] = ur
 
     def add_port(self, port):
-        for p in self.ports:
-            if p.name == port.name:
-                throw_caty_exception(
-                    u'CARA_COMPILE_ERROR',
-                    u'Duplicated port name: $name module: $module', 
-                    name=port.name, module=self._name)
-        self._ports.append(port)
+        if p.name in self._ports:
+            throw_caty_exception(
+                u'CARA_COMPILE_ERROR',
+                u'Duplicated port name: $name module: $module', 
+                name=port.name, module=self._name)
+        self._ports[port.name]
 
     def get_resource(self, name):
-        for r in self._resources:
-            if r.name == name:
-                return r
+        if name in self._resources:
+            return self._resources[name]
         throw_caty_exception(
             u'ResourNotFound',
             u'$resourceName is not defined in $moduleName',
@@ -188,29 +183,35 @@ class ResourceModule(Module):
         o['states'] = {}
         o['userroles'] = {}
         o['ports'] = {}
-        for rc in self._resources:
+        for rc in self.resources:
             o['resources'][rc.name] = rc.reify()
             if rc.name in o['classes']:
                 del o['classes'][rc.name]
-        for st in self._states:
+        for st in self.states:
             o['states'][st.name] = st.reify()
-        for ur in self._userroles:
+        for ur in self.userroles:
             o['userroles'][ur.name] = ur.reify()
-        for p in self._ports:
+        for p in self.ports:
             o['ports'][p.name] = p.reify()
         return json.tagged(u'cara', o)
 
+    def get_state(self, name):
+        if name not in self._states:
+            throw_caty_exception('StateNotFound', '$name', name)
+        return self._states[name]
+
+    
     @property
     def states(self):
-        return self._states
+        return self._states.values()
 
     @property
     def userroles(self):
-        return self._userroles
+        return self._userroles.values()
 
     @property
     def ports(self):
-        return self._ports
+        return self._ports.values()
 
     def make_graph(self):
         root = {
@@ -220,7 +221,7 @@ class ResourceModule(Module):
         edges = []
         nodes = []
         appered_dest = set([])
-        for s in self._states:
+        for s in self.states:
             for f in self._find_links_to(s.name):
                 edges.append({u'from': f, u'to': s.name, u'type': u'action'})
             for i, link in enumerate(s.links):
@@ -266,7 +267,7 @@ class ResourceModule(Module):
                           u'label': s.make_label(self), 
                           u'type': u'state' if 'abstract' not in s.annotations else u'abstract-state'
                           })
-        for rc in self._resources:
+        for rc in self.resources:
             for act in rc.entries.values():
                 for red in act.profiles.redirects:
                     to_name = self._find_linked_action(red)
@@ -282,9 +283,8 @@ class ResourceModule(Module):
                         e = {u'from': act.resource_name + '.' + act.name, u'to': to_name, u'type': u'redirect'}
                     edges.append(e)
                 for st in act.profiles.next_states:
-                    for s in self._states:
-                        if s.name == st:
-                            break
+                    if s.name in self._states:
+                        break
                     else:
                         nodes.append({u'name': st, u'label': st, u'type': u'missing-state'})
                         e = {u'to': st, u'from': act.resource_name+'.'+act.name, u'type': u'missing'}

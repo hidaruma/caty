@@ -3,11 +3,51 @@ from caty.core.language import split_colon_dot_path
 from caty.core.language.util import make_structured_doc
 from caty.jsontools import tagged
 
+class ShallowReifier(object):
+    def reify_state(self, s):
+        tmap = {
+            'embeded-link':  u'embedded',
+            'additional-link': u'additional',
+            'no-care-link': u'indef'
+        }
+        links = {}
+        for l in s.links:
+            links[l.trigger] = tagged(u'link', {
+                'name': l.trigger,
+                'becoming': tmap[l.type],
+                'occurrence': l.appearance,
+                'targets': map(lambda x:x[0], l.link_to_list)
+            })
+        return {
+            'name': s.name,
+            'document': make_structured_doc(s.docstr),
+            'type': s.type.name,
+            'links': links,
+        }
+
+    def reify_resource(self, s):
+        return {
+                'name': s.name,
+                'document': make_structured_doc(s.docstring),
+                'pathPattern': s.url_patterns,
+                'deprecated': 'deprecated' in s.annotations
+        }
+
+    def reify_action(self, s):
+        return {
+                'name': s.name,
+                'document': make_structured_doc(s.docstring),
+                'implemented': s.implemented,
+                'deprecated': 'deprecated' in s.annotations,
+                'invoker': s.invoker_obj,
+        }
+
 class ListStates(Command):
     def setup(self, cdpath):
         self.__cdpath = cdpath
 
     def execute(self):
+        reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, _ = split_colon_dot_path(self.__cdpath)
         if not app_name:
@@ -20,26 +60,9 @@ class ListStates(Command):
         if not module.type == u'cara':
             return []
         r = []
-        tmap = {
-            'embeded-link':  u'embedded',
-            'additional-link': u'additional',
-            'no-care-link': u'indef'
-        }
+
         for s in module.states:
-            links = {}
-            for l in s.links:
-                links[l.trigger] = tagged(u'link', {
-                    'name': l.trigger,
-                    'becoming': tmap[l.type],
-                    'occurrence': l.appearance,
-                    'targets': map(lambda x:x[0], l.link_to_list)
-                })
-            r.append({
-                'name': s.name,
-                'document': make_structured_doc(s.docstr),
-                'type': s.type.name,
-                'links': links,
-            })
+            r.append(reifier.reify_state(s))
         return r
 
 class ListResources(Command):
@@ -47,6 +70,7 @@ class ListResources(Command):
         self.__cdpath = cdpath
 
     def execute(self):
+        reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, _ = split_colon_dot_path(self.__cdpath)
         if not app_name:
@@ -60,12 +84,7 @@ class ListResources(Command):
             return []
         r = []
         for s in module.resources:
-            r.append({
-                'name': s.name,
-                'document': make_structured_doc(s.docstring),
-                'pathPattern': s.url_patterns,
-                'deprecated': 'deprecated' in s.annotations
-            })
+            r.append(reifier.reify_resource(s))
         return r
 
 class ListActions(Command):
@@ -73,6 +92,7 @@ class ListActions(Command):
         self.__cdpath = cdpath
 
     def execute(self):
+        reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, res_name = split_colon_dot_path(self.__cdpath)
         if not app_name:
@@ -84,14 +104,72 @@ class ListActions(Command):
             return []
         r = []
         for s in module.get_resource(res_name).actions:
-            r.append({
-                'name': s.name,
-                'document': make_structured_doc(s.docstring),
-                'implemented': s.implemented,
-                'deprecated': 'deprecated' in s.annotations,
-                'invoker': s.invoker_obj,
-            })
+            r.append(reifier.reify_action(s))
         return r
 
 
+class ShowState(Command):
+    def setup(self, cdpath):
+        self.__cdpath = cdpath
 
+    def execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, module_name, name = split_colon_dot_path(self.__cdpath)
+        if not app_name:
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        if not module_name:
+            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+        if not name:
+            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+        module = app._schema_module.get_module(module_name)
+        if not module.type == u'cara':
+            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+        return reifier.reify_state(module.get_state(name))
+
+class ShowResource(Command):
+    def setup(self, cdpath):
+        self.__cdpath = cdpath
+
+    def execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, module_name, name = split_colon_dot_path(self.__cdpath)
+        if not app_name:
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        if not module_name:
+            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+        if not name:
+            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+        module = app._schema_module.get_module(module_name)
+        if not module.type == u'cara':
+            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+        return reifier.reify_resource(module.get_resource(name))
+
+class ShowAction(Command):
+    def setup(self, cdpath):
+        self.__cdpath = cdpath
+
+    def execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, module_name, name = split_colon_dot_path(self.__cdpath)
+        if not app_name:
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        if not module_name:
+            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+        if not name:
+            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+        module = app._schema_module.get_module(module_name)
+        if not module.type == u'cara':
+            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+        if '.' not in name:
+            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+        rname, aname = name.split('.', 1)
+        return reifier.reify_action(module.get_resource(rname).get_action(aname))

@@ -340,6 +340,7 @@ command show-class
 command show-resource
   [cdpath res]
 :: void -> ResourceSummary
+  refers python:sreif.ShowResource
 ;
 
 command show-type
@@ -356,6 +357,7 @@ command show-command
 command show-action
   [cdpath act]
 :: void -> ActionSummary
+  refers python:sreif.ShowAction
 ;
 
 command show-port
@@ -367,6 +369,7 @@ command show-port
 command show-state
   [cdpath stt]
 :: void -> StateSummary
+  refers python:sreif.ShowState
 ;
 
 command show-userrole
