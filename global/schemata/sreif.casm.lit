@@ -201,6 +201,7 @@ type UserRoleSummary    = reif:UserRoleSummary;
 <<{
 command list-applications
 :: void -> [ApplicationSummary*]
+ refers python:sreif.ListApplications
 ;
 
 /* 仕様未定 */
@@ -313,6 +314,7 @@ command show-project
 command show-application
   [cdpath app]
 :: void -> ApplicationSummary
+ refers python:sreif.ShowApplication
 ;
 
 /* 仕様未定 */

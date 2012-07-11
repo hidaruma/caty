@@ -273,10 +273,12 @@ class System(PbcObject):
 
 class CoreApplication(Application):
     def __init__(self, system):
-        self._name = 'caty'
+        self._name = u'caty'
         self._system = system
         self._schema_fs = None
         self._command_fs = None
+        self.parent = None
+        self._deprecated = False
         self._description = u'Caty Core System'
         self._global_config = system._global_config
         self._group = DummyGroup(self)
@@ -325,4 +327,5 @@ class DummyGroup(object):
         self.apps = [coreapp]
         self.global_config = coreapp._global_config
 
-
+    def __nonzero__(self):
+        return False

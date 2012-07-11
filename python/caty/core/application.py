@@ -212,6 +212,7 @@ class Application(PbcObject):
         self._server_module_name = self._global_config.server_module_name
         self._app_spec = AppConfig()
         self._app_spec.update(cfg.get('appProp', {}))
+        self._deprecated = cfg.get('deprecated', False)
         self._manifest = cfg
         self._lock_wait_limit = cfg.get('lockWaitLimit', 60)
 
@@ -661,6 +662,10 @@ class Application(PbcObject):
     @property
     def resource_module_container(self):
         return self._dispatcher
+
+    @property
+    def deprecated(self):
+        return self._deprecated
 
     def __invariant__(self):
         assert '/' not in self.name

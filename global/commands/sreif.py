@@ -4,6 +4,18 @@ from caty.core.language.util import make_structured_doc
 from caty.jsontools import tagged
 
 class ShallowReifier(object):
+    def reify_app(self, a):
+        r = {
+            'document': make_structured_doc(a.description),
+            'name': a.name,
+            'group': a._group.name if a._group else None,
+            'path': a.web_path,
+            'deprecated': a.deprecated,
+        }
+        if a.parent:
+            r['visibleParent'] = a.parent.name
+        return r
+
     def reify_state(self, s):
         tmap = {
             'embeded-link':  u'embedded',
@@ -41,6 +53,16 @@ class ShallowReifier(object):
                 'deprecated': 'deprecated' in s.annotations,
                 'invoker': s.invoker_obj,
         }
+
+class ListApplications(Command):
+
+    def execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        r = []
+        for a in system._apps:
+            r.append(reifier.reify_app(a))
+        return r
 
 class ListStates(Command):
     def setup(self, cdpath):
@@ -107,6 +129,21 @@ class ListActions(Command):
             r.append(reifier.reify_action(s))
         return r
 
+class ShowApplication(Command):
+    def setup(self, cdpath):
+        self.__cdpath = cdpath
+
+    def execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, module_name, name = split_colon_dot_path(self.__cdpath)
+        if app_name:
+            app = system.get_app(app_name)
+        elif not app_name and not module_name:
+            app = system.get_app(name)
+        else:
+            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+        return reifier.reify_app(app)
 
 class ShowState(Command):
     def setup(self, cdpath):
@@ -173,3 +210,4 @@ class ShowAction(Command):
             throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
         rname, aname = name.split('.', 1)
         return reifier.reify_action(module.get_resource(rname).get_action(aname))
+
