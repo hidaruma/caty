@@ -1,6 +1,6 @@
 #coding:utf-8
 from caty.core.schema.base import Annotations
-from caty.core.exception import throw_caty_exception
+from caty.core.exception import SystemResourceNotFound
 from caty.jsontools import prettyprint
 from caty.util import indent_lines, justify_messages
 ABSOLUTE = 0
@@ -79,7 +79,7 @@ class ResourceClass(object):
         for inv, e in self.entries.items():
             if e.name == name:
                 return e
-        throw_caty_exception(
+        raise SystemResourceNotFound(
             u'ActionNotFound',
             u'$actionName is not defined in $moduleName:$resourceName',
             actionName=aname,

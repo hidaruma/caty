@@ -54,6 +54,21 @@ class ShallowReifier(object):
                 'invoker': s.invoker_obj,
         }
 
+class SafeReifier(Command):
+    def setup(self, opts, cdpath):
+        self._cdpath = cdpath
+        self._safe = opts.get('safe', False)
+
+    def execute(self):
+        from caty.core.exception import SystemResourceNotFound
+        from caty import UNDEFINED
+        try:
+            return self._execute()
+        except SystemResourceNotFound:
+            if self._safe:
+                return UNDEFINED
+            raise
+
 class ListApplications(Command):
 
     def execute(self):
@@ -64,14 +79,12 @@ class ListApplications(Command):
             r.append(reifier.reify_app(a))
         return r
 
-class ListStates(Command):
-    def setup(self, cdpath):
-        self.__cdpath = cdpath
+class ListStates(SafeReifier):
 
-    def execute(self):
+    def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, _ = split_colon_dot_path(self.__cdpath)
+        app_name, module_name, _ = split_colon_dot_path(self._cdpath)
         if not app_name:
             app = self.current_app
         else:
@@ -87,14 +100,12 @@ class ListStates(Command):
             r.append(reifier.reify_state(s))
         return r
 
-class ListResources(Command):
-    def setup(self, opts, cdpath):
-        self.__cdpath = cdpath
+class ListResources(SafeReifier):
 
-    def execute(self):
+    def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, _ = split_colon_dot_path(self.__cdpath)
+        app_name, module_name, _ = split_colon_dot_path(self._cdpath)
         if not app_name:
             app = self.current_app
         else:
@@ -109,14 +120,12 @@ class ListResources(Command):
             r.append(reifier.reify_resource(s))
         return r
 
-class ListActions(Command):
-    def setup(self, opts, cdpath):
-        self.__cdpath = cdpath
+class ListActions(SafeReifier):
 
-    def execute(self):
+    def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, res_name = split_colon_dot_path(self.__cdpath)
+        app_name, module_name, res_name = split_colon_dot_path(self._cdpath)
         if not app_name:
             app = self.current_app
         else:
@@ -129,85 +138,77 @@ class ListActions(Command):
             r.append(reifier.reify_action(s))
         return r
 
-class ShowApplication(Command):
-    def setup(self, cdpath):
-        self.__cdpath = cdpath
+class ShowApplication(SafeReifier):
 
-    def execute(self):
+    def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, name = split_colon_dot_path(self.__cdpath)
+        app_name, module_name, name = split_colon_dot_path(self._cdpath)
         if app_name:
             app = system.get_app(app_name)
         elif not app_name and not module_name:
             app = system.get_app(name)
         else:
-            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         return reifier.reify_app(app)
 
-class ShowState(Command):
-    def setup(self, cdpath):
-        self.__cdpath = cdpath
+class ShowState(SafeReifier):
 
-    def execute(self):
+    def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, name = split_colon_dot_path(self.__cdpath)
+        app_name, module_name, name = split_colon_dot_path(self._cdpath)
         if not app_name:
             app = self.current_app
         else:
             app = system.get_app(app_name)
         if not module_name:
-            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         if not name:
-            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         module = app._schema_module.get_module(module_name)
         if not module.type == u'cara':
-            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         return reifier.reify_state(module.get_state(name))
 
-class ShowResource(Command):
-    def setup(self, cdpath):
-        self.__cdpath = cdpath
+class ShowResource(SafeReifier):
 
-    def execute(self):
+    def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, name = split_colon_dot_path(self.__cdpath)
+        app_name, module_name, name = split_colon_dot_path(self._cdpath)
         if not app_name:
             app = self.current_app
         else:
             app = system.get_app(app_name)
         if not module_name:
-            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         if not name:
-            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         module = app._schema_module.get_module(module_name)
         if not module.type == u'cara':
-            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         return reifier.reify_resource(module.get_resource(name))
 
-class ShowAction(Command):
-    def setup(self, cdpath):
-        self.__cdpath = cdpath
+class ShowAction(SafeReifier):
 
-    def execute(self):
+    def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, name = split_colon_dot_path(self.__cdpath)
+        app_name, module_name, name = split_colon_dot_path(self._cdpath)
         if not app_name:
             app = self.current_app
         else:
             app = system.get_app(app_name)
         if not module_name:
-            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         if not name:
-            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         module = app._schema_module.get_module(module_name)
         if not module.type == u'cara':
-            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         if '.' not in name:
-            throw_caty_exception('BadArg', u'$arg', arg=self.__cdpath)
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         rname, aname = name.split('.', 1)
         return reifier.reify_action(module.get_resource(rname).get_action(aname))
 

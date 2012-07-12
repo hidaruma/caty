@@ -90,7 +90,7 @@ class ResourceModuleContainer(object):
     def get_module(self, name):
         r = self._modules.get(name)
         if not r:
-            throw_caty_exception(
+            raise SystemResourceNotFound(
                 u'ModuleNotFound',
                 u'$moduleName.$moduleType is not defined in $appName',
                 moduleName=name,
@@ -168,7 +168,7 @@ class ResourceModule(Module):
     def get_resource(self, name):
         if name in self._resources:
             return self._resources[name]
-        throw_caty_exception(
+        raise SystemResourceNotFound(
             u'ResourNotFound',
             u'$resourceName is not defined in $moduleName',
             resourceName=name,
@@ -197,7 +197,7 @@ class ResourceModule(Module):
 
     def get_state(self, name):
         if name not in self._states:
-            throw_caty_exception('StateNotFound', '$name', name)
+            raise SystemResourceNotFound('StateNotFound', '$name', name)
         return self._states[name]
 
     

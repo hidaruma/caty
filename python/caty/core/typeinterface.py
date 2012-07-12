@@ -146,13 +146,18 @@ class TreeCursor(object):
     def result(self):
         NotImplementedError
 
-    def _dereference(self, o, reduce_tag=False):
+    def _dereference(self, o, reduce_tag=False, reduce_option=False):
         if reduce_tag:
-            types = (Root, Tag, Ref)
+            if reduce_option:
+                types = (Root, Ref, Tag, Optional)
+            else:
+                types = (Root, Ref, Tag)
+        elif reduce_option:
+            types = (Root, Ref, Optional)
         else:
             types = (Root, Ref)
         if isinstance(o, types):
-            return self._dereference(o.body, reduce_tag)
+            return self._dereference(o.body, reduce_tag, reduce_option)
         else:
             return o
 

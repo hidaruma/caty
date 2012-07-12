@@ -16,7 +16,7 @@ from caty.core.casm.cursor import (SchemaBuilder,
                                    DependencyAnalizer)
 from caty.core.casm.plugin import PluginMap
 from caty.jsontools.path.validator import to_decl_style
-from caty.core.exception import throw_caty_exception, CatyException
+from caty.core.exception import throw_caty_exception, CatyException, SystemResourceNotFound
 from threading import RLock
 from StringIO import StringIO
 from caty.core.facility import Facility
@@ -127,7 +127,7 @@ class Module(Facility):
 
     def _get_resource(self, rname, tracked=(), scope_func=None, type=u''):
         if self in tracked:
-            raise throw_caty_exception(u'%sNotFound'%type, u'$name', name=rname)
+            raise SystemResourceNotFound(u'%sNotFound'%type, u'$name', name=rname)
         scope = scope_func(self)
         app_name, mod_name, name = split_colon_dot_path(rname)
         if app_name:
@@ -149,13 +149,13 @@ class Module(Facility):
             tracked = list(tracked) + [self]
             if self.parent:
                 return self.parent._get_resource(name, tracked, scope_func, type)
-            raise throw_caty_exception(u'ClassNotFound', u'$name', name=c)
+            raise SystemResourceNotFound(u'ClassNotFound', u'$name', name=c)
         if name in scope:
             return scope[name]
         else:
             if self.parent:
                 return self.parent._get_resource(rname, tracked, scope_func, type)
-        raise throw_caty_exception(u'%sNotFound' % type, u'$name', name=rname)
+        raise SystemResourceNotFound(u'%sNotFound' % type, u'$name', name=rname)
 
     def _has_resource(self, name, tracked=(), scope_func=None, type=u''):
         try:
@@ -206,7 +206,7 @@ class Module(Facility):
                 return m
         if self.parent:
             return self.parent.get_module(name, tracked)
-        raise throw_caty_exception(u'ModuleNotFound', u'$name', name=name)
+        raise SystemResourceNotFound(u'ModuleNotFound', u'$name', name=name)
 
     def get_package(self, name, tracked):
         tracked = set() if tracked is None else tracked
@@ -225,7 +225,7 @@ class Module(Facility):
                     return p
         if self.parent:
             self.parent.get_package(name)
-        raise throw_caty_exception(u'PackageNotFound', u'$name', name=name)
+        raise SystemResourceNotFound(u'PackageNotFound', u'$name', name=name)
 
     def get_modules(self):
         yield self

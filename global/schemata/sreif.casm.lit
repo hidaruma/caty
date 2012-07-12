@@ -277,8 +277,13 @@ command list-commands
 
 /* 優先 */
 command list-states
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath mod]
-:: void -> [StateSummary*]
+:: void -> [StateSummary*]?
  refers python:sreif.ListStates
 ;
 
@@ -311,9 +316,12 @@ command list-resources
   {
     @[default(false)]
     "aliases": boolean?,
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
   }
   [cdpath mod]
-:: void -> [ResourceSummary*]
+:: void -> [ResourceSummary*]?
  refers python:sreif.ListResources
 ;
 
@@ -322,9 +330,12 @@ command list-actions
   {
     @[default(false)]
     "rec": boolean?,
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
   }
   [cdpath mod-cls]
-:: void -> [ActionSummary*]
+:: void -> [ActionSummary*]?
  refers python:sreif.ListActions
 ;
 
@@ -349,8 +360,13 @@ command show-project
 ;
 
 command show-application
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath app]
-:: void -> ApplicationSummary
+:: void -> ApplicationSummary?
  refers python:sreif.ShowApplication
 ;
 
@@ -397,8 +413,13 @@ command show-class
 
 /* 優先 */
 command show-resource
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath res]
-:: void -> ResourceSummary
+:: void -> ResourceSummary?
   refers python:sreif.ShowResource
 ;
 
@@ -424,8 +445,13 @@ command show-command
 
 /* 優先 */
 command show-action
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath act]
-:: void -> ActionSummary
+:: void -> ActionSummary?
   refers python:sreif.ShowAction
 ;
 
@@ -441,8 +467,13 @@ command show-port
 
 /* 優先 */
 command show-state
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath stt]
-:: void -> StateSummary
+:: void -> StateSummary?
   refers python:sreif.ShowState
 ;
 

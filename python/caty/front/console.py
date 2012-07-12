@@ -378,7 +378,7 @@ Web サーバの起動・停止を行う
             return False
         elif scm.type == 'array':
             sb = SchemaBuilder(None)
-            scm = sb._dereference(scm)
+            scm = sb._dereference(scm, reduce_option=True)
             if all(map(lambda s: s.type == 'void', scm.schema_list)):
                 return False
         return True
