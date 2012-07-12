@@ -1602,22 +1602,37 @@ command reify-project
 /** 指定されたアプリケーションをレイファイする
  */
 command reify-application
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath app]
-:: void -> Application
+:: void -> Application?
 ;
 
 /** 指定されたパッケージをレイファイする
  */
 command reify-package
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath pkg]
-:: void -> Package
+:: void -> Package?
 ;
 
 /** 指定されたモジュールをレイファイする
  */
 command reify-module
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath mod]
-:: void -> Module
+:: void -> Module?
 ;
 
 /** 指定されたクラスをレイファイする
@@ -1630,57 +1645,97 @@ command reify-class
 /** 指定されたリソースクラスをレイファイする
  */
 command reify-resource
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath res]
-:: void -> Resource
+:: void -> Resource?
 ;
 
 /** 指定された型をレイファイする
  */
 command reify-type
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath typ]
-:: void -> Type
+:: void -> Type?
 ;
 
 /** 指定されたコマンドをレイファイする
  */
 command reify-command
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath cmd]
-:: void -> Command
+:: void -> Command?
 ;
 
 /** 指定されたアクションをレイファイする
  */
 command reify-action
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath act]
-:: void -> Action
+:: void -> Action?
 ;
 
 /** 指定されたポートをレイファイする
  */
 command reify-port
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath prt]
-:: void -> Port
+:: void -> Port?
 ;
 
 /** 指定された状態をレイファイする
  */
 command reify-state
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath stt]
-:: void -> State
+:: void -> State?
 ;
 
 /** 指定されたファシリティをレイファイする
  */
 command reify-facility
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath fcl]
-:: void -> Facility
+:: void -> Facility?
 ;
 
 /** 指定されたユーザーロールをレイファイする
  */
 command reify-userrole
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath uro]
-:: void -> UserRole
+:: void -> UserRole?
 ;
 
 

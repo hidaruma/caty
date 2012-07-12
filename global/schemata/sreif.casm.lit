@@ -207,26 +207,39 @@ command list-applications
 
 /* 仕様未定 */
 command list-facilities
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath app]
-:: void -> [FacilitySummary*]
+:: void -> [FacilitySummary*]?
 ;
 
 command list-modules
   {
     @[default(false)]
     "rec": boolean?,
+
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
   }
   [cdpath app-pkg]
-:: void -> [ModuleSummary*]
+:: void -> [ModuleSummary*]?
 ;
 
 command list-packages
   {
     @[default(false)]
     "rec": boolean?,
+
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
   }
   [cdpath app-pkg]
-:: void -> [PackageSummary*]
+:: void -> [PackageSummary*]?
 ;
 
 command list-types
@@ -236,9 +249,13 @@ command list-types
     @[default(false)]
     "aliases": boolean?,
     "sub": typesSubnamespaceSort?,
+
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
   }
   [cdpath mod-cls]
-:: void -> [TypeSummary*]
+:: void -> [TypeSummary*]?
 ;
  
 command list-commands
@@ -248,9 +265,13 @@ command list-commands
     @[default(false)]
     "aliases": boolean?,
     "sub": commandsSubnamespaceSort?,
+
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
   }
   [cdpath mod-cls]
-:: void -> [CommandSummary*]
+:: void -> [CommandSummary*]?
 ;
 
 /* 優先 */
@@ -265,14 +286,23 @@ command list-classes
     @[default(false)]
     "aliases": boolean?,
     "sub": classesSubnamespaceSort?,
+
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
   }
   [cdpath mod]
-:: void -> [ClassSummary*]
+:: void -> [ClassSummary*]?
 ;
 
 command list-userroles
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath mod]
-:: void -> [UserRoleSummary*]
+:: void -> [UserRoleSummary*]?
 ;
 
 /* 優先 */
@@ -298,8 +328,13 @@ command list-actions
 ;
 
 command list-ports
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath mod]
-:: void -> [PortSummary*]
+:: void -> [PortSummary*]?
 ;
 
 
@@ -320,23 +355,43 @@ command show-application
 
 /* 仕様未定 */
 command show-facility
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath fcl]
-:: void -> FacilitySummary
+:: void -> FacilitySummary?
 ;
 
 command show-module
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath mod]
-:: void -> ModuleSummary
+:: void -> ModuleSummary?
 ;
 
 command show-package
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath pkg]
-:: void -> PackageSummary
+:: void -> PackageSummary?
 ;
 
 command show-class
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath cls]
-:: void -> ClassSummary
+:: void -> ClassSummary?
 ;
 
 /* 優先 */
@@ -347,13 +402,23 @@ command show-resource
 ;
 
 command show-type
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath typ]
-:: void -> TypeSummary
+:: void -> TypeSummary?
 ;
 
 command show-command
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath cmd]
-:: void -> CommandSummary
+:: void -> CommandSummary?
 ;
 
 /* 優先 */
@@ -364,8 +429,13 @@ command show-action
 ;
 
 command show-port
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath prt]
-:: void -> PortSummary
+:: void -> PortSummary?
 ;
 
 /* 優先 */
@@ -376,8 +446,13 @@ command show-state
 ;
 
 command show-userrole
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
   [cdpath uro]
-:: void -> UserRoleSummary
+:: void -> UserRoleSummary?
 ;
 
 }>>
