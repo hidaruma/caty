@@ -218,6 +218,7 @@ command list-modules
   }
   [cdpath app-pkg]
 :: void -> [ModuleSummary*]
+ //refers python:sreif.ListModules
 ;
 
 command list-packages

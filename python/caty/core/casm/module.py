@@ -23,6 +23,7 @@ from caty.core.facility import Facility
 from functools import partial
 
 class Module(Facility):
+    is_package = False
     def __init__(self, app, parent=None):
         self._app = app
         self.kind_ns = {}
@@ -32,6 +33,7 @@ class Module(Facility):
         self.facility_ns = {}
         self.command_loader = None
         self.sub_modules = {}
+        self.sub_packages = {}
         self.parent = parent
         self._name = u'public' # デフォルト値
         self._system = app._system
@@ -47,6 +49,7 @@ class Module(Facility):
         self.docstring = u'undocumented'
         self.last_modified = 0
         self.annotations = Annotations([])
+        self.package_root_path = u'/'
 
         self.add_schema = partial(self._add_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
         self.get_type = partial(self._get_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
@@ -135,16 +138,8 @@ class Module(Facility):
         if mod_name:
             if mod_name == self.name:
                 return self._get_resource(name, tracked, scope_func, type)
-            tracked = list(tracked) + [self]
-            if mod_name == 'public' and self.name not in ('public', 'builtin'):
-                return self.parent._get_resource(name, tracked, scope_func, type)
-            if mod_name == 'public' and self.name in ('public', 'builtin'):
-                return self._get_resource(name, tracked, scope_func, type)
-            if mod_name in self.sub_modules:
-                return self.sub_modules[mod_name]._get_resource(name, tracked, scope_func, type)
-            if self.parent:
-                return self.parent._get_resource(rname, tracked, scope_func, type)
-            raise throw_caty_exception(u'%sNotFound' % type, u'$name', name=name)
+            mod = self.get_module(mod_name)
+            return mod._get_resource(name, tracked, scope_func, type)
         if '.' in name:
             c, n = name.split('.', 1)
             if c == self.name:
@@ -187,23 +182,50 @@ class Module(Facility):
     def schema_finder(self):
         return LocalModule(self)
 
+    @property
+    def canonical_name(self):
+        if self.parent.is_package:
+            return self.parent.canonical_name + '.' + self.name
+        else:
+            return self.name
+
     def get_plugin(self, name):
         return self._plugin.get_plugin(name)
 
     def get_module(self, name, tracked=None):
         tracked = set() if tracked is None else tracked
-        if self in tracked: return
+        assert self not in tracked
         if name == self.name:
             return self
-        else:
-            tracked.add(self)
-            for m in self.sub_modules.values():
-                r = m.get_module(name, tracked)
-                if r:
-                    return r
+        tracked.add(self)
+        if '.' in name:
+            pkg, rest = name.rsplit('.', 1)
+            return self.get_package(pkg).get_module(rest)
+        for m in self.sub_modules.values():
+            if m.name == name:
+                return m
         if self.parent:
             return self.parent.get_module(name, tracked)
-        return None
+        raise throw_caty_exception(u'ModuleNotFound', u'$name', name=name)
+
+    def get_package(self, name, tracked):
+        tracked = set() if tracked is None else tracked
+        assert self not in tracked
+        tracked.add(self)
+        if '.' in name:
+            pkg, rest = name.rsplit('.', 1)
+        else:
+            pkg = name
+            rest = None
+        for p in self.sub_packages.values():
+            if p.name == pkg:
+                if rest:
+                    return p.get_package(rest)
+                else:
+                    return p
+        if self.parent:
+            self.parent.get_package(name)
+        raise throw_caty_exception(u'PackageNotFound', u'$name', name=name)
 
     def get_modules(self):
         yield self
@@ -484,36 +506,46 @@ class AppModule(Module):
         self._plugin.set_fs(app._command_fs)
 
     def _path_to_module(self, path):
-        p = path[1:].rsplit('.')[0]
+        p = path.strip(u'/').rsplit('.')[0]
         return p.replace('/', '.')
 
-    def _module_to_path(self, modname):
-        m = modname.rsplit('.', 1)[0]
-        return '/' + m.replace('.', '/')
-
     def compile(self):
-        for e in self.find(self.fs.DirectoryObject('/')):
-            if self.is_root and e.path == u'/public.casm':
-                self.filepath = e.path
-                self.application.i18n.write(u'[WARNING] public.casm is obsolete')
-                self.application._system.deprecate_logger.warning(u'public.casm is obsolete: %s' % self.application.name)
-                # self._compile(e.path)
-            elif e.path.endswith(u'.casm') or e.path.endswith(u'.pcasm') or e.path.endswith(u'.casm.lit'):
-                mod = self.__class__(self._app, self)
-                mod.filepath = e.path
-                if e.path.endswith(u'.casm.lit'):
-                    mod._type = 'casm.lit'
-                mod._name = unicode(self._path_to_module(mod.filepath))
-                if mod._name in self.sub_modules:
-                    raise Exception(self._app.i18n.get(u'Module $name is already defined', 
-                                               name=mod._name))
-                mod._compile(e.path)
-                self.sub_modules[mod.name] = mod
-                mod.last_modified = e.last_modified
-            elif e.path == u'/formats.xjson':
-                o = self.fs.open(e.path)
-                self._plugin.feed(o.read())
+        # アプリケーションルートのpublicモジュールかパッケージからのみ呼ばれる
+        assert self.is_root == True or self.is_package == True
+        for e in self.fs.DirectoryObject(self.package_root_path).read():
+            if e.is_dir:
+                self._compile_dir(e)
+            else:
+                self._compile_file(e)
 
+    def _compile_file(self, e):
+        if self.is_root and e.path == u'/public.casm':
+            self.filepath = e.path
+            self.application.i18n.write(u'[WARNING] public.casm is obsolete')
+            self.application._system.deprecate_logger.warning(u'public.casm is obsolete: %s' % self.application.name)
+            # self._compile(e.path)
+        elif e.path.endswith(u'.casm') or e.path.endswith(u'.pcasm') or e.path.endswith(u'.casm.lit'):
+            mod = self.__class__(self._app, self)
+            mod.filepath = e.path
+            if e.path.endswith(u'.casm.lit'):
+                mod._type = 'casm.lit'
+            mod._name = unicode(self._path_to_module(e.basename))
+            if mod._name in self.sub_modules:
+                raise Exception(self._app.i18n.get(u'Module $name is already defined', 
+                                           name=mod._name))
+            mod._compile(e.path)
+            self.sub_modules[mod.name] = mod
+            mod.last_modified = e.last_modified
+        elif e.path == u'/formats.xjson':
+            o = self.fs.open(e.path)
+            self._plugin.feed(o.read())
+
+    def _compile_dir(self, e):
+        mod = Package(self._app, self)
+        mod._name = unicode(self._path_to_module(e.basename.strip(u'/')))
+        mod.package_root_path = e.path
+        mod.compile()
+        self.sub_packages[mod.name] = mod
 
     def _compile(self, path):
         o = self.fs.open(path)
@@ -631,6 +663,9 @@ class AppModule(Module):
             if k in self._global_module.sub_modules:
                 return True
         return False
+
+class Package(AppModule):
+    is_package = True
 
 class FilterModule(Module):
     def __init__(self, system):

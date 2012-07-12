@@ -29,7 +29,7 @@ class ModuleName(object):
             if not module.is_builtin:
                 raise InternalException("Module name 'builtin' can be used only to Caty builtin module")
         else:
-            if self.name != module.name:
+            if self.name != module.canonical_name:
                 raise InternalException("Module name $name and path name $path are not matched", name=self.name, path=module.filepath)
         module.docstring = self.docstring
         module.annotations = self.annotations
