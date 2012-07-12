@@ -226,7 +226,8 @@ command list-modules
     "safe": boolean?,
   }
   [cdpath app-pkg]
-:: void -> [ModuleSummary*]?
+:: void -> [ModuleSummary*]
+ //refers python:sreif.ListModules
 ;
 
 command list-packages
