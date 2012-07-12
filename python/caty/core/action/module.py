@@ -158,12 +158,12 @@ class ResourceModule(Module):
         self._userroles[ur.name] = ur
 
     def add_port(self, port):
-        if p.name in self._ports:
+        if port.name in self._ports:
             throw_caty_exception(
                 u'CARA_COMPILE_ERROR',
                 u'Duplicated port name: $name module: $module', 
                 name=port.name, module=self._name)
-        self._ports[port.name]
+        self._ports[port.name] = port
 
     def get_resource(self, name):
         if name in self._resources:
