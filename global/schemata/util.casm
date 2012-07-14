@@ -1,0 +1,38 @@
+// -*- coding: utf-8 -*-
+module util;
+
+/** 引数で指定された長さの配列のインデックスを、乱数で生成して返す
+ */
+command rand-index 
+ {
+   /** 文字列として返すか */
+   @[default(false)]
+   "string" : boolean?,
+ }
+[integer(minimum=1) length] :: void -> (integer|string)
+  refers python:util.RandIndex;
+
+
+/** 引数で指定された長さの配列のインデックスを、乱数で生成してタグとして付加する
+ */
+command rand-tag [integer(minimum=1) length] :: univ -> @*! univ {
+  [rand-index --string %1, pass] | tagged
+};
+
+command fill-wildcard :: string -> string
+  refers python:util.FillWildcard;
+
+command new-file :: string(remark="ファイルパス") -> void {
+  pass > path;
+  file:exists %path |
+  when {
+    OK => void,
+    NG => "" | file:write --mkdir  %path,
+  }
+};
+
+
+
+// End of Module
+
+

@@ -1,0 +1,49 @@
+// -*- coding: utf-8 -*-
+module lunch-menu-act in cara;
+
+/** 開始 */
+@[abstract]
+state start :: any links {
+ - start --> Menu.get;
+};
+
+/** ランチ・メニューの閲覧状態 */
+state menu :: any /*lunch-menu:LunchMenu*/ links {
+ - next!  --> Menu.get;
+ - prev!  --> Menu.get;
+ - today! --> Menu.get;
+/* 新規作成 */
+ - new!   -->  Menu.new;
+};
+
+/** 新規ランチ・メニューの入力状態 */
+state new-menu :: null links {
+ - submit! --> Menu.create;
+ - cancel! --> Menu.get;
+};
+
+
+/** エラーページ */
+state error :: null links {};
+
+/** ランチ・メニューへのWebインターフェイス */
+resource Menu("/menu/") {
+  /** 指定されたメニューを取得する。指定がなければ今日のモノ */ 
+  action get("/GET")
+  {
+    "date": common:date?
+  }
+  :: @[out] #1 _ -> _ produces [menu, error]
+  ;
+
+  /** 今日のメニューを入力するフォームを取得する */ 
+  action new("new/GET")
+  :: @[out] #1 _ -> _  produces new-menu
+  ;
+
+  /** 今日の日付で指定されたメニューを作成する。*/
+  action create("create/POST")
+  :: @[in, out] #1 lunch-menu:NewLunchMenu -> _ produces menu 
+  ;
+
+};

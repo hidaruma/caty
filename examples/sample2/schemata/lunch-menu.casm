@@ -1,0 +1,402 @@
+// -*- coding: utf-8 -*-
+/** ランチ・メニュー（インナーWebアプリケーションのサンプル）
+
+これは、Web上からランチの予約とデリバリーの注文が出来るシステムの一部となる。
+この部分（サブシステム）のユーザーは、レストランの従業員であり、
+当日のランチ・メニューを入力するために使う。
+過去のランチ・メニューを参照閲覧することもできる。
+
+
+*/
+module lunch-menu;
+
+/*== ランチ・メニューの実体（entity）ストレージ部分 */
+
+
+/** ランチ・メニュー
+ * 選択可能なメインディッシュとデザートのみ
+ */
+type LunchMenu = {
+  /** 日付 */
+  "date": common:date,
+
+  /** メインディッシュ
+   * いくつかの選択肢（例：魚と肉）から選べる
+   * まれに1種しかないときもある。
+   */
+  "mainDish": [string, string*],
+
+  /** デザート
+   * いくつかの選択肢（例：プリンとガトーショコラ）から選べる
+   * まれに1種しかないときもある。
+   */
+  "dessert": [string, string*],
+};
+
+/** 新規ランチ・メニューの入力部分
+ * 当日の日付はシステムが入れる。
+ */
+type NewLunchMenu = {
+  "mainDish": [string, string*],
+  "dessert": [string, string*],
+};
+
+/** 日付をキーとして格納されたメニューのコレクション 
+ */
+type LunchMenus = {
+  * /* 日付 */: LunchMenu?
+}(propNameFormat = "date");
+
+/** ダミーのデータベースコレクション（単なるXJSONファイル）のパス 
+ * 一時的な使う内部的なデータ、公開してはならない。
+ */
+@[hidden]
+const LUNCH_MENUS_PATH = "data@this:/lunch-menu/Menus.xjson";
+
+/** 空のデータベースコレクションを作る
+ * ただし、既にデータベースコレクションがあれば何もしない。
+ */
+command setup :: void -> void {
+ LUNCH_MENUS_PATH > path;
+ file:exists %path |
+ when {
+   OK => void,
+   NG => {} | to-string | file:write --mkdir %path,
+ }
+};
+
+/** データベースコレクションをロードする */
+command load-menus :: void -> LunchMenus {
+ LUNCH_MENUS_PATH > path;
+ xjson:read %path
+};
+
+/** データベースコレクションをセーブする */
+command save-menus ::  LunchMenus -> void {
+ pass > in;
+ LUNCH_MENUS_PATH > path;
+ %in | xjson:write %path
+};
+
+
+/*== ハイパーメディアに関する一般的な定義 
+ * 臨時にここで定義しておく
+ */
+
+/** 簡易トリガー
+ * 本来、もっと一般的な文脈で定義されるべき 
+ * 
+ * シングルトン型を使えば、inputData, paramsDataは不要となる。
+ */
+type Trigger = @* {
+  /** リクエスト先
+   * インナーWebでは、コマンドのフルネームを直接書く。
+   */
+  "target": string,
+
+  /** ターゲット（コマンド）の入力データ型
+   * 型の名前の文字列とする。
+   * 将来的には、reif:Type とすべき。
+   */
+  @[without("inputData")]
+  "inputType": common:typeName?,
+
+  /** ターゲット（コマンド）のパラメータ・データ型
+   * 型の名前の文字列とする。
+   * 将来的には、reif:Type とすべき。
+   */
+  @[without("paramsData")]
+  "paramsType": common:typeName?,
+
+  /** ターゲット（コマンド）の入力データの値
+   * 将来的には、inputTypeにシングルトン型を使うべき。
+   */
+  @[without("inputType")]
+  "inputData": any?,
+
+  /** ターゲット（コマンド）のパラメータ・データの値
+   * 将来的には、paramsTypeにシングルトン型を使うべき。
+   * パラメータデータはobjectだが、現状の制限からarrayにしている。
+   */
+  @[without("paramsType")]
+  "paramsData": array?,
+
+
+  *: any? // 拡張可能
+};
+
+/** 簡易トリガー 入力を要求しないトリガー
+ * 本来、こんな型は不要。参考までに。
+ */
+type FixedTrigger = Trigger & (@* {
+
+  "inputType": undefined,
+
+  "paramsType": undefined,
+
+  "inputData": any,
+
+  "paramsData": array, // objectが本来
+
+  *: any?
+});
+
+/** 簡易トリガー 入力を要求するトリガー
+ * 本来、こんな型は不要。参考までに。
+ */
+type InputTrigger = Trigger & (@* {
+
+  "inputType": common:typeName,
+
+  "paramsType": common:typeName,
+
+  "inputData": undefined,
+
+  "paramsData": undefined,
+
+  *: any?
+});
+
+/** トリガー型として許容される型のカインド 
+ */
+kind TriggerType = lower Trigger;
+
+
+/** ハイパーメディアオブジェクト
+ * 本来、もっと一般的な文脈で定義されるべき 
+ */
+type HyperMediaObject = @* {
+  /** ハイパーメディアオブジェクトが持つデータ部分 */
+  "data": any,
+
+  /** ハイパーメディアオブジェクトが持つリンク部分 */
+  "links": HyperLinks,
+};
+
+/** トリガー配列の名前付き集合 */
+type HyperLinks = {*: [Trigger*]? };
+
+/** ハイパーメディア型として許容される型のカインド */
+kind HyperMediaType = lower HyperMediaObject;
+
+/** ハイパーリンク型として許容される型のカインド */
+kind HyperLinksType = lower HyperLinks;
+
+
+/*== メニュー関連のハイパーメディア型 */
+
+
+/** ランチ・メニューの閲覧状態 */
+@[state("menu")]
+type MenuPage in HyperMediaType = @menu {
+  /** ランチ・メニューが見える */
+  "data": LunchMenu,
+  /** リンク情報 */
+  "links": MenuPageLinks,
+};
+
+/** MenuPageのリンク情報 */
+type MenuPageLinks in HyperLinksType = {
+  "next": [
+     {
+       "target": "lunch-menu:Menu.get",
+       "inputData": null,
+       "paramsData": DateParams,
+     }?
+  ],
+  "prev": [
+     {
+       "target": "lunch-menu:Menu.get",
+       "inputData": null,
+       "paramsData": DateParams,
+     }?
+  ],
+  "today": [
+     {
+       "target": "lunch-menu:Menu.get",
+       "inputData": null,
+       "paramsData": [], //{},
+     }?
+  ],
+  /* 新規作成 */
+  "new": [
+     {
+       "target": "lunch-menu:Menu.new",
+       "inputData": null,
+       "paramsData": [], // {}
+     }
+  ],
+};
+
+
+/** 新規ランチ・メニューの入力状態 */
+@[state("new-menu")]
+type NewMenuPage in HyperMediaType = @new-menu {
+  "data": null,
+  "links": NewMenuPageLinks,
+};
+
+/** NewMenuPageのリンク情報 */
+type NewMenuPageLinks in HyperLinksType = {
+  "submit": [
+     {
+       "target": "lunch-menu:Menu.create",
+       "inputType": "lunch-menu:NewLunchMenu",
+       "paramsData": [], // {}
+     },
+  ],
+  "cancel": [
+     {
+       "target": "lunch-menu:Menu.get",
+       "inputData": null,
+       "paramsData": [], // {}
+     },
+  ],
+};
+
+/** エラーページ */
+@[state("error")]
+type ErrorPage in HyperMediaObject = @error {
+  "data": null,
+  "links": {}
+};
+
+
+/*== 補助的な型 ==
+
+型の指定に reif:Type が使えれば不要だが、
+今は名前付きの型が必要。
+
+*/
+
+/** 日付を指定するパラメータの型 */
+type DateParams = [common:date]; // {"date": common:date}
+
+/*== 補助的なコマンド */
+
+/** 今日の日付を得る（ダミー） */
+command today :: void -> common:date {
+ "2012-04-01"
+};
+
+
+/*== アクション群 */
+
+
+/** ランチ・メニューへのインターフェイスとなるコマンド群 */
+@[resource]
+class Menu {
+  /** 指定されたメニューを取得する。指定がなければ今日のモノ */ 
+  command get 
+/*
+  {
+    "date" : common:date?
+  }
+*/
+  [common:date? date]
+  :: void -> MenuPage | ErrorPage {
+
+    %1? |
+    when {
+      undefined => today > date,
+      *         => pass  > date,
+    };
+    load-menus | pv --safe %date | // ここで、xjson.getが普通には使えない
+    when {
+      undefined => gen:sample lunch-menu:ErrorPage,
+      *         => @menu {"data": pass, "links": gen:sample lunch-menu:MenuPageLinks}
+    }
+  };
+
+  /** 今日のメニューを入力するフォームを取得する */ 
+  command new
+  :: void -> NewMenuPage {
+     gen:sample lunch-menu:NewMenuPage
+  };
+
+  /** 今日の日付で指定されたメニューを作成する。*/
+  command create
+  :: NewLunchMenu -> MenuPage {
+    pass  > new;
+    today > date;
+    load-menus > menus;
+    ["'", %date, "'"] | text:concat > date-q; // ちょっとメンドクサイ
+
+    [%new, {"date": %date}] | json:merge > todays-menu; // xjson:merge と書いてしまう
+    [%menus, %todays-menu] | xjson:put %date-q > updated-menus;
+
+    %updated-menus | save-menus;
+    @menu {
+      "data": %todays-menu,
+      "links": gen:sample lunch-menu:MenuPageLinks,
+    }
+  };
+    
+};
+
+
+/** クライアントのエミュレーション 
+ * もっと一般的な文脈で定義されるべき。
+ */
+command client [string? start-point] :: (null | HyperMediaObject) -> any/*never*/ {
+ dump --force --prefix="client input:" |
+ when {
+  null => %1? |
+          when {
+           undefined => forward void, // stop
+           * => {"data": null, "links": {"start": [{"inputData": null, "paramsData": [], "target": pass}]}}
+          }
+  ,
+  * => pass
+  ,
+ } |
+ $.links > links | properties > props | list:length > size |  dump --force --prefix="links size:" |
+ cond {
+  0 => forward void, // stop
+  * => void,
+ };
+ util:rand-index %size > idx1;
+ %props | item %idx1 > prop;
+ %links | pv %prop > selected-truss | list:length > len |
+ cond {
+  0 => dump --force --prefix="target is not selected, stop."; forward void, // stop
+  * => void,
+ };
+ util:rand-index %len > idx2;
+ %selected-truss | item %idx2 > selected-trigger;
+
+ // 少し眠る
+ sleep 200;
+ // ロギング
+ %selected-trigger | dump --force --prefix="client selected-trigger:" ;//json:pretty | logging:info --cout;
+ // 選択したターゲットにジャンプ
+ %selected-trigger | call-target-and-client
+
+};
+
+/** トリガーにより指定されたターゲットを呼び、その後、clientに再入する */
+command call-target-and-client :: Trigger -> any/*never */ {
+// dump  --force --prefix="trigger to be used:" |
+ [
+   $.target      > target,
+   $.inputType?  > inputType,
+   $.inputData?  | when {undefined => gen:sample %inputType,  * => pass} > inputData,
+   $.paramsType? > paramsType,
+   $.paramsData? | when {undefined => gen:sample %paramsType, * => pass} > paramsData,
+ ];
+
+ %paramsData | nth --safe 1 > param1;
+ [%inputData, %target, %param1?] | dump --force --prefix="call:";
+
+ %param1? |
+ when {
+  undefined => %inputData | call %target,
+  *         => %inputData | call %target %param1,
+ }
+// | dump  --force --prefix="response:"
+ > response;
+ 
+ %response | forward lunch-menu:client
+};
+
+// End of Module
