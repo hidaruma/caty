@@ -192,6 +192,22 @@ class Module(Facility):
     def get_plugin(self, name):
         return self._plugin.get_plugin(name)
 
+    def has_module(self, name, tracked=None):
+        tracked = set() if tracked is None else tracked
+        assert self not in tracked
+        if name == self.name:
+            return self
+        tracked.add(self)
+        if '.' in name:
+            pkg, rest = name.rsplit('.', 1)
+            return self.get_package(pkg).has_module(rest, tracked)
+        for m in self.sub_modules.values():
+            if m.name == name:
+                return True
+        if self.parent:
+            return self.parent.has_module(name, tracked)
+        return False
+
     def get_module(self, name, tracked=None):
         tracked = set() if tracked is None else tracked
         assert self not in tracked
@@ -200,13 +216,32 @@ class Module(Facility):
         tracked.add(self)
         if '.' in name:
             pkg, rest = name.rsplit('.', 1)
-            return self.get_package(pkg).get_module(rest)
+            return self.get_package(pkg).get_module(rest, tracked)
         for m in self.sub_modules.values():
             if m.name == name:
                 return m
         if self.parent:
             return self.parent.get_module(name, tracked)
         raise SystemResourceNotFound(u'ModuleNotFound', u'$name', name=name)
+
+    def has_package(self, name, tracked=None):
+        tracked = set() if tracked is None else tracked
+        assert self not in tracked
+        tracked.add(self)
+        if '.' in name:
+            pkg, rest = name.rsplit('.', 1)
+        else:
+            pkg = name
+            rest = None
+        for p in self.sub_packages.values():
+            if p.name == pkg:
+                if rest:
+                    return p.has_package(rest, tracked)
+                else:
+                    return True
+        if self.parent:
+            self.parent.has_package(name, tracked)
+        return False
 
     def get_package(self, name, tracked):
         tracked = set() if tracked is None else tracked
@@ -234,7 +269,7 @@ class Module(Facility):
                 yield m
 
     def add_sub_module(self, module):
-        if module.name in self.sub_modules:
+        if self.has_module(module.name):
             raise Exception(self.application.i18n.get(u'Can not register $name.$type1. $name.$type2 is already defined in $app', 
                                                       name=module.name, 
                                                       type1=module.type,
@@ -534,6 +569,11 @@ class AppModule(Module):
                 raise Exception(self._app.i18n.get(u'Module $name is already defined', 
                                            name=mod._name))
             mod._compile(e.path)
+
+            if self.has_module(mod.name, set()):
+                raise Exception(self.application.i18n.get(u'Module $name is already defined in $app', 
+                                                          name=mod.name, 
+                                                          app=self.get_module(mod.name)._app.name))
             self.sub_modules[mod.name] = mod
             mod.last_modified = e.last_modified
         elif e.path == u'/formats.xjson':
@@ -545,6 +585,10 @@ class AppModule(Module):
         mod._name = unicode(self._path_to_module(e.basename.strip(u'/')))
         mod.package_root_path = e.path
         mod.compile()
+        if self.has_package(mod.name, set()):
+            raise Exception(self.application.i18n.get(u'Package $name is already defined in $app', 
+                                                      name=module.name, 
+                                                      app=self.get_package(mod.name)._app.name)))
         self.sub_packages[mod.name] = mod
 
     def _compile(self, path):
