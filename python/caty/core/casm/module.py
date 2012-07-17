@@ -216,7 +216,9 @@ class Module(Facility):
         tracked.add(self)
         if '.' in name:
             pkg, rest = name.rsplit('.', 1)
-            return self.get_package(pkg).get_module(rest, tracked)
+            pm = self.get_package(pkg)
+            m = pm.get_module(rest, tracked)
+            return m
         for m in self.sub_modules.values():
             if m.name == name:
                 return m
@@ -239,27 +241,28 @@ class Module(Facility):
                     return p.has_package(rest, tracked)
                 else:
                     return True
+
         if self.parent:
-            self.parent.has_package(name, tracked)
+            return self.parent.has_package(name, tracked)
         return False
 
-    def get_package(self, name, tracked):
+    def get_package(self, name, tracked=None):
         tracked = set() if tracked is None else tracked
         assert self not in tracked
         tracked.add(self)
         if '.' in name:
-            pkg, rest = name.rsplit('.', 1)
+            pkg, rest = name.split('.', 1)
         else:
             pkg = name
             rest = None
         for p in self.sub_packages.values():
             if p.name == pkg:
                 if rest:
-                    return p.get_package(rest)
+                    return p.get_module(rest)
                 else:
                     return p
         if self.parent:
-            self.parent.get_package(name)
+            return self.parent.get_package(name)
         raise SystemResourceNotFound(u'PackageNotFound', u'$name', name=name)
 
     def get_modules(self):
@@ -315,31 +318,31 @@ class Module(Facility):
         self.saved_st.update(self.ast_ns)
         if not self.compiled:
             self._loop_exec(self.ast_ns, self.make_schema_builder(), lambda k, v:self.add_schema(v))
-        for m in self.sub_modules.values() + self.class_ns.values():
+        for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._build_schema_tree()
 
     def _resolve_reference(self):
         if not self.compiled:
             self._loop_exec(self.schema_ns, self.make_reference_resolver(), lambda k, v:self.schema_ns.__setitem__(k, v))
-        for m in self.sub_modules.values() + self.class_ns.values():
+        for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._resolve_reference()
 
     def _apply_type_var(self):
         if not self.compiled:
             self._loop_exec(self.schema_ns, self.make_typevar_applier(), lambda k, v:self.schema_ns.__setitem__(k, v))
-        for m in self.sub_modules.values() + self.class_ns.values():
+        for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._apply_type_var()
 
     def _detect_cycle(self):
         if not self.compiled:
             self._loop_exec(self.schema_ns, self.make_cycle_detecter(), lambda k, v: v)
-        for m in self.sub_modules.values() + self.class_ns.values():
+        for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._detect_cycle()
 
     def _normalize(self):
         if not self.compiled:
             self._loop_exec(self.schema_ns, self.make_type_normalizer(), lambda k, v:self.schema_ns.__setitem__(k, v))
-        for m in self.sub_modules.values() + self.class_ns.values():
+        for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._normalize()
 
     def _check_dependency(self):
@@ -349,13 +352,13 @@ class Module(Facility):
             for a, b in graph:
                 if (b, a) in graph:
                     raise Exception(self.application.i18n.get(u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name))
-        for m in self.sub_modules.values() + self.class_ns.values():
+        for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._check_dependency()
     
     def _register_command(self):
         if not self.compiled:
             self._loop_exec(self.proto_ns, ProfileBuilder(self), lambda k, v:self.add_command(v))
-        for m in self.class_ns.values() + self.sub_modules.values():
+        for m in self.class_ns.values() + self.sub_modules.values() + self.sub_packages.values():
             m._register_command()
 
     def _register_facility(self):
@@ -367,7 +370,7 @@ class Module(Facility):
 
                 facilty_class = self._load_facility_class(k, cls.annotations['facility-spec-for'].value)
                 self._app.register_facility(k, facilty_class, v.system_param)
-        for m in self.sub_modules.values():
+        for m in self.sub_modules.values() + self.sub_packages.values():
             m._register_facility()
 
     def _load_facility_class(self, name, uri):
@@ -565,9 +568,6 @@ class AppModule(Module):
             if e.path.endswith(u'.casm.lit'):
                 mod._type = 'casm.lit'
             mod._name = unicode(self._path_to_module(e.basename))
-            if mod._name in self.sub_modules:
-                raise Exception(self._app.i18n.get(u'Module $name is already defined', 
-                                           name=mod._name))
             mod._compile(e.path)
 
             if self.has_module(mod.name, set()):
