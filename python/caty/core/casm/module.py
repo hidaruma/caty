@@ -588,7 +588,7 @@ class AppModule(Module):
         if self.has_package(mod.name, set()):
             raise Exception(self.application.i18n.get(u'Package $name is already defined in $app', 
                                                       name=module.name, 
-                                                      app=self.get_package(mod.name)._app.name)))
+                                                      app=self.get_package(mod.name)._app.name))
         self.sub_packages[mod.name] = mod
 
     def _compile(self, path):
