@@ -339,7 +339,8 @@ class Menu {
  * もっと一般的な文脈で定義されるべき。
  */
 command client [string? start-point] :: (null | HyperMediaObject) -> any/*never*/ {
- dump --force --prefix="client input:" |
+ pass > in | json:pretty | logging:info;
+ %in | dump --force --prefix="client input:" |
  when {
   null => %1? |
           when {
@@ -397,6 +398,17 @@ command call-target-and-client :: Trigger -> any/*never */ {
  > response;
  
  %response | forward lunch-menu:client
+};
+
+command client-loop [integer(minimum=0) n] :: void -> void {
+ %1 > n | num:is-zero |
+ when {
+   True  => forward void,
+   False => %1 | num:dec > n-1,
+ };
+ %n | to-string | logging:info;
+ null | client lunch-menu:Menu.get;
+ forward lunch-menu:client-loop %n-1
 };
 
 // End of Module
