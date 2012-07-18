@@ -109,6 +109,7 @@ class ResourceModule(Module):
         self._resources = {}
         self._states = {}
         self._userroles = {}
+        self.is_root = False
         self._ports = {}
         self._type = u'cara'
 

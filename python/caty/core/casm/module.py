@@ -184,7 +184,7 @@ class Module(Facility):
 
     @property
     def canonical_name(self):
-        if self.parent.is_package:
+        if self.parent and self.parent.is_package:
             return self.parent.canonical_name + '.' + self.name
         else:
             return self.name
@@ -192,78 +192,70 @@ class Module(Facility):
     def get_plugin(self, name):
         return self._plugin.get_plugin(name)
 
-    def has_module(self, name, tracked=None):
-        tracked = set() if tracked is None else tracked
-        assert self not in tracked
-        if name == self.name:
+    def find_public_module(self):
+        if self.is_root:
             return self
-        tracked.add(self)
-        if '.' in name:
-            pkg, rest = name.rsplit('.', 1)
-            return self.get_package(pkg).has_module(rest, tracked)
-        for m in self.sub_modules.values():
-            if m.name == name:
-                return True
-        if self.parent:
-            return self.parent.has_module(name, tracked)
-        return False
-
-    def get_module(self, name, tracked=None):
-        tracked = set() if tracked is None else tracked
-        assert self not in tracked
-        if name == self.name and not self.is_package:
-            return self
-        tracked.add(self)
-        if '.' in name:
-            pkg, rest = name.rsplit('.', 1)
-            pm = self.get_package(pkg)
-            m = pm.get_module(rest, tracked)
-            return m
-        for m in self.sub_modules.values():
-            if m.name == name:
-                return m
-        if self.parent:
-            return self.parent.get_module(name, tracked)
-        raise SystemResourceNotFound(u'ModuleNotFound', u'$name', name=name)
-
-    def has_package(self, name, tracked=None):
-        tracked = set() if tracked is None else tracked
-        assert self not in tracked
-        tracked.add(self)
-        if '.' in name:
-            pkg, rest = name.rsplit('.', 1)
+        elif self.parent:
+            return self.parent.find_public_module()
         else:
-            pkg = name
-            rest = None
-        for p in self.sub_packages.values():
-            if p.name == pkg:
-                if rest:
-                    return p.has_package(rest, tracked)
-                else:
-                    return True
+            return self
 
-        if self.parent:
-            return self.parent.has_package(name, tracked)
-        return False
+    def has_module(self, name):
+        from operator import truth
+        return truth(self.find_public_module()._get_module(name))
 
-    def get_package(self, name, tracked=None):
+    def get_module(self, name):
+        m = self.find_public_module()._get_module(name)
+        if not m:
+            raise SystemResourceNotFound(u'ModuleNotFound', u'$name', name=name)
+        return m
+
+    def _get_module(self, name, tracked=None):
         tracked = set() if tracked is None else tracked
-        assert self not in tracked
-        tracked.add(self)
+        if name == self.canonical_name:
+            return self
+        if self.canonical_name in tracked:
+            return None
+        tracked.add(self.canonical_name)
+        if name in self.sub_modules:
+            return self.sub_modules[name]
         if '.' in name:
             pkg, rest = name.split('.', 1)
-        else:
-            pkg = name
-            rest = None
-        for p in self.sub_packages.values():
-            if p.name == pkg:
-                if rest:
-                    return p.get_module(rest)
-                else:
-                    return p
+            pm = self._get_package(pkg, tracked)
+            if pm:
+                return pm._get_module(rest, tracked)
         if self.parent:
-            return self.parent.get_package(name)
-        raise SystemResourceNotFound(u'PackageNotFound', u'$name', name=name)
+            return self.parent._get_module(name)
+        return None
+
+    def has_package(self, name):
+        from operator import truth
+        return truth(self.find_public_module()._get_package(name))
+
+
+    def get_package(self, name):
+        m = self.find_public_module()._get_package(name)
+        if not m:
+            raise SystemResourceNotFound(u'PackageNotFound', u'$name', name=name)
+        return m
+
+    def _get_package(self, name, tracked=None):
+        tracked = set() if tracked is None else tracked
+        if name == self.canonical_name:
+            return self
+        if self.canonical_name in tracked:
+            return None
+        tracked.add(self.canonical_name)
+        if name in self.sub_packages:
+            return self.sub_packages[name]
+        if '.' in name:
+            pkg, rest = name.split('.', 1)
+            pm = self._get_package(pkg, tracked)
+            if pm:
+                return pm._get_package(rest, tracked)
+        if self.parent:
+            return self.parent._get_package(name)
+        return None
 
     def get_modules(self):
         yield self
@@ -460,6 +452,7 @@ class ClassModule(Module):
         self._name = clsobj.name
         self._clsobj = clsobj
         self._clsrestriction = clsobj.restriction
+        self.is_root = False
         self.annotations = clsobj.annotations
         for m in clsobj.member:
             m.declare(self)
@@ -570,10 +563,10 @@ class AppModule(Module):
             mod._name = unicode(self._path_to_module(e.basename))
             mod._compile(e.path)
 
-            if self.has_module(mod.name, set()):
+            if self.has_module(mod.canonical_name):
                 raise Exception(self.application.i18n.get(u'Module $name is already defined in $app', 
-                                                          name=mod.name, 
-                                                          app=self.get_module(mod.name)._app.name))
+                                                          name=mod.canonical_name, 
+                                                          app=self.get_module(mod.canonical_name)._app.name))
             self.sub_modules[mod.name] = mod
             mod.last_modified = e.last_modified
         elif e.path == u'/formats.xjson':
@@ -585,7 +578,7 @@ class AppModule(Module):
         mod._name = unicode(self._path_to_module(e.basename.strip(u'/')))
         mod.package_root_path = e.path
         mod.compile()
-        if self.has_package(mod.name, set()):
+        if self.has_package(mod.name):
             raise Exception(self.application.i18n.get(u'Package $name is already defined in $app', 
                                                       name=module.name, 
                                                       app=self.get_package(mod.name)._app.name))
@@ -747,6 +740,7 @@ class LocalModule(Module):
     def __init__(self, parent):
         Module.__init__(self, parent._app)
         self.parent = parent
+        self.is_root = False
         self._name = u'$local$' # 絶対に使われない名前をデフォルトにしておく
         
     @property
