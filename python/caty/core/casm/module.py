@@ -211,7 +211,7 @@ class Module(Facility):
     def get_module(self, name, tracked=None):
         tracked = set() if tracked is None else tracked
         assert self not in tracked
-        if name == self.name:
+        if name == self.name and not self.is_package:
             return self
         tracked.add(self)
         if '.' in name:
