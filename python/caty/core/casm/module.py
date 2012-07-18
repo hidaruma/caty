@@ -551,7 +551,7 @@ class AppModule(Module):
         # アプリケーションルートのpublicモジュールかパッケージからのみ呼ばれる
         assert self.is_root == True or self.is_package == True
         for e in self.fs.DirectoryObject(self.package_root_path).read():
-            if e.is_dir:
+            if e.is_dir and '.' not in e.basename:
                 self._compile_dir(e)
             else:
                 self._compile_file(e)
