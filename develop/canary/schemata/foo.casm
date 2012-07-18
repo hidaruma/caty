@@ -1,0 +1,11 @@
+// -*- coding: utf-8 -*-
+/** このモジュールで type Foo を定義する。
+ * 他のモジュールから foo:Foo が見えるかどうかをテストする。
+ */
+module foo;
+
+type Foo = string;
+
+// End of Module
+
+

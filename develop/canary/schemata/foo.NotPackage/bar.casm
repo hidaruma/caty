@@ -1,0 +1,12 @@
+// -*- coding: utf-8 -*-
+/** このモジュールはロードされてはいけない
+ * このモジュールは、ディレクトリ foo.NotPackage/ に存在する。
+ * 無視されるべきである。
+ */
+module foo.bar;
+
+type Bar = string;
+
+// End of Module
+
+

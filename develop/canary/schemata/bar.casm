@@ -1,0 +1,11 @@
+// -*- coding: utf-8 -*-
+/** このモジュールで type Bar を定義する。
+ * type Bar は、type foo:Foo を参照する。
+ */
+module bar;
+
+type Bar = foo:Foo;
+
+// End of Module
+
+
