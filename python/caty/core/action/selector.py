@@ -19,7 +19,7 @@ class ResourceSelector(object):
         self._app = app
 
     def add(self, resource_class):
-        if not resource_class.name in self._entries:
+        if not resource_class.module + ':' + resource_class.name in self._entries:
             self._entries[resource_class.module + ':' + resource_class.name] = PathMatcher(resource_class)
         else:
             self._entries[resource_class.module + ':' + resource_class.name].update(resource_class)

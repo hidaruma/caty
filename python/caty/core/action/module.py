@@ -6,6 +6,7 @@ from caty.core.casm.language.ast import CommandNode, ClassNode, ScalarNode, Comm
 from caty.core.casm.language.commandparser import call_pattern
 from caty.core.casm.module import Module, ClassModule
 from topdown import CharSeq, many1
+from functools import partial
 
 class ResourceModuleContainer(object):
     def __init__(self, app):
@@ -100,6 +101,11 @@ class ResourceModuleContainer(object):
         else:
             return r
 
+class ResourceNode(ClassNode):
+    def declare(self, module):
+        self.module = module
+        module.add_rclass(self)
+
 class ResourceModule(Module):
     type = u'cara'
     def __init__(self, name, docstring, app):
@@ -112,6 +118,10 @@ class ResourceModule(Module):
         self.is_root = False
         self._ports = {}
         self._type = u'cara'
+
+        self.add_rclass = partial(self._add_resource, scope_func=lambda x:x.class_ns, type=u'Resource', see_register_public=False, callback=lambda target: ClassModule(self._app, self, target))
+        self.get_rclass = partial(self._get_resource, scope_func=lambda x:x.class_ns, type=u'Resource')
+        self.has_rclass = partial(self._has_resource, scope_func=lambda x:x.class_ns, type=u'Resource')
 
     @property
     def resources(self):
@@ -139,7 +149,7 @@ class ResourceModule(Module):
                             [],
                             u'action')
             member.append(c)
-        clsnode = ClassNode(res.name, member, ScalarNode(u'univ'), CommandURI([(u'python', u'')]), res.docstring, res.annotations)
+        clsnode = ResourceNode(res.name, member, ScalarNode(u'univ'), CommandURI([(u'python', u'')]), res.docstring, res.annotations)
         clsnode.declare(self)
 
     def add_state(self, st):

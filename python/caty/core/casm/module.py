@@ -269,7 +269,7 @@ class Module(Facility):
                                                       name=module.name, 
                                                       type1=module.type,
                                                       app=self._app.name,
-                                                      type2=self.sub_modules[module.name].type))
+                                                      type2=self.get_module(module.name).type))
         module.parent = self
         self.sub_modules[module.name] = module
 
@@ -457,6 +457,10 @@ class ClassModule(Module):
         for m in clsobj.member:
             m.declare(self)
         self.count = 0
+
+    @property
+    def module(self):
+        return self.parent
 
     def _get_full_name(self):
         return u'class ' + self.name
