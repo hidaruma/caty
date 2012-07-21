@@ -1,0 +1,27 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= tag-onlyデータ
+
+== !exec
+
+|= !input|= !command |= !output |
+| @a 1   | tag       | "a" |
+| @a 1   | untagged  | 1 |
+| @a     | tag       | "a" |
+| @a     | untagged  | undefined |
+
+
+|= !input         |= !command |= !output |
+|["a", 1]         | tagged    | @a 1 |
+|["a", undefined] | tagged    | @a |
+
+
+|= !input|= !command     |= !output |
+| @a 1   |when {a=>pass} | 1 |
+| @a     |when {a=>pass} |undefined |
+
+
+|= !input                      |= !command          |= !output |
+|"module a; type tag-only=@a;" | define-local-schema| null     |
+
+
