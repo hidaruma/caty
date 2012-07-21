@@ -473,7 +473,7 @@ class CommandExecutor(BaseInterpreter):
                     return c.accept(self)
         if default is None:
             throw_caty_exception(
-                u'TypeError',
+                u'CaseUnmatched',
                 node.scalar_tag_map.get(type(case_in), [str(type(case_in))])[0]
             )
         else:
