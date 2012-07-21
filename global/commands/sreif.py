@@ -28,6 +28,7 @@ class ShallowReifier(object):
                 'name': l.trigger,
                 'becoming': tmap[l.type],
                 'occurrence': l.appearance,
+                'document': make_structured_doc(l.docstring),
                 'targets': map(lambda x:x[0], l.link_to_list)
             })
         return {

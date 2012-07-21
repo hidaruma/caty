@@ -353,6 +353,8 @@ class StateBlock(Parser):
         return r
 
     def link_item(self, seq):
+        ds = seq.parse(option(docstring, u''))
+        ann = seq.parse(option(annotation, Annotations([])))
         isembed, trigger, occ, path = self.trigger(seq)
         seq.parse('-->')
         if peek(option(S('[')))(seq):
@@ -362,7 +364,7 @@ class StateBlock(Parser):
         else:
             dest = [self.action_ref(seq)]
         S(';')(seq)
-        return Link(trigger, dest, isembed, occ, path)
+        return Link(trigger, dest, isembed, occ, path, ds, ann)
 
     def trigger(self, seq):
         if option(S('+'))(seq):
@@ -450,7 +452,9 @@ class UserRole(Parser):
 
 
 class Link(object):
-    def __init__(self, trigger, dest, type, appearance, path):
+    def __init__(self, trigger, dest, type, appearance, path, docstring=u'undocumented', annotations=Annotations([])):
+        self.docstring = docstring
+        self.annotations = annotations
         self.link_to_list = dest
         self.trigger = trigger
         self.path = path
