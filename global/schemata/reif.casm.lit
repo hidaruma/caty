@@ -241,6 +241,7 @@ Catyでは、モジュール／クラスをまたがった参照サイクルを�
 
 type ProjectSummary = {
   "document": Doc?,
+  "annotations": object?,  // アノテーションもサマリーに必要
 
   /** プロジェクト名 
    * プロジェクト名は任意の文字列で、ドメイン名のようにドットを含んでもよい。
@@ -271,11 +272,13 @@ type Project = @project (QualifierMixin & ProjectSummary & {
   /** 全てのファシリティの所在 
    * プロジェクト全体でファシリティ名は一意的に保つ。
    */
+  @[detail]
   "facilityLocations": {*: string(remark="アプリケーション名")?},
 
   /** ランタイム・メタオブジェクト 
    * まだ未定
    */
+  @[detail]
   "runtime" : foreign?,
 
   *: any?
@@ -284,6 +287,7 @@ type Project = @project (QualifierMixin & ProjectSummary & {
 
 type ApplicationSummary = {
   "document": Doc?,
+  "annotations": object?,  // アノテーションもサマリーに必要
 
   /** アプリケーション名 */
   "name": string(remark="名前"),
@@ -341,6 +345,7 @@ type LocatedQualifierMixin = QualifierMixin & {
 
 type FacilitySummary = {
   "document": Doc?,
+  "annotations": object?,  // アノテーションもサマリーに必要
 
   /** ファシリティの登録名 */
   "name" : string,
@@ -366,6 +371,7 @@ type Facility = @facility (LocatedQualifierMixin & FacilitySummary & {
 
 type PackageSummary = {
   "document": Doc?,
+  "annotations": object?,  // アノテーションもサマリーに必要
 
   /** パッケージ名 */
   "name": string(remark="名前"),
@@ -398,6 +404,7 @@ type Package = @package (LocatedQualifierMixin & PackageSummary &  {
 
 type ModuleSummary = {
   "document": Doc?,
+  "annotations": object?,  // アノテーションもサマリーに必要
 
   /** モジュール名 */
   "name": string(remark="名前"),
@@ -488,6 +495,7 @@ type Cara = @cara (ModuleStruct & {
 
 type ClassSummary = {
   "document": Doc?,
+  "annotations": object?,  // アノテーションもサマリーに必要
 
   /** クラス名 */
   "name": string,
@@ -542,6 +550,7 @@ type TypeQualifierMixin = QualifierMixin & {
 
 type TypeSummary = {
   "document": Doc?,
+  "annotations": object?,  // アノテーションもサマリーに必要
 
   "name": string,
 
@@ -1220,6 +1229,7 @@ type Script = deferred @script any;
 
 type CommandSummary = {
   "document": Doc?,
+  "annotations": object?,  // アノテーションもサマリーに必要
 
   /** コマンド名 */
   "name": string?,
@@ -1245,6 +1255,7 @@ type CommandSummary = {
 
 type Command = @command (CommandQualifierMixin & CommandSummary & {
 
+    @[detail]
     "body": Implement?,
     
      *: any?
@@ -1282,7 +1293,8 @@ type Profile = {
 
 <<{
 type ResourceSummary = {
-    "document": Doc,
+  "document": Doc,
+  "annotations": object?,  // アノテーションもサマリーに必要
 
     /** リソースクラス名 */
     "name": string,
@@ -1302,7 +1314,6 @@ type ResourceSummary = {
 };
 
 type Resource = @resource (ResourceSummary & {
-    "annotations": object?,
 
     /** アクションの名前空間 */
     @[subnamespace]
@@ -1321,6 +1332,7 @@ type Invoker = {
 
 type ActionSummary = {
   "document": Doc,
+  "annotations": object?,  // アノテーションもサマリーに必要
 
   /** アクション名 */
   "name": string,
@@ -1353,6 +1365,9 @@ type ActionSummary = {
 
   // 以下はアクション特有
 
+  /** 所属するリソースのpathPatternのコピーを持つ */
+  "pathPattern": [string*]?, // 暫定的に省略可能、必須としたい
+
   /** このアクションの起動方式 */
   "invoker": Invoker, // アクション特有
 
@@ -1360,13 +1375,13 @@ type ActionSummary = {
    * フラグメント検索の手間を省くため、
    * 入り口フラグメント（高々1個）のコピーを保持する。
    */
-  "inlet" : FragmentProfile?,
+  "inlet" : FragmentProfile?,  // これがないときはinletが未定義と解釈
 
    /** 出口フラグメント（outlet） 
     * フラグメント検索の手間を省くため、
     * 出口フラグメントのコピーを保持する。
     */
-   "outlets": {*: FragmentProfile?}?,
+   "outlets": {*: FragmentProfile?}?,  // これがないときはoutlets未定義と解釈
 
 
    *: any?
@@ -1379,22 +1394,23 @@ type ActionSummary = {
  * リソースから独立したトップレベルアクションにも対応可能な定義としておく。
  */
 type Action = @action (ActionSummary & {
-    "annotations": object?,
+
 
     /** このアクションが所属する親リソースクラスのパス
      * ドット・コロン区切りの名前列。
      * 必要なら、このパスにより親の情報にアクセスできる。
      */
+  @[detail]
     "parentPath": string,
 
-    /** 所属するリソースのpathPatternのコピーを持つ */
-    "pathPattern": [string*],
-
     /** アクション内に存在するフラグメントの情報 */
+  @[detail]
     "fragmentProfiles" : {*: FragmentProfile?},
 
+  @[detail]
     "body": Implement?,
 
+  @[detail]
     "lock": Script?, //@ なんだっけ？
 
     *: any?
@@ -1411,10 +1427,11 @@ type FragmentProfile = {
     /** フラグメント名 */
     "name": string,
     /** フラグメントの境界特性 
+     * io は inかつout であることを示す。
      * "" は in, out, io のどれでもないことを示す。
      */
     @[default("")]
-    "boundary": ("in" | "out" | "io" | "")?,
+    "boundary": ("in" | "out" | "io" | "")?, 
     /** フラグメントへの入力型 */
     "input": (TypeSpec | IndeterminateType)?,
     /** フラグメントからの出力型 */
@@ -1433,15 +1450,17 @@ type FragmentProfile = {
 };
 
 type UserRoleSummary = {
-  "name": string,
   "document": Doc,
+  "annotations": object?,  // アノテーションもサマリーに必要
+
+  "name": string,
   
   *: any?
 };
 
 /** ユーザーロール（アクター） */
 type UserRole = @userrole (UserRoleSummary & {
-  "annotations": object?,
+//  "annotations": object?,
 
   *: any?
 });
@@ -1455,6 +1474,8 @@ type HalfProfile = {
 
 type PortSummary = {
   "document": Doc,
+  "annotations": object?,  // アノテーションもサマリーに必要
+
   "name": string,
   "profile" : HalfProfile?,
 
@@ -1463,14 +1484,16 @@ type PortSummary = {
 
 /** ポート */
 type Port = @port (PortSummary & {
-  "annotations": object?,
+//  "annotations": object?,
 
   *: any?
 });
 
 type StateSummary = {
-  "name": string,
   "document": Doc?,
+  "annotations": object?,  // アノテーションもサマリーに必要
+
+  "name": string,
 
   "type": TypeSpec,
 
@@ -1484,27 +1507,31 @@ type StateSummary = {
 /** 状態 */
 type State = @state (StateSummary & {
 
-  "annotations": object?,
+//  "annotations": object?,
 
    /** この状態が所属する親モジュールのコロンドットパス
     */
+  @[detail]
    "parentPath": string?,
 
   /** forの目的語のuserroles */
+  @[detail]
   "forWhom": [string*]?, 
 
   /** as で指定された名前 */
-  @[default("state")]
+  @[default("data"), detail]
   "statePropName": string?, 
 
   /** links as で指定された名前 */
-  @[default("links")]
+  @[default("links"), detail]
   "linksPropName": string?,
 
   /** baseobjctが指定されているかどうか  */
-  @[default("false")]
+  @[default("false"), detail]
   "isBaseObject": boolean?,
+
   /** ハイパーリンクグラフのバックポインタ */
+  @[detail]
   "producedBy" : [string(remark="アクション名")* ]?,
 
   *:any?
