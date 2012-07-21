@@ -82,7 +82,7 @@ class JSONPathSelectorParser(Parser):
             seq.ignore_hook = False
 
     def index(self, seq):
-        idx = int(seq.parse(Regex(r'([0-9]|[1-9][0-9]+)')))
+        idx = int(seq.parse(Regex(r'([0-9]+)')))
         optional = False
         #optional = option(u'?')(seq)
         return ItemSelector(idx, optional)
