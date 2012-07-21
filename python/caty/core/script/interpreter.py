@@ -281,13 +281,13 @@ class CommandExecutor(BaseInterpreter):
     def visit_when(self, node):
         jsobj = self.input
         target = node.query.find(jsobj).next()
-        if not isinstance(target, TaggedValue) and not (isinstance(target, dict) and '$$tag' in target):
+        if not isinstance(target, (TagOnly, TaggedValue)) and not (isinstance(target, dict) and '$$tag' in target):
             return self.__not_tagged_value_case(node, target)
         else:
             return self.__tagged_value_case(node, target)
 
     def __tagged_value_case(self, node, target):
-        tag = target.tag if isinstance(target, TaggedValue) else target['$$tag']
+        tag = target.tag if isinstance(target, (TagOnly, TaggedValue)) else target['$$tag']
         if tag not in node.cases:
             if '*' in node.cases:
                 tag = '*'
@@ -295,15 +295,15 @@ class CommandExecutor(BaseInterpreter):
                 if tag not in schema.types:
                     tag = '*!'
                 else:
-                    raise ScriptError(tag)
+                    throw_caty_exception('TagNotMatched', '$type', type=tag)
             else:
-                raise ScriptError(tag)
+                throw_caty_exception('TagNotMatched', '$type', type=tag)
         return self.__exec_cmd(node, tag, target)
 
     def __not_tagged_value_case(self, node, target):
         tags = node.scalar_tag_map.get(type(target), None)
         if tags == None:
-            raise ScriptError()
+            throw_caty_exception('UnknwonType', '$type', type=type(target))
         for tag in tags:
             if tag in node.cases:
                 return self.__exec_cmd(node, tag, target)
@@ -315,9 +315,9 @@ class CommandExecutor(BaseInterpreter):
                     tag = '*!'
                     break
             else:
-                raise ScriptError(tag)
+                throw_caty_exception('TagNotMatched', '$type', type=tag)
         else:
-            raise ScriptError(tag)
+            throw_caty_exception('TagNotMatched', '$type', type=tag)
         return self.__exec_cmd(node, tag, target)
     
     def __exec_cmd(self, node, tag, jsobj):
