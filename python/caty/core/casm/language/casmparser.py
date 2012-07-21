@@ -15,7 +15,7 @@ import sys
 def parse(t):
     try:
         return as_parser(casm).run(t, hook=remove_comment, auto_remove_ws=True)
-    except ParseFailed, e:
+    except ParseError as e:
         raise SchemaSyntaxError(e), None, sys.exc_info()[2]
 
 def parse_literate(t):

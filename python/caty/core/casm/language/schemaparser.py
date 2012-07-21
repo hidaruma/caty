@@ -200,12 +200,18 @@ def array(seq):
     return a
 
 def repeatable_type(seq):
-    s = seq.parse(term)
+    s = seq.parse([term, loose_item])
     r = seq.parse(option('*'))
     n = seq.parse(option(name))
     if n:
         s.options['subName'] = n
     return [s, r]
+
+def loose_item(seq):
+    from caty import UNDEFINED
+    if not seq.peek(option(comma)):
+        raise ParseFailed(seq, array)
+    return ScalarNode(u'undefined')
 
 def maybe_tagged_value(seq):
     @try_

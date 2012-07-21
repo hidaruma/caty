@@ -202,7 +202,7 @@ def listitem(seq):
 
 def loose_item(seq):
     from caty import UNDEFINED
-    if not seq.peek(comma):
+    if not seq.peek(option(comma)):
         raise ParseFailed(seq, array)
     return UNDEFINED
 

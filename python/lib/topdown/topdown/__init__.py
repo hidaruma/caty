@@ -626,7 +626,8 @@ class strict(object):
         if exc_type is None:
             return True
         elif exc_type is ParseFailed:
-            raise exc_val.to_error()
+            import sys
+            raise exc_val.to_error(), None, sys.exc_info()[2]
         else:
             return False
 
