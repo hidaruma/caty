@@ -20,3 +20,8 @@
 | @a 1   |when {a=>pass} | 1 |
 | @a     |when {a=>pass} |undefined |
 
+
+|= !input                      |= !command          |= !output |
+|"module a; type tag-only=@a;" | define-local-schema| null     |
+
+
