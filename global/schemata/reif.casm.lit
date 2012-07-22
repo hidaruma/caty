@@ -34,7 +34,9 @@ module reif;
   objectとarrayはpredefinedな名前と考え、
   レイフィケーション時は常に展開される。（展開形式は下。スキーマにも入っている。）
 # シャローレイフィケーションの当座の実装を容易にするため、
-  テキスト表現も許すTypeSpecという型を入れた。
+  テキスト表現も許すTypeSpecという型を入れた。これは暫定的な処理。
+# containerとparentPathがカブっているようだ。
+# 型がmogra-nodeになってない。
 
 {{{
 // object の展開形式
@@ -137,7 +139,7 @@ type QualifierMixin = {
    * 名前空間に登録された名前を持つメタオブジェクト（型、コマンドなど）は、
    * その親である名前空間を取得できると便利なことが多い。
    */
-  "container": string(remark="CDパス")?,
+  "container": string(remark="CDパス")?, // parentPathも参照
 
    *: any?
 };
@@ -263,7 +265,15 @@ type ProjectSummary = {
  * プロジェクトは1つの名前空間を持つ：
  * * アプリケーションの名前空間 applications
  */
+@[mogra-node]
 type Project = @project (QualifierMixin & ProjectSummary & {
+
+  /** ランタイム・メタオブジェクト 
+   * まだ未定
+   */
+  @[long-summary]
+  "runtime" : foreign?,
+
 
   /** アプリケーションの名前空間 */
   @[namespace]
@@ -272,16 +282,13 @@ type Project = @project (QualifierMixin & ProjectSummary & {
   /** 全てのファシリティの所在 
    * プロジェクト全体でファシリティ名は一意的に保つ。
    */
-  @[detail]
-  "facilityLocations": {*: string(remark="アプリケーション名")?},
-
-  /** ランタイム・メタオブジェクト 
-   * まだ未定
-   */
-  @[detail]
-  "runtime" : foreign?,
+  @[long-summary]
+  "facilityLocations": {
+     * /* ファシリティ名 */: string(remark="アプリケーション名")?
+   },
 
   *: any?
+
 });
 
 
@@ -315,6 +322,7 @@ type ApplicationSummary = {
  * # パッケージの名前空間 packages
  * # モジュールの名前空間 modules
  */
+@[mogra-node]
 type Application = @application (QualifierMixin & ApplicationSummary & {
 
   /** パッケージの名前空間 */
@@ -349,10 +357,10 @@ type FacilitySummary = {
 
   /** ファシリティの登録名 */
   "name" : string,
+
   /** スペッククラスのコロンドットパス */
   "specClass": string(remark="CDパス"),
-  /** 実装クラスの実装言語依存の参照 */
-  "implClass": CodeRef,
+
   /** システムパラメータ */
   "systemParam" : any,
 
@@ -363,7 +371,13 @@ type FacilitySummary = {
    *: any?
 };
 
+/** ファシリティ */
+@[mogra-node]
 type Facility = @facility (LocatedQualifierMixin & FacilitySummary & {
+
+  /** 実装クラスの実装言語依存の参照 */
+  @[long-summary]
+  "implClass": CodeRef,
 
    *: any?
 });
@@ -389,6 +403,7 @@ type PackageSummary = {
  * # パッケージの名前空間 packages
  * # モジュールの名前空間 modules
  */
+@[mogra-node]
 type Package = @package (LocatedQualifierMixin & PackageSummary &  {
 
   /** パッケージの名前空間 */
@@ -428,6 +443,7 @@ type ModuleSummary = {
  * kindは、型名と同じ名前空間を使う、
  * ただし、レイフィケーションとしては、kinds を入れるほうが使いやすいかもしれない。
  */
+@[mogra-node]
 type ModuleStruct = LocatedQualifierMixin & ModuleSummary & {
 
   /** 型の名前空間 */
@@ -450,10 +466,12 @@ type ModuleStruct = LocatedQualifierMixin & ModuleSummary & {
 };
 
 /** モジュール */
+@[mogra-node]
 type Module = Casm | Cara;
 
 
 /** casmモジュール */
+@[mogra-node]
 type Casm = @casm ModuleStruct;
 
 
@@ -467,6 +485,7 @@ type Casm = @casm ModuleStruct;
  * だが、レイフィケーションとしては、resources, portsがあってもいいかもしれないので、そのまま残す。
  * とりあえず、名前空間構造の忠実な反映より、利便性を取る。
  */
+@[mogra-node]
 type Cara = @cara (ModuleStruct & {
 
   /** リソースクラス 
@@ -515,6 +534,7 @@ type ClassSummary = {
  * クラスは名前空間コンテナだが、現状では1つだけの名前空間commandsを持つ
  * クラス表現（class expression）を導入すると、この定義は大幅に変更される。
  */
+@[mogra-node]
 type Class = @class (LocatedQualifierMixin & ClassSummary & {
 
   /** コマンドの名前空間 */
@@ -1252,10 +1272,10 @@ type CommandSummary = {
    * : any?
 };
 
-
+@[mogra-node]
 type Command = @command (CommandQualifierMixin & CommandSummary & {
 
-    @[detail]
+    @[long-summary]
     "body": Implement?,
     
      *: any?
@@ -1274,6 +1294,7 @@ type Profile = {
    "args": TypeSpec?, //ArrayType?,
    /** 入力の型 */
    "input": TypeSpec,
+
    /** 出力の型 */
    "output": TypeSpec,
    /** 例外の型 */
@@ -1296,13 +1317,13 @@ type ResourceSummary = {
   "document": Doc,
   "annotations": object?,  // アノテーションもサマリーに必要
 
-    /** リソースクラス名 */
-    "name": string,
+  /** リソースクラス名 */
+  "name": string,
 
-    /** パスパターン */
-    "pathPattern": [string*],
+  /** パスパターン */
+  "pathPattern": [string*],
 
-    "filetype": {"contentType": string, "isText": boolean}?,
+  "filetype": {"contentType": string, "isText": boolean}?,
 
   /** @[deprecated]アノテーションの値をコピーする */
   @[default(false)]
@@ -1313,6 +1334,7 @@ type ResourceSummary = {
   *: any?
 };
 
+@[mogra-node]
 type Resource = @resource (ResourceSummary & {
 
     /** アクションの名前空間 */
@@ -1393,6 +1415,7 @@ type ActionSummary = {
  *
  * リソースから独立したトップレベルアクションにも対応可能な定義としておく。
  */
+@[mogra-node]
 type Action = @action (ActionSummary & {
 
 
@@ -1400,17 +1423,17 @@ type Action = @action (ActionSummary & {
      * ドット・コロン区切りの名前列。
      * 必要なら、このパスにより親の情報にアクセスできる。
      */
-  @[detail]
+  @[long-summary]
     "parentPath": string,
 
     /** アクション内に存在するフラグメントの情報 */
-  @[detail]
+  @[long-summary]
     "fragmentProfiles" : {*: FragmentProfile?},
 
-  @[detail]
+  @[long-summary]
     "body": Implement?,
 
-  @[detail]
+  @[long-summary]
     "lock": Script?, //@ なんだっけ？
 
     *: any?
@@ -1459,6 +1482,7 @@ type UserRoleSummary = {
 };
 
 /** ユーザーロール（アクター） */
+@[mogra-node]
 type UserRole = @userrole (UserRoleSummary & {
 //  "annotations": object?,
 
@@ -1483,6 +1507,7 @@ type PortSummary = {
 };
 
 /** ポート */
+@[mogra-node]
 type Port = @port (PortSummary & {
 //  "annotations": object?,
 
@@ -1505,33 +1530,34 @@ type StateSummary = {
 };
 
 /** 状態 */
+@[mogra-node]
 type State = @state (StateSummary & {
 
 //  "annotations": object?,
 
    /** この状態が所属する親モジュールのコロンドットパス
     */
-  @[detail]
+  @[long-summary]
    "parentPath": string?,
 
   /** forの目的語のuserroles */
-  @[detail]
+  @[long-summary]
   "forWhom": [string*]?, 
 
   /** as で指定された名前 */
-  @[default("data"), detail]
+  @[long-summary, default("data")]
   "statePropName": string?, 
 
   /** links as で指定された名前 */
-  @[default("links"), detail]
+  @[long-summary, default("links")]
   "linksPropName": string?,
 
   /** baseobjctが指定されているかどうか  */
-  @[default("false"), detail]
+  @[long-summary, default("false")]
   "isBaseObject": boolean?,
 
   /** ハイパーリンクグラフのバックポインタ */
-  @[detail]
+  @[long-summary]
   "producedBy" : [string(remark="アクション名")* ]?,
 
   *:any?

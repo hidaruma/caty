@@ -1,0 +1,10 @@
+// -*- coding: utf-8 -*-
+module mypkg.mod;
+
+/** hello */
+command hello :: void -> string {"hello"};
+
+
+// End of Module
+
+

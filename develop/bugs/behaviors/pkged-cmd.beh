@@ -1,0 +1,13 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= パッケージ付きモジュールで定義されたコマンド
+
+mypkg.mod:hello は定義されている。が存在しない扱い。
+
+パッケージ付きのモジュールはまったく見えてないようだ。
+
+== !exec 
+
+|= !command       |= !output |
+| mypkg.mod:hello | "hello"  |
+
