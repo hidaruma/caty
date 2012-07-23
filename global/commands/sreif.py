@@ -67,6 +67,18 @@ class ShallowReifier(object):
             'document': make_structured_doc(m.docstring),
         }
 
+    def reify_package(self, m):
+        if m.type == 'cara':
+            p = u'actions'
+        else:
+            p = u'schemata'
+        return {
+            'name': m.canonical_name,
+            'place': p,
+            'document': make_structured_doc(m.docstring),
+        }
+
+
 class SafeReifier(Command):
     def setup(self, opts, cdpath):
         self._cdpath = cdpath
@@ -104,6 +116,20 @@ class ListModules(SafeReifier):
         r = []
         for m in app._schema_module.get_modules():
             r.append(reifier.reify_module(m))
+        return r
+
+class ListPackages(SafeReifier):
+    def _execute(self):
+        app_name = self._cdpath
+        system = self.current_app._system
+        if app_name == 'this':
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        reifier = ShallowReifier()
+        r = []
+        for m in app._schema_module.get_packages():
+            r.append(reifier.reify_package(m))
         return r
 
 class ListStates(SafeReifier):
@@ -192,9 +218,24 @@ class ShowModule(SafeReifier):
         if not module_name and _:
             module_name = _
         if not module_name:
-            print app_name, module_name, _
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         return reifier.reify_module(app._schema_module.get_module(module_name))
+
+class ShowPackage(SafeReifier):
+
+    def _execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, pkg_name, _ = split_colon_dot_path(self._cdpath)
+        if app_name == 'this' or not app_name and not pkg_name:
+            app = self.current_app
+        elif app_name:
+            app = system.get_app(app_name)
+        if not pkg_name and _:
+            pkg_name = _
+        if not pkg_name:
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
+        return reifier.reify_package(app._schema_module.get_package(pkg_name))
 
 class ShowState(SafeReifier):
 

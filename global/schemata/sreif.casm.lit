@@ -241,6 +241,7 @@ command list-packages
   }
   [cdpath app-pkg]
 :: void -> [PackageSummary*]?
+ refers python:sreif.ListPackages
 ;
 
 command list-types
@@ -400,6 +401,7 @@ command show-package
   }
   [cdpath pkg]
 :: void -> PackageSummary?
+ refers python:sreif.ShowPackage
 ;
 
 command show-class

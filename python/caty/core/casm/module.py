@@ -267,6 +267,13 @@ class Module(Facility):
             for r in p.get_modules():
                 yield r
 
+    def get_packages(self):
+        if self.is_package:
+            yield self
+        for p in self.sub_packages.values():
+            for r in p.get_packages():
+                yield r
+
     def add_sub_module(self, module):
         if self.has_module(module.name):
             raise Exception(self.application.i18n.get(u'Can not register $name.$type1. $name.$type2 is already defined in $app', 
