@@ -212,11 +212,8 @@ class Module(Facility):
 
     def _get_module(self, name, tracked=None):
         tracked = set() if tracked is None else tracked
-        if name == self.canonical_name:
+        if name == self.name:
             return self
-        if self.canonical_name in tracked:
-            return None
-        tracked.add(self.canonical_name)
         if name in self.sub_modules:
             return self.sub_modules[name]
         if '.' in name:
@@ -225,6 +222,9 @@ class Module(Facility):
             if pm:
                 return pm._get_module(rest, tracked)
         if self.parent:
+            if self.canonical_name in tracked:
+                return None
+            tracked.add(self.canonical_name)
             return self.parent._get_module(name)
         return None
 
@@ -241,11 +241,8 @@ class Module(Facility):
 
     def _get_package(self, name, tracked=None):
         tracked = set() if tracked is None else tracked
-        if name == self.canonical_name:
+        if name == self.name:
             return self
-        if self.canonical_name in tracked:
-            return None
-        tracked.add(self.canonical_name)
         if name in self.sub_packages:
             return self.sub_packages[name]
         if '.' in name:
@@ -254,6 +251,9 @@ class Module(Facility):
             if pm:
                 return pm._get_package(rest, tracked)
         if self.parent:
+            if self.canonical_name in tracked:
+                return None
+            tracked.add(self.canonical_name)
             return self.parent._get_package(name)
         return None
 
@@ -541,8 +541,7 @@ class AppModule(Module):
         self._plugin.set_fs(app._command_fs)
 
     def _path_to_module(self, path):
-        p = path.strip(u'/').rsplit('.')[0]
-        return p.replace('/', '.')
+        return path.strip('/').split(u'/')[-1].rsplit('.')[0]
 
     def compile(self):
         # アプリケーションルートのpublicモジュールかパッケージからのみ呼ばれる
