@@ -55,6 +55,18 @@ class ShallowReifier(object):
                 'invoker': s.invoker_obj,
         }
 
+    def reify_module(self, m):
+        if m.type == 'cara':
+            p = u'actions'
+        else:
+            p = u'schemata'
+        return {
+            'name': m.canonical_name,
+            'place': p,
+            'deprecated': 'deprecated' in m.annotations,
+            'document': make_structured_doc(m.docstring),
+        }
+
 class SafeReifier(Command):
     def setup(self, opts, cdpath):
         self._cdpath = cdpath
@@ -78,6 +90,20 @@ class ListApplications(Command):
         r = []
         for a in system._apps:
             r.append(reifier.reify_app(a))
+        return r
+
+class ListModules(SafeReifier):
+    def _execute(self):
+        app_name = self._cdpath
+        system = self.current_app._system
+        if app_name == 'this':
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        reifier = ShallowReifier()
+        r = []
+        for m in app._schema_module.get_modules():
+            r.append(reifier.reify_module(m))
         return r
 
 class ListStates(SafeReifier):
@@ -152,6 +178,23 @@ class ShowApplication(SafeReifier):
         else:
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         return reifier.reify_app(app)
+
+class ShowModule(SafeReifier):
+
+    def _execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, module_name, _ = split_colon_dot_path(self._cdpath)
+        if app_name == 'this' or not app_name and not module_name:
+            app = self.current_app
+        elif app_name:
+            app = system.get_app(app_name)
+        if not module_name and _:
+            module_name = _
+        if not module_name:
+            print app_name, module_name, _
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
+        return reifier.reify_module(app._schema_module.get_module(module_name))
 
 class ShowState(SafeReifier):
 

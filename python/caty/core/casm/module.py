@@ -260,8 +260,12 @@ class Module(Facility):
     def get_modules(self):
         yield self
         for m in self.sub_modules.values():
+            yield m
             for r in m.get_modules():
-                yield m
+                yield r
+        for p in self.sub_packages.values():
+            for r in p.get_modules():
+                yield r
 
     def add_sub_module(self, module):
         if self.has_module(module.name):

@@ -227,7 +227,7 @@ command list-modules
   }
   [cdpath app-pkg]
 :: void -> [ModuleSummary*]
- //refers python:sreif.ListModules
+ refers python:sreif.ListModules
 ;
 
 command list-packages
@@ -389,6 +389,7 @@ command show-module
   }
   [cdpath mod]
 :: void -> ModuleSummary?
+  refers python:sreif.ShowModule
 ;
 
 command show-package
