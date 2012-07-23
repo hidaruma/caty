@@ -258,6 +258,7 @@ command list-types
   }
   [cdpath mod-cls]
 :: void -> [TypeSummary*]?
+ refers python:sreif.ListTypes
 ;
  
 command list-commands
@@ -434,6 +435,7 @@ command show-type
   }
   [cdpath typ]
 :: void -> TypeSummary?
+ refers python:sreif.ShowType
 ;
 
 command show-command

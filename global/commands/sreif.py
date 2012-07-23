@@ -78,6 +78,25 @@ class ShallowReifier(object):
             'document': make_structured_doc(m.docstring),
         }
 
+    def reify_type(self, t):
+        return {
+            'name': t.name,
+            'document': make_structured_doc(t.docstring),
+            'deprecated': 'deprecated' in t.annotations,
+            'annotations': self.reify_annotations(t.annotations)
+        }
+
+    def reify_annotations(self, a):
+        r = {}
+        for an in a.values():
+            r[an.name] = self.reify_annotation(an)
+        return r
+
+    def reify_annotation(self, a):
+        return {
+            'name': a.name,
+            'value': a.value
+        }
 
 class SafeReifier(Command):
     def setup(self, opts, cdpath):
@@ -130,6 +149,24 @@ class ListPackages(SafeReifier):
         r = []
         for m in app._schema_module.get_packages():
             r.append(reifier.reify_package(m))
+        return r
+
+class ListTypes(SafeReifier):
+
+    def _execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, module_name, _ = split_colon_dot_path(self._cdpath)
+        if not app_name:
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        if not module_name:
+            module_name = _
+        module = app._schema_module.get_module(module_name)
+        r = []
+        for t in module.schema_ns.values():
+            r.append(reifier.reify_type(t))
         return r
 
 class ListStates(SafeReifier):
@@ -236,6 +273,23 @@ class ShowPackage(SafeReifier):
         if not pkg_name:
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         return reifier.reify_package(app._schema_module.get_package(pkg_name))
+
+class ShowType(SafeReifier):
+
+    def _execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, module_name, name = split_colon_dot_path(self._cdpath)
+        if not app_name:
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        if not module_name:
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
+        if not name:
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
+        module = app._schema_module.get_module(module_name)
+        return reifier.reify_type(module.get_type(name))
 
 class ShowState(SafeReifier):
 
