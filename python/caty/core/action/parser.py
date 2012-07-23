@@ -369,19 +369,20 @@ class StateBlock(Parser):
     def trigger(self, seq):
         if option(S('+'))(seq):
             n = name(seq)
-            o = option(choice([u'+', u'*', u'!', u'?']), u'*')(seq)
+            o = option(choice([u'+', u'*', u'!', u'?']), u'!')(seq)
             p = None
             t = u'additional'
         elif option(S('-'))(seq):
             n = name(seq)
-            o = option(choice([u'+', u'*', u'!', u'?']), u'*')(seq)
+            o = option(choice([u'+', u'*', u'!', u'?']), u'!')(seq)
             p = None
-            t = u'no-care'
-        else:
-            n = name(seq)
-            o = option(choice([u'+', u'*', u'!', u'?']), u'*')(seq)
-            p = option(self.embed_trigger, n)(seq)
             t = u'embed' 
+        else:
+            option(S('?'))(seq)
+            n = name(seq)
+            o = option(choice([u'+', u'*', u'!', u'?']), u'!')(seq)
+            p = option(self.embed_trigger, n)(seq)
+            t = u'indef'
         return t, n, o, p
 
     def embed_trigger(self, seq):
@@ -461,8 +462,8 @@ class Link(object):
         self.appearance = appearance
         if type == 'embed':
             self.type = u'embeded-link'
-        elif type == 'no-care':
-            self.type = u'no-care-link'
+        elif type == 'indef':
+            self.type = u'indef-link'
         else:
             self.type = u'additional-link'
 

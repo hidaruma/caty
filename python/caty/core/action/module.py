@@ -246,7 +246,9 @@ class ResourceModule(Module):
                                   u'is-middle-point': True})
                     if link.type == 'additional-link':
                         edges[-1][u'trigger'] = ' '.join(['+', edges[-1][u'trigger']])
-                    elif link.type == 'no-care-link':
+                    elif link.type == 'indef-link':
+                        edges[-1][u'trigger'] = ' '.join(['?', edges[-1][u'trigger']])
+                    else:
                         edges[-1][u'trigger'] = ' '.join(['-', edges[-1][u'trigger']])
                 else:
                     from_name = s.name
@@ -271,7 +273,9 @@ class ResourceModule(Module):
                             e[u'trigger'] = u''
                         if link.type == 'additional-link':
                             e[u'trigger'] = ' '.join(['+', e[u'trigger']])
-                        elif link.type == 'no-care-link':
+                        elif link.type == 'indef-link':
+                            e[u'trigger'] = ' '.join(['?', e[u'trigger']])
+                        else:
                             e[u'trigger'] = ' '.join(['-', e[u'trigger']])
                     edges.append(e)
             nodes.append({u'name': s.name, 

@@ -468,7 +468,7 @@ type ReifiedState = {
 
 type RLink = {
     "trigger": string | null,
-    "type": "embeded" | "no-care" | "additional",
+    "type": "embeded" | "additional" | "indef",
     "appearance": "*" | "+" | "!" | "?",
     "links-to": [[string, (string|null)]*],
     "path": string|null,
