@@ -258,9 +258,9 @@ class Module(Facility):
         return None
 
     def get_modules(self):
-        yield self
+        if not self.is_package:
+            yield self
         for m in self.sub_modules.values():
-            yield m
             for r in m.get_modules():
                 yield r
         for p in self.sub_packages.values():
@@ -570,7 +570,7 @@ class AppModule(Module):
             self.application._system.deprecate_logger.warning(u'public.casm is obsolete: %s' % self.application.name)
             # self._compile(e.path)
         elif e.path.endswith(u'.casm') or e.path.endswith(u'.pcasm') or e.path.endswith(u'.casm.lit'):
-            mod = self.__class__(self._app, self)
+            mod = self._get_module_class()(self._app, self)
             mod.filepath = e.path
             if e.path.endswith(u'.casm.lit'):
                 mod._type = 'casm.lit'
@@ -597,6 +597,9 @@ class AppModule(Module):
                                                       name=module.name, 
                                                       app=self.get_package(mod.name)._app.name))
         self.sub_packages[mod.name] = mod
+
+    def _get_module_class(self):
+        return self.__class__
 
     def _compile(self, path):
         o = self.fs.open(path)
@@ -717,6 +720,9 @@ class AppModule(Module):
 
 class Package(AppModule):
     is_package = True
+
+    def _get_module_class(self):
+        return AppModule
 
 class FilterModule(Module):
     def __init__(self, system):
