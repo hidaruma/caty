@@ -21,6 +21,9 @@ class TypeNormalizer(TreeCursor):
         vc.visit(normalized)
         return normalized
 
+    def _visit_kind(self, node):
+        return node
+
 class _SubNormalizer(SchemaBuilder):
     def _visit_root(self, node):
         try:

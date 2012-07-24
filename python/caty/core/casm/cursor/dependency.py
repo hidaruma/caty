@@ -55,4 +55,6 @@ class DependencyAnalizer(TreeCursor):
     def _visit_tag(self, node):
         node.body.accept(self)
 
+    def _visit_kind(self, node):
+        return self.dependency_graph
 

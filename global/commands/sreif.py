@@ -86,6 +86,15 @@ class ShallowReifier(object):
             'annotations': self.reify_annotations(t.annotations)
         }
 
+    def reify_command(self, c):
+        return {
+            'name': c.name,
+            'document': make_structured_doc(c.docstring),
+            'annotations': self.reify_annotations(c.annotations),
+            'implemented': c.implemented,
+            'typeParams': [],
+        }
+
     def reify_annotations(self, a):
         r = {}
         for an in a.values():

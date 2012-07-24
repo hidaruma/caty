@@ -23,3 +23,7 @@ class ReferenceResolver(SchemaBuilder):
                 node.set_default(self.module.get_type(node.default))
         return node
 
+    def _visit_kind(self, node):
+        return node
+
+

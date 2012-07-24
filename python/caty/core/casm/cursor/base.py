@@ -130,5 +130,8 @@ class SchemaBuilder(TreeCursor):
         s.pseudoTag = pseudoTag(node._name, node._value)
         return s
 
+    def _visit_kind(self, node):
+        return node
+
 
 

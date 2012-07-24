@@ -92,3 +92,6 @@ class TypeVarApplier(SchemaBuilder):
                 return node
         return node
 
+    def _visit_kind(self, node):
+        return node
+

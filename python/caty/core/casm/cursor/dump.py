@@ -218,3 +218,5 @@ class TreeDumper(TreeCursor):
         self._process_option(node, buff)
         return u''.join(buff)
 
+    def _visit_kind(self, node):
+        return u'$kind$'

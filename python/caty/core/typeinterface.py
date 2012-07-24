@@ -142,6 +142,9 @@ class TreeCursor(object):
     def _visit_function(self, node):
         raise NotImplementedError(u'{0}._visit_function'.format(self.__class__.__name__))
 
+    def _visit_kind(self, node):
+        raise NotImplementedError(u'{0}._visit_kind'.format(self.__class__.__name__))
+
     @property
     def result(self):
         NotImplementedError

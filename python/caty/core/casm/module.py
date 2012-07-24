@@ -26,7 +26,6 @@ class Module(Facility):
     is_package = False
     def __init__(self, app, parent=None):
         self._app = app
-        self.kind_ns = {}
         self.schema_ns = {}
         self.command_ns = {}
         self.class_ns = {}
@@ -41,7 +40,6 @@ class Module(Facility):
         self._plugin = PluginMap()
         self._type = u'casm'
         self.ast_ns = {}
-        self.kind_ns = {}
         self.proto_ns = {}
         self.saved_st = {}
         self.const_ns = {}
@@ -55,9 +53,9 @@ class Module(Facility):
         self.get_type = partial(self._get_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
         self.has_schema = partial(self._has_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
 
-        self.add_kind = partial(self._add_resource, scope_func=lambda x:x.kind_ns, type=u'Kind', see_register_public=True)
-        self.get_kind = partial(self._get_resource, scope_func=lambda x:x.kind_ns, type=u'Kind')
-        self.has_kind = partial(self._has_resource, scope_func=lambda x:x.kind_ns, type=u'Kind')
+        self.add_kind = partial(self._add_resource, scope_func=lambda x:x.schema_ns, type=u'Kind', see_register_public=True)
+        self.get_kind = partial(self._get_resource, scope_func=lambda x:x.schema_ns, type=u'Kind')
+        self.has_kind = partial(self._has_resource, scope_func=lambda x:x.schema_ns, type=u'Kind')
 
         self.add_command = partial(self._add_resource, scope_func=lambda x:x.command_ns, type=u'Command', see_register_public=True, see_filter=True)
         self.get_command = partial(self._get_resource, scope_func=lambda x:x.command_ns, type=u'Command')
@@ -788,7 +786,6 @@ class LocalModule(Module):
         self.class_ns = {}
         self.saved_st = {}
         self.const_ns = {}
-        self.kind_ns = {}
         self.schema_ns = {}
         self.command_ns = {}
 

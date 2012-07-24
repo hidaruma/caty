@@ -146,6 +146,10 @@ class _VariableFinderInRecType(TreeCursor):
         if s:
             return s
 
+    def _visit_kind(self, node):
+        return node
+
+
 class _AlphaTransformer(TreeCursor):
     def __init__(self, ref_node):
         params = []
@@ -222,4 +226,6 @@ class _AlphaTransformer(TreeCursor):
         )
 
 
+    def _visit_kind(self, node):
+        return node
 

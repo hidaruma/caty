@@ -524,6 +524,9 @@ class KindReference(object):
         self.module = module
         module.add_kind(self)
 
+    def accept(self, visitor):
+        return visitor._visit_kind(self)
+
 class TypeParam(object):
     def __init__(self, name, kind, default_type):
         self._name = name
