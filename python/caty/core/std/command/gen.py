@@ -242,7 +242,10 @@ class DataGenerator(TreeCursor):
                 o = random.choice(l)
 
     def __flatten_union(self, s):
-        o = [s.left, s.right]
+        if isinstance(s, UnionSchema):
+            o = [s.left, s.right]
+        else:
+            o = [s]
         r = []
         for i in o:
             if isinstance(i, Union):
