@@ -1,0 +1,8 @@
+= Issue 771
+
+== !exec
+
+|=!command|=!params|=!outputCond|
+|params   | 1      | [$.Args.0, 1] ~| eq --boolean |
+
+
