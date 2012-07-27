@@ -327,7 +327,7 @@ class ScriptParser(Parser):
                       self.var_ref
                       )(seq)
             if isinstance(v, VarRef):
-                return OptionVarLoader(o, v, v.optional)
+                return OptionVarLoader(o, v, v.optional, v.default)
             return Option(o, v)
         except:
             return Option(o, True)
