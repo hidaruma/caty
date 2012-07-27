@@ -48,9 +48,12 @@ class Command(object):
                     self._opt_names.append(o.key)
         if self.__arg0_ref:
             opts_ref.remove(self.__arg0_ref)
-        self._profile = self.profile_container.determine_profile(opts_ref, args_ref)
+        self.__opts_ref = opts_ref
+        self.__args_ref = args_ref
+        self._opts = None
+        self._args = None
         self.__type_args = type_args
-        self.__var_loader = VarLoader(opts_ref, args_ref, self._profile)
+        self.__var_loader = VarLoader(opts_ref, args_ref)
         self.__var_storage = VarStorage(None, None) # 基本的に実行時に置換される。
         self._annotations = self.profile_container.get_annotations()
         self._mode = set([u'console', u'web', u'test']).intersection(self._annotations)
@@ -61,9 +64,57 @@ class Command(object):
         self.__facility_names = []
         self.__i18n = None
         self.__pos = pos
+        self.__module = module
+
+    def _prepare(self):
+        self._prepare_opts()
+        self._set_profile()
+        self._finish_opts()
+        opts = self._opts
+        args = self._args
+        if opts:
+            for k, v in opts.items():
+                self.__var_storage.opts[k] = v
+        if args:
+            self.__var_storage.opts['_ARGV'] = [self.__arg0] + args
+        else:
+            self.__var_storage.opts['_ARGV'] = [self.__arg0]
+        if opts:
+            self.__var_storage.opts['_OPTS'] = opts
+        else:
+            self.__var_storage.opts['_OPTS'] = {}
+        if opts is not None and args is not None:
+            self.setup(opts, *args)
+        elif opts is not None:
+            self.setup(opts)
+        elif args is not None:
+            self.setup(*args)
+        else:
+            self.setup()
+
+    def _prepare_opts(self):
+        self._opts, self._args = self.__var_loader.load(self.__var_storage)
+        if self.__arg0_ref and not u'static' in self._annotations:
+            self.__arg0 = self.__var_loader.load_arg0(self.__arg0_ref, self.__var_storage)
+
+    def _finish_opts(self):
+        self.__arg0_schema.validate(self.__arg0)
+        if self.profile.args_schema.type == 'object':
+            self._opts = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(self._opts))
+        else:
+            self._opts = None
+        if self.profile.args_schema.type == 'array':
+            self._args = self.profile.args_schema.convert(self._args)
+        else:
+            self._args = None
+
+    def _set_profile(self):
+        opts = self._opts
+        args = self._args
+        self._profile = self.profile_container.determine_profile(opts, args)
         _ta = []
-        if module:
-            schema = module.schema_finder
+        if self.__module:
+            schema = self.__module.schema_finder
             l = len(self.__type_args)
             for i, p in enumerate(self.profile_container.type_params):
                 if i < l:
@@ -140,7 +191,7 @@ class Command(object):
         _set = set()
         self.__current_application = facilities.app
         self.__i18n = I18nMessageWrapper(self._defined_application.i18n, facilities['env'])
-        for mode, decl in self.profile.facilities:
+        for mode, decl in self.profile_container.profiles[0].facilities:
             name = decl.name
             key = decl.alias if decl.alias else name
             param = None#decl.param
@@ -194,36 +245,6 @@ class Command(object):
     @property
     def var_storage(self):
         return self.__var_storage
-
-    def _prepare(self):
-        self._init_opts()
-        opts = self._opts
-        args = self._args
-        if opts:
-            for k, v in opts.items():
-                self.__var_storage.opts[k] = v
-        if args:
-            self.__var_storage.opts['_ARGV'] = [self.__arg0] + args
-        else:
-            self.__var_storage.opts['_ARGV'] = [self.__arg0]
-        if opts:
-            self.__var_storage.opts['_OPTS'] = opts
-        else:
-            self.__var_storage.opts['_OPTS'] = {}
-        if opts is not None and args is not None:
-            self.setup(opts, *args)
-        elif opts is not None:
-            self.setup(opts)
-        elif args is not None:
-            self.setup(*args)
-        else:
-            self.setup()
-
-    def _init_opts(self):
-        self._opts, self._args = self.__var_loader.load(self.__var_storage)
-        if self.__arg0_ref and not u'static' in self._annotations:
-            self.__arg0 = self.__var_loader.load_arg0(self.__arg0_ref, self.__var_storage)
-        self.__arg0_schema.validate(self.__arg0)
 
     def setup(self, *args, **kwds): pass
 
@@ -317,14 +338,9 @@ class Syntax(Builtin):
     """
     def __init__(self, opts_ref=None, args_ref=None, pos=(None, None), module=None):
         Builtin.__init__(self, opts_ref or [], args_ref or [], [], pos, module)
-        self._in_schema = self.profile.in_schema
-        self._out_schema = self.profile.out_schema
-
-    def _init_opts(self):
-        pass
 
     def _prepare(self):
-        pass
+        self._set_profile()
 
 class Dummy(Command):
     def execute(self, *args, **kwds):
@@ -356,7 +372,9 @@ def scriptwrapper(profile, script):
             return visitor.visit_script(self)
 
         def _prepare(self):
-            self._init_opts()
+            self._prepare_opts()
+            self._set_profile()
+            self._finish_opts()
 
         def set_var_storage(self, storage):
             Command.set_var_storage(self, storage)
@@ -429,10 +447,9 @@ def compile_builtin(module, registrar):
             registrar.compile(schema_string)
 
 class VarLoader(object):
-    def __init__(self, opts_ref, args_ref, profile):
+    def __init__(self, opts_ref, args_ref):
         self.opts = opts_ref
         self.args = args_ref
-        self.profile = profile
 
     def load_arg0(self, opt, storage):
         opts = storage.opts
@@ -459,17 +476,10 @@ class VarLoader(object):
                     raise InternalException(u'Option des not suffice: $opt', opt=opt.key)
 
     def load(self, storage):
-        if self.profile.opts_schema.type == 'object':
-            opts = self._load_opts(storage.opts)
-            opts = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(opts))
-        else:
-            opts = None
-        if self.profile.args_schema.type == 'array':
-            args = self._load_args(storage.opts, storage.args)
-            args = self.profile.args_schema.convert(args)
-        else:
-            args = None
-        return opts, args
+        from caty.core.spectypes import reduce_undefined
+        opts = self._load_opts(storage.opts)
+        args = self._load_args(storage.opts, storage.args)
+        return reduce_undefined(opts), reduce_undefined(args)
 
     def _load_opts(self, opts):
         o = MultiMap()
@@ -522,7 +532,5 @@ class VarLoader(object):
                         a.append(arg.default)
                     else:
                         a.append(UNDEFINED)
-        while a and a[-1] == UNDEFINED:
-            a.pop(-1)
         return a
 

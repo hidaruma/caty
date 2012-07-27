@@ -224,9 +224,11 @@ class CommandExecutor(BaseInterpreter):
 
 
     def visit_scalar(self, node):
+        node._prepare()
         return node.value
 
     def visit_list(self, node):
+        node._prepare()
         r = []
         for v in node:
             prev_input = self.input
@@ -235,6 +237,7 @@ class CommandExecutor(BaseInterpreter):
         return r
 
     def visit_object(self, node):
+        node._prepare()
         obj = {}
         for name, node in node.iteritems():
             prev_input = self.input
@@ -252,6 +255,7 @@ class CommandExecutor(BaseInterpreter):
             return obj
 
     def visit_varstore(self, node):
+        node._prepare()
         if node.var_name not in node.var_storage.opts:
             node.var_storage.opts[node.var_name] = self.input
             return self.input
@@ -259,6 +263,7 @@ class CommandExecutor(BaseInterpreter):
             raise Exception(u'%s is already defined' % node.var_name)
 
     def visit_varref(self, node):
+        node._prepare()
         r = caty.UNDEFINED
         if node.var_name in node.var_storage.opts:
             r = node.var_storage.opts[node.var_name]
@@ -272,6 +277,7 @@ class CommandExecutor(BaseInterpreter):
         return r
 
     def visit_argref(self, node):
+        node._prepare()
         argv = node.var_storage.opts['_ARGV']
         try:
             return argv[node.arg_num]
@@ -281,6 +287,7 @@ class CommandExecutor(BaseInterpreter):
             raise
 
     def visit_when(self, node):
+        node._prepare()
         jsobj = self.input
         target = node.query.find(jsobj).next()
         if not isinstance(target, (TagOnly, TaggedValue)) and not (isinstance(target, dict) and '$$tag' in target):
@@ -332,9 +339,11 @@ class CommandExecutor(BaseInterpreter):
         return childcmd.accept(self)
 
     def visit_binarytag(self, node):
+        node._prepare()
         return tagged(node.tag, node.command.accept(self))
 
     def visit_unarytag(self, node):
+        node._prepare()
         return TagOnly(node.tag)
 
     def visit_each(self, node):
@@ -445,6 +454,7 @@ class CommandExecutor(BaseInterpreter):
             return (v == True and isinstance(v, bool)) or tag(v) == 'True' or tag(v) == 'OK'
 
     def visit_start(self, node):
+        node._prepare()
         from caty.core.facility import TransactionAdaptor
         async_queue = self.app.async_queue
         subproc = TransactionAdaptor(CommandExecutor(node.cmd, self.app, self.facility_set), self.facility_set)
@@ -456,6 +466,7 @@ class CommandExecutor(BaseInterpreter):
 
 
     def visit_case(self, node):
+        node._prepare()
         default = None
         if node.path:
             case_in = node.path.select(self.input).next()
@@ -482,6 +493,7 @@ class CommandExecutor(BaseInterpreter):
             return default.accept(self)
 
     def visit_json_path(self, node):
+        node._prepare()
         from caty.jsontools.selector.stm import Nothing
         stm = node.stm
         try:

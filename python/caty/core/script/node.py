@@ -362,8 +362,8 @@ class Each(Syntax):
         Syntax.__init__(self, opts_ref)
         self.cmd = cmd
 
-    def _init_opts(self):
-        Command._init_opts(self)
+    def _finish_opts(self):
+        Syntax._finish_opts(self)
         o = self.var_storage.opts
         a = o['_ARGV']
         v = a[1:] if a else [u'']
@@ -398,9 +398,6 @@ class Time(Syntax):
         Syntax.__init__(self, opts)
         self.cmd = cmd
 
-    def _init_opts(self):
-        Command._init_opts(self)
-
     def _prepare(self):
         Command._prepare(self)
 
@@ -434,9 +431,6 @@ class Take(Syntax):
 
     def _prepare(self):
         Command._prepare(self)
-
-    def _init_opts(self):
-        Command._init_opts(self)
 
     @property
     def obj(self):

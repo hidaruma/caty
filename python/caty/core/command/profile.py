@@ -46,12 +46,12 @@ class ProfileContainer(object):
     def add_profile(self, profile):
         self.profiles.append(profile)
 
-    def determine_profile(self, opts_ref, args_ref):
+    def determine_profile(self, opts, args):
         lasterror = None
         last_tb = None
         err_msg = ''
         for p in self.profiles:
-            err_msg = p.conform_opts_and_args(opts_ref, args_ref, self.name)
+            err_msg = p.conform_opts_and_args(opts, args, self.name)
             if not err_msg:
                 return p.clone()
         else:
@@ -166,37 +166,33 @@ class CommandProfile(object):
         """
         return self.declobj.get_all_resources()
 
-    def conform_opts_and_args(self, opts_ref, args_ref, name):
+    def conform_opts_and_args(self, opts, args, name):
         u"""オプションと引数が適合するかどうかを判別する。
         この時点では変数参照が解決されていないため、オプション名と引数の数のみで判別する。
         """
-        if self.opts_schema.type == 'null' and opts_ref:
+        if self.opts_schema.type == 'null' and opts:
             return ro.i18n.get(u'$name takes no options', name=name)
         if self.opts_schema.type == 'object':
             o_s = self.opts_schema.schema_obj
             has_wildcard = self.opts_schema.wildcard.type != 'never'
             key_set = set(o_s.keys())
             found_key = set()
-            for opt in opts_ref:
-                if opt.type == 'glob': continue
-                if opt.key not in o_s and not has_wildcard:
-                    return ro.i18n.get('Unknwon option: $key', key=opt.key)
-                found_key.add(opt.key)
+            for k, v in opts.items():
+                if k not in o_s and not has_wildcard:
+                    return ro.i18n.get('Unknwon option: $key', key=k)
+                found_key.add(k)
             for k in key_set - found_key:
                 if not o_s[k].optional:
                     return ro.i18n.get(u'Missing option: $key', key=k)
-                else:
-                    if 'default' in o_s[k].annotations:
-                        opts_ref.append(Option(k, o_s[k].annotations['default'].value))
-        if self.args_schema.type == 'null' and args_ref:
+        if self.args_schema.type == 'null' and (args):
             return ro.i18n.get(u'$name takes no arguments', name=name)
         if self.args_schema.type == 'array':
             max_len = len(self.args_schema.schema_list) if not self.args_schema.repeat else None
             min_len = (len(filter(lambda s: not s.optional, self.args_schema.schema_list)) 
                         - int(self.args_schema.repeat))
-            if max_len is not None and len(args_ref) > max_len:
+            if max_len is not None and len(args) > max_len:
                 return ro.i18n.get(u'$name takes only the arguments up to $max', max=max_len, name=name)
-            if min_len > len(args_ref):
+            if min_len > len(args):
                 return ro.i18n.get(u'$name requires $min or more arguments', min=min_len, name=name)
         return u''
 
