@@ -267,6 +267,8 @@ class CommandExecutor(BaseInterpreter):
                 r = self.facility_set['env'].get(node.var_name)
         if r is UNDEFINED and not node.optional:
             raise Exception(u'%s is not defined' % node.var_name)
+        if r is UNDEFINED and node.default is not UNDEFINED:
+            r = node.default
         return r
 
     def visit_argref(self, node):

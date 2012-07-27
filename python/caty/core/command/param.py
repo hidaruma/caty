@@ -22,10 +22,11 @@ class OptionLoader(Param):
 
 class OptionVarLoader(Param):
     type = 'var'
-    def __init__(self, key, value, optional):
+    def __init__(self, key, value, optional, default):
         self.key = key.lstrip('-')
         self.value = value
         self.optional = optional
+        self.default = default
 
     def reify(self):
         return tagged(u'_optVarLoader', {'key': self.key, 'value': self.value, 'optional': self.optional})
@@ -56,9 +57,10 @@ class Argument(Param):
 
 class NamedArg(Param):
     type = 'narg'
-    def __init__(self, key, optional):
+    def __init__(self, key, optional, default):
         self.key = key
         self.optional = optional
+        self.default = default
 
     def __repr__(self):
         r = '[narg]' + repr(self.key)
@@ -72,9 +74,10 @@ class NamedArg(Param):
 
 class IndexArg(Param):
     type = 'iarg'
-    def __init__(self, index, optional):
+    def __init__(self, index, optional, default):
         self.index = index
         self.optional = optional
+        self.default = default
 
     def __repr__(self):
         r = '[iarg]' + repr(self.index)

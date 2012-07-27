@@ -109,10 +109,11 @@ class VarRef(Syntax):
     command_decl = u"""command __var-ref<T default any> :: void -> T
                         refers python:caty.core.script.node.VarRef;
     """
-    def __init__(self, name, optional):
+    def __init__(self, name, optional, default):
         Syntax.__init__(self)
         self.__var_name = name
         self.__optional = optional
+        self.__default = default
 
     def accept(self, visitor):
         return visitor.visit_varref(self)
@@ -124,6 +125,10 @@ class VarRef(Syntax):
     @property
     def optional(self):
         return self.__optional
+
+    @property
+    def default(self):
+        return self.__default
 
 class ArgRef(Syntax):
     command_decl = u"""command __arg-ref<T default any> :: void -> T

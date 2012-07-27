@@ -398,12 +398,13 @@ class VarStoreProxy(CommandProxy):
 
 class VarRefProxy(CommandProxy):
     reification_type = u'_varref'
-    def __init__(self, name, optional):
+    def __init__(self, name, optional, default):
         self.name = name
         self.optional = optional
+        self.default = default
 
     def instantiate(self, builder):
-        return VarRef(self.name, self.optional)
+        return VarRef(self.name, self.optional, self.default)
 
     def set_module(self, module):
         pass

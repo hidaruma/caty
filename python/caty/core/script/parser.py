@@ -34,6 +34,7 @@ from caty.core.exception import SubCatyException
 from caty.core.command.param import *
 from caty.core.language.util import fragment_name, identifier_token_a, name_token
 from caty.jsontools.selector.parser import JSONPathSelectorParser
+import caty
 
 class NothingTodo(Exception):
     u"""コメントのみの入力など、何もしないときのシグナル
@@ -234,7 +235,18 @@ class ScriptParser(Parser):
         seq.parse('%')
         n = name_token(seq)
         o = seq.parse(option('?'))
-        return VarRef(n, bool(o))
+        if o and option('=')(seq):
+            d = seq.parse([xjson.string, 
+                      xjson.binary,
+                      xjson.multiline_string,
+                      bind2nd(xjson.null, True), 
+                      bind2nd(xjson.number, True), 
+                      bind2nd(xjson.integer, True), 
+                      bind2nd(xjson.boolean, True),
+                      ])
+        else:
+            d = caty.UNDEFINED
+        return VarRef(n, bool(o), d)
 
     def var_name(self, seq):
         return seq.parse(Regex(ur'[a-zA-Z_]+[-a-zA-Z0-9_]*'))
@@ -297,7 +309,7 @@ class ScriptParser(Parser):
                       self.var_ref
                       )(seq)
             if isinstance(v, VarRef):
-                return OptionVarLoader(o, v, v.optional)
+                return OptionVarLoader(o, v, v.optional, v.default)
             return Option(o, v)
         except:
             return Option(o, True)
@@ -344,7 +356,18 @@ class ScriptParser(Parser):
         if name.endswith('?'):
             name = name[:-1]
             optional = True
-        return NamedArg(name, optional)
+        if optional and option('=')(seq):
+            d = seq.parse([xjson.string, 
+                      xjson.binary,
+                      xjson.multiline_string,
+                      bind2nd(xjson.null, True), 
+                      bind2nd(xjson.number, True), 
+                      bind2nd(xjson.integer, True), 
+                      bind2nd(xjson.boolean, True),
+                      ])
+        else:
+            d = caty.UNDEFINED
+        return NamedArg(name, optional, d)
 
     def arg(self, seq):
         r = choice(
@@ -366,7 +389,18 @@ class ScriptParser(Parser):
             optional = True
         else:
             index = int(index)
-        return IndexArg(index, optional)
+        if optional and option('=')(seq):
+            d = seq.parse([xjson.string, 
+                      xjson.binary,
+                      xjson.multiline_string,
+                      bind2nd(xjson.null, True), 
+                      bind2nd(xjson.number, True), 
+                      bind2nd(xjson.integer, True), 
+                      bind2nd(xjson.boolean, True),
+                      ])
+        else:
+            d = caty.UNDEFINED
+        return IndexArg(index, optional, d)
 
     def comma(self, seq):
         _ = seq.parse(',')

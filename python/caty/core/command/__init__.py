@@ -51,7 +51,7 @@ class Command(object):
         self._profile = self.profile_container.determine_profile(opts_ref, args_ref)
         self.__type_args = type_args
         self.__var_loader = VarLoader(opts_ref, args_ref, self._profile)
-        self.__var_storage = VarStorage(None, None)
+        self.__var_storage = VarStorage(None, None) # 基本的に実行時に置換される。
         self._annotations = self.profile_container.get_annotations()
         self._mode = set([u'console', u'web', u'test']).intersection(self._annotations)
         self._defined_application = self.profile_container.defined_application
@@ -447,6 +447,8 @@ class VarLoader(object):
             else:
                 if not opt.optional:
                     raise KeyError(opt.value.name)
+                elif opt.default is not UNDEFINED:
+                    return opt.default
         elif opt.type == 'glob':
             return opts['_OPTS']
         else:
@@ -483,6 +485,8 @@ class VarLoader(object):
                 else:
                     if not opt.optional:
                         raise KeyError(opt.value.name)
+                    elif opt.default is not UNDEFINED:
+                        o[opt.key] = opt.default
             elif opt.type == 'glob':
                 o.update(opts['_OPTS'])
             else:
@@ -504,6 +508,8 @@ class VarLoader(object):
                 else:
                     if not arg.optional:
                         raise InternalException(u'Argument does not suffice: $index', index=arg.index)
+                    elif arg.default is not UNDEFINED:
+                        a.append(arg.default)
             elif arg.type == 'glob':
                 a.extend(opts['_ARGV'][1:])
             else:
@@ -512,6 +518,8 @@ class VarLoader(object):
                 else:
                     if not arg.optional:
                         raise InternalException(u'Argument des not suffice: $index', index=arg.key)
+                    elif arg.default is not UNDEFINED:
+                        a.append(arg.default)
                     else:
                         a.append(UNDEFINED)
         while a and a[-1] == UNDEFINED:
