@@ -331,11 +331,10 @@ class CommandExecutor(BaseInterpreter):
     
     def __exec_cmd(self, node, tag, jsobj):
         childcmd = node.cases[tag].cmd
-        if childcmd.in_schema != jstypes.never:
-            if isinstance(node.cases[tag], UntagCase):
-                self.input = untagged(jsobj)
-            else:
-                self.input = jsobj
+        if isinstance(node.cases[tag], UntagCase):
+            self.input = untagged(jsobj)
+        else:
+            self.input = jsobj
         return childcmd.accept(self)
 
     def visit_binarytag(self, node):

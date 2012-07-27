@@ -173,6 +173,8 @@ class CommandProfile(object):
         if self.opts_schema.type == 'null' and opts:
             return ro.i18n.get(u'$name takes no options', name=name)
         if self.opts_schema.type == 'object':
+            if opts is None:
+                opts = {}
             o_s = self.opts_schema.schema_obj
             has_wildcard = self.opts_schema.wildcard.type != 'never'
             key_set = set(o_s.keys())
@@ -187,6 +189,8 @@ class CommandProfile(object):
         if self.args_schema.type == 'null' and (args):
             return ro.i18n.get(u'$name takes no arguments', name=name)
         if self.args_schema.type == 'array':
+            if args is None:
+                args = []
             max_len = len(self.args_schema.schema_list) if not self.args_schema.repeat else None
             min_len = (len(filter(lambda s: not s.optional, self.args_schema.schema_list)) 
                         - int(self.args_schema.repeat))

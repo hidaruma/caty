@@ -99,7 +99,7 @@ class Command(object):
 
     def _finish_opts(self):
         self.__arg0_schema.validate(self.__arg0)
-        if self.profile.args_schema.type == 'object':
+        if self.profile.opts_schema.type == 'object':
             self._opts = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(self._opts))
         else:
             self._opts = None
@@ -448,8 +448,8 @@ def compile_builtin(module, registrar):
 
 class VarLoader(object):
     def __init__(self, opts_ref, args_ref):
-        self.opts = opts_ref
-        self.args = args_ref
+        self.opts = opts_ref if opts_ref else []
+        self.args = args_ref if args_ref else []
 
     def load_arg0(self, opt, storage):
         opts = storage.opts
