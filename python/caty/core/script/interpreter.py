@@ -533,7 +533,7 @@ class _CallCommand(MafsMixin, Internal):
 
     def setup(self, cmd_name):
         self._cmd_name = cmd_name
-        if self._cmd_name[0] == u'/':
+        if self._cmd_name[0] == u'/' or '@' in self._cmd_name:
             if '@' not in self._cmd_name:
                 self._cmd_name = 'scripts@this:' + self._cmd_name
             self.__is_file = True
