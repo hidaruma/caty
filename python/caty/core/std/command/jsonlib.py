@@ -41,8 +41,11 @@ class Merge(Builtin):
                 self.merge_mode = 'error'
 
     def execute(self, input):
+        if input == []:
+            return {}
+        f = lambda a, b: merge_dict(a, b, self.merge_mode)
         try:
-            return merge_dict(input[0], input[1], self.merge_mode)
+            return reduce(f, input)
         except:
             return None
 

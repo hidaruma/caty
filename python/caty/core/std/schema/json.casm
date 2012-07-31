@@ -48,7 +48,7 @@ command pretty :: any -> string
  * * "snd": 第二要素のものを用いる
  * * "error": エラーとして扱い、 null を返す
  */
-command merge {@[default("fst")]"mode": string?} :: [AnyObject, AnyObject] -> AnyObject | null
+command merge {@[default("fst")]"mode": string?} :: [AnyObject*] -> AnyObject | null
     refers python:caty.core.std.command.jsonlib.Merge;
 
 /**
