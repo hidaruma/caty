@@ -485,10 +485,7 @@ class VarLoader(object):
         o = MultiMap()
         for opt in self.opts:
             if opt.type == 'option':
-                if opt.value != UNDEFINED:
-                    o[opt.key] = opt.value
-                else:
-                    o[opt.key] = True
+                o[opt.key] = opt.value
             elif opt.type == 'var':
                 if opt.value.name in opts:
                     o[opt.key] = opts[opt.value.name]

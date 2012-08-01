@@ -300,19 +300,24 @@ class ScriptParser(Parser):
         o = seq.parse(Regex(ur'--[a-zA-Z]+[-a-zA-Z0-9_]*'))
         try:
             seq.parse('=')
-            v = choice(
-                      bind2nd(xjson.null, True), 
-                      bind2nd(xjson.boolean, True),
-                      xjson.string, 
-                      xjson.multiline_string,
-                      self.unquoted_maybe_num, 
-                      self.var_ref
-                      )(seq)
-            if isinstance(v, VarRef):
-                return OptionVarLoader(o, v, v.optional, v.default)
-            return Option(o, v)
         except:
             return Option(o, True)
+        v = choice(
+                  bind2nd(xjson.null, True), 
+                  bind2nd(xjson.boolean, True),
+                  xjson.string, 
+                  xjson.multiline_string,
+                  self.unquoted_maybe_num, 
+                  self._undefined_literal,
+                  self.var_ref,
+                  )(seq)
+        if isinstance(v, VarRef):
+            return OptionVarLoader(o, v, v.optional, v.default)
+        return Option(o, v)
+
+    def _undefined_literal(self, seq):
+        S(u'%?')(seq)
+        return caty.UNDEFINED
 
     def arg0(self, seq):
         o = seq.parse(Regex(ur'--0'))
@@ -351,6 +356,9 @@ class ScriptParser(Parser):
     def named_arg(self, seq):
         if option(S(u'%#'))(seq):
             return GlobArg()
+        if option(S('%?'))(seq):
+            return Argument(caty.UNDEFINED)
+
         name = seq.parse(Regex(r'%[a-zA-Z]+[-a-zA-Z0-9_]*\??'))[1:]
         optional = False
         if name.endswith('?'):

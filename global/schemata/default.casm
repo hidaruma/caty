@@ -28,7 +28,7 @@ command dump-closure {* : any?} [any* args]
 
 
 /** パラメータをダンプする */
-command params {* : any?} [any* args] :: void -> {"Opts (_OPTS)":object, "Argv (_ARGV)":array, "Arg0":any, "Args":array}
+command params {* : univ?} [univ* args] :: void -> {"Opts (_OPTS)":object, "Argv (_ARGV)":array, "Arg0":any, "Args":array}
 {
  {
    "Opts (_OPTS)" : %_OPTS,
