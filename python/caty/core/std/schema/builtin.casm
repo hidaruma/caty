@@ -1143,7 +1143,7 @@ command object-to-array :: object -> [[string, any]*]
  */
 command call<S default univ, T default univ> [string command_name] :: S -> T
     reads [pub, scripts, interpreter]
-    refers python:caty.core.script.interpreter.CallCommand;
+    refers python:caty.core.script.interpreter.executor.CallCommand;
 
 /** 
  * 引数のコマンドあるいはCatyScriptを呼び出し、制御をそちらに移す。
@@ -1151,7 +1151,7 @@ command call<S default univ, T default univ> [string command_name] :: S -> T
 command forward<S default univ, T default univ>  [string command_name] :: S -> never
     signals T
     reads [pub, scripts, interpreter]
-    refers python:caty.core.script.interpreter.Forward;
+    refers python:caty.core.script.interpreter.executor.Forward;
 
 /**
  * 引数で指定されたミリ秒だけ停止する。

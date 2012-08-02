@@ -81,6 +81,27 @@ class CommandCombinator(Command):
     def __repr__(self):
         return '%s | %s' % (repr(self.bf), repr(self.af))
 
+    def _prepare(self):
+        self._prepare_opts()
+        self._set_profile()
+        self._finish_opts()
+
+    def _prepare_opts(self):
+        self.bf._prepare_opts()
+        self.af._prepare_opts()
+
+    def _set_profile(self):
+        self.bf._set_profile()
+        self.af._set_profile()
+
+    def _finish_opts(self):
+        self.bf._finish_opts()
+        self.af._finish_opts()
+
+    def apply_type_params(self, type_params):
+        self.bf.apply_type_params(type_params)
+        self.af.apply_type_params(type_params)
+
 class DiscardCombinator(CommandCombinator):
     def __call__(self, input):
         self.bf(input)

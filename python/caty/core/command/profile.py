@@ -210,7 +210,8 @@ class CommandProfile(object):
         tc.real_root = False
         i = self._in_schema.accept(tc)
         o = self._out_schema.accept(tc)
-        return i, o
+        a = self.__arg0_schema.accept(tc)
+        return i, o, a
 
 def check_enum(t, name, option, opt_str, value, parser):
     from caty.core.casm.cursor import TreeDumper

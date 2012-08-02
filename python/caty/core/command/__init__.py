@@ -53,6 +53,7 @@ class Command(object):
         self._opts = None
         self._args = None
         self.__type_args = type_args
+        self.__type_params = self.profile_container.type_params
         self.__var_loader = VarLoader(opts_ref, args_ref)
         self.__var_storage = VarStorage(None, None) # 基本的に実行時に置換される。
         self._annotations = self.profile_container.get_annotations()
@@ -113,7 +114,7 @@ class Command(object):
         args = self._args
         self._profile = self.profile_container.determine_profile(opts, args)
         _ta = []
-        if self.__module:
+        if self.__module and self.__type_args:
             schema = self.__module.schema_finder
             l = len(self.__type_args)
             for i, p in enumerate(self.profile_container.type_params):
@@ -123,13 +124,24 @@ class Command(object):
                     x = p.clone(set())
                     x._schema = s
                     _ta.append(x)
-        self.__type_params = _ta
+        if _ta:
+            self.apply_type_params(_ta)
         if self.type_params:
-            self._in_schema, self._out_schema = self.profile.apply(self, self.profile_container.module)
+            self._in_schema, self._out_schema, self.__arg0_schema = self.profile.apply(self, self.profile_container.module)
         else:
             self._in_schema = self.profile.in_schema
             self._out_schema = self.profile.out_schema
-        self.__arg0_schema = self.profile.arg0_schema
+            self.__arg0_schema = self.profile.arg0_schema
+
+    def apply_type_params(self, type_params):
+        if not type_params:
+            return
+        tp = []
+        for param, arg in zip(type_params, self.__type_args):
+            tp.append(param)
+        if tp:
+            self.__type_params = tp
+            self.__type_args = []
 
     def get_command_id(self):
         return self._id
