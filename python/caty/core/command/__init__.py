@@ -314,7 +314,10 @@ class Command(object):
         interpreter = self._defined_application.interpreter.file_mode(fset)
         c = interpreter.build(line)
         return c(input)
-
+    
+    @property
+    def current_module(self):
+        return self.__module
 
 class Builtin(Command):
     u"""組み込みコマンドのベースクラス。
