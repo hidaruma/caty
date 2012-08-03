@@ -4,6 +4,7 @@ class CommandBuilder(object):
     def __init__(self, facilities, namespace):
         self.facilities = facilities
         self.namespace = namespace
+        self.trace = {}
 
     def build(self, proxy, type_args, opts_ref, args_ref, pos, module):
         u"""コマンド文字のチャンクをコマンド名と引数のリストに分割し、呼び出し可能なコマンドオブジェクトを返す。
@@ -18,7 +19,12 @@ class CommandBuilder(object):
             profile = self.namespace.get_command(proxy.name)
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
-            cmd = scriptwrapper(profile, cls.instantiate(self))(opts_ref, args_ref, type_args, pos, module)
+            if cls in self.trace:
+                obj = self.trace[cls]
+            else:
+                obj = scriptwrapper(profile, lambda :cls.instantiate(self))
+                self.trace[cls] = obj
+            cmd = obj(opts_ref, args_ref, type_args, pos, module)
         else:
             cmd = cls(opts_ref, args_ref, type_args, pos, module)
         return cmd

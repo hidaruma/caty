@@ -366,17 +366,17 @@ def new_dummy():
         pass
     return _Dummy
 
-def scriptwrapper(profile, script):
+def scriptwrapper(profile, scriptfactory):
     class Wrapper(Command):
         def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None), module=None):
             self.profile_container = profile
-            self.script = script
+            self.script = scriptfactory
             Command.__init__(self, opts_ref, args_ref, type_args, pos, module)
 
 
         def execute(self, input=None):
             try:
-                return script(input)
+                return self.script(input)
             finally:
                 self.var_storage.del_masked_scope()
 
@@ -387,17 +387,19 @@ def scriptwrapper(profile, script):
             return visitor.visit_script(self)
 
         def _prepare(self):
+            self.script = self.script() # 実体化は遅延して置かないと再帰コマンドの実体化ができない
+            self.script.set_facility(self.facilities)
+            self.script.set_var_storage(self.var_storage)
             self._prepare_opts()
             self._set_profile()
             self._finish_opts()
 
         def set_var_storage(self, storage):
             Command.set_var_storage(self, storage)
-            script.set_var_storage(self.var_storage)
 
         def set_facility(self, facilities):
             Command.set_facility(self, facilities)
-            script.set_facility(facilities)
+            self.facilities = facilities
 
     return Wrapper
 

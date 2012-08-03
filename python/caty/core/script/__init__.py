@@ -65,8 +65,6 @@ class AbstractCommandCompiler(FakeFacility):
     このクラスでは対話シェルからの入力の受付や前二者の紐付けなどを行う。
     """
     def __init__(self, facilities, module):
-        self.builder = CommandBuilder(facilities, module.finder)
-        self.filter_builder = CommandBuilder(facilities, module._filter_finder)
         self._facilities = facilities
         self.prev_string = u''
         self.prev_opts = None
@@ -82,7 +80,6 @@ class AbstractCommandCompiler(FakeFacility):
 
         def set(self, f):
             self._facilities = f
-            self.builder = CommandBuilder(self._facilities, self._finder)
         return get, set
     facilities = property(*facilities())
 
@@ -98,7 +95,8 @@ class AbstractCommandCompiler(FakeFacility):
         opts = None
         args = map(str, args)
         var_storage = VarStorage(opts, args)
-        c = pipeline.instantiate(self.filter_builder)
+        filter_builder = CommandBuilder(self.facilities, self.module._filter_finder)
+        c = pipeline.instantiate(filter_builder)
         c.set_facility(self.facilities)
         c.set_var_storage(var_storage)
         c = CommandExecutor(c, self.module._app, self.facilities)
@@ -127,12 +125,13 @@ class AbstractCommandCompiler(FakeFacility):
     def _instantiate(self, proxy, opts=None, args=None, transaction=COMMIT, type_check=False):
         if proxy is None:
             return None
+        builder = CommandBuilder(self.facilities, self.module.finder)
         var_storage = VarStorage(opts, args)
         env = self._facilities['env']
         for k, v in env.items():
             var_storage.opts[k] = v
         try:
-            c = proxy.instantiate(self.builder)
+            c = proxy.instantiate(builder)
         except CommandUsageError as e:
             msg = [e.args[0]]
             msg.append(CommandUsage(e.args[1]).get_usage())
@@ -161,15 +160,15 @@ class AbstractCommandCompiler(FakeFacility):
  
     def has_command(self, pkg, name):
         if pkg == 'builtin':
-            return name in self.builder.namespace
+            return name in self.module.finder
         else:
-            return pkg + ':' + name in self.builder.namespace
+            return pkg + ':' + name in self.module.finder
 
     def get_help(self, pkg, name):
         if pkg == 'builtin':
-            p = self.builder.namespace[name]
+            p = self.module.finder[name]
         else:
-            p = self.builder.namespace[pkg + ':' + name]
+            p = self.module.finder[pkg + ':' + name]
         return CommandUsage(p).get_usage()
 
     def get_modules(self):
@@ -178,20 +177,20 @@ class AbstractCommandCompiler(FakeFacility):
     def get_commands(self, name):
         import types
         if name == 'builtin':
-            for k, v in self.builder.namespace.items():
+            for k, v in self.module.finder.items():
                 c = v.get_command_class()
                 if isinstance(c, types.TypeType) and issubclass(c, Syntax):
                     continue
                 yield v
         elif name == 'public':
-            for k, v in self.builder.namespace.items():
+            for k, v in self.module.finder.items():
                 c = v.get_command_class()
                 if isinstance(c, types.TypeType) and issubclass(c, Syntax):
                     continue
                 if v.module.name == name:
                     yield v
         else:
-            subm = self.builder.namespace._module.sub_modules.get(name)
+            subm = self.module.sub_modules.get(name)
             for k, v in subm.command_ns.items():
                 yield v
 
