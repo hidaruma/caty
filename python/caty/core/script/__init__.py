@@ -220,7 +220,6 @@ class ShellCommandCompiler(AbstractCommandCompiler):
             return pipeline
 
     def update_facility(self, facilities):
-        self.builder.facilities = facilities
         self.facilities = facilities
 
 
