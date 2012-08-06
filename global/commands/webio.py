@@ -187,7 +187,7 @@ class Parse(Command):
                 data = unicode(raw_data, cs)
             else:
                 data = raw_data
-            return tagged('text', stdjson.loads(dara))
+            return tagged('text', stdjson.loads(data))
         elif type == CT_FORM or type == CT_MULTI:
             import cgi
             from StringIO import StringIO

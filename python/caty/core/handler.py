@@ -362,7 +362,7 @@ class WebInputParser(object):
             input = StringIO(input)
         cs = self.encoding
         if ';' in content_type:
-            content_type, rest = map(str.strip, content_type.split(';', 1))
+            content_type, rest = map(lambda x: x.strip(), content_type.split(';', 1))
             if rest.startswith('charset'):
                 cs = rest.split('=').pop(1)
         if method not in ('POST', 'PUT'):
