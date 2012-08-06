@@ -386,7 +386,7 @@ class WebInputParser(object):
         elif content_type == 'application/json':
             cl = environ['CONTENT_LENGTH']
             if not cl:
-                cl = 0
+                cl = -1 
             src = input.read(int(cl))
             if isinstance(src, str):
                 src = unicode(src, cs)
