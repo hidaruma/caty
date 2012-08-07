@@ -1,0 +1,27 @@
+module template in casm;
+
+/**
+ * コンパイル済みテンプレートの実体。
+ */
+type TemplateObject = foreign;
+
+type TemplateText = string(remark="テンプレート");
+
+type TemplateContext = univ;
+
+/**
+ * テンプレートをコンパイルする。
+ * 入力文字列をテンプレートであると解釈し、コンパイル済みテンプレートオブジェクトを返す。
+ * 入力文字列に<?caty-template ...?>がない場合、単に入力文字列を出力するテンプレートオブジェクトと解釈される。
+ * 入力文字列が不正かつエラー回復不能なテンプレート構文であった場合、例外が送出される。
+ */
+command compile :: TemplateText -> TemplateObject
+    refers python:caty.core.std.command.template.Compile
+;
+
+command expand :: [TemplateObject, TemplateContext] -> string
+    reads [interpreter, schema]
+    uses [include, pub]
+    refers python:caty.core.std.command.template.Expand
+;
+

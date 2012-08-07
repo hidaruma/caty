@@ -23,6 +23,7 @@ def initialize(system, interpreter_module):
                    u'set',
                    u'strg',
                    u'test',
+                   u'template',
                    u'text',
                    u'user',
                    u'viva',
