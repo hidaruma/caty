@@ -19,11 +19,7 @@ class CommandBuilder(object):
             profile = self.namespace.get_command(proxy.name)
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
-            if cls in self.trace:
-                obj = self.trace[cls]
-            else:
-                obj = scriptwrapper(profile, lambda :cls.instantiate(self))
-                self.trace[cls] = obj
+            obj = scriptwrapper(profile, lambda :cls.instantiate(self))
             cmd = obj(opts_ref, args_ref, type_args, pos, module)
         else:
             cmd = cls(opts_ref, args_ref, type_args, pos, module)

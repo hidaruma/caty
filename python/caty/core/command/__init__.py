@@ -52,8 +52,8 @@ class Command(object):
         self.__args_ref = args_ref
         self._opts = None
         self._args = None
-        self.__type_args = type_args
-        self.__type_params = self.profile_container.type_params
+        self.__type_args = type_args # コマンドラインで与えられた型引数
+        self.__type_params = self.profile_container.type_params # デフォルトの型パラメータ。
         self.__var_loader = VarLoader(opts_ref, args_ref)
         self.__var_storage = VarStorage(None, None) # 基本的に実行時に置換される。
         self._annotations = self.profile_container.get_annotations()
@@ -66,6 +66,7 @@ class Command(object):
         self.__i18n = None
         self.__pos = pos
         self.__module = module
+        self.applied = False
 
     def _prepare(self):
         self._prepare_opts()
@@ -137,7 +138,8 @@ class Command(object):
         if not type_params:
             return
         tp = []
-        for param, arg in zip(type_params, self.__type_args):
+        for param, _, arg in zip(type_params, self.__type_args, self.type_params):
+            param.var_name = arg.var_name
             tp.append(param)
         if tp:
             self.__type_params = tp
@@ -149,6 +151,10 @@ class Command(object):
     @property
     def type_params(self):
         return self.__type_params
+
+    @property
+    def type_args(self):
+        return self.__type_args
 
     @property
     def col(self):
@@ -370,9 +376,10 @@ def scriptwrapper(profile, scriptfactory):
     class Wrapper(Command):
         def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None), module=None):
             self.profile_container = profile
-            self.script = scriptfactory
+            self.scriptfactory = scriptfactory
+            self.script = None
+            self.type_var_applied = False
             Command.__init__(self, opts_ref, args_ref, type_args, pos, module)
-
 
         def execute(self, input=None):
             try:
@@ -387,7 +394,7 @@ def scriptwrapper(profile, scriptfactory):
             return visitor.visit_script(self)
 
         def _prepare(self):
-            self.script = self.script() # 実体化は遅延して置かないと再帰コマンドの実体化ができない
+            self.script = self.scriptfactory() # 実体化は遅延して置かないと再帰コマンドの実体化ができない
             self.script.set_facility(self.facilities)
             self.script.set_var_storage(self.var_storage)
             self._prepare_opts()

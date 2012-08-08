@@ -79,6 +79,7 @@ class CommandExecutor(BaseInterpreter):
             tva = TypeVarApplier(node.type_params)
             if tva.type_params:
                 tva.visit(node)
+            node.type_var_applied = True
             if len(argv) == 1:
                 return node.script.accept(self)
             else:
@@ -505,7 +506,7 @@ class _CallCommand(MafsMixin, Internal):
             profile = app.schema_finder.get_command(self._cmd_name)
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
-            c = scriptwrapper(profile, cls.instantiate(CommandBuilder(self._facilities, app.schema_finder)))(self.__opts_ref, self.__args_ref)
+            c = scriptwrapper(profile, lambda :cls.instantiate(CommandBuilder(self._facilities, app.schema_finder)))(self.__opts_ref, self.__args_ref)
         else:
             c = cls(self.__opts_ref, self.__args_ref)
         c.set_facility(self._facilities)

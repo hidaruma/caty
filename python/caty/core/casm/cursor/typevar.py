@@ -70,7 +70,7 @@ class TypeVarApplier(SchemaBuilder):
                     a = type.accept(self)
                     if not node.applied:
                         self.type_args[param.var_name] = a
-                    v =  TreeDumper(True).visit(a)
+                    v = TreeDumper(True).visit(a)
                     arg_memo.append((param.var_name, v))
                 key = tuple(arg_memo)
                 if key in self.history:

@@ -498,6 +498,7 @@ class PassData(Builtin):
     
    
     def execute(self, input):
+        print self.in_schema
         return input
 
 class Default(Builtin):

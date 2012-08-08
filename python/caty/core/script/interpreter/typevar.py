@@ -38,7 +38,7 @@ class TypeVarApplier(BaseInterpreter):
 
     def visit_when(self, node):
         for c in node.cases.values():
-            c.cmd.apply_type_params(self.type_params)
+            c.cmd.accept(self)
 
     def visit_binarytag(self, node):
         node.command.accept(self)
@@ -56,7 +56,9 @@ class TypeVarApplier(BaseInterpreter):
         node.cmd.accept(self)
 
     def visit_script(self, node):
-        node.script.accept(self)
+        node.apply_type_params(self.type_params)
+        if node.script:
+            node.script.accept(self)
 
     def visit_start(self, node):
         node.cmd.accept(self)
