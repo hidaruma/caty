@@ -210,6 +210,8 @@ class CommandProfile(object):
         tc = TypeVarApplier(module)
         tc._init_type_params(node)
         tc.real_root = False
+        if node.name == 'test3':
+            tc.debug = True
         i = tn.visit(self._in_schema.accept(tc))
         o = tn.visit(self._out_schema.accept(tc))
         a = tn.visit(self.__arg0_schema.accept(tc))

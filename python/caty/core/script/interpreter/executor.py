@@ -79,7 +79,6 @@ class CommandExecutor(BaseInterpreter):
             tva = TypeVarApplier(node.type_params)
             if tva.type_params:
                 tva.visit(node)
-            node.type_var_applied = True
             if len(argv) == 1:
                 return node.script.accept(self)
             else:
