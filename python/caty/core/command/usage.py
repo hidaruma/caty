@@ -20,7 +20,7 @@ class CommandUsage(object):
             r.append('Input:\n%s' % self.indent(input))
             r.append('Output:\n%s' % self.indent(output))
             r.append('\n')
-        return '\n'.join(r)
+        return u'\n'.join(r)
 
     def get_usage(self):
         return self.get_type_info() + 'Description:\n' + self.get_doc()

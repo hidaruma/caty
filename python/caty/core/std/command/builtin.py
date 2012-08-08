@@ -498,7 +498,6 @@ class PassData(Builtin):
     
    
     def execute(self, input):
-        print self.in_schema
         return input
 
 class Default(Builtin):
@@ -1069,7 +1068,8 @@ class Help(Builtin):
         interpreter = self.interpreter
         line = self.__line.strip()
         if line == '':
-            line = 'help'
+            self.__line = u'help'
+            line = u'help'
         if line in ('change', 'reload', 'l', 'quit', 'ch', 'cd', 'server'):
             from caty.front.console import CatyShell
             h = getattr(CatyShell, 'do_%s' % line)
