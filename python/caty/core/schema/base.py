@@ -932,6 +932,9 @@ class TypeVariable(SchemaBase, Scalar):
         self._default_schema = None
         SchemaBase.__init__(self, options)
 
+    def __repr__(self):
+        return '<%s>: %s, %s, %s, ' % (self.var_name, repr(self._type_arguments), repr(self._schema), repr(self._default))
+
     @property
     def default(self):
         return self._default
@@ -1326,6 +1329,7 @@ class TypeReference(SchemaBase, Scalar, Ref):
         self.module = module
         self.annotations = Annotations([])
         self.body = None
+        self.applied = False
 
     def intersect(self, another):
         return self.body & another

@@ -205,12 +205,14 @@ class CommandProfile(object):
 
     def apply(self, node, module):
         from caty.core.casm.cursor.typevar import TypeVarApplier
+        from caty.core.casm.cursor.normalizer import TypeNormalizer
+        tn = TypeNormalizer(module)
         tc = TypeVarApplier(module)
         tc._init_type_params(node)
         tc.real_root = False
-        i = self._in_schema.accept(tc)
-        o = self._out_schema.accept(tc)
-        a = self.__arg0_schema.accept(tc)
+        i = tn.visit(self._in_schema.accept(tc))
+        o = tn.visit(self._out_schema.accept(tc))
+        a = tn.visit(self.__arg0_schema.accept(tc))
         return i, o, a
 
 def check_enum(t, name, option, opt_str, value, parser):
