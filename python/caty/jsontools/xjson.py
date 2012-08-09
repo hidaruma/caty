@@ -23,7 +23,7 @@ def _toxml(o, p, doc):
     elif o is False:    
         e = doc.createElement('false')
         p.appendChild(e)
-    elif isinstance(o, (int, Decimal)):
+    elif isinstance(o, (int, long, Decimal)):
         e = doc.createElement('number')
         t = doc.createTextNode(unicode(str(o)))
         e.appendChild(t)

@@ -360,7 +360,7 @@ class PPEncoder(CatyEncoder):
                     yield e
             elif isinstance(o, TagOnly):
                 yield u'@%s' % (o.tag)
-            elif not isinstance(o, (basestring, bool, int, decimal.Decimal, InternalDecimal, dict, list, tuple)) and o is not None:
+            elif not isinstance(o, (basestring, bool, int, long, decimal.Decimal, InternalDecimal, dict, list, tuple)) and o is not None:
                 from caty import UNDEFINED
                 if o is UNDEFINED:
                     yield u"#'undefined"

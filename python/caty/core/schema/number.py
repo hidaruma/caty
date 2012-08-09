@@ -21,11 +21,11 @@ class NumberSchema(ScalarSchema):
         elif self.optional and value == None:
             return
         if self.is_integer:
-            if not (isinstance(value, int) or (isinstance(value, Decimal) and value == int(value)))or isinstance(value, bool):
+            if not (isinstance(value, (int, long)) or (isinstance(value, Decimal) and value == int(value)))or isinstance(value, bool):
                 raise JsonSchemaError(dict(msg=u'value should be $type', type='integer'), value, '')
         if isinstance(value, bool):
             raise JsonSchemaError(dict(msg=u'value should be $type', type='number'), value, '')
-        if not isinstance(value, (Decimal, int)):
+        if not isinstance(value, (Decimal, int, long)):
             raise JsonSchemaError(dict(msg=u'value should be $type', type='number'), value, '')
         if self.minimum != None and self.minimum > value:
             raise JsonSchemaError(dict(msg=u'value should be greater than $val', val=self.minimum), value, '')
