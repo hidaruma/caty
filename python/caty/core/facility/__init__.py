@@ -221,6 +221,10 @@ class TransactionAdaptor(Command):
         self._facilities = facilities
         self._command = command
         self.isRunningAsync = False
+    
+    @property
+    def cmd(self):
+        return self._command
 
     @property
     def profile_container(self):

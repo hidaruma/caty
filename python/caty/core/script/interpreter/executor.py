@@ -36,10 +36,13 @@ class CommandExecutor(BaseInterpreter):
                 if e.cont is None:
                     return e.data
                 self.cmd = e.cont
-                self.data = e.data
+                self.input = e.data
             except KeyboardInterrupt as e:
                 print e
                 return None
+
+    def accept(self, visitor):
+        return self.cmd.accept(visitor)
 
     def visit_command(self, node):
         return self._exec_command(node, self._do_command)
