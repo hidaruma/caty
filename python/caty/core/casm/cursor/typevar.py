@@ -24,9 +24,9 @@ class TypeVarApplier(SchemaBuilder):
         r = self.real_root
         if r:
             self._init_type_params(node)
-        else:
-            self._mask_scope(node)
         body = node.body.accept(self)
+        if self.debug:
+            print '>>>>>>', self.dump_scope(), TreeDumper(True).visit(node.body)
         if r:
             node._schema = body
             self.current = None
@@ -35,10 +35,18 @@ class TypeVarApplier(SchemaBuilder):
             self.history = dict()
             return node
         else:
-            self._unmask_scope()
             s = NamedSchema(node.name, node._type_params, body, node.module)
             s._options = node.options
             return s
+
+    def dump_scope(self):
+        r = []
+        for s in self.type_args.scope:
+            o = {}
+            for k, v in s.items():
+                o[k] = TreeDumper(True).visit(v)
+            r.append(o)
+        return r
 
     def _init_type_params(self, node):
         self.current = node
@@ -49,37 +57,35 @@ class TypeVarApplier(SchemaBuilder):
             parameters[v.var_name] = v
         self.type_args = OverlayedDict(parameters)
 
-    def _mask_scope(self, node):
+    def _mask_scope(self):
         self.scope_stack.append(self.type_args)
-        self.type_args.new_scope()
-        for p, v in zip(node.type_params, node.type_args):
-            self.type_args[p.var_name] = v
+        self.type_args = OverlayedDict({})
+        #for p, v in zip(node.type_params, node.type_args):
+        #    self.type_args[p.var_name] = v
 
     def _unmask_scope(self):
         self.type_args = self.scope_stack.pop(-1)
-        self.type_args.del_scope()
 
     @apply_annotation
     def _visit_scalar(self, node):
         if isinstance(node, TypeReference):
-            self.type_args.new_scope() 
+            self.type_args.new_scope()
             try:
-                arg_memo = [node.name, tuple(node.options.items())]
+                if self.debug:
+                    print '>>', TreeDumper(True).visit(node), node.type_args, node.type_params, self.type_args
                 ta = zip(node.type_params, node.type_args)
+                args = []
                 for param, type in ta:
                     a = type.accept(self)
-                    if not node.applied:
-                        self.type_args[param.var_name] = a
-                        v = TreeDumper(True).visit(a)
-                        arg_memo.append((param.var_name, v))
-                key = tuple(arg_memo)
+                    self.type_args[param.var_name] = a
+                    args.append(a)
+                key = (TreeDumper(True).visit(node), tuple(node.options.items()), tuple(ta))
                 if key in self.history:
                     return self.history[key]
-                r = TypeReference(node.name, node.type_args, node.module)
+                r = TypeReference(node.name, args, node.module)
                 self.history[key] = r
                 r.body = node.body.accept(self)
                 r._options = node.options
-                r.applied = True
                 return r
             finally:
                 self.type_args.del_scope()
@@ -97,3 +103,29 @@ class TypeVarApplier(SchemaBuilder):
     def _visit_kind(self, node):
         return node
 
+class TypeParamApplier(SchemaBuilder):
+    @apply_annotation
+    def _visit_scalar(self, node):
+        if isinstance(node, TypeReference):
+            self.type_args.new_scope() 
+            try:
+                ta = zip(node.type_params, node.type_args)
+                args = []
+                for param, type in ta:
+                    a = type.accept(self)
+                    args.append(a)
+                new_node = TypeReference(node.name, args, node.module)
+                new_node.body = node.body
+                return new_node
+            finally:
+                self.type_args.del_scope()
+        elif isinstance(node, TypeVariable):
+            if node.var_name in self.type_args:
+                r = self.type_args[node.var_name]
+                if isinstance(r, TypeParam):
+                    return node
+                else:
+                    return r._schema if r._schema else r
+            else:
+                return node
+        return node
