@@ -343,9 +343,10 @@ class ScriptParser(Parser):
         return v
 
     def parameter_opt(self, seq):
+        from caty.core.language import _name_token_ptn
         if option(S(u'%--*'))(seq):
             return GlobOption()
-        name = seq.parse(Regex(r'%--[a-zA-Z]+[-a-zA-Z0-9_]*\??'))[3:]
+        name = seq.parse(Regex(r'%%--%s\??' % _name_token_ptn, re.X))[3:]
         optional = False
         if name.endswith('?'):
             name = name[:-1]
@@ -354,12 +355,13 @@ class ScriptParser(Parser):
     
 
     def named_arg(self, seq):
+        from caty.core.language import _name_token_ptn
         if option(S(u'%#'))(seq):
             return GlobArg()
         if option(S('%?'))(seq):
             return Argument(caty.UNDEFINED)
 
-        name = seq.parse(Regex(r'%[a-zA-Z]+[-a-zA-Z0-9_]*\??'))[1:]
+        name = seq.parse(Regex(r'%%%s\??' % _name_token_ptn, re.X))[1:]
         optional = False
         if name.endswith('?'):
             name = name[:-1]
