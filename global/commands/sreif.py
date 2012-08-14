@@ -75,7 +75,7 @@ class ShallowReifier(object):
         return {
             'name': m.canonical_name,
             'place': p,
-            'document': make_structured_doc(m.docstring),
+            'document': {'description': m.docstring, 'moreDescription': m.more_docstring},
         }
 
     def reify_type(self, t):
@@ -273,13 +273,14 @@ class ShowPackage(SafeReifier):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, pkg_name, _ = split_colon_dot_path(self._cdpath)
+        app = None
         if app_name == 'this' or not app_name and not pkg_name:
             app = self.current_app
         elif app_name:
             app = system.get_app(app_name)
         if not pkg_name and _:
             pkg_name = _
-        if not pkg_name:
+        if not pkg_name or not app:
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         return reifier.reify_package(app._schema_module.get_package(pkg_name))
 

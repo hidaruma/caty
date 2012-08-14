@@ -18,6 +18,8 @@ from caty.core.casm.cursor import (SchemaBuilder,
 from caty.core.casm.plugin import PluginMap
 from caty.jsontools.path.validator import to_decl_style
 from caty.core.exception import throw_caty_exception, CatyException, SystemResourceNotFound
+from caty.util.path import join
+from caty.jsontools import xjson
 from threading import RLock
 from StringIO import StringIO
 from caty.core.facility import Facility
@@ -433,7 +435,6 @@ class Module(Facility):
 
 class _FaciltyLoader(object):
     def __init__(self, clsref, facility_name, module):
-        from caty.util.path import join
         self.path = facility_name + '.py'
         self.abspath = join(module._app._physical_path, module.name, self.path)
         self.name = facility_name
@@ -595,6 +596,10 @@ class AppModule(Module):
             raise Exception(self.application.i18n.get(u'Package $name is already defined in $app', 
                                                       name=module.name, 
                                                       app=self.get_package(mod.name)._app.name))
+        with self.fs.open(join(e.path, mod.PACKAGE_FILE)) as pkg:
+            pkginfo = xjson.loads(pkg.read())
+            mod.docstring = pkginfo.get('description')
+            mod.more_docstring = pkginfo.get('moreDescription')
         self.sub_packages[mod.name] = mod
 
     def _get_module_class(self):
@@ -719,6 +724,11 @@ class AppModule(Module):
 
 class Package(AppModule):
     is_package = True
+    PACKAGE_FILE = u'_manifest.xjson'
+
+    def __init__(self, *args, **kwds):
+        AppModule.__init__(self, *args, **kwds)
+        self.more_docstring = u''
 
     def _get_module_class(self):
         return AppModule
