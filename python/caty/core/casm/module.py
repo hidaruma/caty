@@ -18,6 +18,7 @@ from caty.core.casm.cursor import (SchemaBuilder,
 from caty.core.casm.plugin import PluginMap
 from caty.jsontools.path.validator import to_decl_style
 from caty.core.exception import throw_caty_exception, CatyException, SystemResourceNotFound
+from caty.util import error_to_ustr
 from caty.util.path import join
 from caty.jsontools import xjson
 from threading import RLock
@@ -598,7 +599,12 @@ class AppModule(Module):
                                                       app=self.get_package(mod.name)._app.name))
         with self.fs.open(join(e.path, mod.PACKAGE_FILE)) as pkg:
             if pkg.exists:
-                pkginfo = xjson.loads(pkg.read())
+                c = pkg.read()
+                try:
+                    pkginfo = xjson.loads(c)
+                except Exception as e:
+
+                    raise Exception(self.application._system.i18n.get(u'Failed to parse JSON: $path\n$error', path=pkg.path, error=error_to_ustr(e)))
                 mod.docstring = pkginfo.get('description')
                 mod.more_docstring = pkginfo.get('moreDescription')
         self.sub_packages[mod.name] = mod
