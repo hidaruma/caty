@@ -597,9 +597,10 @@ class AppModule(Module):
                                                       name=module.name, 
                                                       app=self.get_package(mod.name)._app.name))
         with self.fs.open(join(e.path, mod.PACKAGE_FILE)) as pkg:
-            pkginfo = xjson.loads(pkg.read())
-            mod.docstring = pkginfo.get('description')
-            mod.more_docstring = pkginfo.get('moreDescription')
+            if pkg.exists:
+                pkginfo = xjson.loads(pkg.read())
+                mod.docstring = pkginfo.get('description')
+                mod.more_docstring = pkginfo.get('moreDescription')
         self.sub_packages[mod.name] = mod
 
     def _get_module_class(self):
