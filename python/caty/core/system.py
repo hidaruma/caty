@@ -40,7 +40,12 @@ class System(PbcObject):
             encoding = locale.getpreferredencoding()
         self._init_temp()
         self._init_logger()
-        gcfg = xjson.load(open('_global.xjson'))
+        global_file = ['_global.xjson', 'prj-manifest.xjson']
+        for f in global_file:
+            if os.path.exists(f):
+                gcfg = xjson.load(open(f))
+                if f == '_global.xjson':
+                    self._deprecate_logger.warning(u'_global.xjson is deprecated.')
         self._global_config = GlobalConfig(gcfg, 
                                            self._validate_encoding(encoding))
         self._global_app = None

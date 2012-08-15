@@ -225,8 +225,17 @@ class Application(PbcObject):
             except Exception, e:
                 self._system.i18n.write(u'Failed to parse JSON: $path\n$error', path=f.path, error=error_to_ustr(e))
                 raise
+            self._system.deprecate_logger.warning(u'%s: _manifest.xjson is deprecated.' % self.name)
         else:
-            cfg = self.default_conf()
+            f = app_dir.create(u'reads').open('/app-manifest.xjson')
+            if f.exists:
+                try:
+                    cfg = xjson.loads(f.read())
+                except Exception, e:
+                    self._system.i18n.write(u'Failed to parse JSON: $path\n$error', path=f.path, error=error_to_ustr(e))
+                    raise
+            else:
+                cfg = self.default_conf()
         manifest_type = self._system._casm._core.schema_finder.get_type('AppManifest')
         manifest_type.validate(cfg)
         cfg = manifest_type.fill_default(cfg)

@@ -731,7 +731,7 @@ class AppModule(Module):
 
 class Package(AppModule):
     is_package = True
-    PACKAGE_FILE = u'_manifest.xjson'
+    PACKAGE_FILE = u'pkg-manifest.xjson'
 
     def __init__(self, *args, **kwds):
         AppModule.__init__(self, *args, **kwds)
