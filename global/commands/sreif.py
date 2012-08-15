@@ -134,30 +134,53 @@ class ListApplications(Command):
 
 class ListModules(SafeReifier):
     def _execute(self):
-        app_name = self._cdpath
-        system = self.current_app._system
-        if app_name == 'this':
-            app = self.current_app
-        else:
-            app = system.get_app(app_name)
         reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, pkg_name, _ = split_colon_dot_path(self._cdpath)
+        if not pkg_name and _:
+            pkg_name = _
+        app = None
+        if app_name == 'this' or not app_name and not pkg_name:
+            app = self.current_app
+        elif app_name:
+            app = system.get_app(app_name)
+        if not app:
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         r = []
-        for m in app._schema_module.get_modules():
-            r.append(reifier.reify_module(m))
+        reifier = ShallowReifier()
+        if pkg_name:
+            pkg = app._schema_module.get_package(pkg_name)
+            for m in pkg.get_modules():
+                r.append(reifier.reify_module(m))
+        else:
+            for m in app._schema_module.get_modules():
+                r.append(reifier.reify_module(m))
         return r
 
 class ListPackages(SafeReifier):
     def _execute(self):
-        app_name = self._cdpath
-        system = self.current_app._system
-        if app_name == 'this':
-            app = self.current_app
-        else:
-            app = system.get_app(app_name)
         reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, pkg_name, _ = split_colon_dot_path(self._cdpath)
+        if not pkg_name and _:
+            pkg_name = _
+        app = None
+        if app_name == 'this' or not app_name and not pkg_name:
+            app = self.current_app
+        elif app_name:
+            app = system.get_app(app_name)
+        if not app:
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         r = []
-        for m in app._schema_module.get_packages():
-            r.append(reifier.reify_package(m))
+        reifier = ShallowReifier()
+        if pkg_name:
+            pkg = app._schema_module.get_package(pkg_name)
+            for m in pkg.get_packages():
+                if pkg == m: continue
+                r.append(reifier.reify_module(m))
+        else:
+            for m in app._schema_module.get_packages():
+                r.append(reifier.reify_module(m))
         return r
 
 class ListTypes(SafeReifier):

@@ -234,7 +234,7 @@ class BasicCDPSplitter(Parser):
         if mod_name:
             mod_name = mod_name.strip(':')
         if not seq.eof:
-            raise ParseFailed(u'not a colon dot path: %s' % seq.text, seq)
+            raise ParseFailed(seq, u'not a colon dot path: %s' % seq.text)
         return app_name, mod_name, name
 
 class CDPSplitter(Parser):
