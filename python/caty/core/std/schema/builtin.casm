@@ -109,6 +109,11 @@ type AppManifest = {
     "description": string?,
 
     /**
+     * アプリケーションのより詳しい説明
+     */
+    "moreDescription": string?,
+
+    /**
      * アプリケーションの無効化の設定
      */
     "disabled": boolean?,
@@ -139,8 +144,40 @@ type AppManifest = {
     "assign": {
         *:string,
     }?,
-    *:any
+
+    /** ディレクトリに対するインデックスファイルの名前 */
+    "indexFiles": [string(remark="ファイル名")*]?,
+
+
+    /** HTTPメソッドトンネリングを有効にするかどうか */
+    "enableHTTPMethodTunneling" : boolean?,
+
+
+//    *:any
 };
+
+
+/**
+ * パッケージの設定ファイル
+ */
+type PkgManifest = {
+    /**
+     * パッケージの説明
+     */
+    "description": string?,
+
+    /**
+     * パッケージのより詳しい説明
+     */
+    "moreDescription": string?,
+
+};
+
+
+/**
+ * プロジェクト全体の設定フィアル。
+ */
+type PrjManifest = GlobalConfig;
 
 /**
  * Caty全体の設定ファイル。
@@ -150,6 +187,17 @@ type GlobalConfig = {
      * プロジェクト名。省略時はカレントディレクトリの名前が設定される。
      */
     "projectName": string?,
+
+    /**
+     * プロジェクトの説明
+     */
+    "description": string?,
+
+    /**
+     * プロジェクトのより詳しい説明
+     */
+    "moreDescription": string?,
+
     /**
      * mafs実装のモジュール名
      */
