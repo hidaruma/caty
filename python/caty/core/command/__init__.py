@@ -125,7 +125,10 @@ class Command(object):
                     sb._type_params = self.type_params
                     rr = self.__module.make_reference_resolver()
                     tn = self.__module.make_type_normalizer()
-                    t = tn.visit(s.accept(sb).accept(rr))
+                    ta = self.__module.make_typevar_applier()
+                    ta._init_type_params(self)
+                    ta.real_root = False
+                    t = tn.visit(s.accept(sb).accept(rr)).accept(ta)
                     x = p.clone(set())
                     x._schema = t
                     _ta.append(x)
