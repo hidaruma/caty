@@ -204,14 +204,13 @@ class CommandProfile(object):
         return self.declobj.get_command_class()
 
     def apply(self, node, module):
-        from caty.core.casm.cursor.typevar import TypeVarApplier, TreeDumper
-        tc = TypeVarApplier(module)
-        tc._init_type_params(node)
-        tc.real_root = False
-        i = self._in_schema.accept(tc)
-        o = self._out_schema.accept(tc)
-        a = self.__arg0_schema.accept(tc)
-        return i, o, a
+        r = []
+        for s in [self._in_schema, self._out_schema, self.__arg0_schema]:
+            tc = module.make_typevar_applier()
+            tc._init_type_params(node)
+            tc.real_root = False
+            r.append(s.accept(tc))
+        return r
 
 def check_enum(t, name, option, opt_str, value, parser):
     from caty.core.casm.cursor import TreeDumper

@@ -120,10 +120,14 @@ class Command(object):
             l = len(self.__type_args)
             for i, p in enumerate(self.profile_container.type_params):
                 if i < l:
-                    t = self.__type_args[i]
-                    s = schema.get_type(t)
+                    s = self.__type_args[i]
+                    sb = self.__module.make_schema_builder()
+                    sb._type_params = self.type_params
+                    rr = self.__module.make_reference_resolver()
+                    tn = self.__module.make_type_normalizer()
+                    t = tn.visit(s.accept(sb).accept(rr))
                     x = p.clone(set())
-                    x._schema = s
+                    x._schema = t
                     _ta.append(x)
         if _ta:
             self.apply_type_params(_ta)

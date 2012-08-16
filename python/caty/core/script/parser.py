@@ -147,10 +147,8 @@ class ScriptParser(Parser):
         return JsonPath(stm, pos)
 
     def type_args(self, seq):
-        seq.parse('<')
-        types = split(self.name, ',', allow_last_delim=False)(seq)
-        seq.parse('>')
-        return types
+        from caty.core.casm.language.schemaparser import type_var
+        return type_var(seq)
 
     def arguments(self, seq):
         args = filter(lambda a: a is not None, seq.parse(many(try_(self.arg))))

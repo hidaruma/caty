@@ -373,7 +373,12 @@ Web サーバの起動・停止を行う
 
     def not_void_out(self, command):
         from caty.core.casm.cursor import SchemaBuilder
+        from caty.core.schema.base import TypeVariable
         scm = command.out_schema
+        while isinstance(scm, TypeVariable):
+            scm = scm._schema if scm._schema else scm._default_schema
+            if not scm:
+                return False
         if scm.type == 'void':
             return False
         elif scm.type == 'array':
