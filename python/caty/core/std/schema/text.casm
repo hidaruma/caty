@@ -6,7 +6,7 @@ module text in casm;
 type RegexpMatch = {
     "src": string,
     "group": string,
-    "groups": [string*],
+    "groups": [(string|null)*],
 };
 
 /**
