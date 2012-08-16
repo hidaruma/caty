@@ -1,0 +1,126 @@
+/* -*- coding: utf-8 -*-  */
+
+/** Rec（レコード）モナド
+ */
+@[register-public]
+module rec-monad;
+
+/** コマンドライン文字列
+ * CatyScriptは高階の対象（指数対象）を直接は扱えない。
+ * しょうがないから、文字列として実行すべきコードを渡す。
+ */
+type commandStr = string(remark="コマンドライン文字列");
+
+/** モナド台関手の対象部分 
+ */
+type Rec<T> = {
+  *: T?
+};
+
+/** 名前パスをドットで連結する
+ * 連結はモノイド演算となり、単位元は空文字列
+ */
+command dot-concat :: [string, string] -> string {
+ [
+   nth 1 > fst,
+   nth 2 > snd,
+ ];
+
+ %fst |
+ cond {
+   "" => %snd,
+   *  =>
+     %snd |
+     cond {
+       "" => %fst,
+       *  => [%fst, ".", %snd] | text:concat,
+     }
+ }
+};
+
+/** 引数で指定された文字列を、ネスト配列の各項目の第1項目にドット前置する 
+ */
+command prefix-names [string pref] :: [[string, any]*] -> [[string, any]*] {
+  pass > in;
+  %1   > pref;
+  %in |
+  each {
+    [
+      nth 1 > name,
+      nth 2 > value,
+    ];
+    [
+      [%pref, %name] | dot-concat,
+      %value,
+    ]
+  }
+};
+
+/** モナドのその他の構成要素 
+ */
+class Rec {
+  /** モナド台関手の射部分 
+   * Rec型のmap関数
+   */
+  command map<S, T> [commandStr /* S -> T */] :: Rec<S> -> Rec<T> {
+    each --obj {
+      [pass, %1] | eval
+    }
+  };
+
+  /** モナド単位 */
+  command unit<T> :: T -> Rec<T> {
+    {"": pass}
+  };
+
+  /** モナド乗法 */
+  command flatten<T> :: Rec<Rec<T>> -> Rec<T> {
+    each {
+      object-to-array | prefix-names %_key
+    } | list:concat | array-to-object
+  };
+};
+
+
+
+type StringRec = Rec<string>;
+type StringRecRec = Rec<Rec<string>>;
+
+
+const REC-REC = {
+ "a": {
+    "x": "hello",
+    "y": "world",
+  },
+  "b": {"":"Hi"}
+};
+
+const REC-REC-REC = {
+ "a": {
+    "x": {"h":"hello"},
+    "y": {"w": "world"},
+  },
+};
+
+
+
+/** Rec<Rec<integer>> の別名 */
+type NestedRec = Rec<Rec<integer>>;
+
+/** Rec<string> のサンプル */
+const STR-REC = {
+ "a": "Hello",
+ "b": "World",
+};
+
+/** Rec<Rec<integer>> のサンプル */
+const NESTED-REC = {
+ "a": {
+    "x": 1,
+    "y": 2,
+    "w.z": 3,
+  },
+  "b": {"":4}
+};
+
+// End of Module

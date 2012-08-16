@@ -1,0 +1,50 @@
+// -*- coding: utf-8 -*-
+/** ツリーレコード（TreeRec）モナド
+ */
+@[register-public]
+module treerec-monad;
+
+/** コマンドライン文字列
+ * CatyScriptは高階の対象（指数対象）を直接は扱えない。
+ * しょうがないから、文字列として実行すべきコードを渡す。
+ */
+// type commandStr = string(remark="コマンドライン文字列");
+
+/** モナド台関手の対象部分 
+ * TreeRecは、再帰的な総称型である。
+ */
+type TreeRec<T> = {
+  *: (T | TreeRec<T>)?
+};
+
+/** モナドのその他の構成要素 
+ */
+class TreeRec {
+  /** モナド台関手の射部分 
+   * TreeRec型のmap関数
+   * TreeRec型が再帰的なので、再帰的コマンドになる。
+   */
+  command map<S, T> [commandStr /* S -> T */] :: TreeRec<S> -> TreeRec<T> {
+    each --obj {
+      when {
+        object => TreeRec.map<S, T> %1 ,
+        *      => [pass, %1] | eval ,
+      }
+    }
+  };
+
+  /** モナド単位 */
+  command unit<T> :: T -> TreeRec<T> {
+    {"": pass}
+  };
+
+  /** モナド乗法 */
+  command flatten<T> :: TreeRec<TreeRec<T>> -> TreeRec<T> {
+    /* TreeRec はベキ等モナドである */
+    pass
+  };
+};
+
+// End of Module
+
+

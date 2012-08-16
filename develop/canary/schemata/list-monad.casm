@@ -1,0 +1,22 @@
+// -*- coding: utf-8 -*-
+/** リストモナド */
+@[register-public]
+module list-monad;
+
+type List<T> = [T*];
+
+class List {
+  command map<S, T> [commandStr /* S -> T */] :: List<S> -> List<T> {
+    each {
+      [pass, %1] | eval
+    }
+  };
+  command unit<T> :: T -> List<T> {
+    [pass]
+  };
+  command flatten<T> :: List<List<T>> -> List<T> {
+    list:concat
+  };
+};
+
+// End of Module
