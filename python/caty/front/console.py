@@ -378,7 +378,7 @@ Web サーバの起動・停止を行う
         while isinstance(scm, TypeVariable):
             scm = scm._schema if scm._schema else scm._default_schema
             if not scm:
-                return False
+                return True
         if scm.type == 'void':
             return False
         elif scm.type == 'array':
