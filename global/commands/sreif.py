@@ -194,7 +194,7 @@ class ListTypes(SafeReifier):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, _ = split_colon_dot_path(self._cdpath)
-        if not app_name:
+        if not app_name or app_name == 'this':
             app = self.current_app
         else:
             app = system.get_app(app_name)
@@ -212,7 +212,7 @@ class ListStates(SafeReifier):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, _ = split_colon_dot_path(self._cdpath)
-        if not app_name:
+        if not app_name or app_name == 'this':
             app = self.current_app
         else:
             app = system.get_app(app_name)
@@ -233,7 +233,7 @@ class ListResources(SafeReifier):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, _ = split_colon_dot_path(self._cdpath)
-        if not app_name:
+        if not app_name or app_name == 'this':
             app = self.current_app
         else:
             app = system.get_app(app_name)
@@ -253,7 +253,7 @@ class ListActions(SafeReifier):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, res_name = split_colon_dot_path(self._cdpath)
-        if not app_name:
+        if not app_name or app_name == 'this':
             app = self.current_app
         else:
             app = system.get_app(app_name)
@@ -339,7 +339,7 @@ class ShowState(SafeReifier):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, name = split_colon_dot_path(self._cdpath)
-        if not app_name:
+        if not app_name or app_name == 'this':
             app = self.current_app
         else:
             app = system.get_app(app_name)
@@ -358,7 +358,7 @@ class ShowResource(SafeReifier):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, name = split_colon_dot_path(self._cdpath)
-        if not app_name:
+        if not app_name or app_name == 'this':
             app = self.current_app
         else:
             app = system.get_app(app_name)
@@ -377,7 +377,7 @@ class ShowAction(SafeReifier):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, name = split_colon_dot_path(self._cdpath)
-        if not app_name:
+        if not app_name or app_name == 'this':
             app = self.current_app
         else:
             app = system.get_app(app_name)
