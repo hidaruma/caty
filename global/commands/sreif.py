@@ -122,6 +122,11 @@ class SafeReifier(Command):
                 return UNDEFINED
             raise
 
+class SafeReifierWithDefaultApp(SafeReifier):
+    def setup(self, opts, cdpath=u'this'):
+        self._cdpath = cdpath
+        self._safe = opts.get('safe', False)
+
 class ListApplications(Command):
 
     def execute(self):
@@ -132,12 +137,12 @@ class ListApplications(Command):
             r.append(reifier.reify_app(a))
         return r
 
-class ListModules(SafeReifier):
+class ListModules(SafeReifierWithDefaultApp):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, pkg_name, _ = split_colon_dot_path(self._cdpath)
-        if not pkg_name and _:
+        if app_name and not pkg_name and _:
             pkg_name = _
         app = None
         if app_name == 'this' or not app_name and not pkg_name:
@@ -157,12 +162,12 @@ class ListModules(SafeReifier):
                 r.append(reifier.reify_module(m))
         return r
 
-class ListPackages(SafeReifier):
+class ListPackages(SafeReifierWithDefaultApp):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, pkg_name, _ = split_colon_dot_path(self._cdpath)
-        if not pkg_name and _:
+        if app_name and not pkg_name and _:
             pkg_name = _
         app = None
         if app_name == 'this' or not app_name and not pkg_name:
@@ -260,18 +265,22 @@ class ListActions(SafeReifier):
             r.append(reifier.reify_action(s))
         return r
 
-class ShowApplication(SafeReifier):
+class ShowApplication(SafeReifierWithDefaultApp):
 
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, name = split_colon_dot_path(self._cdpath)
         if app_name:
-            app = system.get_app(app_name)
+            pass
         elif not app_name and not module_name:
-            app = system.get_app(name)
+            app_name = name
         else:
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
+        if app_name == 'this':
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
         return reifier.reify_app(app)
 
 class ShowModule(SafeReifier):

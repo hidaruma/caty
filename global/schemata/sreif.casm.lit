@@ -212,7 +212,7 @@ command list-facilities
     @[default(false)]
     "safe": boolean?,
   }
-  [cdpath app]
+  [cdpath? app]
 :: void -> [FacilitySummary*]?
 ;
 
@@ -225,7 +225,7 @@ command list-modules
     @[default(false)]
     "safe": boolean?,
   }
-  [cdpath app-pkg]
+  [cdpath? app-pkg]
 :: void -> [ModuleSummary*]
  refers python:sreif.ListModules
 ;
@@ -239,7 +239,7 @@ command list-packages
     @[default(false)]
     "safe": boolean?,
   }
-  [cdpath app-pkg]
+  [cdpath? app-pkg]
 :: void -> [PackageSummary*]?
  refers python:sreif.ListPackages
 ;
@@ -367,7 +367,7 @@ command show-application
     @[default(false)]
     "safe": boolean?,
   }
-  [cdpath app]
+  [cdpath? app]
 :: void -> ApplicationSummary?
  refers python:sreif.ShowApplication
 ;
