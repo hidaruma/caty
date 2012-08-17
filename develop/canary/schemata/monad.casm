@@ -1,0 +1,50 @@
+// -*- coding: utf-8 -*-
+module monad; 
+
+type controlToken = ("escape" | "noescape" | "compact" | "preserve");
+
+/** モナド台関手の対象部分 */
+type Controlled<T> = {
+  "control": [controlToken*],
+  "data"  : T
+};
+
+
+type commandStr = string(remark="コマンドライン文字列");
+
+/** モナド台関手の射部分 */
+command controlled<S, T> [commandStr cmd] :: Controlled<S> -> Controlled<T> {
+  %1 > cmd;
+  do {
+    pv control             >: "control", 
+    [pv data, %cmd] | eval >: "data"
+  }
+};
+
+/** モナド単位 */
+command embed<T> :: T -> Controlled<T> {
+  do {
+    []    >: "control",
+    pass  >: "data"
+  }
+};
+
+
+/** モナド乗法 */
+command flatten<T> :: Controlled<Controlled<T>> -> Controlled<T> {
+  [pv control > outer-control, pv data > outer-data];
+  %outer-data |
+  [pv control > inner-control, pv data > inner-data];
+
+  do {
+    [%inner-control, %outer-control] | list:concat >: "control",
+    %inner-data                                    >: "data"
+  }
+};
+
+
+
+
+// End of Module
+
+

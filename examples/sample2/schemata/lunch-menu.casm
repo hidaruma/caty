@@ -400,6 +400,7 @@ command call-target-and-client :: Trigger -> any/*never */ {
  %response | forward lunch-menu:client
 };
 
+// これはうまく動かない
 command client-loop [integer(minimum=0) n] :: void -> void {
  %1 > n | num:is-zero |
  when {
@@ -407,7 +408,7 @@ command client-loop [integer(minimum=0) n] :: void -> void {
    False => %1 | num:dec > n-1,
  };
  %n | to-string | logging:info;
- null | client lunch-menu:Menu.get;
+ null | client lunch-menu:Menu.get; // ここで制御が飛ぶ
  forward lunch-menu:client-loop %n-1
 };
 

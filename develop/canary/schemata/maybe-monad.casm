@@ -1,0 +1,39 @@
+// -*- coding: utf-8 -*-
+/** Maybe モナド */
+@[register-public]
+module maybe-monad;
+
+type Maybe<T> = {
+  "ok": boolean,
+  "val": T?,
+};
+
+class Maybe {
+  command map<S, T> [commandStr /* S -> T */] :: Maybe<S> -> Maybe<T> {
+    pass > in |
+    $.ok |
+    cond {
+      false => {"ok": false},
+      true  => [%in | $.val, %1] | eval > val; {"ok": true, "val": %val},
+    }
+  };
+  command unit<T> :: T -> Maybe<T> {
+    {"ok": true, "val": pass}
+  };
+  command flatten<T> :: Maybe<Maybe<T>> -> Maybe<T> {
+    pass > in |
+    $.ok |
+    cond {
+      false => {"ok": false},
+      true  => %in | $.val.ok | 
+        cond {
+          false => {"ok": false},
+          true  => {"ok": true, "val": (%in | $.val.val)},
+        },
+    }
+  };
+};
+
+// End of Module
+
+
