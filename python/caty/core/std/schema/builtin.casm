@@ -148,11 +148,6 @@ type AppManifest = {
     /** ディレクトリに対するインデックスファイルの名前 */
     "indexFiles": [string(remark="ファイル名")*]?,
 
-
-    /** HTTPメソッドトンネリングを有効にするかどうか */
-    "enableHTTPMethodTunneling" : boolean?,
-
-
 //    *:any
 };
 
