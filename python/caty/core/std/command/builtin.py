@@ -370,8 +370,12 @@ from caty.core.language import util
 import operator
 class TypeCalculator(object):
     def set_schema(self, s):
+        tn = self.schema.make_type_normalizer()
         scm = self.parse(s)
-        self.converter = scm
+        if self.type_params[0]._schema:
+            self.converter = tn.visit(self.type_params[0]._schema & scm)
+        else:
+            self.converter = scm
 
     def parse(self, s):
         return as_parser(self.parse_type).run(s, auto_remove_ws=True)
@@ -463,7 +467,7 @@ class Translate(Builtin, TypeCalculator):
 
 class Validate(Builtin, TypeCalculator):
     
-    def setup(self, opts, schema_name):
+    def setup(self, opts, schema_name=u'univ'):
         self.pred = opts.get('boolean', caty.UNDEFINED)
         self.schema_name = schema_name
         self.set_schema(schema_name)
