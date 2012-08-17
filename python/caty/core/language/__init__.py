@@ -43,6 +43,11 @@ def __docstring(seq):
     try:
         seq.parse(skip_ws)
         seq.parse('/**')
+        if option(peek('/'))(seq):
+            seq.back()
+            seq.back()
+            seq.back() #コメントなので元の位置にカーソルを移動
+            raise ParseFailed(seq, __docstring)
         doc = seq.parse(until('*/')).strip('\n')#Regex(r'/\*\*.+?\*/', re.S))[3:-2].strip('\n')
         seq.parse('*/')
         seq.parse(skip_ws)
