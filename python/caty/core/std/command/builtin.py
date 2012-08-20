@@ -372,7 +372,7 @@ class TypeCalculator(object):
     def set_schema(self, s):
         tn = self.schema.make_type_normalizer()
         scm = self.parse(s)
-        if self.type_params[0]._schema:
+        if self.type_params and self.type_params[0]._schema:
             self.converter = tn.visit(self.type_params[0]._schema & scm)
         else:
             self.converter = scm
