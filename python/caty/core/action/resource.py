@@ -106,6 +106,10 @@ class ResourceClass(object):
         r['url'] = self.url_pattern
         return json.tagged('_res', r)
 
+    @property
+    def canonical_name(self):
+        return self.module + u':' + self.name
+
 class DefaultResource(ResourceClass):
     def __init__(self, url_pattern, actions, module_name, resource_name, docstring=u'Undocumented', annotations=Annotations([])):
         ResourceClass.__init__(self, url_pattern, actions, {}, module_name, resource_name, docstring, annotations)

@@ -101,6 +101,10 @@ class ResourceModuleContainer(object):
         else:
             return r
 
+    def validate_url_patterns(self):
+        for s in self._selectors:
+            s.validate_url_patterns()
+
 class ResourceNode(ClassNode):
     def declare(self, module):
         self.module = module

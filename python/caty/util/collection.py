@@ -360,3 +360,24 @@ class OverlayedDict(dict):
                 r.append(k)
         return r
 
+def filled_zip(seq1, seq2, fill=None):
+    r = []
+    i = 0
+    l1 = len(seq1)
+    l2 = len(seq2)
+    while True:
+        if i >= l1:
+            o1 = fill
+        else:
+            o1 = seq1[i]
+        if i >= l2:
+            o2 = fill
+        else:
+            o2 = seq2[i]
+        if i >= l1 and i>= l2:
+            break
+        r.append((o1, o2))
+        i += 1
+    return r
+
+

@@ -58,6 +58,15 @@ class ResourceSelector(object):
         else:
             return None
 
+    def validate_url_patterns(self):
+        pairs = set([frozenset([e1, e2]) for e1 in self._entries.values() for e2 in self._entries.values() if e1 != e2])
+        for e1, e2 in pairs:
+            if not e1.is_exclusive(e2):
+                throw_caty_exception(u'ResourcePatternError', 
+                                     u'$pattern1 and $pattern2 is not exclusive', 
+                                     pattern1=e1._resource_class.canonical_name, 
+                                     pattern2=e2._resource_class.canonical_name)
+
 NOT_MATCHED = 0
 PATH_MATCHED = 1
 MATCHED = 2
@@ -83,6 +92,29 @@ class PathMatcher(object):
             else:
                 self._entries[p].update(resource_class)
 
+    def is_exclusive(self, another):
+        for p1 in self._resource_class.url_patterns:
+            for p2 in another._resource_class.url_patterns:
+                if not self._is_exclusive_pattern(p1, p2):
+                    return False
+        return True
+
+    def _is_exclusive_pattern(self, p1, p2):
+        from caty.util.collection import filled_zip
+        tokens1 = as_parser(self._split_pattern).run(p1)
+        tokens2 = as_parser(self._split_pattern).run(p2)
+        for ts in filled_zip(tokens1, tokens2):
+            t1, t2 = ts
+            if t1 != t2:
+                if '/' in (t1, t2): # ディレクトリとファイルの比較
+                    return True
+                if not (t1 in ('**', '*') and t2 in ('**', '*')): # 共にglobでない
+                    return True
+        print '[DEBUG]', p1, p2
+        return False
+
+    def _split_pattern(self, seq):
+        return many1(choice(S(u'/'), Regex(u'[^./*]+'), S('*'), S('**'), Regex(ur'\.[^./*]+')))(seq)
 
 class VerbMatcher(object):
     u"""verb dispatch の記述を解析し、 verb と method に応じたスクリプトを返す。

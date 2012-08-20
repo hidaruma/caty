@@ -29,6 +29,7 @@ def create_resource_action_dispatcher(action_fs, facility, app):
             except:
                 app.cout.writeln('NG')
                 raise
+    rmc.validate_url_patterns()
     return rmc
 
 
