@@ -18,6 +18,8 @@ from caty.core.script.proxy import EachProxy as Each
 from caty.core.script.proxy import TimeProxy as Time
 from caty.core.script.proxy import TakeProxy as Take
 from caty.core.script.proxy import StartProxy as Start
+from caty.core.script.proxy import BeginProxy as Begin
+from caty.core.script.proxy import RepeatProxy as Repeat
 from caty.core.script.proxy import DiscardProxy as Discard
 from caty.core.script.proxy import VarStoreProxy as VarStore
 from caty.core.script.proxy import VarRefProxy as VarRef
@@ -46,8 +48,10 @@ class HashNotationFound(Exception):
     pass
 
 class ScriptParser(Parser):
+    DEFAULT = 0
+    BEGIN_REPEAT = 1
     def __init__(self, facilities=None):
-        pass
+        self._context = [self.DEFAULT]
 
     def parse(self, text):
         if not text:
@@ -91,13 +95,23 @@ class ScriptParser(Parser):
     def functor(self, seq):
         import string as str_mod
         k = lambda s: keyword(s, str_mod.ascii_letters + '_.')
-        func = seq.parse([k(u'each'), k(u'take'), k(u'time'), k(u'start')])
+        func = seq.parse([k(u'each'), k(u'take'), k(u'time'), k(u'start'), k(u'begin')])
         try:
-            opts = self.options(seq)
+            if func == 'each':
+                opts = self.options(seq)
+            else:
+                opts = ()
             seq.parse(u'{')
             if seq.eof:
                 raise EndOfBuffer(seq, self.functor)
-            cmd  = self.make_pipeline(seq)
+            if func == 'begin':
+                self._context.append(self.BEGIN_REPEAT)
+            else:
+                self._context.append(self.DEFAULT)
+            try:
+                cmd = self.make_pipeline(seq)
+            finally:
+                self._context.pop(-1)
             seq.parse(u'}')
             if func == u'each':
                 return Each(cmd, opts)
@@ -107,6 +121,8 @@ class ScriptParser(Parser):
                 return Take(cmd, opts)
             elif func == u'start':
                 return Start(cmd, opts)
+            elif func == u'begin':
+                return Begin(cmd, opts)
         except ParseFailed as e:
             raise ParseError(e.cs, self.functor)
 
@@ -212,6 +228,7 @@ class ScriptParser(Parser):
                     self.diagram_order, 
                     self.value, 
                     self.call_forward,
+                    self.repeat,
                     self.command,
                     self.list, 
                     self.var_ref,
@@ -590,6 +607,12 @@ class ScriptParser(Parser):
         obj = seq.parse(option(parsers))
         seq.parse('>')
         raise HashNotationFound(name)
+
+    def repeat(self, seq):
+        S(u'repeat')(seq)
+        if self._context[-1] != self.BEGIN_REPEAT:
+            raise ParseError(seq, u'repeat')
+        return Repeat()
 
 def anything(l):
     return filter(lambda i: i!= None, l)

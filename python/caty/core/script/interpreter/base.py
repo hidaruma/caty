@@ -56,5 +56,11 @@ class BaseInterpreter(object):
     def visit_case(self, node):
         raise NotImplementedError(u'{0}#visit_case'.format(self.__class__.__name__))
 
+    def visit_begin(self, node):
+        raise NotImplementedError(u'{0}#visit_begin'.format(self.__class__.__name__))
+
+    def visit_repeat(self, node):
+        raise NotImplementedError(u'{0}#visit_repeat'.format(self.__class__.__name__))
+    
     def visit_json_path(self, node):
         raise NotImplementedError(u'{0}#visit_json_path'.format(self.__class__.__name__))

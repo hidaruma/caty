@@ -355,7 +355,7 @@ class Branch(object):
 
 
 class Each(Syntax):
-    command_decl = u"""command each-functor-applied<T default any> {"seq":boolean?} :: object|[T*] -> [T*]|object
+    command_decl = u"""command __each-functor-applied<T default any> {"seq":boolean?} :: object|[T*] -> [T*]|object
                                                        {"seq":boolean?, "obj": boolean} :: object -> object
                         refers python:caty.core.script.node.Each;"""
     def __init__(self, cmd, opts_ref):
@@ -388,6 +388,44 @@ class Each(Syntax):
 
     def accept(self, visitor):
         return visitor.visit_each(self)
+
+class Begin(Syntax):
+    command_decl = u"""command __begin<S default univ, T default univ> :: S -> T
+                        refers python:caty.core.script.node.Begin;"""
+    def __init__(self, cmd, opts_ref):
+        Syntax.__init__(self, opts_ref)
+        self.cmd = cmd
+
+    def _finish_opts(self):
+        Syntax._finish_opts(self)
+        o = self.var_storage.opts
+        a = o['_ARGV']
+        v = a[1:] if a else [u'']
+        self._args = v
+
+    def _prepare(self):
+        Command._prepare(self)
+
+    def set_facility(self, facilities):
+        self.cmd.set_facility(facilities)
+
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        self.cmd.set_var_storage(storage)
+
+    def accept(self, visitor):
+        return visitor.visit_begin(self)
+
+class Repeat(Syntax):
+    command_decl = u"""command __repeat :: void -> never
+                        refers python:caty.core.script.node.Repeat;"""
+
+    def set_facility(self, facilities):
+        pass
+
+    def accept(self, visitor):
+        return visitor.visit_repeat(self)
+
 
 class Time(Syntax):
     command_decl = u"""

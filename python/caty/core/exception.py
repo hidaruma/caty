@@ -66,6 +66,10 @@ class ContinuationSignal(BaseException):
         self.cont = cont
         self.data = data
 
+class RepeatSignal(BaseException):
+    def __init__(self, data):
+        self.data = data
+
 class SystemResourceNotFound(CatyException):
     pass
 

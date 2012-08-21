@@ -67,6 +67,12 @@ class TypeVarApplier(BaseInterpreter):
         for c in node.cases:
             c.accept(self)
 
+    def visit_begin(self, node):
+        node.cmd.accept(self)
+    
+    def visit_repeat(self, node):
+        pass
+
     def visit_json_path(self, node):
         pass
 

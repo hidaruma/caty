@@ -361,6 +361,21 @@ class StartProxy(FunctorProxy):
     def _get_class(self):
         return Start
 
+class BeginProxy(FunctorProxy):
+    reification_type = u'_begin'
+    def _get_class(self):
+        return Begin
+
+class RepeatProxy(Proxy):
+    def instantiate(self, builder):
+        return Repeat()
+
+    def set_module(self, module):
+        pass
+
+    def reify(self):
+        return TagOnly(u'_repeat')
+
 class CombinatorProxy(Proxy):
     def __init__(self, a, b):
         self.a = a

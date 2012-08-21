@@ -9,7 +9,7 @@ from caty.jsontools.path import build_query
 from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettyprint
 from caty.jsontools import jstypes
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Internal, scriptwrapper
-from caty.core.exception import throw_caty_exception, ContinuationSignal
+from caty.core.exception import throw_caty_exception, ContinuationSignal, RepeatSignal
 from caty.core.script.node import *
 from caty.core.exception import *
 import caty
@@ -452,6 +452,21 @@ class CommandExecutor(BaseInterpreter):
             throw_caty_exception(u'Undefined', msg)
         except:
             raise
+
+    def visit_begin(self, node):
+        while True:
+            try:
+                node.var_storage.new_scope()
+                self.input = node.cmd.accept(self)
+            except RepeatSignal as e:
+                self.input = e.data
+            else:
+                break
+            finally:
+                node.var_storage.del_scope()
+
+    def visit_repeat(self, node):
+        raise RepeatSignal(self.input)
 
     @property
     def in_schema(self):
