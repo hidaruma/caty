@@ -93,7 +93,7 @@ class SchemaBase(Resource, PbcObject):
     def _verify_option(self):
         d = set(self._options.keys()) - self.__class__.__options__
         if d:
-            raise JsonSchemaError(dict(msg=u'Undefined schema property: $name', name=(', '.join(d))))
+            raise JsonSchemaError(dict(msg=u'Undefined schema attribute: $name', name=(', '.join(d))))
 
     @property
     def optional(self):

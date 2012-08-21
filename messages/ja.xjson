@@ -183,7 +183,7 @@
 
     "Failed to convert to union type": "ユニオン型への変換に失敗しました",
 
-    "Undefined schema property: $name": "未定義のプロパティ: $name",
+    "Undefined schema attribute: $name": "未定義のスキーマ属性: $name",
 
     "Undeclared type variable at $this: $name": "$nameは$thisで宣言されていない型変数です",
 

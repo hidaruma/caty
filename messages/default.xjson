@@ -174,7 +174,7 @@
 
     "Failed to convert to union type",
 
-    "Undefined schema property: $name",
+    "Undefined schema attribute: $name",
 
     "Undeclared type variable at $this: $name",
 
