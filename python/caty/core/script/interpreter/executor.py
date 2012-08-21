@@ -464,6 +464,7 @@ class CommandExecutor(BaseInterpreter):
                 break
             finally:
                 node.var_storage.del_scope()
+        return self.input
 
     def visit_repeat(self, node):
         raise RepeatSignal(self.input)
