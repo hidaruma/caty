@@ -516,9 +516,10 @@ class CommandURI(object):
             setattr(self, tp, val)
 
 class KindReference(object):
-    def __init__(self, name, annotations, docstring):
+    def __init__(self, name, annotations, docstring=u'undocumented'):
         self.name = name
         self.annotations = annotations
+        self.docstring = docstring
 
     def declare(self, module):
         self.module = module
