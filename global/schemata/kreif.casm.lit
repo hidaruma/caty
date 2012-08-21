@@ -10,30 +10,34 @@ module kreif;
 
 }>>
 
+kreifモジュールは、いずれrefiモジュールに統合されるだろう。
+
 == カインド
 
 カインドは次のように構成される。
 
+
+# 予約語 notnever はカインドである。
+# 予約語 finite はカインドである。
 # 具体的な型（型パラメータは不可）Tに対して、lower T はカインドである。
 # 具体的な型（型パラメータは不可）Tに対して、upper T はカインドである。
 # K, L がカインドのとき、K and L はカインドである。
-# K がカインドのとき K notnever はカインドである。
 
 構文的には、この他に丸括弧を自由に使ってよい。
 
 <<{
 
-syntax sTypeExpr ::= deferred ;
+syntax sNotNever ::= 'notnever';
+
+syntax sFinite ::= 'finite';
+
+syntax sTypeExpr ::= deferred ; // 具体型に限る
 
 syntax sKindExpr ::= (sUpper | sLower | sNotNever | sFinite | sIntersection | sParen) ;
 
 syntax sUpepr ::= 'upper' sTypeExpr ;
 
 syntax sLower ::= 'lower' sTypeExpr ;
-
-syntax sNotNever ::= 'notnever';
-
-syntax sFinite ::= 'finite';
 
 syntax sIntersection ::= sKindExpr 'and' sKindExpr ('and' sKindExpr)* ;
 
@@ -46,11 +50,10 @@ syntax sParen ::= '(' sKindExpr ')' ;
 
 **TYPE**はすべての型の集合、《, 》をスコットブラケットの代わりに使うとして：
 
-
-# 《lower T》 = {X∈**TYPE** | X⊆T}
-# 《upper T》 = {X∈**TYPE** | T⊆X}
 # 《notnever》 = {X∈**TYPE** | Xは空ではない}
 # 《finite》 = {X∈**TYPE** | Xは有限集合}
+# 《lower T》 = {X∈**TYPE** | X⊆T}
+# 《upper T》 = {X∈**TYPE** | T⊆X}
 # 《K and L》 = 《K》∩《L》
 
 <<{
