@@ -586,7 +586,7 @@ def main(args):
         import readline
     except:
         readline = None
-        print '[Warning] readline module is not installed.'
+        print '[WARNING] readline module is not installed.'
     orgdelims = readline.get_completer_delims()
     newdelims = orgdelims.replace('/', '')
     readline.set_completer_delims(newdelims)

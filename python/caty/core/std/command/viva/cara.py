@@ -4,7 +4,7 @@ from caty.core.exception import *
 try:
     import pygraphviz as gv
 except:
-    print '[Warning] graphviz is not installed, viva module does not work.'
+    print '[WARNING] graphviz is not installed, viva module does not work.'
 
 class DrawingMixin(object):
     def _modified(self, path, modname):

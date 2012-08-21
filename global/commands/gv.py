@@ -5,7 +5,7 @@ import caty.jsontools as json
 try:
     from pygraphviz import AGraph
 except:
-    print '[Warning] graphviz is not install, viva module does not work.'
+    print '[WARNING] graphviz is not installed, viva module does not work.'
 
 class Draw(Builtin):
     def setup(self, opts):

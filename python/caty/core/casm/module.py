@@ -356,7 +356,7 @@ class Module(Facility):
             self._loop_exec(self.schema_ns, DependencyAnalizer(self), lambda k, v: graph.update(v) if v else v)
             for a, b in graph:
                 if (b, a) in graph:
-                    raise Exception(self.application.i18n.get(u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name))
+                    print u'[WARNING]', self.application.i18n.get(u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._check_dependency()
     
