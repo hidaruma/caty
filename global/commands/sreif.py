@@ -92,8 +92,49 @@ class ShallowReifier(object):
             'document': make_structured_doc(c.docstring),
             'annotations': self.reify_annotations(c.annotations),
             'implemented': c.implemented,
-            'typeParams': [],
+            'profiles': self._make_profile(c),
+            'typeParams': [self.reify_type_param(p) for p in c.type_params],
         }
+
+    def reify_type_param(self, p):
+        from caty.util.collection import conditional_dict
+        from caty.jsontools import tagged
+        return tagged(u'param', conditional_dict(
+            lambda k, v: v is not None,
+            name = p.var_name,
+            default = p.default,
+            kind = None
+        ))
+
+    def _make_profile(self, c):
+        r = []
+        for p in c.profiles:
+            o = {
+                'arg0': self._dump_schema(p.arg0_schema),
+                'input': self._dump_schema(p.in_schema),
+                'output': self._dump_schema(p.in_schema),
+                'exception': [],
+                'signal': [],
+            }
+            if p.throw_schema and p.throw_schema.type != 'never':
+                for e in p.throw_schema:
+                    o['exception'].append(self._dump_schema(e))
+            if p.signal_schema and p.signal_schema.type != 'never':
+                for e in p.signal_schema:
+                    o['signal'].append(self._dump_schema(e))
+            if p.opts_schema.type != 'null':
+                o['opts'] = self._dump_schema(p.opts_schema)
+            if p.args_schema.type != 'null':
+                o['args'] = self._dump_schema(p.args_schema)
+            r.append(o)
+        return r
+
+    def _dump_schema(self, o):
+        from caty.core.casm.cursor.dump import TreeDumper
+        if not o:
+            return None
+        td = TreeDumper(True)
+        return td.visit(o)
 
     def reify_annotations(self, a):
         r = {}
@@ -204,6 +245,24 @@ class ListTypes(SafeReifier):
         r = []
         for t in module.schema_ns.values():
             r.append(reifier.reify_type(t))
+        return r
+
+class ListCommands(SafeReifier):
+
+    def _execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, module_name, _ = split_colon_dot_path(self._cdpath)
+        if not app_name or app_name == 'this':
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        if not module_name:
+            module_name = _
+        module = app._schema_module.get_module(module_name)
+        r = []
+        for c in module.command_ns.values():
+            r.append(reifier.reify_command(c))
         return r
 
 class ListStates(SafeReifier):

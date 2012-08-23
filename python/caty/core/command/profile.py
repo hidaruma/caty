@@ -23,9 +23,11 @@ class ProfileContainer(object):
         path = (uri.split(':')[-1])
         if path == 'caty.core.command.Dummy':
             self.command_class = new_dummy()
+            self.implemented = u'none'
         else:
             pkgname, cmdname = path.rsplit('.', 1)
             self.command_class = commands.get(pkgname, cmdname)
+            self.implemented = u'python'
         self._annotations = annotations or {}
         self.doc = doc if doc else u'undocumented'
         self.defined_application = app
@@ -38,6 +40,10 @@ class ProfileContainer(object):
 
     def get_annotations(self):
         return self._annotations#[a.strip() for a in self.annotation.split(',')]
+
+    @property
+    def docstring(self):
+        return self.doc
 
     @property
     def annotations(self):
@@ -227,12 +233,13 @@ class ScriptProfileContainer(ProfileContainer):
         self.name = name
         self.command_class = proxy
         self._annotations = annotations or {}
-        self.doc = doc if doc else 'undocumented'
+        self.doc = doc if doc else u'undocumented'
         self.defined_application = app
         self.uri = ''
         self.type_params = []
         self.module = module
         self.command_class.set_module(module)
+        self.implemented = u'catyscript'
 
 class CommandUsageError(Exception): pass
 

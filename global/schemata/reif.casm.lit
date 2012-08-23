@@ -881,7 +881,7 @@ type TypeParam = @param {
 
     "name": string,
     "kind": KindExpr?, // KindExprは暫定
-    "default": TypeExpr?, // KindExprは暫定
+    "default": Type?, // Typeは暫定
 
 };
 
@@ -1269,7 +1269,7 @@ type CommandSummary = {
   "name": string?,
 
   "typeParams": [TypeParam*]?,
-  "profile": Profile,
+  "profiles": [Profile],
 
   /** ファシリティの利用宣言
    * オブジェクトのプロパティ名（キー）は、

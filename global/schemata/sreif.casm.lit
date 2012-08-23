@@ -275,6 +275,7 @@ command list-commands
   }
   [cdpath mod-cls]
 :: void -> [CommandSummary*]?
+ refers python:sreif.ListCommands
 ;
 
 /* 優先 */

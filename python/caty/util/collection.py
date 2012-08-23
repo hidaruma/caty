@@ -380,4 +380,11 @@ def filled_zip(seq1, seq2, fill=None):
         i += 1
     return r
 
+class conditional_dict(dict):
+    def __init__(self, func, **kwds):
+        dict.__init__(self)
+        for k, v in kwds.items():
+            if func(k, v):
+                self[k] = v
+
 
