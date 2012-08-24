@@ -447,6 +447,7 @@ command show-command
   }
   [cdpath cmd]
 :: void -> CommandSummary?
+ refers python:sreif.ShowCommand
 ;
 
 /* 優先 */
