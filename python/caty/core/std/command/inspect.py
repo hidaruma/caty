@@ -1,10 +1,10 @@
 #coding: utf-8
 from caty.core.command import Internal, Builtin
 from caty.core.exception import *
-from caty.core.language import split_colon_dot_path
+from caty.core.language import split_colon_dot_path as _split_colon_dot_path
 import caty.jsontools as json
 
-split_colon_dot_path = lambda s: split_colon_dot_path(s, False)
+split_colon_dot_path = lambda s: _split_colon_dot_path(s, False)
 
 class ListCommands(Internal):
     def setup(self, opts, module_name):
