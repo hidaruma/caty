@@ -225,8 +225,8 @@ def identifier_token_m(seq):
 def identifier_token_a(seq):
     return seq.parse(Regex(_app_identifier_ptn, re.X))
 
-def split_colon_dot_path(s):
-    c = BasicCDPSplitter()
+def split_colon_dot_path(s, consider_context=True):
+    c = CDPSplitter(consider_context)
     return c.run(s)
 
 class BasicCDPSplitter(Parser):
@@ -243,43 +243,30 @@ class BasicCDPSplitter(Parser):
         return app_name, mod_name, name
 
 class CDPSplitter(Parser):
-    APPLICATION = 0
-    PACKAGE = 1
-    MODULE = 2
-    CONTENT = 3
-    def __init__(self, content=CONTENT):
-        self.context = context
-        self.app = None
-        self.packages = []
-        self.module = None
-        self.content = None
+    def __init__(self, consider_context=u'application'):
+        self.__consider_cotext = consider_context
 
     def __call__(self, seq):
         app_name = option(Regex(_name_token_ptn + '::', re.X))(seq)
-        mod_name = option(Regex(_identifier_ptn + ':', re.X))(seq)
-        name = option(identifier_token)(seq)
+        mod_name = option(Regex(_identifier_ptn + '(:|\\.$)', re.X))(seq)
+        content_name = option(identifier_token)(seq)
         if app_name:
             app_name = app_name.rstrip(':')
         if mod_name:
-            mod_name = mod_name.rstrip(':')
+            mod_name = mod_name.rstrip(':.')
         if not seq.eof:
-            raise ParseFailed(u'not a colon dot path: %s' % seq.text, seq)
-        if app_name:
-            self.app = app_name
-        if module_name:
-            names = module_name.split('.')
-            self.module = names.pop(-1)
-            self.packages = names
-        if not app_name and not module_name:
-            if self.context == CDPSplitter.APPLICATION:
-                self.app = name
-            elif self.context in (CDPSplitter.PACKAGE, CDPSplitter.MODULE):
-                names = module_name.split('.')
-                self.module = names.pop(-1)
-                self.packages = names
-            else:
-                self.content = name
-        else:
-            self.content = name
-        return self
+            raise ParseFailed(seq, u'not a colon dot path: %s' % seq.text)
+        if not app_name and self.__consider_cotext: # ::がない場合かつコンテキストをみる
+            if not mod_name: # : がない裸の名前でモジュールコンテキスト
+                if u'.' not in content_name: # パッケージでもない
+                    # これはモジュールやパッケージを探す文脈での曖昧な名前であり、app解釈
+                    app_name = content_name
+                    content_name = None
+                else: # content_nameはパッケージを指しているのでmod_nameと入れ替え
+                    mod_name = content_name.strip('.')
+                    content_name = None
+        elif not mod_name and self.__consider_cotext: # :がない場合かつコンテキストをみる
+            mod_name = content_name.strip('.')
+            content_name = None
+        return app_name, mod_name, content_name
 

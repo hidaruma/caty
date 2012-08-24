@@ -183,15 +183,13 @@ class ListModules(SafeReifierWithDefaultApp):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, pkg_name, _ = split_colon_dot_path(self._cdpath)
-        if app_name and not pkg_name and _:
-            pkg_name = _
         app = None
-        if app_name == 'this' or not app_name and not pkg_name:
-            app = self.current_app
-        elif app_name:
-            app = system.get_app(app_name)
-        if not app:
+        if _:
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
+        if app_name == 'this' or not app_name and pkg_name:
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
         r = []
         reifier = ShallowReifier()
         if pkg_name:
@@ -208,15 +206,13 @@ class ListPackages(SafeReifierWithDefaultApp):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, pkg_name, _ = split_colon_dot_path(self._cdpath)
-        if app_name and not pkg_name and _:
-            pkg_name = _
         app = None
-        if app_name == 'this' or not app_name and not pkg_name:
-            app = self.current_app
-        elif app_name:
-            app = system.get_app(app_name)
-        if not app:
+        if _:
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
+        if app_name == 'this' or not app_name and pkg_name:
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
         r = []
         reifier = ShallowReifier()
         if pkg_name:

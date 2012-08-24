@@ -4,6 +4,8 @@ from caty.core.exception import *
 from caty.core.language import split_colon_dot_path
 import caty.jsontools as json
 
+split_colon_dot_path = lambda s: split_colon_dot_path(s, False)
+
 class ListCommands(Internal):
     def setup(self, opts, module_name):
         self._short = opts['short']

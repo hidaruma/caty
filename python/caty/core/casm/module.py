@@ -131,7 +131,7 @@ class Module(Facility):
         if self in tracked:
             raise SystemResourceNotFound(u'%sNotFound'%type, u'$name', name=rname)
         scope = scope_func(self)
-        app_name, mod_name, name = split_colon_dot_path(rname)
+        app_name, mod_name, name = split_colon_dot_path(rname, False)
         if app_name:
             if app_name in ('this', 'global', 'caty', self._app.name):
                 pass
