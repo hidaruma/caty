@@ -258,7 +258,7 @@ type ProjectSummary = {
   "domain" : string?,
 
   /** 設定ファイルの deprecated の値をコピーする */
-  @[default(false)]
+  @[deprecated, default(false)]
   "deprecated": boolean?,
 
    *: any?
@@ -321,7 +321,7 @@ type ApplicationSummary = {
   "visibleParent" : string(remark="アプリケーション名")?,
 
   /** 設定フィルの deprecated の値をコピーする */
-  @[default(false)]
+  @[deprecated, default(false)]
   "deprecated": boolean?,
 
 
@@ -376,7 +376,7 @@ type FacilitySummary = {
   "systemParam" : any,
 
   /** @[deprecated]アノテーションの値をコピーする */
-  @[default(false)]
+  @[deprecated, default(false)]
   "deprecated": boolean?,
 
   /** 実装クラスの実装言語依存の参照 */
@@ -441,7 +441,7 @@ type ModuleSummary = {
   "place" : ("schemata" | "actions"),
 
   /** @[deprecated]アノテーションの値をコピーする */
-  @[default(false)]
+  @[deprecated, default(false)]
   "deprecated": boolean?,
 
   *: any?
@@ -537,7 +537,7 @@ type ClassSummary = {
   "arg0": TypeSpec?,
 
   /** @[deprecated]アノテーションの値をコピーする */
-  @[default(false)]
+  @[deprecated, default(false)]
   "deprecated": boolean?,
 
  *: any?
@@ -589,7 +589,7 @@ type TypeSummary = {
   "name": string,
 
   /** @[deprecated]アノテーションの値をコピーする */
-  @[default(false)]
+  @[deprecated, default(false)]
   "deprecated": boolean?,
 
   *: any?
@@ -1280,7 +1280,7 @@ type CommandSummary = {
   "implemented": implemented,
 
   /** @[deprecated]アノテーションの値をコピーする */
-  @[default(false)]
+  @[deprecated, default(false)]
   "deprecated": boolean?,
 
    * : any?
@@ -1340,7 +1340,7 @@ type ResourceSummary = {
   "filetype": {"contentType": string, "isText": boolean}?,
 
   /** @[deprecated]アノテーションの値をコピーする */
-  @[default(false)]
+  @[deprecated, default(false)]
   "deprecated": boolean?,
 
 
@@ -1396,7 +1396,7 @@ type ActionSummary = {
   "implemented": implemented,
 
   /** @[deprecated]アノテーションの値をコピーする */
-  @[default(false)]
+  @[deprecated, default(false)]
   "deprecated": boolean?,
 
   // 以下はアクション特有
