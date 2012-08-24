@@ -76,4 +76,9 @@ class TypeVarApplier(BaseInterpreter):
     def visit_json_path(self, node):
         pass
 
+    def visit_try(self, node):
+        node.pipeline.accept(self)
+        for v in node.handler.values():
+            v.accept(self)
+
 

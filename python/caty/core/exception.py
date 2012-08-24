@@ -35,14 +35,27 @@ class CatyException(Exception):
     def error_obj(self):
         return json.untagged(self.__json_obj)
 
+    @property
+    def raw_data(self):
+        return self.__json_obj
+
     def to_json(self):
         return self.__json_obj
 
     def get_message(self, i18n):
         return i18n.get(self.__message, self.__place_holder)
 
+class CatySignal(Exception):
+    def __init__(self, data):
+        self.raw_data = data
+        Exception.__init__(self, u'Caty Signal')
+
 def throw_caty_exception(tag, message, error_class=None, error_id=None, stack_trace=None, **kwds):
     raise CatyException(tag, message, error_class, error_id, stack_trace, **kwds)
+
+def send_caty_signal(data):
+    raise CatySignal(data)
+
 
 class SubCatyException(CatyException):
     def __init__(self, **kwds):

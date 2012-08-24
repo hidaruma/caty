@@ -64,3 +64,7 @@ class BaseInterpreter(object):
     
     def visit_json_path(self, node):
         raise NotImplementedError(u'{0}#visit_json_path'.format(self.__class__.__name__))
+
+    def visit_try(self, node):
+        raise NotImplementedError(u'{0}#visit_try'.format(self.__class__.__name__))
+

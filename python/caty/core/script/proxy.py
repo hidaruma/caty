@@ -514,6 +514,21 @@ class JsonPathProxy(Proxy):
             'pos': self.pos
         }
 
+class TryCatchProxy(Proxy):
+    def __init__(self, pipeline, handler):
+        self.pipeline = pipeline
+        self.handler = handler
+
+    def instantiate(self, builder):
+        return TryCatch(self.pipeline.instantiate(builder), dict([(k, v.instantiate(builder)) for k, v in self.handler.items()]))
+
+    def set_module(self, module):
+        self.pipeline.set_module(module)
+        for v in self.handler.values():
+            v.set_module(module)
+
+
+
 def combine_proxy(args):
     return reduce(CombinatorProxy, args)
 

@@ -29,6 +29,7 @@ from caty.core.script.proxy import TypeCaseProxy as TypeCase
 from caty.core.script.proxy import TypeCondProxy as TypeCond
 from caty.core.script.proxy import BranchProxy as Branch
 from caty.core.script.proxy import JsonPathProxy as JsonPath
+from caty.core.script.proxy import TryCatchProxy as TryCatch
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
@@ -87,10 +88,31 @@ class ScriptParser(Parser):
     def exception_handle(self, seq):
         keyword(u'try')(seq)
         with strict():
-            S(u'{')
-            cmd  = self.make_pipeline(seq)
-            S(u'}')
-            
+            S(u'{')(seq)
+            pipeline = self.make_pipeline(seq)
+            S(u'}')(seq)
+            handle = option(self._catch, {})(seq)
+            return TryCatch(pipeline, handle)
+
+    def _catch(self, seq):
+        r = {}
+        keyword(u'catch')(seq)
+        S(u'{')(seq)
+        handlers = split(self._handler, u',')(seq)
+        for t, cmd in handlers:
+            if t in r:
+                raise ParseError(seq, u'duplicated exception handler: %s' % t)
+            r[t] = cmd
+        S(u'}')(seq)
+        return r
+
+    def _handler(self, seq):
+        t = option(choice(u'normal', u'except', u'signal'))(seq)
+        if not t:
+            return None, None
+        S(u'=>')(seq)
+        cmd = self.make_pipeline(seq)
+        return t, cmd
 
     def functor(self, seq):
         import string as str_mod
@@ -219,6 +241,7 @@ class ScriptParser(Parser):
 
     def term(self, seq):
         parsers = map(try_, [
+                    self.exception_handle,
                     self.functor,
                     self.tag,
                     self.type_case,

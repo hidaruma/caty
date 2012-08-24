@@ -426,6 +426,22 @@ class Repeat(Syntax):
     def accept(self, visitor):
         return visitor.visit_repeat(self)
 
+class TryCatch(Syntax):
+    command_decl = u"""command __try_catch<S default univ, T default univ> :: S -> T
+                        refers python:caty.core.script.node.TryCatch;"""
+
+    def __init__(self, pipeline, handler):
+        Syntax.__init__(self)
+        self.pipeline = pipeline
+        self.handler = handler
+
+    def set_facility(self, facilities):
+        self.pipeline.set_facility(facilities)
+        for v in self.handler.values():
+            v.set_facility(facilities)
+
+    def accept(self, visitor):
+        return visitor.visit_try(self)
 
 class Time(Syntax):
     command_decl = u"""
