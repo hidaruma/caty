@@ -383,7 +383,7 @@ class Module(Facility):
                     else:
                         print u'[WARNING]', self.application.i18n.get(u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
                     b.related.mark(a.name)
-                    a.related.mark(b.name)
+                a.related.mark(b.name)
         if self.related.is_illegal():
             throw_caty_exception(u'SCHEMA_COMPILE_ERROR', 
                                  u'Illegal `related` declaration at $name',
