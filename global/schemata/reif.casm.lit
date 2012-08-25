@@ -6,7 +6,7 @@
 /** レイフィケーションされたメタオブジェクトを表現する型
  *
  */
-module reif; 
+module reif related kreif; 
 
 }>>
 

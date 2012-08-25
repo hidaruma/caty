@@ -99,13 +99,19 @@ def module_decl(seq, type='casm'):
         i = seq.parse(keyword('in'))
     if i:
         seq.parse(keyword(type))
-    seq.parse(option(on_phrase))
+    rel = seq.parse(option(relation, []))
     seq.parse(';')
-    return ModuleName(n, a, doc)
+    return ModuleName(n, a, rel, doc)
 
-def on_phrase(seq):
-    seq.parse(keyword('on'))
-    seq.parse(['boot', 'demand', 'never'])
+def relation(seq):
+    seq.parse(keyword('related'))
+    return seq.parse([lambda s:[pkgname(s)], pkgnames])
+
+def pkgnames(seq):
+    S('[')(seq)
+    r = split(pkgname, u',')(seq)
+    S(']')(seq)
+    return r
 
 def pkgname(seq):
     return seq.parse(Regex(r'[a-zA-Z]+([-a-zA-Z0-9_.])*'))

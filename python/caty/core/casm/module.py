@@ -27,6 +27,22 @@ from caty.core.facility import Facility
 from functools import partial
 
 class Module(Facility):
+    class Relation(object):
+        def __init__(self):
+            self.names = {}
+
+        def __contains__(self, name):
+            return name in self.names
+
+        def mark(self, name):
+            self.names[name] = True
+
+        def add(self, name):
+            self.names[name] = False
+
+        def is_illegal(self):
+            return False in self.names.values()
+
     is_package = False
     def __init__(self, app, parent=None):
         self._app = app
@@ -83,6 +99,7 @@ class Module(Facility):
         self.add_facility = partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.get_facility = partial(self._get_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.has_facility = partial(self._has_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
+        self.__related = Module.Relation()
 
     @property
     def type(self):
@@ -96,6 +113,10 @@ class Module(Facility):
     def name(self):
         return self._name
  
+    @property
+    def related(self):
+        return self.__related
+
     def _get_full_name(self):
         return self.name+'.'+self.type
 
@@ -354,9 +375,19 @@ class Module(Facility):
         if not self.compiled:
             graph = set()
             self._loop_exec(self.schema_ns, DependencyAnalizer(self), lambda k, v: graph.update(v) if v else v)
+            marked = set()
             for a, b in graph:
                 if (b, a) in graph:
-                    print u'[WARNING]', self.application.i18n.get(u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
+                    if b.name not in a.related or a.name not in b.related:
+                        throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
+                    else:
+                        print u'[WARNING]', self.application.i18n.get(u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
+                    b.related.mark(a.name)
+                    a.related.mark(b.name)
+        if self.related.is_illegal():
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', 
+                                 u'Illegal `related` declaration at $name',
+                                 name=self.name)
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._check_dependency()
     

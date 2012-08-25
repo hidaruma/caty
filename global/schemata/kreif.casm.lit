@@ -6,7 +6,7 @@
 /** レイフィケーションされたカインドを表現する型
  *
  */
-module kreif; 
+module kreif related reif; 
 
 }>>
 
