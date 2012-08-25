@@ -453,6 +453,7 @@ class CommandExecutor(BaseInterpreter):
             raise
 
     def visit_begin(self, node):
+        node._prepare()
         while True:
             try:
                 node.var_storage.new_scope()
@@ -469,6 +470,7 @@ class CommandExecutor(BaseInterpreter):
         raise RepeatSignal(self.input)
 
     def visit_try(self, node):
+        node._prepare()
         try:
             self.input = node.pipeline.accept(self)
             if u'normal' in node.handler:

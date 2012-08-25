@@ -440,6 +440,9 @@ class TryCatch(Syntax):
         for v in self.handler.values():
             v.set_facility(facilities)
 
+    def _prepare(self):
+        Command._prepare(self)
+    
     def accept(self, visitor):
         return visitor.visit_try(self)
 
