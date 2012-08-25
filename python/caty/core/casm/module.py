@@ -382,12 +382,12 @@ class Module(Facility):
                         throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
                     else:
                         print u'[WARNING]', self.application.i18n.get(u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
-                    b.related.mark(a.name)
-                a.related.mark(b.name)
-        if self.related.is_illegal():
-            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', 
-                                 u'Illegal `related` declaration at $name',
-                                 name=self.name)
+        for name in self.related.names:
+            mod = self.get_module(name)
+            if self.name not in mod.related:
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', 
+                                     u'Illegal `related` declaration at $name',
+                                     name=self.name)
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._check_dependency()
     
