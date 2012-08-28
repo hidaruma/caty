@@ -294,7 +294,10 @@ class ListResources(SafeReifier):
         else:
             app = system.get_app(app_name)
         if not module_name:
-            module_name = _
+            if _:
+                module_name = _
+            else:
+                throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         module = app._schema_module.get_module(module_name)
         if not module.type == u'cara':
             return []
