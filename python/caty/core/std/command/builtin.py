@@ -682,7 +682,7 @@ class Untagged(Builtin):
 
 class ConsoleOut(Builtin):
     def setup(self, opts):
-        self.nonl = opts.get('nonl', caty.UNDEFINED)
+        self.nonl = opts.get('no-nl', caty.UNDEFINED)
     
     def execute(self, input):
         self.stream.write(input)

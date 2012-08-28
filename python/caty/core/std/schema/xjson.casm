@@ -68,3 +68,8 @@ command put
 throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist, ConsistencyViolation ]
 refers python:caty.core.std.command.xjsonlib.Put;
 
+/**
+ * 入力値の XJSON オブジェクトを整形して返す。
+ */
+command pretty :: any -> string
+    refers python:caty.core.std.command.jsonlib.Pretty;
