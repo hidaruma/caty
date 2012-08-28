@@ -27,7 +27,8 @@ class ShallowReifier(object):
             links[l.trigger] = tagged(u'link', {
                 'name': l.trigger,
                 'becoming': tmap[l.type],
-                'occurrence': l.appearance,
+                'minOccurrs': 0 if l.appearance in (u'?', u'*') else 1,
+                'maxOccurrs': u'unbounded' if l.appearance in (u'+', u'*') else 1,
                 'document': make_structured_doc(l.docstring),
                 'targets': map(lambda x:x[0], l.link_to_list)
             })

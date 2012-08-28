@@ -265,7 +265,7 @@ class CDPSplitter(Parser):
                 else: # content_nameはパッケージを指しているのでmod_nameと入れ替え
                     mod_name = content_name.strip('.')
                     content_name = None
-        elif not mod_name and self.__consider_cotext: # :がない場合かつコンテキストをみる
+        elif not mod_name and content_name and self.__consider_cotext: # :がない場合かつコンテキストをみる
             mod_name = content_name.strip('.')
             content_name = None
         return app_name, mod_name, content_name
