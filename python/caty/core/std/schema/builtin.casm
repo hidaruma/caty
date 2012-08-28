@@ -868,9 +868,9 @@ command untagged<S default any, T default univ> [string?] :: S -> T
 
 /**
  * コンソールに入力値を書き出す。
- * --nonl オプションが指定された場合、改行を出力しない。
+ * --no-nl オプションが指定された場合、改行を出力しない。
  */
-@[console] command cout {"nonl" : boolean?}:: (string|binary) -> void
+@[console] command cout {"no-nl" : boolean?}:: (string|binary) -> void
     updates stream
     refers python:caty.core.std.command.builtin.ConsoleOut;
 
