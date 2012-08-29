@@ -44,11 +44,12 @@ class GetSession(Builtin):
 from caty.core.casm.cursor import TreeDumper
 class DumpSchema(Builtin):
 
-    def setup(self, name):
+    def setup(self, opts, name):
         self.__schema_name = name
+        self.__deep = opts['deep']
 
     def execute(self):
-        print TreeDumper(deep=True).visit(self.schema.get_type(self.__schema_name))
+        print TreeDumper(deep=self.__deep, recursive=self.__deep).visit(self.schema.get_type(self.__schema_name))
 
 class Profile(Builtin):
 

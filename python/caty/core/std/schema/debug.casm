@@ -37,7 +37,7 @@ command dump<T default univ>
 /**
  * スキーマ定義のダンプ
  */
-command dump-schema [string] :: void -> void
+command dump-schema {@[default(false)]"deep": boolean?} [string] :: void -> void
     reads [interpreter, schema]
     refers python:caty.core.std.command.debug.DumpSchema;
 

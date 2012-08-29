@@ -4,11 +4,12 @@ from caty.core.schema import *
 import caty.jsontools as json
 
 class TreeDumper(TreeCursor):
-    def __init__(self, deep=False, withoutdoc=False):
+    def __init__(self, deep=False, withoutdoc=False, recursive=False):
         self.started = False
         self.depth = 0
         self.deep = deep
         self.withoutdoc = withoutdoc
+        self.recursive = recursive
 
     def _visit_root(self, node):
         buff = []
@@ -36,7 +37,7 @@ class TreeDumper(TreeCursor):
             if not self.deep:
                 return node.name
             else:
-                return node.name + node.body.accept(self)
+                return node.body.accept(self)
 
     def _format(self, doc, indent):
         r = []
@@ -48,8 +49,11 @@ class TreeDumper(TreeCursor):
         return ''.join(r)
 
     def _visit_scalar(self, node):
-        buff = [node.name]
-        if not isinstance(node, (ScalarSchema, AnySchema, UndefinedSchema, NeverSchema, NullSchema)):
+        buff = []
+        if isinstance(node, TypeReference) and self.deep and self.recursive and node.body and not node.recursive:
+            buff.append(node.body.accept(self))
+        elif isinstance(node, (TypeReference)):
+            buff = [node.name]
             if node.type_args:
                 buff.append('<')
                 for t in node.type_args:
@@ -57,9 +61,8 @@ class TreeDumper(TreeCursor):
                     buff.append(', ')
                 buff.pop(-1)
                 buff.append('>')
-                #if isinstance(node, TypeReference):
-                #    if node.body:
-                #        buff.append(node.body.accept(self))
+        else:
+            buff = [node.name]
         self._process_option(node, buff)
         return ''.join(buff)
 

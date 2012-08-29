@@ -1329,7 +1329,7 @@ class TypeReference(SchemaBase, Scalar, Ref):
         self.module = module
         self.annotations = Annotations([])
         self.body = None
-        self.applied = False
+        self.recursive = False
 
     def intersect(self, another):
         return self.body & another

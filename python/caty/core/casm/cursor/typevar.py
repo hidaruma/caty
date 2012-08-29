@@ -81,6 +81,7 @@ class TypeVarApplier(SchemaBuilder):
                     args.append(a)
                 key = (TreeDumper(True).visit(node), tuple(node.options.items()), tuple(ta))
                 if key in self.history:
+                    self.history[key].recursive = True
                     return self.history[key]
                 r = TypeReference(node.name, args, node.module)
                 self.history[key] = r
