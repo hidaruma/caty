@@ -520,12 +520,14 @@ class TryCatchProxy(Proxy):
         self.handler = handler
 
     def instantiate(self, builder):
-        return TryCatch(self.pipeline.instantiate(builder), dict([(k, v.instantiate(builder)) for k, v in self.handler.items()]))
+        return TryCatch(self.pipeline.instantiate(builder), 
+                        dict([(k, v.instantiate(builder)) for k, v in self.handler.items()]) if self.handler is not None else None)
 
     def set_module(self, module):
         self.pipeline.set_module(module)
-        for v in self.handler.values():
-            v.set_module(module)
+        if self.handler:
+            for v in self.handler.values():
+                v.set_module(module)
 
 
 

@@ -6,7 +6,7 @@ from caty.core.facility import PEND
 import caty.util as util
 from caty import UNDEFINED
 from caty.jsontools.path import build_query
-from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettyprint
+from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettyprint, split_tag
 from caty.jsontools import jstypes
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Internal, scriptwrapper
 from caty.core.script.node import *
@@ -472,17 +472,15 @@ class CommandExecutor(BaseInterpreter):
     def visit_try(self, node):
         node._prepare()
         try:
-            self.input = node.pipeline.accept(self)
-            if u'normal' in node.handler:
-                self.input = node.handler['normal'].accept(self)
+            self.input = tagged(u'normal', node.pipeline.accept(self))
         except CatySignal as e:
-            self.input = e.raw_data
-            if u'signal' in node.handler:
-                self.input = node.handler['signal'].accept(self)
+            self.input = tagged(u'signal', e.raw_data)
         except CatyException as e:
-            self.input = e.raw_data
-            if u'except' in node.handler:
-                self.input = node.handler['except'].accept(self)
+            self.input = tagged(u'except', e.raw_data)
+        if node.handler is not None:
+            t, self.input = split_tag(self.input)
+            if t in node.handler:
+                self.input = node.handler[t].accept(self)
         return self.input
 
     @property

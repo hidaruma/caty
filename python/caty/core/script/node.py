@@ -437,8 +437,9 @@ class TryCatch(Syntax):
 
     def set_facility(self, facilities):
         self.pipeline.set_facility(facilities)
-        for v in self.handler.values():
-            v.set_facility(facilities)
+        if self.handler:
+            for v in self.handler.values():
+                v.set_facility(facilities)
 
     def _prepare(self):
         Command._prepare(self)

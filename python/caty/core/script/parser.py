@@ -91,7 +91,7 @@ class ScriptParser(Parser):
             S(u'{')(seq)
             pipeline = self.make_pipeline(seq)
             S(u'}')(seq)
-            handle = option(self._catch, {})(seq)
+            handle = option(self._catch, None)(seq)
             return TryCatch(pipeline, handle)
 
     def _catch(self, seq):
