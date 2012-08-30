@@ -514,17 +514,26 @@ class JsonPathProxy(Proxy):
             'pos': self.pos
         }
 
-class TryCatchProxy(Proxy):
-    def __init__(self, pipeline, handler):
+class TryProxy(Proxy):
+    def __init__(self, pipeline):
         self.pipeline = pipeline
-        self.handler = handler
 
     def instantiate(self, builder):
-        return TryCatch(self.pipeline.instantiate(builder), 
-                        dict([(k, v.instantiate(builder)) for k, v in self.handler.items()]) if self.handler is not None else None)
+        return Try(self.pipeline.instantiate(builder))
 
     def set_module(self, module):
         self.pipeline.set_module(module)
+
+
+class CatchProxy(Proxy):
+    def __init__(self, handler):
+        self.handler = handler
+
+
+    def instantiate(self, builder):
+        return Catch(dict([(k, v.instantiate(builder)) for k, v in self.handler.items()]) if self.handler is not None else None)
+
+    def set_module(self, module):
         if self.handler:
             for v in self.handler.values():
                 v.set_module(module)

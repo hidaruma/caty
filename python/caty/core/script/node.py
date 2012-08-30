@@ -426,17 +426,32 @@ class Repeat(Syntax):
     def accept(self, visitor):
         return visitor.visit_repeat(self)
 
-class TryCatch(Syntax):
-    command_decl = u"""command __try_catch<S default univ, T default univ> :: S -> T
-                        refers python:caty.core.script.node.TryCatch;"""
+class Try(Syntax):
+    command_decl = u"""command __try<S default univ, T default univ> :: S -> T
+                        refers python:caty.core.script.node.Try;"""
 
-    def __init__(self, pipeline, handler):
+    def __init__(self, pipeline):
         Syntax.__init__(self)
         self.pipeline = pipeline
-        self.handler = handler
 
     def set_facility(self, facilities):
         self.pipeline.set_facility(facilities)
+
+    def _prepare(self):
+        Command._prepare(self)
+    
+    def accept(self, visitor):
+        return visitor.visit_try(self)
+
+class Catch(Syntax):
+    command_decl = u"""command __catche<S default univ, T default univ> :: S -> T
+                        refers python:caty.core.script.node.Catch;"""
+
+    def __init__(self, handler):
+        Syntax.__init__(self)
+        self.handler = handler
+
+    def set_facility(self, facilities):
         if self.handler:
             for v in self.handler.values():
                 v.set_facility(facilities)
@@ -445,7 +460,9 @@ class TryCatch(Syntax):
         Command._prepare(self)
     
     def accept(self, visitor):
-        return visitor.visit_try(self)
+        return visitor.visit_catch(self)
+
+
 
 class Time(Syntax):
     command_decl = u"""

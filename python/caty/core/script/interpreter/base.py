@@ -68,3 +68,6 @@ class BaseInterpreter(object):
     def visit_try(self, node):
         raise NotImplementedError(u'{0}#visit_try'.format(self.__class__.__name__))
 
+    def visit_catch(self, node):
+        raise NotImplementedError(u'{0}#visit_catch'.format(self.__class__.__name__))
+

@@ -482,6 +482,9 @@ class CommandExecutor(BaseInterpreter):
             self.input = tagged(u'signal', e.raw_data)
         except CatyException as e:
             self.input = tagged(u'except', e.raw_data)
+        return self.input
+
+    def visit_catch(self, node):
         if node.handler is not None:
             t, self.input = split_tag(self.input)
             if t in node.handler:

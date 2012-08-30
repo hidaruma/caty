@@ -29,7 +29,8 @@ from caty.core.script.proxy import TypeCaseProxy as TypeCase
 from caty.core.script.proxy import TypeCondProxy as TypeCond
 from caty.core.script.proxy import BranchProxy as Branch
 from caty.core.script.proxy import JsonPathProxy as JsonPath
-from caty.core.script.proxy import TryCatchProxy as TryCatch
+from caty.core.script.proxy import TryProxy as Try
+from caty.core.script.proxy import CatchProxy as Catch
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
@@ -91,10 +92,9 @@ class ScriptParser(Parser):
             S(u'{')(seq)
             pipeline = self.make_pipeline(seq)
             S(u'}')(seq)
-            handle = option(self._catch, None)(seq)
-            return TryCatch(pipeline, handle)
+            return Try(pipeline)
 
-    def _catch(self, seq):
+    def catch(self, seq):
         r = {}
         keyword(u'catch')(seq)
         S(u'{')(seq)
@@ -104,7 +104,7 @@ class ScriptParser(Parser):
                 raise ParseError(seq, u'duplicated exception handler: %s' % t)
             r[t] = cmd
         S(u'}')(seq)
-        return r
+        return Catch(r)
 
     def _handler(self, seq):
         t = option(choice(u'normal', u'except', u'signal'))(seq)
@@ -245,6 +245,7 @@ class ScriptParser(Parser):
     def term(self, seq):
         parsers = map(try_, [
                     self.exception_handle,
+                    self.catch,
                     self.functor,
                     self.tag,
                     self.type_case,
