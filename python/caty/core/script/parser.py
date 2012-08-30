@@ -228,13 +228,16 @@ class ScriptParser(Parser):
 
     def group(self, seq):
         _ = seq.parse('(')
-        fragment = option(fragment_name)(seq)
         r = self.pipeline(seq)
         _ = seq.parse(')')
-        if fragment:
-            return PipelineFragment(r, fragment)
-        else:
-            return r
+        return r
+
+    def named_block(self, seq):
+        fragment = fragment_name(seq)
+        S(u'{')(seq)
+        p = self.pipeline(seq)
+        S(u'}')(seq)
+        return PipelineFragment(p, fragment)
 
     def make_pipeline(self, seq):
         return self.pipeline(seq)
@@ -256,6 +259,7 @@ class ScriptParser(Parser):
                     self.list, 
                     self.var_ref,
                     self.arg_ref,
+                    self.named_block,
                     self.hash,
                     ])
         return seq.parse(parsers)

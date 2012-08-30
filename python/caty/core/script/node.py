@@ -548,6 +548,10 @@ class PipelineFragment(Syntax):
     def accept(self, visitor):
         return self.cmd.accept(visitor)
 
+    @property
+    def out_schema(self):
+        return self.cmd.out_schema
+
 class ActionEnvelope(Syntax):
     command_decl = u"""
     command __action-envelope {*:any} [string*] :: WebInput | void -> Response | Redirect

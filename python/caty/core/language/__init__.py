@@ -187,7 +187,7 @@ def string_array(seq):
 class IGNORE: pass
 
 def fragment_name(seq):
-    S('#')(seq)
+    S('#:')(seq)
     name = seq.parse(Regex('[a-zA-Z_0-9][-0-9_a-zA-Z]*'))
     return name
 
