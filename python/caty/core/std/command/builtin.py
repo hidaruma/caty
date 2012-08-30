@@ -1225,8 +1225,8 @@ class Foreign(Builtin):
         return ForeignObject()
 
 class Never(Builtin):
-    def execute(self, ignore):
-        throw_caty_exception(u'Never', u'')
+    def execute(self):
+        throw_caty_exception(u'Never', u'never detected')
 
 class Signal(Builtin):
     def execute(self, data):

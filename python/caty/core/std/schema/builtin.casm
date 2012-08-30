@@ -1226,7 +1226,9 @@ command sleep<T default any> [integer(minimum=0)? millisec] :: T -> T
  */
 command to-string :: any -> string
     refers python:caty.core.std.command.builtin.ToString;
-   
 
+/**
+ * 何も出力せず、Never例外を投げる。
+ */   
 command never :: void -> never throws Never
     refers python:caty.core.std.command.builtin.Never;
