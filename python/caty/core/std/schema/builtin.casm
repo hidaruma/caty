@@ -582,7 +582,7 @@ exception ImplementationBug = object;
 /** コンパイルエラー */
 exception CompileError = object;
 
-/** neverが生じた */
+/** neverが検出された */
 exception Never = object;
 
 command never :: any -> never throws Never
@@ -1231,3 +1231,5 @@ command to-string :: any -> string
     refers python:caty.core.std.command.builtin.ToString;
    
 
+command never :: void -> never throws Never
+    refers python:caty.core.std.command.builtin.Never;
