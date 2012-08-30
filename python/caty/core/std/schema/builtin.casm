@@ -585,6 +585,9 @@ exception ImplementationBug = object;
 /** コンパイルエラー */
 exception CompileError = object;
 
+/** neverが検出された */
+exception Never = object;
+
 /**
  * テンプレートを展開する際に扱われるデータ。
  * expand, printなどでテンプレートが展開される際、
@@ -1210,3 +1213,5 @@ command to-string :: any -> string
     refers python:caty.core.std.command.builtin.ToString;
    
 
+command never :: void -> never throws Never
+    refers python:caty.core.std.command.builtin.Never;

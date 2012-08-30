@@ -1214,3 +1214,6 @@ class Foreign(Builtin):
     def execute(self):
         return ForeignObject()
 
+class Never(Builtin):
+    def execute(self):
+        throw_caty_exception(u'Never', u'never detected')
