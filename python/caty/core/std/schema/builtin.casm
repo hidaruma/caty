@@ -585,9 +585,6 @@ exception CompileError = object;
 /** neverが検出された */
 exception Never = object;
 
-command never :: any -> never throws Never
-    refers python:caty.core.std.command.builtin.Never;
-
 exception InvalidThrow = {
  /** throwに入力されたデータ */
  "inputData" : univ,
