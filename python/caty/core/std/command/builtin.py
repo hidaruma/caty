@@ -1159,25 +1159,35 @@ class MakeException(Builtin):
 
 class Throw(Builtin, TypeCalculator):
     def execute(self, input):
-        if self._is_exception(input):
-            t, v = json.split_tag(input)
-            raise CatyException(t, v['message'])
-        else:
-            return input
-
-    def _is_exception(self, input):
-        etype = json.tag(input)
-        if not self.schema.has_schema(etype):
-            return False
-        scm = self.schema.get_type(etype)
-        if '__exception' not in scm.annotations:
-            return False
+        etype, data = json.split_tag(input)
+        scm = self.schema.get_type(u'Exception')
         try:
             scm.validate(input)
         except Exception, e:
-            print json.pp(self.error_report(e))
-            return False
-        return True
+            throw_caty_exception(u'InvalidThrow', etype, origin=input)
+        if not self.schema.has_schema(etype) or u'__exception' not in self.schema.get_type(etype).annotations:
+            throw_caty_exception(u'ExceptionNotFound', etype, origin=input)
+        msg = data.pop('message')
+        if 'class' in data:
+            cls = data.pop('class')
+        else:
+            cls = None
+
+        if 'id' in data:
+            id = data.pop('id')
+        else:
+            id = None
+        
+        if 'class' in data:
+            cls = data.pop('class')
+        else:
+            cls = None
+
+        if 'stackTrace' in data:
+            st = data.pop('stackTrace')
+        else:
+            st = None
+        throw_caty_exception(etype, msg, cls, id, st, **data)
 
 class ArrayToObject(Builtin):
     def execute(self, input):
@@ -1217,4 +1227,9 @@ class Foreign(Builtin):
 class Never(Builtin):
     def execute(self, ignore):
         throw_caty_exception(u'Never', u'')
+
+class Signal(Builtin):
+    def execute(self, data):
+        send_caty_signal(data)
+
 

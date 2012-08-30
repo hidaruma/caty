@@ -425,9 +425,6 @@ type multiOpt<T> = multiItem<T>;
  ******** 例外 ********
  **********************/
 
-/** 例外型が存在しない。*/
-exception ExceptionNotFound = object;
-
 /** モジュールが存在しない */
 exception ModuleNotFound = {
   "moduleName": string,
@@ -590,6 +587,35 @@ exception Never = object;
 
 command never :: any -> never throws Never
     refers python:caty.core.std.command.builtin.Never;
+
+exception InvalidThrow = {
+ /** throwに入力されたデータ */
+ "inputData" : univ,
+ *: any?
+};
+
+/** そういう例外型は存在しない
+ * 例外型（Excetpion）のデータではあるが、タグが登録されてない。
+ */
+exception ExceptionNotFound  = {
+ /** throwに入力されたデータ */
+ "inputData" : Exception,
+ *: any?
+};
+
+/** 
+ * 入力値を例外として送出する。
+ * 入力値が例外型でなかった場合はInvalidThrow例外が、
+ * 例外型ではあるが未定義だった場合はExceptionNotFound例外が送出される。
+ */
+command throw :: any -> never throws Exception
+    refers python:caty.core.std.command.builtin.Throw;
+
+/** 
+ * 入力値をシグナルとして送出する。
+ */
+command signal :: any -> never signals any
+    refers python:caty.core.std.command.builtin.Signal;
 
 /**
  * テンプレートを展開する際に扱われるデータ。
@@ -1162,17 +1188,6 @@ command make-exception [string tag, string message] :: void -> Exception
     throws ExceptionNotFound
     reads schema
     refers python:caty.core.std.command.builtin.MakeException;
-
-
-/** 例外を投げる。
- * 次のときは何もしないで pass として振舞う
- * # 入力が例外（Exception）型でなかったとき
- * # 入力が構造的に例外型だが、定義されてないとき
- */
-command throw-if-can :: any? -> any?
-    throws Exception
-    reads schema
-    refers python:caty.core.std.command.builtin.Throw;
 
 /**
  * [文字列, データ]のペアの配列からオブジェクトを作る。

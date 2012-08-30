@@ -36,6 +36,8 @@ class CommandExecutor(BaseInterpreter):
                     return e.data
                 self.cmd = e.cont
                 self.input = e.data
+            except CatySignal as e:
+                return e.raw_data
             except KeyboardInterrupt as e:
                 print e
                 return None
@@ -134,6 +136,9 @@ class CommandExecutor(BaseInterpreter):
         except ContinuationSignal as e:
             #node.signal_schema.validate(e.data)
             raise
+        except CatySignal as e:
+            node.signal_schema.validate(e.raw_data)
+            raise e
         except CatyException as e:
             import sys
             #try:
