@@ -3,7 +3,7 @@ from topdown import *
 from caty.core.script.parser import ScriptParser
 from caty.core.casm.language.casmparser import module_decl
 from caty.core.casm.language.schemaparser import object_, typedef
-from caty.core.language.util import docstring, annotation, fragment_name, annotation, identifier_token, identifier_token_m, name_token, some_token
+from caty.core.language.util import docstring, annotation, action_fragment_name, annotation, identifier_token, identifier_token_m, name_token, some_token
 from caty.jsontools.xjson import obj
 from caty.core.action.resource import ResourceClass
 from caty.core.action.module import ResourceModule
@@ -245,7 +245,7 @@ class ActionBlock(Parser):
 
     def fragment_name(self, seq):
         ann = annotation(seq)
-        name = fragment_name(seq)
+        name = action_fragment_name(seq)
         if 'in' in ann:
             if 'out' in ann:
                 pf = u'io'

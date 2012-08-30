@@ -131,7 +131,7 @@ resource 住所項目の削除("/delete-item") {
 
 
 <<{
-resource ログイン ("/login.html") {
+resource ログイン ("/loginpage.html") {
  action get("/GET")
  :: @[in, out]#1 void -> void produces ログイン画面 ;
 };
@@ -141,7 +141,7 @@ state ログイン画面 :: any links {
 
 };
 
-resource ログイン処理 ("/do-login.cgi") {
+resource ログイン処理 ("/login.cgi") {
 
  action do ("/POST") 
  :: @[in]#in any -> _ relays [ok, ng],
@@ -150,7 +150,7 @@ resource ログイン処理 ("/do-login.cgi") {
 
 };
 
-resource ログアウト処理 ("/do-logout.cgi") {
+resource ログアウト処理 ("/logout.cgi") {
  action do ("/POST") 
  :: @[in, out]#1 void -> void produces ログアウト後画面;
 

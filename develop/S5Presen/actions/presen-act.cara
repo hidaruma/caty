@@ -47,7 +47,7 @@ resource ディレクトリ("/" | "*/") {
   :: @[in, out]#0 void -> DirInfo produces ディレクトリ・リスト
   {
    %CATY_APP  | $.name > app;
-   (#0 
+   #:0{ 
     do { 
       file:list %PATH_INFO .presen |
         each {pv name}                   >: "wikifiles",
@@ -58,7 +58,7 @@ resource ディレクトリ("/" | "*/") {
       [%app, " ", %PATH_INFO] |
         text:concat                      >: "title",
     }
-   ) | print /list-files.html
+   } | print /list-files.html
   };
 };
 
@@ -71,7 +71,7 @@ resource プレゼン("*.presen") {
   action show ("/GET") 
   :: @[in, out]#0 void -> PresenInfo produces プレゼン・スライド
   {
-    (#0
+    #:0 {
      file:read %0 | presen:split-wiki |
      do {
           pv title            >: "title",
@@ -80,6 +80,6 @@ resource プレゼン("*.presen") {
           pv slides | 
             each{text:creole} >: "slides",
      }
-    ) | print /presen-2.html
+    } | print /presen-2.html
    };
 };

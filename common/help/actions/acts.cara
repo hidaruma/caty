@@ -18,7 +18,7 @@ resource CatySys ("/caty.sys") {
   ::
   @[in, out] # 0 void -> void produces SysIndexPage
   {
-    (#0 void )| print --raw /caty.sys.html
+    #:0 {void}| print --raw /caty.sys.html
   };
 };
 /** Catyシステムのインデックスページ
@@ -34,7 +34,7 @@ resource AppsDir ("**.apps/") {
   ::
   @[in, out] # 0 void -> [AppInfo*] produces AppsDirList
   {
-    (#0 apps ) | print /apps.html
+    #:0 {apps} | print /apps.html
   };
 
 };
@@ -216,11 +216,11 @@ resource UserCmds("/user-cmds.html") {
  ::
  @[in, out] # 0 void -> help:ModInfoList produces CmdsViewingPage
  {
-  (#0
+  #:0{
    do {
     "User-Defined Commands">: "title",
      help:user              >: "mods",
-   }) | print /cmds1.html
+   }} | print /cmds1.html
  };
 };
 
@@ -229,11 +229,11 @@ resource CoreCmds("/core-cmds.html") {
  ::
  @[in, out] # 0 void -> help:ModInfoList produces CmdsViewingPage
  {
-  (#0
+  #:0{
    do {
     "Core Commands"  >: "title",
      help:core        >: "mods",
-   }) | print /cmds1.html
+   }} | print /cmds1.html
  };
 };
 

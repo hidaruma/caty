@@ -1,6 +1,6 @@
 // -*- coding: utf-8 -*- 
 /** Wikiモジュール */
-module wiki in cara on boot;
+module wiki in cara;
 
 userrole 読者;
 userrole 筆者;
@@ -12,11 +12,11 @@ resource Wikiファイル("*.wiki") {
     };
     /** 読み込み */
     action 読み出し("/GET") :: @[in, out] #io void -> WikiPage produces HTMLページ { 
-        (#io file:read %1 | {
+        #:io { file:read %1 | {
             "body": text:creole, 
             "title": %1 | text:rsplit "." | item 0 | text:trim /,
             "lastModified": file:lastmodified %1
-        }) | print include@this:/page.html
+        }} | print include@this:/page.html
     };
 
     /** 編集画面呼び出し */
@@ -31,9 +31,9 @@ resource Wikiファイル("*.wiki") {
         @[in] #translate WikiFile -> _,
         @[out] #ok _ -> never redirects Wikiファイル.読み出し,
         @[out] #ng _ -> never redirects Root.get {
-        (#translate translate wiki:WikiFile) | when {
-            OK => (#ok ["/wiki", (#part pv body) | file:write %1 | %1] | text:concat | redirect),
-            NG => (#ng "/wiki/" | redirect)
+        #: translate {translate wiki:WikiFile} | when {
+            OK => #:ok{ ["/wiki", #:part {pv body} | file:write %1 | %1] | text:concat | redirect},
+            NG => #:ng{ "/wiki/" | redirect}
         }
     };
     /** プレーンテキスト取得 */

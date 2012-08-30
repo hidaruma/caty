@@ -191,7 +191,10 @@ def fragment_name(seq):
     name = seq.parse(Regex('[a-zA-Z_0-9][-0-9_a-zA-Z]*'))
     return name
 
-
+def action_fragment_name(seq):
+    S('#')(seq)
+    name = seq.parse(Regex('[a-zA-Z_0-9][-0-9_a-zA-Z]*'))
+    return name
 # 名前トークンの仕様は以下のIssue及び記事を参考にすること。
 # pub@specdocs:/NameSyntax.wiki
 # https://bitbucket.org/project_caty/dev/issue/675

@@ -50,7 +50,7 @@ state login-failed :: ReturnInfo links {
 /* == アクション == */
 
 /** ログイン画面の生成 */
-resource Login("/login.html") {
+resource Login("/login3.html") {
   action get("/GET")
   {
      "returns" : uri
@@ -60,7 +60,7 @@ resource Login("/login.html") {
 };
 
 /** ログイン処理 */
-resource DoLogin("/do-login.cgi") {
+resource DoLogin("/do-login3.cgi") {
   action do("/POST")
   :: @[in]  #0 object -> _      relays [1, 2],
      @[out] #1 _      -> object redirects dyn-success,

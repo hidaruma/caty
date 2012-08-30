@@ -17,9 +17,16 @@
 === !exec
 
 
-|=input                       |= command    |= output  |= exception |
-|@BadArg {"message":"NG"}     |throw-if-can |          |Exception |
-|@FileNotFound{"message":"NG"}|throw-if-can |          |Exception |
-|@GoodArg{"message":"OK"}     |throw-if-can |@GoodArg{"message":"OK"}| |
-|"bad arg"                    |throw-if-can |"bad arg" | |
+|=input                       |= command|= output |
+|@BadArg {"message":"NG"}     | %throw           | "BadArg"|
+|@FileNotFound{"message":"NG"}|%throw           | "FileNotFound" |
+|@GoodArg{"message":"OK"}     |%throw  | "ExceptionNotFound" |
+|"bad arg"                    |%throw  | "InvalidThrow" |
+
+=== !name: throw
+
+{{{
+try{throw}|untagged|tag
+}}}
+
 
