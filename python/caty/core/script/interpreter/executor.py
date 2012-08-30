@@ -485,6 +485,7 @@ class CommandExecutor(BaseInterpreter):
         return self.input
 
     def visit_catch(self, node):
+        node._prepare()
         if node.handler is not None:
             t, self.input = split_tag(self.input)
             if t in node.handler:

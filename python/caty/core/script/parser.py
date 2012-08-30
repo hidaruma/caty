@@ -100,6 +100,8 @@ class ScriptParser(Parser):
         S(u'{')(seq)
         handlers = split(self._handler, u',')(seq)
         for t, cmd in handlers:
+            if not cmd:
+                continue
             if t in r:
                 raise ParseError(seq, u'duplicated exception handler: %s' % t)
             r[t] = cmd
