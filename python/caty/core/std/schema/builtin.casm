@@ -585,6 +585,12 @@ exception ImplementationBug = object;
 /** コンパイルエラー */
 exception CompileError = object;
 
+/** neverが生じた */
+exception Never = object;
+
+command never :: any -> never throws Never
+    refers python:caty.core.std.command.builtin.Never;
+
 /**
  * テンプレートを展開する際に扱われるデータ。
  * expand, printなどでテンプレートが展開される際、
