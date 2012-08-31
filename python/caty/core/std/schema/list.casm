@@ -65,7 +65,7 @@ command enumerate<T default any> :: [T*] -> [[integer, T]*]
  * オプションの key が指定されて尚且つ入力値が object の配列の場合、
  * key にあたるプロパティがソートキーとして使われる（JSON パス式には未対応）。
  */
-command sort<T default any>  {"key":string?, "reverse": boolean?} :: [T*] -> [T*]
+command sort<T default any>  {"key":string?, @[default(false)]"reverse": boolean?} :: [T*] -> [T*]
     refers python:caty.core.std.command.listlib.Sort;
 
 /**
