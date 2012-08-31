@@ -141,13 +141,13 @@ class CommandExecutor(BaseInterpreter):
             raise e
         except CatyException as e:
             import sys
-            #try:
-            #    node.throw_schema.validate(e.to_json())
-            #except Exception:
-            #    pass
-                # TODO: onlyが付いていたら例外を付け直すように後で修正
-                #raise CatyException(u'RuntimeError', u'Unexpected exception: $name', name=e.tag), None, sys.exc_info()[2]
-            #raise e, None, sys.exc_info()[2]
+            try:
+                node.throw_schema.validate(e.to_json())
+            except Exception:
+                if u'__only' in node.throw_schema.annotations:
+                    raise CatyException(u'TypeError', u'Unexpected exception: $name', name=e.tag), None, sys.exc_info()[2]
+                else:
+                    raise e, None, sys.exc_info()[2]
             raise
         except Exception as e:
             if isinstance(e, PipelineInterruption) or isinstance(e, PipelineErrorExit):

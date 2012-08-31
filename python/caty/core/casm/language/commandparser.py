@@ -91,22 +91,31 @@ def jump(seq):
     t = None
     b = None
     s = None
-    r = unordered(throws, signals)(seq)
-    for k, v in r:
-        if k == u'throws':
-            t = (k, v)
+    r = unordered(try_(throws), try_(signals))(seq)
+    for v in r:
+        if v.name == u'throws':
+            t = v
         else:
-            s = (k, v)
-    return filter(lambda x: x is not None, [t, b, s])
+            s = v
+    return filter(lambda a: a is not None, [t, s])
 
 def throws(seq):
-    _ = seq.parse(keyword(u'throws'))
-    only = seq.parse(option(keyword(u'only')))
-    return _, seq.parse([typelist, lambda s: [typedef(s)]])
+    nothing = option(keyword(u'not'))(seq)
+    name = seq.parse(keyword(u'throws'))
+    only = None
+    types = []
+    if not nothing:
+        only = seq.parse(option(keyword(u'only')))
+        types = seq.parse([typelist, lambda s: [typedef(s)]])
+    return Jump(name, types, only, nothing)
 
 def signals(seq):
-    _ = seq.parse(keyword(u'signals'))
-    return _, seq.parse([typelist, lambda s: [typedef(s)]])
+    nothing = option(keyword(u'not'))(seq)
+    name = seq.parse(keyword(u'signals'))
+    types = []
+    if not nothing:
+        types = seq.parse([typelist, lambda s: [typedef(s)]])
+    return Jump(name, types, None, nothing)
 
 def typelist(seq):
     _ = seq.parse(u'[')

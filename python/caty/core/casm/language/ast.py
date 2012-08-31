@@ -361,9 +361,9 @@ class CommandNode(Function):
         profiles = [pro.reify() for pro in self.patterns]
         r['profiles'] = profiles
         r['exception'] = []
-        for (t, es) in self.patterns[0].decl.jump_decl:
-            if t == 'throws':
-                for e in es:
+        for jump in self.patterns[0].decl.jump_decl:
+            if jump.name == 'throws':
+                for e in jump.types:
                     r['exception'].append(e.reify())
         r['resource'] = []
         for t, n in self.patterns[0].decl.get_all_resources():
@@ -452,7 +452,7 @@ class CommandDecl(object):
         self.uri = '' # 後で挿入される
         self.profile_ast = profile
         self.profile = None
-        self.jump_decl = jump if isinstance(jump, list) else [jump]
+        self.jump_decl = jump
         self.resource = resource if isinstance(resource, list) else [resource]
         self.__initialized = False
 
@@ -475,17 +475,20 @@ class CommandDecl(object):
 
         self.throws = NeverSchema()
         self.signals = NeverSchema()
-        for t, ls in self.jump_decl:
-            if t == u'throws':
-                node = reduce(lambda a, b: UnionNode(a, b), ls)
+        for jump in self.jump_decl:
+            if not jump.nothing:
+                node = reduce(lambda a, b: UnionNode(a, b), jump.types)
+                if jump.only:
+                    node.annotations.add(Annotation(u'__only'))
                 for cursor in cursors:
                     node = node.accept(cursor)
-                self.throws = node
+                    self.throws = node
             else:
-                node = reduce(lambda a, b: UnionNode(a, b), ls)
-                for cursor in cursors:
-                    node = node.accept(cursor)
+                node = None
+            if jump.name == u'signals':
                 self.signals = node
+            else:
+                self.throws = node
         self.__initialized = True
 
     def verify_type_var(self, names):
@@ -512,6 +515,13 @@ class FacilityDecl(object):
         return ''.join(r)
 
     __str__ = __repr__
+
+class Jump(object):
+    def __init__(self, name, types, only, nothing):
+        self.name = name
+        self.types = types
+        self.nothing = nothing
+        self.only = only
 
 class CommandURI(object):
     def __init__(self, types):
