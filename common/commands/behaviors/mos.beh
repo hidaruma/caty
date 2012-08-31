@@ -1,0 +1,21 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= mosモジュール
+
+
+== !exec
+
+|= !command    |= !params |= !input    |= !output           |= コメント |
+|mos:fullpath  |          |"app::"     | "app::"          | ダブルコロンで終わる名前はアプリケーション名と解釈する |
+|mos:fullpath  |          |"app"       | "app::"            | 裸の名前はアプリケーション名と解釈する |
+|mos:fullpath  |          |"pkg."      | "this::pkg."       | ドットで終わる名前はパッケージ名と解釈する |
+|mos:fullpath  |          |"pkg.pkg2." | "this::pkg.pkg2."  | ドットで終わる名前はパッケージ名と解釈する |
+|mos:fullpath  |          |"mod:"      | "this::mod:"       | コロンで終わる名前はモジュール名と解釈する |
+|mos:fullpath  |          |"pkg.mod:"  | "this::pkg.mod:"   | コロンで終わる名前はモジュール名と解釈する |
+|mos:fullpath  |          |"mod:cls."  | "this::mod:cls."   | コロンを含みドットで終わる名前はクラス名と解釈する |
+
+
+|= !command    |= !params |= !input    |= !output           |= コメント |
+|mos:fullpath  |          |""          | "this::"           | 空な名前は現アプリケーション名と解釈する |
+|mos:fullpath  |--as=pkg  |"pkg"       | "this::pkg."       | pkg文脈なら、パッケージ名と解釈する |
+|mos:fullpath  |--as=mod  |"mod"       | "this::mod:"       | mod文脈なら、モジュール名と解釈する |
