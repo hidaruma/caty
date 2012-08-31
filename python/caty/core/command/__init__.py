@@ -102,7 +102,7 @@ class Command(object):
     def _finish_opts(self):
         self.__arg0_schema.validate(self.__arg0)
         if self.profile.opts_schema.type == 'object':
-            self._opts = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(self._opts))
+            self._opts = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(self._opts), True)
         else:
             self._opts = None
         if self.profile.args_schema.type == 'array':

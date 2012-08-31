@@ -18,6 +18,7 @@ def initialize(system, interpreter_module):
                    u'json',
                    u'list',
                    u'logging',
+                   u'mos',
                    u'os',
                    u'path',
                    u'set',

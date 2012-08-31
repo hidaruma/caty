@@ -536,6 +536,9 @@ exception UnexpectedOption = object;
 /** オプションの値が不正である。*/
 exception BadOption = object;
 
+/** オプションが不足している。*/
+exception MissingOption = object;
+
 
 /** 引数が余分にある。*/
 exception UnexpectedArg = object;

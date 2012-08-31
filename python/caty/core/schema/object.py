@@ -286,7 +286,8 @@ class ObjectSchema(SchemaBase, Object):
             raise e
         return result
 
-    def fill_default(self, value):
+    def fill_default(self, value, fill_undef=False):
+        from caty import UNDEFINED
         result = {}
         for k, v in value.items():
             result[k] = v
@@ -294,8 +295,11 @@ class ObjectSchema(SchemaBase, Object):
             if k not in value:
                 if not v.optional:
                     pass
-                elif v.optional and 'default' in v.annotations:
-                    result[k] = v.annotations['default'].value
+                elif v.optional:
+                    if 'default' in v.annotations:
+                        result[k] = v.annotations['default'].value
+                    elif fill_undef:
+                        result[k] = UNDEFINED
             else:
                 result[k] = value[k]
         return result

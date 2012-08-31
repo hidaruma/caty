@@ -1,0 +1,19 @@
+/** MetaObject System に関するコマンド群 */
+module mos;
+
+type CDPathContext = (
+ "app" | "application" |
+ "pkg" | "package" |
+ "mod" | "module" |
+ "cls" | "class" |
+ "typ" | "type" |
+ "cmd" | "command" |
+);
+
+/** コロンドットパスをフルパスにする */
+command fullpath 
+ {
+   "as": CDPathContext?
+ }
+:: string -> string throws [InvalidInput, MissingOption]
+    refers python:caty.core.std.command.mos.FullPath;
