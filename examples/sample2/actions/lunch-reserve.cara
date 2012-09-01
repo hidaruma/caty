@@ -111,7 +111,7 @@ resource 予約ページ  ("/reserve.html") {
    :: @[in, out] #0 void -> void produces 予約注文画面 ;
 };
 
-resource メニュー登録ページ ("/register.html") {
+resource メニュー登録ページ ("/register-menu.html") {
    action 取得("/GET")
    :: @[in, out] #0 void -> void produces メニュー登録画面 ;
 };
