@@ -2,20 +2,74 @@
 
 = mosモジュール
 
+=== CDパスの構文規則
+
+CDパスの解釈は曖昧になる。曖昧性を避けるため、末尾に記号をつける。
+これは、ファイルとディレクトリを区別するために末尾に'/'を付ける行為と類似している。
+
+# 末尾がダブルコロン（::）ならアプリケーションである。
+# 末尾がドット（.）ならパッケージまたはクラスである。
+# 末尾がコロン（:）ならモジュールである。
+# 中間にコロンを含み末尾がドット（.）ならクラスである。
+
+以上の末尾ルールを徹底しても曖昧性は残る。例えば、foo:bar は型かコマンドか区別が付かない。
+この場合は、別に解釈文脈が必要となる。
+
+末尾ルールは常に適用されるわけではないので、実際はさらに曖昧性が高い。
+
 
 == !exec
 
-|= !command    |= !params |= !input    |= !output           |= コメント |
-|mos:fullpath  |          |"app::"     | "app::"          | ダブルコロンで終わる名前はアプリケーション名と解釈する |
-|mos:fullpath  |          |"app"       | "app::"            | 裸の名前はアプリケーション名と解釈する |
-|mos:fullpath  |          |"pkg."      | "this::pkg."       | ドットで終わる名前はパッケージ名と解釈する |
+文脈なしで解釈可能
+
+|= !command    |= !params |= !input    |= !output        |= コメント |
+|mos:fullpath  |          |""          | "this::"        | 空な名前は現アプリケーション名と解釈する |
+|mos:fullpath  |          |"app::"     | "app::"         | ダブルコロンで終わる名前はアプリケーション名と解釈する |
+|mos:fullpath  |          |"app"       | "app::"         | 裸の名前はアプリケーション名と解釈する（追加コンベンション） |
+|mos:fullpath  |          |"pkg."      | "this::pkg."    | ドットで終わる名前はパッケージ名と解釈する |
 |mos:fullpath  |          |"pkg.pkg2." | "this::pkg.pkg2."  | ドットで終わる名前はパッケージ名と解釈する |
 |mos:fullpath  |          |"mod:"      | "this::mod:"       | コロンで終わる名前はモジュール名と解釈する |
 |mos:fullpath  |          |"pkg.mod:"  | "this::pkg.mod:"   | コロンで終わる名前はモジュール名と解釈する |
+|mos:fullpath  |          |"pkg.pkg2.mod:"|"this::pkg.pkg2.mod:"   | コロンで終わる名前はモジュール名と解釈する |
 |mos:fullpath  |          |"mod:cls."  | "this::mod:cls."   | コロンを含みドットで終わる名前はクラス名と解釈する |
+|mos:fullpath  |          |"mod:typ"  | "this::mod:typ"   | 型とコマンドの区別はついてない |
+|mos:fullpath  |          |"mod:cmd"  | "this::mod:cmd"   | 型とコマンドの区別はついてない |
+|mos:fullpath  |          |"mod:cls.typ"  | "this::mod:cls.typ"  | 型とコマンドの区別はついてない |
+|mos:fullpath  |          |"mod:cls.cmd"  | "this::mod:cls.cmd"  | 型とコマンドの区別はついてない |
+
+
+文脈で解釈
+
+* 呼び出しは this:~:cmd でも良いが、
+  すべての型／コマンドは必ずモジュールに含まれるとしている（アプリケーションは型／コマンドの名前空間を持ってない）ので、this:~:public:cmd とする。
 
 
 |= !command    |= !params |= !input    |= !output           |= コメント |
-|mos:fullpath  |          |""          | "this::"           | 空な名前は現アプリケーション名と解釈する |
 |mos:fullpath  |--as=pkg  |"pkg"       | "this::pkg."       | pkg文脈なら、パッケージ名と解釈する |
 |mos:fullpath  |--as=mod  |"mod"       | "this::mod:"       | mod文脈なら、モジュール名と解釈する |
+|mos:fullpath  |--as=cls  |"mod:cls"   | "this::mod:cls."   | cls文脈なら、クラス名と解釈する |
+|mos:fullpath  |--as=cmd  |"mod:cmd"   | "this::mod:cmd"    | cmd文脈なら、コマンド名と解釈する |
+|mos:fullpath  |--as=typ  |"mod:typ"   | "this::mod:typ"    | typ文脈なら、型名と解釈する |
+|mos:fullpath  |--as=cmd  |"cmd"       | "this::public:cmd" | cmd文脈なら、publicコマンド名と解釈する |
+|mos:fullpath  |--as=typ  |"typ"       | "this::public:typ" | cmd文脈なら、public型名と解釈する |
+|mos:fullpath  |--as=cmd  |"cls.cmd"   | "this::public:cls.cmd" | cmd文脈なら、publicなクラス内コマンド名と解釈する |
+|mos:fullpath  |--as=typ  |"cls.typ"   | "this::public:cls.typ" | cmd文脈なら、publicなクラス内型名と解釈する |
+
+
+冗長な文脈情報：文脈情報が冗長でも、矛盾しなければ害はない
+
+
+|= !command    |= !params |= !input    |= !output           |
+|mos:fullpath  |--as=app  |""          | "this::"           | 
+|mos:fullpath  |--as=pkg  |"pkg."      | "this::pkg."       |
+|mos:fullpath  |--as=pkg  |"pkg.pkg2." | "this::pkg.pkg2."  |
+|mos:fullpath  |--as=mod  |"mod:"      | "this::mod:"       |
+|mos:fullpath  |--as=mod  |"pkg.mod:"  | "this::pkg.mod:"   |
+|mos:fullpath  |--as=mod  |"pkg.pkg2.mod:"|"this::pkg.pkg2.mod:" |
+|mos:fullpath  |--as=cls  |"mod:cls."  | "this::mod:cls."   |
+|mos:fullpath  |--as=type |"mod:typ"  | "this::mod:typ"   |
+|mos:fullpath  |--as=cmd  |"mod:cmd"  | "this::mod:cmd"   |
+|mos:fullpath  |--as=typ  |"mod:cls.typ"  | "this::mod:cls.typ"  |
+|mos:fullpath  |--as=cmd  |"mod:cls.cmd"  | "this::mod:cls.cmd"  |
+|mos:fullpath  |--as=app  |"app"       | "app::"            | 
+
