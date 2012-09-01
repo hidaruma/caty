@@ -19,7 +19,7 @@ class FullPath(Builtin):
             if self.__as in (u'app', u'pkg', u'mod'):
                 throw_caty_exception(u'InvalidInput', u'$data', data=s)
             else:
-                if self.__as == u'cls':
+                if self.__as == u'cls' or s.endswith(u'.'):
                     n += u'.'
         else:
             if self.__as and self.__as in (u'cmd', u'typ'):

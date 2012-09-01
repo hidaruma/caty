@@ -245,6 +245,8 @@ class CDPSplitter(Parser):
             app_name = app_name.strip(u':')
         if mod_name:
             mod_name = mod_name.strip(u'.:')
+        if content_name:
+            content_name = content_name.strip(u'.')
         if not app_name and not self.__consider_cotext:
             # アプリケーション名が空でコンテキストが未指定の場合、
             # 裸の名前があればそれをアプリケーション名前として扱う
@@ -256,11 +258,20 @@ class CDPSplitter(Parser):
                     app_name = content_name
                     content_name = None
         if not app_name:
-            # コンテキストがあって単にアプリケーション名が未指定の場合、thisを補う
-            app_name = u'this'
+            if self.__consider_cotext != u'app':
+                # コンテキストがあって単にアプリケーション名が未指定の場合、thisを補う
+                app_name = u'this'
+            else:
+                if not mod_name and content_name:
+                    app_name = content_name
+                    content_name = None
+                else:
+                    app_name = u'this'
         if not mod_name and self.__consider_cotext in (u'mod', u'pkg'):
             # コンテキストがパッケージかモジュールで裸の名前の場合、モジュールかパッケージとして解釈する
             if content_name:
                 mod_name = content_name.strip(u'.')
                 content_name = None
+        elif not mod_name and self.__consider_cotext in (u'cls', u'cmd', u'typ'):
+            mod_name = u'public'
         return app_name, mod_name, content_name
