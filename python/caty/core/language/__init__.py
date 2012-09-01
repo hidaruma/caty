@@ -228,12 +228,13 @@ def identifier_token_m(seq):
 def identifier_token_a(seq):
     return seq.parse(Regex(_app_identifier_ptn, re.X))
 
-def split_colon_dot_path(s, consider_context=True):
+def split_colon_dot_path(s, consider_context=u'ignore'):
+    # ignoreを指定されると文脈を一切無視
     c = CDPSplitter(consider_context)
     return c.run(s)
 
 class CDPSplitter(Parser):
-    def __init__(self, consider_context=u'application'):
+    def __init__(self, consider_context=False):
         self.__consider_cotext = consider_context
 
     def __call__(self, seq):
@@ -241,27 +242,25 @@ class CDPSplitter(Parser):
         mod_name = option(Regex(_identifier_ptn + u'(:|\\.$)', re.X))(seq)
         content_name = option(Regex(_identifier_ptn+u'\\.?', re.X))(seq)
         if app_name:
-            app_name = app_name.rstrip(':')
+            app_name = app_name.strip(u':')
         if mod_name:
-            mod_name = mod_name.rstrip(':.')
-        if not app_name and not mod_name and not content_name:
-            return u'this', None, None
-        if not app_name and self.__consider_cotext and self.__consider_cotext != u'app':
-            app_name = u'this'
-        if not seq.eof:
-            raise ParseFailed(seq, u'not a colon dot path: %s' % seq.text)
-        if not app_name and self.__consider_cotext == u'app': # ::がない場合かつコンテキストをみる
-            if not mod_name: # : がない裸の名前でモジュールコンテキスト
-                if u'.' not in content_name: # パッケージでもない
-                    # これはモジュールやパッケージを探す文脈での曖昧な名前であり、app解釈
+            mod_name = mod_name.strip(u'.:')
+        if not app_name and not self.__consider_cotext:
+            # アプリケーション名が空でコンテキストが未指定の場合、
+            # 裸の名前があればそれをアプリケーション名前として扱う
+            # モジュールまで指定されていればthisを補う
+            if not mod_name:
+                if not content_name:
+                    app_name = u'this'
+                else:
                     app_name = content_name
                     content_name = None
-                else: # content_nameはパッケージを指しているのでmod_nameと入れ替え
-                    mod_name = content_name.strip('.')
-                    content_name = None
-        elif not mod_name and self.__consider_cotext in (u'mod', u'pkg'): # :がない場合かつコンテキストをみる
+        if not app_name:
+            # コンテキストがあって単にアプリケーション名が未指定の場合、thisを補う
+            app_name = u'this'
+        if not mod_name and self.__consider_cotext in (u'mod', u'pkg'):
+            # コンテキストがパッケージかモジュールで裸の名前の場合、モジュールかパッケージとして解釈する
             if content_name:
-                mod_name = content_name.strip('.')
+                mod_name = content_name.strip(u'.')
                 content_name = None
         return app_name, mod_name, content_name
-

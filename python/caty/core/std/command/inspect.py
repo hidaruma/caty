@@ -4,7 +4,7 @@ from caty.core.exception import *
 from caty.core.language import split_colon_dot_path as _split_colon_dot_path
 import caty.jsontools as json
 
-split_colon_dot_path = lambda s: _split_colon_dot_path(s, False)
+split_colon_dot_path = lambda s: _split_colon_dot_path(s, u'ignore')
 
 class ListCommands(Internal):
     def setup(self, opts, module_name):
