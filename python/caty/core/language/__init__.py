@@ -232,27 +232,14 @@ def split_colon_dot_path(s, consider_context=True):
     c = CDPSplitter(consider_context)
     return c.run(s)
 
-class BasicCDPSplitter(Parser):
-    def __call__(self, seq):
-        app_name = option(Regex(_name_token_ptn + '::', re.X))(seq)
-        mod_name = option(Regex(_identifier_ptn + ':', re.X))(seq)
-        name = option(identifier_token)(seq)
-        if app_name:
-            app_name = app_name.strip(':')
-        if mod_name:
-            mod_name = mod_name.strip(':')
-        if not seq.eof:
-            raise ParseFailed(seq, u'not a colon dot path: %s' % seq.text)
-        return app_name, mod_name, name
-
 class CDPSplitter(Parser):
     def __init__(self, consider_context=u'application'):
         self.__consider_cotext = consider_context
 
     def __call__(self, seq):
-        app_name = option(Regex(_name_token_ptn + '::', re.X))(seq)
-        mod_name = option(Regex(_identifier_ptn + '(:|\\.$)', re.X))(seq)
-        content_name = option(identifier_token)(seq)
+        app_name = option(Regex(_name_token_ptn + u'::', re.X))(seq)
+        mod_name = option(Regex(_identifier_ptn + u'(:|\\.$)', re.X))(seq)
+        content_name = option(Regex(_identifier_ptn+u'\\.?', re.X))(seq)
         if app_name:
             app_name = app_name.rstrip(':')
         if mod_name:
