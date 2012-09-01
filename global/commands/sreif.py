@@ -20,7 +20,7 @@ class ShallowReifier(object):
         tmap = {
             'embeded-link':  u'embedded',
             'additional-link': u'additional',
-            'no-care-link': u'indef'
+            'indef-link': u'indef'
         }
         links = {}
         for l in s.links:
