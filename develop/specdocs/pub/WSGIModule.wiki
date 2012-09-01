@@ -1,0 +1,252 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= WSGIモジュール
+
+CatyのコマンドセットであるWSGIモジュールwsgi:は、
+WSGI（[[>http://www.python.org/dev/peps/pep-0333/|PEP333]]）サーバー機能の一部をエミュレートするコマンド群から構成される。
+次の4つの基本コマンドを提供する。
+
+# make-env
+# call-application
+# process-env
+# dispatch-and-exec
+
+== WSGI仕様
+
+WSGI仕様では、Webリクエストは、{{{application(environ, start_response)}}} という形でコールバックに渡される。
+このときの呼び出し可能 application を**WSGIアプリケーション・コールバック**、または単に**WSGIアプリケーション**と呼ぶことにする。
+
+第一引数のenvironはPythonデータであるが、Catyデータとしても定義できる。ただし、XJSONエンコード不能な部分もあるので、
+foreignデータが混じる。
+
+{{{
+type InputStream = foreign;
+
+
+// !! stringではなくて、binaryになるかもしれない !!
+
+type Environ = {
+
+  /** HTTPメソッド */
+  REQUEST_METHOD: httpMethod,
+
+  /** アプリケーションを識別する名前 */
+  SCRIPT_NAME : string,
+
+  /** リクエストパス */
+  PATH_INFO: string,
+
+  /** クエリー文字列 */
+  QUERY_STRING: string?,
+
+  /** リクエストボディのメディア型 */
+  CONTENT_TYPE: mediaType?
+
+  /** リクエストボディの長さ */
+  CONTENT_LENGTH: string?,
+
+  /** リクエストボディ（入力）を表現するfile-likeオブジェクト */
+  wsgi.input: InputStream,
+
+// ... その他なにやら
+
+  * : univ?,
+};
+}}}
+
+WSGIアプリケーションの第一引数の型を以下では**wsgi:Environ型**とする。
+
+== Caty起動スクリプト
+
+Caty起動スクリプトは、使用するWSGIサーバーによって変わる。次のようなWSGIサーバーでCatyは実行可能だ。
+
+# [[>http://www.python.jp/doc/2.5/lib/module-wsgiref.html|wsgiref]]
+# [[>http://projects.unbit.it/uwsgi/|uwsgi]]
+# [[>http://gunicorn.org/|gunicorn (Green Unicorn)]]
+# [[>http://werkzeug.pocoo.org/|Werkzeug]]
+
+WSGIサーバーの選択だけではなく、必要に応じてWSGIミドルウェアを付け足すことができる。また、
+Caty側で使うサーバーモジュールも変えることができる。
+
+可変な部分が多いので、起動スクリプトを生成するメカニズムを入れたほうがいいだろう（余談）。
+
+次のことを仮定する。
+
+# Caty本体は、起動スクリプトに対してWSGIアプリケーションを提示する。
+# 起動スクリプトは、Caty本体に対して一番外側のWSGIアプリケーションを提示する。
+
+よって、Catyは自分が提示したWSGアプリケーションと、
+WSGIミドルウェアスタックを含めたWSGIアプリケーションの知識を持つ（入り口を知る）ことになる。
+
+== wsgi:make-env コマンド
+
+wsgi:make-envコマンドは、Webリクエスト情報をwsgi:Environ型のデータに変換する。
+
+Webリクエスト情報とは：
+
+# リクエストパス
+# クエリー文字列
+# HTTPメソッド
+# 動詞
+# リクエストボディ
+
+{{{
+command make-env 
+  {
+    @[default(false)]
+    "fullpath": boolean?,
+
+    @[default("GET")]
+    "method": string?,
+
+    @[default("")]
+    "verb": string?,
+
+    "content-type": string?,
+  }
+  [string path, string? query]
+:: (null|string|binary) -> Environ;
+}}}
+
+# fullpathオプションの意味は、requestコマンドと同じである。
+  fullpath=falseのときは、現在のCatyアプリケーションを起点とする相対パスとなる。
+# HTTPメソッドがGET, HEAD, DELETEのときは、入力はnullしか許容しない。
+# HTTPメソッドがGET, HEAD, DELETEのときは、content-typeは指定できない。
+# HTTPメソッドがPUT, POSTのときは、入力はstring|binaryが必須。
+# HTTPメソッドがPUT, POSTのとき、入力がstringで
+  content-typeは指定されてないなら、text/plain とみなす。
+# HTTPメソッドがPUT, POSTのとき、入力がbinaryで
+  content-typeは指定されてないなら、application/octet-streamとみなす。
+
+wsgi:make-envコマンドは、WSGI仕様に従ってデータ生成するだけのコマンドである。
+実際の起動スクリプトやWSGIアプリケーションとは無関係に動作する。
+
+次のオプションはcurlコマンドのものであるが、これらをサポートすると便利だろう。
+
+# --cookie=クッキー文字列
+# --referer=リファラーURI
+# --user-agent=ユーザーエージェント名
+# --head=追加／上書きのヘッダエントリー
+
+
+== wsgi:call-application コマンド
+
+wsgi:call-applicationコマンドは、WSGIアプリケーションを呼び出す。
+
+{{{
+type Response = {
+    "status": integer,
+    "header": {
+        *: string?,
+    },
+    "body": (string | binary),
+};
+
+command call-application
+  {
+    @[default(false)]
+    "no-middle": boolean?,
+  }
+:: Environ -> Response;
+}}}
+
+# 入力のwsgi:Environ型データを第一引数にしてWSGIアプリケーションを呼ぶ。
+# 第二引数のstart_resposeは自前で準備したものを渡す。
+# --no-middle=trueのときは、ミドルウェアスタックをバイバスする。つまり、
+  Catyが提示したWSGIアプリケーションを呼び出す。
+# start_responseに渡された情報と、WSGIアプリケーションの戻り値からwsgi:Response型データを組み立てて出力とする。
+
+使用例：
+
+{{{
+wsgi:make-env --verb=frank /hello.cgi | wsgi:call-application
+}}}
+
+== wsgi:process-env コマンド
+
+WSGIミドルウェアは、入力のenvironとレスポンスを加工することがある。
+wsgi:process-envコマンドはenvironの加工状況を調べるものである。
+
+WSGIは直列パイプラインモデルではなくて、入れ子の関数呼び出しモデルを採用しているので、ミドルウェアスタックの入り口処理部分だけを取り出すのは困難である。以下に示す方法は好ましいとは言えないが一案である。より良い方法があるかもしれない。
+
+
+# Catyが提供するWSGIアプリケーションは、wsgi:Environ内の"caty._dump_environ"フィールドを認識する。
+# "caty._dump_environ"フィールドがTrueであった場合、environを含めた例外データを作ってraiseする。
+# wsgi:process-envコマンドは、"caty._dump_environ"をTrueにセットしたwsgi:Environデータを渡して、例外を捕捉して、
+  ミドルウェアスタックを通ったwsgi:Environデータを取得する。
+
+{{{
+command process-env
+:: Environ -> Environ;
+}}}
+
+process-envコマンドは、ミドルウェアによるenvironの加工をエミュレートするので、次の2つは**ほぼ**同値である。
+
+# wsgi:call-application
+# wsgi:process-env | wsgi:call-application --no-middle
+
+ミドルウェアがレスポンスの加工をしていると、2番めはその加工の影響を受けないので結果が変わる。
+（入り口処理と出口処理がを必ず対になってしまうのは不便だなー、マッタク。）
+
+
+== wsgi:dispatch-and-exec コマンド
+
+wsgi:dispatch-and-execコマンドは、WSGIアプリケーションを呼び出すわけではないが、便宜上wsgiモジュールに入れておく。
+wsgi:dispatch-and-execコマンドの主たる目的は、リクエストディスパッチのテストをすることである。
+
+{{{
+command dispatch-and-exec :: Environ -> any
+  throws [ApplicationNotFound, FileNotFound, ActionNotFound]
+;
+}}}
+
+# wsgi:Environデータに含まれる情報を使ってリクエストディパッチをする。
+# リクエストディスパッチが失敗したら、*NotFound系の例外を出す。
+# アクションが見つかった場合は、そのアクションを「コマンドラインで直接呼び出した場合」と**まったく同じ挙動**をする。
+
+wsgi:dispatch-and-execコマンドは、wsgi:Environデータを経由してアクション起動を行うコマンドである。
+パイプラインの手前に、make-envとprocess-envを付けると、Webからのアクション起動（リモートアクション起動; **Remote Action Invocation**）を正確にエミュレートできる。
+
+wsgi:call-applicationでは、Catyの例外マッパーやWSGIアプリケーションによって“生のアクション実行状態”が見えなくなってしまうことが多い。
+それに比べて、wsgi:dipatch-and-execは、アクションのリモート起動の状況を**直接的に**観測できる。
+wsgi:make-env | wsgi:dispatch-and-exec と
+wsgi:make-env | wsgi:process-env | wsgi:dispatch-and-exec を比較することにより、
+WSGIミドルウェアの影響を調べることもできる。
+
+使用例：
+
+{{{
+// ミドルウェアを通さないで実行
+wsgi:make-env --verb=frank /hello.cgi | wsgi:dispatch-and-exec
+
+// ミドルウェアを通して実行
+wsgi:make-env --verb=frank /hello.cgi | wsgi:process-env | wsgi:dispatch-and-exec
+}}}
+
+== WSGIとパイプライン
+
+WSGIミドルウェアスタック処理の入り口をenter、出口はleaveだとして、ソケット待ちをreceive、ソケット書き出しをsendとする。Caty本体のリクエスト処理を dispatch | exec | confirm とする。
+
+全体のパイプラインは（[[>http://d.hatena.ne.jp/m-hiyama/20101201/1291165175|CatyScriptで記述するCatyのリクエスト処理]]参照）：
+
+
+- receive | enter | dispatch | exec | confirm | leave | send
+
+WSGIの構造上パイプライン要素を個別に取り出せないので、必要なサブパイプラインを次のように取り出している。
+
+# receive ≒ make-request
+# enter ≒ process-env
+# (dispatch | exec) ≒ dispatch-and-exec
+# (enter | dispatch | exec | confirm | leave) ≒ call-application
+# (dispatch | exec | confirm) ≒ call-application --no-middle
+
+confirm（例外マッパー）はCaty内部にあるので単独で呼出すことができる。
+leave処理（ミドルウェアスタックの出口処理）を取り出すのが困難だが、
+他の処理との差分として推測可能だろう。
+
+callとreturnを常にペアにする制御モデルが、
+単純データパッシング（goto-with-data）に比べて柔軟性が低く扱いにくい事を露呈しているように思える。
+
+
+
+
