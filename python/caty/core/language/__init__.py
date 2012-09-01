@@ -244,9 +244,13 @@ class CDPSplitter(Parser):
             app_name = app_name.rstrip(':')
         if mod_name:
             mod_name = mod_name.rstrip(':.')
+        if not app_name and not mod_name and not content_name:
+            return u'this', None, None
+        if not app_name and self.__consider_cotext and self.__consider_cotext != u'app':
+            app_name = u'this'
         if not seq.eof:
             raise ParseFailed(seq, u'not a colon dot path: %s' % seq.text)
-        if not app_name and self.__consider_cotext: # ::がない場合かつコンテキストをみる
+        if not app_name and self.__consider_cotext == u'app': # ::がない場合かつコンテキストをみる
             if not mod_name: # : がない裸の名前でモジュールコンテキスト
                 if u'.' not in content_name: # パッケージでもない
                     # これはモジュールやパッケージを探す文脈での曖昧な名前であり、app解釈
@@ -255,8 +259,9 @@ class CDPSplitter(Parser):
                 else: # content_nameはパッケージを指しているのでmod_nameと入れ替え
                     mod_name = content_name.strip('.')
                     content_name = None
-        elif not mod_name and content_name and self.__consider_cotext: # :がない場合かつコンテキストをみる
-            mod_name = content_name.strip('.')
-            content_name = None
+        elif not mod_name and self.__consider_cotext in (u'mod', u'pkg'): # :がない場合かつコンテキストをみる
+            if content_name:
+                mod_name = content_name.strip('.')
+                content_name = None
         return app_name, mod_name, content_name
 

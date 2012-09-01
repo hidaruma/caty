@@ -13,7 +13,7 @@ type CDPathContext = (
 /** コロンドットパスをフルパスにする */
 command fullpath 
  {
-   "as": CDPathContext?
+   @[default("app")]"as": CDPathContext?
  }
 :: string -> string throws [InvalidInput, MissingOption]
     refers python:caty.core.std.command.mos.FullPath;
