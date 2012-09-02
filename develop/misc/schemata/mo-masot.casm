@@ -1,0 +1,57 @@
+// -*- coding: utf-8 -*-
+
+/** メタオブジェクト（MO）に関する簡単なMasoテスト 
+
+Masoテストの基本手法を簡単な順に並べると：
+
+# 同じことを長時間繰り返す。
+# 乱数による選択を長時間繰り返す。
+# 全数データを準備して網羅的に投入する。
+
+ここでは、一番簡単な同じ事の繰り返しを行う。
+
+*/
+
+module mo-masot;
+
+/** メタオブジェクトをスキャンする */
+command scan :: void -> void {
+ sreif:list-applications |
+ each {
+  pass > app | $.name >  appName;
+  %app | each {%_key} | validate<[string*]> | tag | cout;
+  [%appName, "::"] | text:concat > appPath; // これは不要にすべき
+/**/
+  sreif:list-modules %appPath |
+  each {
+    pass > mod | $.name > modName;
+    %mod | each {%_key} | validate<[string*]> | tag | cout;
+    [%appName, "::", %modName, ":"] | text:concat > modPath;
+
+    sreif:list-types %modPath |
+    each {
+      pass > typ | $.name > typName;
+      %typ | each {%_key} | validate<[string*]> | tag | cout
+    } | void;
+
+    sreif:list-commands %modPath |
+    each {
+      pass > cmd | $.name > cmdName;
+      %cmd | each {%_key} | validate<[string*]> | tag | cout
+    } | void
+
+  } | void
+
+ } | void
+
+};
+
+/** メタオブジェクトのスキャンを無限に繰り返す */
+command scan-forever :: void -> never {
+ begin {
+  scan; repeat
+ }
+
+};
+
+// End of Module
