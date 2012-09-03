@@ -340,41 +340,47 @@ class Module(Facility):
     def make_dumper(self):
         return TreeDumper()
 
+    def make_dep_analizer(self):
+        return DependencyAnalizer(self)
+
+    def make_profile_builder(self):
+        return ProfileBuilder(self)
+
     def _build_schema_tree(self):
         self.saved_st.update(self.ast_ns)
         if not self.compiled:
-            self._loop_exec(self.ast_ns, self.make_schema_builder(), lambda k, v:self.add_schema(v))
+            self._loop_exec(self.ast_ns, self.make_schema_builder, lambda k, v:self.add_schema(v))
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._build_schema_tree()
 
     def _resolve_reference(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, self.make_reference_resolver(), lambda k, v:self.schema_ns.__setitem__(k, v))
+            self._loop_exec(self.schema_ns, self.make_reference_resolver, lambda k, v:self.schema_ns.__setitem__(k, v))
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._resolve_reference()
 
     def _apply_type_var(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, self.make_typevar_applier(), lambda k, v:self.schema_ns.__setitem__(k, v))
+            self._loop_exec(self.schema_ns, self.make_typevar_applier, lambda k, v:self.schema_ns.__setitem__(k, v))
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._apply_type_var()
 
     def _detect_cycle(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, self.make_cycle_detecter(), lambda k, v: v)
+            self._loop_exec(self.schema_ns, self.make_cycle_detecter, lambda k, v: v)
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._detect_cycle()
 
     def _normalize(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, self.make_type_normalizer(), lambda k, v:self.schema_ns.__setitem__(k, v))
+            self._loop_exec(self.schema_ns, self.make_type_normalizer, lambda k, v:self.schema_ns.__setitem__(k, v))
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._normalize()
 
     def _check_dependency(self):
         if not self.compiled:
             graph = set()
-            self._loop_exec(self.schema_ns, DependencyAnalizer(self), lambda k, v: graph.update(v) if v else v)
+            self._loop_exec(self.schema_ns, self.make_dep_analizer, lambda k, v: graph.update(v) if v else v)
             marked = set()
             for a, b in graph:
                 if (b, a) in graph:
@@ -393,7 +399,7 @@ class Module(Facility):
     
     def _register_command(self):
         if not self.compiled:
-            self._loop_exec(self.proto_ns, ProfileBuilder(self), lambda k, v:self.add_command(v))
+            self._loop_exec(self.proto_ns, self.make_profile_builder, lambda k, v:self.add_command(v))
         for m in self.class_ns.values() + self.sub_modules.values() + self.sub_packages.values():
             m._register_command()
 
@@ -417,10 +423,11 @@ class Module(Facility):
         loader = _FaciltyLoader(uri, name, self)
         return loader.load()
 
-    def _loop_exec(self, target, cursor, callback):
+    def _loop_exec(self, target, cursor_factory, callback):
         try:
             for k, v in target.items():
                 try:
+                    cursor = cursor_factory()
                     callback(k, cursor.visit(v))
                 except:
                     print '[DEBUG]', k
