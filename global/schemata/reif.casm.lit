@@ -1269,7 +1269,7 @@ type CommandSummary = {
   "name": string?,
 
   "typeParams": [TypeParam*]?,
-  "profiles": [Profile],
+  "profiles": [Profile, Profile*], //マルチプロファイルがまだ有効
 
   /** ファシリティの利用宣言
    * オブジェクトのプロパティ名（キー）は、

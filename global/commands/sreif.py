@@ -6,54 +6,54 @@ from caty.jsontools import tagged
 class ShallowReifier(object):
     def reify_app(self, a):
         r = {
-            'document': make_structured_doc(a.description),
-            'name': a.name,
-            'group': a._group.name if a._group else None,
-            'path': a.web_path,
-            'deprecated': a.deprecated,
+            u'document': make_structured_doc(a.description),
+            u'name': a.name,
+            u'group': a._group.name if a._group else None,
+            u'path': a.web_path,
+            u'deprecated': a.deprecated,
         }
         if a.parent:
-            r['visibleParent'] = a.parent.name
+            r[u'visibleParent'] = a.parent.name
         return r
 
     def reify_state(self, s):
         tmap = {
-            'embeded-link':  u'embedded',
-            'additional-link': u'additional',
-            'indef-link': u'indef'
+            u'embeded-link':  u'embedded',
+            u'additional-link': u'additional',
+            u'indef-link': u'indef'
         }
         links = {}
         for l in s.links:
             links[l.trigger] = tagged(u'link', {
-                'name': l.trigger,
-                'becoming': tmap[l.type],
-                'minOccurrs': 0 if l.appearance in (u'?', u'*') else 1,
-                'maxOccurrs': u'unbounded' if l.appearance in (u'+', u'*') else 1,
-                'document': make_structured_doc(l.docstring),
-                'targets': map(lambda x:x[0], l.link_to_list)
+                u'name': l.trigger,
+                u'becoming': tmap[l.type],
+                u'minOccurrs': 0 if l.appearance in (u'?', u'*') else 1,
+                u'maxOccurrs': u'unbounded' if l.appearance in (u'+', u'*') else 1,
+                u'document': make_structured_doc(l.docstring),
+                u'targets': map(lambda x:x[0], l.link_to_list)
             })
         return {
-            'name': s.name,
-            'document': make_structured_doc(s.docstr),
-            'type': s.type.name,
-            'links': links,
+            u'name': s.name,
+            u'document': make_structured_doc(s.docstr),
+            u'type': s.type.name,
+            u'links': links,
         }
 
     def reify_resource(self, s):
         return {
-                'name': s.name,
-                'document': make_structured_doc(s.docstring),
-                'pathPattern': s.url_patterns,
-                'deprecated': 'deprecated' in s.annotations
+                u'name': s.name,
+                u'document': make_structured_doc(s.docstring),
+                u'pathPattern': s.url_patterns,
+                u'deprecated': 'deprecated' in s.annotations
         }
 
     def reify_action(self, s):
         return {
-                'name': s.name,
-                'document': make_structured_doc(s.docstring),
-                'implemented': s.implemented,
-                'deprecated': 'deprecated' in s.annotations,
-                'invoker': s.invoker_obj,
+                u'name': s.name,
+                u'document': make_structured_doc(s.docstring),
+                u'implemented': s.implemented,
+                u'deprecated': 'deprecated' in s.annotations,
+                u'invoker': s.invoker_obj,
         }
 
     def reify_module(self, m):
@@ -62,10 +62,10 @@ class ShallowReifier(object):
         else:
             p = u'schemata'
         return {
-            'name': m.canonical_name,
-            'place': p,
-            'deprecated': 'deprecated' in m.annotations,
-            'document': make_structured_doc(m.docstring),
+            u'name': m.canonical_name,
+            u'place': p,
+            u'deprecated': 'deprecated' in m.annotations,
+            u'document': make_structured_doc(m.docstring),
         }
 
     def reify_package(self, m):
@@ -74,27 +74,27 @@ class ShallowReifier(object):
         else:
             p = u'schemata'
         return {
-            'name': m.canonical_name,
-            'place': p,
-            'document': {'description': m.docstring, 'moreDescription': m.more_docstring},
+            u'name': m.canonical_name,
+            u'place': p,
+            u'document': {'description': m.docstring, 'moreDescription': m.more_docstring},
         }
 
     def reify_type(self, t):
         return {
-            'name': t.name,
-            'document': make_structured_doc(t.docstring),
-            'deprecated': 'deprecated' in t.annotations,
-            'annotations': self.reify_annotations(t.annotations)
+            u'name': t.name,
+            u'document': make_structured_doc(t.docstring),
+            u'deprecated': 'deprecated' in t.annotations,
+            u'annotations': self.reify_annotations(t.annotations)
         }
 
     def reify_command(self, c):
         return {
-            'name': c.name,
-            'document': make_structured_doc(c.docstring),
-            'annotations': self.reify_annotations(c.annotations),
-            'implemented': c.implemented,
-            'profiles': self._make_profile(c),
-            'typeParams': [self.reify_type_param(p) for p in c.type_params],
+            u'name': c.name,
+            u'document': make_structured_doc(c.docstring),
+            u'annotations': self.reify_annotations(c.annotations),
+            u'implemented': c.implemented,
+            u'profiles': self._make_profile(c),
+            u'typeParams': [self.reify_type_param(p) for p in c.type_params],
         }
 
     def reify_type_param(self, p):
@@ -111,22 +111,22 @@ class ShallowReifier(object):
         r = []
         for p in c.profiles:
             o = {
-                'arg0': self._dump_schema(p.arg0_schema),
-                'input': self._dump_schema(p.in_schema),
-                'output': self._dump_schema(p.in_schema),
-                'exception': [],
-                'signal': [],
+                u'arg0': self._dump_schema(p.arg0_schema),
+                u'input': self._dump_schema(p.in_schema),
+                u'output': self._dump_schema(p.in_schema),
+                u'exception': [],
+                u'signal': [],
             }
             if p.throw_schema and p.throw_schema.type != 'never':
                 for e in self._flatten(p.throw_schema):
-                    o['exception'].append(self._dump_schema(e))
+                    o[u'exception'].append(self._dump_schema(e))
             if p.signal_schema and p.signal_schema.type != 'never':
                 for e in self._flatten(p.signal_schema):
-                    o['signal'].append(self._dump_schema(e))
+                    o[u'signal'].append(self._dump_schema(e))
             if p.opts_schema.type != 'null':
-                o['opts'] = self._dump_schema(p.opts_schema)
+                o[u'opts'] = self._dump_schema(p.opts_schema)
             if p.args_schema.type != 'null':
-                o['args'] = self._dump_schema(p.args_schema)
+                o[u'args'] = self._dump_schema(p.args_schema)
             r.append(o)
         return r
 
@@ -142,7 +142,7 @@ class ShallowReifier(object):
 
     def _dump_schema(self, o):
         from caty.core.casm.cursor.dump import TreeDumper
-        if not o:
+        if o is None:
             return None
         td = TreeDumper(True)
         return td.visit(o)
@@ -155,8 +155,8 @@ class ShallowReifier(object):
 
     def reify_annotation(self, a):
         return {
-            'name': a.name,
-            'value': a.value
+            u'name': a.name,
+            u'value': a.value
         }
 
 class SafeReifier(Command):
