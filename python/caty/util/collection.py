@@ -385,6 +385,6 @@ class conditional_dict(dict):
         dict.__init__(self)
         for k, v in kwds.items():
             if func(k, v):
-                self[k] = v
+                self[unicode(k)] = v
 
 

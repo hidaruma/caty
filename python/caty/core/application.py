@@ -200,6 +200,7 @@ class Application(PbcObject):
         cfg = self._verify_config(self._read_config())
         self._disabled = cfg['disabled']
         self._description = cfg['description']
+        self._more_description = cfg.get('moreDescription', None)
         self._implLang = cfg['implLang']
         self._assgin = cfg['assign']
         self._indexfiles = cfg.get('indexFiles', ['index.html', 'index.htm', 'index.cgi', 'index.act'])
@@ -675,6 +676,10 @@ class Application(PbcObject):
     @property
     def deprecated(self):
         return self._deprecated
+
+    @property
+    def more_description(self):
+        return self._more_description
 
     def __invariant__(self):
         assert '/' not in self.name

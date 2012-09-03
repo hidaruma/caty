@@ -1,6 +1,9 @@
 // -*- coding: utf-8 -*-
 {
     "description" : "Wiki サンプルアプリケーション",
+    "moreDescription" : '''基本的な記事の編集機能だけを持ったWikiアプリケーション。
+
+Wiki記法としてはcreoleを採用している。詳細はHelpページを参照。''',
     "implLang" : "python",
     "assign" : {
         "pub" : "pub",

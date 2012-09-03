@@ -5,8 +5,9 @@ from caty.jsontools import tagged
 
 class ShallowReifier(object):
     def reify_app(self, a):
+        from caty.util.collection import conditional_dict
         r = {
-            u'document': make_structured_doc(a.description),
+            u'document': conditional_dict(lambda k, v: v is not None, description=a.description, moreDescription=a.more_description),
             u'name': a.name,
             u'group': a._group.name if a._group else None,
             u'path': a.web_path,
