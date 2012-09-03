@@ -118,10 +118,10 @@ class ShallowReifier(object):
                 'signal': [],
             }
             if p.throw_schema and p.throw_schema.type != 'never':
-                for e in p.throw_schema:
+                for e in self._flatten(p.throw_schema):
                     o['exception'].append(self._dump_schema(e))
             if p.signal_schema and p.signal_schema.type != 'never':
-                for e in p.signal_schema:
+                for e in self._flatten(p.signal_schema):
                     o['signal'].append(self._dump_schema(e))
             if p.opts_schema.type != 'null':
                 o['opts'] = self._dump_schema(p.opts_schema)
@@ -129,6 +129,16 @@ class ShallowReifier(object):
                 o['args'] = self._dump_schema(p.args_schema)
             r.append(o)
         return r
+
+    def _flatten(self, o):
+        from caty.core.typeinterface import Union
+        if isinstance(o, Union):
+            for r in self._flatten(o.left):
+                yield r
+            for r in self._flatten(o.right):
+                yield r
+        else:
+            yield o
 
     def _dump_schema(self, o):
         from caty.core.casm.cursor.dump import TreeDumper

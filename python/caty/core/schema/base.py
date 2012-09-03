@@ -564,18 +564,18 @@ class UpdatorSchema(OperatorSchema, Updator):
         self._right.resolve_reference()
 
 _builtin_tags = [
-    'integer',
-    'number',
-    'string',
-    'binary',
-    'boolean',
-    'array',
-    'object',
-    'any',
-    'null',
-    'void',
-    'never',
-    'enum',
+    u'integer',
+    u'number',
+    u'string',
+    u'binary',
+    u'boolean',
+    u'array',
+    u'object',
+    u'any',
+    u'null',
+    u'void',
+    u'never',
+    u'enum',
     ]
 
 class TagSchema(SchemaBase, Tag):

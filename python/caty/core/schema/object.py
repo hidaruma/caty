@@ -365,7 +365,7 @@ class ObjectSchema(SchemaBase, Object):
 
     @property
     def type(self):
-        return 'object'
+        return u'object'
 
     def apply(self, vars):
         for k, v in self.schema_obj.items():
