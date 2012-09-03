@@ -1,0 +1,153 @@
+// -*- coding: utf-8 -*- 
+/** バリデーション挙動のテスト用 
+
+次を実行してみる。
+
+{{{
+> a:DATA1 | a:do-test
+> a:DATA1 | a:do-test-2
+> a:DATA2 | a:do-test
+> a:DATA2 | a:do-test-2
+}}}
+
+
+*/
+module a;
+
+type Doc = reif:Doc;
+type Type = reif:TypeSummary;
+type Command = reif:CommandSummary;
+
+type ModInfo = {
+ "name": string,
+ "appName":string,
+ "document": Doc,
+ "typeNames": [string*],
+ "types": [Type*],
+ "commandNames": [string*],
+ "commands": [Command*],
+};
+
+command do-test :: any -> {*:string?} {
+ do {
+   $.name         | validate string       | tag >: "name",
+   $.appName      | validate string       | tag >: "appName",
+   $.document     | validate a:Doc        | tag >: "document",
+   $.typeNames    | validate<[string*]>   | tag >: "typeNames",
+   $.types        | validate<[a:Type*]>   | tag >: "types",
+   $.commandNames | validate<[string*]>   | tag >: "commandNames",
+   $.commands     | validate<[a:Command*]>| tag >: "commands",
+ }
+};
+
+command do-test-2 :: any -> any {
+  validate a:ModInfo
+};
+
+const DATA1 = 
+{
+    "commands": [
+        {
+            "document": {
+                "description": "プレゼンテーション向けのWiki文書を分解してJSONデータにする"
+            },
+            "name": "split-wiki",
+            "profiles": [
+                {
+                    "arg0": "univ",
+                    "input": "string",
+                    "exception": [],
+                    "signal": [],
+                    "output": "string"
+                }
+            ],
+            "typeParams": [],
+            "implemented": "python",
+            "annotations": {}
+        },
+        {
+            "document": {
+                "description": "テスト用、helloを出力する"
+            },
+            "name": "hello",
+            "profiles": [
+                {
+                    "arg0": "univ",
+                    "input": "any",
+                    "exception": [],
+                    "signal": [],
+                    "output": "any"
+                }
+            ],
+            "typeParams": [],
+            "implemented": "python",
+            "annotations": {}
+        },
+        {
+            "document": {
+                "description": "lsdirの出力をフィルターして、'ui'以外のディレクトリだけを抜き出す"
+            },
+            "name": "filter-dir",
+            "profiles": [
+                {
+                    "arg0": "univ",
+                    "input": "[DirEntry*]",
+                    "exception": [],
+                    "signal": [],
+                    "output": "[DirEntry*]"
+                }
+            ],
+            "typeParams": [],
+            "implemented": "python",
+            "annotations": {}
+        }
+    ],
+    "name": "presen",
+    "appName": "S5Presen",
+    "commandNames": [
+        "split-wiki",
+        "hello",
+        "filter-dir"
+    ],
+    "typeNames": [
+        "DirEntry"
+    ],
+    "document": {
+        "description": "S5プレゼンテーションを支援するコマンド群と若干のテストコマンド"
+    },
+    "types": [
+        {
+            "deprecated": false,
+            "document": {
+                "description": "lsdirが出力するデータ"
+            },
+            "name": "DirEntry",
+            "annotations": {}
+        }
+    ]
+};
+
+const DATA2 = 
+{
+    "commands": [
+    ],
+    "name": "presen",
+    "appName": "S5Presen",
+    "commandNames": [
+    ],
+    "typeNames": [
+        "DirEntry"
+    ],
+    "document": {
+        "description": "S5プレゼンテーションを支援するコマンド群と若干のテストコマンド"
+    },
+    "types": [
+        {
+            "document": {
+                "description": "lsdirが出力するデータ"
+            },
+            "name": "DirEntry",
+            "annotations": {}
+        }
+    ]
+};
