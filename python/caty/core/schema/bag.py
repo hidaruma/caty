@@ -97,7 +97,7 @@ class BagSchema(SchemaBase, Bag):
 
     @property
     def type(self):
-        return 'bag'
+        return u'bag'
 
     def apply(self, vars):
         for s in self.schema_list:

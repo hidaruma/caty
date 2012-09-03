@@ -116,7 +116,7 @@ class EnumSchema(SchemaBase, Enum):
 
     @property
     def type(self):
-        return 'enum'
+        return u'enum'
 
     def _check_type_variable(self, declared_type_vars, checked):
         if self.canonical_name in checked: return

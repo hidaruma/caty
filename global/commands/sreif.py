@@ -239,6 +239,7 @@ class ListPackages(SafeReifierWithDefaultApp):
 class ListTypes(SafeReifier):
 
     def _execute(self):
+        from caty.core.schema import types
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, _ = split_colon_dot_path(self._cdpath)
@@ -251,7 +252,8 @@ class ListTypes(SafeReifier):
         module = app._schema_module.get_module(module_name)
         r = []
         for t in module.schema_ns.values():
-            r.append(reifier.reify_type(t))
+            if t.name not in types:
+                r.append(reifier.reify_type(t))
         return r
 
 class ListCommands(SafeReifier):

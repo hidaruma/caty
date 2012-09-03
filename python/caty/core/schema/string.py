@@ -66,7 +66,7 @@ class StringSchema(ScalarSchema):
             raise JsonSchemaError(dict(msg=u'An error occuered while converting to $type', type=self.type), unicode(repr(value)), '')
 
     def dump(self, depth, node=[]):
-        return 'string'
+        return u'string'
 
     @property
     def type(self):

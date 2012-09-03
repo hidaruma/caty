@@ -180,7 +180,7 @@ class ArraySchema(SchemaBase, Array):
 
     @property
     def type(self):
-        return 'array'
+        return u'array'
 
     def apply(self, vars):
         for s in self.schema_list:

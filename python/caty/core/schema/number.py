@@ -70,8 +70,8 @@ class NumberSchema(ScalarSchema):
 
     def dump(self, depth, node=[]):
         if self.is_integer:
-            return 'integer'
-        return 'number'
+            return u'integer'
+        return u'number'
 
     @property
     def type(self):
