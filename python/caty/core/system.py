@@ -285,6 +285,7 @@ class CoreApplication(Application):
         self.parent = None
         self._deprecated = False
         self._description = u'Caty Core System'
+        self._more_description = None
         self._global_config = system._global_config
         self._group = DummyGroup(self)
         self.i18n = system.i18n
