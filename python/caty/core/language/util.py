@@ -7,12 +7,12 @@ def make_structured_doc(s):
     """
     if not s:
         s = u'undocumented'
-    l = s.split('\n', 1)
+    l = s.strip(u' \r\n').split('\n', 1)
     r = {}
     if len(l) == 2:
         a, b = l
     else:
-        a = s
+        a = l[0]
         b = u''
     r['description'] = a
     if b:
