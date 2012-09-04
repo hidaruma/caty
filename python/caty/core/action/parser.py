@@ -9,8 +9,8 @@ from caty.core.action.resource import ResourceClass
 from caty.core.action.module import ResourceModule
 from caty.core.action.entry import ResourceActionEntry, ActionProfiles, ActionProfile
 from caty.core.schema.base import Annotations
-from caty.core.casm.language import schemaparser, commandparser
-from caty.core.casm.language.ast import ASTRoot, CommandNode
+from caty.core.casm.language import schemaparser, commandparser, constparser
+from caty.core.casm.language.ast import ASTRoot, CommandNode, ConstDecl
 from caty.util import bind2nd
 from caty.core.exception import throw_caty_exception
 from caty.core.language.util import make_structured_doc
@@ -29,11 +29,11 @@ class ResourceActionDescriptorParser(Parser):
         if name != self._module_name:
             raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
         rm = ResourceModule(name, ds, self._app)
-        classes = seq.parse(many(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, self.userrole, self.port])))
+        classes = seq.parse(many(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, constparser.const, self.userrole, self.port])))
         if not seq.eof:
             raise ParseError(seq, self)
         for c in classes:
-            if isinstance(c, (ASTRoot, CommandNode)):
+            if isinstance(c, (ASTRoot, CommandNode, ConstDecl)):
                 c.declare(rm)
             else:
                 if isinstance(c, ResourceClass):
@@ -539,7 +539,7 @@ class LiterateRADParser(ResourceActionDescriptorParser):
     def _parse_top_level(self, seq):
         s = []
         while not seq.eof:
-            n = seq.parse(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, self.port, peek(S(u'}>>'))]))
+            n = seq.parse(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, constparser.const, self.port, peek(S(u'}>>'))]))
             if n == u'}>>':
                 break
             s.append(n)
@@ -566,6 +566,7 @@ class LiterateRADParser(ResourceActionDescriptorParser):
                      self.state, 
                      schemaparser.schema, 
                      commandparser.command, 
+                     constparser.const,
                      self.port])))
             for e in elems:
                 s.append(e)
