@@ -1,0 +1,61 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= webioモジュール
+
+== unparseコマンド
+
+=== !name:form-type
+
+{{{
+"application/x-www-form-urlencoded"
+}}}
+
+=== !name:json-type
+
+{{{
+"application/json"
+}}}
+
+=== !name:text-type
+
+{{{
+"text/plain"
+}}}
+
+=== !name:bin-type
+
+{{{
+"application/octet-stream"
+}}}
+
+
+=== !exec 
+
+以下はFITの問題。
+
+|= !command |= !output |= コメント            |= !judge |
+| "hello"   | b"hello" | stringとbinaryは違う | negate  |
+| b"hello"  | "hello"  | stringとbinaryは違う | negate  |
+
+今はstringとbinaryの区別が出来ないので、後で書き足す。
+
+|= !input           |= !command     |= !params                  |= !output |
+|@text "hello"       |webio:unparse |--content-type=%%text-type |   |
+|@bytes b"hello"     |webio:unparse |--content-type=%%bin-type  |   |
+|@json {"a":["b"]}   |webio:unparse  |--content-type=%%json-type |          |
+|@form {"a":["b"]}   |webio:unparse  |--content-type=%%form-type |     |
+|@form {"a":["b","c"]}|webio:unparse  |--content-type=%%form-type | |
+|@form {"a":["b"],"x":["y"]} |webio:unparse  |--content-type=%%form-type | |
+
+content-typeは指定されなくてもよい。
+
+|= !input           |= !command     |= !params                  |= !output |= 備考|
+|@text "hello"       |webio:unparse |                           |          | |
+|@bytes b"hello"     |webio:unparse |                           |          | |
+|@json {"a":["b"]}  |webio:unparse  |                           |          | |
+|@form {"a":["b"]}  |webio:unparse  |                           |          | |
+|@form {"a":["b","c"]}|webio:unparse|                           |          | |
+|@form {"a":["b"],"x":["y"]} |webio:unparse|                    |          | |
+
+
+<<ignore |@void null         |webio:unparse  |                           |null      |例外的にnullとする | >>

@@ -1,0 +1,43 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= webioモジュール 2
+
+後で1つにまとめる予定。
+
+== parseコマンド
+
+=== !name:form-type
+
+{{{
+"application/x-www-form-urlencoded"
+}}}
+
+=== !name:json-type
+
+{{{
+"application/json"
+}}}
+
+=== !name:text-type
+
+{{{
+"text/plain"
+}}}
+
+=== !name:bin-type
+
+{{{
+"application/octet-stream"
+}}}
+
+
+=== !exec 
+
+|= !output           |= !command    |= !params                  |= !input |
+|@text "hello"       |webio:parse  |--content-type=%%text-type |"hello"   |
+|@bytes b"hello"     |webio:parse  |--content-type=%%bin-type  |b"hello"  |
+|@json {"a":["b"]}   |webio:parse  |--content-type=%%json-type |"{\"a\":[\"b\"]}"|
+|@form {"a":["b"]}   |webio:parse  |--content-type=%%form-type |"a=b"     |
+|@form {"a":["b","c"]}|webio:parse |--content-type=%%form-type |"a=b&a=c" |
+|@form {"a":["b"],"x":["y"]} |webio:parse  |--content-type=%%form-type |"a=b&x=y" |
+
