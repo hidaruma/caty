@@ -19,25 +19,25 @@ command scan :: void -> void {
  sreif:list-applications |
  each {
   pass > app | $.name >  appName;
-  %app | each {%_key} | validate<[string*]> | tag | cout;
+  %app | each {%_key} | validate<[string*]> | tag | cout; // cond {"NG"=>cout, *=>void};
   [%appName, "::"] | text:concat > appPath; // これは不要にすべき
 /**/
   sreif:list-modules %appPath |
   each {
     pass > mod | $.name > modName;
-    %mod | each {%_key} | validate<[string*]> | tag | cout;
+    %mod | each {%_key} | validate<[string*]> | tag | cout; // cond {"NG"=>cout, *=>void};
     [%appName, "::", %modName, ":"] | text:concat > modPath;
 
     sreif:list-types %modPath |
     each {
       pass > typ | $.name > typName;
-      %typ | each {%_key} | validate<[string*]> | tag | cout
+      %typ | each {%_key} | validate<[string*]> | tag | cout //cond {"NG"=>cout, *=>void}
     } | void;
 
     sreif:list-commands %modPath |
     each {
       pass > cmd | $.name > cmdName;
-      %cmd | each {%_key} | validate<[string*]> | tag | cout
+      %cmd | each {%_key} | validate<[string*]> | tag | cout //cond {"NG"=>cout, *=>void}
     } | void
 
   } | void
@@ -48,10 +48,38 @@ command scan :: void -> void {
 
 /** メタオブジェクトのスキャンを無限に繰り返す */
 command scan-forever :: void -> never {
+ 0 | 
  begin {
-  scan; repeat
+  pass > n;
+  list:range 1 10 | each {""|cout};
+  %n | to-string | cout;
+  list:range 1 10 | each {""|cout};
+  sleep 1000;
+  scan; 
+  %n | num:inc | repeat
  }
 
 };
 
+/** メタオブジェクトのスキャンを入力に指定された回数 n だけ繰り返す */
+command scan-ntimes :: integer(minimum=1) -> void {
+ pass > Limit;
+ 0 | 
+ begin {
+  pass > n;
+  list:range 1 10 | each {""|cout};
+  %n | to-string | cout;
+  list:range 1 10 | each {""|cout};
+  sleep 1000;
+  scan; 
+  %n | num:inc > nn |
+  [pass, %Limit] | num:lt |
+  when {
+   True  => %nn | repeat,
+   False => void,
+  }
+ }
+
+};
 // End of Module
+

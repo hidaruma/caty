@@ -1,0 +1,45 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= unclose構文
+
+
+{{{
+type VarObject = {*: any?};
+
+type UncloseInput = 
+   [VarObject additionalEnv, /*@[default(null)]*/ univ? input]
+    |
+   {
+     "env" : VarObject?,  
+
+     @[default({})]
+     "additionalEnv" : VarObject?,  
+
+     @[default(null)]
+     "input" : any?
+   }
+;
+}}}
+
+
+== !exec 配列を入力とする場合
+
+|= !command                                           |= !output  |= コメント |
+|[{}, "hello"] ~|unclose{pass}                        | "hello"   | 特に何も変化がない |
+|[{}] ~|unclose{pass}                                 |  null     | 第二項目は省略可能 |
+|[{"X":"foo"}] ~|unclose {~%X}                         | "foo"     | 変数Xが追加される  |
+|[{"X":"foo"}] ~|unclose {~%APP_ENCODING}              | "utf-8"   | もとの変数はそのまま見える  |
+|[{"APP_ENCODING":"utf-16"}] ~|unclose {~%APP_ENCODING}| "utf-16"  | 上書きもできる  |
+
+
+== !exec オブジェクトを入力とする場合
+
+|= !command                                           |= !output  |= コメント |
+|{"input":"hello"] ~|unclose{pass}                    | "hello"   | 特に何も変化がない |
+|{} ~|unclose{pass}                                   |  null     | すべて省略可能 |
+|{"additionalEnv":{"X":"foo"}} ~|unclose {~%X}         | "foo"     | 変数Xが追加される  |
+|{"additionalEnv":{"X":"foo"}} ~|unclose {~%APP_ENCODING}| "utf-8"   | もとの変数はそのまま見える  |
+|{"additionalEnv":{"APP_ENCODING":"utf-16"}} ~|unclose {~%APP_ENCODING}| "utf-16"  | 上書きもできる  |
+|{"env":{"X":"foo"}} ~|unclose {~%X}                   | "foo"     | 変数Xが追加される  |
+|{"env":{"X":"foo"}} ~|unclose {~%APP_ENCODING?}       | undefined | もとの変数はなくなる |
+
