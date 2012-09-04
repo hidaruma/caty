@@ -444,11 +444,11 @@ class Try(Syntax):
         return visitor.visit_try(self)
 
 class Unclose(Syntax):
-    command_decl = u"""command __unclose<T default univ> :: UncloseInput -> T
+    command_decl = u"""command __unclose<T default univ> {@[default(false)]"clear": boolean?} :: UncloseInput -> T
                         refers python:caty.core.script.node.Unclose;"""
 
-    def __init__(self, pipeline):
-        Syntax.__init__(self)
+    def __init__(self, pipeline, opts_ref):
+        Syntax.__init__(self, opts_ref)
         self.pipeline = pipeline
 
     def set_facility(self, facilities):
@@ -457,6 +457,9 @@ class Unclose(Syntax):
     def _prepare(self):
         Command._prepare(self)
     
+    def setup(self, opts):
+        self.clear = opts['clear']
+
     def accept(self, visitor):
         return visitor.visit_unclose(self)
 

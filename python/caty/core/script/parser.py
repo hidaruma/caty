@@ -122,7 +122,7 @@ class ScriptParser(Parser):
         k = lambda s: keyword(s, str_mod.ascii_letters + '_.')
         func = seq.parse([k(u'each'), k(u'take'), k(u'time'), k(u'start'), k(u'begin'), k(u'unclose')])
         try:
-            if func == 'each':
+            if func in ('unclose', 'each'):
                 opts = self.options(seq)
             else:
                 opts = ()
@@ -149,7 +149,7 @@ class ScriptParser(Parser):
             elif func == u'begin':
                 return Begin(cmd, opts)
             elif func == u'unclose':
-                return Unclose(cmd)
+                return Unclose(cmd, opts)
         except ParseFailed as e:
             raise ParseError(e.cs, self.functor)
 

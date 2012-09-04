@@ -514,11 +514,11 @@ class CommandExecutor(BaseInterpreter):
         newenv = Env()
         new_dict = newenv._dict
         if isinstance(self.input, dict):
-            env = self.input.get('env', self.facility_set['env']._dict)
+            env = self.input.get('env', {} if node.clear else self.facility_set['env']._dict)
             additional = self.input.get('additionalEnv', {})
             input = self.input.get('input', None)
         else:
-            env = self.facility_set['env']._dict
+            env = {} if node.clear else self.facility_set['env']._dict
             additional = self.input[0]
             input = self.input[1] if len(self.input) == 2 else None
         new_dict.update(env)
