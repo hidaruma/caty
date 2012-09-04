@@ -312,6 +312,17 @@ class OverlayedDict(dict):
                 return s[k]
         raise KeyError(k)
 
+    def __delitem__(self, k):
+        for s in self.scope:
+            if k in s:
+                del s[k]
+
+    def pop(self, k):
+        if k in self:
+            r = self[k]
+        del self[k]
+        return r
+
     def get(self, k, default=None):
         for s in self.scope:
             if k in s:

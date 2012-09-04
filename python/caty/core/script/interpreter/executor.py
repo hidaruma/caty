@@ -499,7 +499,12 @@ class CommandExecutor(BaseInterpreter):
         newset = self.__make_new_facility_set(newenv)
         node.pipeline.set_facility(newset)
         node.pipeline.set_var_storage(storage)
-        return node.pipeline.accept(self)
+        oldset = self.facility_set
+        self.facility_set = newset
+        try:
+            return node.pipeline.accept(self)
+        finally:
+            self.facility_set = oldset
 
     def __make_new_facility_set(self, newenv):
         from caty.core.facility import FacilitySet
@@ -524,6 +529,11 @@ class CommandExecutor(BaseInterpreter):
         new_dict.update(env)
         new_dict.update(additional)
         storage = self.var_storage.clone()
+        for k, v in self.facility_set['env'].items():
+            if k in storage.opts:
+                storage.opts.pop(k)
+            if k in storage.opts['_OPTS']:
+                storage.opts['_OPTS'].pop(k)
         for k, v in newenv.items():
             storage.opts[k] = v
         return input, newenv, storage
