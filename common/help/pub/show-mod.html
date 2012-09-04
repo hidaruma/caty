@@ -1,0 +1,57 @@
+<?caty-meta template="smarty-mx" type="prj-summary:ModInfo" ?>{* -*- coding: utf-8 -*- *}
+{function name=typDoc type="prj-summary:Type"}
+    <h2 id="t-{$name}">型 {$name}</h2>
+    <p ><b>概要：</b> <span class="desc">{$document.description}</span></p>
+    {if $document.moreDescription|notempty}<hr /><blockquote>{$document.moreDescription|noescape}</blockquote>{/if}
+
+{/function}
+{function name=cmdDoc type="prj-summary:Command"}
+    <h2 id="c-{$name}">コマンド {$name}</h2>
+    <p ><b>概要：</b> <span class="desc">{$document.description}</span></p>
+    {if $document.moreDescription|notempty}<hr /><blockquote>{$document.moreDescription|noescape}</blockquote>{/if}
+    <ul class="profile">
+      <li><b>引数：</b>{$profile.args}</li>
+      <li><b>オプション：</b>{$profile.opts}</li>
+      <li><b>入力：</b>{$profile.input}</li>
+      <li><b>出力：</b>{$profile.output}</li>
+      <li><b>例外：</b>{$profile.exception}</li>
+      <li><b>シグナル：</b>{$profile.signal}</li>
+    </ul>
+
+{/function}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Module {$appName}::{$name}:</title>
+    <link rel="stylesheet" href="style.css" >
+  </head>
+  <body>
+    <h1>Module {$appName}::{$name}:</h1>
+    <p ><b>概要：</b> <span class="desc">{$document.description}</span></p>
+    {if $document.moreDescription|notempty}<hr /><blockquote>{$document.moreDescription|noescape}</blockquote>{/if}
+
+
+    <p>このモジュール「<b>{$name}</b>」には{if $typeNames|empty}型が含まれ<b>ません</b>。{else}次の型が含まれます。{/if}</p>
+    <ol>
+    {foreach from=$typeNames item=typeName}
+      <li><a href="#t-{$typeName}">{$typeName}</a></li>
+    {/foreach}
+    </ol>
+    {foreach from=$types item=typ}
+      {call name=typDoc context=$typ}
+    {/foreach}
+
+    <p>このモジュール「<b>{$name}</b>」には{if $commandNames|empty}コマンドが含まれ<b>ません</b>。{else}次のコマンドが含まれます。{/if}</p>
+    <ol>
+    {foreach from=$commandNames item=commandName}
+      <li><a href="#c-{$commandName}">{$commandName}</a></li>
+    {/foreach}
+    </ol>
+    {foreach from=$commands item=cmd}
+      {call name=cmdDoc context=$cmd}
+    {/foreach}
+
+  </body>
+</html>
+

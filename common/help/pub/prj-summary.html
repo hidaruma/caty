@@ -1,0 +1,40 @@
+<?caty-meta template="smarty-mx" ?>{* -*- coding: utf-8 -*- *}
+<?caty-script
+ prj-summary:gen
+?>
+{function name=appDoc type="prj-summary:App"}
+    <h2 id="{$name}">アプリケーション {$name}{if $group|notempty} (in {$group}){/if}</h2>
+    <p ><b>概要：</b> <span class="desc">{$document.description}</span></p>
+    {if $document.moreDescription|notempty}<hr /><blockquote>{$document.moreDescription|noescape}</blockquote>{/if}
+    <p>このアプリケーション「<b>{$name}</b>」には{if $mods|empty}モジュールが含まれ<b>ません</b>。{else}次のモジュールが含まれます。{/if}
+    {foreach from=$mods item=mod}
+       {call name=modDoc context=$mod}
+    {/foreach}
+{/function}
+{function name=modDoc type="prj-summary:Mod"}
+    <h3>モジュール {$name} (in {$appName})</h3>
+    <p ><b>概要：</b> <span class="desc">{$document.description}</span></p>
+    {if $document.moreDescription|notempty}<hr /><blockquote>{$document.moreDescription|noescape}</blockquote>{/if}
+    <p><a href="show-mod.html?app={$appName}&mod={$name}">詳細</a></p>
+{/function}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Project Summary for '{$name}'</title>
+    <link rel="stylesheet" href="style.css" >
+  </head>
+  <body>
+    <h1>プロジェクト「{$name}」のサマリー</h1>
+    <p>このプロジェクト「<b>{$name}</b>」には
+     次のアプリケーションが含まれます。</p>
+    <ol>
+    {foreach from=$appNames item=appName}
+      <li><a href="#{$appName}">{$appName}</a></li>
+    {/foreach}
+    </ol>
+    {foreach from=$apps item=app}
+      {call name=appDoc context=$app}
+    {/foreach}
+  </body>
+</html>

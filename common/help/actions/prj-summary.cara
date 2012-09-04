@@ -1,0 +1,156 @@
+// -*- coding: utf-8 -*- 
+/** プロジェクトサマリー */
+module prj-summary in cara;
+
+type Doc = reif:Doc;
+
+type Summary = {
+ "name": string,
+ "appNames": [string*],
+ "apps" : [App*]
+};
+
+
+type App = {
+ "name": string,
+ "group": (string|null),
+ "document": Doc,
+ "modNames": [string*],
+ "mods": [Mod*],
+};
+
+type Mod = {
+ "appName": string,
+ "name": string,
+ "document": Doc,
+};
+
+command doc-to-html :: Doc -> Doc  {
+ pass > in |
+ [
+   $.description      > desc,
+   $.moreDescription? > more,
+ ];
+ %more? | 
+ when {
+   undefined => %in,
+   string    => 
+      do {
+          %desc                >: "description",
+          %more | text:creole  >: "moreDescription",
+       }
+   ,
+ }
+};
+
+command gen :: void -> Summary {
+
+ proj > prj-name;
+ sreif:list-applications | list:sort --key=name > orig-apps  | each {$.name} > appNames;
+ %orig-apps |
+ each {
+   [
+     $.name     > appName,
+     $.group?   > group,
+     $.document > appDocument,
+   ];
+   [%appName, "::"] | text:concat > app;
+   sreif:list-modules %app | 
+   take {[$.name, "public"] | eq --boolean | not} | list:sort --key=name > orig-mods | each {$.name} > modNames;
+   %orig-mods |
+   each {
+      do {
+        %appName    >: "appName",
+        $.name      >: "name",
+        $.document | doc-to-html >: "document",
+      }
+   } > mods;
+   do {
+     %appName     >: "name",
+     %group?      >: "group",
+     %modNames    >: "modNames",
+     %mods        >: "mods",
+     %appDocument | doc-to-html >: "document",
+   }
+ } > apps;
+ 
+ do {
+   %prj-name >: "name",
+   %appNames >: "appNames",
+   %apps     >: "apps",
+ }
+
+};
+
+/** 型情報 */
+type Type = reif:TypeSummary;
+/** 型パラメータ */
+type TypeParam = reif:TypeParam;
+/** コマンド情報 */
+type Command = {
+ "name": string,
+ "typeParams": [TypeParam*],
+ "document": Doc,
+ "profile": reif:Profile,
+};
+
+type ModInfo = {
+ "name": string,
+ "appName":string,
+ "document": Doc,
+ "typeNames": [string*],
+ "types": [Type*],
+ "commandNames": [string*],
+ "commands": [Command*],
+};
+
+command modify-command-info :: reif:CommandSummary -> Command {
+ do {
+   $.name        >: "name",
+   $.typeParams  >: "typeParams",
+   $.document    >: "document",
+   $.profiles.0  >: "profile",
+ }
+};
+
+/**/
+
+command show-mod [string app, string mod] :: void -> any/*ModInfo*/ {
+ [
+   %1 > app,
+   %2 > mod,
+ ];
+ [%app, "::", %mod, ":" ] | text:concat > modPath;
+
+ sreif:show-module %modPath | 
+ [ 
+   $.document > document,
+   $.place    > place,
+ ];
+ sreif:list-types %modPath    > types | each{$.name} > typeNames;
+ sreif:list-commands %modPath > commands | each{$.name} > commandNames;
+ 
+ do {
+   %mod      >: "name",
+   %app      >: "appName",
+   %document | doc-to-html >: "document",
+   %typeNames>: "typeNames",
+   %types    >: "types",
+   %commandNames>: "commandNames",
+   %commands | each {modify-command-info}  >: "commands",
+ }
+
+};
+
+resource ShowMod ("/show-mod.html") {
+ action get ("/GET")
+ {
+   "app": string,
+   "mod": string,
+ }
+ ::
+ {
+    show-mod %app %mod | print %0
+ };
+
+};
