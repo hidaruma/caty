@@ -1,4 +1,7 @@
-module annotation.spec; // -*- coding: utf-8 -*-
+// -*- coding: utf-8 -*-
+/** クラスのスペックの定義
+ */
+module annotation.spec; 
 
 /** 実装言語クラスのスペック
  */

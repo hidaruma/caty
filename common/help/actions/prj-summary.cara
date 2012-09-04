@@ -83,7 +83,11 @@ command gen :: void -> Summary {
 };
 
 /** 型情報 */
-type Type = reif:TypeSummary;
+type Type = {
+    "document": Doc,
+    "name": string,
+};
+
 /** 型パラメータ */
 type TypeParam = reif:TypeParam;
 /** コマンド情報 */
@@ -103,6 +107,14 @@ type ModInfo = {
  "commandNames": [string*],
  "commands": [Command*],
 };
+
+command modify-type-info :: reif:TypeSummary -> Type {
+ do {
+   $.name        >: "name",
+   $.document  | doc-to-html >: "document",
+ }
+};
+
 
 command modify-command-info :: reif:CommandSummary -> Command {
  do {
@@ -127,7 +139,7 @@ command show-mod [string app, string mod] :: void -> any/*ModInfo*/ {
    $.document > document,
    $.place    > place,
  ];
- sreif:list-types %modPath    > types | each{$.name} > typeNames;
+ sreif:list-types %modPath |each {modify-type-info}  > types | each{$.name} > typeNames;
  sreif:list-commands %modPath > commands | each{$.name} > commandNames;
  
  do {

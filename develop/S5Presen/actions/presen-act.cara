@@ -2,6 +2,8 @@
 // 注意：presenモジュールは schemata/ に存在するので
 // presen.caraにはできない。
 
+/** S5プレゼンテーションのWebアプリケーション
+ */
 module presen-act in cara;
 
 /** ディレクトリ・リストの情報 */
