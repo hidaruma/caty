@@ -108,7 +108,7 @@ command modify-command-info :: reif:CommandSummary -> Command {
  do {
    $.name        >: "name",
    $.typeParams  >: "typeParams",
-   $.document    >: "document",
+   $.document  | doc-to-html >: "document",
    $.profiles.0  >: "profile",
  }
 };
@@ -151,6 +151,48 @@ resource ShowMod ("/show-mod.html") {
  ::
  {
     show-mod %app %mod | print %0
+ };
+
+};
+
+type FileInfo = {
+  "name": string,
+  "appName": string,
+  "content": string?,
+};
+
+command read-file [string app, string mod] :: void -> FileInfo {
+ [
+   %1 > app,
+   %2 > mod,
+ ];
+ [%app, "::", %mod, ":" ] | text:concat > modPath;
+ sreif:show-module %modPath | $.place    > place | dump --prefix=place |
+ cond {
+   "schemata" => ".casm",
+   "actions"  => ".cara",
+ } > fileExt;
+ [%place, "@", %app, ":/", %mod, %fileExt] | text:concat > filePath;
+ file:read %filePath > content;
+
+ do {
+   %mod     >: "name",
+   %app     >: "appName",
+   %content >: "content",
+ }
+
+};
+
+
+resource ReadFile ("/read-file.html") {
+ action get ("/GET")
+ {
+   "app": string,
+   "mod": string,
+ }
+ ::
+ {
+    read-file %app %mod | print %0
  };
 
 };
