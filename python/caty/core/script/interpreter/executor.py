@@ -495,9 +495,10 @@ class CommandExecutor(BaseInterpreter):
     def visit_unclose(self, node):
         node._prepare()
         node.in_schema.validate(self.input)
-        self.input, newenv = self.__make_new_env_and_input(node)
+        self.input, newenv, storage = self.__make_new_env_and_input(node)
         newset = self.__make_new_facility_set(newenv)
         node.pipeline.set_facility(newset)
+        node.pipeline.set_var_storage(storage)
         return node.pipeline.accept(self)
 
     def __make_new_facility_set(self, newenv):
@@ -507,7 +508,6 @@ class CommandExecutor(BaseInterpreter):
         facilities['env'] = newenv
         new_set = FacilitySet(facilities, self.facility_set.app)
         return new_set
-
 
     def __make_new_env_and_input(self, node):
         from caty.env import Env
@@ -523,7 +523,10 @@ class CommandExecutor(BaseInterpreter):
             input = self.input[1] if len(self.input) == 2 else None
         new_dict.update(env)
         new_dict.update(additional)
-        return input, newenv
+        storage = self.var_storage.clone()
+        for k, v in newenv.items():
+            storage.opts[k] = v
+        return input, newenv, storage
 
     @property
     def in_schema(self):
