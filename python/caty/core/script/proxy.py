@@ -539,12 +539,11 @@ class CatchProxy(Proxy):
                 v.set_module(module)
 
 class UncloseProxy(Proxy):
-    def __init__(self, pipeline, opts):
+    def __init__(self, pipeline):
         self.pipeline = pipeline
-        self.opts = opts
 
     def instantiate(self, builder):
-        return Unclose(self.pipeline.instantiate(builder), self.opts)
+        return Unclose(self.pipeline.instantiate(builder))
 
     def set_module(self, module):
         self.pipeline.set_module(module)
