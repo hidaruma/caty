@@ -5,19 +5,19 @@
 == !exec
 
 |= !command |= !output|= !input|
-| $         |  %data  | %data |
-| $.0       |  0      | %data |
-| $.1       |  1      | %data |
-| $.2?      |undefined| %data |
-| $.3       |  3      | %data |
-| $.4.a     |  1      | %data |
-| $.4.b     |"hello"  | %data |
-| $.4.c.x   |  1      | %data |
-| $.4.c.y   |  2      | %data |
-| $.4.c.'1' |  3      | %data |
-| $.9       |  9      | %data |
-| $.10      | 10      | %data |
-| $.11?     |undefined| %data |
+| $         |  %%data  | %%data |
+| $.0       |  0      | %%data |
+| $.1       |  1      | %%data |
+| $.2?      |undefined| %%data |
+| $.3       |  3      | %%data |
+| $.4.a     |  1      | %%data |
+| $.4.b     |"hello"  | %%data |
+| $.4.c.x   |  1      | %%data |
+| $.4.c.y   |  2      | %%data |
+| $.4.c.'1' |  3      | %%data |
+| $.9       |  9      | %%data |
+| $.10      | 10      | %%data |
+| $.11?     |undefined| %%data |
 
 
 === !name:data

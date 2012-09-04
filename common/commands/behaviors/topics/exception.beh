@@ -18,10 +18,10 @@
 
 
 |=input                       |= command|= output |
-|@BadArg {"message":"NG"}     | %throw           | "BadArg"|
-|@FileNotFound{"message":"NG"}|%throw           | "FileNotFound" |
-|@GoodArg{"message":"OK"}     |%throw  | "ExceptionNotFound" |
-|"bad arg"                    |%throw  | "InvalidThrow" |
+|@BadArg {"message":"NG"}     | %%throw           | "BadArg"|
+|@FileNotFound{"message":"NG"}|%%throw           | "FileNotFound" |
+|@GoodArg{"message":"OK"}     |%%throw  | "ExceptionNotFound" |
+|"bad arg"                    |%%throw  | "InvalidThrow" |
 
 === !name: throw
 

@@ -62,9 +62,9 @@ type Calendar = {
   
 |= input   |= command      |= params              |= output |= exception |= 備考 |
 |= 12      |validate --boolean| Calendar:HolidayInfo | false   |  | BAD_TYPE, boolean, $|
-|= %h1     |validate --boolean| Calendar:HolidayInfo | true    |  | |
-|= %h2     |validate --boolean| Calendar:HolidayInfo | true    |  | |
-|= %h3     |validate --boolean| Calendar:HolidayInfo | false   |  | UNEXPECTED_PROPERTY, object, * |
+|= %%h1     |validate --boolean| Calendar:HolidayInfo | true    |  | |
+|= %%h2     |validate --boolean| Calendar:HolidayInfo | true    |  | |
+|= %%h3     |validate --boolean| Calendar:HolidayInfo | false   |  | UNEXPECTED_PROPERTY, object, * |
 |= {}     |validate --boolean| Calendar:HolidayInfo | false   |  | MISSING_PROPERTY, object, * |
 
 == Day型
@@ -104,8 +104,8 @@ type Calendar = {
 === !exec
 
 |= input   |= command      |= params      |= output |= exception |= 備考 |
-|= %d1     |validate --boolean| Calendar:Day | true    |  | |
-|= %d1     |validate --boolean| Calendar:Day | true    |  | |
-|= %d2     |validate --boolean| Calendar:Day | true   |  | |
-|= %d3     |validate --boolean| Calendar:Day | true   |  |holidayはなくてもよい |
+|= %%d1     |validate --boolean| Calendar:Day | true    |  | |
+|= %%d1     |validate --boolean| Calendar:Day | true    |  | |
+|= %%d2     |validate --boolean| Calendar:Day | true   |  | |
+|= %%d3     |validate --boolean| Calendar:Day | true   |  |holidayはなくてもよい |
 

@@ -30,12 +30,12 @@
 == !preCond
 
 |= input |= command   |= params    |= output|
-| %pt    | xjson:write | /t01.xjson | null   |
+| %%pt    | xjson:write | /t01.xjson | null   |
 
 == !exec
 
 |= command   |= params    |=input |= output   |
-| xjson:read  | /t01.xjson | null  | %pt       |
+| xjson:read  | /t01.xjson | null  | %%pt       |
 
 == 説明
 

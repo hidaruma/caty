@@ -54,12 +54,12 @@ See schemata@this:/t05.casm, schemata@this:/t06.casm .
 |= command        |= params  |=  input   |= output   |= 備考   |
 | validate --boolean | t06:Tree | null      | true      | nullは空木を表す |
 | validate --boolean | t06:Tree | @leaf 12  | true      | リーフだけでもツリー |
-| validate --boolean | t06:Tree | %t01      | true      | |
-| validate --boolean | t06:Tree | %t02      | true      | |
-| validate --boolean | t06:Tree | %t03      | true      | |
-| validate --boolean | t06:Tree | %t04      | true      |ネスト |
-| validate --boolean | t06:Tree | %t05      | false     |rightの省略は許されてない |
-| validate --boolean | t06:Tree | %t06      | false     | @leafが常に必要 |
+| validate --boolean | t06:Tree | %%t01      | true      | |
+| validate --boolean | t06:Tree | %%t02      | true      | |
+| validate --boolean | t06:Tree | %%t03      | true      | |
+| validate --boolean | t06:Tree | %%t04      | true      |ネスト |
+| validate --boolean | t06:Tree | %%t05      | false     |rightの省略は許されてない |
+| validate --boolean | t06:Tree | %%t06      | false     | @leafが常に必要 |
 
 
 

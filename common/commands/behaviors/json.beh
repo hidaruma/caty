@@ -15,11 +15,11 @@ JSON 処理のコマンドを提供する。
 === !exec 
 
 |=input|=command|=params|=output|
-|%in1  |json:merge||%out1|
-|%in2  |json:merge|--mode=fst|%out2|
-|%in2  |json:merge||%out2|
-|%in2  |json:merge|--mode=snd|%out3|
-|%in2  |json:merge|--mode=error|null|
+|%%in1  |json:merge||%%out1|
+|%%in2  |json:merge|--mode=fst|%%out2|
+|%%in2  |json:merge||%%out2|
+|%%in2  |json:merge|--mode=snd|%%out3|
+|%%in2  |json:merge|--mode=error|null|
 
 === !name:in1
 

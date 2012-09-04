@@ -104,11 +104,11 @@ type EditTrigger = Trigger<"edit">;
 == !exec 
 
 |= command       |= params   |= input   |= output   |= 備考 |
-|validate --boolean | t:Binding | %b1      | true      ||
-|validate --boolean | t:Binding | %b2      | true      ||
-|validate --boolean | t:Binding | %b3      | false     |actionNameがない|
-|validate --boolean | t:EditTrigger | %e1  | true      ||
-|validate --boolean | t:EditTrigger | %e2  | false     |"ed"になっている|
+|validate --boolean | t:Binding | %%b1      | true      ||
+|validate --boolean | t:Binding | %%b2      | true      ||
+|validate --boolean | t:Binding | %%b3      | false     |actionNameがない|
+|validate --boolean | t:EditTrigger | %%e1  | true      ||
+|validate --boolean | t:EditTrigger | %%e2  | false     |"ed"になっている|
 
 
 

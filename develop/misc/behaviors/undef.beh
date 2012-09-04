@@ -58,18 +58,18 @@ list:length
 * pvとitem（またはnth）は、完全に並行な挙動を持つ。
 
 |= !input  |= !command   |= !output |= !exception |
-| %arr     | %arr-count  | 2        | |
-| %obj     | %obj-count  | 2        | |
-| %arr     | item 0      |          | Exception |
-| %obj     | pv   a      |          | Exception |
-| %arr     | item 1      | 1        | |
-| %obj     | pv   b      | 1        | |
-| %arr     | item 2      |          | Exception |
-| %obj     | pv   c      |          | Exception |
-| %arr     | item 3      | 3        | |
-| %obj     | pv   d      | 3        | |
-| %arr     | item 4      |          | Exception |
-| %obj     | pv   e      |          | Exception |
-| %arr     | each {pass} | %arr     | |
-| %obj     | each --obj {pass} | %obj| |
+| %%arr     | %%arr-count  | 2        | |
+| %%obj     | %%obj-count  | 2        | |
+| %%arr     | item 0      |          | Exception |
+| %%obj     | pv   a      |          | Exception |
+| %%arr     | item 1      | 1        | |
+| %%obj     | pv   b      | 1        | |
+| %%arr     | item 2      |          | Exception |
+| %%obj     | pv   c      |          | Exception |
+| %%arr     | item 3      | 3        | |
+| %%obj     | pv   d      | 3        | |
+| %%arr     | item 4      |          | Exception |
+| %%obj     | pv   e      |          | Exception |
+| %%arr     | each {pass} | %%arr     | |
+| %%obj     | each --obj {pass} | %%obj| |
 

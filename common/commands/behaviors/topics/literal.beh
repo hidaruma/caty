@@ -40,7 +40,7 @@ JSONリテラル。
 | "\o10"   | pass     |       |Exception | 8進？ ダメだよ |
 | "\010"   | pass     |       |Exception | ダメ |
 | "\'"     | pass     |       |Exception | 仕様にない文字をエスケープするのはダメ |
-| %newline | pass     |       |Exception | 生の改行は入れられない（.beh原稿を見よ） |
+| %%newline | pass     |       |Exception | 生の改行は入れられない（.beh原稿を見よ） |
 
 ==== !name:newline
 

@@ -26,8 +26,8 @@
 == !exec
 
 |= input |= command |= output |
-| %point | pass     | %point |
-| %point | untagged | %untagged |
+| %%point | pass     | %%point |
+| %%point | untagged | %%untagged |
 
 == 問題点
 

@@ -127,13 +127,13 @@ uni:Empha
 |= command       |= params    |= input    |= output |= 備考 |
 |validate --boolean |uni:Empha   |  null     | false    |
 |validate --boolean |uni:Empha   | @em {}    | false    |ショートハンドはダメ |
-|validate --boolean |uni:Empha   | @em %emp  | true  | 空内容要素 |
-|validate --boolean |uni:Empha   | @strong %emp| true  | 空内容要素 |
-|validate --boolean |uni:Empha   | @p %emp| false  | タグが違う |
-|validate --boolean |uni:Empha   | @em %hello  | true  | テキスト内容要素 |
-|validate --boolean |uni:Empha   | @strong %hello| true  | テキスト内容要素 |
-|validate --boolean |uni:Empha   | @p %hello| false  | タグが違う |
-|validate --boolean |uni:Empha   | %hello| false  | タグがない |
+|validate --boolean |uni:Empha   | @em %%emp  | true  | 空内容要素 |
+|validate --boolean |uni:Empha   | @strong %%emp| true  | 空内容要素 |
+|validate --boolean |uni:Empha   | @p %%emp| false  | タグが違う |
+|validate --boolean |uni:Empha   | @em %%hello  | true  | テキスト内容要素 |
+|validate --boolean |uni:Empha   | @strong %%hello| true  | テキスト内容要素 |
+|validate --boolean |uni:Empha   | @p %%hello| false  | タグが違う |
+|validate --boolean |uni:Empha   | %%hello| false  | タグがない |
 |validate --boolean |uni:Empha   | @em  "hello" | false  |
 |validate --boolean |uni:Empha   | @strong 123 | false  |
 |validate --boolean |uni:Empha   | @strong null | false  |

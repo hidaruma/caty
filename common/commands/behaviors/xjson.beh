@@ -119,9 +119,9 @@ XJSONデータをXMLにマーシャリングする。
 === !exec もっと複雑なデータ
 
 |=input  |=command     |=output(ignore-space)   |
-|%xjson-0|xjson:to-xml | %xml-0  |
-|%xjson-1|xjson:to-xml | %xml-1  |
-|%xjson-2|xjson:to-xml | %xml-2  |
-|%xjson-3|xjson:to-xml | %xml-3  |
-|%xjson-4|xjson:to-xml | %xml-4  |
+|%%xjson-0|xjson:to-xml | %%xml-0  |
+|%%xjson-1|xjson:to-xml | %%xml-1  |
+|%%xjson-2|xjson:to-xml | %%xml-2  |
+|%%xjson-3|xjson:to-xml | %%xml-3  |
+|%%xjson-4|xjson:to-xml | %%xml-4  |
 

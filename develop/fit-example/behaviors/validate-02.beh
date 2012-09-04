@@ -33,7 +33,7 @@ type person = {
 |=command        |= params    |= input  |= output   |= 備考 |
 |validate --boolean |t02:strlist1| []      | false     | 空リストは strlist1 ではない |
 |validate --boolean |t02:person  |  {"name":"hoge", "hobbies":[]} | false      | hobbies は空だから |
-|validate --boolean |t02:person  |  %person                       | false      | マクロを使用 |
+|validate --boolean |t02:person  |  %%person                       | false      | マクロを使用 |
 |validate --boolean |t02:person  |  {"name":"hoge"} | true      | hobbies を書かない |
 |validate --boolean |t02:person  |  {"name":"hoge", "hobbies":["a", "b"]} | true      |  |
 |validate --boolean |t02:person  |  {"name":"hoge", "hobbies":["a"]} | true      |  |

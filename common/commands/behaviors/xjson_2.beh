@@ -102,20 +102,20 @@
 Ignore-Tag-Once ルールが適用される。
 
 |= !input       |= !command       |= !output  |
-| %tag-o        | pass            | %tag-o    |
-| [%notag-o, 2] | xjson:put $.e   | %notag-o1 |
-| [%tag-o, 2]   | xjson:put $.e   | %tag-o1   |
-| [%tag-o, 2]   | xjson:put "$.content().e" |  %tag-o1   |
-| [%notag-o, 2] | xjson:put $.b   | %notag-o2 |
-| [%tag-o, 2]   | xjson:put $.b   | %tag-o2   |
-| [%tag-o, 2]   | xjson:put "$.content().b" |  %tag-o2   |
+| %%tag-o        | pass            | %%tag-o    |
+| [%%notag-o, 2] | xjson:put $.e   | %%notag-o1 |
+| [%%tag-o, 2]   | xjson:put $.e   | %%tag-o1   |
+| [%%tag-o, 2]   | xjson:put "$.content().e" |  %%tag-o1   |
+| [%%notag-o, 2] | xjson:put $.b   | %%notag-o2 |
+| [%%tag-o, 2]   | xjson:put $.b   | %%tag-o2   |
+| [%%tag-o, 2]   | xjson:put "$.content().b" |  %%tag-o2   |
 
 その他の変更
 
 |= !input       |= !command       |= !output  |
-| %tag-o        | pass            | %tag-o    |
-| [%tag-o, 2]   | xjson:put $.c.0 | %tag-o3   |
-| [%tag-o, 2]   | xjson:put $.d.x | %tag-o4   |
+| %%tag-o        | pass            | %%tag-o    |
+| [%%tag-o, 2]   | xjson:put $.c.0 | %%tag-o3   |
+| [%%tag-o, 2]   | xjson:put $.d.x | %%tag-o4   |
 
 
 

@@ -13,5 +13,5 @@
 == !exec
 
 |= !command         |= !input   |=!output |= !exception |= 備考 |
-|define-local-schema| %schema   |         |             | |
+|define-local-schema| %%schema   |         |             | |
 

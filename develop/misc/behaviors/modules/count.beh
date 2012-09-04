@@ -94,8 +94,8 @@ countB という変数に、カウンタBのマスターインスタンスを代
 
 
 |= !command                              |=!output         |= 備考 |
-|%set-countA; count:Counter.who %countA |["master", "A"]  | マスターインスタンスを確認 A |
-|%set-countB; count:Counter.who %countB |["master", "B"]  | マスターインスタンスを確認 B |
+|%%set-countA; count:Counter.who %%countA |["master", "A"]  | マスターインスタンスを確認 A |
+|%%set-countB; count:Counter.who %%countB |["master", "B"]  | マスターインスタンスを確認 B |
 
 
 == リクエスターインスタンスの生成
@@ -138,10 +138,10 @@ countB という変数に、カウンタBのマスターインスタンスを代
 リクエスタインスタンスは、createごとに別なオブジェクトが返る。目視確認できる。
 
 |= !command                                      |=!output        |= 備考 |
-|%set-countA; count:Counter.who %countA         |["master", "A"] | マスターインスタンスを確認 A |
-|%set-countA; %make-reqA                         |                | リクエスタインスタンスを生成 |
-|%set-countA; %make-reqA                         |                | リクエスタインスタンスを生成 |
-|%set-countA; %make-reqA;count:Counter.who %reqA|["requester","A"]| リクエスタインスタンスを確認 |
+|%%set-countA; count:Counter.who %%countA         |["master", "A"] | マスターインスタンスを確認 A |
+|%%set-countA; %%make-reqA                         |                | リクエスタインスタンスを生成 |
+|%%set-countA; %%make-reqA                         |                | リクエスタインスタンスを生成 |
+|%%set-countA; %%make-reqA;count:Counter.who %%reqA|["requester","A"]| リクエスタインスタンスを確認 |
 
 == インクリメントとcommit
 
@@ -170,11 +170,11 @@ countB という変数に、カウンタBのマスターインスタンスを代
 
 
 |= !command                                        |=!output      |= 備考 |
-|%set-countA; %make-reqA; %inc %reqA; %value %reqA | 1            | リクエスタでインクリメント |
+|%%set-countA; %%make-reqA; %%inc %%reqA; %%value %%reqA | 1            | リクエスタでインクリメント |
 | count:Counter.dump                             |{"A":0}         | マスターは変わってない |
-|%set-countA; %make-reqA; %inc %reqA; %value %reqA | 2            | リクエスタでインクリメント |
+|%%set-countA; %%make-reqA; %%inc %%reqA; %%value %%reqA | 2            | リクエスタでインクリメント |
 | count:Counter.dump                             |{"A":0}         | マスターは変わってない |
-|%set-countA; count:Counter.commit %countA       | void           | commit |
+|%%set-countA; count:Counter.commit %%countA       | void           | commit |
 | count:Counter.dump                             |{"A":2}         | マスターは変わっている |
 
 

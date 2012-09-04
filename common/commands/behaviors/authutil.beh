@@ -12,8 +12,8 @@
 === !exec 
 
 |=command|=outputCond|=備考|
-|authutil:gen-token|%insession|生成した値がセッションに含まれていることの確認|
-|[authutil:gen-token, authutil:gen-token]|%diff|生成した値は毎回異なる|
+|authutil:gen-token|%%insession|生成した値がセッションに含まれていることの確認|
+|[authutil:gen-token, authutil:gen-token]|%%diff|生成した値は毎回異なる|
 
 === !name: insession
 
@@ -39,10 +39,10 @@ eq --boolean | filter:not
 === !exec 
 
 |=input|=command|=output|=outputCond|=備考|
-|null|authutil:gen-token||%insession||
+|null|authutil:gen-token||%%insession||
 |{"foo": "xxx", "bar":1}|authutil:check-token|@NG null||トークンを含まない入力|
 |{"$_catySecureToken": "x", "foo": "xxx", "bar":1}|authutil:check-token|@NG null||不正なトークン|
-|%validinput|authutil:check-token|@OK {"foo": "xxx", "bar": 1}||正常ケース|
+|%%validinput|authutil:check-token|@OK {"foo": "xxx", "bar": 1}||正常ケース|
 | null |debug:get-session "$_CATY_SECURE_TOKEN_KEY"| [] ||処理が終わったらトークンから値は削除されている|
 
 

@@ -81,18 +81,18 @@ JSON データをテーブルに挿入する。この時の JSON データは JS
 === !exec 
 
 |=input|=command|=params|=output|=備考|
-|%struct1-1|strg:insert|struct1|@OK null||
-|%struct1-2|strg:insert|struct1|@OK null||
-|%struct1-3|strg:insert|struct1|@OK null||
-|%struct1-1|strg:insert|struct1|@NG null|重複した値は挿入できない|
+|%%struct1-1|strg:insert|struct1|@OK null||
+|%%struct1-2|strg:insert|struct1|@OK null||
+|%%struct1-3|strg:insert|struct1|@OK null||
+|%%struct1-1|strg:insert|struct1|@NG null|重複した値は挿入できない|
 
 
 === !postCond
 
 |=input|=command|=params|=output|
-|{"x": "foo"}|strg:select1|struct1|%struct1-1|
-|{"x": "bar"}|strg:select1|struct1|%struct1-2|
-|{"x": "buz"}|strg:select1|struct1|%struct1-3|
+|{"x": "foo"}|strg:select1|struct1|%%struct1-1|
+|{"x": "bar"}|strg:select1|struct1|%%struct1-2|
+|{"x": "buz"}|strg:select1|struct1|%%struct1-3|
 
 == select TABLE_NAME [JSON_PATH]
 
@@ -103,25 +103,25 @@ JSON データをテーブルに挿入する。この時の JSON データは JS
 テストデータを挿入しておく。
 
 |=input|=command|=params|=output|
-|%struct1-1|strg:insert|struct1|@OK null|
-|%struct1-2|strg:insert|struct1|@OK null|
-|%struct1-3|strg:insert|struct1|@OK null|
-|%struct2-1|strg:insert|struct2|@OK null|
-|%struct2-2|strg:insert|struct2|@OK null|
-|%struct2-3|strg:insert|struct2|@OK null|
+|%%struct1-1|strg:insert|struct1|@OK null|
+|%%struct1-2|strg:insert|struct1|@OK null|
+|%%struct1-3|strg:insert|struct1|@OK null|
+|%%struct2-1|strg:insert|struct2|@OK null|
+|%%struct2-2|strg:insert|struct2|@OK null|
+|%%struct2-3|strg:insert|struct2|@OK null|
 
 
 以下のクエリが全て成功するかどうか確認する。
 
 |=input|=command|=params|=output|=備考|
-|{"z": true}|strg:select|struct1|[ %struct1-1 , %struct1-2 ]| z の値が true |
-|{"x": @_OR["foo", "buz"] }|strg:select|struct1|[ %struct1-1 , %struct1-3 ] | x の値が "foo" あるいは "buz" |
-|{"y": @_GT 1 }|strg:select|struct1|[ %struct1-2 , %struct1-3 ] | y の値が 1 よりも大きい |
-|{"y": @_GE 1 }|strg:select|struct1|[ %struct1-1 , %struct1-2 , %struct1-3 ] | y の値が 1 以上 |
+|{"z": true}|strg:select|struct1|[ %%struct1-1 , %%struct1-2 ]| z の値が true |
+|{"x": @_OR["foo", "buz"] }|strg:select|struct1|[ %%struct1-1 , %%struct1-3 ] | x の値が "foo" あるいは "buz" |
+|{"y": @_GT 1 }|strg:select|struct1|[ %%struct1-2 , %%struct1-3 ] | y の値が 1 よりも大きい |
+|{"y": @_GE 1 }|strg:select|struct1|[ %%struct1-1 , %%struct1-2 , %%struct1-3 ] | y の値が 1 以上 |
 |{"y": @_LT 1 }|strg:select|struct1|[ ] | y の値が 1 未満 |
-|{"y": @_LE 1 }|strg:select|struct1|[ %struct1-1 ] | y の値が 1 以下 |
-|{"a": null}|strg:select|struct2| [ %struct2-2 ] | a の値が null|
-|{"b": @_CONTAINS 0}|strg:select|struct2| [ %struct2-1 ] | b が 0 を含む|
+|{"y": @_LE 1 }|strg:select|struct1|[ %%struct1-1 ] | y の値が 1 以下 |
+|{"a": null}|strg:select|struct2| [ %%struct2-2 ] | a の値が null|
+|{"b": @_CONTAINS 0}|strg:select|struct2| [ %%struct2-1 ] | b が 0 を含む|
 |null|strg:select|struct2 "c"| [{"d": 10, "e": @tag 100}, {"d": 10, "e": @tag 0}, {"d": -1, "e": @tag 1}] |オブジェクトの一部を取得|
 |null|strg:select<array>|struct2 "a" "c.d"| [["hoge", 10], [null, 10], ["fuga", -1]] |オブジェクトの一部を取得|
 
@@ -135,15 +135,15 @@ JSON ストレージの更新。入力値は JSON オブジェクトのタプル
 更新対象のデータを投入しておく。
 
 |=input|=command|=params|=output|
-|%struct1-1|strg:insert|struct1|@OK null|
-|%struct1-2|strg:insert|struct1|@OK null|
-|%struct1-3|strg:insert|struct1|@OK null|
+|%%struct1-1|strg:insert|struct1|@OK null|
+|%%struct1-2|strg:insert|struct1|@OK null|
+|%%struct1-3|strg:insert|struct1|@OK null|
 
 投入したデータを更新する。一つの更新処理で複数件のデータを更新可能である。
 
 |=input|=command|=params|=output|
-|%up1  |strg:update|struct1|null|
-|%up2  |strg:update|struct1|null|
+|%%up1  |strg:update|struct1|null|
+|%%up2  |strg:update|struct1|null|
 
 === !postCond
 
@@ -160,9 +160,9 @@ JSON ストレージより値を削除する。入力値をクエリとして扱
 削除対象のデータを投入する。
 
 |=input|=command|=params|=output|
-|%struct1-1|strg:insert|struct1|@OK null|
-|%struct1-2|strg:insert|struct1|@OK null|
-|%struct1-3|strg:insert|struct1|@OK null|
+|%%struct1-1|strg:insert|struct1|@OK null|
+|%%struct1-2|strg:insert|struct1|@OK null|
+|%%struct1-3|strg:insert|struct1|@OK null|
 
 投入したデータを削除する。
 

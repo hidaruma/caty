@@ -44,8 +44,8 @@ c
 == !exec
 
 |= command   |= output  |
-| %abc1      | "a\nb\nc"  |
-| %abc2      | "a\nb\nc\n"  |
-| %abc3      | "a\n   b\nc\n"  | c の後に改行が足りなかったのを修正|
-| %abc4      | "a\nb \nc\n"  | 同様 |
+| %%abc1      | "a\nb\nc"  |
+| %%abc2      | "a\nb\nc\n"  |
+| %%abc3      | "a\n   b\nc\n"  | c の後に改行が足りなかったのを修正|
+| %%abc4      | "a\nb \nc\n"  | 同様 |
 

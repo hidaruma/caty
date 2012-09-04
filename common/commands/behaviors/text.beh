@@ -41,10 +41,10 @@
 === !exec 
 
 |= input |=command       |= params   |= output      |
-| "abc"  | text:regmatch | "a"       | %reg1        |
-| "abc"  | text:regmatch |"(a).*"    | %reg2        |
+| "abc"  | text:regmatch | "a"       | %%reg1        |
+| "abc"  | text:regmatch |"(a).*"    | %%reg2        |
 | "abc"  | text:regmatch |"bcd"      | @NG "abc"  |
-| "abc"  | text:regmatch |"(a)(b).*" | %reg3        |
+| "abc"  | text:regmatch |"(a)(b).*" | %%reg3        |
 
 === !name: reg1
 

@@ -61,12 +61,12 @@ https://bitbucket.org/project_caty/dev/issue/13/undefined より：
 === !exec
 
 |=!command                            |=!output      |=!exception |=  備考 |
-| %hello-ref                          |              |Exception   | |
-| %hello-safe-ref                     |undefined     |            | |
-| "hello" > hello ;   %hello-ref      |"hello"       |            | |
-| "hello" > hello ;   %hello-safe-ref |"hello"       |            | |
-| undefined > hello ; %hello-ref      |              |Exception   | |
-| undefined > hello ; %hello-safe-ref | undefined    |            | |
+| %%hello-ref                          |              |Exception   | |
+| %%hello-safe-ref                     |undefined     |            | |
+| "hello" > hello ;   %%hello-ref      |"hello"       |            | |
+| "hello" > hello ;   %%hello-safe-ref |"hello"       |            | |
+| undefined > hello ; %%hello-ref      |              |Exception   | |
+| undefined > hello ; %%hello-safe-ref | undefined    |            | |
 
 
 === !exec

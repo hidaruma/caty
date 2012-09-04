@@ -73,10 +73,10 @@
 === !exec 
 
 |=input |=command             |= output |= exception |
-|%in1   |json:fix-on-selection|%out1    |            |
-|%in2   |json:fix-on-selection|%out2    |            |
-|%in1o  |json:fix-on-selection|%out1    |            |
-|%in2o  |json:fix-on-selection|%out2    |            |
+|%%in1   |json:fix-on-selection|%%out1    |            |
+|%%in2   |json:fix-on-selection|%%out2    |            |
+|%%in1o  |json:fix-on-selection|%%out1    |            |
+|%%in2o  |json:fix-on-selection|%%out2    |            |
 
 === エラー
 
@@ -224,23 +224,23 @@ $currentのインデックスが存在しない。
 
 
 |=input   |=command             |= output |= exception |
-|%bad-in1 |json:fix-on-selection|         | Exception  |
-|%bad-in2 |json:fix-on-selection|         | Exception  |
-|%bad-in3 |json:fix-on-selection|         | Exception  |
-|%bad-in4 |json:fix-on-selection|         | Exception  |
-|%bad-in5 |json:fix-on-selection|         | Exception  |
-|%bad-in6 |json:fix-on-selection|         | Exception  |
-|%bad-in7 |json:fix-on-selection|         | Exception  |
-|%bad-in8 |json:fix-on-selection|         | Exception  |
+|%%bad-in1 |json:fix-on-selection|         | Exception  |
+|%%bad-in2 |json:fix-on-selection|         | Exception  |
+|%%bad-in3 |json:fix-on-selection|         | Exception  |
+|%%bad-in4 |json:fix-on-selection|         | Exception  |
+|%%bad-in5 |json:fix-on-selection|         | Exception  |
+|%%bad-in6 |json:fix-on-selection|         | Exception  |
+|%%bad-in7 |json:fix-on-selection|         | Exception  |
+|%%bad-in8 |json:fix-on-selection|         | Exception  |
 
 |=input   |=command             |= output         |= exception |
-|%nest    |json:fix-on-selection|{"color":"blue"}| |
+|%%nest    |json:fix-on-selection|{"color":"blue"}| |
 
 |=input    |=command             |= output      |= exception |
-|%embed-1in|json:fix-on-selection|%embed-1out   | |
+|%%embed-1in|json:fix-on-selection|%%embed-1out   | |
 
 |=input    |=command             |= output      |= exception |
-|%embed-2in|json:fix-on-selection|%embed-2out   | |
+|%%embed-2in|json:fix-on-selection|%%embed-2out   | |
 
 
 <<ignore ** データ ** >>

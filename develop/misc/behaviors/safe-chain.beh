@@ -20,26 +20,26 @@
 == !exec
 
 |= !input |= !command                 |= !output  |= !exception |= 備考 |
-| %data   | pv x                      |           | Exception   | |
-| %data   | pv --safe x               |           | | セーフ |
-| %data   | pv --safe b               |           | | セーフ |
-| %data   | pv --safe b~| pv y        |           | Exception   | |
-| %data   | pv --safe b~| pv --safe y |           | Exception   | これはセーフでも型で例外する |
-| %data   | pv  x~| pv --safe y       |           | Exception   | |
-| %data   | pv --safe x~| pv --safe y |           | | セーフ |
-| %data   | item 1                    |           | Exception   | |
-| %data   | item --safe 1             |           | Exception   | これはセーフでも型で例外する |
-| %data   | pv c~| item 1             |           | | |
-| %data   | pv c~| item 5             |           | Exception | |
-| %data   | pv c~| item --safe 5      |           | | |
-| %data   | pv x~| item --safe 5      |           | Exception | |
-| %data   | pv --safe x~| item --safe 5|          | |  セーフ |
+| %%data   | pv x                      |           | Exception   | |
+| %%data   | pv --safe x               |           | | セーフ |
+| %%data   | pv --safe b               |           | | セーフ |
+| %%data   | pv --safe b~| pv y        |           | Exception   | |
+| %%data   | pv --safe b~| pv --safe y |           | Exception   | これはセーフでも型で例外する |
+| %%data   | pv  x~| pv --safe y       |           | Exception   | |
+| %%data   | pv --safe x~| pv --safe y |           | | セーフ |
+| %%data   | item 1                    |           | Exception   | |
+| %%data   | item --safe 1             |           | Exception   | これはセーフでも型で例外する |
+| %%data   | pv c~| item 1             |           | | |
+| %%data   | pv c~| item 5             |           | Exception | |
+| %%data   | pv c~| item --safe 5      |           | | |
+| %%data   | pv x~| item --safe 5      |           | Exception | |
+| %%data   | pv --safe x~| item --safe 5|          | |  セーフ |
 
 
 |= !input |= !command                              |= !output  |
-| %data   | pv --safe x                            |           |
-| %data   | pv --safe x~|default null               |           |
-| %data   | pv --safe x~|pv --safe y               |           |
-| %data   | pv --safe x~|pv --safe y~|default null |           |
-| %data   | pv --safe x~|item --safe 5              |          |
-| %data   | pv --safe x~|item --safe 5~|default null|          |
+| %%data   | pv --safe x                            |           |
+| %%data   | pv --safe x~|default null               |           |
+| %%data   | pv --safe x~|pv --safe y               |           |
+| %%data   | pv --safe x~|pv --safe y~|default null |           |
+| %%data   | pv --safe x~|item --safe 5              |          |
+| %%data   | pv --safe x~|item --safe 5~|default null|          |

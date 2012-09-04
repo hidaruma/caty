@@ -17,6 +17,6 @@
 == !exec
 
 |= !command         |= !input   |=!output |= !exception |= 備考 |
-|define-local-schema| %schema   |         |  Exception  | セミコロン忘れのエラー |
+|define-local-schema| %%schema   |         |  Exception  | セミコロン忘れのエラー |
 
 
