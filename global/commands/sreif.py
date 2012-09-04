@@ -114,7 +114,7 @@ class ShallowReifier(object):
             o = {
                 u'arg0': self._dump_schema(p.arg0_schema),
                 u'input': self._dump_schema(p.in_schema),
-                u'output': self._dump_schema(p.in_schema),
+                u'output': self._dump_schema(p.out_schema),
                 u'exception': [],
                 u'signal': [],
             }
