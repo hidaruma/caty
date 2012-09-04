@@ -104,8 +104,8 @@ class FitHeaderCell(FitNode):
 
 class MacroParser(Parser):
     def __call__(self, seq):
-        leading = until('%')(seq)
-        is_macro = option('%')(seq)
+        leading = until('%%')(seq)
+        is_macro = option('%%')(seq)
         if is_macro:
             macro = seq.parse(Regex(u'[a-zA-Z][a-zA-Z0-9-]*'))
             return leading, macro, seq.rest
