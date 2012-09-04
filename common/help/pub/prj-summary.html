@@ -16,6 +16,7 @@
     <p ><b>概要：</b> <span class="desc">{$document.description}</span></p>
     {if $document.moreDescription|notempty}<hr /><blockquote>{$document.moreDescription|noescape}</blockquote>{/if}
     <p><a href="show-mod.html?app={$appName}&mod={$name}">詳細</a></p>
+    <p><a href="read-file.html?app={$appName}&mod={$name}">ソース</a></p>
 {/function}
 <!DOCTYPE html>
 <html>

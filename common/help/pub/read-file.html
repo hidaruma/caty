@@ -1,0 +1,19 @@
+<?caty-meta template="smarty-mx" type="prj-summary:ModInfo" ?>{* -*- coding: utf-8 -*- *}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Module file {$appName}::{$name}:</title>
+    <link rel="stylesheet" href="{$_APP_PATH}/css/sh_caty.css">
+    <script type="text/javascript" src="{$_APP_PATH}/sh_main.js"></script>
+    <script type="text/javascript" src="{$_APP_PATH}/lang/sh_caty.js"></script>
+
+    <link rel="stylesheet" href="style.css" >
+  </head>
+  <body  onload="sh_highlightDocument();">
+   <h1>Module file {$appName}::{$name}:</h1>
+   {if $content|notempty}<pre class="sh_caty">{$content}</pre>{/if}
+  </body>
+</html>
+
+  
