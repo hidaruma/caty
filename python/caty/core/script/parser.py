@@ -31,6 +31,7 @@ from caty.core.script.proxy import BranchProxy as Branch
 from caty.core.script.proxy import JsonPathProxy as JsonPath
 from caty.core.script.proxy import TryProxy as Try
 from caty.core.script.proxy import CatchProxy as Catch
+from caty.core.script.proxy import UncloseProxy as Unclose
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
@@ -119,7 +120,7 @@ class ScriptParser(Parser):
     def functor(self, seq):
         import string as str_mod
         k = lambda s: keyword(s, str_mod.ascii_letters + '_.')
-        func = seq.parse([k(u'each'), k(u'take'), k(u'time'), k(u'start'), k(u'begin')])
+        func = seq.parse([k(u'each'), k(u'take'), k(u'time'), k(u'start'), k(u'begin'), k(u'unclose')])
         try:
             if func == 'each':
                 opts = self.options(seq)
@@ -147,6 +148,8 @@ class ScriptParser(Parser):
                 return Start(cmd, opts)
             elif func == u'begin':
                 return Begin(cmd, opts)
+            elif func == u'unclose':
+                return Unclose(cmd)
         except ParseFailed as e:
             raise ParseError(e.cs, self.functor)
 

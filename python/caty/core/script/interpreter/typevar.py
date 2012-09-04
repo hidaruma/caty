@@ -78,7 +78,8 @@ class TypeVarApplier(BaseInterpreter):
 
     def visit_try(self, node):
         node.pipeline.accept(self)
-        for v in node.handler.values():
-            v.accept(self)
+
+    def visit_unclose(self, node):
+        node.pipeline.accept(self)
 
 

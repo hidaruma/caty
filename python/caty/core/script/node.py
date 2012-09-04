@@ -443,6 +443,27 @@ class Try(Syntax):
     def accept(self, visitor):
         return visitor.visit_try(self)
 
+class Unclose(Syntax):
+    command_decl = u"""command __unclose<T default univ> :: UncloseInput -> T
+                        refers python:caty.core.script.node.Unclose;"""
+
+    def __init__(self, pipeline):
+        Syntax.__init__(self)
+        self.pipeline = pipeline
+
+    def set_facility(self, facilities):
+        pass
+
+    def _prepare(self):
+        Command._prepare(self)
+    
+    def accept(self, visitor):
+        return visitor.visit_unclose(self)
+
+    @property
+    def out_schema(self):
+        return self.pipeline.out_schema
+
 class Catch(Syntax):
     command_decl = u"""command __catche<S default univ, T default univ> :: S -> T
                         refers python:caty.core.script.node.Catch;"""

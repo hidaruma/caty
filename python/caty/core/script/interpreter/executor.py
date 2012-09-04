@@ -492,6 +492,39 @@ class CommandExecutor(BaseInterpreter):
                 self.input = node.handler[t].accept(self)
         return self.input
 
+    def visit_unclose(self, node):
+        node._prepare()
+        node.in_schema.validate(self.input)
+        self.input, newenv = self.__make_new_env_and_input(node)
+        newset = self.__make_new_facility_set(newenv)
+        node.pipeline.set_facility(newset)
+        return node.pipeline.accept(self)
+
+    def __make_new_facility_set(self, newenv):
+        from caty.core.facility import FacilitySet
+        facilities = {}
+        facilities.update(self.facility_set._facilities)
+        facilities['env'] = newenv
+        new_set = FacilitySet(facilities, self.facility_set.app)
+        return new_set
+
+
+    def __make_new_env_and_input(self, node):
+        from caty.env import Env
+        newenv = Env()
+        new_dict = newenv._dict
+        if isinstance(self.input, dict):
+            env = self.input.get('env', self.facility_set['env']._dict)
+            additional = self.input.get('additionalEnv', {})
+            input = self.input.get('input', None)
+        else:
+            env = self.facility_set['env'].raw_data
+            additional = self.input[0]
+            input = self.input[1] if len(self.input) == 2 else None
+        new_dict.update(env)
+        new_dict.update(additional)
+        return input, newenv
+
     @property
     def in_schema(self):
         return self.cmd.in_schema

@@ -538,7 +538,15 @@ class CatchProxy(Proxy):
             for v in self.handler.values():
                 v.set_module(module)
 
+class UncloseProxy(Proxy):
+    def __init__(self, pipeline):
+        self.pipeline = pipeline
 
+    def instantiate(self, builder):
+        return Unclose(self.pipeline.instantiate(builder))
+
+    def set_module(self, module):
+        self.pipeline.set_module(module)
 
 def combine_proxy(args):
     return reduce(CombinatorProxy, args)

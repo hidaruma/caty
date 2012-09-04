@@ -8,11 +8,6 @@ import caty.jsontools.dxjson as dxjson
 import caty.jsontools.stdjson as stdjson
 import caty.jsontools.selector as selector
 
-name = 'xjson'
-schema = u"""
-type AnyObject = {*:any};
-"""
-
 class ReadJson(FileUtilMixin, Builtin):
     def setup(self, opts, path):
         FileUtilMixin.setup(self, path)

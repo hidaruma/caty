@@ -71,3 +71,6 @@ class BaseInterpreter(object):
     def visit_catch(self, node):
         raise NotImplementedError(u'{0}#visit_catch'.format(self.__class__.__name__))
 
+    def visit_unclose(self, node):
+        raise NotImplementedError(u'{0}#visit_unclose'.format(self.__class__.__name__))
+

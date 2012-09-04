@@ -421,6 +421,24 @@ type multiItem<T> = (T | [T, T, T*]);
 */
 type multiOpt<T> = multiItem<T>;
 
+/** unclose文への入力 */
+type UncloseInput = 
+   [VarObject additionalEnv, /*@[default(null)]*/ any? input]
+    |
+   {
+     "env" : VarObject?,  
+
+     @[default({})]
+     "additionalEnv" : VarObject?,  
+
+     @[default(null)]
+     "input" : any?
+   }
+;
+
+/** 変数セット（束縛）を表すオブジェクト */
+type VarObject = deferred object(remark="変数セット");
+
 /**********************
  ******** 例外 ********
  **********************/
