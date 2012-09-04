@@ -30,6 +30,8 @@ def make_response(resp):
 
 
 def push_verb(url, verb=None):
+    print "url=" + unicode(url)
+    print "verb=" + unicode(verb)
     if verb is None:
         return url
     s = url.split('?')
