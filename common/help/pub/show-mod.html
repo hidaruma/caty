@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="style.css" >
   </head>
   <body>
-    <h1>Module {$appName}::{$name}:</h1>
+    <h1>Module {$appName}::{$name}:{if $deprecated} <span class="deprecated"> (DEPRECATED)</span>{/if}</h1>
     <p ><b>概要：</b> <span class="desc">{$document.description}</span></p>
     {if $document.moreDescription|notempty}<hr /><blockquote>{$document.moreDescription|noescape}</blockquote>{/if}
 

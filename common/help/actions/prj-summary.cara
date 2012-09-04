@@ -22,6 +22,7 @@ type App = {
 type Mod = {
  "appName": string,
  "name": string,
+ "deprecated": boolean?,
  "document": Doc,
 };
 
@@ -62,6 +63,7 @@ command gen :: void -> Summary {
       do {
         %appName    >: "appName",
         $.name      >: "name",
+        $.deprecated? >: "deprecated",
         $.document | doc-to-html >: "document",
       }
    } > mods;
@@ -99,6 +101,7 @@ type Command = {
 };
 
 type ModInfo = {
+ "deprecated": boolean,
  "name": string,
  "appName":string,
  "document": Doc,
@@ -127,7 +130,7 @@ command modify-command-info :: reif:CommandSummary -> Command {
 
 /**/
 
-command show-mod [string app, string mod] :: void -> any/*ModInfo*/ {
+command show-mod [string app, string mod] :: void -> ModInfo {
  [
    %1 > app,
    %2 > mod,
@@ -136,13 +139,15 @@ command show-mod [string app, string mod] :: void -> any/*ModInfo*/ {
 
  sreif:show-module %modPath | 
  [ 
-   $.document > document,
-   $.place    > place,
+   $.deprecated > deprecated,
+   $.document   > document,
+   $.place      > place,
  ];
  sreif:list-types %modPath |each {modify-type-info}  > types | each{$.name} > typeNames;
  sreif:list-commands %modPath > commands | each{$.name} > commandNames;
  
  do {
+   %deprecated >: "deprecated",
    %mod      >: "name",
    %app      >: "appName",
    %document | doc-to-html >: "document",
@@ -173,18 +178,32 @@ type FileInfo = {
   "content": string?,
 };
 
+/** プレース（のロール）名、アプリケーション名、パッケージ修飾モジュール名からフィルのパスを作る */
+command make-file-path :: [string place, string app, string mod]  -> string {
+ [
+   nth 1 > place,
+   nth 2 > app,
+   nth 3 > mod,
+ ];
+ %place | 
+ cond {
+   "schemata" => ".casm",
+   "actions"  => ".cara",
+ } > fileExt;
+ %mod | text:split "." | text:join "/" > mod-path;
+
+ [%place, "@", %app, ":/", %mod-path, %fileExt] | text:concat
+};
+
+
 command read-file [string app, string mod] :: void -> FileInfo {
  [
    %1 > app,
    %2 > mod,
  ];
  [%app, "::", %mod, ":" ] | text:concat > modPath;
- sreif:show-module %modPath | $.place    > place | dump --prefix=place |
- cond {
-   "schemata" => ".casm",
-   "actions"  => ".cara",
- } > fileExt;
- [%place, "@", %app, ":/", %mod, %fileExt] | text:concat > filePath;
+ sreif:show-module %modPath | $.place    > place | dump --prefix=place;
+ [%place, %app, %mod] | make-file-path > filePath;
  file:read %filePath > content;
 
  do {

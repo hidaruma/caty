@@ -12,7 +12,7 @@
     {/foreach}
 {/function}
 {function name=modDoc type="prj-summary:Mod"}
-    <h3>モジュール {$name} (in {$appName})</h3>
+    <h3>モジュール {$name} (in {$appName}){if $deprecated} <span class="deprecated"> DEPRECATED</span>{/if}</h3>
     <p ><b>概要：</b> <span class="desc">{$document.description}</span></p>
     {if $document.moreDescription|notempty}<hr /><blockquote>{$document.moreDescription|noescape}</blockquote>{/if}
     <p><a href="show-mod.html?app={$appName}&mod={$name}">詳細</a></p>

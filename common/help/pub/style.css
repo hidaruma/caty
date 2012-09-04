@@ -68,3 +68,5 @@ span.desc {
  color: darkblue;
  /*text-decoration: underline;*/
 }
+
+.deprecated {color:red;}
