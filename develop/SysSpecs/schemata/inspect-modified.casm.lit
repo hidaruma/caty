@@ -19,7 +19,10 @@
 <<{
 /**
  * Catyランタイムのオブジェクト情報
+ * inspectモジュールの修正版。
+ * 現在（2012-09）は *reifモジュールになっている。
  */
+@[deprecated]
 module inspect-modified in casm;
 
 type typeExprText = string(remark="型表現のテキスト");

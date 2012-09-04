@@ -1,4 +1,6 @@
 // -*- coding: utf-8 -*-
+/** caraで使うアノテーションの定義 
+ */
 module annotation.cara;
 
 /** 動的なポートである

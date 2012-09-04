@@ -1,4 +1,11 @@
+// -*- coding: utf-8 -*-
 {
-//  "disabled" : true,
+  "description" : "Catyシステム自身の仕様に関わる定義",
+
+  "moreDescription": '''schemata/ にシステムが使用するデータ型の候補を書く。
+
+このアプリケーションで定義されたスキーマは、
+Catyシステムに取り込まれる候補となるものである。''', 
 
 }
+
