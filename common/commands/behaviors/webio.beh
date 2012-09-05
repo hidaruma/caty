@@ -28,34 +28,104 @@
 "application/octet-stream"
 }}}
 
+=== !name:parse-unparse
+
+{{{
+webio:parse | webio:unparse
+}}}
+
+=== !name:unparse-parse
+
+{{{
+webio:unparse | webio:parse
+}}}
+
 
 === !exec 
 
-以下はFITの問題。
-
-|= !command |= !output |= コメント            |= !judge |
-| "hello"   | b"hello" | stringとbinaryは違う | negate  |
-| b"hello"  | "hello"  | stringとbinaryは違う | negate  |
-
-今はstringとbinaryの区別が出来ないので、後で書き足す。
-
-|= !input           |= !command     |= !params                  |= !output |
-|@text "hello"       |webio:unparse |--content-type=%%text-type |   |
-|@bytes b"hello"     |webio:unparse |--content-type=%%bin-type  |   |
-|@json {"a":["b"]}   |webio:unparse  |--content-type=%%json-type |          |
-|@form {"a":["b"]}   |webio:unparse  |--content-type=%%form-type |     |
-|@form {"a":["b","c"]}|webio:unparse  |--content-type=%%form-type | |
-|@form {"a":["b"],"x":["y"]} |webio:unparse  |--content-type=%%form-type | |
+|= !input           |= !command     |= !params                  |= !output |= 備考|= !judge |
+|@text "hello"       |webio:unparse |--content-type=%%text-type |"hello"    |||
+|@bytes b"hello"     |webio:unparse |--content-type=%%bin-type  |b"hello"   |||
+|@json {"a":["b"]}   |webio:unparse  |--content-type=%%json-type |"{\n \"a\": [\n \"b\"\n ]\n}"|この比較は危うい|ignore|
+|@form {"a":["b"]}   |webio:unparse  |--content-type=%%form-type |"a=b"    |この段階ではテキスト||
+|@form {"a":["b","c"]}|webio:unparse  |--content-type=%%form-type|"a=b&a=c"    |この段階ではテキスト||
+|@form {"a":["b"],"x":["y"]} |webio:unparse  |--content-type=%%form-type |"a=b&x=y"    |この段階ではテキスト||
 
 content-typeは指定されなくてもよい。
 
-|= !input           |= !command     |= !params                  |= !output |= 備考|
-|@text "hello"       |webio:unparse |                           |          | |
-|@bytes b"hello"     |webio:unparse |                           |          | |
-|@json {"a":["b"]}  |webio:unparse  |                           |          | |
-|@form {"a":["b"]}  |webio:unparse  |                           |          | |
-|@form {"a":["b","c"]}|webio:unparse|                           |          | |
-|@form {"a":["b"],"x":["y"]} |webio:unparse|                    |          | |
+|= !input           |= !command     |= !params                  |= !output |= 備考|= judge |
+|@text "hello"       |webio:unparse |                           |"hello"    |||
+|@bytes b"hello"     |webio:unparse |                           |b"hello"   |||
+|@json {"a":["b"]}  |webio:unparse  |                           |"{\n \"a\": [\n \"b\"\n ]\n}"|この比較は危うい|ignore|
+|@form {"a":["b"]}  |webio:unparse  |                           |"a=b"    |この段階ではテキスト||
+|@form {"a":["b","c"]}|webio:unparse|                           |"a=b&a=c"    |この段階ではテキスト||
+|@form {"a":["b"],"x":["y"]} |webio:unparse|                    |"a=b&x=y"    |この段階ではテキスト||
+
+== parseコマンド
+
+=== !exec 
+
+|= !output            |= !command  |= !params                  |= !input |
+|@text "hello"        |webio:parse |--content-type=%%text-type |"hello"   |
+|@bytes b"hello"      |webio:parse |--content-type=%%bin-type  |b"hello"  |
+|@json {"a":["b"]}    |webio:parse |--content-type=%%json-type |"{\"a\":[\"b\"]}"|
+|@form {"a":["b"]}    |webio:parse |--content-type=%%form-type |"a=b"     |
+|@form {"a":["b","c"]}|webio:parse |--content-type=%%form-type |"a=b&a=c" |
+|@form {"a":["b"],"x":["y"]} |webio:parse |--content-type=%%form-type |"a=b&x=y" |
+
+--content-typeオプションの代わりに環境変数CONTETNT_TYPEでもよい。
+
+|= !output            |= !command  |= !env                       |= !input |
+|@text "hello"        |webio:parse |{"CONTENT_TYPE":%%text-type} |"hello"   |
+|@bytes b"hello"      |webio:parse |{"CONTENT_TYPE":%%bin-type}  |b"hello"  |
+|@json {"a":["b"]}    |webio:parse |{"CONTENT_TYPE":%%json-type} |"{\"a\":[\"b\"]}"|
+|@form {"a":["b"]}    |webio:parse |{"CONTENT_TYPE":%%form-type} |"a=b"     |
+|@form {"a":["b","c"]}|webio:parse |{"CONTENT_TYPE":%%form-type} |"a=b&a=c" |
+|@form {"a":["b"],"x":["y"]} |webio:parse |{"CONTENT_TYPE":%%form-type} |"a=b&x=y" |
+
+
+--content-typeもCONTETNT_TYPEもないときは、テキストかバイナリ（bytes）かの判断だけ。
+
+|= !output            |= !command  |= !input |
+|@text "hello"        |webio:parse |"hello"   |
+|@bytes b"hello"      |webio:parse |b"hello"  |
+|@text "{\"a\":[\"b\"]}"|webio:parse |"{\"a\":[\"b\"]}"|
+|@text "a=b"          |webio:parse |"a=b"     |
+|@text "a=b&a=c"      |webio:parse |"a=b&a=c" |
+|@text "a=b&x=y"      |webio:parse |"a=b&x=y" |
+
+
+エンコーディング情報がないのだから、無理にバイナリをテキストにしようと試みてはいけない。
+
+|= !output            |= !command  |= !input  |= !exception |= !params |
+|@text "hello"        |webio:parse |"hello"   |             |--content-type=%%text-type|
+|                     |webio:parse |b"hello"  |Exception    |--content-type=%%text-type|
+|@text "{\"a\":[\"b\"]}"|webio:parse |"{\"a\":[\"b\"]}"|    |--content-type=%%text-type|
+|@text "a=b"          |webio:parse |"a=b"     |             |--content-type=%%text-type|
+|@text "a=b&a=c"      |webio:parse |"a=b&a=c" |             |--content-type=%%text-type|
+|@text "a=b&x=y"      |webio:parse |"a=b&x=y" |             |--content-type=%%text-type|
+
+parseとunparseは逆である。
+
+|= !input         |= !command      |= !output |= !env |= !judge |
+| "hello"         |%%parse-unparse |"hello"   |{"CONTENT_TYPE":%%text-type} ||
+| b"hello"        |%%parse-unparse |b"hello"  |{"CONTENT_TYPE":%%bin-type}  ||
+|"{\"a\":[\"b\"]}"|%%parse-unparse |"{\"a\":[\"b\"]}"|{"CONTENT_TYPE":%%json-type} |ignore|
+|"a=b"            |%%parse-unparse |"a=b"     |{"CONTENT_TYPE":%%form-type} ||
+|"a=b&a=c"        |%%parse-unparse |"a=b&a=c" |{"CONTENT_TYPE":%%form-type} ||
+|"a=b&x=y"        |%%parse-unparse |"a=b&x=y" |{"CONTENT_TYPE":%%form-type} ||
+
+unparseとparseは逆である。
+
+|= !input             |= !output              |= !command      |= !env |= !judge |
+|@text "hello"        |@text "hello"          |%%unparse-parse |{"CONTENT_TYPE":%%text-type} ||
+|@bytes b"hello"      |@bytes b"hello"        |%%unparse-parse |{"CONTENT_TYPE":%%bin-type}  ||
+|@json {"a":["b"]}    |@json {"a":["b"]}      |%%unparse-parse |{"CONTENT_TYPE":%%json-type} ||
+|@form {"a":["b"]}    |@form {"a":["b"]}      |%%unparse-parse |{"CONTENT_TYPE":%%form-type} ||
+|@form {"a":["b","c"]}|@form {"a":["b","c"]}  |%%unparse-parse |{"CONTENT_TYPE":%%form-type} ||
+|@form {"a":["b"],"x":["y"]}|@form {"a":["b"],"x":["y"]}|%%unparse-parse |{"CONTENT_TYPE":%%form-type} ||
+
+
 
 
 <<ignore |@void null         |webio:unparse  |                           |null      |例外的にnullとする | >>
