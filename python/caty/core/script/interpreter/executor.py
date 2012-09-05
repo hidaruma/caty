@@ -524,9 +524,9 @@ class CommandExecutor(BaseInterpreter):
             input = self.input.get('input', None)
             unset = self.input.get('unset', [])
         else:
-            additional = self.input[0] if self.input else []
-            input = self.input[1] if len(self.input) >= 2 else None
-            unset = self.input[2] if len(self.input) == 3 else []
+            additional = self.input[0] or {} if self.input else []
+            input = self.input[1] or None if len(self.input) >= 2 else None
+            unset = self.input[2] or [] if len(self.input) == 3 else []
         additional_names = set(additional.keys())
         conflict = additional_names.intersection(set(unset))
         if conflict:
