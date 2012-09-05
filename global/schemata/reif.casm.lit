@@ -430,6 +430,7 @@ type Package = @package (LocatedQualifierMixin & PackageSummary &  {
   *: any?
 });
 
+/** モジュールに関する情報 */
 type ModuleSummary = {
   "document": Doc?,
   "annotations": object?,  // アノテーションもサマリーに必要
@@ -439,6 +440,12 @@ type ModuleSummary = {
 
   /** 置かれているプレース */
   "place" : ("schemata" | "actions"),
+
+  /** モジュール記述の構文 */
+  "syntax": ("casm"|"cara"|"camb")?,
+
+  /** 文芸的か */
+  "literate": boolean?,
 
   /** @[deprecated]アノテーションの値をコピーする */
   @[deprecated, default(false)]
