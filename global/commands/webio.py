@@ -5,6 +5,7 @@ from caty.core.exception import throw_caty_exception
 from caty.jsontools import tagged, obj2path, untagged, split_tag, path2obj, prettyprint, stdjson
 from caty.core.std.command.builtin import TypeCalculator
 from caty.core.schema import JsonSchemaError
+from caty import UNDEFINED
 
 CT_JSON = u'application/json'
 CT_FORM = u'application/x-www-form-urlencoded'
@@ -107,7 +108,7 @@ class Unparse(Command):
 
     def execute(self, generic_data):
         tag, data = split_tag(generic_data)
-        if self.__content_type is None:
+        if self.__content_type is UNDEFINED:
             if tag == 'form':
                 self.__content_type = CT_FORM
             elif tag == 'json':
@@ -158,12 +159,14 @@ class Unparse(Command):
 
 class Parse(Command):
     def setup(self, opts):
-        self.__content_type = opts.get('content-type', self.env.get('CONTENT_TYPE', CT_JSON))
+        self.__content_type = opts.get('content-type')
         self.__format = opts.get('format')
 
     def execute(self, raw_data):
         type = self.__content_type
-        if self.__format is not None:
+        if type is UNDEFINED:
+            type = self.env.get('CONTENT_TYPE', CT_JSON)
+        if self.__format is not UNDEFINED:
             if self.__format == 'json':
                 type = CT_JSON
             elif self.__format == 'text':
@@ -179,7 +182,7 @@ class Parse(Command):
         else:
             cs = self.env.get('APP_ENCODING', 'utf-8')
         if type == CT_BIN:
-            return tagged('binary', raw_data)
+            return tagged('bytes', raw_data)
         elif type.startswith('text/'):
             return tagged('text', raw_data)
         elif type == CT_JSON:
@@ -187,7 +190,7 @@ class Parse(Command):
                 data = unicode(raw_data, cs)
             else:
                 data = raw_data
-            return tagged('text', stdjson.loads(data))
+            return tagged('json', stdjson.loads(data))
         elif type == CT_FORM or type == CT_MULTI:
             import cgi
             from StringIO import StringIO
@@ -205,17 +208,22 @@ class Parse(Command):
             fs = cgi.FieldStorage(fp=input, environ=env)
             o = {}
             for k in fs.keys():
-                v = fs[k]
-                if isinstance(v.value, (list, tuple)):
-                    o[k] = self._to_unicode(v.value, cs)
-                elif hasattr(v, 'filename') and v.filename:
-                    o[k + ".filename"] = [unicode(v.filename, cs)]
-                    o[k + ".data"] = [v.file.read()]
-                else:
-                    o[k] = self._to_unicode([v.value], cs)
+                vs = fs[k]
+                if not isinstance(vs, list):
+                    vs = [vs]
+                if not k in o:
+                    o[k] = []
+                for v in vs:
+                    if isinstance(v.value, (list, tuple)):
+                        o[k].extend(self._to_unicode(v.value, cs))
+                    elif hasattr(v, 'filename') and v.filename:
+                        o[k + ".filename"] = [unicode(v.filename, cs)]
+                        o[k + ".data"] = [v.file.read()]
+                    else:
+                        o[k].extend(self._to_unicode([v.value], cs))
             return  tagged(u'form', o)
         else:
-            return tagged('binary', raw_data)
+            return tagged('bytes', raw_data)
 
     def _to_unicode(self, seq, cs):
         return [unicode(v, cs) if not isinstance(v, unicode) else v for v in seq]
