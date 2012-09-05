@@ -518,16 +518,24 @@ class CommandExecutor(BaseInterpreter):
         from caty.env import Env
         newenv = Env()
         new_dict = newenv._dict
+        env = self.facility_set['env']._dict if not node.clear else {}
         if isinstance(self.input, dict):
-            env = self.input.get('env', self.facility_set['env']._dict if not node.clear else {})
-            additional = self.input.get('additionalEnv', {})
+            additional = self.input.get('env', {})
             input = self.input.get('input', None)
+            unset = self.input.get('unset', [])
         else:
-            env = self.facility_set['env']._dict if not node.clear else {}
-            additional = self.input[0]
-            input = self.input[1] if len(self.input) == 2 else None
+            additional = self.input[0] if self.input else []
+            input = self.input[1] if len(self.input) >= 2 else None
+            unset = self.input[2] if len(self.input) == 3 else []
+        additional_names = set(additional.keys())
+        conflict = additional_names.intersection(set(unset))
+        if conflict:
+            throw_caty_exception(u'UncloseConflict', u'$names', names=u', '.join(conflict))
         new_dict.update(env)
         new_dict.update(additional)
+        for n in unset:
+            if n in new_dict:
+                del new_dict[n]
         storage = self.var_storage.clone()
         for k, v in self.facility_set['env'].items():
             if k in storage.opts:
