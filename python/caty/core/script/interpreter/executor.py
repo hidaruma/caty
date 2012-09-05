@@ -520,7 +520,7 @@ class CommandExecutor(BaseInterpreter):
         new_dict = newenv._dict
         env = self.facility_set['env']._dict if not node.clear else {}
         if isinstance(self.input, dict):
-            additional = self.input.get('env', {})
+            additional = self.input.get('set', {})
             input = self.input.get('input', None)
             unset = self.input.get('unset', [])
         else:

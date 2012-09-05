@@ -57,7 +57,7 @@ each {pv userid} | [pass, ["foo", "bar"]] | eq --boolean
 
 === !exec 
 
-|=env|=input|=command|=outputMatch|=備考|
+|=!setenv|=!input|=!command|=!outputMatch|=備考|
 |%%hosturl|{"userid": "boo", "password": "qwerty"} | %%login | {"status": 302, "location": %%TOP} |Cookie のセッション ID の値は予測不可能なので、オブジェクトの部分一致でチェック|
 |%%hosturl|{"userid": "boo", "password": "zxcvb"}|%%login|||
 
@@ -67,7 +67,7 @@ each {pv userid} | [pass, ["foo", "bar"]] | eq --boolean
 
 === !exec 
 
-|=env|=input|=command|=outputMatch|=備考|
+|=setenv|=input|=command|=outputMatch|=備考|
 |%%hosturl|{"userid": "boo", "password": "qwerty"}|%%login| {"status": 302, "location": %%TOP} ||
 |%%hosturl|"/login.html"|%%logout|"http://localhost/login.html"||
 |%%hosturl|"/login.html"|%%logout|"http://localhost/login.html"|既にログアウトしているが、同様に処理される|
