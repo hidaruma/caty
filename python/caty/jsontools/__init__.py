@@ -492,6 +492,7 @@ pp = prettyprint
 
 import types
 import caty
+import caty.core.spectypes
 _tag_class_dict = {
     int: u'number',
     decimal.Decimal: u'number',

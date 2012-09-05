@@ -16,6 +16,9 @@ class ForeignObject(object):
     def __eq__(self, another):
         return isinstance(another, ForeignObject)
 
+    def __ne__(self, another):
+        return not isinstance(another, ForeignObject)
+
 UNDEFINED = _Undefined()  # singleton
 import itertools
 def reduce_undefined(obj):

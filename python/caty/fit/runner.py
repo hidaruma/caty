@@ -356,26 +356,58 @@ class TestCase(object):
             return
         cmd = self._interpreter.build(target, transaction=self.runner.transaction)
         expected = cmd(None)
-        if json == expected:
+        if self._rec_comp(json, expected):
             case.ok()
             return
         else:
             if ('ig' in opts or'ignore-space' in opts) and isinstance(json, basestring) and isinstance(target, basestring):
                 import re
                 c = re.compile('\s')
-                if c.sub('', json) == c.sub('', expected):
+                if self._rec_comp(c.sub('', json), c.sub('', expected)):
                     case.ok()
                     return
             if self.orElse:
                 for e in self.orElse:
                     cmd = self._interpreter.build(e, transaction=self.runner.transaction)
                     expected = cmd(None)
-                    if json == expected:
+                    if self._rec_comp(json, expected):
                         case.ok()
                         return
 
             case.ng(json)
             return
+
+    def _rec_comp(self, a, b):
+        import caty.jsontools as json
+        from caty.template.core.context import StringWrapper
+        if isinstance(a, StringWrapper):
+            a = a.string
+        if isinstance(b, StringWrapper):
+            b = b.string
+        if type(a) != type(b):
+            return False
+        if isinstance(a, list):
+            if len(a) != len(b):
+                return False
+            for x, y in zip(a, b):
+                if not self._rec_comp(x, y):
+                    return False
+        elif isinstance(a, dict):
+            if len(a) != len(b):
+                return False
+            for x, y in zip(a, b):
+                if not self._rec_comp(a[x], b[y]):
+                    return False
+        elif isinstance(a, json.TaggedValue):
+            if a.tag != b.tag:
+                return False
+            return self._rec_comp(json.untagged(a), json.untagged(b))
+        elif isinstance(a, json.TagOnly):
+            if a.tag != b.tag:
+                return False
+        elif a != b:
+            return False
+        return True
 
     def _eval_cond(self, case, result):
         try:
