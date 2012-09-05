@@ -107,6 +107,8 @@ class Unparse(Command):
         self.__content_type = opts.get('content-type')
 
     def execute(self, generic_data):
+        if self.__content_type is UNDEFINED and self.env.exists('CONTENT_TYPE'):
+            self.__content_type = self.env.get('CONTENT_TYPE')
         tag, data = split_tag(generic_data)
         if self.__content_type is UNDEFINED:
             if tag == 'form':
@@ -155,7 +157,7 @@ class Unparse(Command):
                 if isinstance(i, unicode):
                     i = i.encode(self.env.get('APP_ENCODING', 'utf-8'))
                 r.append(urllib.urlencode({k: i}))
-        return '&'.join(r)
+        return unicode('&'.join(r))
 
 class Parse(Command):
     def setup(self, opts):
@@ -163,9 +165,14 @@ class Parse(Command):
         self.__format = opts.get('format')
 
     def execute(self, raw_data):
+        if self.__content_type is UNDEFINED and self.env.exists('CONTENT_TYPE'):
+            self.__content_type = self.env.get('CONTENT_TYPE')
         type = self.__content_type
         if type is UNDEFINED:
-            type = self.env.get('CONTENT_TYPE', CT_JSON)
+            if isinstance(raw_data, str):
+                type = CT_BIN
+            else:
+                type = CT_TEXT
         if self.__format is not UNDEFINED:
             if self.__format == 'json':
                 type = CT_JSON
