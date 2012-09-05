@@ -64,7 +64,7 @@ type UncloseInputArr = [
 |[{"X":"foo"}] ~|unclose {%X}                         | "foo"     | 変数Xが追加される  |
 |[{"X":"foo"}] ~|unclose {%APP_ENCODING}              | "utf-8"   | もとの変数はそのまま見える  |
 |[{"APP_ENCODING":"utf-16"}] ~|unclose {%APP_ENCODING}| "utf-16"  | 上書きもできる  |
-
+|[{},null,["APP_ENCODING"]] ~|unclose {%APP_ENCODING?}      | undefined | 存在する変数を選択して消せる  |
 
 == !exec オブジェクトを入力とする場合（変数参照使用）
 
@@ -75,6 +75,19 @@ type UncloseInputArr = [
 |{"set":{"X":"foo"}} ~|unclose {%APP_ENCODING}| "utf-8"   | もとの変数はそのまま見える  |
 |{"set":{"APP_ENCODING":"utf-16"}} ~|unclose {%APP_ENCODING}| "utf-16"  | 上書きもできる  |
 |{"set":{"X":"foo"}} ~|unclose {%X}                   | "foo"     | 変数Xが追加される  |
-|{"set":{"X":"foo"}} ~|unclose --clear {%APP_ENCODING?}       | undefined | もとの変数はなくなる |
+|{"set":{"X":"foo"}} ~|unclose --clear {%APP_ENCODING?}      | undefined | もとの変数はなくなる |
+|{"unset": ["APP_ENCODING"]} ~|unclose {%APP_ENCODING?}      | undefined | 存在する変数を選択して消せる |
+
+== !exec ルーズ配列ならどうか？
+
+配列を使うのは、手入力時のキー入力を節約したいからだから、
+ルーズ配列は使いたい。
+
+|= !command                                            |= !output  |= コメント |
+|[{},null,["APP_ENCODING"]] ~|unclose {%APP_ENCODING?} | undefined | 存在する変数を選択して消せる  |
+|[{},null,["APP_ENCODING"],] ~|unclose {%APP_ENCODING?}| undefined | 存在する変数を選択して消せる  |
+|[,null,["APP_ENCODING"]] ~|unclose {%APP_ENCODING?}   | undefined | 存在する変数を選択して消せる  |
+|[{},,["APP_ENCODING"]] ~|unclose {%APP_ENCODING?}     | undefined | 存在する変数を選択して消せる  |
+|[,,["APP_ENCODING"]] ~|unclose {%APP_ENCODING?}       | undefined | 存在する変数を選択して消せる  |
 
 
