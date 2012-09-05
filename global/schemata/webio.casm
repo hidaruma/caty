@@ -43,7 +43,7 @@ exception webio_InsufficientMetainfo = Exception;
 type mediaType = common:mediaType;
 
 /** raw階層（転送階層）で使われるデータ */
-type Raw = (string | binary);
+type Raw = (null | string | binary);
 
 /** フォームを表現するオブジェクト */
 type FormObj = {
