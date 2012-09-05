@@ -209,9 +209,9 @@ def repeatable_type(seq):
 
 def annotated_term(seq):
     doc = seq.parse(option(docstring))
-    d = seq.parse(option(annotation, Annotations([])))
-    s = typedef(seq)
-    s.annotations = d
+    a = seq.parse(option(annotation, Annotations([])))
+    s = term(seq)
+    s.annotations = a
     if doc:
         s.docstring = doc
     return s
