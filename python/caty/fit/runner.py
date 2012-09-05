@@ -269,7 +269,8 @@ class TestCase(object):
         self.params = u''
         self.session = u'{}'
         self.sessionAfter = u'{}'
-        self.env = u'{}'
+        self.setenv = u'{}'
+        self.unsetenv = u'[]'
         self.outputCond = None
         self.orElse = []
         self.runner = runner
@@ -279,9 +280,8 @@ class TestCase(object):
             case.invalid()
         try:
             session = self._interpreter.build(self.session or '{}', transaction=self.runner.transaction)(None)
-            env = self._interpreter.build(self.env or '{}', transaction=self.runner.transaction)(None)
-            self._set_env_and_session(env, session)
-            cmdline = self._build_command_line()
+            self._set_session(session)
+            cmdline = self._build_command_line(self.setenv, self.unsetenv)
             cmd = self._interpreter.build(cmdline, transaction=self.runner.transaction)
         except Exception, e:
             if self.exception:
@@ -330,10 +330,9 @@ class TestCase(object):
             case.error()
             return
 
-    def _set_env_and_session(self, env, session):
+    def _set_session(self, session):
         from caty.util.collection import merge_dict
         from caty.session.value import SessionInfoWrapper, SessionInfo
-        from caty.env import Env
         facilities = {}
         app = self._interpreter.facilities.app
         for k, v in self._interpreter.facilities.items():
@@ -342,11 +341,6 @@ class TestCase(object):
         storage = facilities['session'].storage
         new_s = merge_dict(orig_s['objects'], session)
         facilities['session'] = SessionInfoWrapper(SessionInfo(orig_s['key'], storage, default=new_s))
-        orig_e = dict(facilities['env'].items())
-        new_e = merge_dict(orig_e, env)
-        facilities['env'] = Env().create('uses')
-        for k, v in new_e.items():
-            facilities['env'].put(k, v)
         self._interpreter.facilities = FacilitySet(facilities, app)
 
     def _compare(self, case, json, target, opts=[]):
@@ -466,8 +460,11 @@ class TestCase(object):
         if v.strip() == '': return False
         return True
 
-    def _build_command_line(self):
-        return '%s %s' % (self.command, self.params)
+    def _build_command_line(self, setenv, unsetenv):
+        if setenv != u'{}' or unsetenv != u'[]':
+            return u'[%s, pass, %s] | unclose {%s %s}' % (setenv, unsetenv, self.command, self.params)
+        else:
+            return u'%s %s' % (self.command, self.params)
 
     def _setup(self):
         return '[%s]' % (', '.join(self._prepare))

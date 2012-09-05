@@ -163,7 +163,8 @@ CELL_TYPES = set(['command',
                   'sessionafter',
                   'outputcond',
                   'outputmatch',
-                  'env',
+                  'setenv',
+                  'unsetenv',
                   'judge'
               ])
 
@@ -230,8 +231,12 @@ class FitExpectationType(FitRow):
         return self._find_cell('outputmatch')
 
     @property
-    def env_num(self):
-        return self._find_cell('env')
+    def setenv_num(self):
+        return self._find_cell('setenv')
+
+    @property
+    def unsetenv_num(self):
+        return self._find_cell('unsetenv')
 
     @property
     def judge_num(self):
@@ -284,7 +289,8 @@ class FitCase(FitRow):
         self.exception_num = title_row.exception_num
         self.signal_num = title_row.signal_num
         self.params_num = title_row.params_num
-        self.env_num = title_row.env_num
+        self.setenv_num = title_row.setenv_num
+        self.unsetenv_num = title_row.unsetenv_num
         self.session_num = title_row.session_num
         self.sessionAfter_num = title_row.sessionAfter_num
         self.outputCond_num = title_row.outputCond_num
@@ -307,7 +313,8 @@ class FitCase(FitRow):
             testcase.params = self.params
             testcase.session = self.session
             testcase.sessionAfter = self.sessionAfter
-            testcase.env = self.env
+            testcase.setenv = self.setenv
+            testcase.unsetenv = self.unsetenv
             testcase.outputCond = self.outputCond
             testcase.outputMatch = self.outputMatch
             testcase.orElse = self.orElse
@@ -446,11 +453,18 @@ class FitCase(FitRow):
             return []
 
     @property
-    def env(self):
-        if self.env_num != -1:
-            return self[self.env_num].text
+    def setenv(self):
+        if self.setenv_num != -1:
+            return self[self.setenv_num].text
         else:
             return '{}'
+
+    @property
+    def unsetenv(self):
+        if self.unsetenv_num != -1:
+            return self[self.unsetenv_num].text
+        else:
+            return '[]'
 
     @property
     def judge(self):

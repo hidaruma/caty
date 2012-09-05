@@ -444,6 +444,8 @@ class Translate(Builtin, TypeCalculator):
             if self.__content_type:
                 e = dict(e)
                 e['CONTENT_TYPE'] = self.__content_type
+            if 'CONTENT_TYPE' not in e:
+                e['CONTENT_TYPE'] = u'application/json'
             input = WebInputParser(e, self.env['APP_ENCODING'], raw_input).read()
             t, v = split_tag(input)
             scm = self.converter

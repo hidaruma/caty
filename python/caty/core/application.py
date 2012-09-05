@@ -571,8 +571,6 @@ class Application(PbcObject):
   #env.put('FILE_ASSOC', self._raw_associations)
         if 'CONTENT_TYPE' in environ:
             env.put(u'CONTENT_TYPE', unicode(environ['CONTENT_TYPE']))
-        else:
-            env.put(u'CONTENT_TYPE', u'application/json')
         if 'PATH_INFO' in environ:
             env.put(u'PATH_INFO', unicode(environ['PATH_INFO']))
         if 'LANGUAGE' in environ:

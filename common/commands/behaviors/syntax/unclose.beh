@@ -4,21 +4,34 @@
 
 
 {{{
-type VarObject = {*: any?};
+type UncloseInputObj = {
+  /** 上書きでセットする変数と値 */
+  @[default({})]
+  "set": object?,
 
-type UncloseInput = 
-   [VarObject additionalEnv, /*@[default(null)]*/ univ? input]
-    |
-   {
-     "env" : VarObject?,  
+  /** アンセットする変数達 */
+  @[default([])]
+  "unset": [string*]?,
 
-     @[default({})]
-     "additionalEnv" : VarObject?,  
+  /** 入力 */
+  @[default(null)]
+  "input": univ?,
+};
 
-     @[default(null)]
-     "input" : any?
-   }
-;
+type UncloseInputArr = [
+  /** 上書きでセットする変数と値 */
+  @[default({})]
+  object? set,
+
+  /** 入力 */
+  @[default(null)]
+  univ? input,
+
+  /** アンセットする変数達 */
+  @[default([])]
+  [string*]? unset,
+
+];
 }}}
 
 
@@ -37,11 +50,11 @@ type UncloseInput =
 |= !command                                           |= !output  |= コメント |
 |{"input":"hello"} ~|unclose{pass}                    | "hello"   | 特に何も変化がない |
 |{} ~|unclose{pass}                                   |  null     | すべて省略可能 |
-|{"additionalEnv":{"X":"foo"}} ~|unclose {env~|$.X}         | "foo"     | 変数Xが追加される  |
-|{"additionalEnv":{"X":"foo"}} ~|unclose {env~|$.APP_ENCODING}| "utf-8"   | もとの変数はそのまま見える  |
-|{"additionalEnv":{"APP_ENCODING":"utf-16"}} ~|unclose {env~|$.APP_ENCODING}| "utf-16"  | 上書きもできる  |
-|{"env":{"X":"foo"}} ~|unclose {env~|$.X}                   | "foo"     | 変数Xが追加される  |
-|{"env":{"X":"foo"}} ~|unclose {env~|$.APP_ENCODING?}       | undefined | もとの変数はなくなる |
+|{"set":{"X":"foo"}} ~|unclose {env~|$.X}         | "foo"     | 変数Xが追加される  |
+|{"set":{"X":"foo"}} ~|unclose {env~|$.APP_ENCODING}| "utf-8"   | もとの変数はそのまま見える  |
+|{"set":{"APP_ENCODING":"utf-16"}} ~|unclose {env~|$.APP_ENCODING}| "utf-16"  | 上書きもできる  |
+|{"set":{"X":"foo"}} ~|unclose {env~|$.X}                   | "foo"     | 変数Xが追加される  |
+|{"set":{"X":"foo"}} ~|unclose --clear {env~|$.APP_ENCODING?}       | undefined | もとの変数はなくなる |
 
 == !exec 配列を入力とする場合 （変数参照使用）
 
@@ -58,10 +71,10 @@ type UncloseInput =
 |= !command                                           |= !output  |= コメント |
 |{"input":"hello"} ~|unclose{pass}                    | "hello"   | 特に何も変化がない |
 |{} ~|unclose{pass}                                   |  null     | すべて省略可能 |
-|{"additionalEnv":{"X":"foo"}} ~|unclose {%X}         | "foo"     | 変数Xが追加される  |
-|{"additionalEnv":{"X":"foo"}} ~|unclose {%APP_ENCODING}| "utf-8"   | もとの変数はそのまま見える  |
-|{"additionalEnv":{"APP_ENCODING":"utf-16"}} ~|unclose {%APP_ENCODING}| "utf-16"  | 上書きもできる  |
-|{"env":{"X":"foo"}} ~|unclose {%X}                   | "foo"     | 変数Xが追加される  |
-|{"env":{"X":"foo"}} ~|unclose {%APP_ENCODING?}       | undefined | もとの変数はなくなる |
+|{"set":{"X":"foo"}} ~|unclose {%X}         | "foo"     | 変数Xが追加される  |
+|{"set":{"X":"foo"}} ~|unclose {%APP_ENCODING}| "utf-8"   | もとの変数はそのまま見える  |
+|{"set":{"APP_ENCODING":"utf-16"}} ~|unclose {%APP_ENCODING}| "utf-16"  | 上書きもできる  |
+|{"set":{"X":"foo"}} ~|unclose {%X}                   | "foo"     | 変数Xが追加される  |
+|{"set":{"X":"foo"}} ~|unclose --clear {%APP_ENCODING?}       | undefined | もとの変数はなくなる |
 
 

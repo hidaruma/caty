@@ -200,12 +200,21 @@ def array(seq):
     return a
 
 def repeatable_type(seq):
-    s = seq.parse([term, loose_item])
+    s = seq.parse([annotated_term, loose_item])
     r = seq.parse(option('*'))
     n = seq.parse(option(name))
     if n:
         s.options['subName'] = n
     return [s, r]
+
+def annotated_term(seq):
+    doc = seq.parse(option(docstring))
+    a = seq.parse(option(annotation, Annotations([])))
+    s = term(seq)
+    s.annotations = a
+    if doc:
+        s.docstring = doc
+    return s
 
 def loose_item(seq):
     from caty import UNDEFINED

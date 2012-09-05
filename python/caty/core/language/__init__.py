@@ -158,6 +158,7 @@ def _comment(seq, doc_str_checker):
         seq.parse(skip_ws)
 
 from caty.core.schema.base import Annotations, Annotation
+@try_
 def annotation(seq):
     if seq.current != '@':
         return Annotations([])
