@@ -1,0 +1,11 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= CatyFIT が壊れないように
+
+
+== !exec 
+
+|= !command |= !output |= コメント            |= !judge |
+| "hello"   | b"hello" | stringとbinaryは違う | negate  |
+| b"hello"  | "hello"  | stringとbinaryは違う | negate  |
+
