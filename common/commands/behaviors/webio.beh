@@ -86,13 +86,13 @@ content-typeは指定されなくてもよい。
 
 --content-typeもCONTETNT_TYPEもないときは、テキストかバイナリ（bytes）かの判断だけ。
 
-|= !output            |= !command  |= !input |
-|@text "hello"        |webio:parse |"hello"   |
-|@bytes b"hello"      |webio:parse |b"hello"  |
-|@text "{\"a\":[\"b\"]}"|webio:parse |"{\"a\":[\"b\"]}"|
-|@text "a=b"          |webio:parse |"a=b"     |
-|@text "a=b&a=c"      |webio:parse |"a=b&a=c" |
-|@text "a=b&x=y"      |webio:parse |"a=b&x=y" |
+|= !unsetenv     |= !output            |= !command  |= !input |
+|["CONTENT_TYPE"]|@text "hello"        |webio:parse |"hello"   |
+|["CONTENT_TYPE"]|@bytes b"hello"      |webio:parse |b"hello"  |
+|["CONTENT_TYPE"]|@text "{\"a\":[\"b\"]}"|webio:parse |"{\"a\":[\"b\"]}"|
+|["CONTENT_TYPE"]|@text "a=b"          |webio:parse |"a=b"     |
+|["CONTENT_TYPE"]|@text "a=b&a=c"      |webio:parse |"a=b&a=c" |
+|["CONTENT_TYPE"]|@text "a=b&x=y"      |webio:parse |"a=b&x=y" |
 
 
 エンコーディング情報がないのだから、無理にバイナリをテキストにしようと試みてはいけない。
@@ -125,6 +125,40 @@ unparseとparseは逆である。
 |@form {"a":["b","c"]}|@form {"a":["b","c"]}  |%%unparse-parse |{"CONTENT_TYPE":%%form-type} ||
 |@form {"a":["b"],"x":["y"]}|@form {"a":["b"],"x":["y"]}|%%unparse-parse |{"CONTENT_TYPE":%%form-type} ||
 
+== content-type情報がないときの挙動
+
+* parseは、format情報もcontent-type情報もないなら、テキスト／バイナリの判断をするだけ。
+* unparseは、format情報もcontent-type情報がなくても困らない。むしろ、矛盾した指定をされると迷惑。
+
+format情報は、parseにとって「**努力目標**」として指定される。
+可能なら変換を実行する。努力の範囲外なら例外とする。**無理な変換はしないこと。**
+
+=== !exec
+
+|= !unsetenv     |= !input            |= !command  |= !params     |= !output   |= !exception |
+|["CONTENT_TYPE"]| "a=b"              | parse      |              | @text "a=b"| |
+|["CONTENT_TYPE"]| "a=b"              | parse      |--format=void |            |Exception |
+|["CONTENT_TYPE"]| "a=b"              | parse      |--format=text | @text "a=b"| |
+|["CONTENT_TYPE"]| "a=b"              | parse      |--format=bytes|            |Exception |
+|["CONTENT_TYPE"]| "a=b"              | parse      |--format=form | @form {"a":["b"]}| |
+|["CONTENT_TYPE"]| "a=b"              | parse      |--format=json |            |Exception |
+
+|= !unsetenv     |= !input            |= !command  |= !params     |= !output         |= !exception |= !judge|
+|["CONTENT_TYPE"]| "\"hello\""        | parse      |              | @text "\"hello\""| | |
+|["CONTENT_TYPE"]| "\"hello\""        | parse      |--format=void |                  |Exception | |
+|["CONTENT_TYPE"]| "\"hello\""        | parse      |--format=text | @text "\"hello\""| | |
+|["CONTENT_TYPE"]| "\"hello\""        | parse      |--format=bytes|                  |Exception | |
+|["CONTENT_TYPE"]| "\"hello\""        | parse      |--format=form |                  | |suspend |
+|["CONTENT_TYPE"]| "\"hello\""        | parse      |--format=json | @json "hello"    | | |
+
+
+|= !unsetenv     |= !input     |= !command  |= !params     |= !output  |= !exception |= !judge|
+|["CONTENT_TYPE"]| "12"        | parse      |              | @text "12"| | |
+|["CONTENT_TYPE"]| "12"        | parse      |--format=void |           |Exception | |
+|["CONTENT_TYPE"]| "12"        | parse      |--format=text | @text "12"| | |
+|["CONTENT_TYPE"]| "12"        | parse      |--format=bytes|           |Exception | |
+|["CONTENT_TYPE"]| "12"        | parse      |--format=form |           | |suspend |
+|["CONTENT_TYPE"]| "12"        | parse      |--format=json | @json 12  | | |
 
 
 
