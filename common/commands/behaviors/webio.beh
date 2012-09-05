@@ -75,7 +75,7 @@ content-typeは指定されなくてもよい。
 
 --content-typeオプションの代わりに環境変数CONTETNT_TYPEでもよい。
 
-|= !output            |= !command  |= !env                       |= !input |
+|= !output            |= !command  |= !setenv                       |= !input |
 |@text "hello"        |webio:parse |{"CONTENT_TYPE":%%text-type} |"hello"   |
 |@bytes b"hello"      |webio:parse |{"CONTENT_TYPE":%%bin-type}  |b"hello"  |
 |@json {"a":["b"]}    |webio:parse |{"CONTENT_TYPE":%%json-type} |"{\"a\":[\"b\"]}"|
@@ -107,7 +107,7 @@ content-typeは指定されなくてもよい。
 
 parseとunparseは逆である。
 
-|= !input         |= !command      |= !output |= !env |= !judge |
+|= !input         |= !command      |= !output |= !setenv |= !judge |
 | "hello"         |%%parse-unparse |"hello"   |{"CONTENT_TYPE":%%text-type} ||
 | b"hello"        |%%parse-unparse |b"hello"  |{"CONTENT_TYPE":%%bin-type}  ||
 |"{\"a\":[\"b\"]}"|%%parse-unparse |"{\"a\":[\"b\"]}"|{"CONTENT_TYPE":%%json-type} |ignore|
@@ -117,7 +117,7 @@ parseとunparseは逆である。
 
 unparseとparseは逆である。
 
-|= !input             |= !output              |= !command      |= !env |= !judge |
+|= !input             |= !output              |= !command      |= !setenv |= !judge |
 |@text "hello"        |@text "hello"          |%%unparse-parse |{"CONTENT_TYPE":%%text-type} ||
 |@bytes b"hello"      |@bytes b"hello"        |%%unparse-parse |{"CONTENT_TYPE":%%bin-type}  ||
 |@json {"a":["b"]}    |@json {"a":["b"]}      |%%unparse-parse |{"CONTENT_TYPE":%%json-type} ||
