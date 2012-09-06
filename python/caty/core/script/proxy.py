@@ -515,15 +515,15 @@ class JsonPathProxy(Proxy):
         }
 
 class TryProxy(Proxy):
-    def __init__(self, pipeline):
+    def __init__(self, pipeline, opts):
         self.pipeline = pipeline
+        self.opts = opts
 
     def instantiate(self, builder):
-        return Try(self.pipeline.instantiate(builder))
+        return Try(self.pipeline.instantiate(builder), self.opts)
 
     def set_module(self, module):
         self.pipeline.set_module(module)
-
 
 class CatchProxy(Proxy):
     def __init__(self, handler):

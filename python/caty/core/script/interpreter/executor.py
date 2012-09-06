@@ -37,7 +37,7 @@ class CommandExecutor(BaseInterpreter):
                 self.cmd = e.cont
                 self.input = e.data
             except CatySignal as e:
-                return e.raw_data
+                throw_caty_exception(u'UnhandledSignal', u'$signal', signal=e.raw_data)
             except KeyboardInterrupt as e:
                 print e
                 return None
@@ -137,7 +137,7 @@ class CommandExecutor(BaseInterpreter):
             #node.signal_schema.validate(e.data)
             raise
         except CatySignal as e:
-            node.signal_schema.validate(e.raw_data)
+            #node.signal_schema.validate(e.raw_data)
             raise e
         except CatyException as e:
             import sys
@@ -480,10 +480,30 @@ class CommandExecutor(BaseInterpreter):
         try:
             self.input = tagged(u'normal', node.pipeline.accept(self))
         except CatySignal as e:
+            if self.__is_runaway_signal(e) and node.wall < node.HARD:
+                raise
             self.input = tagged(u'signal', e.raw_data)
         except CatyException as e:
+            if self.__is_runaway_exception(e) and node.wall < node.HARD:
+                raise
             self.input = tagged(u'except', e.raw_data)
+        except Exception as e:
+            if node.wall == node.SUPERHARD:
+                import traceback
+                tb = traceback.format_exc()
+                self.input = tagged(u'except', CatyException(u'RuntimeError', u'', stack_trace=tb))
+            else:
+                raise
         return self.input
+
+    def __is_runaway_exception(self, e):
+        try:
+            return u'runaway' in self.facility_set['schema'].get_type(e.tag).annotations
+        except:
+            return False
+
+    def __is_runaway_signal(self, e):
+        return isinstance(e.raw_data, TaggedValue) and e.raw_data.tag == u'runaway'
 
     def visit_catch(self, node):
         node._prepare()

@@ -1235,7 +1235,12 @@ class Never(Builtin):
         throw_caty_exception(u'Never', u'never detected')
 
 class Signal(Builtin):
+    def setup(self, opts):
+        self.runaway = opts['runaway']
+
     def execute(self, data):
+        if self.runaway and json.tag(data) != u'runaway':
+            data = json.tagged(u'runaway', data)
         send_caty_signal(data)
 
 

@@ -150,20 +150,35 @@ class TreeCursor(object):
         NotImplementedError
 
     def _dereference(self, o, reduce_tag=False, reduce_option=False):
-        if reduce_tag:
-            if reduce_option:
-                types = (Root, Ref, Tag, Optional)
-            else:
-                types = (Root, Ref, Tag)
-        elif reduce_option:
-            types = (Root, Ref, Optional)
+        return dereference(o, reduce_tag, reduce_option)
+
+
+def dereference(o, reduce_tag=False, reduce_option=False):
+    if reduce_tag:
+        if reduce_option:
+            types = (Root, Ref, Tag, Optional)
         else:
-            types = (Root, Ref)
-        if isinstance(o, types):
-            return self._dereference(o.body, reduce_tag, reduce_option)
-        else:
-            return o
+            types = (Root, Ref, Tag)
+    elif reduce_option:
+        types = (Root, Ref, Optional)
+    else:
+        types = (Root, Ref)
+    if isinstance(o, types):
+        return dereference(o.body, reduce_tag, reduce_option)
+    else:
+        return o
 
 
-
-
+def flatten_union(node):
+    r = []
+    if node.type != '__union__':
+        return [node]
+    if node.left.type == '__union__':
+        r.extend(flatten_union(dereference(node.left)))
+    else:
+        r.append(node.left)
+    if node.right.type == '__union__':
+        r.extend(flatten_union(dereference(node.right)))
+    else:
+        r.append(node.right)
+    return r

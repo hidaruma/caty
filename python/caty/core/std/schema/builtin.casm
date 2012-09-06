@@ -627,6 +627,11 @@ exception InvalidThrow = {
  *: any?
 };
 
+exception UnhandledSignal = {
+ "signal" : univ,
+ *: any?
+};
+
 /** そういう例外型は存在しない
  * 例外型（Excetpion）のデータではあるが、タグが登録されてない。
  */
@@ -650,7 +655,7 @@ command throw :: any -> never throws Exception
 /** 
  * 入力値をシグナルとして送出する。
  */
-command signal :: any -> never signals any
+command signal {@[default(false)]"runaway": boolean?} :: any -> never signals any
     refers python:caty.core.std.command.builtin.Signal;
 
 /**

@@ -89,11 +89,12 @@ class ScriptParser(Parser):
 
     def exception_handle(self, seq):
         keyword(u'try')(seq)
+        opts = self.options(seq)
         with strict():
             S(u'{')(seq)
             pipeline = self.make_pipeline(seq)
             S(u'}')(seq)
-            return Try(pipeline)
+            return Try(pipeline, opts)
 
     def catch(self, seq):
         r = {}

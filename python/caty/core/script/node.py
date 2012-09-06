@@ -427,12 +427,26 @@ class Repeat(Syntax):
         return visitor.visit_repeat(self)
 
 class Try(Syntax):
-    command_decl = u"""command __try<S default univ, T default univ> :: S -> T
+    SOFT = 0
+    HARD = 1
+    SUPERHARD = 2
+
+    command_decl = u"""command __try<S default univ, T default univ> {"wall": ("soft"|"hard"|"superhard")?} :: S -> T
                         refers python:caty.core.script.node.Try;"""
 
-    def __init__(self, pipeline):
-        Syntax.__init__(self)
+    def __init__(self, pipeline, opts):
+        Syntax.__init__(self, opts)
         self.pipeline = pipeline
+
+
+    def setup(self, opts):
+        wall = opts.get(u'wall')
+        if wall == u'hard':
+            self.wall = self.HARD
+        elif wall == u'superhard':
+            self.wall = self.SUPERHARD
+        else:
+            self.wall = self.SOFT
 
     def set_facility(self, facilities):
         self.pipeline.set_facility(facilities)
