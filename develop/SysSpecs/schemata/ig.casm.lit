@@ -6,6 +6,7 @@
 <<{
 /** 情報グラフ (Information Graph; IG)
  */
+@[depreacted]
 module ig;
 
 }>>

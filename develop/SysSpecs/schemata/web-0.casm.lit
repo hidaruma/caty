@@ -3,11 +3,13 @@
 == Web
 
 
-* 参考：[[>http://d.hatena.ne.jp/m-hiyama/20101201/1291165175|
-CatyScriptで記述するCatyのリクエスト処理]]
-
-
 <<{
+
+/** Web処理
+* * 参考：[[>http://d.hatena.ne.jp/m-hiyama/20101201/1291165175|
+*  CatyScriptで記述するCatyのリクエスト処理]]
+*/
+
 module web-0;
 
 /** MIMEメディアタイプ */

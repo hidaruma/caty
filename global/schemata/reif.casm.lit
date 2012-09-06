@@ -22,7 +22,7 @@ module reif related kreif;
 # const宣言された定数は、型とコマンドとして定義されるので、定数定義は独立したメタオブジェクトとは考えないことにした。
   実際、constだけ特別扱いすると一様に扱えないために場合分けが必要になる弊害が出ている。
   できるだけ概念は減らし、一様に扱うべき（特別扱いはなし）。
-# 名前グラフのルート（基点）はプロジェクトとした。runtimeメタオブジェクトは、
+# メタオブジェクト名前グラフ（MOGra）のルート（基点）はプロジェクトとした。runtimeメタオブジェクトは、
   プロジェクトのプロパティとして生（foreign）で取れるようになっているが、これは変更されるだろう。
 # 名前空間であるプロパティには @[namespace] を付けた。
 # 他の名前空間の一部となるプロパティには @[subnamespace] を付けた。
@@ -34,7 +34,7 @@ module reif related kreif;
   objectとarrayはpredefinedな名前と考え、
   レイフィケーション時は常に展開される。（展開形式は下。スキーマにも入っている。）
 # シャローレイフィケーションの当座の実装を容易にするため、
-  テキスト表現も許すTypeSpecという型を入れた。これは暫定的な処理。
+  テキスト表現も許すTypeSpecという型を入れた。TypeSpecは暫定的な処理。
 # containerとparentPathがカブっているようだ。
 # //型がmogra-nodeになってない。//
 # 変数（名前）のphylum概念は必要そうだ。
@@ -89,7 +89,7 @@ State, Resource, Actionを優先。これらは、プロトタイプサイト（
 # プロパティ名は小文字始まりのキャメルケース
 # タグ名は小文字のみ、ハイフン区切り
 # タグ名が予約語とかぶるときは、末尾に -of を付ける。
-  実際に使うのは、object-ofとarray-ofだけ。
+  実際に使うのは、**object-of**と**array-o**fだけ。
 
 == スクリプトレイフィケーションとの共有
 
@@ -130,9 +130,9 @@ type QualifierMixin = {
   // docコメントとアノテーションは、ほとんどどこにでも付けることができる
 
   /** ドキュメンテーションコメント */
-  "document": Doc?,
+  "document": Doc?, // いずれ必須にすべき
   /** アノテーション */
-  "annotations": object?,
+  "annotations": object?, // いずれ必須にすべき
 
   /** メタオブジェクトが所属する名前空間のコンテナ
    * コンテナのコロンドットパスが入る。
@@ -233,10 +233,10 @@ type NamespaceOf<T> = @* {
 
 再帰的な定義（参照・呼び出しのサイクル）を持つ可能性があるのは、型とコマンドだけである。
 
-他のモジュール／クラスを経由したサイクリック参照はないと仮定してよい。
-この特性により、型名前空間／コマンド名前空間ごとの分割コンパイルが可能となる。
-
-**いずれにしても分割コンパイルはする。**
+他のモジュール／クラスを経由したサイクリック参照は原則的に許さないが、
+related宣言があるときだけは許す。
+related宣言されたモジュール群は単一のものとして扱う。
+これにより、型名前空間／コマンド名前空間ごとの分割コンパイルが可能となる。
 
 == 名前空間コンテナ
 
@@ -244,6 +244,7 @@ type NamespaceOf<T> = @* {
 
 <<{
 
+/** プロジェクトの情報 */
 type ProjectSummary = {
   "document": Doc?,
   "annotations": object?,  // アノテーションもサマリーに必要
@@ -302,10 +303,8 @@ type Project = @project (QualifierMixin & ProjectSummary & {
 
 });
 
-
-type ApplicationSummary = {
-  "document": Doc?,
-  "annotations": object?,  // アノテーションもサマリーに必要
+/** アプリケーションの情報 */
+type ApplicationSummary =  QualifierMixin & {
 
   /** アプリケーション名 */
   "name": string(remark="名前"),
@@ -334,7 +333,7 @@ type ApplicationSummary = {
  * # モジュールの名前空間 modules
  */
 @[mogra-node, full-info]
-type Application = @application (QualifierMixin & ApplicationSummary & {
+type Application = @application (ApplicationSummary & {
 
   /** パッケージの名前空間 */
   @[namespace]
@@ -600,18 +599,6 @@ type TypeSummary = {
   "deprecated": boolean?,
 
   *: any?
-};
-  
-/** コマンドのレイフィケーションデータの修飾情報 
- */
-type CommandQualifierMixin = QualifierMixin & {
-
-    /** コマンドが名前空間（束縛セット、コンテキスト）内で名前に束縛されているとき、その名前が再帰的かどうか 
-     */
-    @[default(@Indef)]
-    "recursive": triboolean?,
-
-    *: any?  // open
 };
 
 }>>
@@ -1135,7 +1122,27 @@ type RPseudoTag = @_pseudoTag ([string, any] | [null, null]); //@ 塩漬け
 // type ReifiedKind = deferred @kind object;  //@ 塩漬け
 }>>
 
-== 便利な型／型関数
+=== 型let式
+
+
+<<{
+
+/** 型let式 
+ * let式とletrec式を区別せずに、どちらも一律にlet式と呼ぶ。
+ */
+
+type LetExpr = @type-let (TypeQualifierMixin & {
+
+  "bindings": {*: (TypeExpr | LetExpr)?},
+  "expr": TypeExpr,
+
+  *: any?
+});
+
+}>>
+
+
+=== オマケ： 便利な型／型関数
 
 <<{
 /** 列挙型 */
@@ -1184,36 +1191,22 @@ type FlatRecordType = ClosedObjectTypeOf<NormalScalarType>;
 
 }>>
 
-== 型let式、型letrec式
-
-
-<<{
-
-type LetExpr = @type-let (TypeQualifierMixin & {
-  /** let式は再帰を含んではならない */
-  "recursive": false,
-
-  "bindings": {*: (TypeExpr | LetrecExpr)?},
-  "expr": TypeExpr,
-
-  *: any?
-});
-
-type LetrecExpr = @type-letrec (TypeQualifierMixin & {
-
-  "bindings": {*: (TypeExpr | LetrecExpr)?},
-  "expr": TypeExpr,
-
-  *: any?
-});
-
-}>>
-
-
 == コマンド
 
 
 <<{
+/** コマンドのレイフィケーションデータの修飾情報 
+ */
+type CommandQualifierMixin = QualifierMixin & {
+
+    /** コマンドが名前空間（束縛セット、コンテキスト）内で名前に束縛されているとき、その名前が再帰的かどうか 
+     */
+    @[default(@Indef)]
+    "recursive": triboolean?,
+
+    *: any?  // open
+};
+
 /** 実装状況を示す値 
  */
 type implemented = (

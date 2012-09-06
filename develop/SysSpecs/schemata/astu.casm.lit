@@ -5,6 +5,7 @@
 
 <<{
 /** ASymmetric Type Unification 
+ * 型解析の基本アルゴリズムの実験
  */
 module astu; 
 
