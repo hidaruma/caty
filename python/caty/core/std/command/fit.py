@@ -238,7 +238,7 @@ class ClearReport(Internal):
     def _run(self, app):
         import caty
         dispatcher = AppDispatcher(self._system)
-        app = dispatcher.dispatch(app['path'])
+        app = dispatcher.dispatch(app.web_path)
         f = app.create_facilities(lambda: self._facilities['session'])
         app.init_env(f, caty.DEBUG, ['console'], self._system, {})
         i = f['interpreter'] 
