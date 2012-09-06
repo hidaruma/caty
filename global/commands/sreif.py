@@ -45,7 +45,7 @@ class ShallowReifier(object):
                 u'name': s.name,
                 u'document': make_structured_doc(s.docstring),
                 u'pathPattern': s.url_patterns,
-                u'deprecated': 'deprecated' in s.annotations
+                u'annotations': self.reify_annotations(s.annotations)
         }
 
     def reify_action(self, s):
@@ -53,8 +53,8 @@ class ShallowReifier(object):
                 u'name': s.name,
                 u'document': make_structured_doc(s.docstring),
                 u'implemented': s.implemented,
-                u'deprecated': 'deprecated' in s.annotations,
                 u'invoker': s.invoker_obj,
+                u'annotations': self.reify_annotations(s.annotations)
         }
 
     def reify_module(self, m):
@@ -67,7 +67,7 @@ class ShallowReifier(object):
             u'place': p,
             u'syntax': m.type,
             u'literate': m.literate,
-            u'deprecated': 'deprecated' in m.annotations,
+            u'annotations': self.reify_annotations(m.annotations),
             u'document': make_structured_doc(m.docstring),
         }
 
@@ -80,6 +80,7 @@ class ShallowReifier(object):
             u'name': m.canonical_name,
             u'place': p,
             u'document': {'description': m.docstring, 'moreDescription': m.more_docstring},
+            u'annotations': {},
         }
 
     def reify_type(self, t):
