@@ -231,7 +231,7 @@ class ClearReport(Internal):
             fit_dir.delete(True)
 
     def run_all(self):
-        apps = self.env.get('CATY_APPS')
+        apps = self.current_app._system._apps
         for app in apps:
             self._run(app)
 
