@@ -1,6 +1,8 @@
 // -*- coding: utf-8 -*-
 
-/** システムで使用するデータ構造 */
+/** システムで使用するデータ構造 
+ * 大部分は既にシステムに入っている。
+ */
 module sys; 
 
 type ScriptText = string(remark = "スクリプト");

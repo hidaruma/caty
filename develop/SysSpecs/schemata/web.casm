@@ -1,6 +1,8 @@
-module web; // -*- coding: utf-8 -*-
-
-type hoge = string(remark="hoge");
+// -*- coding: utf-8 -*-
+/** Web関連のデータ型
+ */
+@[deprecated]
+module web; 
 
 
 /** MIMEメディアタイプ */

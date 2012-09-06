@@ -2,6 +2,20 @@
 /** プロジェクトサマリー */
 module prj-summary in cara;
 
+
+/*
+{
+    "name": "reif.t",
+    "literate": false,
+    "syntax": "casm",
+    "place": "schemata",
+    "document": {
+        "description": "undocumented"
+    },
+    "annotations": {}
+}
+*/
+
 type Doc = reif:Doc;
 
 type Summary = {
@@ -44,6 +58,23 @@ command doc-to-html :: Doc -> Doc  {
  }
 };
 
+/*
+ "deprecated": {
+     "name": "deprecated",
+     "value": null
+ },
+
+  $.annotations.deprecated?=false >: "deprecated",
+
+*/
+
+command deprecated-to-boolean :: object? -> boolean {
+ when {
+  undefined => false,
+  object    => true,
+ }
+};
+
 command gen :: void -> Summary {
 
  proj > prj-name;
@@ -63,7 +94,7 @@ command gen :: void -> Summary {
       do {
         %appName    >: "appName",
         $.name      >: "name",
-        $.deprecated? >: "deprecated",
+        $.annotations.deprecated? | deprecated-to-boolean >: "deprecated",
         $.document | doc-to-html >: "document",
       }
    } > mods;
@@ -139,7 +170,7 @@ command show-mod [string app, string mod] :: void -> ModInfo {
 
  sreif:show-module %modPath | 
  [ 
-   $.deprecated > deprecated,
+   $.annotations.deprecated?  | deprecated-to-boolean > deprecated,
    $.document   > document,
    $.place      > place,
  ];
@@ -179,17 +210,24 @@ type FileInfo = {
 };
 
 /** プレース（のロール）名、アプリケーション名、パッケージ修飾モジュール名からフィルのパスを作る */
-command make-file-path :: [string place, string app, string mod]  -> string {
+command make-file-path :: [string place, string app, string mod, boolean literate]  -> string {
  [
    nth 1 > place,
    nth 2 > app,
    nth 3 > mod,
+   nth 4 > literate,
  ];
  %place | 
  cond {
    "schemata" => ".casm",
    "actions"  => ".cara",
+ } > fileExt0;
+ %literate |
+ cond {
+   true => [%fileExt0, ".lit"] | text:concat,
+   false => %fileExt0,
  } > fileExt;
+
  %mod | text:split "." | text:join "/" > mod-path;
 
  [%place, "@", %app, ":/", %mod-path, %fileExt] | text:concat
@@ -202,8 +240,12 @@ command read-file [string app, string mod] :: void -> FileInfo {
    %2 > mod,
  ];
  [%app, "::", %mod, ":" ] | text:concat > modPath;
- sreif:show-module %modPath | $.place    > place | dump --prefix=place;
- [%place, %app, %mod] | make-file-path > filePath;
+ sreif:show-module %modPath | 
+ [
+    $.place    > place,
+    $.literate > literate,
+ ];
+ [%place, %app, %mod, %literate] | make-file-path > filePath;
  file:read %filePath > content;
 
  do {
