@@ -503,6 +503,7 @@ exception UserroleNotFound = {
   *: any?
 };
 
+/** アプリケーションが存在しない */
 exception ApplicationNotFound = {
   "appName": string,
   *: any?,
@@ -529,6 +530,7 @@ exception ConversionError = {
 };
 
 /** 型の妥当性検証に失敗した。*/
+@[runaway]
 exception ValidatatonFailed = object;
 
 /** 入力が（なんらかの意味で）不正である。*/
@@ -564,22 +566,28 @@ exception CollectionAccessError = object;
 
 
 /** 指定できないオプションが指定された。*/
+@[runaway]
 exception UnexpectedOption = object;
 
 /** オプションの値が不正である。*/
+@[runaway]
 exception BadOption = object;
 
 /** オプションが不足している。*/
+@[runaway]
 exception MissingOption = object;
 
 
 /** 引数が余分にある。*/
+@[runaway]
 exception UnexpectedArg = object;
 
 /** 引数が不足している。*/
+@[runaway]
 exception MissingArg = object;
 
 /** 引数の値が不正である。 */
+@[runaway]
 exception BadArg = object;
 
 /** 認証失敗 */
@@ -627,6 +635,8 @@ exception InvalidThrow = {
  *: any?
 };
 
+/** シグナルがハンドルされなかった */
+@[runaway]
 exception UnhandledSignal = {
  "signal" : univ,
  *: any?
@@ -642,6 +652,7 @@ exception ExceptionNotFound  = {
 };
 
 /** uncloseでsetとunsetの競合が起きた。 */
+@[runaway]
 exception UncloseConflict = object;
 
 /** 
