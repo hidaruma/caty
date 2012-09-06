@@ -65,6 +65,8 @@ class ShallowReifier(object):
         return {
             u'name': m.canonical_name,
             u'place': p,
+            u'syntax': m.type,
+            u'literate': m.literate,
             u'deprecated': 'deprecated' in m.annotations,
             u'document': make_structured_doc(m.docstring),
         }
@@ -176,7 +178,7 @@ class SafeReifier(Command):
             raise
 
 class SafeReifierWithDefaultApp(SafeReifier):
-    def setup(self, opts, cdpath=u'this'):
+    def setup(self, opts, cdpath=u'this::'):
         self._cdpath = cdpath
         self._safe = opts.get('safe', False)
 
@@ -194,7 +196,7 @@ class ListModules(SafeReifierWithDefaultApp):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, pkg_name, _ = split_colon_dot_path(self._cdpath)
+        app_name, pkg_name, _ = split_colon_dot_path(self._cdpath, u'pkg')
         app = None
         if _:
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
@@ -217,7 +219,7 @@ class ListPackages(SafeReifierWithDefaultApp):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, pkg_name, _ = split_colon_dot_path(self._cdpath)
+        app_name, pkg_name, _ = split_colon_dot_path(self._cdpath, u'pkg')
         app = None
         if _:
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)

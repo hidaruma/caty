@@ -59,6 +59,7 @@ class Module(Facility):
         self._lazy_resolve = []
         self._plugin = PluginMap()
         self._type = u'casm'
+        self._literate = False
         self.ast_ns = {}
         self.proto_ns = {}
         self.saved_st = {}
@@ -113,6 +114,10 @@ class Module(Facility):
     def name(self):
         return self._name
  
+    @property
+    def literate(self):
+        return self._literate
+
     @property
     def related(self):
         return self.__related
@@ -612,7 +617,7 @@ class AppModule(Module):
             mod = self._get_module_class()(self._app, self)
             mod.filepath = e.path
             if e.path.endswith(u'.casm.lit'):
-                mod._type = 'casm.lit'
+                mod._literate = True
             mod._name = unicode(self._path_to_module(e.basename))
             mod._compile(e.path)
 

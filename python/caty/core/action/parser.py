@@ -520,6 +520,7 @@ class LiterateRADParser(ResourceActionDescriptorParser):
             raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
         rm = ResourceModule(name, ds, self._app)
         classes = self._parse_top_level(seq)
+        rm._literate = True
         if not seq.eof:
             raise ParseError(seq, self)
         for c in classes:
