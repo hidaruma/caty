@@ -11,6 +11,7 @@ class ShallowReifier(object):
             u'name': a.name,
             u'group': a._group.name if a._group else None,
             u'path': a.web_path,
+            u'annotations': {},
             u'deprecated': a.deprecated,
         }
         if a.parent:
@@ -36,6 +37,7 @@ class ShallowReifier(object):
         return {
             u'name': s.name,
             u'document': make_structured_doc(s.docstr),
+            u'annotations': {},
             u'type': s.type.name,
             u'links': links,
         }
