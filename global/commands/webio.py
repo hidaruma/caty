@@ -20,6 +20,8 @@ class Untranslate(Command):
         self.__type = opts.get('type')
 
     def execute(self, data):
+        if data is None:
+            return tagged(u'void', None)
         if self.__format == 'form':
             conv = self.__convert_to_form(data)
             return tagged(self.__format, conv)
@@ -87,6 +89,8 @@ class Translate(Command, TypeCalculator):
                     scm = self.schema['string']
                 elif t == 'bytes':
                     scm = self.schema['binary']
+                elif t == 'void':
+                    scm = self.schema['null']
                 scm.validate(v)
                 return v
             except JsonSchemaError, e:
@@ -110,6 +114,8 @@ class Unparse(Command):
         if self.__content_type is UNDEFINED and self.env.exists('CONTENT_TYPE'):
             self.__content_type = self.env.get('CONTENT_TYPE')
         tag, data = split_tag(generic_data)
+        if tag == 'void':
+            return None
         if self.__content_type is UNDEFINED:
             if tag == 'form':
                 self.__content_type = CT_FORM
@@ -165,6 +171,8 @@ class Parse(Command):
         self.__format = opts.get('format')
 
     def execute(self, raw_data):
+        if raw_data is None:
+            return tagged('void', None)
         if self.__content_type is UNDEFINED and self.env.exists('CONTENT_TYPE'):
             self.__content_type = self.env.get('CONTENT_TYPE')
         type = self.__content_type
