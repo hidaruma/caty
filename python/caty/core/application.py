@@ -674,6 +674,10 @@ class Application(PbcObject):
 
     def __invariant__(self):
         assert '/' not in self.name
+    
+    @property
+    def manifest(self):
+        return self._manifest
 
     def to_name_tree(self):
   # ネームツリーの各要素は
