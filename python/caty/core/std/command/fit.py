@@ -130,14 +130,14 @@ class Run(Internal, MafsMixin):
         }
 
     def run_all(self):
-        apps = self.env.get('CATY_APPS')
+        apps = self.current_app._system._apps
         for app in apps:
             self._run(app)
 
     def _run(self, app):
         import caty
         dispatcher = AppDispatcher(self._system)
-        app = dispatcher.dispatch(app['path'])
+        app = dispatcher.dispatch(app.web_path)
         f = app.create_facilities(lambda: self._facilities['session'])
         app.init_env(f, caty.DEBUG, ['console'], self._system, {})
         i = f['interpreter'] 

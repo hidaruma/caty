@@ -557,18 +557,11 @@ class Application(PbcObject):
         env.put(u'APP_PATH', unicode(self.web_path))
         env.put(u'CATY_APP', {'group': self._group.name, 'description':self.description, 'name':self.name, 'path': unicode(self.web_path)})
         env.put(u'DEBUG', system.debug)
-        siteInfoList= []
-        for n in system.app_names:
-            s = system.get_app(n)
-            siteInfoList.append({'group': s._group.name, 'description': s.description, 'name': s.name, 'path': unicode(s.web_path)})
-        env.put(u'CATY_APPS', siteInfoList)
         env.put(u'HOST_URL', unicode(self.host_url))
         env.put(u'CATY_VERSION', unicode(caty.__version__))
         env.put(u'CATY_EXEC_MODE', modes)
         env.put(u'CATY_HOME', unicode(os.getcwd(), self._system.sysencoding))
         env.put(u'CATY_PROJECT', self._system.project_name)
-        env.put(u'APP_MANIFEST', self._manifest)
-  #env.put('FILE_ASSOC', self._raw_associations)
         if 'CONTENT_TYPE' in environ:
             env.put(u'CONTENT_TYPE', unicode(environ['CONTENT_TYPE']))
         if 'PATH_INFO' in environ:

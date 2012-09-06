@@ -707,7 +707,11 @@ class DisplayApp(Builtin):
 class DisplayApps(Builtin):
     
     def execute(self):
-        return self.env.get('CATY_APPS')
+        siteInfoList= []
+        for n in self.current_app._system.app_names:
+            s = self.current_app._system.get_app(n)
+            siteInfoList.append({'group': s._group.name, 'description': s.description, 'name': s.name, 'path': unicode(s.web_path)})
+        return siteInfoList
 
 class Home(Builtin):
     
@@ -735,7 +739,7 @@ class Project(Builtin):
 class Manifest(Builtin):
     
     def execute(self):
-        return self.env.get('APP_MANIFEST')
+        return self.current_app._manifest
 
 class ExecContext(Print):
     
