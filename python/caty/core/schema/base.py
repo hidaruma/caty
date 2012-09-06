@@ -1460,7 +1460,7 @@ class Annotations(dict):
         return tagged('annotation', [a.reify() for a in self._annotations])
 
 class Annotation(object):
-    def __init__(self, name, value=None):
+    def __init__(self, name, value=True):
         self.name = name
         self.value = value
 

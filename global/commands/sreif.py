@@ -156,14 +156,8 @@ class ShallowReifier(object):
     def reify_annotations(self, a):
         r = {}
         for an in a.values():
-            r[an.name] = self.reify_annotation(an)
+            r[an.name] = an.value
         return r
-
-    def reify_annotation(self, a):
-        return {
-            u'name': a.name,
-            u'value': a.value
-        }
 
 class SafeReifier(Command):
     def setup(self, opts, cdpath):

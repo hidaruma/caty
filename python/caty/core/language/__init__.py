@@ -170,7 +170,7 @@ def annotation(seq):
 
 def _annotation_item(seq):
     symbol = seq.parse(Regex(u'[a-zA-Z_][-a-zA-Z0-9_]*'))
-    arg = seq.parse(option(_annotation_arg, None))
+    arg = seq.parse(option(_annotation_arg, True))
     return Annotation(symbol, arg)
 
 def _annotation_arg(seq):
