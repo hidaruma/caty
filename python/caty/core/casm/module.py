@@ -3,7 +3,7 @@ from __future__ import with_statement
 from caty.core.casm.loader import CommandLoader, BuiltinLoader
 from caty.core.language import split_colon_dot_path
 from caty.core.schema import schemata
-from caty.core.schema.base import Annotations
+from caty.core.schema.base import Annotations, Annotation
 from caty.core.casm.language.casmparser import parse, parse_literate
 from caty.core.casm.language import xcasmparser as xcasm
 from caty.core.casm.cursor import (SchemaBuilder, 
@@ -650,6 +650,9 @@ class AppModule(Module):
                     raise Exception(self.application._system.i18n.get(u'Failed to parse JSON: $path\n$error', path=pkg.path, error=error_to_ustr(e)))
                 mod.docstring = pkginfo.get('description')
                 mod.more_docstring = pkginfo.get('moreDescription')
+                annotations = pkginfo.get('annotations', {})
+                for k, v in annotations.items():
+                    mod.annotations.add(Annotation(k, v))
         self.sub_packages[mod.name] = mod
 
     def _get_module_class(self):

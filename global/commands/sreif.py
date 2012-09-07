@@ -11,8 +11,7 @@ class ShallowReifier(object):
             u'name': a.name,
             u'group': a._group.name if a._group else None,
             u'path': a.web_path,
-            u'annotations': {},
-            u'deprecated': a.deprecated,
+            u'annotations': a._annotations,
         }
         if a.parent:
             r[u'visibleParent'] = a.parent.name
@@ -82,7 +81,7 @@ class ShallowReifier(object):
             u'name': m.canonical_name,
             u'place': p,
             u'document': {'description': m.docstring, 'moreDescription': m.more_docstring},
-            u'annotations': {},
+            u'annotations': m.annotations,
         }
 
     def reify_type(self, t):

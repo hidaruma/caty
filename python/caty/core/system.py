@@ -284,6 +284,7 @@ class CoreApplication(Application):
         self._command_fs = None
         self.parent = None
         self._deprecated = False
+        self._annotations = {}
         self._description = u'Caty Core System'
         self._more_description = None
         self._global_config = system._global_config
