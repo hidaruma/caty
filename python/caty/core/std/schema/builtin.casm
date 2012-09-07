@@ -114,6 +114,11 @@ type AppManifest = {
     "moreDescription": string?,
 
     /**
+     * アノテーション
+     */
+    "annotations": object?,
+
+    /**
      * アプリケーションの無効化の設定
      */
     "disabled": boolean?,
@@ -166,6 +171,11 @@ type PkgManifest = {
      */
     "moreDescription": string?,
 
+    /**
+     * アノテーション
+     */
+    "annotations": object?,
+
 };
 
 
@@ -192,6 +202,11 @@ type GlobalConfig = {
      * プロジェクトのより詳しい説明
      */
     "moreDescription": string?,
+
+    /**
+     * アノテーション
+     */
+    "annotations": object?,
 
     /**
      * mafs実装のモジュール名
