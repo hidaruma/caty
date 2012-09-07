@@ -723,6 +723,7 @@ command dump<T default univ> // 実は総称、passと同じだから
   "prefix" : string?,
  }
  :: T -> T
+  reads env
     refers python:caty.core.std.command.debug.Dump;
 
 /**
