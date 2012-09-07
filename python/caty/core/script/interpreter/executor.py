@@ -495,9 +495,9 @@ class CommandExecutor(BaseInterpreter):
         except Exception as e:
             if node.wall == node.SUPERHARD:
                 import traceback
-                from caty.util import error_to_ustr
-                tb = traceback.format_exc()
-                self.input = tagged(u'except', CatyException(u'RuntimeError', u'$origin', stack_trace=tb, origin=error_to_ustr(e)).to_json())
+                from caty.util import error_to_ustr, brutal_encode
+                tb = brutal_encode(traceback.format_exc(), u'unicode-escape')
+                self.input = tagged(u'except', CatyException(u'RuntimeError', error_to_ustr(e), stack_trace=tb).to_json())
             else:
                 raise
         return self.input
