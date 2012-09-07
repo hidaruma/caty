@@ -112,10 +112,15 @@ class CommandExecutor(BaseInterpreter):
         if node._mode: # @console など、特定のモードでしか動かしてはいけないコマンドのチェック処理
             mode = node.env.get('CATY_EXEC_MODE', [])
             if not node._mode.intersection(set(mode)):
-                raise InternalException(u"Command $name can not use while running mode $mode", 
-                                        name=node.profile_container.name,
-                                        mode=str(' '.join(mode))
-                )
+                if mode:
+                    raise InternalException(u"Command $name can not use while running mode $mode", 
+                                            name=node.profile_container.name,
+                                            mode=str(' '.join(mode))
+                    )
+                else:
+                    raise InternalException(u"Command $name can not use while running mode is not specified", 
+                                            name=node.profile_container.name
+                    )
         try:
             node.var_storage.new_scope()
             node._prepare()
