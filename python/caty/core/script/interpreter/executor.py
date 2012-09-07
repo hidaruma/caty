@@ -533,6 +533,7 @@ class CommandExecutor(BaseInterpreter):
         facilities.update(self.facility_set._facilities)
         facilities['env'] = newenv
         new_set = FacilitySet(facilities, self.facility_set.app)
+        facilities['interpreter'] = self.app._interpreter.file_mode(new_set)
         return new_set
 
     def __make_new_env_and_input(self, node):
