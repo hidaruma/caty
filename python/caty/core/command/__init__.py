@@ -418,7 +418,7 @@ class VarStorage(object):
         self.opts = OverlayedDict(deepcopy(opts) if opts else {})
         self.args = args if args else []
         self.opts['_ARGV'] = args
-        self.opts['_OPTS'] = opts
+        self.opts['_OPTS'] = opts if opts is not None else {}
         self.args_stack = []
         self.opts_stack = []
 
