@@ -96,6 +96,7 @@ command loggedin<T default any> {@[default("")]"userid":string?} :: T -> @OK T |
  * 未ログイン時でも同じく遷移する。
  */
 command logout :: string -> Redirect
+    reads env
     uses [user, session]
     refers python:caty.core.std.command.user.Logout;
 

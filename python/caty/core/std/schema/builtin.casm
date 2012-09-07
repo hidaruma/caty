@@ -802,7 +802,7 @@ command request {
  * 引数で指定された型に入力値を変換して返す。
  */
 command translate {"content-type": string?} [string] :: WebInput -> @OK any | @NG MiniErrorInfo
-    reads schema
+    reads [env, schema]
     refers python:caty.core.std.command.builtin.Translate;
 
 /**
@@ -970,6 +970,7 @@ command untagged<S default any, T default univ> [string?] :: S -> T
  * --no-nl オプションが指定された場合、改行を出力しない。
  */
 @[console] command cout {"no-nl" : boolean?}:: (string|binary) -> void
+    reads env
     updates stream
     refers python:caty.core.std.command.builtin.ConsoleOut;
 
@@ -977,6 +978,7 @@ command untagged<S default any, T default univ> [string?] :: S -> T
  * 標準入力より1行を読み込み、それを文字列として返す。
  */
 @[console] command cin [string? prompt] :: void -> string
+    reads env
     refers python:caty.core.std.command.builtin.ConsoleIn;
 
 /**

@@ -28,11 +28,6 @@ class Command(object):
     これはシステムの初期化時に /schema/ 以下の .casm ファイルで定義された
     コマンドの型指定からインジェクトされる。
     そのため、コマンドクラスの実装に際しては必ずスキーマを書かなければならない。
-
-    schema, env プロパティはそれぞれスキーマモジュールの各関数/クラスへの参照と
-    環境変数へのアクセスオブジェクトであり、これらは常にインジェクトされる。
-    他のプロパティは入出力をのぞき、基本的にコマンド型宣言の reads, updates, uses 句に
-    基づいてインジェクトされる。型宣言に記述の無い Caty ファシリティにはアクセスできない。
     """
 
     def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None), module=None):
@@ -232,10 +227,7 @@ class Command(object):
                 self.async_queue = self.__current_application.async_queue
             setattr(self, key, facility)
             _set.add(name)
-        # 互換性維持のため、envとschemaを追加
-        if not 'env' in _set:
-            setattr(self, 'env', facilities['env'].create(u'reads'))
-            _set.add('env')
+        # 互換性維持のため、schemaを追加
         if not 'schema' in _set:
             setattr(self, 'schema', facilities['schema'].create(u'reads'))
             _set.add('schema')

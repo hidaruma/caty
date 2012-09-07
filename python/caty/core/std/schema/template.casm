@@ -20,7 +20,7 @@ command compile :: TemplateText -> TemplateObject
 ;
 
 command expand :: [TemplateObject, TemplateContext] -> string
-    reads [interpreter, schema]
+    reads [interpreter, schema, env]
     uses [include, pub]
     refers python:caty.core.std.command.template.Expand
 ;

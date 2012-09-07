@@ -136,6 +136,7 @@ command unparse
    "content-type" : mediaType?,
  }
 :: Generic -> Raw throws [webio_InsufficientMetainfo, ConversionError]
+    reads env
     refers python:webio.Unparse;
 
 /** rawデータをgenericデータにupward変換する 
@@ -160,6 +161,7 @@ command parse
    "format" : GenericFormatName?,
  }
 :: Raw -> Generic throws [webio_InsufficientMetainfo, ConversionError]
+    reads env
     refers python:webio.Parse;
 
 /** genericデータをsemanticデータにupward変換する 
