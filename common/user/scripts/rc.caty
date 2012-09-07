@@ -1,9 +1,13 @@
-[strg:create-collection --as-global user:RegistryInfo user,
- {
+/* -*- coding: utf-8 -*-  */
+
+strg:create-collection --as-global user:RegistryInfo user;
+
+{
      "userid": "root", 
      "username": "root ユーザー", 
      "role": ["root"], 
      "password": "caty"
- } | user:add
-]
+} | user:add
+
+
 
