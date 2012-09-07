@@ -17,6 +17,7 @@ command dump<T default univ>
   "prefix" : string?,
  }
  :: T -> T 
+    reads env
     refers python:caty.core.std.command.debug.Dump;
 
 /**
