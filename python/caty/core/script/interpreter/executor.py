@@ -110,7 +110,7 @@ class CommandExecutor(BaseInterpreter):
                 msg = u'%s (other infomation is lacking)' % node.name
                 self.app._system.deprecate_logger.debug(msg)
         if node._mode: # @console など、特定のモードでしか動かしてはいけないコマンドのチェック処理
-            mode = node.env.get('CATY_EXEC_MODE')
+            mode = node.env.get('CATY_EXEC_MODE', [])
             if not node._mode.intersection(set(mode)):
                 raise InternalException(u"Command $name can not use while running mode $mode", 
                                         name=node.profile_container.name,
@@ -486,12 +486,12 @@ class CommandExecutor(BaseInterpreter):
         except CatyException as e:
             if self.__is_runaway_exception(e) and node.wall < node.HARD:
                 raise
-            self.input = tagged(u'except', e.raw_data)
+            self.input = tagged(u'except', e.to_json())
         except Exception as e:
             if node.wall == node.SUPERHARD:
                 import traceback
                 tb = traceback.format_exc()
-                self.input = tagged(u'except', CatyException(u'RuntimeError', u'', stack_trace=tb))
+                self.input = tagged(u'except', CatyException(u'RuntimeError', u'$origin', stack_trace=tb, origin=e).to_json())
             else:
                 raise
         return self.input
