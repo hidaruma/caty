@@ -934,6 +934,7 @@ command eq
  * このコマンドはテストモードでしか動作しないため、通常は使う必要はない。
  */
 @[test] command eval<T default any> :: [any, string] | string -> T
+    reads env
     uses interpreter
     refers python:caty.core.std.command.builtin.Eval;
 
