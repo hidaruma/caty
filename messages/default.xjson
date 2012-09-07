@@ -140,7 +140,9 @@
     "Cross reference has detected: $mod1, $mod2",
 
     "Command $name can not use while running mode $mode",
-
+    
+    "Command $name can not use while running mode is not specified", 
+    
     "Different format: $format1, $format2",
 
     "Different profile: $profile1, $profile2",

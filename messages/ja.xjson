@@ -149,6 +149,8 @@
 
     "Command $name can not use while running mode $mode": "$nameは動作モード$modeでは使用できません",
 
+    "Command $name can not use while running mode is not specified": "$nameは動作モード未指定では使用できません", 
+
     "Different format: $format1, $format2": "異なるフォーマット: $format1, $format2",
 
     "Different profile: $profile1, $profile2": "異なるプロファイル: $profile, $profile2",

@@ -81,7 +81,7 @@ class ShallowReifier(object):
             u'name': m.canonical_name,
             u'place': p,
             u'document': {'description': m.docstring, 'moreDescription': m.more_docstring},
-            u'annotations': m.annotations,
+            u'annotations': self.reify_annotations(m.annotations),
         }
 
     def reify_type(self, t):
@@ -229,10 +229,10 @@ class ListPackages(SafeReifierWithDefaultApp):
             pkg = app._schema_module.get_package(pkg_name)
             for m in pkg.get_packages():
                 if pkg == m: continue
-                r.append(reifier.reify_module(m))
+                r.append(reifier.reify_package(m))
         else:
             for m in app._schema_module.get_packages():
-                r.append(reifier.reify_module(m))
+                r.append(reifier.reify_package(m))
         return r
 
 class ListTypes(SafeReifier):
