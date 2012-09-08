@@ -457,6 +457,10 @@ class Try(Syntax):
     def accept(self, visitor):
         return visitor.visit_try(self)
 
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        self.pipeline.set_var_storage(storage)
+
 class Unclose(Syntax):
     command_decl = u"""command __unclose<T default univ> {@[default(false)]"clear": boolean?} :: UncloseInput -> T
                         refers python:caty.core.script.node.Unclose;"""
@@ -500,6 +504,11 @@ class Catch(Syntax):
     def accept(self, visitor):
         return visitor.visit_catch(self)
 
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        if self.handler:
+            for v in self.handler.values():
+                v.set_var_storage(storage)
 
 
 class Time(Syntax):
