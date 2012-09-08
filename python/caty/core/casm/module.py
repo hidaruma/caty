@@ -860,6 +860,7 @@ class LocalModule(Module):
         self.resolve()
 
     def _another_app_callback(self, rname, tracked=(), scope_func=None, type=u''):
+        app_name, rname = rname.split('::', 1)
         return self._app._system.get_app(app_name).schema_finder._get_resource(rname, tracked, scope_func, type)
 
     def clone(self):
