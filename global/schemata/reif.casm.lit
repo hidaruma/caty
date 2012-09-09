@@ -251,12 +251,9 @@ type ProjectSummary = {
 
   /** プロジェクト名 
    * プロジェクト名は任意の文字列で、ドメイン名のようにドットを含んでもよい。
+   * 設定項目の projectName 
    */
   "name": string,
-
-  /** Webサイトとしてのドメイン名
-   */
-  "domain" : string?,
 
   /** 設定ファイルの deprecated の値をコピーする */
   @[deprecated, default(false)]
@@ -1343,7 +1340,10 @@ type ResourceSummary = {
   @[deprecated, default(false)]
   "deprecated": boolean?,
 
-
+  /** インスタンス文字列の集合
+   * 将来、サマリーには入れないことになるかもしれない。
+   */
+  "instances" : [string*]?,
 
   *: any?
 };
