@@ -28,6 +28,7 @@ def initialize(system, interpreter_module):
                    u'text',
                    u'user',
                    u'viva',
+                   u'wsgi',
                    u'xjson',
     ]
     std_schema = map(lambda m:(m, create_std_schema(m)), std_modules)

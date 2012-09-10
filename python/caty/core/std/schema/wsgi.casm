@@ -1,0 +1,53 @@
+module wsgi in casm;
+
+
+type InputStream = foreign;
+
+// !! stringではなくて、binaryになるかもしれない !!
+
+type Environ = {
+
+  /** HTTPメソッド */
+  "REQUEST_METHOD": httpMethod,
+
+  /** アプリケーションを識別する名前 */
+  "SCRIPT_NAME" : string,
+
+  /** リクエストパス */
+  "PATH_INFO": string,
+
+  /** クエリー文字列 */
+  "QUERY_STRING": string?,
+
+  /** リクエストボディのメディア型 */
+  "CONTENT_TYPE": mediaType?,
+
+  /** リクエストボディの長さ */
+  "CONTENT_LENGTH": string?,
+
+  /** リクエストボディ（入力）を表現するfile-likeオブジェクト */
+  "wsgi.input": InputStream,
+
+// ... その他なにやら
+
+  * : univ?,
+};
+
+command make-env 
+  {
+    @[default(false)]
+    "fullpath": boolean?,
+
+    @[default("GET")]
+    "method": string?,
+
+    @[default("")]
+    "verb": string?,
+
+    "content-type": string?,
+  }
+  [string path, string? query]
+:: (null|string|binary) -> Environ
+    throws InvalidInput
+    refers python:caty.core.std.command.wsgilib.MakeEnv
+;

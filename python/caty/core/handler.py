@@ -355,6 +355,7 @@ class WebInputParser(object):
         import caty.jsontools as json
         from caty.jsontools import stdjson
         from StringIO import StringIO
+        from caty.util.web import find_encoding
         method = environ.get('REQUEST_METHOD')
         content_type = environ.get('CONTENT_TYPE', u'')
         if input is None:
@@ -362,10 +363,9 @@ class WebInputParser(object):
         else:
             input = StringIO(input)
         cs = self.encoding
-        if ';' in content_type:
-            content_type, rest = map(lambda x: x.strip(), content_type.split(';', 1))
-            if rest.startswith('charset'):
-                cs = rest.split('=').pop(1)
+        newcs = find_encoding(content_type)
+        if newcs:
+            cs = newcs
         if method not in ('POST', 'PUT'):
             return None
         if content_type in ('application/www-form-urlencoded', 'application/x-www-form-urlencoded', 'multipart/form-data'):

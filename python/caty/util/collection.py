@@ -392,8 +392,13 @@ def filled_zip(seq1, seq2, fill=None):
     return r
 
 class conditional_dict(dict):
-    def __init__(self, func, **kwds):
+    def __init__(self, func, base=None, **kwds):
         dict.__init__(self)
+        if base:
+            for k, v in base.items():
+                if func(k, v):
+                    self[unicode(k)] = v
+
         for k, v in kwds.items():
             if func(k, v):
                 self[unicode(k)] = v

@@ -34,6 +34,12 @@ def get_virtual_path(sitepath, access):
         l = len(os.path.commonprefix((sitepath, access)))
         return access[l:]
 
+def find_encoding(content_type):
+    if ';' in content_type:
+        content_type, rest = map(lambda x: x.strip(), content_type.split(';', 1))
+        if rest.startswith('charset'):
+            return rest.split('=').pop(1)
+
 
 HTTP_STATUS = {
     200: '200 OK',
