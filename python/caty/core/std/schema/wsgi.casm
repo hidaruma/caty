@@ -17,7 +17,7 @@ type Environ = {
   "PATH_INFO": string,
 
   /** クエリー文字列 */
-  "QUERY_STRING": string?,
+  "QUERY_STRING": string,
 
   /** リクエストボディのメディア型 */
   "CONTENT_TYPE": mediaType?,
@@ -50,4 +50,21 @@ command make-env
 :: (null|string|binary) -> Environ
     throws InvalidInput
     refers python:caty.core.std.command.wsgilib.MakeEnv
+;
+
+type Response = {
+    "status": integer,
+    "header": {
+        *: string?,
+    },
+    "body": (string | binary),
+};
+
+command call-application
+  {
+    @[default(false)]
+    "no-middle": boolean?,
+  }
+:: Environ -> Response
+    refers python:caty.core.std.command.wsgilib.CallApplication
 ;

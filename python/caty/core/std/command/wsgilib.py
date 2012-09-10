@@ -30,7 +30,9 @@ class MakeEnv(Builtin):
             top = chunk[0]
             if top in system.app_names and top not in (u'caty', u'global'):
                 script_name = top
-            path = u'/' + u'/'.join(chunk[1:])
+        elif script_name != u'root':
+            path = u'/%s%s' % (script_name, path)
+
         if isinstance(input, unicode):
             input = input.encode(find_encoding(self.__content_type) or self.current_app.encoding)
         length = u''
@@ -43,7 +45,7 @@ class MakeEnv(Builtin):
             verb = u'__verb=%s' % self.__verb
         query = u'&'.join([s for s in [verb, self.__query] if s])
 
-        return conditional_dict(lambda k, v: v, 
+        return conditional_dict(lambda k, v: v is not None, 
                                 {u'REQUEST_METHOD': self.__method, 
                                 u'QUERY_STRING': query,
                                 u'SCRIPT_NAME': script_name, 
@@ -62,5 +64,64 @@ class MakeEnv(Builtin):
         if self.__method in (u'PUT', u'POST') and input is None:
             throw_caty_exception(u'InvalidInput', u'Input must not be null')
 
+class CallApplication(Builtin):
+    def setup(self, opts):
+        self.__no_middle = opts['no-middle']
 
+    def execute(self, environ):
+        environ['REMOTE_ADDR'] = u'127.0.0.1'
+        system = self.current_app._system
+        if self.__no_middle:
+            wsgi_app = InternalWSGIDispatcher(system, system.debug)
+        else:
+            server_module_name = system.server_module_name
+            exec 'import %s as server_module' % server_module_name
+            wsgi_app = server_module.get_dispatcher(system, system.debug)
+        response_handler = ResponseHandler()
+        output = wsgi_app(environ, response_handler.start_response)
+        return response_handler.make_response(output)
 
+class ResponseHandler(object):
+    def __init__(self):
+        self.status = None
+        self.headers = {}
+
+    def start_response(self, status, headers, exc_info=None):
+        from types import StringType
+        assert type(status) is StringType,"Status must be a string"
+        assert len(status)>=4,"Status must be at least 4 characters"
+        assert int(status[:3]),"Status message must begin w/3-digit code"
+        assert status[3]==" ", "Status message must have a space after code"
+        for name,val in headers:
+            assert type(name) is StringType,"Header names must be strings"
+            assert type(val) is StringType,"Header values must be strings"
+        self.status = status
+        for a, b in headers:
+            self.headers[a] = unicode(b)
+        return self.make_response
+
+    def make_response(self, data):
+        return {
+            u'status': int(self.status.split(' ')[0]),
+            u'header': self.headers,
+            u'body': ''.join(data)
+        }
+
+from caty.front.web.app import CatyWSGIDispatcher, CatyApp, HTTP_STATUS
+class InternalWSGIDispatcher(CatyWSGIDispatcher):
+
+    def __call__(self, environ, start_response):
+        path = environ['PATH_INFO']
+        app = self.dispatch(path)
+        return InternalCatyApp(app, self.is_debug, self._system).start(environ, start_response)
+
+class InternalCatyApp(CatyApp):
+    def _end_proc(self, json, headers, start_response):
+        status = 200
+        status = HTTP_STATUS[json.get('status', 200)]
+        start_response(status, headers)
+        if 'body' in json:
+            b = json['body']
+            return [b]
+        else:
+            return []
