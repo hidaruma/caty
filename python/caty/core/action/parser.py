@@ -64,12 +64,13 @@ class ResourceActionDescriptorParser(Parser):
             rcname = name_token(seq)
             url_pattern = self.url_pattern(seq)
             seq.parse('{')
-            block = seq.parse(ActionBlock(rcname, self._script_parser, self._module_name))
+            block = seq.parse(ResourceBodyBlock(rcname, self._script_parser, self._module_name))
             actions = block.actions
             filetype = block.filetype
+            instances = block.instances
             seq.parse('}')
             seq.parse(';')
-            return ResourceClass(url_pattern, actions, filetype, self._module_name, rcname, ds, ann)
+            return ResourceClass(url_pattern, actions, filetype, instances, self._module_name, rcname, ds, ann)
         except ParseFailed, e:
             raise ParseError(e.cs, e.cause, e._message)
 
@@ -111,10 +112,11 @@ def url_pattern(seq):
         r.append(c)
     return r
 
-class ActionBlock(Parser):
+class ResourceBodyBlock(Parser):
     def __init__(self, rcname, script_parser, module_name):
         self.rcname = rcname
         self.actions = {}
+        self.instances = []
         self.filetype = {}
         self.names = set()
         self._script_parser = script_parser
@@ -124,7 +126,7 @@ class ActionBlock(Parser):
 
     def __call__(self, seq):
         option(self.filetype_)(seq)
-        many(self.action)(seq)
+        many(choice(self.action, self.instance))(seq)
         return self
 
     def filetype_(self, seq):
@@ -187,6 +189,16 @@ class ActionBlock(Parser):
                     invoker=invoker, resource=self.rcname, module=self._module_name)
         self._invoker = invoker
         self.actions[invoker] = rae
+
+    def instance(self, seq):
+        keyword(u'instance')(seq)
+        if seq.current == u'"':
+            self.instances.append(string(seq))
+        else:
+            S(u'[')(seq)
+            self.instances.extend(split(string, u',', allow_last_delim=True)(seq))
+            S(u']')(seq)
+        S(u';')(seq)
 
     def invoker(self, seq):
         # XXX:verbの構文チェックが必要?
@@ -286,18 +298,6 @@ class ActionBlock(Parser):
         r = split(some_token, ',', allow_last_delim=True)(seq)
         seq.parse(']')
         return r
-
-    def instance(self, seq):
-        seq.parse(keyword('instance'))
-        seq.parse(split(self.instance_name, ','))
-        seq.parse(';')
-        return None, None
-
-    def instance_name(self, seq):
-        seq.parse('"')
-        seq.parse(until('"'))
-        seq.parse('"')
-        return
 
     def locks(self, seq):
         seq.parse(keyword('locks'))

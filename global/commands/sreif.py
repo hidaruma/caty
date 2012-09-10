@@ -46,7 +46,8 @@ class ShallowReifier(object):
                 u'name': s.name,
                 u'document': make_structured_doc(s.docstring),
                 u'pathPattern': s.url_patterns,
-                u'annotations': self.reify_annotations(s.annotations)
+                u'annotations': self.reify_annotations(s.annotations),
+                u'instances': s.instances,
         }
 
     def reify_action(self, s):
