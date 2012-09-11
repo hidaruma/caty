@@ -115,6 +115,8 @@ class CatyApp(object):
         raw_input = environ['wsgi.input'].read(int(environ['CONTENT_LENGTH'] or 0))
         input, options, method, environ = self._process_env(raw_input, query, environ)
         
+        if method not in (u'POST', u'PUT'):
+            input = None
         facilities = self._app.create_facilities(lambda : self.create_session(environ))
         del environ['PATH_INFO'] # init_envで生PATH_INFOを使わせない
         self._app.init_env(facilities, self.is_debug, [u'web'], self._system, environ)
