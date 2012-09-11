@@ -1,4 +1,5 @@
 // -*- coding: utf-8 -*-
+/** パッケージ内モジュールの確認用 */
 module mypkg.mod;
 
 /** hello */

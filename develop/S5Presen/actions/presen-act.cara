@@ -53,7 +53,7 @@ resource ディレクトリ("/" | "*/") {
     do { 
       file:list %PATH_INFO .presen |
         each {pv name}                   >: "wikifiles",
-      file:listr --kind=dir %PATH_INFO |
+      file:list --kind=dir %PATH_INFO |
         each {pv name}                   >: "subdirs",
       %PATH_INFO                         >: "path",
       %app                               >: "app",
