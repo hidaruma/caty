@@ -49,6 +49,7 @@ class RequestHandler(object):
         self._file = interpreter._facilities['pub'].start().create(u'reads')
         self._encoding = app.encoding
         self._env = env
+        env.put('SCRIPT_NAME', app.name if app.name != u'root' else u'')
         self._app = app
         self._verb = ''
 

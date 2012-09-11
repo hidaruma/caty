@@ -45,6 +45,21 @@ command make-env
     "verb": string?,
 
     "content-type": string?,
+
+    @[default("http")]
+    "url-scheme": string?,
+
+    "server-name": string?, // デフォルトは設定から取るべきか？
+
+    "server-port": integer?, // ここでは、文字列である必要性はないだろう。
+     // デフォルトは設定から取るべきか？
+
+    @[default(false)]
+    "multiprocess": boolean?, // デフォルトは設定から取るべきか？
+
+    @[default(true)]
+    "multithread": boolean?, // デフォルトは設定から取るべきか？
+
   }
   [string path, string? query]
 :: (null|string|binary) -> Environ

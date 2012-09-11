@@ -14,12 +14,18 @@ class MakeEnv(Builtin):
         self.__method = opts['method'].upper()
         self.__verb = opts['verb']
         self.__content_type = opts['content-type']
+        self.__multiprocess = opts['multiprocess']
+        self.__multithread = opts['multithread']
+        self.__server_name = opts['server-name']
+        self.__server_port = opts['server-port']
+        self.__url_scheme = opts['url-scheme']
         self.__query = query
         self.__path = path
 
     def execute(self, input):
         self._validate_input(input)
-        if self.__method in (u'PUT', u'POST') and not self.__content_type:
+        self._fill_default_value()
+        if not self.__content_type:
             self.__content_type = u'text/plain' if isinstance(input, unicode) else u'application/octet-stream'
         chunk = self.__path.strip(u'/').split(u'/')
         system = self.current_app._system
@@ -27,12 +33,12 @@ class MakeEnv(Builtin):
         path = self.__path
         istream = StringIO()
         if len(chunk) >= 2 and self.__fullpath:
-            top = chunk[0]
+            top = chunk.pop(0)
             if top in system.app_names and top not in (u'caty', u'global'):
                 script_name = top
-        elif script_name != u'root':
-            path = u'/%s%s' % (script_name, path)
-
+            path = u'/' + u'/'.join(chunk)
+        elif script_name == u'root':
+            script_name = u''
         if isinstance(input, unicode):
             input = input.encode(find_encoding(self.__content_type) or self.current_app.encoding)
         length = u''
@@ -52,7 +58,14 @@ class MakeEnv(Builtin):
                                 u'PATH_INFO': path,
                                 u'CONTENT_TYPE': self.__content_type,
                                 u'CONTENT_LENGTH': length,
+                                u'SERVER_NAME': self.__server_name,
+                                u'SERVER_PORT': self.__server_port,
+                                u'SERVER_PROTOCOL': u'HTTP/1.1',
                                 u'wsgi.input': istream, 
+                                u'wsgi.run_once': False,
+                                u'wsgi.multithread': self.__multithread,
+                                u'wsgi.multiprocess': self.__multiprocess,
+                                u'wsgi.version': (1,0),
                                 })
 
 
@@ -64,21 +77,38 @@ class MakeEnv(Builtin):
         if self.__method in (u'PUT', u'POST') and input is None:
             throw_caty_exception(u'InvalidInput', u'Input must not be null')
 
+    def _fill_default_value(self):
+        from caty import UNDEFINED
+        system = self.current_app._system
+        if self.__server_name is UNDEFINED:
+            self.__server_name = system._global_config.server_name
+        if self.__server_port is UNDEFINED:
+            self.__server_port = system._global_config.server_port
+
 class CallApplication(Builtin):
     def setup(self, opts):
         self.__no_middle = opts['no-middle']
 
     def execute(self, environ):
         environ['REMOTE_ADDR'] = u'127.0.0.1'
+        environ['SERVER_PORT'] = str(environ['SERVER_PORT'])
         system = self.current_app._system
         if self.__no_middle:
-            wsgi_app = InternalWSGIDispatcher(system, system.debug)
+            wsgi_app_cls = InternalCatyApp
         else:
             server_module_name = system.server_module_name
             exec 'import %s as server_module' % server_module_name
-            wsgi_app = server_module.get_dispatcher(system, system.debug)
+            wsgi_app_cls = server_module.get_app_class()
+        path = environ['PATH_INFO']
+        app_name = environ['SCRIPT_NAME'] or u'root'
+        del environ['SCRIPT_NAME']
+        app = system.get_app(app_name)
+        if app_name != u'root':
+            path = u'/%s%s' % (app_name, path) if path else u'/%s/' % app_name
+        environ['PATH_INFO'] = path
         response_handler = ResponseHandler()
-        output = wsgi_app(environ, response_handler.start_response)
+        wsgi_app = wsgi_app_cls(app, system.debug, system)
+        output = wsgi_app.start(environ, response_handler.start_response)
         return response_handler.make_response(output)
 
 class ResponseHandler(object):
@@ -107,13 +137,7 @@ class ResponseHandler(object):
             u'body': ''.join(data)
         }
 
-from caty.front.web.app import CatyWSGIDispatcher, CatyApp, HTTP_STATUS
-class InternalWSGIDispatcher(CatyWSGIDispatcher):
-
-    def __call__(self, environ, start_response):
-        path = environ['PATH_INFO']
-        app = self.dispatch(path)
-        return InternalCatyApp(app, self.is_debug, self._system).start(environ, start_response)
+from caty.front.web.app import CatyApp, HTTP_STATUS
 
 class InternalCatyApp(CatyApp):
     def _end_proc(self, json, headers, start_response):

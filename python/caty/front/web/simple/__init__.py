@@ -57,7 +57,10 @@ def get_handler(system, is_debug):
     logger = system.access_logger
     return lambda r, c, s: CatyRequestHandler(logger, r, c, s)
 
-from caty.front.web.app import CatyWSGIDispatcher
+from caty.front.web.app import CatyWSGIDispatcher, CatyApp
 def get_dispatcher(system, is_debug):
     return CatyWSGIDispatcher(system, is_debug)
+
+def get_app_class():
+    return CatyApp
 
