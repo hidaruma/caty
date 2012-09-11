@@ -2,10 +2,10 @@ from caty.command import *
 from caty.core.language import split_colon_dot_path
 from caty.core.language.util import make_structured_doc
 from caty.jsontools import tagged
+from caty.util.collection import conditional_dict
 
 class ShallowReifier(object):
     def reify_app(self, a):
-        from caty.util.collection import conditional_dict
         r = {
             u'document': conditional_dict(lambda k, v: v is not None, description=a.description, moreDescription=a.more_description),
             u'name': a.name,
@@ -81,7 +81,7 @@ class ShallowReifier(object):
         return {
             u'name': m.canonical_name,
             u'place': p,
-            u'document': {'description': m.docstring, 'moreDescription': m.more_docstring},
+            u'document': conditional_dict(lambda k,v: v is not None, {'description': m.docstring, 'moreDescription': m.more_docstring}),
             u'annotations': self.reify_annotations(m.annotations),
         }
 

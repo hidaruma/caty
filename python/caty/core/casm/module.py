@@ -648,8 +648,8 @@ class AppModule(Module):
                 except Exception as e:
 
                     raise Exception(self.application._system.i18n.get(u'Failed to parse JSON: $path\n$error', path=pkg.path, error=error_to_ustr(e)))
-                mod.docstring = pkginfo.get('description')
-                mod.more_docstring = pkginfo.get('moreDescription')
+                mod.docstring = pkginfo.get('description', u'undocumented')
+                mod.more_docstring = pkginfo.get('moreDescription', None)
                 annotations = pkginfo.get('annotations', {})
                 for k, v in annotations.items():
                     mod.annotations.add(Annotation(k, v))
@@ -781,7 +781,7 @@ class Package(AppModule):
 
     def __init__(self, *args, **kwds):
         AppModule.__init__(self, *args, **kwds)
-        self.more_docstring = u''
+        self.more_docstring = None
 
     def _get_module_class(self):
         return AppModule
