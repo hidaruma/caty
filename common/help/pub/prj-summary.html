@@ -6,10 +6,20 @@
     <h2 id="{$name}">アプリケーション {$name}{if $group|notempty} (in {$group}){/if}</h2>
     <p ><b>概要：</b> <span class="desc">{$document.description}</span></p>
     {if $document.moreDescription|notempty}<hr /><blockquote>{$document.moreDescription|noescape}</blockquote>{/if}
+
+    <p>このアプリケーション「<b>{$name}</b>」には{if $pkgs|empty}パッケージが含まれ<b>ません</b>。{else}次のパッケージが含まれます。{/if}
+    {foreach from=$pkgs item=pkg}
+       {call name=pkgDoc context=$pkg}
+    {/foreach}
     <p>このアプリケーション「<b>{$name}</b>」には{if $mods|empty}モジュールが含まれ<b>ません</b>。{else}次のモジュールが含まれます。{/if}
     {foreach from=$mods item=mod}
        {call name=modDoc context=$mod}
     {/foreach}
+{/function}
+{function name=pkgDoc type="prj-summary:Pkg"}
+    <h3>パッケージ {$name} (in {$appName}){if $deprecated} <span class="deprecated"> DEPRECATED</span>{/if}</h3>
+    <p ><b>概要：</b> <span class="desc">{$document.description}</span></p>
+    {if $document.moreDescription|notempty}<hr /><blockquote>{$document.moreDescription|noescape}</blockquote>{/if}
 {/function}
 {function name=modDoc type="prj-summary:Mod"}
     <h3>モジュール {$name} (in {$appName}){if $deprecated} <span class="deprecated"> DEPRECATED</span>{/if}</h3>

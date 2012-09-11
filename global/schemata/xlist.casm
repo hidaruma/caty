@@ -1,4 +1,7 @@
-module xlist; // -*- coding: utf-8 -*-
+// -*- coding: utf-8 -*-
+/** listモジュールに入れる候補のコマンド群 
+ */
+module xlist;
 
 /** 指定された個数の項目をまとめて、ネストしたリストを作る。*/
 command nest

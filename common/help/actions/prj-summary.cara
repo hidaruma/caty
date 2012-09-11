@@ -21,7 +21,7 @@ type Doc = reif:Doc;
 type Summary = {
  "name": string,
  "appNames": [string*],
- "apps" : [App*]
+ "apps" : [App*],
 };
 
 
@@ -30,7 +30,15 @@ type App = {
  "group": (string|null),
  "document": Doc,
  "modNames": [string*],
+ "pkgs" : [Pkg*],
  "mods": [Mod*],
+};
+
+type Pkg = {
+ "appName": string,
+ "name": string,
+ "deprecated": boolean?,
+ "document": Doc,
 };
 
 type Mod = {
@@ -70,6 +78,18 @@ command gen :: void -> Summary {
      $.document > appDocument,
    ];
    [%appName, "::"] | text:concat > app;
+   sreif:list-packages %app |
+   list:sort --key=name > orig-pkgs | each {$.name} > pkgNames;
+   %orig-pkgs |
+   each {
+      do {
+        %appName    >: "appName",
+        $.name      >: "name",
+        $.annotations.deprecated?=false  >: "deprecated",
+        $.document | doc-to-html >: "document",
+      }
+   } > pkgs;
+
    sreif:list-modules %app | 
    take {[$.name, "public"] | eq --boolean | not} | list:sort --key=name > orig-mods | each {$.name} > modNames;
    %orig-mods |
@@ -86,6 +106,7 @@ command gen :: void -> Summary {
      %group?      >: "group",
      %modNames    >: "modNames",
      %mods        >: "mods",
+     %pkgs        >: "pkgs",
      %appDocument | doc-to-html >: "document",
    }
  } > apps;

@@ -1,3 +1,5 @@
+// -*- coding: utf-8 -*-
+/** テンプレート機能のCatyScripによる実装 */
 module tpl;
 
 command render :: {"title": string, "mods": help:ModInfoList} -> string {
@@ -22,6 +24,7 @@ command render :: {"title": string, "mods": help:ModInfoList} -> string {
  */
 command mod :: help:ModInfo -> string {
  [pv fullname > fullname, pv cmds > cmds];
+
  ['''<div class="mod">
   <h2>モジュール ''', %fullname, "</h2>",
   %cmds | cmdlist
