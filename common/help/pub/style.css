@@ -1,26 +1,30 @@
 body {
  background-color : #CCFFFF;
  line-height: 1.3;
+ margin-left: 5em;
 }
 
-h1 {
+body > h1 {
  padding-left: 4px;
  border-left : 4px gray solid;
  border-bottom : 2px gray solid;
  background-color : Cornsilk; /*Honeydew; */
+ margin-left: -2em;
 }
 
-h2 {
+body > h2 {
  padding-left: 2px;
  border-left : 2px gray solid;
  border-bottom : 1px gray solid;
  background-color : Cornsilk;
+ margin-left: -2em;
 }
 
-h3 {
+body > h3 {
  padding-left: 2px;
  border-left : 2px gray solid;
  /*border-bottom : 1px gray solid;*/
+ margin-left: -2em;
 }
 
 blockquote h1,
