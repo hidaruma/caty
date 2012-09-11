@@ -269,24 +269,19 @@ class CommandExecutor(BaseInterpreter):
         return self.__exec_cmd(node, tag, target)
 
     def __not_tagged_value_case(self, node, target):
-        tags = node.scalar_tag_map.get(type(target), None)
-        if tags == None:
-            throw_caty_exception('UnknwonType', '$type', type=type(target))
-        for tag in tags:
-            if tag in node.cases:
-                return self.__exec_cmd(node, tag, target)
+        t = tag(target)
+        if t in node.cases:
+            return self.__exec_cmd(node, t, target)
         if '*' in node.cases:
-            tag = '*'
+            t = '*'
         elif '*!' in node.cases:
-            for tag in tags:
-                if tag not in schema.types:
-                    tag = '*!'
-                    break
+            if t not in schema.types:
+                t = '*!'
             else:
-                throw_caty_exception('TagNotMatched', '$type', type=tag)
+                throw_caty_exception('TagNotMatched', '$type', type=t)
         else:
-            throw_caty_exception('TagNotMatched', '$type', type=tag)
-        return self.__exec_cmd(node, tag, target)
+            throw_caty_exception('TagNotMatched', '$type', type=t)
+        return self.__exec_cmd(node, t, target)
     
     def __exec_cmd(self, node, tag, jsobj):
         childcmd = node.cases[tag].cmd
