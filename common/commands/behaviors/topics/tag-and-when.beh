@@ -1,0 +1,50 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= 暗黙タグとwhen
+
+
+== !exec
+
+number型データのタグは常にnumberである。
+integerはnumberの部分集合型であり、integer型は独立したスカラー型ではない。
+
+|= !input|= !command |= !output |
+| 0      | tag       | "number" |
+| 1      | tag       | "number" |
+| -1     | tag       | "number" |
+| 1.2    | tag       | "number" |
+| 0.2e+3 | tag       | "number" |
+| 3.14159| tag       | "number" |
+| 123456 | tag       | "number" |
+
+case 分岐の選択肢は、排他的な型でなくてはならない。
+
+
+|= !input|= !command                    |= !output |= !exception |
+| 1      |case{string=>"S",integer=>"I"}| "I"      | |
+| "hello"|case{string=>"S",integer=>"I"}| "S"      | |
+| 1.2    |case{string=>"S",integer=>"I"}|          |Exception  |
+| 1      |case{number=>"N",integer=>"I"}|          |Exception  |
+| 1      |case{integer=>"I",number=>"N"}|          |Exception  |
+
+whenの場合は、型ではなくて文字列による分岐なので、
+"integer" と "number" は排他（異なる文字列）となる。
+
+
+|= !input|= !command                      |= !output |
+| 1.2    |when{integer==>tag,number==>tag}| "number" |
+| 1      |when{integer==>tag,number==>tag}| "number" |
+| -1     |when{integer==>tag,number==>tag}| "number" |
+| 0      |when{integer==>tag,number==>tag}| "number" |
+
+
+しかし、
+integer型であっても、タグは"number"なので、"I"は出力されない。
+
+
+|= !input|= !command                     |= !output |
+| 1.2    |when{integer=>"I",number =>"N"}| "N" |
+| 1      |when{integer=>"I",number =>"N"}| "N" |
+| -1     |when{integer=>"I",number =>"N"}| "N" |
+| 0      |when{integer=>"I",number =>"N"}| "N" |
+
