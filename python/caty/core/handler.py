@@ -111,7 +111,6 @@ class RequestHandler(object):
                     lock_file = cmd(None)
                 else:
                     lock_file = None
-                self._env.put(u'ACTION', proxy.canonical_name)
                 if 'deprecated' in proxy.annotations:
                     self._app._system.deprecate_logger.debug('path: %s verb: %s' % (path, verb))
                 if proxy.compiled:

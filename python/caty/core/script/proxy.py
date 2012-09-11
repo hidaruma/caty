@@ -482,11 +482,12 @@ class FragmentProxy(Proxy):
         }   
 
 class EnvelopeProxy(Proxy):
-    def __init__(self, c):
+    def __init__(self, c, name):
         self.cmdproxy = c
+        self.action_name = name
 
     def instantiate(self, builder):
-        r = ActionEnvelope(self.cmdproxy.instantiate(builder))
+        r = ActionEnvelope(self.cmdproxy.instantiate(builder), self.action_name)
         return r
 
     def set_module(self, module):

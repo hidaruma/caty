@@ -147,7 +147,7 @@ class ResourceModule(Module):
             ptn = many1(call_pattern)(CharSeq(u'{*: any} [string*]:: WebInput | void -> Response | Redirect', auto_remove_ws=True))
             c = CommandNode(act.name, 
                             map(lambda p:p([], []), ptn), 
-                            ActionEnvelope(script), 
+                            ActionEnvelope(script, act.canonical_name), 
                             act.docstring, 
                             act.annotations, 
                             [],
