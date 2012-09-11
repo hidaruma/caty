@@ -393,7 +393,7 @@ class ShowType(SafeReifier):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, name = split_colon_dot_path(self._cdpath)
-        if not app_name:
+        if not app_name or app_name == 'this':
             app = self.current_app
         else:
             app = system.get_app(app_name)
@@ -410,7 +410,7 @@ class ShowCommand(SafeReifier):
         reifier = ShallowReifier()
         system = self.current_app._system
         app_name, module_name, name = split_colon_dot_path(self._cdpath)
-        if not app_name:
+        if not app_name or app_name == 'this':
             app = self.current_app
         else:
             app = system.get_app(app_name)

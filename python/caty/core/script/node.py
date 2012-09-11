@@ -621,12 +621,15 @@ class ActionEnvelope(Syntax):
     command __action-envelope {*:any} [string*] :: WebInput | void -> Response | Redirect
         refers python:caty.core.script.node.ActionEnvelope;
     """
-    def __init__(self, script):
+    def __init__(self, script, name):
         Syntax.__init__(self)
         self.cmd = script
+        self.action_name = name
 
     def set_facility(self, facilities):
         self.cmd.set_facility(facilities)
+        env = facilities['env']
+        env._dict['ACTION'] = self.action_name
 
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)
