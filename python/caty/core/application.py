@@ -487,7 +487,8 @@ class Application(PbcObject):
 
     def _extract_casm_from_cara(self):
         for mod in self._dispatcher.get_modules():
-            self._schema_module.add_sub_module(mod)
+            if u'.' not in mod.canonical_name:
+                self._schema_module.add_sub_module(mod)
 
     def __exec_callback(self, callback_class_name):
         import copy

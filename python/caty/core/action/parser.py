@@ -14,21 +14,23 @@ from caty.core.casm.language.ast import ASTRoot, CommandNode, ConstDecl
 from caty.util import bind2nd
 from caty.core.exception import throw_caty_exception
 from caty.core.language.util import make_structured_doc
+from caty.core.exception import InternalException
 
 class ResourceActionDescriptorParser(Parser):
-    def __init__(self, module_name, facility, lit=False):
+    def __init__(self, path, facility, lit=False):
         self._script_parser = ScriptParser(facility)
-        self._module_name = module_name
+        self._path = path
         self._app = facility.app
         self._lit = lit
 
     def __call__(self, seq):
         mn = module_decl(seq, 'cara')
         name = mn.name
+        self._module_name = name
         ds = mn.docstring or u'undocumented'
-        if name != self._module_name:
-            raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
-        rm = ResourceModule(name, ds, self._app)
+        if self._path.strip(u'/').split(u'.')[0].replace(u'/', u'.') != name:
+            raise InternalException("Module name $name and path name $path are not matched", name=name, path=self._path)
+        rm = ResourceModule(name.split('.')[-1], ds, self._app)
         classes = seq.parse(many(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, constparser.const, self.userrole, self.port])))
         if not seq.eof:
             raise ParseError(seq, self)
@@ -515,16 +517,17 @@ class LiterateRADParser(ResourceActionDescriptorParser):
         seq.ignore_hook = h
         mn = module_decl(seq, 'cara')
         name = mn.name
+        self._module_name = name
         ds = mn.docstring or u'undocumented'
-        if name != self._module_name:
-            raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
+        if self._path.strip(u'/').split(u'.')[0].replace(u'/', u'.') != name:
+            raise InternalException("Module name $name and path name $path are not matched", name=name, path=self._path)
         rm = ResourceModule(name, ds, self._app)
         classes = self._parse_top_level(seq)
         rm._literate = True
         if not seq.eof:
             raise ParseError(seq, self)
         for c in classes:
-            if isinstance(c, (ASTRoot, CommandNode)):
+            if isinstance(c, (ASTRoot, CommandNode, ConstDecl)):
                 c.declare(rm)
             else:
                 if isinstance(c, ResourceClass):

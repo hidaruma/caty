@@ -21,12 +21,12 @@ class ResourceModuleContainer(object):
         return self._modules.itervalues()
 
     def add_module(self, resource_module):
-        if resource_module.name in self._modules:
+        if resource_module.canonical_name in self._modules:
             raise Exception(self._app.i18n.get(u'Module $name is already defined', 
-                                               name=resource_module.name))
+                                               name=resource_module.canonical_name))
         for r in resource_module.resources:
             self.add_resource(r)
-        self._modules[resource_module.name] = resource_module
+        self._modules[resource_module.canonical_name] = resource_module
     
     def add_resource(self, r):
         self._selectors[r.type].add(r)

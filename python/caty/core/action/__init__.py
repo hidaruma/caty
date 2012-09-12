@@ -23,10 +23,12 @@ def read_cara_files(rmc, action_fs, facility, target, app, current_package=None)
                 app.cout.write('...')
                 source = f.read()
                 if f.path.endswith('.cara.lit'):
-                    parser = LiterateRADParser(f.path.strip('/').split('.')[0].replace('/', '.'), facility)
+                    parser = LiterateRADParser(f.path, facility)
                 else:
-                    parser = ResourceActionDescriptorParser(f.path.strip('/').split('.')[0].replace('/', '.'), facility)
+                    parser = ResourceActionDescriptorParser(f.path, facility)
                 resource_module = parser.run(source, hook=lambda seq:remove_comment(seq, is_doc_str), auto_remove_ws=True)
+                if current_package:
+                    current_package.add_sub_module(resource_module)
                 for res in resource_module.resources:
                     app.update_filetypes(res.filetypes)
                 rmc.add_module(resource_module)
