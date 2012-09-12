@@ -631,14 +631,16 @@ class AppModule(Module):
             o = self.fs.open(e.path)
             self._plugin.feed(o.read())
 
-    def _compile_dir(self, e):
-        mod = Package(self._app, self)
+    def _compile_dir(self, e, pkg_class=None):
+        if not pkg_class:
+            pkg_class = Package
+        mod = pkg_class(self._app, self)
         mod._name = unicode(self._path_to_module(e.basename.strip(u'/')))
         mod.package_root_path = e.path
         mod.compile()
         if self.has_package(mod.name):
             raise Exception(self.application.i18n.get(u'Package $name is already defined in $app', 
-                                                      name=module.name, 
+                                                      name=mod.name, 
                                                       app=self.get_package(mod.name)._app.name))
         with self.fs.open(join(e.path, mod.PACKAGE_FILE)) as pkg:
             if pkg.exists:
@@ -654,6 +656,7 @@ class AppModule(Module):
                 for k, v in annotations.items():
                     mod.annotations.add(Annotation(k, v))
         self.sub_packages[mod.name] = mod
+        return mod
 
     def _get_module_class(self):
         return self.__class__
