@@ -40,6 +40,7 @@ def read_cara_files(rmc, action_fs, facility, target, app, current_package=None)
             orig = app._schema_module.fs
             app._schema_module.fs = action_fs
             pkg = app._schema_module._compile_dir(f, ResPackage)
+            pkg._type = u'cara'
             app._schema_module.fs = orig
             read_cara_files(rmc, action_fs, facility, f.path, app, pkg)
 
