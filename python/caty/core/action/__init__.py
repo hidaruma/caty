@@ -30,8 +30,6 @@ def read_cara_files(rmc, action_fs, facility, target, app, current_package=None)
                 for res in resource_module.resources:
                     app.update_filetypes(res.filetypes)
                 rmc.add_module(resource_module)
-                if current_package:
-                    current_package.add_sub_module(resource_module)
                 app.cout.writeln('OK')
             except:
                 app.cout.writeln('NG')
