@@ -66,7 +66,7 @@ class MakeEnv(Builtin):
                                 u'wsgi.multithread': self.__multithread,
                                 u'wsgi.multiprocess': self.__multiprocess,
                                 u'wsgi.version': (1,0),
-                                u'wsgi.ulr_scheme': self.__url_scheme,
+                                u'wsgi.url_scheme': self.__url_scheme,
                                 })
 
 
