@@ -6,7 +6,7 @@ from caty.core.schema import types as reserved
 import caty.jsontools as json
 import random
 from string import printable
-from caty import ForeignObject
+from caty import ForeignObject, UNDEFINED
 from decimal import Decimal
 
 class Sample(Builtin):
@@ -28,7 +28,25 @@ class Sample(Builtin):
         tn = mod.make_type_normalizer()
         ta = mod.make_typevar_applier()
         t = ast.accept(sb).accept(rr).accept(cd).accept(ta).accept(tn).body
-        return t.accept(DataGenerator(self._gen_options))
+        return self._empty_to_undefined(t.accept(DataGenerator(self._gen_options)))
+
+    def _empty_to_undefined(self, o):
+        if o is _EMPTY:
+            return UNDEFINED
+        elif isinstance(o, dict):
+            r = {}
+            for k, v in o.items():
+                r[k] = self._empty_to_undefined(v)
+            return r
+        elif isinstance(o, list):
+            r = []
+            for a in o:
+                r.append(self._empty_to_undefined(a))
+            return r
+        elif isinstance(o, json.TaggedValue):
+            return json.tagged(o.tag, self._empty_to_undefined(json.untagged(o)))
+        else:
+            return o
 
 class _EMPTY(object): pass # undefinedではない、存在しない事を表すアトム
 
@@ -213,7 +231,10 @@ class DataGenerator(TreeCursor):
                 pass
         if node.repeat and (len(r) >= len(node.schema_list)) and self.__occur == 'min':
             r.pop(-1)
-        return [i for i in r if i is not _EMPTY]
+        if r:
+            while r and r[-1] is _EMPTY:
+                r.pop(-1)
+        return r
 
     def __imply_array_item(self, schema, num):
         value = schema.accept(self)
