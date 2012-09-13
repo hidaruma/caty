@@ -11,12 +11,23 @@ from decimal import Decimal
 
 class Sample(Builtin):
    
-    def setup(self, opts, type_name):
-        self.__type_name = type_name
+    def setup(self, opts, type_repr):
+        self.__type_repr = type_repr
         self._gen_options = opts
 
     def execute(self):
-        t = self.schema.get_type(self.__type_name)
+        from caty.core.casm.language.schemaparser import typedef
+        from caty.core.casm.language.ast import ASTRoot
+        from caty.core.schema.base import Annotations
+        from topdown import as_parser
+        mod = self.current_module
+        ast = ASTRoot(u'', [], as_parser(typedef).run(self.__type_repr, auto_remove_ws=True), Annotations([]), u'')
+        sb = mod.make_schema_builder()
+        rr = mod.make_reference_resolver()
+        cd = mod.make_cycle_detecter()
+        tn = mod.make_type_normalizer()
+        ta = mod.make_typevar_applier()
+        t = ast.accept(sb).accept(rr).accept(cd).accept(ta).accept(tn).body
         return t.accept(DataGenerator(self._gen_options))
 
 class _EMPTY(object): pass # undefinedではない、存在しない事を表すアトム
