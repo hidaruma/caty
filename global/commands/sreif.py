@@ -269,14 +269,16 @@ class ListTypes(SafeReifier):
         from caty.core.schema import types
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, _ = split_colon_dot_path(self._cdpath)
+        app_name, module_name, cls_name = split_colon_dot_path(self._cdpath)
         if not app_name or app_name == 'this':
             app = self.current_app
         else:
             app = system.get_app(app_name)
         if not module_name:
-            module_name = _
+            module_name = cls_name
         module = app._schema_module.get_module(module_name)
+        if cls_name:
+            module = module.get_class(cls_name)
         r = []
         for t in module.schema_ns.values():
             if t.name not in types:

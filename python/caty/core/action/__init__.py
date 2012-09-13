@@ -7,7 +7,10 @@ def create_resource_action_dispatcher(action_fs, facility, app):
         rmc.add_resource(r)
     if app._no_ambient:
         return rmc
+    orig = app._schema_module.fs
+    app._schema_module.fs = action_fs
     read_cara_files(rmc, action_fs, facility, u'/', app)
+    app._schema_module.fs = orig
     rmc.validate_url_patterns()
     return rmc
 
@@ -37,11 +40,9 @@ def read_cara_files(rmc, action_fs, facility, target, app, current_package=None)
                 app.cout.writeln('NG')
                 raise
         elif f.is_dir:
-            orig = app._schema_module.fs
-            app._schema_module.fs = action_fs
-            pkg = app._schema_module._compile_dir(f, ResPackage)
+            parent = app._schema_module if not current_package else current_package
+            pkg = parent._compile_dir(f, ResPackage)
             pkg._type = u'cara'
-            app._schema_module.fs = orig
             read_cara_files(rmc, action_fs, facility, f.path, app, pkg)
 
 from caty.core.casm.module import Package

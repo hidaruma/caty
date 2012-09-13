@@ -277,6 +277,7 @@ class Module(Facility):
             pkg, rest = name.split('.', 1)
             pm = self._get_package(pkg, tracked)
             if pm:
+                tracked.add(pm.canonical_name)
                 return pm._get_package(rest, tracked)
         if self.parent:
             if self.canonical_name in tracked:
@@ -638,7 +639,7 @@ class AppModule(Module):
         mod._name = unicode(self._path_to_module(e.basename.strip(u'/')))
         mod.package_root_path = e.path
         mod.compile()
-        if self.has_package(mod.name):
+        if self.has_package(mod.canonical_name):
             raise Exception(self.application.i18n.get(u'Package $name is already defined in $app', 
                                                       name=mod.name, 
                                                       app=self.get_package(mod.name)._app.name))
