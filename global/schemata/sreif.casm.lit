@@ -302,6 +302,7 @@ command list-classes
   }
   [cdpath mod]
 :: void -> [ClassSummary*]?
+ refers python:sreif.ListClasses
 ;
 
 command list-userroles
@@ -414,6 +415,7 @@ command show-class
   }
   [cdpath cls]
 :: void -> ClassSummary?
+ refers python:sreif.ShowClass
 ;
 
 /* 優先 */

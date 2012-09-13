@@ -85,6 +85,14 @@ class ShallowReifier(object):
             u'annotations': self.reify_annotations(m.annotations),
         }
 
+    def reify_class(self, c):
+        return {
+            u'document': make_structured_doc(c.docstring),
+            u'annotations': self.reify_annotations(c.annotations),
+            u'name': c.name,
+            u'arg0': self._dump_schema(c._clsrestriction),
+        }
+
     def reify_type(self, t):
         return {
             u'name': t.name,
@@ -236,6 +244,25 @@ class ListPackages(SafeReifierWithDefaultApp):
                 r.append(reifier.reify_package(m))
         return r
 
+class ListClasses(SafeReifierWithDefaultApp):
+    def _execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, mod_name, _ = split_colon_dot_path(self._cdpath, u'mod')
+        app = None
+        if _:
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
+        if app_name == 'this' or not app_name and pkg_name:
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        r = []
+        reifier = ShallowReifier()
+        mod = app._schema_module.get_module(mod_name)
+        for c in mod.class_ns.values():
+            r.append(reifier.reify_class(c))
+        return r
+
 class ListTypes(SafeReifier):
 
     def _execute(self):
@@ -261,14 +288,16 @@ class ListCommands(SafeReifier):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, _ = split_colon_dot_path(self._cdpath)
+        app_name, module_name, cls_name = split_colon_dot_path(self._cdpath)
         if not app_name or app_name == 'this':
             app = self.current_app
         else:
             app = system.get_app(app_name)
         if not module_name:
-            module_name = _
+            module_name = cls_name
         module = app._schema_module.get_module(module_name)
+        if cls_name:
+            module = module.get_class(cls_name)
         r = []
         for c in module.command_ns.values():
             r.append(reifier.reify_command(c))
@@ -420,6 +449,23 @@ class ShowCommand(SafeReifier):
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         module = app._schema_module.get_module(module_name)
         return reifier.reify_command(module.get_command(name))
+
+class ShowClass(SafeReifier):
+
+    def _execute(self):
+        reifier = ShallowReifier()
+        system = self.current_app._system
+        app_name, module_name, name = split_colon_dot_path(self._cdpath)
+        if not app_name or app_name == 'this':
+            app = self.current_app
+        else:
+            app = system.get_app(app_name)
+        if not module_name:
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
+        if not name:
+            throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
+        module = app._schema_module.get_module(module_name)
+        return reifier.reify_class(module.get_class(name))
 
 class ShowState(SafeReifier):
 
