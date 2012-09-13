@@ -215,11 +215,17 @@ class DataGenerator(TreeCursor):
 
     def _visit_array(self, node):
         r = []
-        min_i = node.minItems or 0
-        max_i = node.maxItems or (len(node.schema_list)+5)
+        mandatory = len(node.schema_list)
+        if node.repeat:
+            mandatory -= 1
+        min_i = node.minItems or mandatory
+        max_i = node.maxItems or mandatory
+        if node.repeat:
+            max_i += 5
         l = random.randint(min_i, max_i)
         num = 0
         for s in node.schema_list:
+            if num >= l: break
             r.append(self.__imply_array_item(s, num))
             num += 1
 
