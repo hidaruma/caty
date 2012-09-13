@@ -142,13 +142,17 @@ class DataGenerator(TreeCursor):
 
     def __rand_int(self, node):
         import sys
-        min_i = node.minimum or 0
-        max_i = node.maximum or 100
+        max_i = node.maximum if node.maximum is not None else 100
+        min_i = node.minimum if node.minimum is not None else max_i - 100
+        if node.maximum is None:
+            max_i = min_i + 100
         return random.randint(min_i, max_i)
 
     def __rand_number(self, node):
-        min_i = node.minimum or 0
-        max_i = node.maximum or 100.0
+        max_i = node.maximum if node.maximum is not None else 100.0
+        min_i = node.minimum if node.minimum is not None else max_i - 100.0
+        if node.maximum is None:
+            max_i = min_i + 100
         return Decimal(str(random.uniform(min_i, max_i)))
     
     def __gen_string(self, node):
