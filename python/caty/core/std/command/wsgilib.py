@@ -58,15 +58,15 @@ class MakeEnv(Builtin):
                                 u'PATH_INFO': path,
                                 u'CONTENT_TYPE': self.__content_type,
                                 u'CONTENT_LENGTH': length,
-                                u'SERVER_NAME': self.__server_name,
-                                u'SERVER_PORT': self.__server_port,
+                                u'SERVER_NAME': self.__server_name.split(u'//')[-1],
+                                u'SERVER_PORT': unicode(self.__server_port),
                                 u'SERVER_PROTOCOL': u'HTTP/1.1',
                                 u'wsgi.input': istream, 
                                 u'wsgi.run_once': False,
                                 u'wsgi.multithread': self.__multithread,
                                 u'wsgi.multiprocess': self.__multiprocess,
                                 u'wsgi.version': (1,0),
-                                u'wsgi.ulr_scheme': self.__url_scheme,
+                                u'wsgi.url_scheme': self.__url_scheme,
                                 })
 
 
