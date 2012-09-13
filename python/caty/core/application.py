@@ -34,6 +34,7 @@ import locale
 import codecs
 import operator
 import os
+import platform
 import sys
 import time
 import tempfile
@@ -564,6 +565,7 @@ class Application(PbcObject):
         env.put(u'CATY_EXEC_MODE', modes)
         env.put(u'CATY_HOME', unicode(os.getcwd(), self._system.sysencoding))
         env.put(u'CATY_PROJECT', self._system.project_name)
+        env.put(u'OS_PLATFORM', unicode(platform.system()))
         if 'CONTENT_TYPE' in environ:
             env.put(u'CONTENT_TYPE', unicode(environ['CONTENT_TYPE']))
         if 'PATH_INFO' in environ:
