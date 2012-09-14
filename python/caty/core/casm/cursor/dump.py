@@ -10,6 +10,7 @@ class TreeDumper(TreeCursor):
         self.deep = deep
         self.withoutdoc = withoutdoc
         self.recursive = recursive
+        self.context = None
 
     def _visit_root(self, node):
         buff = []
@@ -68,9 +69,7 @@ class TreeDumper(TreeCursor):
 
     def _process_option(self, node, buff):
         if node.options:
-            items = [(k, v) for k, v in node.options.items() if k not in ('subName', 'minCount', 'maxCount', 'repeat')]
-            if 'subName' in node.options:
-                buff.append(' ' + node.options['subName'])
+            items = [(k, v) for k, v in node.options.items() if k not in ('subName', 'minCount', 'maxCount', 'repeat', '__optional__')]
             if items:
                 buff.append('(')
                 for k, v in items:
@@ -88,13 +87,17 @@ class TreeDumper(TreeCursor):
                 if node.options.get('maxCount', None) is not None:
                     buff.append(str(node.options['maxCount']))
                 buff.append('}')
+            if 'subName' in node.options:
+                if self.context == 'option':
+                    buff.append('?')
+                buff.append(' ' + node.options['subName'])
+        else:
+            if self.context == 'option':
+                buff.append('?')
 
     def _visit_option(self, node):
-        s = node.body.accept(self)
-        for c in ['&', '|', '++', '\n']:
-            if c in s:
-                return '(%s)?' % s
-        return s + '?'
+        self.context = 'option'
+        return node.body.accept(self)
 
     def _visit_enum(self, node):
         if len(node.enum) > 1:
@@ -181,29 +184,27 @@ class TreeDumper(TreeCursor):
         l = node.left.accept(self)
         r = node.right.accept(self)
         buff = [l + ' & ' + r]
+        buff.insert(0, u'(')
+        buff.insert(2, u')')
         self._process_option(node, buff)
-        if len(buff) > 1:
-            buff.insert(0, u'(')
-            buff.insert(2, u')')
         return u''.join(buff)
 
     def _visit_union(self, node):
         l = node.left.accept(self)
         r = node.right.accept(self)
         buff = [l + ' | ' + r]
+        buff.insert(0, u'(')
+        buff.insert(2, u')')
         self._process_option(node, buff)
-        if len(buff) > 1:
-            buff.insert(0, u'(')
-            buff.insert(2, u')')
         return u''.join(buff)
 
     def _visit_updator(self, node):
         l = node.left.accept(self)
         r = node.right.accept(self)
         buff = [l + ' ++ ' + r]
-        if len(buff) > 1:
-            buff.insert(0, u'(')
-            buff.insert(2, u')')
+        buff.insert(0, u'(')
+        buff.insert(2, u')')
+        self._process_option(node, buff)
         return u''.join(buff)
 
     def _visit_tag(self, node):
