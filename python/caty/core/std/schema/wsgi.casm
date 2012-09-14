@@ -1,10 +1,19 @@
+// -*- coding: utf-8 -*-
+/** WSGI仕様に基づくWeb処理のエミュレーション */
 module wsgi in casm;
 
-
+/** エンティティボディを表現する入力ストリーム 
+ * Pythonのfile-likeオブジェクトである。
+ */
 type InputStream = foreign;
 
-// !! stringではなくて、binaryになるかもしれない !!
+/** 出力ストリーム 
+ * Pythonのfile-likeオブジェクトである。
+ */
+type OutputStream = foreign;
 
+
+/** WSGIアプリケーションコールバックへの入力データ */
 type Environ = {
 
   /** HTTPメソッド */
@@ -23,12 +32,39 @@ type Environ = {
   "CONTENT_TYPE": mediaType?,
 
   /** リクエストボディの長さ */
-  "CONTENT_LENGTH": string?,
+  "CONTENT_LENGTH": string,
+
+  /** サーバーのホスト名 */
+  "SERVER_NAME": string,
+
+  /** サーバーのポート番号、ただし文字列 */
+  "SERVER_PORT": string,
+
+  /** 使っているHTTPプロトコル */
+  "SERVER_PROTOCOL": "HTTP/1.1",
 
   /** リクエストボディ（入力）を表現するfile-likeオブジェクト */
   "wsgi.input": InputStream,
 
-// ... その他なにやら
+  /** エラー出力のストリーム 
+   * PEP333では必須のようだが、Catyではオプショナルとする。
+   */
+  "wsgi.errors": OutputStream?, 
+
+  /** マルチプロセス処理をしているか */
+  "wsgi.multiprocess": boolean,
+
+  /** マルチスレッド処理をしているか */
+  "wsgi.multithread": boolean,
+
+  /** リクエストごとに毎回プロセス起動をするか */
+  "wsgi.run_once": false,
+
+  /** http または https */
+  "wsgi.url_scheme": ("http" | "https"),
+
+  /** WSGIのバージョン */
+  "wsgi.version": [1, 0],
 
   * : univ?,
 };
