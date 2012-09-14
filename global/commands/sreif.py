@@ -186,6 +186,7 @@ class SafeReifierWithDefaultApp(SafeReifier):
     def setup(self, opts, cdpath=u'this::'):
         self._cdpath = cdpath
         self._safe = opts.get('safe', False)
+        self._rec = opts.get('rec', False)
 
 class ListApplications(Command):
 
@@ -213,10 +214,11 @@ class ListModules(SafeReifierWithDefaultApp):
         reifier = ShallowReifier()
         if pkg_name:
             pkg = app._schema_module.get_package(pkg_name)
-            for m in pkg.get_modules():
+            for m in pkg.list_modules(self._rec):
                 r.append(reifier.reify_module(m))
         else:
-            for m in app._schema_module.get_modules():
+            r.append(reifier.reify_module(app._schema_module))
+            for m in app._schema_module.list_modules(self._rec):
                 r.append(reifier.reify_module(m))
         return r
 
@@ -236,11 +238,10 @@ class ListPackages(SafeReifierWithDefaultApp):
         reifier = ShallowReifier()
         if pkg_name:
             pkg = app._schema_module.get_package(pkg_name)
-            for m in pkg.get_packages():
-                if pkg == m: continue
+            for m in pkg.list_packages(self._rec):
                 r.append(reifier.reify_package(m))
         else:
-            for m in app._schema_module.get_packages():
+            for m in app._schema_module.list_packages(self._rec):
                 r.append(reifier.reify_package(m))
         return r
 

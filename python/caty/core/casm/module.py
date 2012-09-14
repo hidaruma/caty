@@ -296,6 +296,24 @@ class Module(Facility):
             for r in p.get_modules():
                 yield r
 
+    def list_modules(self, rec=False):
+        for m in self.sub_modules.values():
+            yield m
+            if rec:
+                for r in m.list_modules(rec):
+                    yield r
+        if rec:
+            for p in self.sub_packages.values():
+                for r in p.list_modules(rec):
+                    yield r
+
+    def list_packages(self, rec=False):
+        for p in self.sub_packages.values():
+            yield p
+            if rec:
+                for r in p.list_packages(rec):
+                    yield r
+
     def get_packages(self):
         if self.is_package:
             yield self
