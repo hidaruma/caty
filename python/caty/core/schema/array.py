@@ -55,7 +55,7 @@ class ArraySchema(SchemaBase, Array):
         while count < len(value):
             v = value[count]
             if v is caty.UNDEFINED:
-                if (s_count < len(self.schema_list) and (self.schema_list[s_count].optional or self.schema_list[s.count].type == 'univ') or
+                if (s_count < len(self.schema_list) and (self.schema_list[s_count].optional or self.schema_list[s_count].type == 'univ') or
                     s_count >= (len(self.schema_list) -1) and self.repeat):
                     count += 1
                     s_count += 1
