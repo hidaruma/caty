@@ -179,7 +179,7 @@ class ObjectSchema(SchemaBase, Object):
 
         # optional でないメンバーで漏れがないかチェック
         for k, v in self.schema_obj.iteritems():
-            if not v.optional and k not in value:
+            if not v.optional and k not in value and v.type != u'univ':
                 errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Property not exists: $name', name=k))
                 is_error = True
         if is_error:
@@ -274,7 +274,7 @@ class ObjectSchema(SchemaBase, Object):
                     errors[k] = e
         for k, v in self.schema_obj.iteritems():
             if k not in value:
-                if not v.optional:
+                if not v.optional and v.type != u'univ':
                     is_error = True
                     errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Property not exists: $name', name=k))
                 elif v.optional and 'default' in v.annotations:
