@@ -201,7 +201,7 @@ class ListModules(SafeReifierWithDefaultApp):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, pkg_name, _ = split_colon_dot_path(self._cdpath, u'pkg')
+        app_name, pkg_name, _ = split_colon_dot_path(self._cdpath, u'app')
         app = None
         if _:
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
@@ -224,7 +224,7 @@ class ListPackages(SafeReifierWithDefaultApp):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, pkg_name, _ = split_colon_dot_path(self._cdpath, u'pkg')
+        app_name, pkg_name, _ = split_colon_dot_path(self._cdpath, u'app')
         app = None
         if _:
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
@@ -269,7 +269,7 @@ class ListTypes(SafeReifier):
         from caty.core.schema import types
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, cls_name = split_colon_dot_path(self._cdpath)
+        app_name, module_name, cls_name = split_colon_dot_path(self._cdpath, u'mod')
         if not app_name or app_name == 'this':
             app = self.current_app
         else:
@@ -290,7 +290,7 @@ class ListCommands(SafeReifier):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, cls_name = split_colon_dot_path(self._cdpath)
+        app_name, module_name, cls_name = split_colon_dot_path(self._cdpath, 'mod')
         if not app_name or app_name == 'this':
             app = self.current_app
         else:
@@ -310,7 +310,7 @@ class ListStates(SafeReifier):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, _ = split_colon_dot_path(self._cdpath)
+        app_name, module_name, _ = split_colon_dot_path(self._cdpath, u'mod')
         if not app_name or app_name == 'this':
             app = self.current_app
         else:
@@ -331,7 +331,7 @@ class ListResources(SafeReifier):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, _ = split_colon_dot_path(self._cdpath)
+        app_name, module_name, _ = split_colon_dot_path(self._cdpath, u'mod')
         if not app_name or app_name == 'this':
             app = self.current_app
         else:
@@ -354,7 +354,7 @@ class ListActions(SafeReifier):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, res_name = split_colon_dot_path(self._cdpath)
+        app_name, module_name, res_name = split_colon_dot_path(self._cdpath, u'mod')
         if not app_name or app_name == 'this':
             app = self.current_app
         else:
