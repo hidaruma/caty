@@ -304,13 +304,13 @@ class Module(Facility):
                 yield r
 
     def add_sub_module(self, module):
+        module.parent = self
         if self.has_module(module.name) and self.get_module(module.name).canonical_name == module.canonical_name:
             raise Exception(self.application.i18n.get(u'Can not register $name.$type1. $name.$type2 is already defined in $app', 
                                                       name=module.name, 
                                                       type1=module.type,
                                                       app=self._app.name,
                                                       type2=self.get_module(module.name).type))
-        module.parent = self
         self.sub_modules[module.name] = module
 
     def resolve(self):
