@@ -13,6 +13,7 @@ class Sample(Builtin):
    
     def setup(self, opts, type_repr):
         self.__type_repr = type_repr
+        self.__mod = opts.pop(u'mod')
         self._gen_options = opts
 
     def execute(self):
@@ -20,7 +21,10 @@ class Sample(Builtin):
         from caty.core.casm.language.ast import ASTRoot
         from caty.core.schema.base import Annotations
         from topdown import as_parser
-        mod = self.current_module
+        if self.__mod:
+            mod = self.current_module.get_module(self.__mod)
+        else:
+            mod = self.current_module
         ast = ASTRoot(u'', [], as_parser(typedef).run(self.__type_repr, auto_remove_ws=True), Annotations([]), u'')
         sb = mod.make_schema_builder()
         rr = mod.make_reference_resolver()
