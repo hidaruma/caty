@@ -8,6 +8,7 @@ import random
 from string import printable
 from caty import ForeignObject, UNDEFINED
 from decimal import Decimal
+from caty.core.language import split_colon_dot_path
 
 class Sample(Builtin):
    
@@ -22,7 +23,12 @@ class Sample(Builtin):
         from caty.core.schema.base import Annotations
         from topdown import as_parser
         if self.__mod:
-            mod = self.current_module.get_module(self.__mod)
+            app_name, mod_name, _ = split_colon_dot_path(self.__mod, u'mod')
+            if app_name == 'this':
+                app = self.current_app
+            else:
+                app = self.current_app._system.get_app(app_name)
+            mod = app._schema_module.get_module(mod_name)
         else:
             mod = self.current_module
         ast = ASTRoot(u'', [], as_parser(typedef).run(self.__type_repr, auto_remove_ws=True), Annotations([]), u'')
