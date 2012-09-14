@@ -76,7 +76,7 @@ class TreeDumper(TreeCursor):
                 for k, v in items:
                     buff.append(k)
                     buff.append('=')
-                    buff.append(v if isinstance(v, unicode) else str(v))
+                    buff.append('"%s"' % v if isinstance(v, unicode) else u'b"%s"' % v if isinstance(v, str) else str(v))
                     buff.append(', ')
                 buff.pop(-1)
                 buff.append(')')
@@ -118,7 +118,7 @@ class TreeDumper(TreeCursor):
         for k, v in node.items():
             if v.docstring and not self.withoutdoc:
                 buff.append('    ' * self.depth)
-                buff.append(v.docstring.strip())
+                buff.append(u'/** %s */' % v.docstring.strip())
                 buff.append('\n')
             if v.annotations:
                 buff.append('    ' * self.depth)

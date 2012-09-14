@@ -1186,12 +1186,10 @@ class NamedSchema(SchemaBase, Root):
     @property
     def canonical_name(self):
         an = self.application.name
-        mn = self._module.name
+        mn = self._module.canonical_name
         name = self.name
         if mn and mn != 'public':
             name = '%s:%s' % (mn, name)
-        if an:
-            name = '%s#%s' % (an, name)
         return name
 
     @property
