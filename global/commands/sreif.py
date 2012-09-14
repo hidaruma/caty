@@ -265,6 +265,9 @@ class ListClasses(SafeReifierWithDefaultApp):
         return r
 
 class ListTypes(SafeReifier):
+    def setup(self, opts, cdpath):
+        SafeReifier.setup(self, opts, cdpath)
+        self._rec = opts.get('rec', False)
 
     def _execute(self):
         from caty.core.schema import types
@@ -284,9 +287,19 @@ class ListTypes(SafeReifier):
         for t in module.schema_ns.values():
             if t.name not in types:
                 r.append(reifier.reify_type(t))
+        if not cls_name and self._rec:
+            for cls in module.class_ns.values():
+                for t in cls.schema_ns.values():
+                    o = reifier.reify_type(t)
+                    o['name'] = cls.name + '.' + o['name']
+                    r.append(o)
         return r
 
 class ListCommands(SafeReifier):
+    def setup(self, opts, cdpath):
+        SafeReifier.setup(self, opts, cdpath)
+        self._rec = opts.get('rec', False)
+
 
     def _execute(self):
         reifier = ShallowReifier()
@@ -304,6 +317,12 @@ class ListCommands(SafeReifier):
         r = []
         for c in module.command_ns.values():
             r.append(reifier.reify_command(c))
+        if not cls_name and self._rec:
+            for cls in module.class_ns.values():
+                for c in cls.command_ns.values():
+                    o = reifier.reify_command(c)
+                    o['name'] = cls.name + '.' + o['name']
+                    r.append(o)
         return r
 
 class ListStates(SafeReifier):
