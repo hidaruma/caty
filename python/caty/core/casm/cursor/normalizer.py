@@ -258,7 +258,7 @@ class TypeCalcurator(_SubNormalizer):
                 res = self._intersect_enum_and_scalar(self._dereference(r), l)
             else:
                 res = NeverSchema()
-        if node.left.optional and node.right.optional:
+        if (node.left.optional and node.right.optional) or (lt == 'univ' or rt == 'univ'):
             res = OptionalSchema(res)
         return res
 
