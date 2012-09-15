@@ -1,0 +1,131 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= 型定義における特殊な型と '?' と '*'
+
+== !exec
+
+* neverは空集合である。
+
+|= !input  |= !command         |= !params  |= !output |
+|null      | validate<never>   | --boolean | false |
+|undefined | validate<never>   | --boolean | false |
+| ""       | validate<never>   | --boolean | false |
+| false    | validate<never>   | --boolean | false |
+|foreign   | validate<never>   | --boolean | false |
+
+
+* univはあらゆるデータを含む全体集合である。
+
+|= !input  |= !command        |= !params  |= !output |
+|null      | validate<univ>   | --boolean | true |
+|undefined | validate<univ>   | --boolean | true |
+| ""       | validate<univ>   | --boolean | true |
+| false    | validate<univ>   | --boolean | true |
+|foreign   | validate<univ>   | --boolean | true |
+|"hello"   | validate<univ>   | --boolean | true |
+|123       | validate<univ>   | --boolean | true |
+
+* foreignはXJSONでも#'undefinedでもないデータすべてを含む集合である。（ただし、同値性と等値性が違う）
+
+|= !input  |= !command         |= !params  |= !output |
+|null      | validate<foreign> | --boolean | false |
+|undefined | validate<foreign> | --boolean | false |
+| ""       | validate<foreign> | --boolean | false |
+| false    | validate<foreign> | --boolean | false |
+|foreign   | validate<foreign> | --boolean | true  |
+|"hello"   | validate<foreign> | --boolean | false |
+|123       | validate<foreign> | --boolean | false |
+
+* undefinedは#'undefinedだけを含む単元集合である。
+
+|= !input  |= !command         |= !params  |= !output |
+|null      | validate<undefined> | --boolean | false |
+|undefined | validate<undefined> | --boolean | true |
+| ""       | validate<undefined> | --boolean | false |
+| false    | validate<undefined> | --boolean | false |
+|foreign   | validate<undefined> | --boolean | false |
+|"hello"   | validate<undefined> | --boolean | false |
+|123       | validate<undefined> | --boolean | false |
+
+* anyは #'undefined, foreign を含まない。
+
+|= !input  |= !command     |= !params  |= !output |
+|null      | validate<any> | --boolean | true |
+|undefined | validate<any> | --boolean | false|
+| ""       | validate<any> | --boolean | true |
+| false    | validate<any> | --boolean | true |
+|foreign   | validate<any> | --boolean | false|
+|"hello"   | validate<any> | --boolean | true |
+|123       | validate<any> | --boolean | true |
+
+* never? = never∪undefined = undefined （neverは空集合だから）
+
+|= !input  |= !command        |= !params  |= !output |
+|null      | validate<never?> | --boolean | false |
+|undefined | validate<never?> | --boolean | true |
+| ""       | validate<never?> | --boolean | false |
+| false    | validate<never?> | --boolean | false |
+|foreign   | validate<never?> | --boolean | false |
+|"hello"   | validate<never?> | --boolean | false |
+|123       | validate<never?> | --boolean | false |
+
+
+* X? = X∪undefined
+
+|= !input  |= !command        |= !params  |= !output |
+|null      | validate<never~|undefined> | --boolean | false |
+|undefined | validate<never~|undefined> | --boolean | true |
+| ""       | validate<never~|undefined> | --boolean | false |
+| false    | validate<never~|undefined> | --boolean | false |
+|foreign   | validate<never~|undefined> | --boolean | false |
+|"hello"   | validate<never~|undefined> | --boolean | false |
+|123       | validate<never~|undefined> | --boolean | false |
+
+* unviv? = univ∪undefined = univ （undefined⊆univ だから）
+
+|= !input  |= !command        |= !params  |= !output |
+|null      | validate<univ?>   | --boolean | true |
+|undefined | validate<univ?>   | --boolean | true |
+| ""       | validate<univ?>   | --boolean | true |
+| false    | validate<univ?>   | --boolean | true |
+|foreign   | validate<univ?>   | --boolean | true |
+|"hello"   | validate<univ?>   | --boolean | true |
+|123       | validate<univ?>   | --boolean | true |
+
+* [X*] = [X?, X*] = [X?, X?, X*] = [X?, X?, X?, X*] = ...
+
+|= !input  |= !command          |= !params  |= !output |
+|[]        |validate<[integer*]>| --boolean | true |
+|[1]       |validate<[integer*]>| --boolean | true |
+|[1,2]     |validate<[integer*]>| --boolean | true |
+|[1,2,3]   |validate<[integer*]>| --boolean | true |
+|[,2]      |validate<[integer*]>| --boolean | true |
+|[,2,]     |validate<[integer*]>| --boolean | true |
+|[,2,3]    |validate<[integer*]>| --boolean | true |
+|[,2,3,]   |validate<[integer*]>| --boolean | true |
+|[,2,,4]   |validate<[integer*]>| --boolean | true |
+
+
+* X?? = (X∪undefined)∪undefined = X∪(undefined∪undefined) = X∪undefined = X?
+
+|= !input  |= !command        |= !params  |= !output |
+|null      | validate<(never?)?> | --boolean | false |
+|undefined | validate<(never?)?> | --boolean | true |
+| ""       | validate<(never?)?> | --boolean | false |
+| false    | validate<(never?)?> | --boolean | false |
+|foreign   | validate<(never?)?> | --boolean | false |
+|"hello"   | validate<(never?)?> | --boolean | false |
+|123       | validate<(never?)?> | --boolean | false |
+
+
+|= !input  |= !command        |= !params  |= !output |
+|null      | validate<(any?)?> | --boolean | true |
+|undefined | validate<(any?)?> | --boolean | true |
+| ""       | validate<(any?)?> | --boolean | true |
+| false    | validate<(any?)?> | --boolean | true |
+|foreign   | validate<(any?)?> | --boolean | false|
+|"hello"   | validate<(any?)?> | --boolean | true |
+|123       | validate<(any?)?> | --boolean | true |
+
+
+
