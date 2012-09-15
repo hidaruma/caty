@@ -87,25 +87,9 @@ class TreeDumper(TreeCursor):
                 if node.options.get('maxCount', None) is not None:
                     buff.append(str(node.options['maxCount']))
                 buff.append('}')
-            if 'subName' in node.options:
-                if self.context[-1] == 'option':
-                    buff.append('?')
-                    self.context.pop(-1)
-                elif self.context[-1] == 'repeat':
-                    buff.append('*')
-                    self.context.pop(-1)
-                buff.append(' ' + node.options['subName'])
-        else:
-            if self.context[-1] == 'option':
-                buff.append('?')
-                self.context.pop(-1)
-            elif self.context[-1] == 'repeat':
-                buff.append('*')
-                self.context.pop(-1)
 
     def _visit_option(self, node):
-        self.context.append('option')
-        return node.body.accept(self)
+        return node.body.accept(self) + '?'
 
     def _visit_enum(self, node):
         if len(node.enum) > 1:
@@ -168,14 +152,14 @@ class TreeDumper(TreeCursor):
             ls.append(c)
         if ls:
             for c in ls[:-1]:
-                _buff.append(c.accept(self) + ', ')
-        if ls and isinstance(node, Array) and node.repeat and u'subName' in ls[-1].options:
-            self.context.append('repeat')
-            _buff.append(ls[-1].accept(self))
-        elif ls:
+                _buff.append(c.accept(self))
+                if u'subName' in c._options:
+                    _buff.append(' ' + c._options['subName'])
             _buff.append(ls[-1].accept(self))
             if node.repeat:
                 _buff.append('*')
+            if u'subName' in ls[-1]._options:
+                _buff.append(' ' + ls[-1]._options['subName'])
         if filter(lambda s: '\n' in s, _buff):
             for b in _buff:
                 buff.append('\n')
@@ -186,7 +170,7 @@ class TreeDumper(TreeCursor):
         else:
             buff.extend(_buff)
         self.depth -= 1
-        return _buff
+        return buff
 
     def _visit_bag(self, node):
         buff = ['{[']
@@ -205,11 +189,13 @@ class TreeDumper(TreeCursor):
         return u''.join(buff)
 
     def _visit_union(self, node):
-        l = node.left.accept(self)
-        r = node.right.accept(self)
-        buff = [l + ' | ' + r]
-        buff.insert(0, u'(')
-        buff.insert(2, u')')
+        ls = flatten_union(node)
+        buff = [u'(']
+        for n in ls:
+            buff.append(n.accept(self))
+            buff.append(u' | ')
+        buff.pop(-1)
+        buff.append(u')')
         self._process_option(node, buff)
         return u''.join(buff)
 
