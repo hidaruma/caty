@@ -90,21 +90,22 @@ class TreeDumper(TreeCursor):
             if 'subName' in node.options:
                 if self.context[-1] == 'option':
                     buff.append('?')
+                    self.context.pop(-1)
                 elif self.context[-1] == 'repeat':
                     buff.append('*')
+                    self.context.pop(-1)
                 buff.append(' ' + node.options['subName'])
         else:
             if self.context[-1] == 'option':
                 buff.append('?')
+                self.context.pop(-1)
             elif self.context[-1] == 'repeat':
                 buff.append('*')
+                self.context.pop(-1)
 
     def _visit_option(self, node):
         self.context.append('option')
-        try:
-            return node.body.accept(self)
-        finally:
-            self.context.pop(-1)
+        return node.body.accept(self)
 
     def _visit_enum(self, node):
         if len(node.enum) > 1:
@@ -168,10 +169,13 @@ class TreeDumper(TreeCursor):
         if ls:
             for c in ls[:-1]:
                 _buff.append(c.accept(self) + ', ')
-        if isinstance(node, Array) and node.repeat:
+        if ls and isinstance(node, Array) and node.repeat and u'subName' in ls[-1].options:
             self.context.append('repeat')
-            _buff.append(c.accept(self))
-            self.context.pop(-1)
+            _buff.append(ls[-1].accept(self))
+        elif ls:
+            _buff.append(ls[-1].accept(self))
+            if node.repeat:
+                _buff.append('*')
         if filter(lambda s: '\n' in s, _buff):
             for b in _buff:
                 buff.append('\n')
