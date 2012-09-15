@@ -3,6 +3,7 @@
 module ct;
 
 /** 標準入力の画像データを表示する */
+@[interactive]
 command show-image :: binary -> void
 refers python:image.ShowImage;
 

@@ -75,6 +75,7 @@ command annotate [string path] :: void -> string
  * このデバッガはCatyランタイムのデバッグのためのものであり、
  * CatyScriptのデバッグには使用できない。
  */
+@[interactive]
 command debugger :: void -> void
     refers python:caty.core.std.command.debug.Debugger;
 

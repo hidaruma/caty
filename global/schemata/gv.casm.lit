@@ -324,6 +324,7 @@ command fix
 };
 
 /** グラフの描画結果を表示する */
+@[interactive]
 command show
  {
    "font" : string?, // とりあえずfontオプションは使える
@@ -335,6 +336,7 @@ command show
 
 
 /** グラフの描画結果を表示してからpassする */
+@[interactive]
 command peek 
  {
    /** debugの値に無関係に常に描画する */
