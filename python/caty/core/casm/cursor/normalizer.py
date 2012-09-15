@@ -138,6 +138,11 @@ class TypeCalcurator(_SubNormalizer):
         # 一方がneverであれば演算結果はnever
         if lt == 'never' or rt == 'never':
             res = NeverSchema()
+        # univは&演算では単位元
+        elif lt == 'univ':
+            res = r
+        elif rt == 'univ':
+            res = l
         # フォーリンデータはどうしようもないのでnever
         elif lt == 'foreign' or rt == 'foreign':
             res = NeverSchema()
@@ -146,11 +151,6 @@ class TypeCalcurator(_SubNormalizer):
                 res = UndefinedSchema()
             else:
                 res = NeverSchema()
-        # univは&演算では単位元
-        elif lt == 'univ':
-            res = r
-        elif rt == 'univ':
-            res = l
         # anyはforeignとundefined以外に対して単位元
         elif lt == 'any':
             res = r
@@ -258,7 +258,7 @@ class TypeCalcurator(_SubNormalizer):
                 res = self._intersect_enum_and_scalar(self._dereference(r), l)
             else:
                 res = NeverSchema()
-        if (node.left.optional and node.right.optional) or (lt == 'univ' or rt == 'univ'):
+        if (node.left.optional and node.right.optional) or (lt == 'univ' and node.right.optional) or (rt == 'univ' and node.left.optional):
             res = OptionalSchema(res)
         return res
 

@@ -153,13 +153,13 @@ class TreeDumper(TreeCursor):
         if ls:
             for c in ls[:-1]:
                 _buff.append(c.accept(self))
-                if u'subName' in c._options:
-                    _buff.append(' ' + c._options['subName'])
+                if u'subName' in c.options:
+                    _buff.append(' ' + c.options['subName'])
             _buff.append(ls[-1].accept(self))
             if node.repeat:
                 _buff.append('*')
-            if u'subName' in ls[-1]._options:
-                _buff.append(' ' + ls[-1]._options['subName'])
+            if u'subName' in ls[-1].options:
+                _buff.append(' ' + ls[-1].options['subName'])
         if filter(lambda s: '\n' in s, _buff):
             for b in _buff:
                 buff.append('\n')
