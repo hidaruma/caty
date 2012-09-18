@@ -3,6 +3,7 @@ from caty.core.language import split_colon_dot_path
 from caty.core.language.util import make_structured_doc
 from caty.jsontools import tagged
 from caty.util.collection import conditional_dict
+from caty.core.casm.language.ast import KindReference
 
 class ShallowReifier(object):
     def _get_localtion(self, obj):
@@ -319,10 +320,12 @@ class ListTypes(SafeReifier):
         r = []
         for t in module.schema_ns.values():
             if t.name not in types:
+                if isinstance(t, KindReference): continue
                 r.append(reifier.reify_type(t))
         if not cls_name and self._rec:
             for cls in module.class_ns.values():
                 for t in cls.schema_ns.values():
+                    if isinstance(t, KindReference): continue
                     o = reifier.reify_type(t)
                     o['name'] = cls.name + '.' + o['name']
                     r.append(o)
