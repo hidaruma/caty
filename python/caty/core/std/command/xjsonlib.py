@@ -95,3 +95,8 @@ class Get(Builtin):
                 throw_caty_exception(u'Undefined', msg)
             else:
                 return caty.UNDEFINED
+
+class Pretty(Builtin):
+    def execute(self, input):
+        return json.pp(input)
+

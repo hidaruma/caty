@@ -69,7 +69,18 @@ throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist, Cons
 refers python:caty.core.std.command.xjsonlib.Put;
 
 /**
- * 入力値の XJSON オブジェクトを整形して返す。
+ * 入力値のXJSONオブジェクトを整形して返す。
  */
-command pretty :: any -> string
-    refers python:caty.core.std.command.jsonlib.Pretty;
+command pretty :: any -> string {
+    univ-pretty
+};
+
+/**
+ * 入力値のXJSONオブジェクトを整形して返す。
+ * prettyとは違い、undefinedやforeignも出力できる。
+ */
+command univ-pretty :: univ -> string
+    refers python:caty.core.std.command.xjsonlib.Pretty;
+
+
+

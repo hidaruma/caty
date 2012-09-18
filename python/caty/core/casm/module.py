@@ -193,7 +193,7 @@ class Module(Facility):
         return True
 
     def _another_app_callback(self, rname, tracked=(), scope_func=None, type=u''):
-        throw_caty_exception('RUNTIME_ERROR', u'To call another application\'s %s is forbidden at compile-time' % type)
+        raise Exception(u'To call another application\'s %s is forbidden at compile-time' % type)
 
     @property
     def command_profiles(self):
