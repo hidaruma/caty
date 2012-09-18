@@ -59,7 +59,7 @@ syntax sParen ::= '(' sKindExpr ')' ;
 <<{
 type QualifierMixin = reif:QualifierMixin;
 
-type Type = reif:Type;
+type Type = reif:TypeSpec;
 
 /** カインドのレイフィケーションデータの修飾情報 
  * 特に追加情報はない。
