@@ -4,7 +4,14 @@
 module json in casm;
 
 type AnyObject = {*:any};
-type StandardJson = string | number | null | boolean | array | object;
+
+type StandardJson = string | number | null | boolean | StdArray | StdObject;
+
+type StdObject = {
+  *: StandardJson,
+};
+
+type StdArray = [StandardJson*];
 
 /** selectionのフォーマットや値に間違いがある */
 exception BadSelection = object;
@@ -35,9 +42,9 @@ command write [string] :: any -> void
     refers python:caty.core.std.command.jsonlib.WriteJson;
 
 /**
- * 入力値の JSON オブジェクトを整形して返す。
+ * 入力値のJSONオブジェクトを整形して返す。
  */
-command pretty :: any -> string
+command pretty :: StandardJson -> string
     refers python:caty.core.std.command.jsonlib.Pretty;
 
 /**
