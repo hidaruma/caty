@@ -190,7 +190,7 @@ class TreeDumper(TreeCursor):
         return u''.join(buff)
 
     def _visit_union(self, node):
-        ls = flatten_union(node)
+        ls = self.__flatten_union(node)
         buff = [u'(']
         for n in ls:
             buff.append(n.accept(self))
@@ -199,6 +199,23 @@ class TreeDumper(TreeCursor):
         buff.append(u')')
         self._process_option(node, buff)
         return u''.join(buff)
+
+    def __flatten_union(self, node):
+        res = []
+        if not isinstance(node, Union):
+            return [node]
+        l = dereference(node.left)
+        if isinstance(l, Union):
+            res.extend(self.__flatten_union(l))
+        else:
+            res.append(node.left)
+        r = dereference(node.right)
+        if isinstance(r, Union):
+            res.extend(self.__flatten_union(r))
+        else:
+            res.append(node.right)
+        return res
+
 
     def _visit_updator(self, node):
         l = node.left.accept(self)

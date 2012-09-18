@@ -1,34 +1,34 @@
-class AbsoluteNode(object):
+class AbstractNode(object):
     def accept(self, cursor):
         raise NotImplementedError
 
-class Root(AbsoluteNode):
+class Root(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_root(self)
 
-class Scalar(AbsoluteNode):
+class Scalar(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_scalar(self)
 
-class Optional(AbsoluteNode):
+class Optional(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_option(self)
 
-class Array(AbsoluteNode):
+class Array(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_array(self)
 
     def __iter__(self):
         raise NotImplementedError
 
-class Bag(AbsoluteNode):
+class Bag(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_bag(self)
 
     def __iter__(self):
         raise NotImplementedError
 
-class Enum(AbsoluteNode):
+class Enum(AbstractNode):
 
     def accept(self, cursor):
         return cursor._visit_enum(self)
@@ -36,7 +36,7 @@ class Enum(AbsoluteNode):
     def __iter__(self):
         raise NotImplementedError
 
-class Object(AbsoluteNode):
+class Object(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_object(self)
 
@@ -55,11 +55,11 @@ class Object(AbsoluteNode):
     def __setitem__(self, key, value):
         raise NotImplementedError
 
-class Function(AbsoluteNode):
+class Function(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_function(self)
 
-class Operator(AbsoluteNode):
+class Operator(AbstractNode):
     @property
     def left(self):
         raise NotImplementedError
@@ -80,7 +80,7 @@ class Updator(Operator):
     def accept(self, cursor):
         return cursor._visit_updator(self)
 
-class Tag(AbsoluteNode):
+class Tag(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_tag(self)
 
@@ -91,7 +91,7 @@ class Tag(AbsoluteNode):
 class Ref(object):
     pass
 
-class PseudoTag(AbsoluteNode):
+class PseudoTag(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_pseudo_tag(self)
 
