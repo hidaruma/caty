@@ -26,7 +26,6 @@ module reif related kreif;
   プロジェクトのプロパティとして生（foreign）で取れるようになっているが、これは変更されるだろう。
 # 名前空間であるプロパティには @[namespace] を付けた。
 # 他の名前空間の一部となるプロパティには @[subnamespace] を付けた。
-# namespaceContainerは長いので、プロパティ名は単にcontainerとした。
 # NamespaceInfoをどこに置くかは未定。
 # 型とコマンドの両方に共通のレイフィケーションルールを使うことを考慮して
   シングルトン型は「値の表現」と解釈する。
@@ -35,7 +34,6 @@ module reif related kreif;
   レイフィケーション時は常に展開される。（展開形式は下。スキーマにも入っている。）
 # シャローレイフィケーションの当座の実装を容易にするため、
   テキスト表現も許すTypeSpecという型を入れた。TypeSpecは暫定的な処理。
-# containerとparentPathがカブっているようだ。
 # //型がmogra-nodeになってない。//
 # 変数（名前）のphylum概念は必要そうだ。
 
@@ -54,34 +52,46 @@ module reif related kreif;
  "additional" : @builtin {"typeName": "univ"}
 }
 }}}
+
+== 変更予定
+
+=== 位置情報
+
+# **位置情報のプロパティ名は "location" **
+# **app, pkg, mod, cls の4つのプロパティを持つJSONオブジェクト**、
+  必要なプロパティだけに値（文字列）が入る。
+# projectメタオブジェクト、
+  applicationメタオブジェクトを除くすべてのメタオブジェクト（レイフィケーション）に、
+ この情報を持たせる。
+
+=== optsとargsは必須に
+
+=== profiles --> profile
+
+同名コマンドに異なるプロファイルを割り当てたいなら、オーバーロードを使う。
+
+=== docコメントがないときはundefined
+
+=== 例外とシグナルの値にタグを追加
+
+@only か @likely を付ける。
  
 
 == 実装優先度
 
 State, Resource, Actionを優先。これらは、プロトタイプサイト（モックアップ）作成に使う。
 
-型のレイフィケーションには型名（文字列）を併用する。名前を持つ型で、スキーマ属性と型パラメータを持たない型は
+型のレイフィケーションには型名／テキスト形式（文字列）を併用する。
+名前を持つ型で、スキーマ属性と型パラメータを持たない型は
 その名前のみで識別できる。
-現状では、型名しか受け付けないコマンドを使う状況が多いので、型名としてのレイフィケーションを優先する。
+現状では、型名しか受け付けないコマンドを使う状況が多いので、
+型名／テキスト形式としてのレイフィケーションを優先する。
 最後の方の get-name コマンドを参照。
 
 レイフィケーション・コマンドに、--type-name オプションを付けると、可能な限りtypeNameを使うようにする。
 型名（テキスト文字列）の使用は、今後も排除できないと思う。
 
 スクリプトコードのレイフィケーションの整備は先延ばし。
-
-
-== どうすべきか？（未定）
-
-# Docは必須とするか？
-#  "exception": [Type*], @ どうしよう?
-#  "signal": [Type*], @ どうしよう?
-
-
-=== こうしよう
-
-# Docは必須としてもよさそうだ。"undocumented" が既に入っているので。
-
 
 == ネーミングルール
 
@@ -107,17 +117,16 @@ State, Resource, Actionを優先。これらは、プロトタイプサイト（
 /** ドキュメンテーションコメント */
 type Doc = {
   /** 短い簡潔な記述 */
-  "description": string,
+  "description": string?,
   /** より詳しい説明（Wikiテキストと解釈する） */
   "moreDescription" : string(remark="Wikiテキスト")?,
 };
 
-/** 共通の修飾情報 
+/** 共通の修飾情報 - 名前?, Doc, アノテーション
  *
  * # 名前
  * # Docコメント
  * # アノテーション
- * # 親となる名前空間コンテナ
  */
 type QualifierMixin = {
 
@@ -134,17 +143,24 @@ type QualifierMixin = {
   /** アノテーション */
   "annotations": object?, // いずれ必須にすべき
 
-  /** メタオブジェクトが所属する名前空間のコンテナ
-   * コンテナのコロンドットパスが入る。
-   *
-   * 名前空間に登録された名前を持つメタオブジェクト（型、コマンドなど）は、
-   * その親である名前空間を取得できると便利なことが多い。
-   * ただし、この機能はオプショナルで実装依存。
-   */
-  "container": string(remark="CDパス")?, // parentPathも参照
-
    *: any?
 };
+
+/** コロンドットパスによるロケーションを含む修飾情報
+ */
+type LocatedQualifierMixin = QualifierMixin & {
+  /** このメタオブジェクトが所属する親コンテナの位置情報
+   */
+  "location": {
+    "app": string?,
+    "pkg": string?,
+    "mod": string?,
+    "cls": string?,
+   }?, // いずれ必須にする
+
+  * : any?
+};
+
 }>>
 
 
@@ -154,7 +170,8 @@ KindExprの定義は済んでいる。kreif.casm.lit。
 いずれはカインドも統合する。
 
 <<{
-type KindExpr = kreif:KindExpr;
+/** カインド */
+type Kind = kreif:KindExpr;
 
 }>>
 
@@ -244,16 +261,14 @@ related宣言されたモジュール群は単一のものとして扱う。
 
 <<{
 
-/** プロジェクトの情報 */
-type ProjectSummary = {
-  "document": Doc?,
-  "annotations": object?,  // アノテーションもサマリーに必要
+/** プロジェクトの基本情報 */
+type ProjectSummary = QualifierMixin & {
 
   /** プロジェクト名 
    * プロジェクト名は任意の文字列で、ドメイン名のようにドットを含んでもよい。
    * 設定項目の projectName 
    */
-  "name": string,
+  "name": string, // 必須
 
   /** 設定ファイルの deprecated の値をコピーする */
   @[deprecated, default(false)]
@@ -267,14 +282,13 @@ type ProjectSummary = {
  * * アプリケーションの名前空間 applications
  */
 @[mogra-node, full-info]
-type Project = @project (QualifierMixin & ProjectSummary & {
+type Project = @project (ProjectSummary & {
 
 /*{{{
 
   /** ランタイム・メタオブジェクト 
    * まだ未定
    */
-  @[long-summary]
   "runtime" : foreign?,
 
 }}}*/
@@ -289,7 +303,7 @@ type Project = @project (QualifierMixin & ProjectSummary & {
   /** 全てのファシリティの所在 
    * プロジェクト全体でファシリティ名は一意的に保つ。
    */
-  @[long-summary]
+
   "facilityLocations": {
      * /* ファシリティ名 */: string(remark="アプリケーション名")?
    },
@@ -300,11 +314,11 @@ type Project = @project (QualifierMixin & ProjectSummary & {
 
 });
 
-/** アプリケーションの情報 */
+/** アプリケーションの基本情報 */
 type ApplicationSummary =  QualifierMixin & {
 
   /** アプリケーション名 */
-  "name": string(remark="名前"),
+  "name": string(remark="名前"), // 必須
 
   /** 所属するグループ */
   "group" : (string | null),
@@ -347,23 +361,11 @@ type Application = @application (ApplicationSummary & {
   *: any?
 });
 
-/** コロンドットパスによるロケーションを含む修飾情報
- */
-type LocatedQualifierMixin = QualifierMixin & {
-  /** このメタオブジェクトが所属する親コンテナのパス
-   * コロンドット区切りの名前列。
-   */
-  "parentPath": string(remark="コロンドットパス"),
-
-  * : any?
-};
-
-type FacilitySummary = {
-  "document": Doc?,
-  "annotations": object?,  // アノテーションもサマリーに必要
+/** ファシリティの基本情報 */
+type FacilitySummary = LocatedQualifierMixin & {
 
   /** ファシリティの登録名 */
-  "name" : string,
+  "name" : string, // 必須
 
   /** スペッククラスのコロンドットパス */
   "specClass": string(remark="CDパス"),
@@ -377,27 +379,25 @@ type FacilitySummary = {
 
   /** 実装クラスの実装言語依存の参照 */
   @[old-long-summary]
-  "implClass": CodeRef?, // 必須にする予定
+  "implClass": ImplRef?, // 必須にする予定
 
    *: any?
 };
 
 /** ファシリティ */
 @[mogra-node, full-info]
-type Facility = @facility (LocatedQualifierMixin & FacilitySummary & {
+type Facility = @facility (FacilitySummary & {
 
   // サブツリーなし
 
    *: any?
 });
 
-
-type PackageSummary = {
-  "document": Doc?,
-  "annotations": object?,  // アノテーションもサマリーに必要
+/** パッケージの基本情報 */
+type PackageSummary = LocatedQualifierMixin & {
 
   /** パッケージ名 */
-  "name": string(remark="名前"),
+  "name": string(remark="名前"), // 必須
 
   /** 置かれているプレース */
   "place" : ("schemata" | "actions"),
@@ -413,7 +413,7 @@ type PackageSummary = {
  * # モジュールの名前空間 modules
  */
 @[mogra-node, full-info]
-type Package = @package (LocatedQualifierMixin & PackageSummary &  {
+type Package = @package (PackageSummary &  {
 
   /** パッケージの名前空間 */
   @[namespace]
@@ -426,13 +426,11 @@ type Package = @package (LocatedQualifierMixin & PackageSummary &  {
   *: any?
 });
 
-/** モジュールに関する情報 */
-type ModuleSummary = {
-  "document": Doc?,
-  "annotations": object?,  // アノテーションもサマリーに必要
+/** モジュールに関する基本情報 */
+type ModuleSummary = LocatedQualifierMixin & {
 
   /** モジュール名 */
-  "name": string(remark="名前"),
+  "name": string(remark="名前"), // 必須
 
   /** 置かれているプレース */
   "place" : ("schemata" | "actions"),
@@ -450,21 +448,22 @@ type ModuleSummary = {
   *: any?
 };
 
-/** モジュールの共通構造 
- * モジュールは3つの名前空間を持つ： 
+
+
+/** モジュール
+ * モジュールは常に3つの名前空間を持つ： 
  * # 型の名前空間 types
  * # コマンドの名前空間 commands
  * # クラスの名前空間 classes
  *
- * kindは、型名と同じ名前空間を使う、
- * ただし、レイフィケーションとしては、kinds を入れるほうが使いやすいかもしれない。
+ * 他の名前空間、部分名前空間はオプショナルである。
  */
 @[mogra-node, full-info]
-type ModuleStruct = LocatedQualifierMixin & ModuleSummary & {
+type Module = @module (ModuleSummary & {
 
   /** 型の名前空間 */
   @[namespace]
-  "types": NamespaceOf<Type>,
+  "types": NamespaceOf<TypeSpec>,
 
   /** コマンドの名前空間 */
   @[namespace]
@@ -474,62 +473,45 @@ type ModuleStruct = LocatedQualifierMixin & ModuleSummary & {
   @[namespace]
   "classes": NamespaceOf<Class>,
 
-  /** カインド */
-  @[subnamespace]
-  "kinds": {*: KindExpr?},
-
-
-  *: any?
-};
-
-/** モジュール */
-@[mogra-node]
-type Module = Casm | Cara;
-
-
-/** casmモジュール */
-@[mogra-node]
-type Casm = @casm ModuleStruct;
-
-
-/** caraモジュール
- * caraの場合、さらに2つの名前空間が追加される： 
- * # 状態の名前空間 states
- * # ユーザーロールの名前空間 userroles
- *
- * リソースクラス名はクラスの名前空間に配置される。
- * ポート名はコマンドの名前空間に配置される。
- * だが、レイフィケーションとしては、resources, portsがあってもいいかもしれないので、そのまま残す。
- * とりあえず、名前空間構造の忠実な反映より、利便性を取る。
- */
-@[mogra-node]
-type Cara = @cara (ModuleStruct & {
-
-  /** リソースクラス 
-   * classesと名前空間は同じ
+  /** ポートの部分名前空間
+   * commandsと名前空間は同じ
+   * 部分名前空間をレイファイするかどうかは未定
    */
   @[subnamespace]
-  "resources": NamespaceOf<Resource>, 
+  "ports": NamespaceOf<Port>?,
 
-  /** ユーザーロールの名前空間 */
-  @[namespace]
-  "userroles": NamespaceOf<UserRole>,
-
-  /** 状態の名前空間 */
-  @[namespace]
-  "states": NamespaceOf<State>,
-
-  /** ポート
+  /** カインドの部分名前空間 
    * commandsと名前空間は同じ
    */
   @[subnamespace]
-  "ports": NamespaceOf<Port>,
+  "kinds": NamespaceOf<Kind>?,
 
-  *: any? // open
+/* 以下の名前空間は、caraモジュールのみ */
+
+  /** リソースクラス 
+   * classesと名前空間は同じ
+   * 部分名前空間をレイファイするかどうかは未定
+   */
+  @[subnamespace]
+  "resources": NamespaceOf<Resource>?, 
+
+  /** ユーザーロールの名前空間 */
+  @[namespace]
+  "userroles": NamespaceOf<UserRole>?,
+
+  /** 状態の名前空間 */
+  @[namespace]
+  "states": NamespaceOf<State>?,
+
+  *: any?
 });
 
+/*{{{
+}}}*/
 
-type ClassSummary = {
+
+/** クラスの基本情報 */
+type ClassSummary = LocatedQualifierMixin & {
   "document": Doc?,
   "annotations": object?,  // アノテーションもサマリーに必要
 
@@ -552,7 +534,7 @@ type ClassSummary = {
  * クラス表現（class expression）を導入すると、この定義は大幅に変更される。
  */
 @[mogra-node, full-info]
-type Class = @class (LocatedQualifierMixin & ClassSummary & {
+type Class = @class (ClassSummary & {
 
   /** コマンドの名前空間 */
   @[namespace]
@@ -571,9 +553,9 @@ type Class = @class (LocatedQualifierMixin & ClassSummary & {
 
 <<{
 /** 型のレイフィケーションデータの修飾情報 
- * スキーマ属性が付く
+ * スキーマ属性と再帰性のフラグが付く
  */
-type TypeQualifierMixin = QualifierMixin & {
+type TypeQualifierMixin = LocatedQualifierMixin & {
      /** スキーマ属性 */
     "attributes": object?,
 
@@ -585,11 +567,13 @@ type TypeQualifierMixin = QualifierMixin & {
     *: any?  // open
 };
 
+/** 型の基本情報 */
 type TypeSummary = {
   "document": Doc?,
   "annotations": object?,  // アノテーションもサマリーに必要
 
   "name": string,
+  "typeParams": [TypeParam*]?, // 必須にする
 
   /** @[deprecated]アノテーションの値をコピーする */
   @[deprecated, default(false)]
@@ -776,13 +760,13 @@ type TypeRef = @type-ref (TypeQualifierMixin & {
    */
   "ref" : string,
   /** カインド */
-  "kind" : KindExpr?,
+  "kind" : Kind?,
   /** 名前が型関数であるときは、パラメータのカインドリスト
    *
    * paramKindsが未定義なら、参照先は型であり、
    * paramKindsが定義されているなら、参照先は型関数である。
    */
-  "paramKinds" : [KindExpr*]?,
+  "paramKinds" : [Kind*]?,
 
    *: any?
 });
@@ -871,8 +855,8 @@ type TypeParam = @param {
     "annotations" : object?,
 
     "name": string,
-    "kind": KindExpr?, // KindExprは暫定
-    "default": Type?, // Typeは暫定
+    "kind": Kind?,
+    "default": TypeSpec?, // TypeSpecは暫定
 
 };
 
@@ -904,21 +888,14 @@ type typeName = string(remark="型の名前");
  */
 type typeText = string(remark="型のテキスト表現");
 
-
-
-/** 型 
- * 型の名前（文字列）も許す
- */
-type Type = typeName|TypeExpr;
-
-
 /** 型の仕様（テキストを許す）
  */
 type TypeSpec = typeText|TypeExpr;
 
 
-/** 型表現 
+/** 型表現 - 各種型表現のユニオン
  */
+@[mogra-node, node-group]
 type TypeExpr = (
   TypeConst // 組み込み型、シングルトン型
 | TypeRef // 型変数＝型名、型関数名
@@ -1174,18 +1151,6 @@ type NormalScalarType = BuiltinTypeOf<normalScalarTypeName>;
 /** データベースレコードのような型 */
 type FlatRecordType = ClosedObjectTypeOf<NormalScalarType>;
 
-/*{{{
-
-@object-of (TypeQualifierMixin & {
-
-  "specified": {*: NormalScalarType?},
-  "additional": @builtin {"typeName" : "undefined"},
-
-   *: any? // open
-});
-}}}*/
-
-
 }>>
 
 == コマンド
@@ -1241,10 +1206,10 @@ type FacilityUsage = {
 };
 
 /** 実装 */
-type Implement = (Script | CodeRef);
+type Implement = (Script | ImplRef);
 
-/** コード参照 */
-type CodeRef = @code-ref {
+/** 実装への参照 */
+type ImplRef = @imple-ref {
   /** 実装言語 
    * Pythonのときは、"python"
    */
@@ -1257,7 +1222,7 @@ type CodeRef = @code-ref {
 type Script = deferred @script any;
 
 
-
+/** コマンドの基本情報 */
 type CommandSummary = {
   "document": Doc?,
   "annotations": object?,  // アノテーションもサマリーに必要
@@ -1283,6 +1248,8 @@ type CommandSummary = {
    * : any?
 };
 
+
+/** コマンド */
 @[mogra-node, full-info]
 type Command = @command (CommandQualifierMixin & CommandSummary & {
 
@@ -1300,18 +1267,18 @@ type Profile = {
    /** クラスに属するときは、クラスのarg0をコピーする */
    "arg0": TypeSpec,
    /** オプションの型 */
-   "opts": TypeSpec?, //ObjectType?,
+   "opts": TypeSpec?, //ObjectType?, 必須にする。
    /** 引数の型 */
-   "args": TypeSpec?, //ArrayType?,
+   "args": TypeSpec?, //ArrayType?, 必須にする。
    /** 入力の型 */
    "input": TypeSpec,
 
    /** 出力の型 */
    "output": TypeSpec,
    /** 例外の型 */
-   "exception": [TypeSpec*], //@ どうしよう?
+   "exception": [TypeSpec*], // @only か @likely を付ける
    /** シグナルの型 */
-   "signal": [TypeSpec*], //@ どうしよう?
+   "signal": [TypeSpec*], // @only か @likely を付ける
 };
 
 }>>
@@ -1324,6 +1291,7 @@ type Profile = {
 
 
 <<{
+/** リソースクラスの基本情報 */
 type ResourceSummary = {
   "document": Doc,
   "annotations": object?,  // アノテーションもサマリーに必要
@@ -1348,6 +1316,7 @@ type ResourceSummary = {
   *: any?
 };
 
+/** リソースクラス */
 @[mogra-node, full-info]
 type Resource = @resource (ResourceSummary & {
 
@@ -1359,13 +1328,14 @@ type Resource = @resource (ResourceSummary & {
 
 });
 
+/** アクション・インボーカー */
 type Invoker = {
   "verb": string,
   "method": httpMethod,
   "checkers": object?
 };
 
-
+/** アクションの基本情報 */
 type ActionSummary = {
   "document": Doc,
   "annotations": object?,  // アノテーションもサマリーに必要
@@ -1406,6 +1376,15 @@ type ActionSummary = {
 
   /** このアクションの起動方式 */
   "invoker": Invoker, // アクション特有
+
+
+  /** このアクションが生成する可能性のある状態のリスト */
+  "produces": [string*]?, // 暫定的に省略可能、必須としたい
+  /** このアクションがリダイレクトする可能性のあるアクション／ポートのリスト */
+  "redirects": [string*]?,// 暫定的に省略可能、必須としたい
+  /** このアクションがフォーワードする可能性のあるアクション／ポートのリスト */
+  "forwards": [string*]?, // 暫定的に省略可能、必須としたい
+
 
   /** 入り口フラグメント（inlet） 
    * フラグメント検索の手間を省くため、
@@ -1461,11 +1440,8 @@ type FragmentProfile = {
     /** フラグメント名 */
     "name": string,
     /** フラグメントの境界特性 
-     * io は inかつout であることを示す。
-     * "" は in, out, io のどれでもないことを示す。
      */
-    @[default("")]
-    "boundary": ("in" | "out" | "io" | "")?, 
+    "boundary": {"in": boolean, "out":boolean}, 
     /** フラグメントへの入力型 */
     "input": (TypeSpec | IndeterminateType)?,
     /** フラグメントからの出力型 */
@@ -1474,15 +1450,16 @@ type FragmentProfile = {
     // アクションの構造グラフの辺情報
 
     /** 生成する状態 */
-    "produces": [string*], 
+    "produces": [string*]?, 
     /** アクション内の制御の遷移先 */
-    "relays": [string*],   
+    "relays": [string*]?,   
     /** リダイレクト先アクション／ポート */
-    "redirects": [string*],
+    "redirects": [string*]?,
     /** フォーワード先アクション／ポート  */
-    "forwards": [string*], 
+    "forwards": [string*]?, 
 };
 
+/** ユーザーロールの基本情報 */
 type UserRoleSummary = {
   "document": Doc,
   "annotations": object?,  // アノテーションもサマリーに必要
@@ -1508,6 +1485,7 @@ type HalfProfile = {
    "input": TypeSpec,
 };
 
+/** ポートの基本情報 */
 type PortSummary = {
   "document": Doc,
   "annotations": object?,  // アノテーションもサマリーに必要
@@ -1527,6 +1505,7 @@ type Port = @port (PortSummary & {
   *: any?
 });
 
+/** 状態の基本情報 */
 type StateSummary = {
   "document": Doc?,
   "annotations": object?,  // アノテーションもサマリーに必要
@@ -1636,7 +1615,7 @@ type Link = @link {
 <<{
 /** 型が名前を持つときは、その名前を取り出す 
 */
-command get-name :: Type -> (string|null) {
+command get-name :: TypeExpr -> (string|null) {
   // 組み込み型と型参照を選び出す
   when {
     builtin => [pass], 
@@ -1669,6 +1648,7 @@ command get-name :: Type -> (string|null) {
 
 <<{
 
+/** コロンドット・パス */
 type cdpath = string(remark="CDPATH");
 
 /** プロジェクト全体をレイファイする
@@ -1742,7 +1722,7 @@ command reify-type
     "safe": boolean?,
   }
   [cdpath typ]
-:: void -> Type?
+:: void -> TypeSpec?
 ;
 
 /** 指定されたコマンドをレイファイする
