@@ -163,6 +163,7 @@ class ResourceModule(Module):
                 u'Duplicated state name: $name module: $module', 
                 name=st.name, module=self._name)
         self._states[st.name] = st
+        st.parent = self
 
     def add_userrole(self, ur):
         if ur.name in self._userroles:

@@ -316,6 +316,7 @@ class StateBlock(Parser):
         self.merge = False
         self.link_name = u'links'
         self._script_parser = parser
+        self.parent = None
 
     def __call__(self, seq):
         seq.parse(keyword('state'))
@@ -434,6 +435,14 @@ class StateBlock(Parser):
             "links": [l.reify() for l in self.links],
             "type": self.type.reify()
         }
+
+    @property
+    def canonical_name(self):
+        return self.parent.canonical_name + ':' + self.name
+
+    @property
+    def app(self):
+        return self.parent.app.name
 
 class UserRole(Parser):
     def __init__(self, ds, ann):

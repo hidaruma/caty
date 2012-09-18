@@ -49,6 +49,14 @@ class ProfileContainer(object):
     def annotations(self):
         return self._annotations
 
+    @property
+    def app(self):
+        return self.defined_application
+
+    @property
+    def canonical_name(self):
+        return self.module.canonical_name + ':' + self.name
+
     def add_profile(self, profile):
         self.profiles.append(profile)
 

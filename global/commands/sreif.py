@@ -5,6 +5,32 @@ from caty.jsontools import tagged
 from caty.util.collection import conditional_dict
 
 class ShallowReifier(object):
+    def _get_localtion(self, obj):
+        if obj.app:
+            a = obj.app.name
+        else:
+            a = u'caty'
+        aname, mname, name = split_colon_dot_path(a + '::' + obj.canonical_name)
+        if name and not mname:
+            mname = name
+            name = None
+        pname = None
+        cname = None
+        if mname and '.' in mname:
+            pname, mname = mname.rsplit('.', 1)
+        if not name:
+            mname = None
+        if name and '.' in name:
+            cname, name = name.rsplit('.', 1)
+        name = None
+        return conditional_dict(lambda k, v: v is not None,
+            {
+                u'app': aname,
+                u'pkg': pname,
+                u'mod': mname,
+                u'cls': cname,
+            })
+
     def reify_app(self, a):
         r = {
             u'document': conditional_dict(lambda k, v: v is not None, description=a.description, moreDescription=a.more_description),
@@ -48,6 +74,7 @@ class ShallowReifier(object):
                 u'pathPattern': s.url_patterns,
                 u'annotations': self.reify_annotations(s.annotations),
                 u'instances': s.instances,
+                u'location': self._get_localtion(s),
         }
 
     def reify_action(self, s):
@@ -56,7 +83,8 @@ class ShallowReifier(object):
                 u'document': make_structured_doc(s.docstring),
                 u'implemented': s.implemented,
                 u'invoker': s.invoker_obj,
-                u'annotations': self.reify_annotations(s.annotations)
+                u'annotations': self.reify_annotations(s.annotations),
+                u'location': self._get_localtion(s),
         }
 
     def reify_module(self, m):
@@ -65,12 +93,13 @@ class ShallowReifier(object):
         else:
             p = u'schemata'
         return {
-            u'name': m.canonical_name,
+            u'name': m.name,
             u'place': p,
             u'syntax': m.type,
             u'literate': m.literate,
             u'annotations': self.reify_annotations(m.annotations),
             u'document': make_structured_doc(m.docstring),
+            u'location': self._get_localtion(m),
         }
 
     def reify_package(self, m):
@@ -79,10 +108,11 @@ class ShallowReifier(object):
         else:
             p = u'schemata'
         return {
-            u'name': m.canonical_name,
+            u'name': m.name,
             u'place': p,
             u'document': conditional_dict(lambda k,v: v is not None, {'description': m.docstring, 'moreDescription': m.more_docstring}),
             u'annotations': self.reify_annotations(m.annotations),
+            u'location': self._get_localtion(m),
         }
 
     def reify_class(self, c):
@@ -91,6 +121,7 @@ class ShallowReifier(object):
             u'annotations': self.reify_annotations(c.annotations),
             u'name': c.name,
             u'arg0': self._dump_schema(c._clsrestriction),
+            u'location': self._get_localtion(m),
         }
 
     def reify_type(self, t):
@@ -98,7 +129,8 @@ class ShallowReifier(object):
             u'name': t.name,
             u'document': make_structured_doc(t.docstring),
             u'deprecated': 'deprecated' in t.annotations,
-            u'annotations': self.reify_annotations(t.annotations)
+            u'annotations': self.reify_annotations(t.annotations),
+            u'location': self._get_localtion(t),
         }
 
     def reify_command(self, c):
@@ -109,6 +141,7 @@ class ShallowReifier(object):
             u'implemented': c.implemented,
             u'profiles': self._make_profile(c),
             u'typeParams': [self.reify_type_param(p) for p in c.type_params],
+            u'location': self._get_localtion(c),
         }
 
     def reify_type_param(self, p):
@@ -321,7 +354,6 @@ class ListCommands(SafeReifier):
             for cls in module.class_ns.values():
                 for c in cls.command_ns.values():
                     o = reifier.reify_command(c)
-                    o['name'] = cls.name + '.' + o['name']
                     r.append(o)
         return r
 

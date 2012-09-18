@@ -107,6 +107,10 @@ class Module(Facility):
         return self._type
 
     @property
+    def app(self):
+        return self._app
+
+    @property
     def system(self):
         return self._system
 

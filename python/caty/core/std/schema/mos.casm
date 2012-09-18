@@ -17,3 +17,27 @@ command fullpath
  }
 :: string -> string throws [InvalidInput, MissingOption]
     refers python:caty.core.std.command.mos.FullPath;
+
+/** メタオブジェクトから完全修飾名を取り出す。 */
+command get-canonical-name :: {"name": string, "location": {*:string}, *:any?} -> string {
+    $ > src;
+    %src|$.location.app? | case {
+        undefined => [] > app,
+        string => [pass, "::"]> app
+    };
+    %src|$.location.pkg? | case {
+        undefined => [] > pkg,
+        string => [pass, "."] > mod
+    };
+    %src|$.location.mod? | case {
+        undefined => [] > mod,
+        string => [pass, ":"] > mod
+    };
+    %src|$.location.cls? | case {
+        undefined => [] > cls,
+        string => [pass, "."] > mod
+    };
+    [%app, %pkg, %mod, %cls, [%src|$.name]] | list:concat > path;
+    %path | text:concat
+};
+

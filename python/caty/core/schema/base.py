@@ -104,6 +104,10 @@ class SchemaBase(Resource, PbcObject):
     def dereferenced(self):
         return self
 
+    @property
+    def app(self):
+        return None
+
     def remarks():
         def _get(self):
             return self._options.get('remark', False)
@@ -771,7 +775,7 @@ class AnySchema(SchemaBase, Scalar):
         if value is caty.UNDEFINED:
             raise JsonSchemaError(dict(msg='undefined value'))
         if type(value) not in (dict, list, tuple, unicode, NoneType, str, int, bool, Decimal, TagOnly, TaggedValue):
-            raise JsonSchemaError(dict(msg='Not a json value'))
+            raise JsonSchemaError(dict(msg='Not a json value'), repr(value))
 
     def _convert(self, value):
         return value
@@ -1185,8 +1189,11 @@ class NamedSchema(SchemaBase, Root):
         return self._module
 
     @property
+    def app(self):
+        return self.module.app
+
+    @property
     def canonical_name(self):
-        an = self.application.name
         mn = self._module.canonical_name
         name = self.name
         if mn and mn != 'public':
@@ -1358,6 +1365,10 @@ class TypeReference(SchemaBase, Scalar, Ref):
     @property
     def definition(self):
         return self._name
+
+    @property
+    def app(self):
+        return self.module.app
 
     def type_args():
         def get(self):
