@@ -984,6 +984,8 @@ class Help(Builtin):
 
 
     def _type_help(self):
+        from caty.core.casm.language.ast import KindReference
+        from caty.core.language.util import make_structured_doc
         line = self.__type_name.strip()
         if line == '':
             return u''
@@ -1026,9 +1028,9 @@ class Help(Builtin):
             else:
                 modules = [u'builtin', u'public']
             for module in modules:
-                types = [(s.name, s.docstring) 
+                types = [(s.name, make_structured_doc(s.docstring)['description']) 
                          for s in self.schema.get_module(module).schema_ns.values()
-                         if (not query) or (query in s.annotations)
+                         if ((not query) or (query in s.annotations)) and not isinstance(s, KindReference)
                         ]
                 types.sort(cmp=lambda x, y:cmp(x[0], y[0]))
                 if types:

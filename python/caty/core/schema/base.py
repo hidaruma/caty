@@ -83,6 +83,7 @@ class SchemaBase(Resource, PbcObject):
 
     def docstring():
         def _get(self):
+            assert isinstance(self._docstring, unicode)
             return self._docstring
         def _set(self, v):
             assert isinstance(v, unicode)
