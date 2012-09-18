@@ -13,7 +13,7 @@ module os in casm;
  */
 command exec-script [string script-name, string* args] :: void -> integer
  throws [ScriptNotFound, CommandExecutionError]
- reads scripts
+ reads [scripts, env]
  refers python:caty.core.std.command.oslib.ExecScript;
 
 /** 整数値の終了ステータスを OK, NG タグ付きデータに変換する。

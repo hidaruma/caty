@@ -979,7 +979,8 @@ command untagged<S default any, T default univ> [string?] :: S -> T
 /**
  * 標準入力より1行を読み込み、それを文字列として返す。
  */
-@[console] command cin [string? prompt] :: void -> string
+@[console, interactive]
+command cin [string? prompt] :: void -> string
     reads env
     refers python:caty.core.std.command.builtin.ConsoleIn;
 
@@ -1045,6 +1046,7 @@ command proj :: void -> string
                        :: void -> Assocs
                        {} [string]         :: void -> Assoc
                        {} [string, string] :: void -> string | null
+    reads env
     refers python:caty.core.std.command.builtin.Assoc;
 
 /**
@@ -1054,7 +1056,7 @@ command proj :: void -> string
  */
 @[console] command filetype :: void -> FileTypes
                           {} [string] :: void -> FileType | null
-        reads pub
+        reads [pub, env]
         refers python:caty.core.std.command.builtin.ShowFileType;
 
 /**
