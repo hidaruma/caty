@@ -29,6 +29,7 @@ class ResourceClass(object):
             e.annotations += self.annotations
             e.resource_name = resource_name
             e.module_name = module_name
+            e.parent = self
 
     def _extract_ext(self, pattern):
         e = pattern.split('.').pop(-1)

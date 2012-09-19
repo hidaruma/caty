@@ -66,7 +66,7 @@ class ResourceActionDescriptorParser(Parser):
             rcname = name_token(seq)
             url_pattern = self.url_pattern(seq)
             seq.parse('{')
-            block = seq.parse(ResourceBodyBlock(rcname, self._script_parser, self._module_name))
+            block = seq.parse(ResourceBodyBlock(rcname, self))
             actions = block.actions
             filetype = block.filetype
             instances = block.instances
@@ -115,14 +115,15 @@ def url_pattern(seq):
     return r
 
 class ResourceBodyBlock(Parser):
-    def __init__(self, rcname, script_parser, module_name):
+    def __init__(self, rcname, parent):
         self.rcname = rcname
         self.actions = {}
         self.instances = []
         self.filetype = {}
         self.names = set()
-        self._script_parser = script_parser
-        self._module_name = module_name
+        self._script_parser = parent._script_parser
+        self._module_name = parent._module_name
+        self.parent = parent
         self.implemented = u'none'
         self._invoker = None
 
@@ -176,8 +177,7 @@ class ResourceBodyBlock(Parser):
                                   n, 
                                   ds, 
                                   a, 
-                                  self.rcname, 
-                                  self._module_name,
+                                  self,
                                   prof,
                                   invoker,
                                   self.implemented)

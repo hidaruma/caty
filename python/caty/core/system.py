@@ -64,7 +64,6 @@ class System(PbcObject):
         gag = ApplicationGroup('', self._global_config, no_ambient, no_app, app_names, self)
         self._global_app = gag._apps[0]
         self._global_app.finish_setup()
-        #self._casm._core.schema_finder("GlobalConfig").validate(gcfg)
         # アプリケーショングループの順序は rc.caty の実行順序に関わる
         # common, main, extra, examples という順序は固定
         self._app_groups = [
@@ -213,6 +212,11 @@ class System(PbcObject):
     def debug(self):
         return self.__debug
     
+
+    @property
+    def system_resource_actions(self):
+        return self._core_app._system_resource_actions
+
     def reload_library(self):
         files = list(self._find_packages())
         for f in files:
@@ -289,6 +293,7 @@ class CoreApplication(Application):
         self._more_description = None
         self._global_config = system._global_config
         self._group = DummyGroup(self)
+        self._system_resource_actions = []
         self.i18n = system.i18n
 
     def _init(self):
@@ -296,13 +301,20 @@ class CoreApplication(Application):
         self._web_path = u''
         self._interpreter = script.initialize(self._schema_module, self, self._system)
         self._dispatcher = self._create_system_dispatcher()
+        self._extract_casm_from_cara()
+        self._schema_module.resolve()
 
     def _create_system_dispatcher(self):
-        from caty.core.action.module import ResourceModuleContainer
+        from caty.core.action.module import ResourceModuleContainer, ResourceModule
         from caty.core.std.action import create_default_resources
+        self._system.cout.write(u'Initializing default resource classes...')
+        rm = ResourceModule(u'resources', u'Caty Default Resource Classes', self)
         rmc = ResourceModuleContainer(self)
-        for r in create_default_resources(self.create_facilities()):
-            rmc.add_resource(r)
+        create_default_resources(rm)
+        rmc.add_module(rm)
+        for r in rm.resources:
+            self._system_resource_actions.append(r)
+        self._system.cout.writeln(u'OK')
         return rmc
 
     def create_facilities(self, session_maker=None):

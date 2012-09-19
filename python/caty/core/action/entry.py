@@ -4,17 +4,19 @@ from caty.util import indent_lines, justify_messages
 from caty.core.exception import *
 
 class ResourceActionEntry(object):
-    def __init__(self, proxy, source, name=u'', docstring=u'undocumented', annotations=Annotations([]), resource_name=u'system', module_name=u'builtin', profiles=None, invoker=None, implemented=True):
+    def __init__(self, proxy, source, name=u'', docstring=u'undocumented', annotations=Annotations([]), rbody=None, profiles=None, invoker=None, implemented=True):
         self.profiles = profiles if profiles else ActionProfiles([ActionProfile(None, None, None, None, [],  [], [])])
         self.instance = proxy
         self.source = source
         self.name = name
         self.docstring = docstring
         self.annotations = annotations
-        self.resource_name = resource_name
-        self.module_name = module_name
+        self.resource_name = rbody.rcname
+        self.module_name = rbody._module_name
         self.invoker = invoker
         self.implemented = implemented
+        self.resource = rbody.parent
+        self.parent = None # リソースクラスがのちに代入される
         self._lock_cmd = None
 
     @property

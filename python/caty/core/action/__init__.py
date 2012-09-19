@@ -1,9 +1,8 @@
 
 def create_resource_action_dispatcher(action_fs, facility, app):
     from caty.core.action.module import ResourceModuleContainer
-    from caty.core.std.action import create_default_resources
     rmc = ResourceModuleContainer(app)
-    for r in create_default_resources(facility):
+    for r in app._system.system_resource_actions:
         rmc.add_resource(r)
     if app._no_ambient:
         return rmc
