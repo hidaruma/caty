@@ -188,12 +188,13 @@ type ModuleSummary      = reif:ModuleSummary;
 type ClassSummary       = reif:ClassSummary;
 type ResourceSummary    = reif:ResourceSummary;
 type TypeSummary        = reif:TypeSummary;
+type KindSummary        = reif:KindSummary;
 type CommandSummary     = reif:CommandSummary;
 type ActionSummary      = reif:ActionSummary;
 type PortSummary        = reif:PortSummary;
 type StateSummary       = reif:StateSummary;
 type FacilitySummary    = reif:FacilitySummary;
-type UserRoleSummary    = reif:UserRoleSummary;
+type UserroleSummary    = reif:UserroleSummary;
 
 }>>
 
@@ -260,6 +261,22 @@ command list-types
 :: void -> [TypeSummary*]?
  refers python:sreif.ListTypes
 ;
+
+command list-kinds
+  {
+    @[default(false)]
+    "rec": boolean?,
+    @[default(false)]
+    "aliases": boolean?,
+
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
+  [cdpath mod-cls]
+:: void -> [KindSummary*]?
+
+;
  
 command list-commands
   {
@@ -312,7 +329,7 @@ command list-userroles
     "safe": boolean?,
   }
   [cdpath mod]
-:: void -> [UserRoleSummary*]?
+:: void -> [UserroleSummary*]?
 ;
 
 /* 優先 */
@@ -441,6 +458,17 @@ command show-type
  refers python:sreif.ShowType
 ;
 
+command show-kind
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
+  [cdpath typ]
+:: void -> KindSummary?
+ 
+;
+
 command show-command
   {
     /** 指定されたシステム要素が存在しないときはundefinedを返すか */
@@ -493,7 +521,7 @@ command show-userrole
     "safe": boolean?,
   }
   [cdpath uro]
-:: void -> UserRoleSummary?
+:: void -> UserroleSummary?
 ;
 
 }>>
