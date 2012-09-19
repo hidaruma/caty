@@ -11,11 +11,16 @@ class ResourceActionEntry(object):
         self.name = name
         self.docstring = docstring
         self.annotations = annotations
-        self.resource_name = rbody.rcname
-        self.module_name = rbody._module_name
         self.invoker = invoker
         self.implemented = implemented
-        self.resource = rbody.parent
+        if proxy is not None:
+            self.resource_name = rbody.rcname
+            self.module_name = rbody._module_name
+            self.resource = rbody.parent
+        else:
+            self.resource_name = None
+            self.module_name = None
+            self.resource = None
         self.parent = None # リソースクラスがのちに代入される
         self._lock_cmd = None
 
