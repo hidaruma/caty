@@ -411,7 +411,11 @@ class TypeCalculator(object):
         return util.name(seq)
     
     def type(self, seq):
-        return self.schema.get_type(self.type_name(seq))
+        if self.mod:
+            mod = self.schema.get_module(self.mod)
+        else:
+            mod = self.schema
+        return mod.get_type(self.type_name(seq))
 
     def type_name(self, seq):
         return schemaparser.typename(seq)
@@ -430,6 +434,7 @@ class Translate(Builtin, TypeCalculator):
     
     def setup(self, opts, schema_name):
         self.schema_name = schema_name
+        self.mod = caty.UNDEFINED
         self.__content_type = opts.get('content-type', None)
         self.set_schema(schema_name)
 
@@ -471,6 +476,7 @@ class Validate(Builtin, TypeCalculator):
     
     def setup(self, opts, schema_name=u'univ'):
         self.pred = opts.get('boolean', caty.UNDEFINED)
+        self.mod = opts.get('mod')
         self.schema_name = schema_name
         self.set_schema(schema_name)
 
