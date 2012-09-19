@@ -170,8 +170,8 @@ KindExprの定義は済んでいる。kreif.casm.lit。
 いずれはカインドも統合する。
 
 <<{
-/** カインド */
-type Kind = kreif:KindExpr;
+/** カインド表現 */
+type KindExpr = kreif:KindExpr;
 
 }>>
 
@@ -224,20 +224,6 @@ type namespaceSort = (
 | "userroles"
 );
 
-
-// 不要かも。
-/** 名前空間のメタ情報 
- * この情報があれば参考になるが、いつでも存在するとは期待できない。
- */
-type NamespaceInfo = {
-   /** 再帰的な型定義を含むか */
-   @[default(@Indef)]
-   "recursive": triboolean?,
-   /** 依存している他のコンテナ */
-   "dependentContainers": [string(remark="コンテナのCDパス")*]?,
-   
-   *: any?
-};
 
 /** 値の型がTの名前空間 */
 type NamespaceOf<T> = @* {
@@ -497,7 +483,7 @@ type Module = @module (ModuleSummary & {
 
   /** ユーザーロールの名前空間 */
   @[namespace]
-  "userroles": NamespaceOf<UserRole>?,
+  "userroles": NamespaceOf<Userrole>?,
 
   /** 状態の名前空間 */
   @[namespace]
@@ -505,10 +491,6 @@ type Module = @module (ModuleSummary & {
 
   *: any?
 });
-
-/*{{{
-}}}*/
-
 
 /** クラスの基本情報 */
 type ClassSummary = LocatedQualifierMixin & {
@@ -548,25 +530,56 @@ type Class = @class (ClassSummary & {
 
 <<{
 
-type TypeExpr = treif:TypeExpr;
-type TypeSpec = treif:TypeSpec;
+/* treifに移したものを、ここで定義 */
+
+type TypeExpr =  treif:TypeExpr;
+type TypeSpec =  treif:TypeSpec;
 type TypeParam = treif:TypeParam;
 
-// copyしている。
 /** 型の基本情報 */
-type TypeSummary = {
-  "document": Doc?,
-  "annotations": object?,  // アノテーションもサマリーに必要
+type TypeSummary = LocatedQualifierMixin & {
+  "name": string, // 必須
 
-  "name": string,
-  "typeParams": [TypeParam*]?, // 必須にする
+  "typeParams": [TypeParam*]?, // 必須にする予定
 
   /** @[deprecated]アノテーションの値をコピーする */
   @[deprecated, default(false)]
-  "deprecated": boolean?,
+  "deprecated": boolean?, // 廃止予定
 
   *: any?
 };
+
+
+/** メタオブジェクトとしての型
+ * 名前付きの型、または型関数の定義
+ */
+@[mogra-node, full-info]
+type Type = @type (TypeSummary & {
+
+  @[body]
+  "body": TypeSpec,
+
+  *: any? // open
+});
+
+
+/** カインドの基本情報 */
+type KindSummary = LocatedQualifierMixin & {
+  "name": string, // 必須
+
+  *: any?
+};
+
+/** カインド
+ */
+@[mogra-node, full-info]
+type Kind = @kind (KindSummary & {
+
+  @[body]
+  "body": KindExpr,
+
+  *: any? // open
+});
 
 }>>
 
@@ -624,7 +637,7 @@ type FacilityUsage = {
 };
 
 /** 実装 */
-type Implement = (Script | ImplRef);
+type Implement = (ScriptCode | ImplRef);
 
 /** 実装への参照 */
 type ImplRef = @imple-ref {
@@ -637,7 +650,7 @@ type ImplRef = @imple-ref {
 };
 
 /** スクリプトコード */
-type Script = deferred @script any;
+type ScriptCode = deferred @script any;
 
 
 /** コマンドの基本情報 */
@@ -839,10 +852,10 @@ type ActionSummary = {
 @[mogra-node, full-info]
 type Action = @action (ActionSummary & {
   @[body]
-    "body": Implement?,
+   "body": Implement?,
 
   @[body]
-    "lock": Script?, //@ なんだっけ？
+   "lock": ScriptCode?, //@ なんだっけ？
 
     *: any?
 });
@@ -878,7 +891,7 @@ type FragmentProfile = {
 };
 
 /** ユーザーロールの基本情報 */
-type UserRoleSummary = {
+type UserroleSummary = {
   "document": Doc,
   "annotations": object?,  // アノテーションもサマリーに必要
 
@@ -889,7 +902,7 @@ type UserRoleSummary = {
 
 /** ユーザーロール（アクター） */
 @[mogra-node, full-info]
-type UserRole = @userrole (UserRoleSummary & {
+type Userrole = @userrole (UserroleSummary & {
 
   // サブツリー情報なし
 
@@ -1084,7 +1097,7 @@ command reify-application
     @[default(false)]
     "safe": boolean?,
   }
-  [cdpath app]
+  [/** 指定がなければthis */cdpath? app]
 :: void -> Application?
 ;
 
@@ -1140,7 +1153,19 @@ command reify-type
     "safe": boolean?,
   }
   [cdpath typ]
-:: void -> TypeSpec?
+:: void -> Type?
+;
+
+/** 指定されたカインドをレイファイする
+ */
+command reify-kind
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
+  [cdpath typ]
+:: void -> Kind?
 ;
 
 /** 指定されたコマンドをレイファイする
@@ -1212,7 +1237,7 @@ command reify-userrole
     "safe": boolean?,
   }
   [cdpath uro]
-:: void -> UserRole?
+:: void -> Userrole?
 ;
 
 

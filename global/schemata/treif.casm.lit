@@ -298,20 +298,6 @@ type TypeAbst = @type (TypeQualifierMixin & { //@ 旧 TypeTerm
   *: any? // open
 });
 
-/** 型定義
- * 名前付き型関数、
- * 型抽象の名前を必須としたもので
- * スタンドアロンで型定義として利用可能。
- */
-type TypeDef = @type (TypeQualifierMixin & {
-  "name": string, // 名前は必須
-
-  "params": [TypeParam*],
-  "expr": TypeExpr,
-
-  *: any? // open
-});
-
 
 /** 型パラメータ（型関数の仮引数） 
  * 型パラメータは、型表現内の参照を束縛する
@@ -362,7 +348,6 @@ type TypeSpec = typeText|TypeExpr;
 
 /** 型表現 - 各種型表現のユニオン
  */
-@[mogra-node, node-group]
 type TypeExpr = (
   TypeConst // 組み込み型、シングルトン型
 | TypeRef // 型変数＝型名、型関数名
@@ -579,43 +564,5 @@ type LetExpr = @type-let (TypeQualifierMixin & {
 
   *: any?
 });
-
-}>>
-
-
-=== オマケ： 便利な型／型関数
-
-<<{
-/** 列挙型 */
-type EnumType = ClosedUnionTypeOf<SingletonType>;
-
-/** 閉じたオブジェクト型の型関数 */
-type ClosedObjectTypeOf<PropType> = @object-of (TypeQualifierMixin & {
-
-  "specified": {*: PropType?},
-  "additional": @builtin {"typeName" : "undefined"},
-
-   *: any? // open
-});
-
-/** 閉じたオブジェクト型 */
-type ClosedObjectType = ClosedObjectTypeOf<TypeExpr>;
-
-
-/** データベースなどで使われている比較的標準的なスカラー型の名前 */
-type normalScalarTypeName = (
-  "null"
-| "boolean"
-| "integer"
-| "number"
-| "string" 
-| "binary"
-);
-
-/** データベースなどで使われている比較的標準的なスカラー型 */
-type NormalScalarType = BuiltinTypeOf<normalScalarTypeName>;
-
-/** データベースレコードのような型 */
-type FlatRecordType = ClosedObjectTypeOf<NormalScalarType>;
 
 }>>
