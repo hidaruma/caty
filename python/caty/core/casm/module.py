@@ -186,7 +186,7 @@ class Module(Facility):
             return scope[name]
         else:
             if self.parent:
-                return self.parent._get_resource(rname, tracked, scope_func, type)
+                return self.parent._get_resource(name, tracked, scope_func, type)
         raise SystemResourceNotFound(u'%sNotFound' % type, u'$name', name=rname)
 
     def _has_resource(self, name, tracked=(), scope_func=None, type=u''):
