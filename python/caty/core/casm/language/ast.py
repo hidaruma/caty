@@ -72,13 +72,9 @@ class ASTRoot(Root):
 
     @property
     def canonical_name(self):
-        an = self.module._app.name
         mn = self.module.name
         name = self.name
-        if mn and mn != 'public':
-            name = '%s:%s' % (mn, name)
-        if an:
-            name = '%s#%s' % (an, name)
+        name = '%s:%s' % (mn, name)
         return name
 
     def declare(self, module):
@@ -96,6 +92,10 @@ class ASTRoot(Root):
         if self.options:
             o.value['options'] = self.options
         return o
+
+    @property
+    def app(self):
+        return self.module.app
 
 class ClassNode(object):
     def __init__(self, name, member, restriction, uri, doc, annotations):

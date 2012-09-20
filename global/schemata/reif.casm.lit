@@ -1154,6 +1154,7 @@ command reify-type
   }
   [cdpath typ]
 :: void -> Type?
+  refers python:reif.ReifyType
 ;
 
 /** 指定されたカインドをレイファイする
