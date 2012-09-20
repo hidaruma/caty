@@ -126,7 +126,7 @@ class ShallowReifier(object):
             u'annotations': self.reify_annotations(c.annotations),
             u'name': c.name,
             u'arg0': self._dump_schema(c._clsrestriction),
-            u'location': self._get_localtion(m),
+            u'location': self._get_localtion(c),
         }
 
     def reify_type(self, t):
