@@ -27,7 +27,7 @@ command get-canonical-name :: {"name": string, "location": {*:string}, *:any?} -
     };
     %src|$.location.pkg? | case {
         undefined => [] > pkg,
-        string => [pass, "."] > mod
+        string => [pass, "."] > pkg
     };
     %src|$.location.mod? | case {
         undefined => [] > mod,
@@ -35,7 +35,7 @@ command get-canonical-name :: {"name": string, "location": {*:string}, *:any?} -
     };
     %src|$.location.cls? | case {
         undefined => [] > cls,
-        string => [pass, "."] > mod
+        string => [pass, "."] > cls
     };
     [%app, %pkg, %mod, %cls, [%src|$.name]] | list:concat > path;
     %path | text:concat

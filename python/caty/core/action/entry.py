@@ -25,6 +25,10 @@ class ResourceActionEntry(object):
         self._lock_cmd = None
 
     @property
+    def app(self):
+        return self.parent.app
+
+    @property
     def invoker_obj(self):
         from caty.core.action.selector import verb_parser, PARENT, NO_CARE
         v, m, e = verb_parser.run(self.invoker, auto_remove_ws=True)

@@ -29,7 +29,7 @@ def resource_class_from_assocs(assocs, facility, app):
                 app.i18n.write("Failed to compile association: $app_name, $path_pattern", app_name=app.name, path_pattern=path+' '+k)
                 raise
 
-        classes.append(DefaultResource(p, actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations))
+        classes.append(DefaultResource(app, p, actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations))
     return classes
 
 def _to_action_name(key):

@@ -85,6 +85,7 @@ class ShallowReifier(object):
                 u'implemented': s.implemented,
                 u'invoker': s.invoker_obj,
                 u'annotations': self.reify_annotations(s.annotations),
+                u'location': self._get_localtion(s),
                 u'pathPattern': s.parent.url_patterns,
                 u'produces': reduce(lambda x, y: x+y, [p._next_states for p in s.profiles]),
                 u'redirects': reduce(lambda x, y: x+y, [p._redirects for p in s.profiles]),

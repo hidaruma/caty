@@ -8,7 +8,7 @@ RELATIVE = 1
 DEFAULT = 2
 
 class ResourceClass(object):
-    def __init__(self, url_pattern, actions, filetype, instances, module_name, resource_name, docstring=u'Undocumented', annotations=Annotations([])):
+    def __init__(self, app, url_pattern, actions, filetype, instances, module_name, resource_name, docstring=u'Undocumented', annotations=Annotations([])):
         self.url_pattern = url_pattern
         self.url_patterns = self._split_pattern(iter(url_pattern))
         self.entries = actions
@@ -18,6 +18,7 @@ class ResourceClass(object):
         self.annotations = annotations
         self.filetypes = {}
         self.instances = instances
+        self.app = app
         if filetype:
             for p in self.url_patterns:
                 self.filetypes[self._extract_ext(p)] = filetype
@@ -113,7 +114,7 @@ class ResourceClass(object):
         return self.module + u':' + self.name
 
 class DefaultResource(ResourceClass):
-    def __init__(self, url_pattern, actions, module_name, resource_name, docstring=u'Undocumented', annotations=Annotations([])):
-        ResourceClass.__init__(self, url_pattern, actions, {}, [], module_name, resource_name, docstring, annotations)
+    def __init__(self, app, url_pattern, actions, module_name, resource_name, docstring=u'Undocumented', annotations=Annotations([])):
+        ResourceClass.__init__(self, app, url_pattern, actions, {}, [], module_name, resource_name, docstring, annotations)
         self.type = DEFAULT
 

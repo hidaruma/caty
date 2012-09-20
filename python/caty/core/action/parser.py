@@ -72,7 +72,7 @@ class ResourceActionDescriptorParser(Parser):
             instances = block.instances
             seq.parse('}')
             seq.parse(';')
-            return ResourceClass(url_pattern, actions, filetype, instances, self._module_name, rcname, ds, ann)
+            return ResourceClass(self._app, url_pattern, actions, filetype, instances, self._module_name, rcname, ds, ann)
         except ParseFailed, e:
             raise ParseError(e.cs, e.cause, e._message)
 
