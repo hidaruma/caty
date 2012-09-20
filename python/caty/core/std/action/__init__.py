@@ -20,7 +20,7 @@ def _script_actions(module):
         '/PUT': ResourceActionEntry(parser.parse(u'http:not-allowed %0 PUT'), u'http:not-allowed %0 PUT', u'put', rbody=rbody),
         '/DELETE': ResourceActionEntry(parser.parse(u'http:not-allowed %0 PUT'), u'http:not-allowed %0 DELETE', u'delete', rbody=rbody),
     }
-    r = DefaultResource(module.app,'**.cgi|**.act|**.do', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
+    r = DefaultResource(module.app, u'**.cgi|**.act|**.do', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
     module.add_resource(r)
 
 def _dir_actions(module):
@@ -29,7 +29,7 @@ def _dir_actions(module):
     actions = {
         '/GET': ResourceActionEntry(parser.parse(u'dir-index %0 GET'), u'dir-index %0 GET', u'get', rbody=rbody),
     }
-    r = DefaultResource(module.app, '**/|/', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
+    r = DefaultResource(module.app, u'**/|/', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
     module.add_resource(r)
 
 def _file_actions(module):
@@ -38,7 +38,7 @@ def _file_actions(module):
     actions = {
         '/GET': ResourceActionEntry(parser.parse(u'print --raw %0'), u'print --raw %0', u'get', rbody=rbody),
     }
-    r = DefaultResource(module.app, '**.*', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
+    r = DefaultResource(module.app, u'**.*', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
     module.add_resource(r)
 
 def _template_actions(module):
@@ -47,7 +47,7 @@ def _template_actions(module):
     actions = {
         '/GET': ResourceActionEntry(parser.parse(u'print %0'), u'print %0', u'get', rbody=rbody),
     }
-    r = DefaultResource(module.app, '**.html|**.xhtml|**.xml|**.htm', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
+    r = DefaultResource(module.app, u'**.html|**.xhtml|**.xml|**.htm', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
     module.add_resource(r)
 
 class DummyResourceBodyBlock(object):
