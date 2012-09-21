@@ -192,7 +192,7 @@ type TypeAttribute = {
 /** ドキュメンテーションコメント */
 type Doc = {
  /** 短い簡潔な記述 */
- "description": string,
+ "description": string?,
  /** より詳しい説明 */
  "moreDescription" : string(remark="Wikiテキスト")?   
 };
