@@ -70,7 +70,7 @@ class SchemaBase(Resource, PbcObject):
         self._annotations = Annotations([])
         self._verify_option()
         PbcObject.__init__(self)
-        self._docstring = u'undocumented'
+        self._docstring = u''
 
     def annotations():
         def _get(self):

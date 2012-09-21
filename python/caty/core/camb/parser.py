@@ -11,14 +11,14 @@ class BindingParser(Parser):
 
     def __call__(self, seq):
         mn = module_decl(seq, u'camb')
-        ds = mn.docstring or u'undocumented'
+        ds = mn.docstring or u''
         if name != self._module_name:
             raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
         bindings = many(self.bindings)
         return ModuleBindings(self._module_name, bindings, ds)
 
     def bindings(self, seq):
-        ds = option(docstring, u'undocumented')(seq)
+        ds = option(docstring, u'')(seq)
         ann = annotations(seq)
         keyword(u'bind')(seq)
         keyword(u'port')(seq)
@@ -53,7 +53,7 @@ class LiterateBindingParser(BindingParser):
             break
         seq.ignore_hook = h
         mn = module_decl(seq, u'camb')
-        ds = mn.docstring or u'undocumented'
+        ds = mn.docstring or u''
         if name != self._module_name:
             raise ParseFailed(seq, self, u'module name mismatched: %s' % name)
         bindings = self._parse_top_level(seq)

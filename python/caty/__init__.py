@@ -1,6 +1,6 @@
 # coding: utf-8
 
-__version__ = 'pp-2.0.0'
+__version__ = u'pp-2.0.0'
 DEBUG = True
 
 

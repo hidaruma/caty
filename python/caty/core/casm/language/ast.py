@@ -19,7 +19,7 @@ class Provide(object):
         module.exports= self.exports
 
 class ModuleName(object):
-    def __init__(self, name, annotations, rel, docstring=u'undocumented'):
+    def __init__(self, name, annotations, rel, docstring=u''):
         self.name = name
         self.docstring = docstring
         self.annotations = annotations
@@ -45,7 +45,7 @@ class ASTRoot(Root):
         self.body = ast
         self.options = None
         self.__annotation = annotation
-        self.__docstring = docstring if docstring else u'undocumented'
+        self.__docstring = docstring if docstring else u''
 
     #def clone(self):
     #    return TypeLambda(self._name, self._type_params, self.__definition, self.__annotation, self.__docstring)
@@ -356,7 +356,7 @@ class CommandNode(Function):
             'name': self.name,
             'annotation': self.annotation.reify(),
             'typeParams': [p.reify() for p in self.type_params_ast],
-            'document': make_structured_doc(self.doc or u'undocumented'),
+            'document': make_structured_doc(self.doc or u''),
         }
         profiles = [pro.reify() for pro in self.patterns]
         r['profiles'] = profiles
@@ -529,7 +529,7 @@ class CommandURI(object):
             setattr(self, tp, val)
 
 class KindReference(object):
-    def __init__(self, name, annotations, docstring=u'undocumented'):
+    def __init__(self, name, annotations, docstring=u''):
         self.name = name
         self.annotations = annotations
         self.docstring = docstring
@@ -599,7 +599,7 @@ class ConstDecl(object):
             'name': self.name, 
             'constBody': self.value,
             'annotation': self.annotations.reify(),
-            'document': make_structured_doc(self.docstring or u'undocumented'),
+            'document': make_structured_doc(self.docstring or u''),
         })
         return o
 

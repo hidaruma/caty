@@ -540,7 +540,7 @@ type TypeParam = treif:TypeParam;
 type TypeSummary = LocatedQualifierMixin & {
   "name": string, // 必須
 
-  "typeParams": [TypeParam*]?, // 必須にする予定
+  "typeParams": [TypeParam*], // 必須にする予定
 
   /** @[deprecated]アノテーションの値をコピーする */
   @[deprecated, default(false)]
@@ -662,7 +662,7 @@ type CommandSummary = {
   "name": string?,
 
   "typeParams": [TypeParam*]?,
-  "profiles": [Profile, Profile*], //マルチプロファイルがまだ有効
+  "profile": Profile, //マルチプロファイルがまだ有効
 
   /** ファシリティの利用宣言
    * オブジェクトのプロパティ名（キー）は、
@@ -698,19 +698,21 @@ type Profile = {
    /** クラスに属するときは、クラスのarg0をコピーする */
    "arg0": TypeSpec,
    /** オプションの型 */
-   "opts": TypeSpec?, //ObjectType?, 必須にする。
+   "opts": TypeSpec, //ObjectType?, 必須にする。
    /** 引数の型 */
-   "args": TypeSpec?, //ArrayType?, 必須にする。
+   "args": TypeSpec, //ArrayType?, 必須にする。
    /** 入力の型 */
    "input": TypeSpec,
 
    /** 出力の型 */
    "output": TypeSpec,
    /** 例外の型 */
-   "exception": [TypeSpec*], // @only か @likely を付ける
+   "exception": ExceptionTypes, // @only か @likely を付ける
    /** シグナルの型 */
-   "signal": [TypeSpec*], // @only か @likely を付ける
+   "signal": ExceptionTypes, // @only か @likely を付ける
 };
+
+type ExceptionTypes = (@only [TypeSpec*]) | (@likely [TypeSpec*]);
 
 }>>
 

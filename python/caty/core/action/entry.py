@@ -4,7 +4,7 @@ from caty.util import indent_lines, justify_messages
 from caty.core.exception import *
 
 class ResourceActionEntry(object):
-    def __init__(self, proxy, source, name=u'', docstring=u'undocumented', annotations=Annotations([]), rbody=None, profiles=None, invoker=None, implemented=True):
+    def __init__(self, proxy, source, name=u'', docstring=u'', annotations=Annotations([]), rbody=None, profiles=None, invoker=None, implemented=True):
         self.profiles = profiles if profiles else ActionProfiles([ActionProfile(None, None, None, None, [],  [], [])])
         self.instance = proxy
         self.source = source
@@ -81,7 +81,7 @@ class ResourceActionEntry(object):
         from caty.core.language.util import make_structured_doc
         r = {}
         r['name'] = self.name
-        r['document'] = make_structured_doc(self.docstring or u'undocumented')
+        r['document'] = make_structured_doc(self.docstring or u'')
         r['annotation'] = self.annotations.reify()
         r['script'] = self.instance.reify()
         if self._lock_cmd:

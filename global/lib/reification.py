@@ -145,7 +145,7 @@ class ShallowReifier(object):
             u'document': make_structured_doc(c.docstring),
             u'annotations': self.reify_annotations(c.annotations),
             u'implemented': c.implemented,
-            u'profiles': self._make_profile(c),
+            u'profile': self._make_profile(c),
             u'typeParams': [self.reify_type_param(p) for p in c.type_params],
             u'location': self._get_localtion(c),
         }
@@ -167,21 +167,35 @@ class ShallowReifier(object):
                 u'arg0': self._dump_schema(p.arg0_schema),
                 u'input': self._dump_schema(p.in_schema),
                 u'output': self._dump_schema(p.out_schema),
-                u'exception': [],
-                u'signal': [],
+                u'exception': tagged(u'only', []),
+                u'opts': u'{}',
+                u'args': u'[]',
+                u'signal': tagged(u'only', []),
             }
             if p.throw_schema and p.throw_schema.type != 'never':
+                exc = []
                 for e in self._flatten(p.throw_schema):
-                    o[u'exception'].append(self._dump_schema(e))
+                    exc.append(self._dump_schema(e))
+                if u'__only' in p.throw_schema.annotations:
+                    exc = tagged(u'only', exc)
+                else:
+                    exc = tagged(u'likely', exc)
+                o['exception'] = exc
             if p.signal_schema and p.signal_schema.type != 'never':
+                sig = []
                 for e in self._flatten(p.signal_schema):
-                    o[u'signal'].append(self._dump_schema(e))
+                    sig.append(self._dump_schema(e))
+                if u'__only' in p.signal_schema.annotations:
+                    sig = tagged(u'only', sig)
+                else:
+                    sig = tagged(u'likely', sig)
+                o['signal'] = sig
             if p.opts_schema.type != 'null':
                 o[u'opts'] = self._dump_schema(p.opts_schema)
             if p.args_schema.type != 'null':
                 o[u'args'] = self._dump_schema(p.args_schema)
             r.append(o)
-        return r
+        return r[0]
 
     def _flatten(self, o):
         from caty.core.typeinterface import Union

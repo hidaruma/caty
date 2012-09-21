@@ -44,6 +44,7 @@ class Module(Facility):
             return False in self.names.values()
 
     is_package = False
+    is_class = False
     def __init__(self, app, parent=None):
         self._app = app
         self.schema_ns = {}
@@ -65,7 +66,7 @@ class Module(Facility):
         self.saved_st = {}
         self.const_ns = {}
         self.compiled = False
-        self.docstring = u'undocumented'
+        self.docstring = u''
         self.last_modified = 0
         self.annotations = Annotations([])
         self.package_root_path = u'/'
@@ -486,7 +487,7 @@ class Module(Facility):
     @property
     def doc_object(self):
         from caty.core.language.util import make_structured_doc
-        return make_structured_doc(self.docstring or u'undocumented')
+        return make_structured_doc(self.docstring or u'')
 
     def find_root(self):
         if not self.parent:
@@ -523,6 +524,7 @@ class ClassModule(Module):
     クラスは名前空間を構成するというその機能においてモジュールに近い。
     そのため、実装はモジュールとほぼ同等とする。
     """
+    is_class = True
     def __init__(self, app, parent, clsobj):
         Module.__init__(self, app, parent)
         self._type = u'class'
@@ -539,6 +541,10 @@ class ClassModule(Module):
     @property
     def module(self):
         return self.parent
+
+    @property
+    def canonical_name(self):
+        return self.parent.canonical_name + u':' + self.name
 
     def _get_full_name(self):
         return u'class ' + self.name
@@ -673,7 +679,7 @@ class AppModule(Module):
                 except Exception as e:
 
                     raise Exception(self.application._system.i18n.get(u'Failed to parse JSON: $path\n$error', path=pkg.path, error=error_to_ustr(e)))
-                mod.docstring = pkginfo.get('description', u'undocumented')
+                mod.docstring = pkginfo.get('description', u'')
                 mod.more_docstring = pkginfo.get('moreDescription', None)
                 annotations = pkginfo.get('annotations', {})
                 for k, v in annotations.items():

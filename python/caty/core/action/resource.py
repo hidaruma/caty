@@ -99,7 +99,7 @@ class ResourceClass(object):
         from caty.core.language.util import make_structured_doc
         r = {}
         r['name'] = self.name
-        r['document'] = make_structured_doc(self.docstring or u'undocumented')
+        r['document'] = make_structured_doc(self.docstring or u'')
         r['annotation'] = self.annotations.reify()
         if self.filetypes:
             r['filetype'] = self.filetypes.values()[0]

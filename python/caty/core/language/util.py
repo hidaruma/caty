@@ -6,7 +6,7 @@ def make_structured_doc(s):
     詳細はIssue#538を参照。
     """
     if not s:
-        s = u'undocumented'
+        return {}
     l = s.strip(u' \r\n').split('\n', 1)
     r = {}
     if len(l) == 2:
@@ -14,7 +14,8 @@ def make_structured_doc(s):
     else:
         a = l[0]
         b = u''
-    r['description'] = a
-    if b:
-        r['moreDescription'] = b
+    if a:
+        r['description'] = a
+        if b:
+            r['moreDescription'] = b
     return r

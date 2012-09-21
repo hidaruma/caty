@@ -29,7 +29,7 @@ class ProfileContainer(object):
             self.command_class = commands.get(pkgname, cmdname)
             self.implemented = u'python'
         self._annotations = annotations or {}
-        self.doc = doc if doc else u'undocumented'
+        self.doc = doc if doc else u''
         self.defined_application = app
         self.uri = uri
         self.module = module
@@ -55,6 +55,8 @@ class ProfileContainer(object):
 
     @property
     def canonical_name(self):
+        if self.module.is_class:
+            return self.module.canonical_name + '.' + self.name
         return self.module.canonical_name + ':' + self.name
 
     def add_profile(self, profile):
@@ -241,7 +243,7 @@ class ScriptProfileContainer(ProfileContainer):
         self.name = name
         self.command_class = proxy
         self._annotations = annotations or {}
-        self.doc = doc if doc else u'undocumented'
+        self.doc = doc if doc else u''
         self.defined_application = app
         self.uri = ''
         self.type_params = []

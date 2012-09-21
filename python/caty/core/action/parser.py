@@ -27,7 +27,7 @@ class ResourceActionDescriptorParser(Parser):
         mn = module_decl(seq, 'cara')
         name = mn.name
         self._module_name = name
-        ds = mn.docstring or u'undocumented'
+        ds = mn.docstring or u''
         if self._path.strip(u'/').split(u'.')[0].replace(u'/', u'.') != name:
             raise InternalException("Module name $name and path name $path are not matched", name=name, path=self._path)
         rm = ResourceModule(name.split('.')[-1], ds, self._app)
@@ -309,7 +309,7 @@ class ResourceBodyBlock(Parser):
         return proxy
 
 class StateBlock(Parser):
-    def __init__(self, docstr=u'undocumented', annotations=Annotations([]), parser=None):
+    def __init__(self, docstr=u'', annotations=Annotations([]), parser=None):
         self.annotations = annotations
         self.docstr = docstr
         self.modifier = u'state'
@@ -464,7 +464,7 @@ class UserRole(Parser):
 
 
 class Link(object):
-    def __init__(self, trigger, dest, type, appearance, path, docstring=u'undocumented', annotations=Annotations([])):
+    def __init__(self, trigger, dest, type, appearance, path, docstring=u'', annotations=Annotations([])):
         self.docstring = docstring
         self.annotations = annotations
         self.link_to_list = dest
@@ -527,7 +527,7 @@ class LiterateRADParser(ResourceActionDescriptorParser):
         mn = module_decl(seq, 'cara')
         name = mn.name
         self._module_name = name
-        ds = mn.docstring or u'undocumented'
+        ds = mn.docstring or u''
         if self._path.strip(u'/').split(u'.')[0].replace(u'/', u'.') != name:
             raise InternalException("Module name $name and path name $path are not matched", name=name, path=self._path)
         rm = ResourceModule(name, ds, self._app)
