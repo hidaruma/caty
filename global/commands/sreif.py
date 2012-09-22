@@ -212,7 +212,7 @@ class ShowApplication(SafeReifierWithDefaultApp):
     def _execute(self):
         reifier = ShallowReifier()
         system = self.current_app._system
-        app_name, module_name, name = split_colon_dot_path(self._cdpath)
+        app_name, module_name, name = split_colon_dot_path(self._cdpath, u'app')
         if app_name:
             pass
         elif not app_name and not module_name:
