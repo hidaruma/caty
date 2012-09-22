@@ -476,15 +476,15 @@ class CommandDecl(object):
         self.throws = NeverSchema()
         self.signals = NeverSchema()
         for jump in self.jump_decl:
-            if not jump.nothing:
+            if jump.types:
                 node = reduce(lambda a, b: UnionNode(a, b), jump.types)
-                if jump.only:
-                    node.annotations.add(Annotation(u'__only'))
                 for cursor in cursors:
                     node = node.accept(cursor)
                     self.throws = node
             else:
-                node = None
+                node = NeverSchema()
+            if jump.only:
+                node.annotations.add(Annotation(u'__only'))
             if jump.name == u'signals':
                 self.signals = node
             else:

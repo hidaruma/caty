@@ -539,7 +539,7 @@ class Time(Syntax):
 
 class Take(Syntax):
     command_decl = u"""
-    command take-functor<T default any> {"indef": boolean?} :: array | object -> [T*]
+    command __take-functor<T default any> {"indef": boolean?} :: array | object -> [T*]
                                         {"indef": boolean?, "obj": true} :: object -> object
         refers python:caty.core.script.node.Take;
     """

@@ -167,28 +167,26 @@ class ShallowReifier(object):
                 u'arg0': self._dump_schema(p.arg0_schema),
                 u'input': self._dump_schema(p.in_schema),
                 u'output': self._dump_schema(p.out_schema),
-                u'exception': tagged(u'only', []),
                 u'opts': u'{}',
                 u'args': u'[]',
-                u'signal': tagged(u'only', []),
             }
-            if p.throw_schema and p.throw_schema.type != 'never':
-                exc = []
+            exc = []
+            if p.throw_schema.type != 'never':
                 for e in self._flatten(p.throw_schema):
                     exc.append(self._dump_schema(e))
-                if u'__only' in p.throw_schema.annotations:
-                    exc = tagged(u'only', exc)
-                else:
-                    exc = tagged(u'likely', exc)
-                o['exception'] = exc
-            if p.signal_schema and p.signal_schema.type != 'never':
-                sig = []
+            if u'__only' in p.throw_schema.annotations:
+                exc = tagged(u'only', exc)
+            else:
+                exc = tagged(u'likely', exc)
+            o['exception'] = exc
+            sig = []
+            if p.signal_schema.type != 'never':
                 for e in self._flatten(p.signal_schema):
                     sig.append(self._dump_schema(e))
-                if u'__only' in p.signal_schema.annotations:
-                    sig = tagged(u'only', sig)
-                else:
-                    sig = tagged(u'likely', sig)
+            if u'__only' in p.signal_schema.annotations:
+                sig = tagged(u'only', sig)
+            else:
+                sig = tagged(u'likely', sig)
                 o['signal'] = sig
             if p.opts_schema.type != 'null':
                 o[u'opts'] = self._dump_schema(p.opts_schema)

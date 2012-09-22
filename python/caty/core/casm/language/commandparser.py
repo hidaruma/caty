@@ -107,6 +107,8 @@ def throws(seq):
     if not nothing:
         only = seq.parse(option(keyword(u'only')))
         types = seq.parse([typelist, lambda s: [typedef(s)]])
+    else:
+        only = u'only'
     return Jump(name, types, only, nothing)
 
 def signals(seq):
@@ -115,11 +117,13 @@ def signals(seq):
     types = []
     if not nothing:
         types = seq.parse([typelist, lambda s: [typedef(s)]])
+    else:
+        only = u'only'
     return Jump(name, types, None, nothing)
 
 def typelist(seq):
     _ = seq.parse(u'[')
-    r = chain_flat(typedef, comma)(seq)
+    r = option(chain_flat(typedef, comma), [])(seq)
     _ = seq.parse(u']')
     return r
 

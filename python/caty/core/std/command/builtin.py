@@ -765,7 +765,7 @@ class ExecContext(Print):
 
 class Assoc(Internal):
     
-    def setup(self, ext=None, verb=None):
+    def setup(self, opts=None, ext=None, verb=None):
         self.ext = ext
         self.verb = verb
 
