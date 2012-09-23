@@ -156,7 +156,7 @@ type LocatedQualifierMixin = QualifierMixin & {
     "pkg": string?,
     "mod": string?,
     "cls": string?,
-   }?, // いずれ必須にする
+   }?, // いずれ必須にする */
 
   * : any?
 };
@@ -654,9 +654,7 @@ type ScriptCode = deferred @script any;
 
 
 /** コマンドの基本情報 */
-type CommandSummary = {
-  "document": Doc?,
-  "annotations": object?,  // アノテーションもサマリーに必要
+type CommandSummary = LocatedQualifierMixin & {
 
   /** コマンド名 */
   "name": string?,
@@ -725,9 +723,7 @@ type ExceptionTypes = (@only [TypeSpec*]) | (@likely [TypeSpec*]);
 
 <<{
 /** リソースクラスの基本情報 */
-type ResourceSummary = {
-  "document": Doc,
-  "annotations": object?,  // アノテーションもサマリーに必要
+type ResourceSummary = LocatedQualifierMixin & {
 
   /** リソースクラス名 */
   "name": string,
@@ -768,10 +764,55 @@ type Invoker = {
   "checkers": object?
 };
 
+
+/** アクションプロファイル
+
+アクション専用のプロファイル。
+次の項目が省略可能となっている。
+ 
+ # "arg0":
+ # "args":
+ # "input":
+ # "output":
+
+次は必須である。
+
+ # "internalInput"
+ # "opts":
+ # "exception": 
+ # "signal": 
+
+*/
+type ActionProfile = {
+   /** リソースクラスの pathPatternのコピー
+    * 冗長なので省略してもよい。
+    */
+   "arg0": TypeSpec?,
+   /** オプションの型 */
+   "opts": TypeSpec, // これは必須
+   /** 引数の型 */
+   "args": TypeSpec?,
+
+   /** 入力の型 */
+   "input": TypeSpec?,
+
+   /** 内部的な入力の型 
+    * inlet.input のコピー
+    */
+   "internalInput": TypeSpec?,
+
+   /** 出力の型 */
+   "output": TypeSpec?,
+
+   /** 例外の型 */
+   "exception": ExceptionTypes,  // これは必須
+   /** シグナルの型 */
+   "signal": ExceptionTypes, // これは必須
+};
+
+
 /** アクションの基本情報 */
-type ActionSummary = {
-  "document": Doc,
-  "annotations": object?,  // アノテーションもサマリーに必要
+type ActionSummary = LocatedQualifierMixin & {
 
   /** アクション名 */
   "name": string,
@@ -782,12 +823,11 @@ type ActionSummary = {
    */
   "typeParams": undefined,
 
-  /** コマンドとしてのプロファイル
+  /** プロファイル
    * アクションはコマンドの一種なので、コマンドと同じ情報を持つ
-   * ただし、デフォルトが決まっているので省略可能である。
-   * 自由にプロファイルを定義することはできない。
+   * ただし、デフォルトが決まっているので一部の項目は省略可能である。
    */
-  "profile": Profile?,
+  "profile": ActionProfile?, // 必須にする予定
 
   /** 使用するファシリティ
    * アクションがファシリティを使う可能性を否定はしない。
@@ -798,49 +838,44 @@ type ActionSummary = {
   // implementedはコマンドと同じ
   "implemented": implemented,
 
-  /** @[deprecated]アノテーションの値をコピーする */
-  @[deprecated, default(false)]
-  "deprecated": boolean?,
 
   // 以下はアクション特有
 
   /** 所属するリソースのpathPatternのコピーを持つ */
-  "pathPattern": [string*]?, // 暫定的に省略可能、必須としたい
+  "pathPattern": [string*],
 
   /** このアクションの起動方式 */
   "invoker": Invoker, // アクション特有
 
 
   /** このアクションが生成する可能性のある状態のリスト */
-  "produces": [string*]?, // 暫定的に省略可能、必須としたい
+  "produces": [string*],
   /** このアクションがリダイレクトする可能性のあるアクション／ポートのリスト */
-  "redirects": [string*]?,// 暫定的に省略可能、必須としたい
+  "redirects": [string*],
   /** このアクションがフォーワードする可能性のあるアクション／ポートのリスト */
-  "forwards": [string*]?, // 暫定的に省略可能、必須としたい
+  "forwards": [string*],
+
+
+  /* フラグメント情報の形式はまだ未定、以下は暫定案 */
 
 
   /** 入り口フラグメント（inlet） 
-   * フラグメント検索の手間を省くため、
-   * 入り口フラグメント（高々1個）のコピーを保持する。
+   * 入り口フラグメント（**高々1個**）を保持する。
    */
   "inlet" : FragmentProfile?,  // これがないときはinletが未定義と解釈
 
    /** 出口フラグメント（outlet） 
-    * フラグメント検索の手間を省くため、
-    * 出口フラグメントのコピーを保持する。
+    * 出口フラグメント（任意個数）を保持する。
+    * 出口／入り口の両方に接しているフラグメントがあると、inletとoutletsに重複が生じる。
     */
    "outlets": {*: FragmentProfile?}?,  // これがないときはoutlets未定義と解釈
 
-    /** このアクションが所属する親リソースクラスのパス
-     * ドット・コロン区切りの名前列。
-     * 必要なら、このパスにより親の情報にアクセスできる。
-     */
-  @[old-long-summary]
-    "parentPath": string?, // 必須にする予定
 
-    /** アクション内に存在するフラグメントの情報 */
-  @[old-long-summary]
-    "fragmentProfiles" : {*: FragmentProfile?}? , // 必須にする予定
+   /** 中間フラグメント（midlet） 
+    * 出口／入り口に接していないフラグメント。
+    */
+   "midlets": {*: FragmentProfile?}?,
+
 
    *: any?
 };
@@ -893,9 +928,7 @@ type FragmentProfile = {
 };
 
 /** ユーザーロールの基本情報 */
-type UserroleSummary = {
-  "document": Doc,
-  "annotations": object?,  // アノテーションもサマリーに必要
+type UserroleSummary = LocatedQualifierMixin & {
 
   "name": string,
   
@@ -919,9 +952,7 @@ type HalfProfile = {
 };
 
 /** ポートの基本情報 */
-type PortSummary = {
-  "document": Doc,
-  "annotations": object?,  // アノテーションもサマリーに必要
+type PortSummary = LocatedQualifierMixin & {
 
   "name": string,
   "profile" : HalfProfile?,
@@ -939,9 +970,7 @@ type Port = @port (PortSummary & {
 });
 
 /** 状態の基本情報 */
-type StateSummary = {
-  "document": Doc?,
-  "annotations": object?,  // アノテーションもサマリーに必要
+type StateSummary = LocatedQualifierMixin & {
 
   "name": string,
 
