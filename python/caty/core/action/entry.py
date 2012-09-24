@@ -4,7 +4,7 @@ from caty.util import indent_lines, justify_messages
 from caty.core.exception import *
 
 class ResourceActionEntry(object):
-    def __init__(self, proxy, source, name=u'', docstring=u'', annotations=Annotations([]), rbody=None, profiles=None, invoker=None, implemented=True):
+    def __init__(self, proxy, source, name=u'', docstring=u'', annotations=Annotations([]), rbody=None, profiles=None, invoker=None, implemented=True, opts=None):
         self.profiles = profiles if profiles else ActionProfiles([ActionProfile(None, None, None, None, [],  [], [])])
         self.instance = proxy
         self.source = source
@@ -22,6 +22,7 @@ class ResourceActionEntry(object):
             self.module_name = None
             self.resource = None
         self.parent = None # リソースクラスがのちに代入される
+        self.opts = opts
         self._lock_cmd = None
 
     @property
@@ -226,6 +227,7 @@ class ActionProfiles(object):
         self._profiles = profiles
         self._next_states = []
         self._input_type = None
+        self._output_types = []
         self._redirects = []
         for p in profiles:
             if p.io_type != 'in':

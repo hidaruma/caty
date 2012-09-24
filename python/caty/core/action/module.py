@@ -133,6 +133,7 @@ class ResourceModule(Module):
 
     def add_resource(self, res):
         from caty.core.script.proxy import EnvelopeProxy as ActionEnvelope
+        from caty.core.casm.language.ast import ScalarNode, CommandDecl, CallPattern, UnionNode, ArrayNode
         if res.name in self.resources:
             throw_caty_exception(
                 u'CARA_COMPILE_ERROR',
@@ -144,16 +145,22 @@ class ResourceModule(Module):
         member = []
         for act in res.actions:
             script = act.instance
-            ptn = many1(call_pattern)(CharSeq(u'{*: any} [string*]:: WebInput | void -> Response | Redirect', auto_remove_ws=True))
+            opt = act.opts
+            arg = ArrayNode([ScalarNode(u'string', {u'pattern': act.parent.url_pattern})], {})
             c = CommandNode(act.name, 
-                            map(lambda p:p([], []), ptn), 
+                            [CallPattern(opt, 
+                                         arg, 
+                                         CommandDecl((ScalarNode(u'WebInput'), 
+                                                      UnionNode(ScalarNode(u'Response'), ScalarNode(u'Redirect'))), 
+                                                      [], 
+                                                      []))], 
                             ActionEnvelope(script, act.canonical_name), 
                             act.docstring, 
                             act.annotations, 
                             [],
                             u'action')
             member.append(c)
-        clsnode = ResourceNode(res.name, member, ScalarNode(u'univ'), CommandURI([(u'python', u'')]), res.docstring, res.annotations)
+        clsnode = ResourceNode(res.name, member, ScalarNode(u'string', {u'pattern': res.url_pattern}), CommandURI([(u'python', u'')]), res.docstring, res.annotations)
         clsnode.declare(self)
 
     def add_state(self, st):

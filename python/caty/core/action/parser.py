@@ -180,7 +180,8 @@ class ResourceBodyBlock(Parser):
                                   self,
                                   prof,
                                   invoker,
-                                  self.implemented)
+                                  self.implemented,
+                                  opts)
         if lock:
             rae.set_lock_cmd(lock)
         generates = option(self.generates)(seq)

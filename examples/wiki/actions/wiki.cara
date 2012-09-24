@@ -27,7 +27,7 @@ resource Wikiファイル("*.wiki") {
         } | print include@this:/edit.html
     };
 
-    action 書き込み("/POST#exists-parent")  :: 
+    action 書き込み("/POST#exists-parent") {"ignore": boolean} :: 
         @[in] #translate WikiFile -> _,
         @[out] #ok _ -> never redirects Wikiファイル.読み出し,
         @[out] #ng _ -> never redirects Root.get {

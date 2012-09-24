@@ -80,7 +80,7 @@ class ShallowReifier(object):
         }
 
     def reify_action(self, s):
-        return {
+        return conditional_dict(lambda k, v: v is not None, {
                 u'name': s.name,
                 u'document': make_structured_doc(s.docstring),
                 u'implemented': s.implemented,
@@ -91,6 +91,15 @@ class ShallowReifier(object):
                 u'produces': reduce(lambda x, y: x+y, [p._next_states for p in s.profiles]),
                 u'redirects': reduce(lambda x, y: x+y, [p._redirects for p in s.profiles]),
                 u'forwards': reduce(lambda x, y: x+y, [p._relay_list for p in s.profiles]),
+                u'profile': self._reify_action_profile(s),
+        })
+
+    def _reify_action_profile(self, act):
+        return {
+            u'opts': u'{}' if act.opts is None else self._dump_schema(act.opts),
+            u'exception': tagged(u'likely', []),
+            u'signal': tagged(u'likely', []),
+            u'internalInput': u'any' if act.profiles._input_type is None else self._dump_schema(act.profiles._input_type)
         }
 
     def reify_module(self, m):
