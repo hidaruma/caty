@@ -9,7 +9,9 @@ class CommandBuilder(object):
     def build(self, proxy, type_args, opts_ref, args_ref, pos, module):
         u"""コマンド文字のチャンクをコマンド名と引数のリストに分割し、呼び出し可能なコマンドオブジェクトを返す。
         """
-        from caty.core.script.proxy import Proxy
+        from caty.core.script.proxy import Proxy, EnvelopeProxy
+        from caty.core.script.proxy import VarRefProxy as VarRef
+        from caty.core.command.param import Option, OptionVarLoader
         if proxy.module:
             try:
                 profile = proxy.module.schema_finder.get_command(proxy.name)
@@ -20,6 +22,13 @@ class CommandBuilder(object):
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
             obj = scriptwrapper(profile, lambda :cls.instantiate(self))
+            if isinstance(cls, EnvelopeProxy):
+                opts_ref = opts_ref[:]
+                if args_ref[0].type == 'arg':
+                    arg0 = Option(u'0', args_ref[0].value)
+                elif args_ref[0].type == 'narg':
+                    arg0 = OptionVarLoader(u'0', VarRef(args_ref[0].key, False, None), False, None)
+                opts_ref.append(arg0)
             cmd = obj(opts_ref, args_ref, type_args, pos, module)
         else:
             cmd = cls(opts_ref, args_ref, type_args, pos, module)

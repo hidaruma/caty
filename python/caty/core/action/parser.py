@@ -140,6 +140,7 @@ class ResourceBodyBlock(Parser):
         seq.parse(';')
 
     def action(self, seq):
+        from caty.core.casm.language.ast import ObjectNode, ScalarNode
         ds = seq.parse(option(docstring, u''))
         a = seq.parse(option(annotation, Annotations([])))
         seq.parse(keyword('action'))
@@ -152,7 +153,7 @@ class ResourceBodyBlock(Parser):
         self.names.add(n)
         invoker = option(self.invoker)(seq)
 
-        opts = option(object_)(seq)
+        opts = option(object_, ObjectNode({}, wildcard=ScalarNode(u'any')))(seq)
         seq.parse('::')
         prof = option(try_(self.profiles))(seq)
         c = choice('{', ';')(seq)

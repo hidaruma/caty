@@ -146,21 +146,21 @@ class ResourceModule(Module):
         for act in res.actions:
             script = act.instance
             opt = act.opts
-            arg = ArrayNode([ScalarNode(u'string', {u'pattern': act.parent.url_pattern})], {})
+            arg = ArrayNode([ScalarNode(u'string', {u'remark': act.parent.url_pattern})], {'repeat': False})
             c = CommandNode(act.name, 
                             [CallPattern(opt, 
                                          arg, 
-                                         CommandDecl((ScalarNode(u'WebInput'), 
+                                         CommandDecl((UnionNode(ScalarNode(u'WebInput'), ScalarNode(u'void')), 
                                                       UnionNode(ScalarNode(u'Response'), ScalarNode(u'Redirect'))), 
                                                       [], 
                                                       []))], 
-                            ActionEnvelope(script, act.canonical_name), 
+                            ActionEnvelope(script, act.canonical_name.split(':')[-1]), 
                             act.docstring, 
                             act.annotations, 
                             [],
                             u'action')
             member.append(c)
-        clsnode = ResourceNode(res.name, member, ScalarNode(u'string', {u'pattern': res.url_pattern}), CommandURI([(u'python', u'')]), res.docstring, res.annotations)
+        clsnode = ResourceNode(res.name, member, ScalarNode(u'string', {u'remark': res.url_pattern}), CommandURI([(u'python', u'')]), res.docstring, res.annotations)
         clsnode.declare(self)
 
     def add_state(self, st):
