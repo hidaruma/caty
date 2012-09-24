@@ -442,7 +442,7 @@ class StateBlock(Parser):
 
     @property
     def app(self):
-        return self.parent.app.name
+        return self.parent.app
 
 class UserRole(Parser):
     def __init__(self, ds, ann):

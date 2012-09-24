@@ -65,6 +65,7 @@ class ShallowReifier(object):
             u'document': make_structured_doc(s.docstr),
             u'annotations': {},
             u'type': s.type.name,
+            u'location': self._get_localtion(s),
             u'links': links,
         }
 
