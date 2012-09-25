@@ -1,0 +1,477 @@
+<<ignore // -*- coding: utf-8 -*- >>
+
+= meta programming library 
+
+<<{
+
+/** meta programming library */
+module mpl;
+
+/* メモ
+
+ file:list --rec --long / | take{$.abspath | path:matches "*.txt"}
+
+*/
+
+
+
+/** 引数で指定したアプリケーションに属するすべてのリソースクラスを列挙する */
+command list-app-resources [string appPath] :: void -> [reif:ResourceSummary*] {
+ %1 > appPath;
+
+ sreif:list-modules --rec %appPath |
+ take { [$.syntax, "cara"]|eq } |
+ each {
+    mos:get-canonical-name > modPath;
+    sreif:list-resources %modPath
+ } | list:concat
+};
+
+/** リソースクラスに含まれるインスタンス（パス文字列）を列挙する */
+command res-instances 
+  {
+    /** 実在するファイルを含めるか */
+    @[default(false)]
+    "existing": boolean?
+  }
+  :: reif:ResourceSummary -> [string*] 
+{
+ pass > res |
+ [
+   $.pathPattern > patt,
+   $.instances   > inst,
+ ];
+ %patt |
+ take {
+   text:regmatch "^[^*]*$" 
+ } > no-wild;
+
+ %existing? |
+ case {
+  undefined | false => [],
+  * => %res | existing-instances, 
+ } > existing-insts;
+
+ [%inst, %existing-insts, %no-wild] | list:concat
+};
+
+/** リソースクラスにマッチする実在のインスタンス（ファイル）を列挙する */
+command existing-instances :: reif:ResourceSummary -> [string*] {
+  [
+    $.location.app > app,
+    $.pathPattern  > patts,
+  ];
+  %patts | matched-files %app
+};
+
+/** パターンにマッチするファイル（パス文字列）を列挙する */
+command matched-files [string? app] :: string | [string*] -> [string*] {
+ when {
+  string => [pass],
+  * => pass,
+ } > patts;
+
+ %1? | $?="this" > app;
+ ["pub@", %app, ":/"] | text:concat > root;
+
+ file:list --rec --long %root | each {$.abspath} > files;
+ %patts |
+ each {
+   pass > patt;
+   %files |
+   take {path:matches %patt}
+ } | list:concat
+};
+
+/*
+type Endpoint = {
+ "pathInfo": string(remark="パス"),
+ "action": {
+    "name": string,
+    "location": reif:Location,
+  }
+};
+*/
+
+
+/** 入力のアクションが、引数に指定したパスをキャプチャーするかどうかを調べる 
+ * 出力が @True のとき、コンテントにはエンドポイントが入る。
+ */
+command captures [string path] :: reif:ActionSummary -> Logical<EndPoint | null> {
+ pass > act |
+ [
+   act-name               > actName,
+   $.invoker.method       > method,
+   $.invoker.verb         > verb,
+   $.name                 > name,
+   $.location             > location,
+ ];
+ %1   > path;
+
+ [select-action --method=%method --verb=%verb %path, %actName] | eq |
+ when {
+   True  => 
+     @True {
+       "pathInfo": %path,
+       "action": {
+          "name": %name,
+         "location": %location,
+       },
+       "method": %method,
+       "verb": %verb,
+     },
+   False => 
+     @False null
+ }
+};
+
+/** 入力の文字列達から、引数に指定したアクションにキャプチャーされるものを選び出す */
+command take-captured [string actPath] :: string | [string*] -> [any*] {
+ when {
+  string => [pass],
+  * => pass,
+ } > in;
+ %1 > actPath;
+ sreif:show-action %actPath > act;
+
+ %in |
+ take {
+  pass > path;
+  %act | captures %path
+ }
+};
+
+/** URLを表現する構造体 
+ * クエリー文字列は含まない。
+ */
+type UrlStruct = {
+  "pathInfo": string,
+  "hostUrl": string,
+  "appPath": string,
+};
+
+/** 型を表すテキスト（暫定） */
+type typeText = string;
+
+/** アクションを外部から起動するための情報 */
+type ActionTriggerInfo = {
+  /** ターゲットのURL 
+   * クエリー文字列は含まない。
+   */
+  "targetUrl": UrlStruct?,
+ 
+  /** 動詞 */
+  @[default("")]
+  "verb": string?,
+
+  /** HTTPメソッド */ 
+  @[default("GET")]
+  "method": httpMethod?,
+
+  /** アクションのセマンティックな入力型
+   * HTTPリクエストでは、リクエストボディとなる 
+   */
+  @[default("void")]
+  "inputType": typeText?,
+
+  /** アクションのオプションパラメータの型
+   * HTTPリクエストでは、クエリー文字列となる 
+   */
+  @[default("{}")]
+  "paramsType": typeText?,
+
+  /** ターゲットアクションが所属するモジュール
+   * gen:sample が型名の解決をするために必要。
+   */
+  "targetModule": {
+    "name": string,
+    "location": reif:Location,
+  }?, // 必須にする
+
+  /** 転送に使用するフォーマットの名前 
+   * このフォーマットからMIMEメディアタイプ（content-type）は決まる。
+   */
+  @[default("form")]
+  "transferFormat":  webio:GenericFormatName?,
+
+  /** ターゲットアクション（必須ではない、参考情報）*/
+  "targetAction": {
+    "name": string,
+    "location": reif:Location,
+  }?,
+
+  /** ターゲットリソースのパスパターン（必須ではない、参考情報）*/
+  "pathPattern": [string*]?,
+
+  *: any? // いずれ閉じる
+};
+
+/** サーバー側のエンドポイント 
+ * ハイパーリンクやRPCのターゲット（矢の先端）となるポイント
+ */
+type EndPoint = {
+ "pathInfo": string(remark="パス"),
+ "action": {
+    "name": string,
+    "location": reif:Location,
+  },
+  "method": httpMethod,
+  "verb": string,
+};
+
+
+/** リンクからトリガーセットを生成する 未完 */
+command link-to-triggers [string prefix ] :: reif:Link -> any {
+ pas > link | $.targets > targets;
+ %1 > prefix;
+
+ %targets |
+ each {
+   pass > act;
+   [%prefix, %act] | text:concat > actPath;
+   list-act-triggers %actPath
+ } | list:concat
+
+};
+
+/** 状態からトリガーセットを生成する 未完 */
+command state-to-triggers :: reif:StateSummary -> any {
+ pass > stt | $.links > links;
+
+ %stt | $.location | mod-name > prefix;
+
+ %links |
+ each --obj {
+  link-to-triggers %prefix
+ }
+
+};
+
+command loc-to-mod-name
+ ::   {"app":string, "pkg":string?, "mod":string?, *:any?} -> string
+{
+ pass > loc | $.pkg? |
+ when {
+   undefined => "",
+   string => [pass, "."] | text:concat,
+ } > pkg;
+ %loc |
+ [
+   $.app, "::",
+   %pkg,
+   $.mod, ":",
+ ] | text:concat
+};
+
+command loc-to-res-name
+ ::   {"app":string, "pkg":string?, "mod":string?, "cls": string, *:any?} -> string
+{
+ pass > loc | $.pkg? |
+ when {
+   undefined => "",
+   string => [pass, "."] | text:concat,
+ } > pkg;
+ %loc |
+ [
+   $.app, "::",
+   %pkg,
+   $.mod, ":",
+   $.cls, ".",
+ ] | text:concat
+};
+
+command act-name
+ :: {"name": string, "location":{"app":string, "pkg":string?, "mod":string?, "cls": string, *:any?},*:any?} -> string
+{
+ pass |
+ [ 
+   $.name > name,
+   $.location > loc | $.pkg? > p,
+ ];
+ %p? |
+ when {
+   undefined => "",
+   string => [pass, "."] | text:concat,
+ } > pkg;
+ %loc |
+ [
+   %pkg,
+   $.mod, ":",
+   $.cls, ".",
+   %name,
+ ] | text:concat
+};
+
+
+command list-act-triggers   {
+    /** 実在するファイルを含めるか */
+    @[default(false)]
+    "existing": boolean?
+  }
+  [string actPath] :: void -> any/*[ActionTriggerInfo*]*/ 
+{
+ %1 > actPath;
+
+ sreif:show-action %actPath |
+ act-all-triggers %--existing
+};
+
+command act-all-triggers 
+  {
+    /** 実在するファイルを含めるか */
+    @[default(false)]
+    "existing": boolean?
+  }
+  :: reif:ActionSummary -> any/*[ActionTriggerInfo*]*/ 
+{
+ pass > act | $.location | 
+ [
+   loc-to-res-name > resPath,
+   $.app > app,
+ ];
+ sreif:show-resource %resPath | res-instances %--existing > insts;
+ 
+ %insts | dump --prefix="mpl:get-triggers" |
+ each {
+  pass > pathInfo;
+  [
+      %act |
+      do {
+         mos:get-canonical-name >: "targetName",
+         $.invoker.verb   >: "verb",
+         $.invoker.method >: "method",
+         $.pathPattern >: "pathPattern",
+      }
+      ,
+      {"targetUrl":{"hostUrl":%HOST_URL, "appPath":%APP_PATH, "pathInfo":%pathInfo}}
+  ] | json:merge
+ }
+
+};
+
+/** 引数に指定されたアプリケーションに含まれるトリガーを列挙する */
+command list-app-triggers
+  {
+    /** 実在するファイルを含めるか */
+    @[default(false)]
+    "existing": boolean?
+  }
+  [string appPath]
+ :: void -> [ActionTriggerInfo*] 
+{
+ %1 > appPath;
+
+ sreif:show-application %appPath |
+ app-all-triggers %--existing
+
+};
+
+command list-mod-triggers 
+  {
+    /** 実在するファイルを含めるか */
+    @[default(false)]
+    "existing": boolean?
+  }
+  [string modPath]
+  :: void ->  [ActionTriggerInfo*] 
+{
+ %1 > modPath;
+
+ sreif:show-module %modPath |
+ mod-all-triggers %--existing
+
+};
+
+command list-res-triggers
+  {
+    /** 実在するファイルを含めるか */
+    @[default(false)]
+    "existing": boolean?
+  }
+  [string resPath] 
+:: void -> [ActionTriggerInfo*] 
+{
+ %1 > resPath;
+
+ sreif:show-resource %resPath |
+ res-all-triggers %--existing
+
+};
+
+command app-all-triggers 
+  {
+    /** 実在するファイルを含めるか */
+    @[default(false)]
+    "existing": boolean?
+  }
+  :: reif:ApplicationSummary -> [ActionTriggerInfo*] 
+{
+  // mos:get-canonical-name > appPath; /* ここでも使えたほうがイイ */
+  $.name > appPath;
+
+  sreif:list-modules %appPath | 
+  each {
+    mod-all-triggers %--existing
+  } | list:concat
+};
+
+command mod-all-triggers
+  {
+    /** 実在するファイルを含めるか */
+    @[default(false)]
+    "existing": boolean?
+  }
+  :: reif:ModuleSummary -> [ActionTriggerInfo*] 
+{
+  mos:get-canonical-name > modPath;
+
+  sreif:list-resources %modPath | 
+  each {
+    res-all-triggers %--existing
+  } | list:concat
+};
+
+/** リソースに含まれるすべてのトリガーを列挙する */
+command res-all-triggers 
+  {
+    /** 実在するファイルを含めるか */
+    @[default(false)]
+    "existing": boolean?
+  }
+  :: reif:ResourceSummary -> [ActionTriggerInfo*] 
+{
+ [
+   /* このリソースのCDパス */
+   mos:get-canonical-name    > resPath,
+   /* このリソースに所属するインスタンス（パス文字列）セット */
+   res-instances %--existing > insts,
+
+ ];
+ /* リソースに含まれるアクションを列挙し、必要な情報を抽出 */
+ sreif:list-actions %resPath |
+ each {
+   do {
+      mos:get-canonical-name >: "targetName",
+      $.invoker.verb   >: "verb",
+      $.invoker.method >: "method",
+      $.pathPattern >: "pathPattern",
+   }
+ } > acts;
+ /* アクションセットとインスタンスセットの直積を作る */
+ %insts | dump --prefix="mpl:res-all-triggers" |
+ each {
+  pass > pathInfo;
+  %acts |
+    each {
+      pass > obj;
+      [
+        %obj,
+        {"targetUrl":{"hostUrl":%HOST_URL, "appPath":%APP_PATH, "pathInfo":%pathInfo}}
+      ] | json:merge
+    }
+ } | list:concat
+
+};
+
+// End of Module
+}>>

@@ -146,17 +146,21 @@ type QualifierMixin = {
    *: any?
 };
 
+
+/* メタオブジェクトグラフ内での位置を表現するデータ */
+type Location = {
+    "app": string?,
+    "pkg": string?,
+    "mod": string?,
+    "cls": string?,
+};
+
 /** コロンドットパスによるロケーションを含む修飾情報
  */
 type LocatedQualifierMixin = QualifierMixin & {
   /** このメタオブジェクトが所属する親コンテナの位置情報
    */
-  "location": {
-    "app": string?,
-    "pkg": string?,
-    "mod": string?,
-    "cls": string?,
-   }?, // いずれ必須にする */
+  "location": Location?, // いずれ必須にする */
 
   * : any?
 };
