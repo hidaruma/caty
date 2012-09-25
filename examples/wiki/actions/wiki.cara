@@ -10,6 +10,9 @@ resource Wikiファイル("*.wiki") {
         "contentType": "text/原稿",
          "isText": true,
     };
+
+    instance ["/FrontPage.wiki", "/HelpPage.wiki"];
+
     /** 読み込み */
     action 読み出し("/GET") :: @[in, out] #io void -> WikiPage produces HTMLページ { 
         #:io { file:read %1 | {
