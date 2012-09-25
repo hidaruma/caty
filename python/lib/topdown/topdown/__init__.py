@@ -265,6 +265,7 @@ class CharSeq(object):
         return r
 
     def _list(self, ps):
+        import sys
         error_list = []
         for p in ps:
             try:
@@ -272,11 +273,12 @@ class CharSeq(object):
             except EndOfBuffer, e:
                 raise
             except ParseFailed, e:
-                error_list.append(e)
+                info = sys.exc_info()[2]
+                error_list.append((e, info))
             else:
                 return r
-        error_list.sort(cmp=lambda a, b:cmp(a.pos, b.pos))
-        raise error_list[-1]
+        error_list.sort(cmp=lambda a, b:cmp(a[0].pos, b[0].pos))
+        raise error_list[-1][0], None, error_list[-1][1]
 
     def _parser(self, p):
         return p(self)

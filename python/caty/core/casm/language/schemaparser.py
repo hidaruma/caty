@@ -134,9 +134,10 @@ def default_type(seq):
 @try_
 def type_var(seq):
     _ = seq.parse('<')
-    vars = chain_flat(typedef, comma)(seq)
-    _ = seq.parse('>')
-    return vars
+    with strict():
+        vars = chain_flat(typedef, comma)(seq)
+        _ = seq.parse('>')
+        return vars
 
 def scalar(seq):
     n = seq.parse(typename)
@@ -187,17 +188,18 @@ def bag_type(seq):
 
 def array(seq):
     seq.parse('[')
-    r = option(chain_flat(repeatable_type, comma), [])(seq)
-    seq.parse(']')
-    o = seq.parse(option(options, {}))
-    o['repeat'] = False
-    l = []
-    for s, opt in r:
-        if opt == '*':
-            o['repeat'] = True
-        l.append(s)
-    a = ArrayNode(l, o)
-    return a
+    with strict():
+        r = option(chain_flat(repeatable_type, comma), [])(seq)
+        seq.parse(']')
+        o = seq.parse(option(options, {}))
+        o['repeat'] = False
+        l = []
+        for s, opt in r:
+            if opt == '*':
+                o['repeat'] = True
+            l.append(s)
+        a = ArrayNode(l, o)
+        return a
 
 def repeatable_type(seq):
     s = seq.parse([annotated_term, loose_item])
@@ -210,7 +212,7 @@ def repeatable_type(seq):
 def annotated_term(seq):
     doc = seq.parse(option(docstring))
     a = seq.parse(option(annotation, Annotations([])))
-    s = term(seq)
+    s = typedef(seq)
     s.annotations = a
     if doc:
         s.docstring = doc
