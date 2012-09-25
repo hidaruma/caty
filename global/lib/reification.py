@@ -23,6 +23,16 @@ class ShallowReifier(object):
             mname = None
         if name and '.' in name:
             cname, name = name.rsplit('.', 1)
+        if aname:
+            aname += '::'
+        if pname:
+            pname += '.'
+        else:
+            pname = u''
+        if mname:
+            mname += ':'
+        if cname:
+            cname += u'.'
         name = None
         return conditional_dict(lambda k, v: v is not None,
             {
