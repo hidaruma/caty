@@ -51,8 +51,8 @@ type Mod = {
 command doc-to-html :: Doc -> Doc  {
  pass > in |
  [
-   $.description      > desc,
-   $.moreDescription? > more,
+   $.description?="(ナシ)"  > desc,
+   $.moreDescription?        > more,
  ];
  %more? | 
  when {
@@ -159,7 +159,7 @@ command modify-command-info :: reif:CommandSummary -> Command {
    $.name        >: "name",
    $.typeParams  >: "typeParams",
    $.document  | doc-to-html >: "document",
-   $.profiles.0  >: "profile",
+   $.profile  >: "profile",
  }
 };
 

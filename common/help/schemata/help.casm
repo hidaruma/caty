@@ -38,10 +38,12 @@ command modify-cmd-info :: CmdInfo -> CmdInfo2 {
 };
 
 command mods [string appName] :: void -> ModInfoList {
- inspect:list-mod %1 | 
+ %1 | dump --prefix="help:mods appName" ;
+ %1 > appName;
+ inspect:list-mod %appName | 
  each {
   pv name >n;
-  [%1, ":", %n] | text:concat | dump > mod;
+  [%appName, "::", %n] | text:concat | dump > mod;
   {"fullname":%mod, "cmds":inspect:list-cmd %mod  | each {modify-cmd-info}}
  }
 };
