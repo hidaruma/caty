@@ -19,8 +19,8 @@ command fullpath
     refers python:caty.core.std.command.mos.FullPath;
 
 /** メタオブジェクトから完全修飾名を取り出す。 */
-command get-canonical-name :: {"name": string, "location": {*:string}, *:any?} -> string {
-    $ > src;
+command get-canonical-name :: @* {"name": string, "location": {*:string}, *:any?} -> string {
+    $.content() > src;
     %src|$.location.app? | case {
         undefined => [] > app,
         string => [pass, "::"]> app
