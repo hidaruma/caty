@@ -34,11 +34,10 @@ class ErrorLogWriter(object):
     def flush(self):
         pass
 
-class CatyRequestHandler(WSGIRequestHandler):
-    def __init__(self, logger, request, client_address, server):
+class CatyRequestHandler(object):
+    def __init__(self, logger):
         self.__logger = logger
         self.__error_log_writer = ErrorLogWriter(logger)
-        WSGIRequestHandler.__init__(self, request, client_address, server)
 
     def log_message(self, format, *args):
         self.__logger.info("%s - - [%s] %s" %
@@ -49,13 +48,31 @@ class CatyRequestHandler(WSGIRequestHandler):
     def get_stderr(self):
         return self.__error_log_writer
 
+    def process_env(self, env):
+        return env
 
 def get_server(*args):
     return CatyWSGIServer
 
+def make_handler(handler_class, base_class=WSGIRequestHandler):
+    class _Handler(handler_class, base_class):
+        def __init__(self, r, c, s, *rest):
+            handler_class.__init__(self, *rest)
+            base_class.__init__(self, r, c, s)
+
+        def get_environ(self):
+            e = base_class.get_environ(self)
+            return handler_class.process_env(self, e)
+
+    return _Handler
+
+def get_handler_class():
+    return CatyRequestHandler
+
 def get_handler(system, is_debug):
     logger = system.access_logger
-    return lambda r, c, s: CatyRequestHandler(logger, r, c, s)
+    rh_class = make_handler(get_handler_class())
+    return lambda r, c, s: rh_class(r, c, s, logger)
 
 from caty.front.web.app import CatyWSGIDispatcher, CatyApp
 def get_dispatcher(system, is_debug):
