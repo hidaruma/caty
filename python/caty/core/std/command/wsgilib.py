@@ -152,6 +152,15 @@ class InternalCatyApp(CatyApp):
             return []
 
 
+class ProcessEnv(Builtin):
+
+    def execute(self, environ):
+        system = self.current_app._system
+        server_module_name = system.server_module_name
+        exec 'import %s as server_module' % server_module_name
+        handler = server_module.get_handler_class()(None)
+        return handler.process_env(environ)
+
 class DispatchAndExec(Builtin):
     def execute(self, environ):
         environ['REMOTE_ADDR'] = u'127.0.0.1'
