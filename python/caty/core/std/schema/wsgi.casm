@@ -69,6 +69,15 @@ type Environ = {
   * : univ?,
 };
 
+/** Webリクエスト情報をwsgi:Environ型のデータに変換する。
+ *
+ * # fullpathオプションの意味は、requestコマンドと同じである。 fullpath=falseのときは、現在のCatyアプリケーションを起点とする相対パスとなる。
+ * # HTTPメソッドがGET, HEAD, DELETEのときは、入力はnullしか許容しない。
+ * # HTTPメソッドがGET, HEAD, DELETEのときは、content-typeは指定できない。
+ * # HTTPメソッドがPUT, POSTのときは、入力はstring|binaryが必須。
+ * # HTTPメソッドがPUT, POSTのとき、入力がstringで content-typeは指定されてないなら、text/plain とみなす。
+ * # HTTPメソッドがPUT, POSTのとき、入力がbinaryで content-typeは指定されてないなら、application/octet-streamとみなす。
+ */
 command make-env 
   {
     @[default(false)]
@@ -111,11 +120,23 @@ type Response = {
     "body": (string | binary),
 };
 
+/** WSGIアプリケーションを呼び出す。
+ * 
+ * # 入力のwsgi:Environ型データを第一引数にしてWSGIアプリケーションを呼ぶ。
+ * # 第二引数のstart_resposeは自前で準備したものを渡す。
+ * # --no-middle=trueのときは、ミドルウェアスタックをバイバスする。つまり、 Catyが提示したWSGIアプリケーションを呼び出す。
+ * # start_responseに渡された情報と、WSGIアプリケーションの戻り値からwsgi:Response型データを組み立てて出力とする。
+ */
 command call-application
   {
     @[default(false)]
     "no-middle": boolean?,
   }
 :: Environ -> Response
-    refers python:caty.core.std.command.wsgilib.CallApplication
+  refers python:caty.core.std.command.wsgilib.CallApplication
+;
+
+command dispatch-and-exec :: Environ -> any
+  throws [ApplicationNotFound, FileNotFound, ActionNotFound]
+  refers python:caty.core.std.command.wsgilib.DispatchAndExec
 ;

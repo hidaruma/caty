@@ -150,3 +150,20 @@ class InternalCatyApp(CatyApp):
             return [b]
         else:
             return []
+
+
+class DispatchAndExec(Builtin):
+    def execute(self, environ):
+        environ['REMOTE_ADDR'] = u'127.0.0.1'
+        environ['SERVER_PORT'] = str(environ['SERVER_PORT'])
+        system = self.current_app._system
+        wsgi_app_cls = InternalCatyApp
+        path = environ['PATH_INFO']
+        app_name = environ['SCRIPT_NAME'] or u'root'
+        del environ['SCRIPT_NAME']
+        app = system.get_app(app_name)
+        if app_name != u'root':
+            path = u'/%s%s' % (app_name, path) if path else u'/%s/' % app_name
+        environ['PATH_INFO'] = path
+        wsgi_app = wsgi_app_cls(app, system.debug, system)
+        return wsgi_app.main(environ)
