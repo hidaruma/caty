@@ -120,6 +120,9 @@ class Application(PbcObject):
         self.parent._schema_module.resolve()
         self._init_action()
         self._schema_module.resolve()
+        self._system._core_app._init_interpreter()
+        self.parent._init_interpreter()
+        self._init_interpreter()
 
     def exec_rc_script(self):
         if self._disabled:

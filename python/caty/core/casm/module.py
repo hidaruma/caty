@@ -152,7 +152,7 @@ class Module(Facility):
             if not self.is_root:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)
         if ('override-public' in target.annotations or 'override-public' in self.annotations):
-            if not self.is_root and self.parent is not None:
+            if not self.is_root or self.parent is not None:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
         if see_filter and 'filter' in target.annotations:
             if self.name != 'filter':
@@ -548,7 +548,8 @@ class Module(Facility):
             for k, v in self.ast_ns.items():
                 if u'register-public' in v.annotations:
                     self.find_root().ast_ns.pop(k)
-
+        for k, v in self.proto_ns.items():
+            v.profile_container = None
         for k, v in self.sub_modules.items():
             if v.type == 'cara':
                 self.sub_modules.pop(k)

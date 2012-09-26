@@ -51,6 +51,19 @@ class DumpSchema(Builtin):
     def execute(self):
         print TreeDumper(deep=self.__deep, recursive=self.__deep).visit(self.schema.get_type(self.__schema_name))
 
+class DumpCmd(Builtin):
+
+    def setup(self, opts, name):
+        self.__cmd_name = name
+        self.__deep = opts['deep']
+
+    def execute(self):
+        cmd = self.schema.get_command(self.__cmd_name)
+        print TreeDumper(deep=self.__deep, recursive=self.__deep).visit(cmd.profiles[0].in_schema)
+        print TreeDumper(deep=self.__deep, recursive=self.__deep).visit(cmd.profiles[0].out_schema)
+
+
+
 class Profile(Builtin):
 
     def setup(self, opts):

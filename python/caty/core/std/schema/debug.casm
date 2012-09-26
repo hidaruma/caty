@@ -43,6 +43,13 @@ command dump-schema {@[default(false)]"deep": boolean?} [string] :: void -> void
     refers python:caty.core.std.command.debug.DumpSchema;
 
 /**
+ * コマンドの入出力型のダンプ
+ */
+command dump-cmd {@[default(false)]"deep": boolean?} [string] :: void -> void
+    reads [interpreter, schema]
+    refers python:caty.core.std.command.debug.DumpCmd;
+
+/**
  * メモリ使用状況のプロファイルを行う。
  * このコマンドを使うにはguppy (http://pypi.python.org/pypi/guppy)が必要となる。
  */

@@ -12,7 +12,7 @@ class ProfileBuilder(SchemaBuilder):
     def _visit_function(self, node):
 
         self._root_name = node.name
-        if node.profile_container:
+        if node.profile_container: # register-public時に処理が二重に走らないように
             return node.profile_container
         if node.uri:
             pc = ProfileContainer(node.name, 
@@ -32,6 +32,7 @@ class ProfileBuilder(SchemaBuilder):
                                         self.module)
 
         for pat in node.patterns:
+            pat = pat.clone() # 不変オブジェクトになっていないのでクローンで元のデータを保護
             rr = ReferenceResolver(self.module)
             params = []
             # 型パラメータのデフォルト値を設定
@@ -39,7 +40,6 @@ class ProfileBuilder(SchemaBuilder):
                 schema = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
                 params.append(schema.accept(rr))
 
-            node.type_params = params
             self._type_params = params
             pc.type_params = params
             pat.build([self, rr])

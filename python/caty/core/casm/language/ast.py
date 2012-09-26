@@ -394,6 +394,9 @@ class CallPattern(object):
         self.args = args
         self.decl = decl
 
+    def clone(self):
+        return CallPattern(self.opts, self.args, self.decl.clone())
+
     def build(self, cursors):
         if self.opts:
             o = self.opts
@@ -463,6 +466,11 @@ class CommandDecl(object):
         self.jump_decl = jump
         self.resource = resource if isinstance(resource, list) else [resource]
         self.__initialized = False
+
+    def clone(self):
+        new = CommandDecl(self.profile_ast, self.jump_decl, self.resource)
+        new.uri = self.uri
+        return new
 
     def get_all_resources(self):
         for res in self.resource:
