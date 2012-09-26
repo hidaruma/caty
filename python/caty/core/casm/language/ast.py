@@ -19,11 +19,12 @@ class Provide(object):
         module.exports= self.exports
 
 class ModuleName(object):
-    def __init__(self, name, annotations, rel, docstring=u''):
+    def __init__(self, name, annotations, rel, docstring=u'', timing=u'boot'):
         self.name = name
         self.docstring = docstring
         self.annotations = annotations
         self.related = rel
+        self.timing = timing
 
     def declare(self, module):
         if self.name == 'builtin': #ビルトインのみは特別扱い
@@ -34,8 +35,11 @@ class ModuleName(object):
                 raise InternalException("Module name $name and path name $path are not matched", name=self.name, path=module.filepath)
         module.docstring = self.docstring
         module.annotations = self.annotations
+        module.timing = self.timing
         for r in self.related:
             module.related.add(r)
+        if self.timing == u'demand':
+            return u'stop'
 
 class ASTRoot(Root):
     def __init__(self, name, type_params, ast, annotation, docstring):
@@ -335,6 +339,10 @@ class CommandNode(Function):
         self.type_params_ast = type_params
         self.command_type = command_type
 
+    @property
+    def annotations(self):
+        return self.annotation
+
     def declare(self, module):
         self.module = module
         module.add_proto_type(self)
@@ -546,7 +554,11 @@ class TypeParam(object):
         self._name = name
         self.var_name = name
         self.kind = kind
-        self.default = default_type
+        self._default = default_type
+
+    @property
+    def default(self):
+        return self._default
 
     @property
     def name(self):

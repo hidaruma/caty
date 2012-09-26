@@ -99,9 +99,13 @@ def module_decl(seq, type='casm'):
         i = seq.parse(keyword('in'))
     if i:
         seq.parse(keyword(type))
+    if option(keyword('on'))(seq):
+        timing = choice(keyword(u'boot'), keyword(u'demand'))(seq)
+    else:
+        timing = u'boot'
     rel = seq.parse(option(relation, []))
     seq.parse(';')
-    return ModuleName(n, a, rel, doc)
+    return ModuleName(n, a, rel, doc, timing)
 
 def relation(seq):
     seq.parse(keyword('related'))

@@ -56,7 +56,6 @@ def throw_caty_exception(tag, message, error_class=None, error_id=None, stack_tr
 def send_caty_signal(data):
     raise CatySignal(data)
 
-
 class SubCatyException(CatyException):
     def __init__(self, **kwds):
         CatyException.__init__(self, self.error_type, self.error_message, **kwds)

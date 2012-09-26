@@ -46,5 +46,6 @@ def read_cara_files(rmc, action_fs, facility, target, app, current_package=None)
 
 from caty.core.casm.module import Package
 class ResPackage(Package):
+    type = u'cara'
     def compile(self):
         pass

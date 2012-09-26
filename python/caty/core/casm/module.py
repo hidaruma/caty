@@ -54,6 +54,7 @@ class Module(Facility):
         self.command_loader = None
         self.sub_modules = {}
         self.sub_packages = {}
+        self.pending_modules = {} # on demand宣言されたモジュール
         self.parent = parent
         self._name = u'public' # デフォルト値
         self._system = app._system
@@ -68,6 +69,7 @@ class Module(Facility):
         self.compiled = False
         self.docstring = u''
         self.last_modified = 0
+        self.timing = u'boot'
         self.annotations = Annotations([])
         self.package_root_path = u'/'
 
@@ -75,9 +77,9 @@ class Module(Facility):
         self.get_type = partial(self._get_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
         self.has_schema = partial(self._has_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
 
-        self.add_kind = partial(self._add_resource, scope_func=lambda x:x.schema_ns, type=u'Kind', see_register_public=True)
-        self.get_kind = partial(self._get_resource, scope_func=lambda x:x.schema_ns, type=u'Kind')
-        self.has_kind = partial(self._has_resource, scope_func=lambda x:x.schema_ns, type=u'Kind')
+        self.add_kind = partial(self._add_resource, scope_func=lambda x:x.ast_ns, type=u'Kind', see_register_public=True)
+        self.get_kind = partial(self._get_resource, scope_func=lambda x:x.ast_ns, type=u'Kind')
+        self.has_kind = partial(self._has_resource, scope_func=lambda x:x.ast_ns, type=u'Kind')
 
         self.add_command = partial(self._add_resource, scope_func=lambda x:x.command_ns, type=u'Command', see_register_public=True, see_filter=True)
         self.get_command = partial(self._get_resource, scope_func=lambda x:x.command_ns, type=u'Command')
@@ -135,10 +137,10 @@ class Module(Facility):
         m = t.module.name + '.' + t.module.type
         return m, a
 
-    def _add_resource(self, target, scope_func=None, type=u'', see_register_public=False, see_filter=False, callback=None):
+    def _add_resource(self, target, scope_func=None, type=u'', see_register_public=False, see_filter=False, callback=None, force=False):
         scope = scope_func(self)
         name = target.name
-        if name in scope:
+        if name in scope and not force:
             t = scope[name]
             m, a = self._get_mod_and_app(t)
             raise Exception(self.application.i18n.get(u'%s $name of $this is already defined in $module of $app' % type, 
@@ -148,7 +150,10 @@ class Module(Facility):
                                                        app=a))
         if see_register_public and ('register-public' in target.annotations or 'register-public' in self.annotations):
             if not self.is_root:
-                self.parent._add_resource(target, scope_func, type, see_register_public=False, see_filter=False, callback=callback)
+                self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)
+        if ('override-public' in target.annotations or 'override-public' in self.annotations):
+            if not self.is_root:
+                self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
         if see_filter and 'filter' in target.annotations:
             if self.name != 'filter':
                 fm = self.get_module('filter')
@@ -259,6 +264,34 @@ class Module(Facility):
                 return None
             tracked.add(self.canonical_name)
             return self.parent._get_module(name)
+        return None
+
+    def load_on_demand(self, name):
+        m = self.find_public_module()._load_on_demand(name)
+        if not m:
+            raise SystemResourceNotFound(u'ModuleNotFound', u'$name', name=name)
+        trunk = m.canonical_name.replace('.', '/')
+        path = u'/' + trunk + u'.casm' if not m._literate else u'.casm.lit'
+        m._compile(path, force=True)
+
+    def _load_on_demand(self, name, tracked=None):
+        tracked = set() if tracked is None else tracked
+        if name == self.name:
+            return self
+        if name in self.pending_modules:
+            m = self.pending_modules[name]
+            self.sub_modules[name] = m
+            return m
+        if '.' in name:
+            pkg, rest = name.split('.', 1)
+            pm = self._get_package(pkg, tracked)
+            if pm:
+                return pm._load_on_demand(rest, tracked)
+        if self.parent:
+            if self.canonical_name in tracked:
+                return None
+            tracked.add(self.canonical_name)
+            return self.parent._load_on_demand(name)
         return None
 
     def has_package(self, name):
@@ -501,6 +534,24 @@ class Module(Facility):
             for p in self.parent.iter_parents():
                 yield p
 
+    def clear_namespace(self):
+        self.compiled = False
+        self.schema_ns = {}
+        self.command_ns = {}
+        self.saved_st = {}
+        for k, v in self.sub_modules.items():
+            if v.type == 'cara':
+                self.sub_modules.pop(k)
+        for m in self.sub_modules.values():
+            m.clear_namespace()
+        for k, m in self.sub_packages.items():
+            if m.type == 'cara':
+                self.sub_packages.pop(k)
+            else:
+                m.clear_namespace()
+        for m in self.class_ns.values():
+            m.clear_namespace()
+
 class _FaciltyLoader(object):
     def __init__(self, clsref, facility_name, module):
         self.path = facility_name + '.py'
@@ -531,7 +582,7 @@ class ClassModule(Module):
         self.command_loader = parent.command_loader
         self._name = clsobj.name
         self._clsobj = clsobj
-        self._clsrestriction = clsobj.restriction
+        self._clsrestriction_proto = clsobj.restriction
         self.is_root = False
         self.annotations = clsobj.annotations
         for m in clsobj.member:
@@ -558,7 +609,7 @@ class ClassModule(Module):
         Module._build_schema_tree(self)
         b = self.make_schema_builder()
         b._type_params = []
-        self._clsrestriction = b.visit(self._clsrestriction)
+        self._clsrestriction = b.visit(self._clsrestriction_proto)
 
     def _resolve_reference(self):
         Module._resolve_reference(self)
@@ -612,6 +663,10 @@ class CoreModule(Module):
             for t in parse(schema_string):
                 t.declare(self)
 
+    def clear_namespace(self):
+        Module.clear_namespace(self)
+        self.schema_ns.update(schemata)
+
 class AppModule(Module):
     def __init__(self, app, parent=None, is_root=False):
         Module.__init__(self, app)
@@ -654,7 +709,10 @@ class AppModule(Module):
                 raise Exception(self.application.i18n.get(u'Module $name is already defined in $app', 
                                                           name=mod.canonical_name, 
                                                           app=self.get_module(mod.canonical_name)._app.name))
-            self.sub_modules[mod.name] = mod
+            if mod.timing == u'demand':
+                self.pending_modules[mod.name] = mod
+            else:
+                self.sub_modules[mod.name] = mod
             mod.last_modified = e.last_modified
         elif e.path == u'/formats.xjson':
             o = self.fs.open(e.path)
@@ -690,11 +748,10 @@ class AppModule(Module):
     def _get_module_class(self):
         return self.__class__
 
-    def _compile(self, path):
+    def _compile(self, path, force=False):
         o = self.fs.open(path)
         if path.endswith('.casm'):
-            for t in self.parse_casm(o):
-                t.declare(self)
+            res = self.parse_casm(o)
         elif path.endswith('.pcasm'):
             d = to_decl_style(o)
             if self.pcasm_cache:
@@ -703,14 +760,15 @@ class AppModule(Module):
                 io = StringIO(d)
                 io.path = o.path
                 self.pcasm_cache = io
-            for t in self.parse_casm(io):
-                t.declare(self)
+            res = self.parse_casm(io)
         elif path.endswith('.xcasm'):
-            for t in self.parse_casm(o, 'xcasm'):
-                t.declare(self)
+            res = self.parse_casm(o, 'xcasm')
         else:
-            for t in self.parse_casm(o, 'lit'):
-                t.declare(self)
+            res = self.parse_casm(o, 'lit')
+
+        for t in res:
+            if t.declare(self) == u'stop' and not force:
+                break
 
     def parse_casm(self, fo, type='casm'):
         try:

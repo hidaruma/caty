@@ -195,6 +195,17 @@ commands, schemata などの再読み込みを行う。
         return False
 
     @catch
+    def do_force_load(self, line):
+        u"""
+Usage: force_load module_name
+Alias: fl
+
+on demand宣言されたモジュールを読み込む。
+        """
+        self.app.force_load(line.strip())
+        return False
+
+    @catch
     def do_debug(self, line):
         u"""
 Usage: debug [on|off]

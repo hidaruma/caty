@@ -87,7 +87,7 @@ class TypeCalcurator(_SubNormalizer):
         _SubNormalizer.__init__(self, module)
         self.history = set()
         self.traced = set()
-
+    
     @apply_annotation
     def _visit_scalar(self, node):
         if isinstance(node, TypeReference):
