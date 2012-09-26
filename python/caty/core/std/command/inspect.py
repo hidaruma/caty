@@ -46,7 +46,7 @@ class ListCommands(Internal):
             o['signals'] = []
             o['typeVars'] = [v.var_name for v in profile.type_params]
             if p.declobj.throws.type != u'never':
-                for node in self.__divide_union(p.throws):
+                for node in self.__divide_union(p.declobj.throws):
                     o['throws'].append(td.visit(node))
             if p.declobj.signals.type != u'never':
                 for node in self.__divide_union(p.declobj.signals):
