@@ -130,11 +130,11 @@ class Module(Facility):
         return self.__related
 
     def _get_full_name(self):
-        return self.name+'.'+self.type
+        return self.canonical_name+'.'+self.type
 
     def _get_mod_and_app(self, t):
         a = t.module.application.name
-        m = t.module.name + '.' + t.module.type
+        m = t.module.canonical_name + '.' + t.module.type
         return m, a
 
     def _add_resource(self, target, scope_func=None, type=u'', see_register_public=False, see_filter=False, callback=None, force=False):
@@ -152,7 +152,7 @@ class Module(Facility):
             if not self.is_root:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)
         if ('override-public' in target.annotations or 'override-public' in self.annotations):
-            if not self.is_root:
+            if not self.is_root and self.parent is not None:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
         if see_filter and 'filter' in target.annotations:
             if self.name != 'filter':
@@ -272,6 +272,11 @@ class Module(Facility):
             raise SystemResourceNotFound(u'ModuleNotFound', u'$name', name=name)
         trunk = m.canonical_name.replace('.', '/')
         path = u'/' + trunk + u'.casm' if not m._literate else u'.casm.lit'
+        m.ast_ns = {}
+        m.proto_ns = {}
+        m.class_ns = {}
+        m.facility_ns = {}
+        m.clear_namespace()
         m._compile(path, force=True)
 
     def _load_on_demand(self, name, tracked=None):
@@ -523,7 +528,7 @@ class Module(Facility):
         return make_structured_doc(self.docstring or u'')
 
     def find_root(self):
-        if not self.parent:
+        if self.is_root:
             return self
         else:
             return self.parent.find_root()
@@ -539,6 +544,11 @@ class Module(Facility):
         self.schema_ns = {}
         self.command_ns = {}
         self.saved_st = {}
+        if not self.is_root:
+            for k, v in self.ast_ns.items():
+                if u'register-public' in v.annotations:
+                    self.find_root().ast_ns.pop(k)
+
         for k, v in self.sub_modules.items():
             if v.type == 'cara':
                 self.sub_modules.pop(k)
