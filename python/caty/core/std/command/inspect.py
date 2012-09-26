@@ -22,39 +22,39 @@ class ListCommands(Internal):
         app = self._system.get_app(app_name)
         mod = app._schema_module.get_module(mod_name)
         r = []
-        for k, v in mod.proto_ns.items():
+        for k, v in mod.command_ns.items():
             if v.module.name == mod.name:
                 r.extend(self._get_command_info(v))
         return r
 
-    def _get_command_info(self, proto_type):
+    def _get_command_info(self, profile):
         from caty.core.casm.cursor.dump import TreeDumper
         td = TreeDumper(withoutdoc=True)
         td.started = True
         profiles = []
-        for p in proto_type.patterns:
+        for p in profile.profiles:
             o = {
-                'name': proto_type.name,
-                'implemented': u'catyscript' if proto_type.script_proxy is not None else u'python' if proto_type.uri != 'caty.core.command.Dummy' else u'none',
+                'name': profile.name,
+                'implemented': profile.implemented,
             }
-            o['opts'] = td.visit(p.opts) if p.opts else u'{}'
-            o['args'] = td.visit(p.args) if p.args else u'[]'
-            o['input'] = td.visit(p.decl.profile[0])
-            o['output'] = td.visit(p.decl.profile[1])
-            o['deprecated'] = 'deprecated' in proto_type.annotation
+            o['opts'] = td.visit(p.opts_schema) if p.opts_schema.type != 'never' else u'{}'
+            o['args'] = td.visit(p.args_schema) if p.args_schema.type != 'never'  else u'[]'
+            o['input'] = td.visit(p.declobj.profile[0])
+            o['output'] = td.visit(p.declobj.profile[1])
+            o['deprecated'] = 'deprecated' in profile.annotations
             o['throws'] = []
             o['signals'] = []
-            o['typeVars'] = [v.var_name for v in proto_type.type_params]
-            if p.decl.throws.type != u'never':
-                for node in self.__divide_union(p.decl.throws):
+            o['typeVars'] = [v.var_name for v in profile.type_params]
+            if p.declobj.throws.type != u'never':
+                for node in self.__divide_union(p.throws):
                     o['throws'].append(td.visit(node))
-            if p.decl.signals.type != u'never':
-                for node in self.__divide_union(p.decl.signals):
+            if p.declobj.signals.type != u'never':
+                for node in self.__divide_union(p.declobj.signals):
                     o['signals'].append(td.visit(node))
             if not self._short:
                 o['facilityUsages'] = []
-                for mode, decl in p.decl.get_all_resources():
-                    o['facilityUsages'].append({'usageType': unicode(mode), 'facilityName': decl.name})
+                for mode, declobj in p.declobj.get_all_resources():
+                    o['facilityUsages'].append({'usageType': unicode(mode), 'facilityName': declobj.name})
             profiles.append(o)
         return profiles
         
