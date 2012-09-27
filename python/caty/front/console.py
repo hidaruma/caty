@@ -195,9 +195,9 @@ commands, schemata などの再読み込みを行う。
         return False
 
     @catch
-    def do_force_load(self, line):
+    def do_fl(self, line):
         u"""
-Usage: force_load module_name
+Usage: force-load module_name
 Alias: fl
 
 on demand宣言されたモジュールを読み込む。
@@ -524,6 +524,8 @@ Web サーバの起動・停止を行う
         if name in self.env:
             del self.env[name]
         self.deleted_env.add(name)
+
+setattr(CatyShell, 'do_force-load', CatyShell.do_fl)
 
 import threading
 class ServerThread(threading.Thread):
