@@ -479,7 +479,7 @@ class Module(Facility):
                     raise
 
         except:
-            print '[ERROR]', u'Application:%s, module:%s' % (self._app.name, self._name)
+            print '[ERROR]', u'%s::%s (%s)' % (self._app.name, self.canonical_name, self.type)
             raise
 
     def reify(self):
