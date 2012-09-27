@@ -1088,7 +1088,7 @@ class Help(Builtin):
         if line == '':
             self.__line = u'help'
             line = u'help'
-        if line in ('change', 'reload', 'l', 'quit', 'ch', 'cd', 'server'):
+        if line in ('change', 'reload', 'l', 'quit', 'ch', 'cd', 'server', 'fl', 'force-load'):
             from caty.front.console import CatyShell
             h = getattr(CatyShell, 'do_%s' % line)
             return h.__doc__.strip()
