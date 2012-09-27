@@ -433,7 +433,19 @@ type ModuleSummary = LocatedQualifierMixin & {
 
   /** @[deprecated]アノテーションの値をコピーする */
   @[deprecated, default(false)]
-  "deprecated": boolean?,
+  "deprecated": boolean?, // 廃止予定
+
+  /** ロードタイミング */
+  @[default("boot")]
+  "loadOn": ("boot" | "demand")?,
+
+  /** 既にロードされているか 
+   * loadOn が boot なら、この値は常に真である。
+   * loadOn が demand のとき、この値は状況により変わる。
+   */
+  @[default(true)]
+  "loaded": boolean?,
+
 
   *: any?
 };
