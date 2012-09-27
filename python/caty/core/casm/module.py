@@ -271,6 +271,12 @@ class Module(Facility):
             raise SystemResourceNotFound(u'ModuleNotFound', u'$name', name=name)
         trunk = m.canonical_name.replace('.', '/')
         path = u'/' + trunk + u'.casm' if not m._literate else u'.casm.lit'
+        if not m.is_root:
+            for k, v in m.ast_ns.items():
+                if u'register-public' in v.annotations:
+                    m.find_root().ast_ns.pop(k)
+        for k in m.facility_ns:
+            m.app._facility_classes.pop(k)
         m.ast_ns = {}
         m.proto_ns = {}
         m.class_ns = {}
@@ -522,10 +528,7 @@ class Module(Facility):
         self.schema_ns = {}
         self.command_ns = {}
         self.saved_st = {}
-        if not self.is_root:
-            for k, v in self.ast_ns.items():
-                if u'register-public' in v.annotations:
-                    self.find_root().ast_ns.pop(k)
+
         for k, v in self.proto_ns.items():
             v.profile_container = None
         for k, v in self.sub_modules.items():

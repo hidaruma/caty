@@ -433,7 +433,7 @@ class Application(PbcObject):
 
     def register_facility(self, name, cls, system_param):
         if name in self._facility_classes:
-            raise Exception(self.i18n.get("Facility name conflicted: $name at $app", name=name, app=app.name))
+            raise Exception(self.i18n.get("Facility name conflicted: $name at $app", name=name, app=self.name))
         self._facility_classes[name] = (cls, system_param)
 
     def _init_facilities(self):
