@@ -54,7 +54,6 @@ class Module(Facility):
         self.command_loader = None
         self.sub_modules = {}
         self.sub_packages = {}
-        self.pending_modules = {} # on demand宣言されたモジュール
         self.parent = parent
         self._name = u'public' # デフォルト値
         self._system = app._system
@@ -267,7 +266,7 @@ class Module(Facility):
         return None
 
     def load_on_demand(self, name):
-        m = self.find_public_module()._load_on_demand(name)
+        m = self.find_public_module().get_module(name)
         if not m:
             raise SystemResourceNotFound(u'ModuleNotFound', u'$name', name=name)
         trunk = m.canonical_name.replace('.', '/')
@@ -279,30 +278,9 @@ class Module(Facility):
         m.clear_namespace()
         m._compile(path, force=True)
 
-    def _load_on_demand(self, name, tracked=None):
-        tracked = set() if tracked is None else tracked
-        if name == self.name:
-            return self
-        if name in self.pending_modules:
-            m = self.pending_modules[name]
-            self.sub_modules[name] = m
-            return m
-        if '.' in name:
-            pkg, rest = name.split('.', 1)
-            pm = self._get_package(pkg, tracked)
-            if pm:
-                return pm._load_on_demand(rest, tracked)
-        if self.parent:
-            if self.canonical_name in tracked:
-                return None
-            tracked.add(self.canonical_name)
-            return self.parent._load_on_demand(name)
-        return None
-
     def has_package(self, name):
         from operator import truth
         return truth(self.find_public_module()._get_package(name))
-
 
     def get_package(self, name):
         m = self.find_public_module()._get_package(name)
@@ -720,10 +698,7 @@ class AppModule(Module):
                 raise Exception(self.application.i18n.get(u'Module $name is already defined in $app', 
                                                           name=mod.canonical_name, 
                                                           app=self.get_module(mod.canonical_name)._app.name))
-            if mod.timing == u'demand':
-                self.pending_modules[mod.name] = mod
-            else:
-                self.sub_modules[mod.name] = mod
+            self.sub_modules[mod.name] = mod
             mod.last_modified = e.last_modified
         elif e.path == u'/formats.xjson':
             o = self.fs.open(e.path)
