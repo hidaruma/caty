@@ -151,7 +151,7 @@ class ResourceModule(Module):
                             [CallPattern(opt, 
                                          arg, 
                                          CommandDecl((ScalarNode(u'WebInput'), 
-                                                      UnionNode(ScalarNode(u'Response'), ScalarNode(u'Redirect'))), 
+                                                      ScalarNode(u'WebOutput')), 
                                                       [], 
                                                       []))], 
                             ActionEnvelope(script, act.canonical_name.split(':')[-1]), 
