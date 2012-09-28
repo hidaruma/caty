@@ -19,7 +19,7 @@ command compile :: TemplateText -> TemplateObject
     refers python:caty.core.std.command.template.Compile
 ;
 
-command expand :: [TemplateObject, TemplateContext] -> string
+command expand :: [TemplateContext, TemplateObject] -> string
     reads [interpreter, schema, env]
     uses [include, pub]
     refers python:caty.core.std.command.template.Expand

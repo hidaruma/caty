@@ -53,7 +53,7 @@ class Expand(Builtin, MafsMixin):
         from caty.template.core.loader import TextBytecodePersister, BytecodeLoader
         from caty.template.core import template
         from caty.core.template import MafsResourceIO, CompilerAndPreprocessor
-        tpl, context = input
+        context, tpl = input
         io = MafsResourceIO(self.include)
         compiler = CompilerAndPreprocessor(io)
         persister = TextBytecodePersister()
