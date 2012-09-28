@@ -5,6 +5,12 @@ from caty.command import Command
 import caty.jsontools as xjson
 from caty.core.exception import throw_caty_exception
 from decimal import Decimal
+from caty.jsontools import normalize_number
+
+def normalize_number_wrapper(f):
+    def _wrapped(*args, **kwds):
+        return normalize_number(f(*args, **kwds))
+    return _wrapped
 
 class FromString(Command):
     def execute(self, input):
@@ -14,6 +20,7 @@ class FromString(Command):
             throw_caty_exception(u'InvalidInput', u'bad number format')
 
 class Add(Command):
+    @normalize_number_wrapper
     def execute(self, input):
         r = 0
         for x in input:
@@ -21,6 +28,7 @@ class Add(Command):
         return r
 
 class Mul(Command):
+    @normalize_number_wrapper
     def execute(self, input):
         r = 1
         for x in input:
@@ -28,10 +36,12 @@ class Mul(Command):
         return r
 
 class Sub(Command):
+    @normalize_number_wrapper
     def execute(self, input):
         return input[0] - input[1]
 
 class Div(Command):
+    @normalize_number_wrapper
     def setup(self, opts):
         self.integer = opts.get('integer')
 
@@ -40,6 +50,7 @@ class Div(Command):
         return long(r) if self.integer else r
 
 class Mod(Command):
+    @normalize_number_wrapper
     def execute(self, input):
         return input[0] % input[1]
 

@@ -424,6 +424,7 @@ def normalize(o):
     else:
         return o
 
+
 def _erase_undef(r):
     from caty import UNDEFINED
     import itertools
@@ -438,6 +439,22 @@ def _reduce_undef(o):
         else:
             r[k] = normalize(v)
     return r
+
+def normalize_number(o):
+    if isinstance(o, (tuple, list)):
+        return map(normalize_number, o)
+    elif isinstance(o, dict):
+        return dict([(k, normalize_number(v)) for k, v in o.items()])
+    elif isinstance(o, TaggedValue):
+        return tagged(o.tag, normalize_number(o.value))
+    elif isinstance(o, decimal.Decimal):
+        l = long(o)
+        if l == o:
+            return l
+        else:
+            return o
+    else:
+        return o
 
 def encode(obj):
     u"""Caty 内部形式から JSON 標準形式へと変換する。

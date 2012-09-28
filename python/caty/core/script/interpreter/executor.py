@@ -1,4 +1,8 @@
 #coding: utf-8
+
+import types
+import time
+
 from caty.core.command.exception import *
 from caty.command import MafsMixin
 from copy import deepcopy
@@ -6,15 +10,13 @@ from caty.core.facility import PEND
 import caty.util as util
 from caty import UNDEFINED
 from caty.jsontools.path import build_query
-from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettyprint, split_tag
+from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettyprint, split_tag, normalize_number
 from caty.jsontools import jstypes
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Internal, scriptwrapper
 from caty.core.script.node import *
 from caty.core.exception import *
 import caty
 import caty.core.schema as schema
-import types
-import time
 from caty.core.spectypes import reduce_undefined
 
 from caty.core.script.interpreter.base import BaseInterpreter
