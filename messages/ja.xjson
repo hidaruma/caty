@@ -67,6 +67,14 @@
 
     "Unknown checker: $checker": "不明なチェッカー: $checker",
 
+    "Initializing default resource classes...": "デフォルトのリソースクラスを初期化しています...",
+
+    "Failed to force-load. Reloading system data": "force-loadに失敗しました。システム情報を再度読み込んでいます",
+
+    "A cyclic dependency between $mod1 and $mod2 was detected": "循環参照が$mod1と$mod2の間で検出されました",
+
+    "Illegal `related` declaration at $name": "$nameで不正なrelated宣言が見つかりました",
+
     /*******************************
      ******* 組み込み例外 *********
      *******************************/

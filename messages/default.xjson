@@ -62,6 +62,14 @@
 
     "Unknown checker: $checker",
 
+    "Initializing default resource classes...",
+
+    "Failed to force-load. Reloading system data",
+
+    "A cyclic dependency between $mod1 and $mod2 was detected",
+
+    "Illegal `related` declaration at $name",
+
     /*******************************
      ******* Builtin exception *********
      *******************************/

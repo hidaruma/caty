@@ -40,6 +40,9 @@ class Module(Facility):
         def add(self, name):
             self.names[name] = False
 
+        def __getitem__(self, name):
+            return self.names[name]
+
         def is_illegal(self):
             return False in self.names.values()
 
@@ -286,6 +289,27 @@ class Module(Facility):
         m._compile(path, force=True)
         m.loaded = True
 
+    def discard_module(self, name):
+        m = self.find_public_module().get_module(name)
+        if not m:
+            raise SystemResourceNotFound(u'ModuleNotFound', u'$name', name=name)
+        trunk = m.canonical_name.replace('.', '/')
+        path = u'/' + trunk + u'.casm' if not m._literate else u'.casm.lit'
+        if not m.is_root:
+            for k, v in m.ast_ns.items():
+                if u'register-public' in v.annotations:
+                    r = m.find_root()
+                    if k in r.ast_ns:
+                        r.ast_ns.pop(k)
+        for k in m.facility_ns:
+            if k in m.app._facility_classes:
+                m.app._facility_classes.pop(k)
+        m.ast_ns = {}
+        m.proto_ns = {}
+        m.class_ns = {}
+        m.facility_ns = {}
+        m.clear_namespace()
+
     def has_package(self, name):
         from operator import truth
         return truth(self.find_public_module()._get_package(name))
@@ -438,9 +462,13 @@ class Module(Facility):
             for a, b in graph:
                 if (b, a) in graph:
                     if b.name not in a.related or a.name not in b.related:
-                        throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
+                        throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'A cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
                     else:
-                        print u'[WARNING]', self.application.i18n.get(u'The cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
+                        if a.related[b.name] or b.related[a.name]:
+                            continue
+                        a.related.mark(b.name)
+                        b.related.mark(a.name)
+                        print u'[WARNING]', self.application.i18n.get(u'A cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
         for name in self.related.names:
             mod = self.get_module(name)
             if self.name not in mod.related:

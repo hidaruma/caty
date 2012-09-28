@@ -115,14 +115,35 @@ class Application(PbcObject):
         self._system.casm._core.clear_namespace()
         self.parent._schema_module.clear_namespace()
         self._schema_module.clear_namespace()
-        self._schema_module.load_on_demand(module_name)
-        self._system._core_app._init()
-        self.parent._schema_module.resolve()
-        self._init_action()
-        self._schema_module.resolve()
-        self._system._core_app._init_interpreter()
-        self.parent._init_interpreter()
-        self._init_interpreter()
+        error = False
+        try:
+            self._schema_module.load_on_demand(module_name)
+        except:
+            error = True
+            raise
+        finally:
+            if error:
+                self.cout.writeln(self.i18n.get(u'Failed to force-load. Reloading system data'))
+            self._system._core_app._init()
+            self.parent._schema_module.resolve()
+            self._init_action()
+            try:
+                self._schema_module.resolve()
+            except:
+                self.cout.writeln(self.i18n.get(u'Failed to force-load. Reloading system data'))
+                self._schema_module.discard_module(module_name)
+
+                self._system.casm._core.clear_namespace()
+                self.parent._schema_module.clear_namespace()
+                self._schema_module.clear_namespace()
+                self._system._core_app._init()
+                self.parent._schema_module.resolve()
+                self._init_action()
+                self._schema_module.resolve()
+                raise
+            self._system._core_app._init_interpreter()
+            self.parent._init_interpreter()
+            self._init_interpreter()
 
     def exec_rc_script(self):
         if self._disabled:

@@ -307,7 +307,7 @@ class CoreApplication(Application):
     def _create_system_dispatcher(self):
         from caty.core.action.module import ResourceModuleContainer, ResourceModule
         from caty.core.std.action import create_default_resources
-        self._system.cout.write(u'Initializing default resource classes...')
+        self._system.cout.write(self._system.i18n.get(u'Initializing default resource classes...'))
         rm = ResourceModule(u'resources', u'Caty Default Resource Classes', self)
         rmc = ResourceModuleContainer(self)
         create_default_resources(rm)
