@@ -39,6 +39,7 @@ class ModuleName(object):
         for r in self.related:
             module.related.add(r)
         if self.timing == u'demand':
+            module.loaded = False
             return u'stop'
 
 class ASTRoot(Root):

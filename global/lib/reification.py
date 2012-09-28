@@ -125,6 +125,8 @@ class ShallowReifier(object):
             u'annotations': self.reify_annotations(m.annotations),
             u'document': make_structured_doc(m.docstring),
             u'location': self._get_localtion(m),
+            u'loadOn': m.timing,
+            u'loaded': m.loaded,
         }
 
     def reify_package(self, m):

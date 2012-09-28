@@ -69,6 +69,7 @@ class Module(Facility):
         self.docstring = u''
         self.last_modified = 0
         self.timing = u'boot'
+        self.loaded = True
         self.annotations = Annotations([])
         self.package_root_path = u'/'
 
@@ -277,6 +278,7 @@ class Module(Facility):
                     m.find_root().ast_ns.pop(k)
         for k in m.facility_ns:
             m.app._facility_classes.pop(k)
+        m.loaded = True
         m.ast_ns = {}
         m.proto_ns = {}
         m.class_ns = {}
