@@ -278,13 +278,13 @@ class Module(Facility):
                     m.find_root().ast_ns.pop(k)
         for k in m.facility_ns:
             m.app._facility_classes.pop(k)
-        m.loaded = True
         m.ast_ns = {}
         m.proto_ns = {}
         m.class_ns = {}
         m.facility_ns = {}
         m.clear_namespace()
         m._compile(path, force=True)
+        m.loaded = True
 
     def has_package(self, name):
         from operator import truth
