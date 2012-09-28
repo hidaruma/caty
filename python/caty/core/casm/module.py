@@ -468,7 +468,7 @@ class Module(Facility):
                             continue
                         a.related.mark(b.name)
                         b.related.mark(a.name)
-                        print u'[WARNING]', self.application.i18n.get(u'A cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
+                        self.application.cout.writeln(u'[WARNING] ' + self.application.i18n.get(u'A cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name))
         for name in self.related.names:
             mod = self.get_module(name)
             if self.name not in mod.related:
