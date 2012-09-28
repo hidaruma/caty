@@ -214,8 +214,8 @@ class Action(object):
 
 @as_parser
 def verb_parser(seq):
-    v = seq.parse(option(verb, ''))
-    m = seq.parse(option(method, 'GET'))
+    v = seq.parse(option(verb, u''))
+    m = seq.parse(option(method, u'GET'))
     e = seq.parse(option(parent, 0))
     if not seq.eof:
         raise CatyException(u'CARA_PARSE_ERROR', u'Unknown checker: $checker', checker=seq.rest)

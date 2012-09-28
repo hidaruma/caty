@@ -116,5 +116,8 @@ class ResourceClass(object):
 class DefaultResource(ResourceClass):
     def __init__(self, app, url_pattern, actions, module_name, resource_name, docstring=u'Undocumented', annotations=Annotations([])):
         ResourceClass.__init__(self, app, url_pattern, actions, {}, [], module_name, resource_name, docstring, annotations)
+        for k, v in actions.items():
+            v.invoker = k
+            v.implemented = u'catyscript'
         self.type = DEFAULT
 
