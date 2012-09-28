@@ -932,6 +932,7 @@ class Help(Builtin):
             return self._command_help()
 
     def _resources_help(self):
+        from caty.core.language.util import make_structured_doc
         line = self.__resource_name.strip()
         if line == '':
             return u''
@@ -965,7 +966,7 @@ class Help(Builtin):
         if mode == 'module_list':
             mods = []
             for k, v in rmc._modules.items():
-                mods.append((k+': ', v.docstring.split('\n')[0]))
+                mods.append((k+': ', make_structured_doc(v.docstring).get('description', u'undocumented')))
             max_width = max(map(lambda x:len(x[0]), mods)) if mods else 0
             r = []
             for m in mods:
@@ -1034,7 +1035,7 @@ class Help(Builtin):
             else:
                 modules = [u'builtin', u'public']
             for module in modules:
-                types = [(s.name, make_structured_doc(s.docstring)['description']) 
+                types = [(s.name, make_structured_doc(s.docstring).get('description', u'undocumented')) 
                          for s in self.schema.get_module(module).schema_ns.values()
                          if ((not query) or (query in s.annotations)) and not isinstance(s, KindReference)
                         ]
@@ -1083,6 +1084,7 @@ class Help(Builtin):
         return r
 
     def _command_help(self):
+        from caty.core.language.util import make_structured_doc
         interpreter = self.interpreter
         line = self.__line.strip()
         if line == '':
@@ -1132,7 +1134,7 @@ class Help(Builtin):
             else:
                 modules = [u'builtin', u'public']
             for module in modules:
-                commands = [(s.name, s.doc.splitlines()[0].strip()) 
+                commands = [(s.name, make_structured_doc(s.docstring).get('description', u'undocumented')) 
                          for s in self.schema.get_module(module).command_ns.values()
                          if (not query) or (query in s.annotations)
                         ]
