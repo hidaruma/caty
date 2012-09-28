@@ -37,7 +37,7 @@ class Div(Command):
 
     def execute(self, input):
         r = Decimal(input[0]) / input[1]
-        return Decimal(long(r)) if self.integer else r
+        return long(r) if self.integer else r
 
 class Mod(Command):
     def execute(self, input):
