@@ -151,6 +151,13 @@ command reify-module [string modName] :: void -> ReifiedModule
     throws [ApplicationNotFound, ModuleNotFound, BadArg]
     refers python:caty.core.std.command.inspect.ReifyModule;
 
+/** 
+ * コマンドの所属するモジュールの完全修飾名を出力する。
+ * 主にregister-publicやoverrideで登録されたコマンドの所在を確認するのに使う。
+ */
+command where-is [string cmdName] :: void -> string
+    refers python:caty.core.std.command.inspect.Whereis;
+
 /*レイフィケーション関係*/
 
 /** モジュールのレイフィケーションイメージ */

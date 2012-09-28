@@ -150,3 +150,12 @@ class ReifyModule(Internal):
         mod = app._schema_module.get_module(mod_name)
         return mod.reify()
 
+class Whereis(Internal):
+    def setup(self, cmd_name):
+        self._cmd_name = cmd_name
+
+    def execute(self):
+        m = self.current_app._schema_module
+        c = m.get_command(self._cmd_name)
+        return c.module.app.name + u'::' + c.module.canonical_name + u':' + self._cmd_name
+
