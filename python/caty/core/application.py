@@ -112,6 +112,7 @@ class Application(PbcObject):
         self.exec_rc_script()
 
     def force_load(self, module_name):
+        import traceback
         self._system.casm._core.clear_namespace()
         self.parent._schema_module.clear_namespace()
         self._schema_module.clear_namespace()
@@ -120,7 +121,7 @@ class Application(PbcObject):
             self._schema_module.load_on_demand(module_name)
         except:
             error = True
-            raise
+            self.cout.writeln(traceback)
         finally:
             if error:
                 self.cout.writeln(self.i18n.get(u'Failed to force-load. Reloading system data'))
@@ -130,6 +131,7 @@ class Application(PbcObject):
             try:
                 self._schema_module.resolve()
             except:
+                self.cout.writeln(traceback)
                 self.cout.writeln(self.i18n.get(u'Failed to force-load. Reloading system data'))
                 self._schema_module.discard_module(module_name)
 
@@ -140,7 +142,6 @@ class Application(PbcObject):
                 self.parent._schema_module.resolve()
                 self._init_action()
                 self._schema_module.resolve()
-                raise
             self._system._core_app._init_interpreter()
             self.parent._init_interpreter()
             self._init_interpreter()

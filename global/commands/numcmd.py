@@ -36,7 +36,7 @@ class Div(Command):
         self.integer = opts.get('integer')
 
     def execute(self, input):
-        r = Decimal(input[0]) / input[1]
+        r = Decimal(str(float(input[0]))) / input[1]
         return long(r) if self.integer else r
 
 class Mod(Command):
