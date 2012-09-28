@@ -1,5 +1,7 @@
+// -*- coding: utf-8 -*-
+
 @[register-public]
-module predefined;// -*- coding: utf-8 -*-
+module predefined;
 
 type list<X default any> = [X*];
 
@@ -27,6 +29,16 @@ command neq
 
 command content [string? tagName] :: univ -> univ {
  untagged %1?
+};
+
+/** 実装がまだ定義されてないアクションにおいて使うダミーコマンド
+ */
+command do-it :: any -> any {
+ %ACTION?="(Unknown action)" > my-name;
+ %CATY_APP | $.name > app-name;
+
+ ["Hello, this is ", %my-name, " in ", %app-name, ".\n"] | text:concat |
+ response --content-type="text/plain"
 };
 
 // End of Module
