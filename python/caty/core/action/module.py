@@ -150,7 +150,7 @@ class ResourceModule(Module):
             c = CommandNode(act.name, 
                             [CallPattern(opt, 
                                          arg, 
-                                         CommandDecl((UnionNode(ScalarNode(u'WebInput'), ScalarNode(u'void')), 
+                                         CommandDecl((ScalarNode(u'WebInput'), 
                                                       UnionNode(ScalarNode(u'Response'), ScalarNode(u'Redirect'))), 
                                                       [], 
                                                       []))], 

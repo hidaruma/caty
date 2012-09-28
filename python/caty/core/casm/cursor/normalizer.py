@@ -256,6 +256,8 @@ class TypeCalcurator(_SubNormalizer):
                 res = self._intersect_enum_and_scalar(self._dereference(l), r)
             elif rt == 'enum' and isinstance(l, Scalar):
                 res = self._intersect_enum_and_scalar(self._dereference(r), l)
+            elif set([lt, rt]) == set([u'null', u'void']):
+                res = l
             else:
                 res = NeverSchema()
         if (node.left.optional and node.right.optional) or (lt == 'univ' and node.right.optional) or (rt == 'univ' and node.left.optional):

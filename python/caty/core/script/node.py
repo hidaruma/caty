@@ -618,7 +618,7 @@ class PipelineFragment(Syntax):
 
 class ActionEnvelope(Syntax):
     command_decl = u"""
-    command __action-envelope {*:any} [string*] :: WebInput | void -> Response | Redirect
+    command __action-envelope {*:any} [string*] :: WebInput -> Response | Redirect
         refers python:caty.core.script.node.ActionEnvelope;
     """
     def __init__(self, script, name):
