@@ -86,6 +86,77 @@ class MakeEnv(Builtin):
         if self.__server_port is UNDEFINED:
             self.__server_port = system._global_config.server_port
 
+class ReqToEnv(Builtin):
+    def execute(self, req):
+        self._validate_input(req)
+        if not 'contentType' in req:
+            req['contentType'] = u'text/plain' if isinstance(req['body'], unicode) else u'application/octet-stream'
+        chunk = req['path'].strip(u'/').split(u'/')
+        path = req['path']
+        system = self.current_app._system
+        script_name = self.current_app.name
+        istream = StringIO()
+        if len(chunk) >= 2 and req['fullpath']:
+            top = chunk.pop(0)
+            if top in system.app_names and top not in (u'caty', u'global'):
+                script_name = top
+            path = u'/' + u'/'.join(chunk)
+        elif script_name == u'root':
+            script_name = u''
+        input = req['body']
+        if isinstance(input, unicode):
+            input = input.encode(find_encoding(req['encoding']) or self.current_app.encoding)
+        length = u''
+        if input:
+            length = unicode(str(len(input)))
+            istream.write(input)
+            istream.seek(0)
+        verb = None
+        queries = []
+        if req['verb']:
+            verb = u'__verb=%s' % self.__verb
+        if req['query']:
+            if isinstance(query, dict):
+                for k, v in req['query'].items():
+                    queries.append('%s=%s' % (k, v))
+            else:
+                queries = [req['query']]
+        query = u'&'.join([s for s in [verb] + queries if s])
+
+        r = conditional_dict(lambda k, v: v is not None, 
+                                {u'REQUEST_METHOD': req['method'], 
+                                u'QUERY_STRING': query,
+                                u'SCRIPT_NAME': script_name, 
+                                u'PATH_INFO': path,
+                                u'CONTENT_TYPE': req['contentType'],
+                                u'CONTENT_LENGTH': length,
+                                u'SERVER_NAME': system._global_config.server_name.split(u'//')[-1],
+                                u'SERVER_PORT': unicode(system._global_config.server_port),
+                                u'SERVER_PROTOCOL': u'HTTP/1.1',
+                                u'wsgi.input': istream, 
+                                u'wsgi.run_once': False,
+                                u'wsgi.multithread': True,
+                                u'wsgi.multiprocess': False,
+                                u'wsgi.version': (1,0),
+                                u'wsgi.url_scheme': u'http',
+                                })
+        if req.get('cookie'):
+            r['cookie'] = req['cookie']
+        r.update(req.get('header', {}))
+        return r
+
+
+    def _validate_input(self, req):
+        method = req['method']
+        input = req['body']
+        if method in (u'GET', u'HEAD', u'DELETE') and input is not None:
+            throw_caty_exception(u'InvalidInput', u'Input must be null')
+        if method in (u'GET', u'HEAD', u'DELETE') and req.get('contentType'):
+            throw_caty_exception(u'InvalidInput', u'content-type can not be specified')
+        if method in (u'PUT', u'POST') and input is None:
+            throw_caty_exception(u'InvalidInput', u'Input must not be null')
+
+
 class CallApplication(Builtin):
     def setup(self, opts):
         self.__no_middle = opts['no-middle']

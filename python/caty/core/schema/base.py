@@ -1421,6 +1421,10 @@ class TypeReference(SchemaBase, Scalar, Ref):
     def __repr__(self):
         return 'Ref: ' + self.name + repr(self.body)
 
+    def fill_default(self, value):
+        return self.body.fill_default(value)
+
+
 class OverlayedDict(object):
     def __init__(self, a, b):
         self.a = a

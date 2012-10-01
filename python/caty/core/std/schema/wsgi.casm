@@ -69,6 +69,52 @@ type Environ = {
   * : univ?,
 };
 
+/** HTTPリクエストを記述するデータ構造 */
+type Request = {
+
+  /** リクエストパス */
+  "path": string,
+
+  /** リクエストパスがフルパスかどうか */
+  @[default(false)]
+  "fullpath": boolean?,
+
+  /** クエリー文字列
+   * 文字列値のオブジェクトでもよい。
+   */
+  @[default("")]
+  "query": (string|{*:string?})?,
+
+  /** HTTPメソッド */
+  @[default("GET")]
+  "method": httpMethod?,
+
+  /** 動詞 */
+  @[default("")]
+  "verb": string?,
+
+  /** リクエストボディのメディア型  */
+  "contentType": mediaType?,
+
+  /** リクエストボディをテキストとみなすべきかどうか */
+  "isText": boolean?,
+
+  /** リクエストボディがテキストであるときの文字符号化方式 */
+  "encoding": string?,
+
+  /** リクエストボディ */
+  @[default(null)]
+  "body": (null | string | binary)?,
+
+  /** 送信するクッキー文字列 */
+  "cookie": string?,
+
+  /** その他リクエストヘッダ */
+  "header": {
+    *: string?,
+  }?,
+};
+
 /** Webリクエスト情報をwsgi:Environ型のデータに変換する。
  *
  * # fullpathオプションの意味は、requestコマンドと同じである。 fullpath=falseのときは、現在のCatyアプリケーションを起点とする相対パスとなる。
@@ -112,6 +158,13 @@ command make-env
     refers python:caty.core.std.command.wsgilib.MakeEnv
 ;
 
+
+command req-to-env :: Request -> Environ
+    throws InvalidInput
+    refers python:caty.core.std.command.wsgilib.ReqToEnv
+;
+
+
 type Response = {
     "status": integer,
     "header": {
@@ -145,3 +198,5 @@ command dispatch-and-exec :: Environ -> any
   throws [ApplicationNotFound, FileNotFound, ActionNotFound]
   refers python:caty.core.std.command.wsgilib.DispatchAndExec
 ;
+
+
