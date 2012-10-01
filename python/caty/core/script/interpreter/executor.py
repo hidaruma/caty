@@ -575,6 +575,7 @@ class CommandExecutor(BaseInterpreter):
 
     def visit_choice_branch(self, node):
         import random
+        node._prepare()
         c = random.choice(node.cases)
         return c.cmd.accept(self)
 
