@@ -32,6 +32,8 @@ from caty.core.script.proxy import JsonPathProxy as JsonPath
 from caty.core.script.proxy import TryProxy as Try
 from caty.core.script.proxy import CatchProxy as Catch
 from caty.core.script.proxy import UncloseProxy as Unclose
+from caty.core.script.proxy import ChoiceBranchProxy as ChoiceBranch
+from caty.core.script.proxy import ChoiceBranchItemProxy as ChoiceBranchItem
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
@@ -254,6 +256,7 @@ class ScriptParser(Parser):
                     self.catch,
                     self.functor,
                     self.tag,
+                    self.choice_branch,
                     self.type_case,
                     self.type_cond,
                     self.cond,
@@ -530,6 +533,29 @@ class ScriptParser(Parser):
         seq.parse('>:')
         n = xjson.string(seq)
         return CommandNode(n, v)
+
+    def choice_branch(self, seq):
+        seq.parse(keyword('branch'))
+        seq.parse('{')
+        name_set = set()
+        cases = seq.parse(split(lambda s:self.choice_branch_item(s, name_set), self.comma, allow_last_delim=True))
+        seq.parse('}')
+        t = ChoiceBranch()
+        for c in anything(cases):
+            t.add_case(c)
+        return t
+
+    def choice_branch_item(self, seq, name_set):
+        t = name_token(seq)
+        if t in name_set:
+            raise ParseFailed(seq, self.type_case_branch, t)
+        name_set.add(t)
+        S(u'=>')(seq)
+        try:
+            v = self.make_pipeline(seq)
+        except NothingTodo:
+            raise ParseFailed(seq, self.case)
+        return ChoiceBranchItem(t, v)
 
     def type_case(self, seq):
         seq.parse(keyword('case'))

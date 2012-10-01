@@ -74,3 +74,5 @@ class BaseInterpreter(object):
     def visit_unclose(self, node):
         raise NotImplementedError(u'{0}#visit_unclose'.format(self.__class__.__name__))
 
+    def visit_choice_branch(self, node):
+        raise NotImplementedError(u'{0}#visit_choice_branch'.format(self.__class__.__name__))

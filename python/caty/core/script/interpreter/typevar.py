@@ -82,4 +82,6 @@ class TypeVarApplier(BaseInterpreter):
     def visit_unclose(self, node):
         node.pipeline.accept(self)
 
-
+    def visit_choice_branch(self, node):
+        for c in node.cases:
+            c.accept(self)

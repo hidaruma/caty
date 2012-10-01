@@ -683,3 +683,32 @@ class VarStorageForAction(VarStorage):
             self.args = args
         self.opts[u'_ARGV'] = self.args
 
+class ChoiceBranch(Syntax):
+    command_decl = u"""command __choice_branch :: any -> any
+                        refers python:caty.core.script.node.ChoiceBranch;
+    """
+
+    def __init__(self):
+        self.__cases = []
+        Syntax.__init__(self)
+    
+    @property
+    def cases(self):
+        return self.__cases
+
+    def add_case(self, case):
+        self.__cases.append(case)
+
+    def set_facility(self, facilities):
+        for v in self.__cases:
+            v.set_facility(facilities)
+
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        for v in self.__cases:
+            v.set_var_storage(storage)
+
+
+    def accept(self, visitor):
+        return visitor.visit_choice_branch(self)
+

@@ -573,6 +573,11 @@ class CommandExecutor(BaseInterpreter):
             storage.opts[k] = v
         return input, newenv, storage
 
+    def visit_choice_branch(self, node):
+        import random
+        c = random.choice(node.cases)
+        return c.cmd.accept(self)
+
     @property
     def in_schema(self):
         return self.cmd.in_schema

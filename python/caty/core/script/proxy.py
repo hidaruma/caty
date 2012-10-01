@@ -279,6 +279,24 @@ class BranchProxy(Proxy):
             'body': self.cmdproxy.reify()
         }
     
+class ChoiceBranchItemProxy(Proxy):
+    def __init__(self, typedef, cmdproxy):
+        self.typedef = typedef
+        self.cmdproxy = cmdproxy
+        self.type = None
+
+    def set_module(self, module):
+        self.cmdproxy.set_module(module)
+
+    def instantiate(self, builder):
+        return Branch(self.type, self.cmdproxy.instantiate(builder))
+        
+    def reify(self):
+        return {
+            'type': self.typedef.reify() if self.typedef != u'*' else json.TagOnly(u'_wildcard'),
+            'body': self.cmdproxy.reify()
+        }
+
 class TagProxy(Proxy):
     reification_type = u'_tag'
     def __init__(self, t, c):
@@ -549,6 +567,30 @@ class UncloseProxy(Proxy):
 
     def set_module(self, module):
         self.pipeline.set_module(module)
+
+class ChoiceBranchProxy(Proxy):
+    reification_type = u'_branch'
+    def __init__(self):
+        self.cases = []
+
+    def add_case(self, node):
+        self.cases.append(node)
+
+    def instantiate(self, builder):
+        o = ChoiceBranch()
+        for n in self.cases:
+            o.add_case(n.instantiate(builder))
+        return o
+
+    def set_module(self, module):
+        for n in self.cases:
+            n.set_module(module)
+
+    def _reify(self):
+        o = {}
+        for n in self.nodes:
+            o[n.name] = n.reify()
+        return o
 
 def combine_proxy(args):
     return reduce(CombinatorProxy, args)
