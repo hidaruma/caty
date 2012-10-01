@@ -157,6 +157,12 @@ class Module(Facility):
         if ('override-public' in target.annotations or 'override-public' in self.annotations):
             if not self.is_root and name not in scope:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
+        if 'override' in target.annotations and not force:
+            tgt = self.get_module(target.annotations['override'].value)
+            tgt._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
+        if 'override' in self.annotations and not force:
+            tgt = self.get_module(self.annotations['override'].value)
+            tgt._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
         if see_filter and 'filter' in target.annotations:
             if self.name != 'filter':
                 fm = self.get_module('filter')
