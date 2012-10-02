@@ -125,10 +125,8 @@ class Application(PbcObject):
         finally:
             if error:
                 self.cout.writeln(self.i18n.get(u'Failed to force-load. Reloading system data'))
-            self._system._core_app._schema_module.resolve()
-            self.parent._schema_module.resolve()
             try:
-                self._schema_module.resolve()
+                self.reinit_schema()
             except:
                 self.cout.writeln(traceback)
                 self.cout.writeln(self.i18n.get(u'Failed to force-load. Reloading system data'))
@@ -137,12 +135,16 @@ class Application(PbcObject):
                 self._system.casm._core.clear_namespace()
                 self.parent._schema_module.clear_namespace()
                 self._schema_module.clear_namespace()
-                self._system._core_app._schema_module.resolve()
-                self.parent._schema_module.resolve()
-                self._schema_module.resolve()
+                self.reinit_schema()
             self._system._core_app._init_interpreter()
             self.parent._init_interpreter()
             self._init_interpreter()
+
+    def reinit_schema(self):
+        if self.parent:
+            self.parent.reinit_schema()
+        self.cout.writeln('  * ' + self.i18n.get(u'Re-initializing schema: $name', name=self.name))
+        self._schema_module.resolve()
 
     def exec_rc_script(self):
         if self._disabled:
