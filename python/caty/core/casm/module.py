@@ -154,13 +154,16 @@ class Module(Facility):
         if see_register_public and ('register-public' in target.annotations or 'register-public' in self.annotations):
             if not self.is_root:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)
-        if ('override-public' in target.annotations or 'override-public' in self.annotations):
-            if not self.is_root and name not in scope:
-                self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
-        if 'override' in target.annotations and not force:
+        if see_register_public and ('override-public' in target.annotations or 'override-public' in self.annotations) and not force:
+            for m in (u'builtin', u'public'):
+                mod = self.find_root().get_module(m)
+                if mod._has_resource(name, set(), scope_func, type):
+                    break
+            mod._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
+        if see_register_public and 'override' in target.annotations and not force:
             tgt = self.get_module(target.annotations['override'].value)
             tgt._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
-        if 'override' in self.annotations and not force:
+        if see_register_public and 'override' in self.annotations and not force:
             tgt = self.get_module(self.annotations['override'].value)
             tgt._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
         if see_filter and 'filter' in target.annotations:
@@ -579,16 +582,10 @@ class Module(Facility):
 
         for k, v in self.proto_ns.items():
             v.profile_container = None
-        for k, v in self.sub_modules.items():
-            if v.type == 'cara':
-                self.sub_modules.pop(k)
         for m in self.sub_modules.values():
             m.clear_namespace()
         for k, m in self.sub_packages.items():
-            if m.type == 'cara':
-                self.sub_packages.pop(k)
-            else:
-                m.clear_namespace()
+            m.clear_namespace()
         for m in self.class_ns.values():
             m.clear_namespace()
 

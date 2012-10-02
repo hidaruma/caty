@@ -131,6 +131,9 @@ class ResourceModule(Module):
     def resources(self):
         return self._resources.values()
 
+    def clear_namespace(self):
+        Module.clear_namespace(self)
+
     def add_resource(self, res):
         from caty.core.script.proxy import EnvelopeProxy as ActionEnvelope
         from caty.core.casm.language.ast import ScalarNode, CommandDecl, CallPattern, UnionNode, ArrayNode

@@ -30,7 +30,10 @@ def read_cara_files(rmc, action_fs, facility, target, app, current_package=None)
                     parser = ResourceActionDescriptorParser(f.path, facility)
                 resource_module = parser.run(source, hook=lambda seq:remove_comment(seq, is_doc_str), auto_remove_ws=True)
                 if current_package:
+                    resource_module.parent = current_package
                     current_package.add_sub_module(resource_module)
+                else:
+                    resource_module.parent = app._schema_module
                 for res in resource_module.resources:
                     app.update_filetypes(res.filetypes)
                 rmc.add_module(resource_module)

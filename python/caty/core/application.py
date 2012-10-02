@@ -125,9 +125,8 @@ class Application(PbcObject):
         finally:
             if error:
                 self.cout.writeln(self.i18n.get(u'Failed to force-load. Reloading system data'))
-            self._system._core_app._init()
+            self._system._core_app._schema_module.resolve()
             self.parent._schema_module.resolve()
-            self._init_action()
             try:
                 self._schema_module.resolve()
             except:
@@ -138,9 +137,8 @@ class Application(PbcObject):
                 self._system.casm._core.clear_namespace()
                 self.parent._schema_module.clear_namespace()
                 self._schema_module.clear_namespace()
-                self._system._core_app._init()
+                self._system._core_app._schema_module.resolve()
                 self.parent._schema_module.resolve()
-                self._init_action()
                 self._schema_module.resolve()
             self._system._core_app._init_interpreter()
             self.parent._init_interpreter()
