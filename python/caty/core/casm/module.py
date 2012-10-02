@@ -486,7 +486,19 @@ class Module(Facility):
     
     def _register_command(self):
         if not self.compiled:
-            self._loop_exec(self.proto_ns, self.make_profile_builder, lambda k, v:self.add_command(v))
+            try:
+                for k, v in self.proto_ns.items():
+                    try:
+                        cursor = v.module.make_profile_builder()
+                        self.add_command(cursor.visit(v))
+                    except:
+                        print '[DEBUG]', k
+                        raise
+
+            except:
+                print '[ERROR]', u'%s::%s (%s)' % (self._app.name, self.canonical_name, self.type)
+                raise
+
         for m in self.class_ns.values() + self.sub_modules.values() + self.sub_packages.values():
             m._register_command()
 

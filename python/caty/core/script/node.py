@@ -684,7 +684,7 @@ class VarStorageForAction(VarStorage):
         self.opts[u'_ARGV'] = self.args
 
 class ChoiceBranch(Syntax):
-    command_decl = u"""command __choice_branch :: any -> any
+    command_decl = u"""command __choice_branch :: univ -> univ
                         refers python:caty.core.script.node.ChoiceBranch;
     """
 
