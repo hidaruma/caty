@@ -846,6 +846,7 @@ command lsdir {"long":boolean?, "kind":string?} [string, string?] ::
  * 入力をそのまま出力にコピーする。
  *
  */
+@[no-auto-fill]
 command pass<T default univ> :: T -> T
     refers python:caty.core.std.command.builtin.PassData;
 
