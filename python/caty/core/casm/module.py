@@ -84,11 +84,11 @@ class Module(Facility):
         self.get_kind = partial(self._get_resource, scope_func=lambda x:x.ast_ns, type=u'Kind')
         self.has_kind = partial(self._has_resource, scope_func=lambda x:x.ast_ns, type=u'Kind')
 
-        self.add_command = partial(self._add_resource, scope_func=lambda x:x.command_ns, type=u'Command', see_register_public=True, see_filter=True)
+        self.add_command = partial(self._add_resource, scope_func=lambda x:x.command_ns, type=u'Command')
         self.get_command = partial(self._get_resource, scope_func=lambda x:x.command_ns, type=u'Command')
         self.has_command_type = partial(self._has_resource, scope_func=lambda x:x.command_ns, type=u'Command')
         
-        self.add_proto_type = partial(self._add_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
+        self.add_proto_type = partial(self._add_resource, scope_func=lambda x:x.proto_ns, type=u'Command', see_register_public=True, see_filter=True)
         self.get_proto_type = partial(self._get_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
         self.has_proto_type = partial(self._has_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
         
@@ -155,12 +155,21 @@ class Module(Facility):
             if not self.is_root:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)
         if ('override-public' in target.annotations or 'override-public' in self.annotations):
+            if self.timing != u'demand':
+                raise Exception(self.application.i18n.get(u'$app::$name is not on-demand-module',
+                                                       app=self.app.name, name=self.canonical_name))
             if not self.is_root and name not in scope:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
         if 'override' in target.annotations and not force:
+            if self.timing != u'demand':
+                raise Exception(self.application.i18n.get(u'$app::$name is not on-demand-module',
+                                                       app=self.app.name, name=self.canonical_name))
             tgt = self.get_module(target.annotations['override'].value)
             tgt._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
         if 'override' in self.annotations and not force:
+            if self.timing != u'demand':
+                raise Exception(self.application.i18n.get(u'$app::$name is not on-demand-module',
+                                                       app=self.app.name, name=self.canonical_name))
             tgt = self.get_module(self.annotations['override'].value)
             tgt._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
         if see_filter and 'filter' in target.annotations:
