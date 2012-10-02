@@ -1,0 +1,40 @@
+// -*- coding: utf-8 -*-
+@[override-public]
+module do-it-rich on demand;
+
+/** 実装がまだ定義されてないアクションにおいて使うダミーコマンド
+ */
+command do-it :: any -> any {
+
+/* ---- テンプレートテキスト ---- */
+'''<?caty-meta template="smarty-mx" ?>
+<p style='font-size:x-large;'>Hello,
+this is '<span style='font-weight:bold;background-color:yellow;'>{$actionName}</span>
+in '<span style='font-weight:bold;background-color:yellow;'>{$appName}</span>'.</p>
+<ul>
+ <li>Requested URL: <a href="{$requestUrl}">{$requestUrl}</a></li>
+ <li>HTTP Method: <b>{$httpMethod}</b></li>
+</ul>
+ 
+ <h2>Environment Variables</h2>
+ <pre>{$envs}</pre>
+
+''' /* ---- ここまで ---- */
+ > template-text;
+
+ do {
+   %ACTION?="(Unknown action)" >: "actionName",
+   %CATY_APP | $.name          >: "appName",
+   [%HOST_URL, %APP_PATH, %PATH_INFO] | text:concat >: "requestUrl",
+   %REQUEST_METHOD >: "httpMethod",
+   env | json:pretty >: "envs",
+ } > context;
+
+ [%context, (%template-text | template:compile)] | template:expand |
+ response --content-type="text/html"
+};
+
+
+// End of Module
+
+

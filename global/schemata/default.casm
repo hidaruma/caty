@@ -225,3 +225,7 @@ command caras [string? app] :: void -> [inspect:Module*] {
 command names :: [object*] -> [string*] {
  each {$.name}
 };
+
+command which [string cmdName] :: void -> string {
+ inspect:where-is %1
+};

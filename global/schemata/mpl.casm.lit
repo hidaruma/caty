@@ -3,7 +3,6 @@
 = meta programming library 
 
 <<{
-
 /** meta programming library */
 module mpl;
 
@@ -14,7 +13,76 @@ module mpl;
 */
 
 
+// trig.casm と重複している
+type LocatedName = {
+ "name": string,
+ "location": reif:Location,
+ *: any?
+};
 
+// trig.casm と重複している
+command location :: LocatedName -> string {
+ $.location |
+ [
+   $.app?="",
+   $.pkg?="",
+   $.mod?="",
+   $.cls?="",
+ ] | text:concat
+};
+
+// trig.casm と重複している
+command fullname :: LocatedName -> string {
+ [
+   location,
+   $.name,
+ ] | text:concat
+};
+
+
+command fullnames :: [LocatedName*] -> [string*] {
+ each {fullname}
+};
+
+// trig.casm と重複している
+command longname :: LocatedName -> string {
+ [
+   $.location | [$.pkg?="", $.mod?="", $.cls?=""] | text:concat,
+   $.name
+ ] | text:concat
+};
+
+command longnames :: [LocatedName*] -> [string*] {
+ each {longname}
+};
+
+
+command shortname :: LocatedName -> string {
+ [$.location.cls?="", $.name] | text:concat
+};
+
+command shortnames :: [LocatedName*] -> [string*] {
+ each {shortname}
+};
+
+
+/** 引数で指定したアプリケーションに属するすべてのcaraモジュールを列挙する */
+command list-app-caras [string appPath] :: void -> [reif:ModuleSummary*] {
+ %1 > appPath;
+
+ sreif:list-modules --rec %appPath |
+ take { [$.syntax, "cara"]|eq }
+};
+
+/** 引数で指定したアプリケーションに属するすべてのcasmモジュールを列挙する */
+command list-app-casms [string appPath] :: void -> [reif:ModuleSummary*] {
+ %1 > appPath;
+
+ sreif:list-modules --rec %appPath |
+ take { [$.syntax, "casm"]|eq }
+};
+
+// list-resources --rec appPath が望ましい。
 /** 引数で指定したアプリケーションに属するすべてのリソースクラスを列挙する */
 command list-app-resources [string appPath] :: void -> [reif:ResourceSummary*] {
  %1 > appPath;
@@ -22,10 +90,25 @@ command list-app-resources [string appPath] :: void -> [reif:ResourceSummary*] {
  sreif:list-modules --rec %appPath |
  take { [$.syntax, "cara"]|eq } |
  each {
-    mos:get-canonical-name > modPath;
+    fullname > modPath;
     sreif:list-resources %modPath
  } | list:concat
 };
+
+
+// list-actions --rec appPath が望ましい。
+
+/** 引数で指定したアプリケーションに属するすべてのアクションを列挙する */
+command list-app-actions [string appPath] :: void -> [reif:ActionSummary*] {
+ %1 > appPath;
+ 
+ list-app-resources %appPath |
+ each {
+   fullname > resPath;
+   sreif:list-actions %resPath
+ } | list:concat
+};
+
 
 /** リソースクラスに含まれるインスタンス（パス文字列）を列挙する */
 command res-instances 

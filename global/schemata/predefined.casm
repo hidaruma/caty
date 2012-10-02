@@ -34,10 +34,19 @@ command content [string? tagName] :: univ -> univ {
 /** 実装がまだ定義されてないアクションにおいて使うダミーコマンド
  */
 command do-it :: any -> any {
- %ACTION?="(Unknown action)" > my-name;
- %CATY_APP | $.name > app-name;
 
- ["Hello, this is ", %my-name, " in ", %app-name, ".\n"] | text:concat |
+/* ---- テンプレートテキスト ---- */
+'''<?caty-meta template="smarty-mx" ?>
+Hello, this is '{$actionName}' in '{$appName}'.
+''' /* ---- ここまで ---- */
+ > template-text;
+
+ do {
+   %ACTION?="(Unknown action)" >: "actionName",
+   %CATY_APP | $.name          >: "appName",
+ } > context;
+
+ [%context, (%template-text | template:compile)] | template:expand |
  response --content-type="text/plain"
 };
 
