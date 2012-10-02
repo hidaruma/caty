@@ -131,7 +131,7 @@ class CommandExecutor(BaseInterpreter):
                 r = exec_func(node)
             else:
                 node.in_schema.validate(input)
-                r = exec_func(node, node.in_schema.fill_default(input))
+                r = exec_func(node, input)
             if node.out_schema.type == 'void':
                 r = None
             else:
