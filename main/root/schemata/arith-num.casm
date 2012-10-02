@@ -1,0 +1,21 @@
+// -*- coding: utf-8 -*-
+/** 足し算／掛け算／ゼロ／イチ の数値計算的な解釈を提供する 
+ * このモジュールは要求時に読み込まれる。
+ */
+@[override-public]
+module arith-num on demand;
+
+type Element = number;
+
+const Zero :: Element = 0;
+const Unit :: Element = 1;
+
+command plus :: [Element x, Element y] -> Element {
+ num:add
+};
+
+command star :: [Element x, Element y] -> Element {
+ num:mul
+};
+
+// End of Module

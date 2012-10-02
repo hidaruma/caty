@@ -1,0 +1,40 @@
+// -*- coding: utf-8 -*-
+
+/** 算術的指標（足し算／掛け算／ゼロ／イチ）の上の応用的な計算
+ */
+module arith-app;
+
+/** 入力の配列に含まれるElementをすべて足す */
+command plus-all :: [Element*] -> Element {
+ cond {
+  [] => Zero,
+  [Element] => nth 1,
+  [Element, Element] => plus,
+  * =>
+     [
+        nth 1        > first,
+        list:slice 1 > rest,
+     ];
+     [%first, %rest | plus-all] | plus,
+ }
+};
+
+/** 2つのベクトルの内積相当の計算をする */
+command star-plus :: [[Element*], [Element*]] -> Element {
+ [
+   nth 1 > x,
+   nth 2 > y,
+ ];
+ [%x | list:length, %y | list:length] | eq |
+ when {
+   False => 
+     make-exception InvalidInput "invalid" | throw,
+   True  => 
+     [%x, %y] | list:zip |
+     each {
+       star
+     } | dump |
+     plus-all,
+ }
+};
+// End of Module
