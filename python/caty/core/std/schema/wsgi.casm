@@ -194,9 +194,9 @@ command process-env
   refers python:caty.core.std.command.wsgilib.ProcessEnv
 ;
 
-command dispatch-and-exec :: Environ -> any
+command lookup-and-exec :: Environ -> any
   throws [ApplicationNotFound, FileNotFound, ActionNotFound]
-  refers python:caty.core.std.command.wsgilib.DispatchAndExec
+  refers python:caty.core.std.command.wsgilib.LookupAndExec
 ;
 
 

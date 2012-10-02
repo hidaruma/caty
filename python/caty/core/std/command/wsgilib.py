@@ -232,7 +232,7 @@ class ProcessEnv(Builtin):
         handler = server_module.get_handler_class()(None)
         return handler.process_env(environ)
 
-class DispatchAndExec(Builtin):
+class LookupAndExec(Builtin):
     def execute(self, environ):
         environ['REMOTE_ADDR'] = u'127.0.0.1'
         environ['SERVER_PORT'] = str(environ['SERVER_PORT'])
