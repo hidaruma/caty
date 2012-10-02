@@ -136,15 +136,18 @@ class Application(PbcObject):
                 self.parent._schema_module.clear_namespace()
                 self._schema_module.clear_namespace()
                 self.reinit_schema()
-            self._system._core_app._init_interpreter()
-            self.parent._init_interpreter()
-            self._init_interpreter()
+            self.reinit_interperter()
 
     def reinit_schema(self):
         if self.parent:
             self.parent.reinit_schema()
-        self.cout.writeln('  * ' + self.i18n.get(u'Re-initializing schema: $name', name=self.name))
+        self.cout.writeln('  * ' + self.i18n.get(u'Reconfiguring schema: $name', name=self.name))
         self._schema_module.resolve()
+
+    def reinit_interperter(self):
+        if self.parent:
+            self.parent.reinit_interperter()
+        self._init_interpreter()
 
     def exec_rc_script(self):
         if self._disabled:

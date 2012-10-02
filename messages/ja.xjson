@@ -75,7 +75,7 @@
 
     "Illegal `related` declaration at $name": "$nameで不正なrelated宣言が見つかりました",
 
-    "Re-initializing schema: $name": "スキーマを再度初期化しています: $name",
+    "Reconfiguring schema: $name": "スキーマを再設定しています: $name",
 
     /*******************************
      ******* 組み込み例外 *********

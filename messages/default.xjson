@@ -70,7 +70,7 @@
 
     "Illegal `related` declaration at $name",
 
-    "Re-initializing schema: $name",
+    "Reconfiguring schema: $name",
 
     /*******************************
      ******* Builtin exception *********
