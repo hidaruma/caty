@@ -1253,4 +1253,6 @@ class Signal(Builtin):
             data = json.tagged(u'runaway', data)
         send_caty_signal(data)
 
-
+class Fill(Builtin):
+    def execute(self, data):
+        return self.in_schema.fill_default(data)

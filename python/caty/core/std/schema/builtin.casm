@@ -1297,14 +1297,19 @@ command forward<S default univ, T default univ>  [string command_name] :: S -> n
 command sleep<T default any> [integer(minimum=0)? millisec] :: T -> T
     refers python:caty.core.std.command.builtin.Sleep;
    
-/**
+/** 
  * 入力データを文字列化する。
  */
 command to-string :: any -> string
     refers python:caty.core.std.command.builtin.ToString;
 
-/**
+/** 
  * 何も出力せず、Never例外を投げる。
  */   
 command never :: void -> never throws Never
     refers python:caty.core.std.command.builtin.Never;
+
+/** 型のデフォルト値を埋めた値を返す。 */
+command fill<T> :: T -> T
+    refers python:caty.core.std.command.builtin.Fill;
+
