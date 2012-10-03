@@ -7,7 +7,7 @@ except:
     print '[WARNING] graphviz is not installed, viva module does not work.'
 
 class DrawingMixin(object):
-    def _modified(self, path, modname):
+    def _modified(self, modname):
         import os
         app_info = self.env.get('CATY_APP')
         src = os.path.join(self.env.get('CATY_HOME'), app_info['group'], app_info['name'], 'actions', modname + '.cara')
@@ -15,8 +15,20 @@ class DrawingMixin(object):
         if not dest.exists:
             return True
         src_mod = os.stat(src).st_mtime
-        return not dest.is_modifed_since(src_mod)
-
+        if self._out_file:
+            with self.pub.open(self._out_file) as out:
+                if not out.exists:
+                    return True
+                else:
+                    return out.last_modified < src_mod
+        elif self._time:
+            return out.last_modified < self._time
+        else:
+            with self.pub.open(self._time_file) as tf:
+                if not tf.exists:
+                    return True
+                else:
+                    return out.last_modified < tf.last_modified
 
     def _strip(self, o):
         if not self._strip_xml_decl: return o
@@ -177,6 +189,8 @@ class DrawModule(Builtin, DrawingMixin):
         self._format = opts['format']
         self._font = opts.get('font', '')
         self._strip_xml_decl = False
+        self._time = opts['time']
+        self._time_file = opts['timefile']
         if self._format == 'svge':
             self._format = 'svg'
             self._strip_xml_decl = True
@@ -189,8 +203,8 @@ class DrawModule(Builtin, DrawingMixin):
         self._if_modified = opts['if-modified']
 
     def execute(self):
-        if self._out_file and self._if_modified:
-            if not self._modified(self._out_file, self._module_name):
+        if self._if_modified:
+            if not self._modified(self._module_name):
                 return
         src = self.format_graph(self.make_graph())
         G = self.transform(src)
@@ -464,6 +478,8 @@ class DrawAction(Builtin, DrawingMixin):
         self._format = opts['format']
         self._font = opts.get('font', '')
         self._strip_xml_decl = False
+        self._time = opts['time']
+        self._time_file = opts['timefile']
         if self._format == 'svge':
             self._format = 'svg'
             self._strip_xml_decl = True

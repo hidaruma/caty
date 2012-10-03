@@ -20,9 +20,20 @@ command draw {
  @[default("any")]
  "node" : ("state" | "action" | "userrole" | "any")?,
 
- /** ファイル出力時に.caraの変更がされていない場合は再出力しない */
- @[with("out"), default(false)]
- "if-modified": boolean?,
+  /** データ最終変更の日時 */
+  @[without("timefile")]
+  "time" : string?,
+
+  /** このファイルのタイムスタンプをデータ最終変更の日時とみなす 
+   * ファイルが存在しないときは、そのタイムスタンプは無限の未来だとする。
+   */
+  @[without("time")]
+  "timefile" : string?,
+
+  /** 出力ファイルがデータ最終変更の日時より古いときだけ描画する
+   * ファイル出力時に.caraの変更がされていない場合は再出力しない */
+  @[with(@_OR ["time", "timefile", "out"]), default(false)]
+  "if-modified" : boolean?,
 
  /** 描画に使われるフォント。日本語を使う場合は指定するのを推奨 */
  "font": string?
@@ -53,9 +64,21 @@ command draw-action {
  @[default(false)]
  "lone": boolean?,
 
- /** ファイル出力時に.caraの変更がされていない場合は再出力しない */
- @[with("out"), default(false)]
- "if-modified": boolean?,
+
+  /** データ最終変更の日時 */
+  @[without("timefile")]
+  "time" : string?,
+
+  /** このファイルのタイムスタンプをデータ最終変更の日時とみなす 
+   * ファイルが存在しないときは、そのタイムスタンプは無限の未来だとする。
+   */
+  @[without("time")]
+  "timefile" : string?,
+
+  /** 出力ファイルがデータ最終変更の日時より古いときだけ描画する
+   * ファイル出力時に.caraの変更がされていない場合は再出力しない */
+  @[with(@_OR ["time", "timefile", "out"]), default(false)]
+  "if-modified" : boolean?,
 
  /** 描画に使われるフォント。日本語を使う場合は指定するのを推奨 */
  "font": string?

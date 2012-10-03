@@ -114,7 +114,7 @@ class ReqToEnv(Builtin):
         verb = None
         queries = []
         if req['verb']:
-            verb = u'__verb=%s' % self.__verb
+            verb = u'__verb=%s' % req['verb']
         if req['query']:
             if isinstance(query, dict):
                 for k, v in req['query'].items():
