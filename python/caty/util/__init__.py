@@ -232,3 +232,12 @@ def justify_messages(seq):
         r.append( (s[0].ljust(max_width + 1) + s[1]))
     return '\n'.join(r)
 
+def utime_from_timestr(timestr, fmt=u'%Y%m%d%H%M'):
+    import time
+    return time.mktime(time.strptime(timestr, fmt))
+
+def timestamp_from_utime(sec):
+    import datetime
+    import time
+    return datetime.datetime(*(time.localtime(sec)[:-3]))
+

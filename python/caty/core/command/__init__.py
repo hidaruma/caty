@@ -524,7 +524,7 @@ class VarLoader(object):
                     o[opt.key] = opts[opt.key]
                 else:
                     if not opt.optional:
-                        raise Exception(u'%s is not defined', opt.key)
+                        raise Exception(u'%s is not defined' % opt.key)
         return o.to_dict()
 
     def _load_args(self, opts, args):
