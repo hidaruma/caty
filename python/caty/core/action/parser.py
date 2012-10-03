@@ -320,6 +320,10 @@ class StateBlock(Parser):
         self._script_parser = parser
         self.parent = None
 
+    @property
+    def docstring(self):
+        return self.docstr
+
     def __call__(self, seq):
         seq.parse(keyword('state'))
         with strict():
