@@ -322,6 +322,15 @@ class OptionNode(Node, Optional):
     def _reify(self):
         return {'body': self.body.reify()}
 
+    def annotations():
+        def get(self):
+            return self.body.annotations
+
+        def set(self, v):
+            self.body.annotations = v
+        return get, set
+    annotations = property(*annotations())
+
 class CommandNode(Function):
     def __init__(self, name, patterns, uri_or_script, doc, annotation, type_params, command_type=u'command'):
         self.name = name

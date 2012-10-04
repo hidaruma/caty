@@ -170,7 +170,11 @@ class DataGenerator(TreeCursor):
     
     def __gen_string(self, node):
         import sys
-        if self.__occur == 'rand':
+        if 'typical' in node.annotations:
+            return node.annotations['typical'].value
+        elif 'default' in node.annotations:
+            return node.annotations['default'].value
+        elif self.__gen_str == 'rand':
             min_l = node.minLength or 0
             max_l = node.maxLength or 100
             r = []
@@ -178,15 +182,10 @@ class DataGenerator(TreeCursor):
             for i in range(l):
                 r.append(unicode(random.choice(printable)))
             return ''.join(r)
-        elif self.__occur == 'empty':
+        elif self.__gen_str == 'empty':
             return u''
         else:
-            if 'typical' in node.annotations:
-                return random.choice(node.annotations['typical'].value)
-            elif 'default' in node.annotations:
-                return node.annotations['default'].value
-            else:
-                return u'string'
+            return u'string'
 
     def __gen_binary(self, node):
         min_l = node.minLength or 0
@@ -215,7 +214,7 @@ class DataGenerator(TreeCursor):
         r = {}
         for k, v in node.items():
             r[k] = v.accept(self)
-            if (r[k] is not _EMPTY and r[k] == u'string' 
+            if ((r[k] is not _EMPTY) and r[k] == u'string' 
                 and v.type == 'string' 
                 and self.__gen_str == 'implied'
                 and 'default' not in v.annotations 
