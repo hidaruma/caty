@@ -105,7 +105,7 @@ class ReqToEnv(Builtin):
             script_name = u''
         input = req['body']
         if isinstance(input, unicode):
-            input = input.encode(find_encoding(req['encoding']) or self.current_app.encoding)
+            input = input.encode(req.get('encoding') or self.current_app.encoding)
         length = u''
         if input:
             length = unicode(str(len(input)))
