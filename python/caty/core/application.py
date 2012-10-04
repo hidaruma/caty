@@ -215,9 +215,9 @@ class Application(PbcObject):
         self._app_map[app.name] = app
 
     def get_app(self, name):
-        if name not in self._app_map:
-            raise Exception(self.i18n.get("Application does not exists: $name", name=name))
-        return self._app_map[name]
+        if name == 'this':
+            return self
+        return self._system.get_app(name)
 
     def release(self, key):
         try:

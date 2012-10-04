@@ -412,7 +412,9 @@ class TypeCalculator(object):
     
     def type(self, seq):
         if self.mod:
-            mod = self.schema.get_module(self.mod)
+            from caty.core.language import split_colon_dot_path
+            app, mod, _ = split_colon_dot_path(self.mod, u'mod')
+            mod = self.schema.app.get_app(app)._schema_module.get_module(mod)
         else:
             mod = self.schema
         return mod.get_type(self.type_name(seq))

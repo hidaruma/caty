@@ -177,6 +177,7 @@ class Module(Facility):
             scope[name] = callback(target)
 
     def _get_resource(self, rname, tracked=(), scope_func=None, type=u''):
+        rname = rname.rstrip(':.') # 正規化された名前の一部は:.で終わっているのでそれを取り除く
         if self in tracked:
             raise SystemResourceNotFound(u'%sNotFound'%type, u'$name', name=rname)
         scope = scope_func(self)
@@ -256,6 +257,7 @@ class Module(Facility):
         return truth(self.find_public_module()._get_module(name))
 
     def get_module(self, name):
+        name = name.rstrip(':')
         m = self.find_public_module()._get_module(name)
         if not m:
             raise SystemResourceNotFound(u'ModuleNotFound', u'$name', name=name)
@@ -329,6 +331,7 @@ class Module(Facility):
         return truth(self.find_public_module()._get_package(name))
 
     def get_package(self, name):
+        name = name.rstrip('.')
         m = self.find_public_module()._get_package(name)
         if not m:
             raise SystemResourceNotFound(u'PackageNotFound', u'$name', name=name)
