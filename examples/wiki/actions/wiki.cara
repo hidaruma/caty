@@ -86,6 +86,7 @@ resource AllPages("/all.html") {
     };
 };
 
+@[start]
 state 索引 for 読者 :: WikiIndex links {
     + new --> 新規ファイル.雛形;
     + link --> Wikiファイル.読み出し;

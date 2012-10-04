@@ -2,8 +2,8 @@
 /** 足し算／掛け算／ゼロ／イチ の文字列処理的な解釈を提供する 
  * このモジュールはブート時に読み込まれる。
  */
-//@[override-public] // こうなっていた
-@[register-public] // 修正した
+@[override-public] // こうなっていた
+// @[register-public] // 修正した
 module arith-str;
 
 type Element = [string*];

@@ -2,6 +2,7 @@
 
 /** 算術的指標（足し算／掛け算／ゼロ／イチ）の上の応用的な計算
  */
+@[register-public]
 module arith-app;
 
 /** 入力の配列に含まれるElementをすべて足す */
