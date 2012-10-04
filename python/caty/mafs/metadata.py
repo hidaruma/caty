@@ -7,10 +7,7 @@ import os
 import time
 import datetime
 import re
-from caty.util import merge_dict
-
-def timestamp(sec):
-    return datetime.datetime(*(time.localtime(sec)[:-3]))
+from caty.util import merge_dict, timestamp_from_utime
 
 class MetadataRegistrar(object):
     def __init__(self, mime_types):
@@ -40,13 +37,13 @@ class MetadataRegistrar(object):
                     readOnly = False,
                     created = 0):
                 self.__contentLength = contentLength
-                self.__lastModified = timestamp(lastModified)
+                self.__lastModified = timestamp_from_utime(lastModified)
                 self.__contentType = contentType
                 self.__executable = executable
                 self.__hidden = hidden
                 self.__readOnly = readOnly
                 if created:
-                    self.__created = timestamp(created)
+                    self.__created = timestamp_from_utime(created)
                 else:
                     self.__created = None
 
@@ -85,11 +82,11 @@ class MetadataRegistrar(object):
         class DirectoryMetadata(object):
             is_dir = True
             def __init__(self, lastModified, hidden=False, readOnly=False, created=0):
-                self.__lastModified = timestamp(lastModified)
+                self.__lastModified = timestamp_from_utime(lastModified)
                 self.__hidden = hidden
                 self.__readOnly = readOnly
                 if created:
-                    self.__created = timestamp(created)
+                    self.__created = timestamp_from_utime(created)
                 else:
                     self.__created = None
 

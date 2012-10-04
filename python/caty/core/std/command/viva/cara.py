@@ -1,6 +1,7 @@
 # coding: utf-8
 from caty.core.command import Builtin
 from caty.core.exception import *
+from caty.util import utime_from_timestr, timestamp_from_utime
 try:
     import pygraphviz as gv
 except:
@@ -11,24 +12,21 @@ class DrawingMixin(object):
         import os
         app_info = self.env.get('CATY_APP')
         src = os.path.join(self.env.get('CATY_HOME'), app_info['group'], app_info['name'], 'actions', modname + '.cara')
-        dest = self.pub.open('/'+path.lstrip('/'))
-        if not dest.exists:
-            return True
         src_mod = os.stat(src).st_mtime
         if self._out_file:
             with self.pub.open(self._out_file) as out:
                 if not out.exists:
                     return True
                 else:
-                    return out.last_modified < src_mod
+                    return out.last_modified < timestamp_from_utime(src_mod)
         elif self._time:
-            return out.last_modified < self._time
+            return utime_from_timestr(self._time) < src_mod
         else:
             with self.pub.open(self._time_file) as tf:
                 if not tf.exists:
                     return True
                 else:
-                    return out.last_modified < tf.last_modified
+                    return tf.last_modified < timestamp_from_utime(src_mod)
 
     def _strip(self, o):
         if not self._strip_xml_decl: return o

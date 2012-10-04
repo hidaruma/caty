@@ -1,8 +1,8 @@
 # coding: utf-8
 import os
 from caty.mafs.authorization import simple_checker, CREATE, READ, UPDATE, DELETE
-from caty.mafs.metadata import timestamp
 from caty.core.exception import *
+from caty.util import timestamp_from_utime
 import tempfile
 
 def createFile(path):
@@ -207,7 +207,7 @@ class FileTransactionAccessManager(TransactionalAccessManager):
         if fun.__name__ == '_last_modified':
             self._parent_exists(fo)
             if fo.canonical_name in self._write_queue:
-                return timestamp(time.time())
+                return timestamp_from_utime(time.time())
             else:
                 return fun(fo)
         elif fun.__name__ == '_exists':

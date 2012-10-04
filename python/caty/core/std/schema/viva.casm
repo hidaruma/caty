@@ -44,6 +44,7 @@ command draw {
   string module
 ] :: void -> void | binary | string
      throws [ModuleNotFound]
+     reads env
      updates pub
     refers python:caty.core.std.command.viva.cara.DrawModule;
 
@@ -87,6 +88,7 @@ command draw-action {
   string action_name
 ] :: void -> void | binary | string
      throws [ModuleNotFound, ResourceNotFound, ActionNotFound]
+     reads env
      updates pub
     refers python:caty.core.std.command.viva.cara.DrawAction;
 

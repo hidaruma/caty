@@ -3,7 +3,7 @@ from __future__ import with_statement
 import os
 from datetime import datetime
 from caty.mafs import stdfs
-from caty.mafs.metadata import timestamp
+from caty.mafs.metadata import timestamp_from_utime
 from caty.util import path
 from pbc import PbcObject, Contract
 
@@ -161,7 +161,7 @@ class FileObject(PbcObject):
         引数の型は float もしくは datetime オブジェクトのみを受け付ける。
         """
         if isinstance(ts, float):
-            ts = timestamp(ts)
+            ts = timestamp_from_utime(ts)
         elif not isinstance(ts, datetime):
             raise TypeError('Type of argument must be float or datetime')
         return self.last_modified > ts
