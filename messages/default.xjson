@@ -228,9 +228,9 @@
     
     "Pseudo tag is not exclusive: $tag1, $tag2",
 
-    "Number of property should be smaller than $min",
+    "Number of property should be smaller than $max",
 
-    "Number of property should be greater than $max",
+    "Number of property should be greater than $min",
 
     "Unknown property: $name",
 
