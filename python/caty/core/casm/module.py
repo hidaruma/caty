@@ -155,12 +155,16 @@ class Module(Facility):
         if see_register_public and ('register-public' in target.annotations or 'register-public' in self.annotations):
             if not self.is_root:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)
-        if see_register_public and ('override-public' in target.annotations or 'override-public' in self.annotations) and not force and self.force:
-            for m in (u'builtin', u'public'):
-                mod = self.find_root().get_module(m)
-                if mod._has_resource(name, set(), scope_func, type):
-                    break
-            mod._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
+        if see_register_public and ('override-public' in target.annotations or 'override-public' in self.annotations) and not force:
+            if self.force:
+                for m in (u'builtin', u'public'):
+                    mod = self.find_root().get_module(m)
+                    if mod._has_resource(name, set(), scope_func, type):
+                        break
+                mod._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
+            else:
+                if not self.is_root:
+                    self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)
         if see_register_public and 'override' in target.annotations and not force and self.force:
             tgt = self.get_module(target.annotations['override'].value)
             tgt._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback, force=True)
