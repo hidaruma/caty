@@ -109,6 +109,17 @@ command list-app-actions [string appPath] :: void -> [reif:ActionSummary*] {
  } | list:concat
 };
 
+/** 引数で指定したアプリケーションに属するすべての型を列挙する */
+command list-app-types [string appPath] :: void -> [reif:TypeSummary*] {
+ %1 > appPath;
+ 
+ sreif:list-modules --rec %appPath |
+ each {
+   mpl:fullname > modPath;
+   sreif:list-types %modPath
+ } | list:concat
+};
+
 
 /** リソースクラスに含まれるインスタンス（パス文字列）を列挙する */
 command res-instances 

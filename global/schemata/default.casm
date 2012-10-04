@@ -209,11 +209,8 @@ command call-moniker [ClassMoniker moniker, string name] :: univ -> univ {
 };
 
 /** アプリケーションのモジュールをリストする */
-command mods [string? app] :: void -> [inspect:Module*] {
-  app | pv name > this-app; %this-app;
-
-  %1? | when {undefined => %this-app, *=>pass} > app-name;
-  inspect:list-mod %app-name
+command mods [string? app] :: void -> [reif:ModuleSummary*] {
+  sreif:list-modules %1?
 };
 
 /** アプリケーションのcaraモジュールをリストする */
