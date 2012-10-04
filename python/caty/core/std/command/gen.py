@@ -148,8 +148,10 @@ class DataGenerator(TreeCursor):
             return self.__union(node)
         elif isinstance(node, ForeignSchema):
             return ForeignObject()
-        elif isinstance(node, (NeverSchema, UndefinedSchema)):
+        elif isinstance(node, (NeverSchema)) :
             return _EMPTY
+        elif isinstance(node, UndefinedSchema):
+            return UNDEFINED
         return None
 
 
@@ -181,7 +183,7 @@ class DataGenerator(TreeCursor):
             l = random.randint(min_l, max_l)
             for i in range(l):
                 r.append(unicode(random.choice(printable)))
-            return ''.join(r)
+            return u''.join(r)
         elif self.__gen_str == 'empty':
             return u''
         else:
@@ -320,7 +322,7 @@ class DataGenerator(TreeCursor):
         if r is not _EMPTY:
             return json.tagged(node.tag, r)
         else:
-            return _EMPTY
+            return json.TagOnly(node.tag)
 
 class Url(Builtin):
     def setup(self, pattern):
