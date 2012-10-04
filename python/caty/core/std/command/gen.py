@@ -225,6 +225,13 @@ class DataGenerator(TreeCursor):
         for k, v in r.items():
             if v is _EMPTY:
                 del r[k]
+        if node.wildcard.type != 'never':
+            num = 0
+            upper = random.randint(node.minProperties if node.minProperties != -1 else 0, 
+                                   node.maxProperties if node.maxProperties != -1 else node.minProperties + 2)
+            while len(r) < upper:
+                r[u'$random_gen_%d' % num] = node.wildcard.body.accept(self)
+                num += 1
         return r
 
     def _visit_array(self, node):
