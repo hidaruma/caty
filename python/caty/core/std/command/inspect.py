@@ -155,7 +155,9 @@ class Whereis(Internal):
         self._cmd_name = cmd_name
 
     def execute(self):
+        from caty.core.language import split_colon_dot_path
         m = self.current_app._schema_module
-        c = m.get_command(self._cmd_name)
-        return c.module.app.name + u'::' + c.module.canonical_name + u':' + self._cmd_name
+        cn = split_colon_dot_path(self._cmd_name, u'cmd')[2]
+        c = m.get_command(cn)
+        return c.module.app.name + u'::' + c.module.canonical_name + u':' + c.name
 
