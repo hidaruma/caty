@@ -111,12 +111,14 @@ class Tighten(Builtin):
         return filter(lambda s: s is not UNDEFINED, input)
 
 class Range(Builtin):
-    def setup(self, start, end):
+    def setup(self, opts, start, end):
+        self.upto = opts['up-to']
         self.start = start
         self.end = end
 
     def execute(self):
-        return range(self.start, self.end + 1)
+        offset = 1 if self.upto else 0
+        return range(self.start, self.end + offset)
 
 class Reverse(Builtin):
     def execute(self, l):

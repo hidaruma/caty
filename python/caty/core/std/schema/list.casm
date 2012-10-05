@@ -101,8 +101,14 @@ command tighten :: [any*] -> [any*]
 
 /**
  * 連続する整数値からなる配列を返す。
+ * --up-to オプションをtrueにすると最後の要素を含める。
  */
-command range [integer start, integer end] :: void  -> [integer*]
+command range 
+  {
+    @[default(false)]
+    "up-to": boolean?
+  } 
+  [integer start, integer end] :: void  -> [integer*]
     refers python:caty.core.std.command.listlib.Range;
 
 /**

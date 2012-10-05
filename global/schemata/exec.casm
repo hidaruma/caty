@@ -1,0 +1,79 @@
+// -*- coding: utf-8 -*-
+/** Executable型とexecコマンドを定義する
+ */
+module exec;
+
+/** 実行可能なコマンドクロージャ
+ */ 
+@[register-public]
+type Executable = @* {
+
+/* ---- 実行すべきコマンドの指定 ---- */
+
+  /** アプリケーション名 
+   * コマンドは、このアプリケーションのアンビエントで実行される。
+   */
+  @[default("this")]
+  "app" : string?,
+
+  /** パッケージ修飾とクラス修飾を許すコマンド名、またはファイルパス
+   * ファイルパスが指定された場合は、そのファイル内容をボディとする無名コマンドとして
+   * 実行する。
+   */
+  "callable" : string,
+
+  /** 型引数リスト 
+   * callableがコマンド名であり、それが総称コマンドの場合、
+   * 型具体化に使う型引数を指定する。
+   */
+  "typeArgs" : [reif:TypeSpec*]?,
+
+/* ---- 環境変数の制御 ---- */
+
+  /** デフォルトの環境変数をどこから取るか 
+   * 現在のフレームから取る（"frame"）か、
+   * または、アプリケーションのトップレベル環境から取る（"app"）か。
+   */
+  @[default("frame")]
+  "defaultEnv" : ("frame" | "app")?,
+
+  /** デフォルト環境変数をクリアするか */
+  @[default("false")]
+  "clearEnv" : boolean?,
+
+  /** セットする環境変数と値 */
+  @[default({})]
+  "setEnv" : object?,
+
+  /** アンセットする環境変数 */
+  @[default([])]
+  "unsetEnv" : [string*]?,
+
+/* ---- 起動時に渡すデータ ---- */
+
+  /** 入力データ */
+  @[default(null)]
+  "input" : any?,
+
+  /** オプションパラメータの値 */
+  @[default({})]
+  "opts" : object?,
+
+  /** arg0パラメータの値 */
+  @[default(null)]
+  "arg0" : univ?,
+
+  /** 引数パラメータの値 */
+  @[default([])]
+  "args" : array?,
+
+};
+
+/** 実行可能なコマンドクロージャを実行する 
+ * eval, call と同様な能力を持つ
+ */
+@[register-public]
+command exec :: Executable -> univ throws Exception signals univ;
+
+// End of Module
+
