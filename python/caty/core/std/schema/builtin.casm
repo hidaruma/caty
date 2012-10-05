@@ -1314,3 +1314,7 @@ command never :: void -> never throws Never
 command fill<T default univ> :: T -> T
     refers python:caty.core.std.command.builtin.Fill;
 
+command keys :: array | object | @*! (array|object) -> [(string|integer)*] {
+    untagged | each {%_key}
+};
+
