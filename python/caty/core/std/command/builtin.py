@@ -1208,12 +1208,33 @@ class Throw(Builtin, TypeCalculator):
         throw_caty_exception(etype, msg, cls, id, st, **data)
 
 class ArrayToObject(Builtin):
+    def setup(self, opts):
+        self.multi = opts['multi']
+
     def execute(self, input):
-        return dict(input)
+        if self.multi:
+            r = {}
+            for k, v in input:
+                if k not in r:
+                    r[k] = []
+                r[k].append(v)
+            return r
+        else:
+            return dict(input)
 
 class ObjectToArray(Builtin):
+    def setup(self, opts):
+        self.multi = opts['multi']
+
     def execute(self, input):
-        return list(input.items())
+        if self.multi:
+            r = []
+            for k, v in input.items():
+                for i in v:
+                    r.append([k, i])
+            return r
+        else:
+            return list(input.items())
 
 
 import time
