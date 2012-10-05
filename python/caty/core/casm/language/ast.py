@@ -633,4 +633,34 @@ class ConstDecl(object):
         })
         return o
 
+class AnnotationDecl(object):
+    def __init__(self, name, type, doc, ann):
+        from caty.core.script.parser import ScriptParser
+        self.name = name
+        self.docstring = doc
+        self.annotations = ann
+        a = Annotations([])
+        for c in ann._annotations:
+            a.add(c)
+        a.add(Annotation(u'__annotation'))
+        sp = ScriptParser()
+        script = sp.parse('void')
+        self.__command = CommandNode(name, 
+                                     [CallPattern(None, 
+                                                 None, 
+                                                 CommandDecl(
+                                                    (type if type is not None else schema, ScalarNode(u'void')),
+                                                    [], 
+                                                    []
+                                                 ), 
+                                     )],
+                                     script,
+                                     doc, 
+                                     a,
+                                     [])
+
+    def declare(self, module):
+        pass #self.__command.declare(module)
+
+
 

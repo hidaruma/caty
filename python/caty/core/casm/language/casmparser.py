@@ -3,6 +3,7 @@ import re
 from topdown import *
 from caty.core.casm.language.ast import Provide, ModuleName
 from caty.core.language.util import *
+from caty.core.casm.language.annotationparser import annotation_decl
 from caty.core.casm.language.schemaparser import schema
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.commandparser import command
@@ -24,7 +25,7 @@ def parse_literate(t):
     except ParseFailed, e:
         raise SchemaSyntaxError(e)
 
-_top_level = [try_(schema), try_(command), try_(syntax), try_(kind), try_(const), try_(catyclass), try_(facility)]
+_top_level = [try_(schema), try_(command), try_(syntax), try_(kind), try_(const), try_(catyclass), try_(facility), try_(annotation_decl)]
 
 def casm(seq):
     s = []

@@ -1318,3 +1318,103 @@ command keys :: array | object | @*! (array|object) -> [(string|integer)*] {
     untagged | each {%_key}
 };
 
+
+/* アノテーション宣言 */
+/** アノテーションのターゲットタイプ 
+ */
+type TargetType = (
+  /** 任意のターゲット */
+  "ANY_TARGET" |
+  /** 型の宣言文 */
+  "TYPE_DECL" | 
+  /** 例外型の宣言文 */
+  "EXCEPTION_DECL" | 
+  /** スカラー型 */
+  "SCALAR" |
+  /** オブジェクト型 */ 
+  "OBJECT" |
+  /** 配列型 */
+  "ARRAY" |
+  /** ユニオン型 */
+  "UNION" |
+  /** タグ付き型 */
+  "TAGGED" | // TAGGED_TYPE から変更
+  /** 任意の型（型表現） */
+  "TYPE" |
+  /** オブジェクトのプロパティ */
+  "PROPERTY" |
+  /** 配列の項目 */
+  "ITEM" |
+  /** 列挙型／ユニオン型の選択肢 */
+  "CHOICE" |
+  /** コマンドの宣言文 */
+  "COMMAND_DECL" |
+  /** コマンドのオプション（プロパティ） */
+  "OPTION" |
+  /** コマンドの引数（項目） */
+  "ARGUMENT" |
+  /** アノテーションの宣言文 */
+  "ANNOTATION_DECL" |
+  /** アノテーションのパラメータ（プロパティ） */
+  "ANNOTATION_PARAM" |
+  /** モジュールの宣言文（module 名前 ;） */
+  "MODULE_DECL" | 
+  /** 定数の宣言文 */
+  "CONST_DECL" |
+  /** クラスの宣言文 */
+  "CLASS_DECL" |
+);
+
+/** アノテーションのターゲットを指定
+ * どの構文構成素に対してアノテートするかを指定する。
+ * このアノテーションが指定されないときは、ANY_TARGET となる。
+ */
+@[target("ANNOTATION_DECL")]
+annotation target = {
+ "value" : (TargetType | [TargetType, TargetType*])
+};
+
+@[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL"])]
+annotation register-public = {"value": boolean};
+
+@[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL"])]
+annotation override-public = {"value": boolean};
+
+@[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL"])]
+annotation override = {"value": boolean};
+
+@[target("PROPERTY")]
+annotation without = {
+  "value" : (string | [string, string*])
+};
+
+@[target("PROPERTY")]
+annotation with = {
+  "value" : (string | [string, string*])
+};
+
+@[target(["PROPERTY", "TYPE", "ITEM"])]
+annotation default = {
+  "value" : univ 
+};
+
+@[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL", "ITEM", "PROPERTY"])]
+annotation deprecated = {
+  "value" : boolean
+};
+
+@[target("COMMAND_DECL")]
+annotation filter = {
+  "value": boolean
+};
+
+@[target("COMMAND_DECL")]
+annotation no-auto-fill = {
+  "value": boolean
+};
+
+@[target("COMMAND_DECL")]
+annotation interactive = {
+  "value": boolean
+};
+
