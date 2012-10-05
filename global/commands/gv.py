@@ -41,7 +41,7 @@ class Draw(Builtin):
             with self.pub.open(self._out_file, 'wb') as f:
                 f.write(o)
         else:
-            if self._format in ('svg', 'dot', 'plaindot'):
+            if self._format in ('svg', 'dot', 'plaindot') and not isinstance(o, unicode):
                 return unicode(o, 'utf-8')
             else:
                 return o
