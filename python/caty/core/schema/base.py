@@ -645,7 +645,15 @@ class TagSchema(SchemaBase, Tag):
         return tagged(self.__tag, self.__schema.convert(value))
 
     def fill_default(self, value):
-        return tagged(self.__tag, self.__schema.fill_default(value))
+        import caty.jsontools as json
+        if self.__tag not in ('*', '*!'):
+            return tagged(self.__tag, self.__schema.fill_default(json.untagged(value)))
+        else:
+            try:
+                t = json.tag(value, explicit=True)
+                return tagged(t, self.__schema.fill_default(json.untagged(value)))
+            except:
+                return self.__schema.fill_default(value)
 
     def dump(self, depth, node=[]):
         return u'@%s %s' % (self.__tag, self.__schema.dump(depth, node))
