@@ -1,0 +1,406 @@
+// -*- coding: utf-8 -*-
+/** トリガーライブラリ */
+module trig;
+
+/*{{{
+@[deprecated]
+type LocatedName = {
+ "name": string,
+ "location": reif:Location,
+ *: any?
+};
+
+command action-key :: LocatedName -> string {
+ [$.location.cls, $.name] | text.concat 
+};
+
+@[deprecated]
+command location :: LocatedName -> string {
+ $.location |
+ [
+   $.app?="",
+   $.pkg?="",
+   $.mod?="",
+   $.cls?="",
+ ] | text:concat
+};
+
+@[deprecated]
+command fullname :: LocatedName -> string {
+ [
+   location,
+   $.name,
+ ] | text:concat
+};
+
+@[deprecated]
+command longname :: LocatedName -> string {
+ [
+   $.location | [$.pkg?="", $.mod?="", $.cls?=""] | text:concat,
+   $.name
+ ] | text:concat
+};
+}}}*/
+
+/*
+
+=== 対応関係
+
+|= TriggerInfo      |= TriggerLink |= Executable  |= Request   |= 備考 |
+| targetModule      |              |              |            | gen:sampleが使用 |
+| paramsType        |paramsType    | opts         | query      | 型を具体化 |
+| inputType         |inputType     | input        | body       | 型を具体化 |
+|targetUrl          |hrefMain      |              | path       | URL |
+|targetUrl.pathInfo |              | arg0         | pathの一部 | |
+| -                 |              | args         | -          |アクションに引数はなし |
+|targetAction.location.app|        | app          | pathの一部 | WebではAPP_PATHにエンコードされる|
+|targetAction       |command       | callable     | -          | コマンド名 |
+|method             |mehot         |              | method     | |
+|verb               |verb          |              | verb       | |
+|transferFormat     |requestContentType|          | contentType| |
+|transferFormat     |               |             | isText     | |
+|                   |responseContentType|         |            | |
+
+
+*/
+
+
+/** URLを表現する構造体 
+ * クエリー文字列は含まない。
+ */
+type UrlStruct = {
+  "pathInfo": string,
+  "hostUrl": string,
+  "appPath": string,
+};
+
+/** 型を表すテキスト（暫定） */
+type typeText = string;
+
+/** アクションを外部から起動するための情報 
+ */
+type TriggerInfo = {
+  /** ターゲットのURL 
+   * クエリー文字列は含まない。
+   */
+  "targetUrl": UrlStruct,
+ 
+  /** 動詞 */
+  "verb": string,
+
+  /** HTTPメソッド */ 
+  "method": httpMethod,
+
+  /** アクションのセマンティックな入力型
+   * HTTPフォームを作るときに必要
+   * マーシャリングしてリクエストボディになる型。
+   */
+  @[default("void")]
+  "inputType": typeText?,
+
+  /** アクションのオプションパラメータの型
+   * HTTPリクエストでは、クエリー文字列となる 
+   */
+  "paramsType": typeText,
+
+  /** ターゲットアクションが所属するモジュール
+   * gen:sample が型名の解決をするために必要。
+   */
+  "targetModule": {
+    "name": string,
+    "location": reif:Location,
+  },
+
+  /** 転送に使用するフォーマットの名前 
+   * このフォーマットからMIMEメディアタイプ（content-type）は決まる。
+   */
+  @[default("form")]
+  "transferFormat":  webio:GenericFormatName?,
+
+  /** ターゲットアクション*/
+  "targetAction": {
+    "name": string,
+    "location": reif:Location,
+  },
+
+  /** 説明 */
+  "description" : string?,
+
+  /** ターゲットリソースのパスパターン*/
+  "pathPattern": [string*],
+
+  *: any? // いずれ閉じる
+};
+
+/** クライアント側のリンク情報 
+ */
+type TriggerLink = {
+  /** 動詞 */
+  @[default("")]
+  "verb": string?,
+  /** HTTPメソッド */
+  @[default("GET")]
+  "method": httpMethod?,
+  /** クエリー文字列とフラグメントIDを含まないURL */
+  "hrefMain": uri,
+
+ /* 以下はコマンドとしての直接実行のためのデータ */
+  /** arg0 */ 
+  "arg0": string?,
+  /** コマンド名 */ 
+  "command": string?,
+
+  /** 入力のセマンティック層における型 */
+  @[default("void")]
+  "inputType": typeText?,
+  /** パラメータ（クエリー文字列）のセマンティック層における型 */
+  "paramsType": typeText?,
+  /** UIの情報 */
+  "ui": any?,
+
+  /** リンクターゲットへのリクエストのMIMEメディア型 */
+  "requestContentType": mediaType?,
+  /** リンクターゲット実行後のレスポンスのMIMEメディア型 */
+  "responseContentType": mediaType?,
+
+  /** リンクに関するヘルプテキスト */
+  "help": string?,
+
+ /* 以下はHTML内での使用を想定している。
+  * 意味と使用法はHTML仕様に従う。
+  */
+
+  /** リンクのタイトル */
+  "title": string?,
+  /** リンクのソースとターゲットの関係 */
+  "rel": string?,
+  /** リンクのソースとターゲットの逆関係 */
+  "rev": string?,
+  /** リンクのID */
+  "id": string?,
+  /** リンクのクラス */
+  "class": string?,
+  /** リンクの名前 */
+  "name": string?,
+
+   *: any?
+};
+
+
+/** UrlStructを文字列URIに変換する 
+ */
+command to-href :: UrlStruct -> uri {
+ [
+  $.hostUrl,
+  $.appPath,
+  $.pathInfo,
+ ] | text:concat
+};
+
+/** TriggerInfo型データをTriggerLink型データに変換する 
+ */
+command info-to-link :: TriggerInfo -> TriggerLink {
+ do {
+  $.verb   >: "verb",
+  $.method >: "metohd",
+    $.targetUrl | to-href >: "hrefMain",
+
+
+  $.inputType >:  "inputType",
+  $.paramsType >: "paramsType",
+
+  $.description?="(Undocumented)" >: "help",
+  $.targetAction | mpl:fullname  >: "title",
+
+  $.targetAction | mpl:fullname  >: "command",
+  $.targetUrl.pathInfo >: "arg0",
+
+ }
+};
+
+/** 入力のアクションが、引数に指定したパスをキャプチャーするなら、それをトリガーに変換する
+ * * 出力が @True タグ付きのとき、そのコンテントにはトリガーが入る。
+ * * 出力が @True タグ付きのとき、そのコンテントはnullである。
+ */
+command get-trigger-if-captures [string path] :: reif:ActionSummary -> @True TriggerInfo | @False TriggerInfo {
+ pass > act |
+ [
+   mpl:longname           > actName, // アプリケーション修飾はしてない
+   $.invoker.method       > method,
+   $.invoker.verb         > verb,
+   $.name                 > name,
+   $.location             > location,
+   $.location.app         > app,
+   $.pathPattern          > pathPattern,
+   $.document.description?=""          > description,
+   $.profile.internalInput > inputType,
+   $.profile.opts         > paramsType,
+ ] ;
+ %1   > path;
+
+ sreif:show-application %app | $.path > appPath;
+ [%appPath, %path] | text:concat > appFullpath;
+
+ /* デバッグ専用 */
+ @select-action {"method":%method, "verb":%verb, "path":%appFullpath, "actName":%actName} | dump --prefix="captures";
+
+ {
+       "targetUrl":{"hostUrl":%HOST_URL, "appPath":%appPath, "pathInfo":%path},
+       "verb": %verb,
+       "method": %method,
+       "targetModule": {
+         "name": %location | $.mod,
+         "location": %location | {"app": $.app, "pkg": $.pkg?},
+        },
+       "inputType": %inputType,
+       "paramsType": %paramsType,
+
+       "pathPattern": %pathPattern,
+       "description": %description,
+       "targetAction": {
+          "name": %name,
+         "location": %location,
+       },
+
+ } > obj;
+
+ [select-action --method=%method --verb=%verb --fullpath %appFullpath, %actName] | eq |
+ when {
+   True  => @True  %obj,
+   False => @False %obj,
+ }
+};
+
+/** リソースに所属するインスタンスを列挙する 
+ * リソースクラスに埋め込まれているインスタンスを取り出し、
+ * 入力のリソースインスタンス（パス名）セットをフィルタリングして、所属するインスタンスを選び、
+ * これらをマージする。 
+ */
+command res-instances :: [reif:ResourceSummary res, [string*] files] -> [string*] {
+ [
+   nth 1 > res,
+   nth 2 > files,
+ ];
+ %res |
+ [
+   $.pathPattern > patts,
+   $.instances   > insts,
+ ];
+ %patts |
+ take {
+   text:regmatch "^[^*]*$" 
+ } > no-wilds;
+
+ %patts |
+ each {
+   pass > patt;
+   %files |
+   take {path:matches %patt}
+ } | list:concat > matched;
+
+ [%insts, %no-wilds, %matched] | list:concat
+};
+
+
+/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、リソースに含まれるすべてのトリガーを列挙する */
+command res-all-triggers 
+  :: [reif:ResourceSummary res, [string*] files] -> [TriggerInfo*]
+{
+  [
+    nth 1 > res,
+    nth 2 > files,
+  ];
+
+  /* このリソースのCDパス */
+  %res | mpl:fullname   > resPath;
+  /* このリソースに所属するインスタンス（パス文字列）セット */
+  [%res, %files] | res-instances  > insts;
+
+  /* リソースに含まれるアクションを列挙 */
+  sreif:list-actions %resPath > acts;
+  /* アクションセットとインスタンスセットの直積を作る */
+  %insts | dump --prefix="res-all-triggers" |
+  each {
+    pass > path;
+    %acts |
+    each {
+      get-trigger-if-captures %path
+    } | take {pass} | each {untagged}
+  } | list:concat
+};
+
+/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、モジュールに含まれるすべてのトリガーを列挙する */
+command mod-all-triggers  /*OK*/
+  :: [reif:ModuleSummary mod, [string*] files] -> [TriggerInfo*]
+{
+  [
+    nth 1 > mod,
+    nth 2 > files,
+  ];
+  /* このモジュールのCDパス */
+  %mod | mpl:fullname   > modPath;
+
+  sreif:list-resources %modPath |
+  each {
+   [pass, %files] | res-all-triggers
+  } | list:concat
+};
+
+/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、アプリケーションに含まれるすべてのトリガーを列挙する */
+command app-all-triggers /*OK*/ 
+  :: [reif:ApplicationSummary app, [string*] files] -> [TriggerInfo*]
+{
+  [
+    nth 1 > app,
+    nth 2 > files,	
+  ];
+  /* このアプリケーションCDパス */
+  %app | [$.name, "::"] | text:concat > appPath;
+
+  mpl:list-app-caras %appPath |
+  each {
+   [pass, %files] | mod-all-triggers
+  } | list:concat
+};
+
+/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、アプリケーションに含まれるすべてのトリガーを列挙する */
+command list-app-triggers [string app] :: void ->  [TriggerInfo*]
+{
+ %1 > app;
+
+ ["pub@", %app, ":/"] | text:concat > root  | dump --prefix="root"  ;
+ file:list --rec --long %root | each {$.abspath} > files | dump --prefix="files"
+ ;
+
+ mpl:list-app-caras %app | 
+ each {
+   [pass, %files] | mod-all-triggers
+  } | list:concat
+
+};
+
+/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、モジュールに含まれるすべてのトリガーのマップを作る 
+ */
+command mod-trigger-map
+  :: [reif:ModuleSummary mod, [string*] files] -> any/*[TriggerInfo*]*/
+{
+  [
+    nth 1 > mod,
+    nth 2 > files,
+  ];
+  /* このモジュールのCDパス */
+  %mod | mpl:fullname   > modPath;
+
+  sreif:list-resources %modPath |
+  each {
+     [pass, %files] | res-all-triggers /* こここで、Trueのフィルタリングされる */
+  } | list:concat | /* 真偽タグは取れていてトリガーの配列になる*/
+  each {
+    [
+      $.targetAction | mpl:shortname,   
+      pass | untagged,
+    ]
+  } | xlist:group | each --obj {each {nth --safe 2}}
+};
+
+// End of Module
