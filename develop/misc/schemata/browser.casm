@@ -5,6 +5,17 @@ command open [uri uri] :: void -> void
  refers python:browser.Open
 ;
 
+command show 
+  {
+    @[default("html")]
+    "ext": string?
+  }
+  :: string -> void 
+  refers python:browser.Show
+;
+
+/*{{{
+
 /** 標準入力を一時ファイルにして、それをブラウザでオープンする */
 command show :: string -> void
 {
@@ -15,6 +26,8 @@ command show :: string -> void
   ["file:", tempfile:os-path %tmpf tmp_show.html] | text:concat > file-url;
   browser:open %file-url
 };
+
+}}}*/
 
 // End of Module
 
