@@ -497,6 +497,7 @@ Web サーバの起動・停止を行う
             if not proxy:
                 return
             try:
+                proxy.set_module(self.app._schema_module)
                 cmd = self.interpreter._instantiate(proxy)
                 self.env[name] = cmd(None)
                 if name in self.deleted_env:
