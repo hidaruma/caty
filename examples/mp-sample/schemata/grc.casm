@@ -1,0 +1,143 @@
+// -*- coding: utf-8 -*-
+
+/** Graph Compiler のサンプル 
+
+ # %tran-graph | gen-modole としてCatyScripのモジュールを生成する。
+ # 生成されたモジュールをロード可能な場所に配置する。
+ # _start %ttl として実行する。
+ # %ttl はコマンド実行の最大回数。無限（長時間）実行したいなら -1 とする。
+
+*/
+module grc;
+
+/** 状態遷移グラフ */
+type TranGraph = {
+ "name": string,
+ "start" : string,
+ "graph" : {*: [string*]?}
+};
+
+/** 状態遷移グラフからモジュールを生成する */
+command gen-module :: TranGraph -> string {
+ pass > in |
+ [
+   $.name  > name,
+   $.start > start,
+   $.graph > graph,
+ ];
+ %graph |
+ each {
+   pass  > targets;
+   {
+    "name": %_key,
+    "start": %start,
+    "targets": %targets,
+   } | gen-cmd-def
+ } | text:concat > defs;
+
+ [%in | gen-module-head, %defs] | text:concat
+
+};
+
+/** コマンド定義を生成する */
+command gen-cmd-def :: {"name":string, "start": string, "targets":[string*]} -> string {
+ pass > graph;
+ cmd-def-template | template:compile > obj;
+ [%graph, %obj] | template:expand
+};
+
+/** モジュールヘッドを生成する */
+command gen-module-head :: {"name":string, "start": string, *:any?} -> string {
+ pass > ctx;
+ module-head-template | template:compile > obj;
+ [%ctx, %obj] | template:expand
+};
+
+
+/** モジュールヘッドのテンプレート */
+const module-head-template = '''<?caty-meta template="smarty-mx" ?>
+/* -*- coding: utf-8 -*- */
+/** このモジュールは、Graph Compiler により自動生成されました 
+ */
+module {$name};
+
+/** テスト時に受け渡すデータ */
+type TestPacket = {{
+ /** Time To Live */
+ "ttl": integer,
+ "from": string,
+ "data": univ?
+}};
+
+/** スタート
+ * 長時間走行させたいときは、ttl に -1 を指定する。
+ */
+command _start [integer ttl] ::  univ -> never {{
+ pass > data;
+ %1   > ttl;
+ {{
+    "ttl": %ttl,
+    "from": "_start",
+    "data": %data,
+ }} | forward {$start}
+}};
+
+command _finished :: TestPacket -> TestPacket {{
+  pass
+}};
+
+'''; /* ---- ここまで ---- */
+
+
+/** コマンド定義のテンプレート */
+const cmd-def-template = '''<?caty-meta template="smarty-mx"?>
+command {$name} :: TestPacket -> never {{
+  pass > pkt |
+  [
+    $.from > from,
+    $.ttl  > ttl,
+  ];
+
+  ["Reached at ", "{$name}", " from ", %from, " ttl = ", %ttl | to-string] | text:concat | cout;
+  %ttl |
+  cond {{
+   0 => %pkt | forward  _finished,
+   * => void,
+  }};
+  sleep 500;
+
+  %pkt |
+  {{
+    "ttl" : $.ttl | num:dec,
+    "from": "{$name}",
+    "data": $.data?,
+  }} > newPkt;
+
+{if  $targets|notempty}
+  %newPkt |
+  branch {{
+   {foreach from=$targets item=targ}
+     {$targ} => forward {$targ},
+   {/foreach}
+  }}
+{else}
+  %newPkt | forward {$start}
+{/if}
+
+}};
+'''; /* ---- ここまで ---- */
+
+/** 状態遷移グラフのサンプル */
+const sample :: TranGraph = {
+ "name": "sample",
+ "start": "a",
+ "graph": {
+   "a": ["b"],
+   "b": ["c"],
+   "c": ["a", "d"],
+   "d": [],
+   "e": []
+  }
+};
+
+// End of Module
