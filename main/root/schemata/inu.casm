@@ -1,0 +1,633 @@
+// -*- coding: utf-8 -*-
+
+/** 
+ * イヌテスト 未整理状態
+ * いずれライブラリ化すべき
+ */
+module inu;
+
+/** パスのglobパターン */
+const path-pattern-1 = [
+ "/*",
+ "/**",
+ "/**.html",
+ "/*/*.svg",
+ "/**/*.txt",
+ "/*/**.txt",
+ "/**/**/*.gif",
+ "/images/*/**.gif",
+ "/*/*/*.xml",
+ "/**/*/*.xml",
+ "/*/**/*.xml",
+ "/*/*/**.xml",
+
+];
+
+/** パスのglobパターンから具体値を生成し、マッチングをチェックする 
+ * コメントアウト部分を生かすと、構文エラーでコンパイルできない。
+ */
+command gen-and-check-pattern [integer(minimum=1)? count] :: [string*] -> void  throws ImplementationBug {
+  pass > patts;
+  %1? | $?=1 > count;
+ 
+  %patts |
+  begin {
+   cond {
+     [] => "OK" | cout, /* 終了 */
+     *  => /* テスト実行 */
+      [
+         item 0 > patt,
+         list:slice 1 > rest,
+      ];
+/*
+      list:range 0 %count |
+      each {
+*/
+        gen:url %patt > gen | path:matches %patt |
+        when {
+          True  => %rest | repeat ,
+          False => 
+              ["Pattern:", %patt, "\nGen:", %gen] | text:concat > msg | cout;
+              make-exception ImplementationBug %msg | throw
+          ,
+        }
+/*
+     }
+*/
+   }
+ }
+};
+
+
+
+
+command ttt :: integer(minimum=0) -> void {
+ begin {
+  dump --prefix="\n\ncount:" |
+  case {
+   0 => void, /* ---> 終了 */
+   * =>
+     pass > count;
+     try --wall=superhard {gen:sample wsgi:Request | dump | wsgi:req-to-env}|
+     catch {
+       normal => %count | num:dec | dump --prefix="なんと成功:" | repeat, /* ---> 繰り返し */, 
+       except => 
+         when {
+           RuntimeError ==> xjson:pretty | cout, /* ---> 終了 */
+           *             => %count | num:dec | dump --prefix="普通に失敗:" | repeat, /* ---> 繰り返し */
+         }
+       ,
+     }
+   ,
+  }
+ }
+
+};
+
+
+
+/** コマンド */
+type Command = reif:CommandSummary;
+/*                  CommandSummary*/
+
+/** ピッカー（picker）によって拾われたコマンドを列挙する 
+ * アプリケーションがthisに決め打ちになっているの注意。
+ */
+command list-picked-commands [string modName, string picker] :: void -> any?/*[Command*]*/ {
+   %1 > modName;
+   %2 > picker;
+
+   ["this::", %modName] | text:concat > modPath | dump/*確認用*/;
+   sreif:list-commands --rec %modPath |
+   each {
+     [pass, %picker] | eval
+   } | list:tighten
+};
+
+/** docコメントがないコマンドをピックアップする */
+command pick-undocumented :: Command -> Command? {
+ pass > cmd | $.document.description? |
+ when {
+   undefined => undefined,
+   * => %cmd,
+ }
+};
+
+//inu-neko:list-picked-commands inu-neko inu-neko:pick-undocumented |take {typeis object} | each {$.document}/**/
+
+type Undocumented = {
+ "document" : {
+    "description": "undocumented",
+    *: any?
+  },
+  *: any?
+};
+
+/*{{{
+command list-picked-commands<T> [string modName] :: void -> [Command*] {
+   %1 > modName;
+   %2 > picker;
+
+   ["this::", %modName] | text:concat > modPath | dump/*確認用*/;
+   sreif:list-commands --rec %modPath |
+   each {
+     case {
+       T => pass,
+       * => undefined,
+     }
+   } | list:tighten
+};
+}}}*/
+//inu-neko:list-picked-commands<inu-neko:Undocumented> inu-neko /**/
+
+
+/** イヌネコでも実行可能なコマンドの特徴付け 
+* この型はフィルタリング条件として使う
+*/
+type InuNekoExecutable = {
+ /* 型パラメータは空 */
+ "typeParams": [],
+ 
+ /* 実装されている */
+ "implemented": ("python" | "catyscript"),
+
+ /* interactive ではない */
+ "annotations": {
+   "interactive": false?,
+   * : any?
+ }?,
+
+ *: any?
+};
+
+/** イヌネコでも実行可能かを調べる (述語コマンド) */
+command can-exec :: Command -> (@OK Command | @NG Command) {
+  case {
+   InuNekoExecutable => @OK pass,
+   *                 => @NG pass,
+  }
+};
+
+type ExecData = {
+  "command": Command,
+  "exec": Executable?,
+};
+
+/** アプリケーションに含まれるすべてのコマンドを列挙して、イヌネコ実行可能かを調べる 
+ * 出力は OK/NG タグがついたデータで、OKなら $.exec にExecutableが入る。
+ */
+command list-and-check-commands [string appName] :: void -> any/*[(@OK ExecData | @NG ExecData)*]*/ {
+ %1 > appName;
+ sreif:list-modules --rec  %appName |
+ each {
+   [
+      $.name > name,
+      mpl:fullname > modPath | dump --prefix=modPath,
+   ];
+   %name;
+   cond {
+    "public" => [],
+    * =>
+      sreif:list-commands --rec %modPath | dump --prefix=commands |
+      each {
+        can-exec  | prepare-exec
+      }
+   }
+ } | list:concat
+};
+
+/** アプリケーションに含まれるすべてのコマンドをExecutableにして列挙 */
+command list-executables  [string appName] :: void -> [Executable*] {
+ list-and-check-commands %1 | each {$.exec?} | list:tighten
+};
+
+/** コマンドに関連する型 */
+type CommandTypes = {
+ "app": string,
+ "mod": string,
+ "name": string,
+ "typeParams": [any*],
+ "opts": string,
+ "args": string,
+ "input": string,
+ "output": string,
+};
+
+/** コマンドに関連する型を列挙する */
+command list-command-types [string appName] :: void -> [CommandTypes*] {
+ %1 > appName;
+ sreif:list-modules --rec  %appName |
+ each {
+   $.name > modName |
+   cond {
+    "public" => [],
+    * =>
+      [%appName, "::", %modName] | text:concat > modPath | dump/*確認用*/;
+      sreif:list-commands --rec %modPath |
+      each {
+        do {
+         %appName >: "app",
+         %modName >: "mod",
+         $.name >: "name",
+         $.typeParams >: "typeParams",
+         $.profile.opts >: "opts",
+         $.profile.args >: "args",
+         $.profile.input >: "input",
+         $.profile.input >: "output",
+        }
+      }
+   }
+ } | list:concat
+};
+
+command check-types :: CommandTypes -> string {
+ pass > in |
+ [
+   [$.app, "::", $.mod] | text:concat > modPath,
+   [$.app, "::", $.mod, ":", $.name] | text:concat > cmd,
+ ];
+ %in | $.typeParams |
+ cond {
+  [] =>
+    %in |
+    [
+      $.opts | gen-sample %modPath,
+      $.args | gen-sample %modPath,
+      $.input | gen-sample %modPath,
+      $.output | gen-sample %modPath,
+    ]
+  ,
+  * => void
+  ,
+ };
+ %cmd
+};
+
+command check-types-2 :: CommandTypes -> string {
+ pass > in |
+ [
+   [$.app, "::", $.mod] | text:concat > modPath,
+   [$.app, "::", $.mod, ":", $.name] | text:concat > cmd,
+ ];
+ %in | $.typeParams |
+ cond {
+  [] =>
+    %in |
+    [
+      $.opts >p  | gen-sample %modPath | validate-type %modPath %p,
+      $.args >a  | gen-sample %modPath | validate-type %modPath %a,
+      $.input >i | gen-sample %modPath | validate-type %modPath %i,
+      $.output >o| gen-sample %modPath | validate-type %modPath %o,
+    ]
+  ,
+  * => void
+  ,
+ };
+ %cmd
+};
+
+command validate-type [string, string] :: univ -> void {
+ pass > in;
+ %1 > modPath;
+ %2 > typeSpec;
+
+ [%modPath, " : ", %typeSpec] | text:concat | cout;
+ ["validate<", %typeSpec, "> --boolean"] | text:concat > cmdline;
+ try --wall=superhard {
+    [%in, %cmdline] | eval 
+ } |
+ catch {
+  except => 
+     ["**EXCEPT** ",%modPath, "\nType: ", %typeSpec, "\nData: ", %in | xjson:pretty] | 
+     text:concat | logging:error --cout; void
+     ,
+  normal => 
+     cond {
+      true  => to-string | cout,
+      false => 
+         ["**NG** ",%modPath, "\nType: ", %typeSpec, "\nData: ", %in | xjson:pretty] | 
+         text:concat | logging:debug --cout; void
+      ,
+     }
+  }
+};
+
+
+command gen-sample 
+{
+  "occur": ("once"|"min")?,
+}
+[string modPath] :: string -> univ {
+  pass > typeSpec;
+  %1 > modPath;
+  try --wall=superhard {
+    gen:sample %--occur --mod=%modPath %typeSpec
+  } |
+  catch {
+   except => [%modPath, "\nType: ", %typeSpec] | text:concat | logging:debug --cout; void,
+  }
+};
+
+/** 実行の準備をする */
+command prepare-exec
+:: (@OK Command | @NG Command) -> any/*(@OK ExecData | @NG ExecData)*/
+{
+ pass > in |
+ untagged | mpl:fullname > modPath | dump --prefix=prepare-exec;
+
+ %in |
+ when {
+  NG => @NG {"command": pass},
+  OK => pass > cmd |
+    do {
+     $.location.app >: "app",
+
+     mpl:fullname >: "callable",
+
+     $.profile.input | gen-sample %modPath >: "input",
+
+     $.profile.opts | gen-sample --occur=once %modPath >: "opts",
+
+     $.profile.args  | gen-sample %modPath >: "args",
+
+    } > exec;
+    @OK {"command": %cmd, "exec": %exec}
+    ,
+ }
+};
+
+
+/** 例外を完全に捕捉して実行する */
+command confined-exec :: Executable -> univ {
+  pass > exec |
+  [
+    /* 入力を取り出す */
+    $.input > input,
+    /* コマンドラインを作る */
+    [
+      /* コマンド名フルパス */
+      [$.app, "::", $.callable] | text:concat,
+      /* オプション並び */
+      $.opts | each { ["--", %_key, "=", xjson:pretty] | text:concat}|text:join " ",
+      /* 引数並び */
+      $.args | each { xjson:pretty } | text:join " ",
+    ] | text:join " " > cmdline
+  ];
+  /* 先に情報をログに書いておく */
+  {"exec":%exec, "cmdline":%cmdline} | xjson:pretty | logging:info --cout;
+  /* superhard wall内で実行 */
+  try --wall=superhard {
+    [%input, %cmdline] | eval
+  } | 
+  catch {
+   /* 例外時はログに書いて、undefinedを返す */
+   except => [%cmdline, pass] | xjson:pretty | logging:error ; undefined,
+   /* そのまま値を返す */
+   normal => pass,
+  }
+};
+
+
+command is-not-never :: string -> @True string | @False string {
+  [pass > in, "never"] | eq --boolean | not |
+  cond {
+    true  => @True  %in,
+    false => @False %in,
+  }
+};
+
+command is-implemented :: string -> @True string | @False string {
+ cond {
+  "none" => @False pass,
+  *      => @True  pass,
+ }
+};
+
+command is-not-interactive :: boolean -> (@True | @False) {
+ cond {
+  true  => @False,
+  false => @True,
+ }
+};
+
+
+type CanExec = {
+  /* 型パラメータは空 */
+  "emptyTypeParams": (@True any | @False any),
+
+  /* 出力の型がnever以外 */
+   "notNever": (@True any | @False any),
+
+  /* 実装されている*/
+  "implemented": (@True any | @False any),
+
+  /* interactive ではない */
+  "notInteractive": (@True | @False),
+};
+
+type CanExecResult = 
+  @True  {"canExec": CanExec, "command":Command} | 
+  @False {"canExec": CanExec, "command":Command}
+; 
+
+     
+
+/*{{{
+
+command can-exec 
+:: Command -> CanExecResult {
+ pass > in 
+
+ |
+ do {
+   /* 型パラメータは空 */
+   [$.typeParams?, []] | eq >:"emptyTypeParams",
+
+   /* 出力の型がnever以外 */
+   $.profile.output | is-not-never   >: "notNever",
+
+   /* 実装されている*/
+   $.implemented | is-implemented >: "implemented",
+
+
+   /* interactive ではない */
+   $.annotations.interective?=false | is-not-interactive >: "notInteractive"
+
+ } > obj 
+ | each {tag} | cpl:and > tag;
+
+ [
+  %tag,
+  {"canExec": %obj, "command":%in}
+ ] | tagged
+
+
+};
+
+}}}*/
+
+/* !! global::exec:Executableに移した */
+
+/** 実行可能なコマンドクロージャ
+ */ 
+type Executable = {
+
+/* 実行すべきコマンドの指定 */
+
+  /** アプリケーション名 
+   * コマンドは、このアプリケーションのアンビエントで実行される。
+   */
+  @[default("this")]
+  "app" : string?,
+
+  /** パッケージ修飾とクラス修飾を許すコマンド名、またはファイルパス
+   * ファイルパスが指定された場合は、そのファイル内容をボディとする無名コマンドとして
+   * 実行する。
+   */
+  "callable" : string,
+
+  /** 型引数リスト 
+   * callableがコマンド名であり、それが総称コマンドの場合、
+   * 型具体化に使う型引数を指定する。
+   */
+  // "typeArgs" : [typeExpr*]?,
+
+/* 環境変数の制御 */
+
+  /** デフォルトの環境変数をどこから取るか 
+   * 現在のフレームから取る（"frame"）か、
+   * または、アプリケーションのトップレベル環境から取る（"app"）か。
+   */
+  @[default("frame")]
+  "defaultEnv" : ("frame" | "app")?,
+
+  /** デフォルト環境変数をクリアするか */
+  @[default("false")]
+  "clearEnv" : boolean?,
+
+  /** セットする環境変数と値 */
+  @[default({})]
+  "setEnv" : object?,
+
+  /** アンセットする環境変数 */
+  @[default([])]
+  "unsetEnv" : [string*]?,
+
+/* 起動時に渡すデータ */
+
+  /** 入力 */
+  @[default(null)]
+  "input" : univ,
+
+  /** オプションパラメータ */
+  @[default({})]
+  "opts" : object?,
+
+  /** arg0パラメータ */
+  @[default(null)]
+  "arg0" : univ?,
+
+  /** 引数パラメータ */
+  @[default([])]
+  "args" : array?,
+
+};
+
+/*
+
+command prepare-exec :: CanExecResult -> (null | Executable) {
+ when {
+  False => null,
+  True  =>
+   do {
+     undefined >: "app",
+
+     $.command.name >: "callable",
+
+     $.command.profile.input > input; gen:sample %input >: "input",
+
+     $.command.profile.opts > opts; gen:sample %opts >: "opts",
+
+     $.command.profile.args > args; gen:sample %args >: "args"
+  },
+ }
+};
+*/
+
+/* !! 以下は mpl でサポートすべき */
+
+/** アプリケーションに属するすべてのリソースクラスを列挙する */
+command list-all-resources [string appName] :: void -> [reif:ResourceSummary*] {
+ %1 > appName;
+ [%appName, "::"] | text:concat > appPath;
+
+ sreif:list-modules --rec %appPath |
+ take{[$.syntax, "cara"]|eq} | names |
+ each {
+    pass > modName;
+    [%appPath, %modName, ":"] | text:concat > modPath;
+    sreif:list-resources %modPath
+ } | list:concat
+};
+
+/** アプリケーションに属するすべての型を列挙する */
+command list-all-types [string appName] :: void -> [reif:TypeSummary*] {
+ %1 > appName;
+ [%appName, "::"] | text:concat > appPath;
+
+ sreif:list-modules --rec %appPath | names |
+ each {
+    pass > modName;
+    [%appPath, %modName, ":"] | text:concat > modPath;
+    sreif:list-types --rec %modPath
+ } | list:concat
+};
+
+/** アプリケーションに属するすべてのコマンドを列挙する */
+command list-all-commands [string appName] :: void -> [reif:TypeSummary*] {
+ %1 > appName;
+ [%appName, "::"] | text:concat > appPath;
+
+ sreif:list-modules --rec %appPath |
+ each {
+    mpl:fullname > modPath | dump ;
+    sreif:list-commands --rec %modPath
+ } | list:concat
+};
+
+
+
+/** アプリケーションに属するすべてのアクションを列挙する */
+command list-all-actions [string appName] :: void -> [reif:ActionSummary*] {
+ %1 > appName;
+ [%appName, "::"] | text:concat > appPath;
+
+ sreif:list-modules --rec %appPath |
+ take{[$.syntax, "cara"]|eq} | names |
+ each {
+    pass > modName;
+    [%appPath, %modName, ":"] | text:concat > modPath;
+    sreif:list-resources %modPath | names |
+    each {
+      pass > resName;
+      [%modPath, %resName, "."] | text:concat > resPath;
+      sreif:list-actions %resPath
+    } | list:concat
+ } | list:concat
+};
+
+/** アプリケーションに属するすべての状態を列挙する */
+command list-all-states [string appName] :: void -> [reif:StateSummary*] {
+ %1 > appName;
+ [%appName, "::"] | text:concat > appPath;
+
+ sreif:list-modules --rec %appPath |
+ take{[$.syntax, "cara"]|eq} | names |
+ each {
+    pass > modName;
+    [%appPath, %modName, ":"] | text:concat > modPath;
+    sreif:list-states %modPath
+ } | list:concat
+};
+
+
