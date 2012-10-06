@@ -350,7 +350,11 @@ class Url(Builtin):
                 url.append(self.__random_str(True))
             else:
                 url.append(s)
-        return u''.join(url)
+        r = u''.join(url)
+        if r.startswith(u'/'):
+            return r
+        else:
+            return u'/' + r
 
     def __random_str(self, includes_colon=False):
         p = [u'']
