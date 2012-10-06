@@ -8,23 +8,39 @@ module inu;
 
 /** パスのglobパターン */
 const path-pattern-1 = [
- "/*",
- "/**",
- "/**.html",
- "/*/*.svg",
- "/**/*.txt",
- "/*/**.txt",
- "/**/**/*.gif",
- "/images/*/**.gif",
- "/*/*/*.xml",
- "/**/*/*.xml",
- "/*/**/*.xml",
- "/*/*/**.xml",
+/* -- 絶対パス */
+  "/",
+  "/*",
+  "/**",
+  "/**.html",
+  "/*/*.svg",
+  "/**/*.txt",
+  "/*/**.txt",
+  "/**/**/*.gif",
+  "/images/*/**.gif",
+  "/*/*/*.xml",
+  "/**/*/*.xml",
+  "/*/**/*.xml",
+  "/*/*/**.xml",
+
+/* -- ディレクトリ */
+  "/*/",
+  "/foo/*/",
+  "/**/*/",
+  "/images/*/",
+  "/js/**/lib/",
+
+/* --  相対パス */
+  "*.html",
+  "*/**.txt",
+  "*.tar.gz",
+  "**.tar.gz",
+  "*",
+  "**",
 
 ];
 
 /** パスのglobパターンから具体値を生成し、マッチングをチェックする 
- * コメントアウト部分を生かすと、構文エラーでコンパイルできない。
  */
 command gen-and-check-pattern [integer(minimum=1)? count] :: [string*] -> void  throws ImplementationBug {
   pass > patts;
@@ -39,22 +55,21 @@ command gen-and-check-pattern [integer(minimum=1)? count] :: [string*] -> void  
          item 0 > patt,
          list:slice 1 > rest,
       ];
-/*
-      list:range 0 %count |
+
+      list:range 0 %count | dump |
       each {
-*/
-        gen:url %patt > gen | path:matches %patt |
+        dump; 
+        gen:url %patt > gen | dump | path:matches %patt |
         when {
-          True  => %rest | repeat ,
+          True  => void, /* do nothing */
           False => 
               ["Pattern:", %patt, "\nGen:", %gen] | text:concat > msg | cout;
-              make-exception ImplementationBug %msg | throw
+              make-exception ImplementationBug %msg | throw /* escape */
           ,
-        }
-/*
-     }
-*/
-   }
+        } /* /when */
+     }; /* /each */
+     %rest | repeat
+   } /* /cond */
  }
 };
 
