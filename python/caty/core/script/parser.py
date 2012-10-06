@@ -135,7 +135,7 @@ class ScriptParser(Parser):
             if func == 'begin':
                 self._context.append(self.BEGIN_REPEAT)
             else:
-                self._context.append(self.DEFAULT)
+                self._context.append(self._context[-1])
             try:
                 cmd = self.make_pipeline(seq)
             finally:
