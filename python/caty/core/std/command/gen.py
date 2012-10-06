@@ -352,18 +352,18 @@ class Url(Builtin):
                 url.append(s)
         return u''.join(url)
 
-    def __random_str(self, includes_slash=False):
+    def __random_str(self, includes_colon=False):
         p = [u'']
         seed = u'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_'
-        if includes_slash:
-            seed += u'///////'
+        if includes_colon:
+            seed += u'.....'
         for i in range(random.choice(range(3,10))):
             c = unicode(random.choice(seed))
             if not (c == u'/' and p[-1] == u'/'):
                 p.append(c)
         r = u''.join(p).strip(u'/')
         if not r:
-            return self.__random_str(includes_slash)
+            return self.__random_str(includes_colon)
         else:
             return r
 
