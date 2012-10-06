@@ -1220,7 +1220,13 @@ class ArrayToObject(Builtin):
                 r[k].append(v)
             return r
         else:
-            return dict(input)
+            r = {}
+            for k, v in input:
+                if k not in r:
+                    r[k] = v
+                else:
+                    throw_caty_exception(u'BadInput', u'$data', data=input)
+            return r
 
 class ObjectToArray(Builtin):
     def setup(self, opts):
