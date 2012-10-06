@@ -473,6 +473,10 @@ type UncloseInputArr = [
  ******** 例外 ********
  **********************/
 
+/*
+ * --- NotFound系 --- 
+ */
+
 /** モジュールが存在しない */
 exception ModuleNotFound = {
   "moduleName": string,
@@ -524,6 +528,33 @@ exception ApplicationNotFound = {
   *: any?,
 };
 
+/** 要求されたスクリプトが見つからない、存在しない。*/
+exception ScriptNotFound = object;
+
+/** 要求されたファイルが見つからない、存在しない。*/
+exception FileNotFound = object;
+
+/** データベースのコレクションが見つからない。*/
+exception CollectionNotFound = object;
+
+/** そういう例外型は存在しない
+ * 例外型（Excetpion）のデータではあるが、タグが登録されてない。
+ */
+exception ExceptionNotFound  = {
+ /** throwに入力されたデータ */
+ "inputData" : Exception,
+ *: any?
+};
+
+
+
+/* 
+ * --- 不正な操作／壊れたデータ --- 
+ */
+
+/** データの整合性を破壊するので許されない操作である。*/
+exception ConsistencyViolation = object;
+
 /** 配列のインデックスが範囲外、または不正である。*/
 exception IndexOutOfRange = object;
 
@@ -548,11 +579,12 @@ exception ConversionError = {
 @[runaway]
 exception ValidatatonFailed = object;
 
-/** 入力が（なんらかの意味で）不正である。*/
+/** 入力が（なんらかの意味で）不正である。（旧） */
+@[deprecated]
 exception InvalidInput = object;
 
-/** データの整合性を破壊するので許されない操作である。*/
-exception ConsistencyViolation = object;
+/** 入力が（なんらかの意味で）不正である。*/
+exception BadInput = object;
 
 /** ルーズ配列である。 */
 exception LooseArray = object;
@@ -563,22 +595,21 @@ exception Undefined = object;
 /** タグが存在しない。 */
 exception TagNotExist = object;
 
-/** 要求されたスクリプトが見つからない、存在しない。*/
-exception ScriptNotFound = object;
 
-/** 要求されたファイルが見つからない、存在しない。*/
-exception FileNotFound = object;
+/* 
+ * --- IOエラー
+ */
 
 /** ファイルのIOに関連してエラーが生じた。 */
 exception FileIOError = object;
 
-
-/** データベースのコレクションが見つからない。*/
-exception CollectionNotFound = object;
-
 /** コレクションへのアクセスに失敗。*/
 exception CollectionAccessError = object;
 
+
+/* 
+ * --- 不正なコマンドライン --- 
+ */
 
 /** 指定できないオプションが指定された。*/
 @[runaway]
@@ -592,7 +623,6 @@ exception BadOption = object;
 @[runaway]
 exception MissingOption = object;
 
-
 /** 引数が余分にある。*/
 @[runaway]
 exception UnexpectedArg = object;
@@ -605,6 +635,34 @@ exception MissingArg = object;
 @[runaway]
 exception BadArg = object;
 
+/*
+ * -- ユーザーの誤り
+ */
+
+/** throwへの入力が不正 */
+@[runaway]
+exception InvalidThrow = {
+ /** throwに入力されたデータ */
+ "inputData" : univ,
+ *: any?
+};
+
+/** シグナルがハンドルされなかった */
+@[runaway]
+exception UnhandledSignal = {
+ "signal" : univ,
+ *: any?
+};
+
+/** uncloseでsetとunsetの競合が起きた。 */
+@[runaway]
+exception UncloseConflict = object;
+
+
+/*
+ * --- セキュリティ
+ */
+
 /** 認証失敗 */
 exception CertificationFailed = object;
 
@@ -613,6 +671,10 @@ exception IllegalAccess = object;
 
 /** その他セキュリティエラー。 */
 exception SecurityError = object;
+
+/*
+ * --- その他 ---
+ */
 
 /** コマンド実行エラー */
 exception CommandExecutionError = object;
@@ -626,7 +688,7 @@ exception Timeout = object;
 /** 算術エラー。 */
 exception ArithmeticError = object;
 
-/** 実行時エラー。 */
+/** Pythonレベルの実行時エラー。 */
 exception RuntimeError = object;
 
 /** 未実装。 */
@@ -644,31 +706,6 @@ exception CompileError = object;
 /** neverが検出された */
 exception Never = object;
 
-exception InvalidThrow = {
- /** throwに入力されたデータ */
- "inputData" : univ,
- *: any?
-};
-
-/** シグナルがハンドルされなかった */
-@[runaway]
-exception UnhandledSignal = {
- "signal" : univ,
- *: any?
-};
-
-/** そういう例外型は存在しない
- * 例外型（Excetpion）のデータではあるが、タグが登録されてない。
- */
-exception ExceptionNotFound  = {
- /** throwに入力されたデータ */
- "inputData" : Exception,
- *: any?
-};
-
-/** uncloseでsetとunsetの競合が起きた。 */
-@[runaway]
-exception UncloseConflict = object;
 
 /** 
  * 入力値を例外として送出する。
