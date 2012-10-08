@@ -48,7 +48,7 @@ class MakeEnv(Builtin):
             istream.seek(0)
         verb = None
         if self.__verb:
-            verb = u'__verb=%s' % self.__verb
+            verb = u'_verb=%s' % self.__verb
         query = u'&'.join([s for s in [verb, self.__query] if s])
 
         return conditional_dict(lambda k, v: v is not None, 
@@ -114,7 +114,7 @@ class ReqToEnv(Builtin):
         verb = None
         queries = []
         if req['verb']:
-            verb = u'__verb=%s' % req['verb']
+            verb = u'_verb=%s' % req['verb']
         if req['query']:
             if isinstance(req['query'], dict):
                 for k, v in req['query'].items():
