@@ -10,7 +10,7 @@ DEFAULT = 2
 class ResourceClass(object):
     def __init__(self, app, url_pattern, actions, filetype, instances, module_name, resource_name, docstring=u'Undocumented', annotations=Annotations([])):
         self.url_pattern = url_pattern
-        self.url_patterns = self._split_pattern(iter(url_pattern))
+        self.url_patterns = split_url_pattern(iter(url_pattern))
         self.entries = actions
         self.name = resource_name
         self.module = module_name
@@ -39,33 +39,6 @@ class ResourceClass(object):
                                  u'Path pattern for filetype must be extension, but directory found: module=$mod, resource=$res',
                                  mod=self.module, res=self.name)
         return '.' + e
-
-    def _split_pattern(self, seq):
-        r = []
-        buf_list = [[]]
-        for c in seq:
-            if c == '|':
-                for b in buf_list:
-                    if b:
-                        r.append(''.join(b))
-                buf_list = [[]]
-            elif c == '(':
-                sub = self._split_pattern(seq)
-                buf_list[0].append(sub.pop(0))
-                for s in sub:
-                    buf_list.append([])
-                    buf_list[-1].extend(buf_list[0][:-1])
-                    buf_list[-1].append(s)
-            elif c == ')':
-                break
-            else:
-                for b in buf_list:
-                    b.append(c)
-
-        for b in buf_list:
-            if b:
-                r.append(''.join(b))
-        return r
 
     def usage(self):
         buff = []
@@ -121,3 +94,29 @@ class DefaultResource(ResourceClass):
             v.implemented = u'catyscript'
         self.type = DEFAULT
 
+def split_url_pattern(seq):
+    r = []
+    buf_list = [[]]
+    for c in seq:
+        if c == '|':
+            for b in buf_list:
+                if b:
+                    r.append(''.join(b))
+            buf_list = [[]]
+        elif c == '(':
+            sub = self._split_pattern(seq)
+            buf_list[0].append(sub.pop(0))
+            for s in sub:
+                buf_list.append([])
+                buf_list[-1].extend(buf_list[0][:-1])
+                buf_list[-1].append(s)
+        elif c == ')':
+            break
+        else:
+            for b in buf_list:
+                b.append(c)
+
+    for b in buf_list:
+        if b:
+            r.append(''.join(b))
+    return r
