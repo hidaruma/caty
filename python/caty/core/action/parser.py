@@ -336,7 +336,7 @@ class StateBlock(Parser):
                 else:
                     self.actor_names = [seq.parse(name)]
             else:
-                self.actor_names = [u'']
+                self.actor_names = []
             seq.parse('::')
             self.type = typedef(seq)
             if option(keyword('as'))(seq):
