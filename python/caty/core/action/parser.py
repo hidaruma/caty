@@ -153,7 +153,7 @@ class ResourceBodyBlock(Parser):
         self.names.add(n)
         invoker = option(self.invoker)(seq)
 
-        opts = option(object_, ObjectNode({}, wildcard=ScalarNode(u'any')))(seq)
+        opts = option(object_, ObjectNode({}))(seq)
         seq.parse('::')
         prof = option(try_(self.profiles))(seq)
         c = choice('{', ';')(seq)
