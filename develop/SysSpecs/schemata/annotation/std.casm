@@ -36,6 +36,13 @@ type deprecated = {};
 @[annotation, target(["TYPE_DECL", "COMMAND_DECL", "PROPERTY"]), affect-management]
 type unquiet = {};
 
+
+/** システムが使用する型やコマンド
+ */
+@[annotation, target(["TYPE_DECL", "COMMAND_DECL"]), affect-management]
+type system = {};
+
+
 /*{{{
 
 /** open制約
