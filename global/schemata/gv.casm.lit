@@ -62,6 +62,7 @@ type lblString = string(remark="escString or an HTML label");
 type elementId = string;
 
 /** Graphvizで使える属性名 */
+@[typical("name")]
 type AttrName = string(pattern="[a-zA-Z][a-zA-Z0-9]*");
 }>>
 

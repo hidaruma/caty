@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-
+/** 事前定義 */
 @[register-public]
 module predefined;
 
@@ -30,6 +30,26 @@ command neq
 command content [string? tagName] :: univ -> univ {
  untagged %1?
 };
+
+/*
+command lookup-action 
+   {
+        @[default(false)]
+        "fullpath": boolean?,
+        "exception": boolean?,
+        "verb": string?,
+        "check": boolean?,
+        "method": ("GET" | "POST" | "PUT" | "DELETE" | "HEAD")?,
+        *: never?
+    }
+[string path]
+Input:
+    void
+Output:
+    (string | false)
+
+*/
+
 
 /** 実装がまだ定義されてないアクションにおいて使うダミーコマンド
  */

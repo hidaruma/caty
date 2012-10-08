@@ -13,14 +13,14 @@ module mpl;
 */
 
 
-// trig.casm と重複している
+type Location = reif:Location;
+
 type LocatedName = {
  "name": string,
  "location": reif:Location,
  *: any?
 };
 
-// trig.casm と重複している
 command location :: LocatedName -> string {
  $.location |
  [
@@ -31,7 +31,6 @@ command location :: LocatedName -> string {
  ] | text:concat
 };
 
-// trig.casm と重複している
 command fullname :: LocatedName -> string {
  [
    location,
@@ -44,7 +43,6 @@ command fullnames :: [LocatedName*] -> [string*] {
  each {fullname}
 };
 
-// trig.casm と重複している
 command longname :: LocatedName -> string {
  [
    $.location | [$.pkg?="", $.mod?="", $.cls?=""] | text:concat,
@@ -65,27 +63,50 @@ command shortnames :: [LocatedName*] -> [string*] {
  each {shortname}
 };
 
+command loc-to-mod-name :: Location -> string {
+ [
+   $.app, 
+   $.pkg,
+   $.mod,
+ ] | text:concat
+};
 
+command loc-to-res-name ::  Location -> string {
+ [
+   $.app,
+   $.pkg,
+   $.mod,
+   $.cls,
+ ] | text:concat
+};
+
+
+/*== モジュールの検索 */
+
+// --syntax=cara
 /** 引数で指定したアプリケーションに属するすべてのcaraモジュールを列挙する */
-command list-app-caras [string appPath] :: void -> [reif:ModuleSummary*] {
- %1 > appPath;
+command list-app-caras [string? appPath] :: void -> [reif:ModuleSummary*] {
+ %1? | $?="this" > appPath;
 
  sreif:list-modules --rec %appPath |
  take { [$.syntax, "cara"]|eq }
 };
 
+// --syntax=casm
 /** 引数で指定したアプリケーションに属するすべてのcasmモジュールを列挙する */
-command list-app-casms [string appPath] :: void -> [reif:ModuleSummary*] {
- %1 > appPath;
+command list-app-casms [string? appPath] :: void -> [reif:ModuleSummary*] {
+ %1? | $?="this" > appPath;
 
  sreif:list-modules --rec %appPath |
  take { [$.syntax, "casm"]|eq }
 };
 
+/*== クラスの検索 */
+
 // list-resources --rec appPath が望ましい。
 /** 引数で指定したアプリケーションに属するすべてのリソースクラスを列挙する */
-command list-app-resources [string appPath] :: void -> [reif:ResourceSummary*] {
- %1 > appPath;
+command list-app-resources [string? appPath] :: void -> [reif:ResourceSummary*] {
+ %1? | $?="this" > appPath;
 
  sreif:list-modules --rec %appPath |
  take { [$.syntax, "cara"]|eq } |
@@ -95,12 +116,27 @@ command list-app-resources [string appPath] :: void -> [reif:ResourceSummary*] {
  } | list:concat
 };
 
+/*== 状態の検索 */
+
+/** 引数で指定したアプリケーションに属するすべての状態を列挙する */
+command list-app-states [string? appPath] :: void -> [reif:StateSummary*] {
+ %1? | $?="this" > appPath;
+
+ sreif:list-modules --rec %appPath |
+ take { [$.syntax, "cara"]|eq } |
+ each {
+    fullname > modPath;
+    sreif:list-states %modPath
+ } | list:concat
+};
+
+
+/*== コマンド/アクションの検索 */
 
 // list-actions --rec appPath が望ましい。
-
 /** 引数で指定したアプリケーションに属するすべてのアクションを列挙する */
-command list-app-actions [string appPath] :: void -> [reif:ActionSummary*] {
- %1 > appPath;
+command list-app-actions [string? appPath] :: void -> [reif:ActionSummary*] {
+ %1? | $?="this" > appPath;
  
  list-app-resources %appPath |
  each {
@@ -109,9 +145,36 @@ command list-app-actions [string appPath] :: void -> [reif:ActionSummary*] {
  } | list:concat
 };
 
+// list-commands --rec appPath が望ましい。
+/** 引数で指定したアプリケーションに属するすべてのコマンドを列挙する */
+command list-app-commands [string? appPath] :: void -> [reif:CommandSummary*] {
+ %1? | $?="this" > appPath;
+ 
+ sreif:list-modules %appPath |
+ each {
+   fullname > modPath;
+   sreif:list-commands --rec %modPath
+ } | list:concat
+};
+
+// list-actions --rec modPath が望ましい。
+/** 引数で指定したモジュールに属するすべてのアクションを列挙する */
+command list-mod-actions [string modPath] :: void -> [reif:ActionSummary*] {
+  %1 > modPath;
+
+  sreif:list-resources %modPath |
+  each {
+   mpl:fullname > resPath;
+   sreif:list-actions %resPath
+  } | list:concat
+};
+
+
+/*== 型の検索 */
+
 /** 引数で指定したアプリケーションに属するすべての型を列挙する */
 command list-app-types [string appPath] :: void -> [reif:TypeSummary*] {
- %1 > appPath;
+ %1? | $?="this" > appPath;
  
  sreif:list-modules --rec %appPath |
  each {
@@ -121,7 +184,10 @@ command list-app-types [string appPath] :: void -> [reif:TypeSummary*] {
 };
 
 
-/** リソースクラスに含まれるインスタンス（パス文字列）を列挙する */
+/*== */
+
+
+/** 入力のリソースクラスに含まれるインスタンス（パス文字列）を列挙する */
 command res-instances 
   {
     /** 実在するファイルを含めるか */
@@ -194,7 +260,7 @@ type Endpoint = {
 command captures [string path] :: reif:ActionSummary -> Logical<EndPoint | null> {
  pass > act |
  [
-   act-name               > actName,
+   longname               > actName,
    $.invoker.method       > method,
    $.invoker.verb         > verb,
    $.name                 > name,
@@ -235,19 +301,25 @@ command take-captured [string actPath] :: string | [string*] -> [any*] {
  }
 };
 
-/** URLを表現する構造体 
+/* -- ここから下はトリガー -- */
+
+
+/** URLを表現する構造体  → trigに 
  * クエリー文字列は含まない。
  */
+@[deprecated]
 type UrlStruct = {
   "pathInfo": string,
   "hostUrl": string,
   "appPath": string,
 };
 
-/** 型を表すテキスト（暫定） */
+/** 型を表すテキスト（暫定） → trigに  */
+@[deprecated]
 type typeText = string;
 
-/** アクションを外部から起動するための情報 */
+/** アクションを外部から起動するための情報  → trigに */
+@[deprecated]
 type ActionTriggerInfo = {
   /** ターゲットのURL 
    * クエリー文字列は含まない。
@@ -300,7 +372,7 @@ type ActionTriggerInfo = {
   *: any? // いずれ閉じる
 };
 
-/** サーバー側のエンドポイント 
+/** サーバー側のエンドポイント  → trigに 
  * ハイパーリンクやRPCのターゲット（矢の先端）となるポイント
  */
 type EndPoint = {
@@ -314,7 +386,8 @@ type EndPoint = {
 };
 
 
-/** リンクからトリガーセットを生成する 未完 */
+/** 入力のリンクからトリガーセットを生成する 未完  → atrigに */
+@[deprecated]
 command link-to-triggers [string prefix ] :: reif:Link -> any {
  pas > link | $.targets > targets;
  %1 > prefix;
@@ -328,7 +401,8 @@ command link-to-triggers [string prefix ] :: reif:Link -> any {
 
 };
 
-/** 状態からトリガーセットを生成する 未完 */
+/** 入力の状態からトリガーセットを生成する 未完 → atrigに */
+@[deprecated]
 command state-to-triggers :: reif:StateSummary -> any {
  pass > stt | $.links > links;
 
@@ -341,62 +415,9 @@ command state-to-triggers :: reif:StateSummary -> any {
 
 };
 
-command loc-to-mod-name
- ::   {"app":string, "pkg":string?, "mod":string?, *:any?} -> string
-{
- pass > loc | $.pkg? |
- when {
-   undefined => "",
-   string => [pass, "."] | text:concat,
- } > pkg;
- %loc |
- [
-   $.app, "::",
-   %pkg,
-   $.mod, ":",
- ] | text:concat
-};
 
-command loc-to-res-name
- ::   {"app":string, "pkg":string?, "mod":string?, "cls": string, *:any?} -> string
-{
- pass > loc | $.pkg? |
- when {
-   undefined => "",
-   string => [pass, "."] | text:concat,
- } > pkg;
- %loc |
- [
-   $.app, "::",
-   %pkg,
-   $.mod, ":",
-   $.cls, ".",
- ] | text:concat
-};
-
-command act-name
- :: {"name": string, "location":{"app":string, "pkg":string?, "mod":string?, "cls": string, *:any?},*:any?} -> string
-{
- pass |
- [ 
-   $.name > name,
-   $.location > loc | $.pkg? > p,
- ];
- %p? |
- when {
-   undefined => "",
-   string => [pass, "."] | text:concat,
- } > pkg;
- %loc |
- [
-   %pkg,
-   $.mod, ":",
-   $.cls, ".",
-   %name,
- ] | text:concat
-};
-
-
+/** → trigに */
+@[deprecated]
 command list-act-triggers   {
     /** 実在するファイルを含めるか */
     @[default(false)]
@@ -410,6 +431,8 @@ command list-act-triggers   {
  act-all-triggers %--existing
 };
 
+/** → trigに */
+@[deprecated]
 command act-all-triggers 
   {
     /** 実在するファイルを含めるか */
@@ -443,7 +466,8 @@ command act-all-triggers
 
 };
 
-/** 引数に指定されたアプリケーションに含まれるトリガーを列挙する */
+/** 引数に指定されたアプリケーションに含まれるトリガーを列挙する → trigに*/
+@[deprecated]
 command list-app-triggers
   {
     /** 実在するファイルを含めるか */
@@ -460,6 +484,8 @@ command list-app-triggers
 
 };
 
+/** 引数に指定されたモジュールに含まれるトリガーを列挙する → trigに */
+@[deprecated]
 command list-mod-triggers 
   {
     /** 実在するファイルを含めるか */
@@ -476,6 +502,8 @@ command list-mod-triggers
 
 };
 
+/** 引数に指定されたリソースに含まれるトリガーを列挙する → trigに*/
+@[deprecated]
 command list-res-triggers
   {
     /** 実在するファイルを含めるか */
@@ -492,6 +520,8 @@ command list-res-triggers
 
 };
 
+/** → trigに */
+@[deprecated]
 command app-all-triggers 
   {
     /** 実在するファイルを含めるか */
@@ -509,6 +539,8 @@ command app-all-triggers
   } | list:concat
 };
 
+/** → trigに */
+@[deprecated]
 command mod-all-triggers
   {
     /** 実在するファイルを含めるか */
@@ -525,7 +557,8 @@ command mod-all-triggers
   } | list:concat
 };
 
-/** リソースに含まれるすべてのトリガーを列挙する */
+/** 入力のリソースに含まれるすべてのトリガーを列挙する → trigに */
+@[deprecated]
 command res-all-triggers 
   {
     /** 実在するファイルを含めるか */

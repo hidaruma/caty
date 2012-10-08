@@ -202,7 +202,7 @@ command to-href :: UrlStruct -> uri {
 command info-to-link :: TriggerInfo -> TriggerLink {
  do {
   $.verb   >: "verb",
-  $.method >: "metohd",
+  $.method >: "method",
     $.targetUrl | to-href >: "hrefMain",
 
 
@@ -271,7 +271,7 @@ command get-trigger-if-captures [string path] :: reif:ActionSummary -> @True Tri
  }
 };
 
-/** リソースに所属するインスタンスを列挙する 
+/** 入力のリソースに所属するインスタンスを列挙する 
  * リソースクラスに埋め込まれているインスタンスを取り出し、
  * 入力のリソースインスタンス（パス名）セットをフィルタリングして、所属するインスタンスを選び、
  * これらをマージする。 
@@ -302,7 +302,7 @@ command res-instances :: [reif:ResourceSummary res, [string*] files] -> [string*
 };
 
 
-/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、リソースに含まれるすべてのトリガーを列挙する */
+/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、入力のリソースに含まれるすべてのトリガーを列挙する */
 command res-all-triggers 
   :: [reif:ResourceSummary res, [string*] files] -> [TriggerInfo*]
 {
@@ -329,7 +329,7 @@ command res-all-triggers
   } | list:concat
 };
 
-/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、モジュールに含まれるすべてのトリガーを列挙する */
+/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、入力のモジュールに含まれるすべてのトリガーを列挙する */
 command mod-all-triggers  /*OK*/
   :: [reif:ModuleSummary mod, [string*] files] -> [TriggerInfo*]
 {
@@ -346,7 +346,7 @@ command mod-all-triggers  /*OK*/
   } | list:concat
 };
 
-/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、アプリケーションに含まれるすべてのトリガーを列挙する */
+/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、入力のアプリケーションに含まれるすべてのトリガーを列挙する */
 command app-all-triggers /*OK*/ 
   :: [reif:ApplicationSummary app, [string*] files] -> [TriggerInfo*]
 {
@@ -363,7 +363,7 @@ command app-all-triggers /*OK*/
   } | list:concat
 };
 
-/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、アプリケーションに含まれるすべてのトリガーを列挙する */
+/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、入力のアプリケーションに含まれるすべてのトリガーを列挙する */
 command list-app-triggers [string app] :: void ->  [TriggerInfo*]
 {
  %1 > app;
@@ -379,7 +379,7 @@ command list-app-triggers [string app] :: void ->  [TriggerInfo*]
 
 };
 
-/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、モジュールに含まれるすべてのトリガーのマップを作る 
+/** リソースインスタンス（パス名）セットのフィルタリング結果を加えて、入力のモジュールに含まれるすべてのトリガーのマップを作る 
  */
 command mod-trigger-map
   :: [reif:ModuleSummary mod, [string*] files] -> any/*[TriggerInfo*]*/
