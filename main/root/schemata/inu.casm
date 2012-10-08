@@ -6,6 +6,99 @@
  */
 module inu;
 
+type NoTypeParams = @* {
+ "typeParams" : [],
+ * : any?
+};
+
+/** 引数（省略可）で指定されたアプリケーション内で、型パラメータを持つ型／コマンドを探す
+ */
+command app-type-paramed [string? app] :: void -> [any*] {
+ %1? | $?="this" > app;
+ [
+   mpl:list-app-types    %app, 
+   mpl:list-app-commands %app, 
+ ] | list:concat |
+ each {
+   case {
+     NoTypeParams => undefined,
+     * => pass,
+   }
+ } | list:tighten
+};
+
+/** 第二引数（省略可）で指定されたアプリケーション内で、第一引数で指定されたアノテーションが付いているモジュール／型／コマンドを探す
+ */
+command app-annotated [string anno, string? app] :: void -> [any*] {
+ %1 > anno;
+ %2? | $?="this" > app;
+
+ [
+   sreif:list-modules --rec %app,
+   mpl:list-app-types    %app, 
+   mpl:list-app-commands %app, 
+ ] | list:concat> all;
+
+ %all | mpl:fullnames | dump ;
+
+ %all |
+ take { $.annotations | pv --safe %anno | filter:defined}
+
+};
+
+
+/** モジュール、型、コマンドに付けられているすべてのアノテーションを列挙する */
+command app-toplevel-annotations [string? app] :: void -> [string*] {
+ %1? | $?="this" > app;
+
+ [
+   sreif:list-modules --rec %app,
+   mpl:list-app-types    %app, 
+   mpl:list-app-commands %app, 
+ ] | list:concat|
+ each {$.annotations | properties} | set:union
+
+};
+
+
+/** 第一引数で指定されたアプリケーション内で、select-actionのチェックをする */
+command check-select-action [string? app, integer(minimum=1)? count] :: void -> any {
+ %1? | $?="this" > app;
+ %2? | dump | $?=1 |dump > count;
+
+ mpl:list-app-resources %app |
+ each {
+   mpl:fullname  > resPath;
+   sreif:list-actions %resPath |
+   each {
+     [
+        mpl:longname     > longname,
+        $.pathPattern    > patts,
+        $.invoker.verb   > verb,
+        $.invoker.method > method,
+     ];
+     %patts |
+     each {
+       pass > patt;
+       list:range 0 %count |
+       each {
+         gen:url %patt > path;
+         select-action --method=%method --verb=%verb %path > act;
+         {
+            "orig": %longname, 
+            "selected": %act,
+            "pattern": %patt,
+            "generated": %path,
+         }
+       } /* /each range-val */
+     } /* /each patt */ | list:concat
+   } /* /each action */ | list:concat
+ } /* /each resource */ | list:concat
+
+
+};
+
+
 /** パスのglobパターン */
 const path-pattern-1 = [
 /* -- 絶対パス */
