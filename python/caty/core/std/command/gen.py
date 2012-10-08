@@ -337,9 +337,11 @@ class Url(Builtin):
 
     def execute(self):
         from caty.core.action.parser import url_pattern
+        from caty.core.action.resource import split_url_pattern
         from topdown import as_parser
+        import random
         try:
-            p = as_parser(url_pattern).run(self._pattern)
+            p = as_parser(url_pattern).run(random.choice(split_url_pattern(self._pattern)))
         except:
             throw_caty_exception(u'BadArg', self._pattern)
         url = []

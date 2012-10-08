@@ -42,12 +42,14 @@ class Matches(Builtin):
 
     def execute(self, path):
         from caty.core.action.selector import PathMatchingAutomaton
-        pma = PathMatchingAutomaton(self._pattern)
-        if pma.match(path):
-            if self._bool:
-                return True
-            else:
-                return json.tagged(u'True', path)
+        from caty.core.action.resource import split_url_pattern
+        for p in split_url_pattern(self._pattern):
+            pma = PathMatchingAutomaton(p)
+            if pma.match(path):
+                if self._bool:
+                    return True
+                else:
+                    return json.tagged(u'True', path)
         else:
             if self._bool:
                 return False
