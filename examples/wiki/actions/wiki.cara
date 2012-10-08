@@ -12,7 +12,7 @@ userrole 筆者;
 /** Wiki記事となるファイル */
 resource Wikiファイル("*.wiki") {
     filetype {
-        "contentType": "text/原稿",
+        "contentType": "text/plain",
          "isText": true,
     };
 
