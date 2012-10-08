@@ -100,7 +100,7 @@ class ShallowReifier(object):
                 u'pathPattern': s.parent.url_patterns,
                 u'produces': reduce(lambda x, y: x+y, [p._next_states for p in s.profiles]),
                 u'redirects': reduce(lambda x, y: x+y, [p._redirects for p in s.profiles]),
-                u'forwards': reduce(lambda x, y: x+y, [p._relay_list for p in s.profiles]),
+                u'forwards': [], 
                 u'profile': self._reify_action_profile(s),
         })
 
