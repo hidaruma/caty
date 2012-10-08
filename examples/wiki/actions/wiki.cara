@@ -1,10 +1,15 @@
 // -*- coding: utf-8 -*- 
-/** Wikiモジュール */
+/** Wikiモジュール 
+
+簡単な**Wiki**システム。
+
+*/
 module wiki in cara;
 
 userrole 読者;
 userrole 筆者;
 
+/** Wiki記事となるファイル */
 resource Wikiファイル("*.wiki") {
     filetype {
         "contentType": "text/原稿",
@@ -30,15 +35,21 @@ resource Wikiファイル("*.wiki") {
         } | print include@this:/edit.html
     };
 
+    /** Wiki記事の書き込み 
+     * * トランスレートが成功すれば書き込まれた記事にリダイレクト
+     * * トンススレートが失敗すればルートにリダイレクト
+     */
     action 書き込み("/POST#exists-parent") {"ignore": boolean} :: 
         @[in] #translate WikiFile -> _,
         @[out] #ok _ -> never redirects Wikiファイル.読み出し,
-        @[out] #ng _ -> never redirects Root.get {
+        @[out] #ng _ -> never redirects Root.get 
+    {
         #: translate {translate wiki:WikiFile} | when {
             OK => #:ok{ ["/wiki", #:part {pv body} | file:write %1 | %1] | text:concat | redirect},
             NG => #:ng{ "/wiki/" | redirect}
         }
     };
+
     /** プレーンテキスト取得 */
     action 原稿("plain/GET") :: @[in, out] #io void -> Response produces 原稿
     {
@@ -46,6 +57,7 @@ resource Wikiファイル("*.wiki") {
     };
 };
 
+/** 読者と筆者が閲覧するHTMLページ */
 state HTMLページ for [読者, 筆者] :: WikiPage links {
     + 編集 --> Wikiファイル.編集;
     + ソース --> Wikiファイル.原稿;
@@ -53,7 +65,6 @@ state HTMLページ for [読者, 筆者] :: WikiPage links {
     + 一覧 --> AllPages.get;
     + root --> Root.get;
 };
-
 
 resource Root("/") {
     action get("/GET") :: @[in, out] #io void -> never redirects Wikiファイル.読み出し {
@@ -86,18 +97,25 @@ resource AllPages("/all.html") {
     };
 };
 
-@[start]
+/** Wiki記事の一覧 */
 state 索引 for 読者 :: WikiIndex links {
     + new --> 新規ファイル.雛形;
     + link --> Wikiファイル.読み出し;
 };
 
+/** 編集UIとなる画面 */
 state 編集 for 不明なユーザー :: WikiSkele links {
     submit --> Wikiファイル.書き込み;
     + cancel --> Wikiファイル.読み出し;
 };
 
-state 原稿 for 読者 :: Response;
+state 原稿 for 読者 :: any;
+
+/** 便宜上の開始画面 */
+@[abstract]
+state start for 読者 :: any links {
+  visit --> AllPages.get;
+};
  
 
 type NewWiki = {
