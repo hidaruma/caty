@@ -113,13 +113,34 @@ class Application(PbcObject):
 
     def force_load(self, module_name):
         import traceback
+        from caty.core.casm.module import InMemoryModule
+        from caty.util.path import is_mafs_path
         self._system.casm._core.clear_namespace()
         self.parent._schema_module.clear_namespace()
         self._schema_module.clear_namespace()
         error = False
         try:
-            self._schema_module.load_on_demand(module_name)
+            if is_mafs_path(module_name):
+                path = module_name
+                if '@' in path:
+                    place, path = path.split('@', 1)
+                else:
+                    place = u'data'
+                if path.startswith('this:'):
+                    path = path.replace('this:', '')
+                mafs = getattr(self, place)
+                imm = InMemoryModule(self, self._schema_module)
+
+                msg = self.i18n.get('Schema: $path', path=module_name)
+                self.cout.write(u'  * ' + msg)
+                imm.compile(mafs.start().open(path).read())
+                self.cout.writeln(u'OK')
+                self._schema_module.sub_modules[imm.name] = imm
+            else:
+                self._schema_module.load_on_demand(module_name)
         except:
+            if is_mafs_path(module_name):
+                self.cout.writeln(u'NG')
             error = True
             self.cout.writeln(traceback)
         finally:
@@ -130,7 +151,8 @@ class Application(PbcObject):
             except:
                 self.cout.writeln(traceback)
                 self.cout.writeln(self.i18n.get(u'Failed to force-load. Reloading system data'))
-                self._schema_module.discard_module(module_name)
+                if not is_mafs_path(module_name):
+                    self._schema_module.discard_module(module_name)
 
                 self._system.casm._core.clear_namespace()
                 self.parent._schema_module.clear_namespace()

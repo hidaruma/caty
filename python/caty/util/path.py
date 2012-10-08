@@ -38,3 +38,6 @@ def list_hierarchy(path):
         stack.append(p)
         yield u'/'.join(stack)
 
+
+def is_mafs_path(s):
+    return s and (s[0] == u'/' or '@' in s and ':/' in s)

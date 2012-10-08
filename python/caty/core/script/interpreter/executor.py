@@ -610,11 +610,12 @@ class _CallCommand(MafsMixin, Internal):
         self.__is_file = False
 
     def setup(self, cmd_name):
+        from caty.util.path import is_mafs_path
         self._cmd_name = cmd_name
-        if self._cmd_name[0] == u'/' or '@' in self._cmd_name:
-            if '@' not in self._cmd_name:
+        self.__is_file = is_mafs_path(cmd_name)
+        if self.__is_file:
+            if '@' not in cmd_name:
                 self._cmd_name = 'scripts@this:' + self._cmd_name
-            self.__is_file = True
 
     def _make_cmd(self):
         n = self._facilities['env'].get('CATY_APP')['name']

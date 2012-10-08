@@ -600,6 +600,8 @@ class Module(Facility):
             m.clear_namespace()
         for m in self.class_ns.values():
             m.clear_namespace()
+        for k in self.facility_ns:
+            m.app._facility_classes.pop(k)
 
 class _FaciltyLoader(object):
     def __init__(self, clsref, facility_name, module):
@@ -680,6 +682,26 @@ class ClassModule(Module):
         if 'classes' in v:
             del v['classes']
         return json.tagged(u'_class', v)
+
+class InMemoryModule(Module):
+    u"""schemataからの読み出しではなく、文字列を直に渡されて構築される。
+    """
+    def __init__(self, app, parent):
+        Module.__init__(self, app)
+        self.schema_ns = {}
+        self.command_loader = CommandLoader(app._command_fs)
+        self.parent = parent
+        self.is_root= False
+        self.is_builtin = False
+        self.filepath = u''
+        self.compiled = False
+
+    def compile(self, schema_string):
+        from caty.core.casm.language.ast import ModuleName
+        for t in parse(schema_string):
+            if isinstance(t, ModuleName):
+                self._name = t.name
+            t.declare(self)
 
 class CoreModule(Module):
     u"""Caty付属のモジュール。
