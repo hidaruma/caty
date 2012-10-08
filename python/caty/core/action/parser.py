@@ -365,15 +365,16 @@ class StateBlock(Parser):
         ds = seq.parse(option(docstring, u''))
         ann = seq.parse(option(annotation, Annotations([])))
         isembed, trigger, occ, path = self.trigger(seq)
-        seq.parse('-->')
-        if peek(option(S('[')))(seq):
-            S('[')(seq)
-            dest = split(self.action_ref, ',')(seq)
-            S(']')(seq)
-        else:
-            dest = [self.action_ref(seq)]
-        S(';')(seq)
-        return Link(trigger, dest, isembed, occ, path, ds, ann)
+        with strict():
+            seq.parse('-->')
+            if peek(option(S('[')))(seq):
+                S('[')(seq)
+                dest = split(self.action_ref, ',')(seq)
+                S(']')(seq)
+            else:
+                dest = [self.action_ref(seq)]
+            S(';')(seq)
+            return Link(trigger, dest, isembed, occ, path, ds, ann)
 
     def trigger(self, seq):
         if option(S('+'))(seq):
