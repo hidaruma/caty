@@ -9,15 +9,21 @@ class Diff(Builtin):
 
 class Union(Builtin):
     def execute(self, input):
-        s1 = set(input[0])
-        s2 = set(input[1])
-        return list(s1 | s2)
+        ss = input
+        r = set([])
+        while len(ss) != 0:
+            r = (r | set(ss[0]))
+            ss = ss[1:]
+        return list(r)
 
 class Meet(Builtin):
     def execute(self, input):
-        s1 = set(input[0])
-        s2 = set(input[1])
-        return list(s1 & s2)
+        ss = input
+        r = set([])
+        while len(ss) != 0:
+            r = (r & set(ss[0]))
+            ss = ss[1:]
+        return list(r)
 
 class Empty(Builtin):
     def execute(self):
