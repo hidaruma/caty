@@ -498,9 +498,11 @@ def is_doc_str(seq):
     if _:
         try:
             seq.parse(skip_ws)
-            seq.parse(['resource', 'action', 'module'])
+            seq.parse(option(annotation))
+            seq.parse(skip_ws)
+            seq.parse(['resource', 'action', 'module', 'state', 'port', 'command', 'type', 'const'])
             return True
-        except:
+        except Exception, e:
             return False
     return False
 
