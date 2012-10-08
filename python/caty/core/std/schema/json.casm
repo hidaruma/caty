@@ -13,7 +13,7 @@ type StdObject = {
 
 type StdArray = [StandardJson*];
 
-/** selectionのフォーマットや値に間違いがある */
+/** 例外：selectionのフォーマットや値に間違いがある */
 exception BadSelection = object;
 
 type selection = {

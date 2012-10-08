@@ -3,8 +3,10 @@
  */
 module builtin in casm; 
 
+@[system, unquiet]
 type CatyExecMode = [string*];
 
+@[system]
 type DirectoryEntry = {"name":string, "isDir":boolean, *:any};
 
 type ErrorObj = {
@@ -46,12 +48,16 @@ type MiniError = string;
 type WebInput = null | string | binary;
 
 // 本当は @form とすべきだろうが使い勝手を考えて
+/** HTMLフォームを表現するデータ */
+@[unquiet]
 type FormInput = {
     *: [WebItem, WebItem*]
 };
 
+@[unquiet]
 type WebItem = any;
 
+@[unquiet]
 type CommonResponsePart = {
     "header": {
         "content-type": string?,
@@ -63,10 +69,12 @@ type CommonResponsePart = {
     "responseOriginalEncoding" : string?,
 };
 
+@[unquiet]
 type Response = CommonResponsePart ++ {
     "status": integer(minimum=200, maximum=299),
 };
 
+@[unquiet]
 type Redirect = {
     "status": integer(minimum=300, maximum=399),
     "header": {
@@ -75,16 +83,20 @@ type Redirect = {
     }
 };
 
+@[unquiet]
 type ErrorResponse = CommonResponsePart ++ {
     "status": integer(minimum=400, maximum=599),
 };
 
+@[unquiet]
 type WebOutput = Response | Redirect | ErrorResponse;
 
+@[unquiet]
 type ErrorStatus = {
     "status": integer
 };
 
+@[unquiet]
 type AppInfo = {
     "name": string,
     "description": string,
@@ -95,6 +107,7 @@ type AppInfo = {
 /**
  * Catyのアプリケーション毎の設定ファイル。
  */
+@[system]
 type AppManifest = {
 
     /**
@@ -160,6 +173,7 @@ type AppManifest = {
 /**
  * パッケージの設定ファイル
  */
+@[system]
 type PkgManifest = {
     /**
      * パッケージの説明
@@ -179,15 +193,18 @@ type PkgManifest = {
 };
 
 
-/**
- * プロジェクト全体の設定フィアル。
- */
-type PrjManifest = GlobalConfig;
 
 /**
  * Caty全体の設定ファイル。
  */
-type GlobalConfig = {
+@[deprecated]
+type GlobalConfig = PrjManifest;
+
+/**
+ * プロジェクト全体の設定フィアル。
+ */
+@[system]
+type PrjManifest = {
     /**
      * プロジェクト名。省略時はカレントディレクトリの名前が設定される。
      */
@@ -284,21 +301,25 @@ type GlobalConfig = {
 
 };
 
+@[system]
 type Assoc = {
     // プロパティ名はverb名、デフォルトのverb名（無名）は""
     *:string
 };
 
+@[system]
 type Assocs = {
     *: Assoc
 };
 
+@[system]
 type FileType = {
     "isText": boolean?,
     "contentType": string?,
     "description": string?
 };
 
+@[system]
 type FileTypes = {
     *: FileType
 };
@@ -317,6 +338,8 @@ type Message = {
   * : string?
 } (minProperties = 1);
 
+/** 例外型 Exceptionとダブっているため使用禁止 */
+@[deprecated]
 type CatyException = @* {
  "message" : Message, 
 
@@ -342,6 +365,7 @@ type CatyAppProperty = {
 /**
  * 組み込み型の名前
  */
+@[system]
 type BuiltinTypeName = (
    "number" | "string" | "boolean" | "null" | "binary" // スカラー型
  | "array" | "object" // 複合型
@@ -402,6 +426,7 @@ type Form = Trigger & {
   * : any?
 };
 
+@[system]
 type Exception = @*! {
  "message" : string, 
 
@@ -437,8 +462,10 @@ type multiItem<T> = (T | [T, T, T*]);
 type multiOpt<T> = multiItem<T>;
 
 /** unclose文への入力 */
+@[system]
 type UncloseInput = UncloseInputObj | UncloseInputArr;
 
+@[system]
 type UncloseInputObj = {
   /** 上書きでセットする変数と値 */
   @[default({})]
@@ -453,6 +480,7 @@ type UncloseInputObj = {
   "input": univ?,
 };
 
+@[system]
 type UncloseInputArr = [
   /** 上書きでセットする変数と値 */
   @[default({})]
@@ -477,7 +505,7 @@ type UncloseInputArr = [
  * --- NotFound系 --- 
  */
 
-/** モジュールが存在しない */
+/** 例外：モジュールが存在しない */
 exception ModuleNotFound = {
   "moduleName": string,
   "moduleType": "cara" | "casm",
@@ -485,7 +513,7 @@ exception ModuleNotFound = {
   *: any?
 };
 
-/** リソースが存在しない */
+/** 例外：リソースが存在しない */
 exception ResourceNotFound = {
   "moduleName": string,
   "resourceName": string,
@@ -493,21 +521,21 @@ exception ResourceNotFound = {
 };
 
 
-/** 型が存在しない */
+/** 例外：型が存在しない */
 exception TypeNotFound = {
   "moduleName": string,
   "typeName": string,
   *: any?
 };
 
-/** コマンドが存在しない */
+/** 例外：コマンドが存在しない */
 exception CommandNotFound = {
   "moduleName": string,
   "cmdName": string,
   *: any?
 };
 
-/** アクションが存在しない */
+/** 例外：アクションが存在しない */
 exception ActionNotFound = {
   "moduleName": string,
   "actionName": string,
@@ -515,29 +543,29 @@ exception ActionNotFound = {
   *: any?
 };
 
-/** ユーザーロールが存在しない */
+/** 例外：ユーザーロールが存在しない */
 exception UserroleNotFound = {
   "moduleName": string,
   "userrole": string,
   *: any?
 };
 
-/** アプリケーションが存在しない */
+/** 例外：アプリケーションが存在しない */
 exception ApplicationNotFound = {
   "appName": string,
   *: any?,
 };
 
-/** 要求されたスクリプトが見つからない、存在しない。*/
+/** 例外：要求されたスクリプトが見つからない、存在しない。*/
 exception ScriptNotFound = object;
 
-/** 要求されたファイルが見つからない、存在しない。*/
+/** 例外：要求されたファイルが見つからない、存在しない。*/
 exception FileNotFound = object;
 
-/** データベースのコレクションが見つからない。*/
+/** 例外：データベースのコレクションが見つからない。*/
 exception CollectionNotFound = object;
 
-/** そういう例外型は存在しない
+/** 例外：そういう例外型は存在しない
  * 例外型（Excetpion）のデータではあるが、タグが登録されてない。
  */
 exception ExceptionNotFound  = {
@@ -552,22 +580,22 @@ exception ExceptionNotFound  = {
  * --- 不正な操作／壊れたデータ --- 
  */
 
-/** データの整合性を破壊するので許されない操作である。*/
+/** 例外：データの整合性を破壊するので許されない操作である。*/
 exception ConsistencyViolation = object;
 
-/** 配列のインデックスが範囲外、または不正である。*/
+/** 例外：配列のインデックスが範囲外、または不正である。*/
 exception IndexOutOfRange = object;
 
-/** オブジェクトのプロパティが存在しない、またはプロパティ名が不正である。*/
+/** 例外：オブジェクトのプロパティが存在しない、またはプロパティ名が不正である。*/
 exception PropertyNotExist = object;
 
-/** データが（事故や不注意で）壊れていると推測される。*/
+/** 例外：データが（事故や不注意で）壊れていると推測される。*/
 exception MalformedData = object;
 
-/** 構文エラーが存在する。パーシングが失敗した。*/
+/** 例外：構文エラーが存在する。パーシングが失敗した。*/
 exception SyntaxError = object;
 
-/** データの変換に失敗した */
+/** 例外：データの変換に失敗した */
 exception ConversionError = {
     "errorObj": MiniErrorInfo,
     "source": univ,
@@ -575,24 +603,24 @@ exception ConversionError = {
     *: any?
 };
 
-/** 型の妥当性検証に失敗した。*/
+/** 例外：型の妥当性検証に失敗した。*/
 @[runaway]
 exception ValidatatonFailed = object;
 
-/** 入力が（なんらかの意味で）不正である。（旧） */
+/** 例外：入力が（なんらかの意味で）不正である。（旧） */
 @[deprecated]
 exception InvalidInput = object;
 
-/** 入力が（なんらかの意味で）不正である。*/
+/** 例外：入力が（なんらかの意味で）不正である。*/
 exception BadInput = object;
 
-/** ルーズ配列である。 */
+/** 例外：ルーズ配列である。 */
 exception LooseArray = object;
 
-/** 未定義である。 */
+/** 例外：未定義である。 */
 exception Undefined = object;
 
-/** タグが存在しない。 */
+/** 例外：タグが存在しない。 */
 exception TagNotExist = object;
 
 
@@ -600,10 +628,10 @@ exception TagNotExist = object;
  * --- IOエラー
  */
 
-/** ファイルのIOに関連してエラーが生じた。 */
+/** 例外：ファイルのIOに関連してエラーが生じた。 */
 exception FileIOError = object;
 
-/** コレクションへのアクセスに失敗。*/
+/** 例外：コレクションへのアクセスに失敗。*/
 exception CollectionAccessError = object;
 
 
@@ -611,27 +639,27 @@ exception CollectionAccessError = object;
  * --- 不正なコマンドライン --- 
  */
 
-/** 指定できないオプションが指定された。*/
+/** 例外：指定できないオプションが指定された。*/
 @[runaway]
 exception UnexpectedOption = object;
 
-/** オプションの値が不正である。*/
+/** 例外：オプションの値が不正である。*/
 @[runaway]
 exception BadOption = object;
 
-/** オプションが不足している。*/
+/** 例外：オプションが不足している。*/
 @[runaway]
 exception MissingOption = object;
 
-/** 引数が余分にある。*/
+/** 例外：引数が余分にある。*/
 @[runaway]
 exception UnexpectedArg = object;
 
-/** 引数が不足している。*/
+/** 例外：引数が不足している。*/
 @[runaway]
 exception MissingArg = object;
 
-/** 引数の値が不正である。 */
+/** 例外：引数の値が不正である。 */
 @[runaway]
 exception BadArg = object;
 
@@ -639,7 +667,7 @@ exception BadArg = object;
  * -- ユーザーの誤り
  */
 
-/** throwへの入力が不正 */
+/** 例外：throwへの入力が不正 */
 @[runaway]
 exception InvalidThrow = {
  /** throwに入力されたデータ */
@@ -647,14 +675,14 @@ exception InvalidThrow = {
  *: any?
 };
 
-/** シグナルがハンドルされなかった */
+/** 例外：シグナルがハンドルされなかった */
 @[runaway]
 exception UnhandledSignal = {
  "signal" : univ,
  *: any?
 };
 
-/** uncloseでsetとunsetの競合が起きた。 */
+/** 例外：uncloseでsetとunsetの競合が起きた。 */
 @[runaway]
 exception UncloseConflict = object;
 
@@ -663,47 +691,47 @@ exception UncloseConflict = object;
  * --- セキュリティ
  */
 
-/** 認証失敗 */
+/** 例外：認証失敗 */
 exception CertificationFailed = object;
 
-/** 不正なアクセス */
+/** 例外：不正なアクセス */
 exception IllegalAccess = object;
 
-/** その他セキュリティエラー。 */
+/** 例外：その他セキュリティエラー。 */
 exception SecurityError = object;
 
 /*
  * --- その他 ---
  */
 
-/** コマンド実行エラー */
+/** 例外：コマンド実行エラー */
 exception CommandExecutionError = object;
 
-/** サポートされていない操作。 */
+/** 例外：サポートされていない操作。 */
 exception Unsupported = object;
 
-/** タイムアウト。 */
+/** 例外：タイムアウト。 */
 exception Timeout = object;
 
-/** 算術エラー。 */
+/** 例外：算術エラー。 */
 exception ArithmeticError = object;
 
-/** Pythonレベルの実行時エラー。 */
+/** 例外：Pythonレベルの実行時エラー。 */
 exception RuntimeError = object;
 
-/** 未実装。 */
+/** 例外：未実装。 */
 exception NotImplemented =object;
 
-/** 不明なエラー。*/
+/** 例外：不明なエラー。*/
 exception UnknownError = object;
 
-/** 実装のバグ。 */
+/** 例外：実装のバグ。 */
 exception ImplementationBug = object;
 
-/** コンパイルエラー */
+/** 例外：コンパイルエラー */
 exception CompileError = object;
 
-/** neverが検出された */
+/** 例外：neverが検出された */
 exception Never = object;
 
 
@@ -728,6 +756,7 @@ command signal {@[default(false)]"runaway": boolean?} :: any -> never signals an
  * 入力がobjectでない場合は、入力をCONTEXTの値としたobjectとなる。
  *
  */
+@[system]
 type DefaultTemplateContext = {
     /** expand, printの引数のファイルパス */
     "_FILE_PATH": string,
@@ -1202,6 +1231,7 @@ command trace-dispatch
 :: void -> @EXISTS _trace | @FAILED _trace
     refers python:caty.core.std.command.builtin.TraceDispatch;
 
+@[unquiet]
 type HelpInfo = deferred @* object;
 
 /**
@@ -1359,6 +1389,7 @@ command keys :: array | object | @*! (array|object) -> [(string|integer)*] {
 /* アノテーション宣言 */
 /** アノテーションのターゲットタイプ 
  */
+@[system]
 type TargetType = (
   /** 任意のターゲット */
   "ANY_TARGET" |
