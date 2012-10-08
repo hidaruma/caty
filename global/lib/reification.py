@@ -77,6 +77,7 @@ class ShallowReifier(object):
             u'type': s.type.name,
             u'location': self._get_localtion(s),
             u'links': links,
+            u'forWhom': s.actor_names,
         }
 
     def reify_resource(self, s):
