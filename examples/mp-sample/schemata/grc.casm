@@ -140,4 +140,84 @@ const sample :: TranGraph = {
   }
 };
 
+command tgraph-to-gvgraph :: TranGraph -> gv:Digraph {
+ [
+   $.name > name,
+   $.graph |
+   [
+     properties             > nodes,
+     object-to-array --multi > edges,
+   ],
+ ];
+ [
+   %nodes | each {@node pass}, 
+   %edges | each {@edge pass},
+ ] | list:concat | gv:graph %name
+
+};
+
+command find-start-state :: [reif:StateSummary*] -> reif:StateSummary? {
+ cond {
+  [] => undefined,
+  *  =>
+    [
+      take { $.annotations.start?=false}            | dump | item --safe 0 > by-anno,
+      take { [$.name|text:tolower , "start"] | eq } | dump | item --safe 0 > by-name,
+    ];
+    %by-anno? |
+    when {
+     undefined => %by-name?,
+     * => pass,
+    }
+ }
+};
+
+command action-to-graph-star :: reif:ActionSummary -> [string, [string*]] {
+  [
+    mpl:shortname | replace "." "_",
+    [$.redirects, $.forwards, $.produces] | list:concat | each {replace "." "_"},
+  ]
+};
+
+command state-to-graph-star :: reif:StateSummary -> [string, [string*]] {
+  [
+    mpl:shortname,
+    $.links | each {$.targets} | list:concat | each {replace "." "_"},
+  ]
+};
+
+command replace [string from , string to] :: string -> string {
+ text:split %1 | text:join %2
+};
+
+command mod-to-tgraph [string mod] :: void -> TranGraph {
+ %1 > mod;
+
+ sreif:show-module %mod |
+ mpl:fullname | replace ":" "_" > name;
+
+ sreif:list-states %mod > stts;
+ mpl:list-mod-actions %mod  > acts;
+
+ %stts | find-start-state | when {undefined =>pass, *=> mpl:shortname} > start;
+ %acts | each {action-to-graph-star} > acts-stars;
+ %stts | each {state-to-graph-star}  > stts-stars;
+
+ {
+   "name": %name,
+   "start": %start?="_not_found",
+   "graph": [%acts-stars, %stts-stars] | list:concat | array-to-object,
+ }
+};
+
+command view-module  [string mod] :: void -> void {
+ %1 > mod;
+ grc-conf:FONT > font;
+ mod-to-tgraph %mod | tgraph-to-gvgraph | gv:draw --font=%font | ct:show-image
+};
+
+
+
+
+
 // End of Module
