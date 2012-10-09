@@ -226,3 +226,6 @@ command names :: [object*] -> [string*] {
 command which [string cmdName] :: void -> string {
  inspect:where-is %1
 };
+
+command narrow [string* args] :: object -> object
+ refers python:util.Narrow;

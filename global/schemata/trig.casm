@@ -143,6 +143,8 @@ type TriggerLink = {
   "method": httpMethod?,
   /** クエリー文字列とフラグメントIDを含まないURL */
   "hrefMain": uri,
+  /** URLのパス部分 */
+  "path": string,
 
  /* 以下はコマンドとしての直接実行のためのデータ */
   /** arg0 */ 
@@ -155,6 +157,8 @@ type TriggerLink = {
   "inputType": typeText?,
   /** パラメータ（クエリー文字列）のセマンティック層における型 */
   "paramsType": typeText?,
+  /** 型名解釈のベースとなるモジュールのフルネーム */
+  "baseModule": string,
   /** UIの情報 */
   "ui": any?,
 
@@ -197,13 +201,23 @@ command to-href :: UrlStruct -> uri {
  ] | text:concat
 };
 
+/** UrlStructをpath文字列に変換する 
+ */
+command to-path :: UrlStruct -> uri {
+ [
+  $.appPath,
+  $.pathInfo,
+ ] | text:concat
+};
+
 /** TriggerInfo型データをTriggerLink型データに変換する 
  */
 command info-to-link :: TriggerInfo -> TriggerLink {
  do {
   $.verb   >: "verb",
   $.method >: "method",
-    $.targetUrl | to-href >: "hrefMain",
+  $.targetUrl | to-href >: "hrefMain",
+  $.targetUrl | to-path >: "path",
 
 
   $.inputType >:  "inputType",
@@ -214,6 +228,7 @@ command info-to-link :: TriggerInfo -> TriggerLink {
 
   $.targetAction | mpl:fullname  >: "command",
   $.targetUrl.pathInfo >: "arg0",
+  $.targetModule | mpl:fullname >: "baseModule",
 
  }
 };
