@@ -65,7 +65,7 @@ command realpath [string] :: void -> string
 /**
  * ディレクトリを作成する。
  */
-command mkdir [string] :: void -> void
+command mkdir {@[default(false)]"mkdir": boolean?} [string] :: void -> void
     updates [pub, include, data, behaviors, scripts]
     refers python:caty.core.std.command.file.MakeDir;
 
