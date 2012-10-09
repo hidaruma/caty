@@ -45,7 +45,7 @@ command create-fs-entry [string path] :: void -> void {
   %1 > path;
   %path | text:regmatch "/$" |
   when {
-    OK => file:mkdir %path,
+    OK => file:mkdir --mkdir %path,
     NG => "" | file:write --mkdir %path,
   }
 };

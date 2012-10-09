@@ -1,4 +1,4 @@
-<?caty-meta template="smarty-mx" ?><!-- -*- coding: utf-8 -*- 
+<?caty-meta template="smarty-mx" type="action:ActionInfo" ?><!-- -*- coding: utf-8 -*- 
 -->{*
 
 *}
@@ -71,7 +71,7 @@
      <tr><th>メソッド</th><td>"{$method}"</td></tr>
      <tr><th>動詞</th><td>"{$verb}"</td></tr>
      <tr><th>URL</th><td>"{$requestUrl}"</td></tr>
-     <tr><th>クエリー文字列</th><td>"{$queryString}"</td></tr>
+     <tr><th>クエリー文字列</th><td>{if $queryString|defined}"{$queryString}"{else}(ナシ){/if}</td></tr>
    </table>
 
    <p>このリクエストにより、次のアクションが起動されました。</p>
