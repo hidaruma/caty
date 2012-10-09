@@ -100,3 +100,31 @@ class Pretty(Builtin):
     def execute(self, input):
         return json.pp(input)
 
+class Flatten(Builtin):
+    def setup(self, opts):
+        self.rec = opts['rec']
+        self.object = opts['also-obj']
+
+    def execute(self, obj):
+        if isinstance(obj, json.TaggedValue):
+            t, o = json.split_tag(obj)
+            return json.tagged(t, self.flatten(o))
+        else:
+            return self.flatten(obj)
+
+    def flatten(self, obj, depth=0):
+        r = []
+        if depth > 1 and not self.rec:
+            return [obj]
+        if isinstance(obj, dict):
+            if self.object:
+                for v in obj.values():
+                    r.extend(self.flatten(v, depth+1))
+            else:
+                r.append(obj)
+        elif isinstance(obj, list):
+            for v in obj:
+                r.extend(self.flatten(v, depth+1))
+        else:
+            r.append(obj)
+        return r
