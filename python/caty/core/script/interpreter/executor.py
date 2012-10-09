@@ -95,7 +95,7 @@ class CommandExecutor(BaseInterpreter):
 
     def _exec_command(self, node, exec_func):
         input = self.input
-        if 'deprecated' in node.annotations:
+        if 'deprecated' in node.annotations or 'deprecated' in node.defined_module.annotations:
             util.cout.writeln(u'[DEBUG] Deprecated: %s' % node.name)
             try:
                 name = self.__get_name(node)

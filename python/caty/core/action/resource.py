@@ -27,7 +27,6 @@ class ResourceClass(object):
         else:
             self.type = RELATIVE
         for i, e in self.entries.items():
-            e.annotations += self.annotations
             e.resource_name = resource_name
             e.module_name = module_name
             e.parent = self
