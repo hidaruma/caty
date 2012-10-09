@@ -220,7 +220,7 @@ class DirectoryObject(PbcObject):
             return False
 
     def list_parents(self):
-        return list(path.list_hierarchy(self.__path))[:-1]
+        return list(path.list_hierarchy(self.__path.rstrip(u'/')))[:-1]
 
     def create(self):
         r"""ディレクトリを作成する。

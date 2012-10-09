@@ -324,6 +324,10 @@ class Command(object):
     def current_module(self):
         return self.__module
 
+    @property
+    def defined_module(self):
+        return self.profile_container.module
+
 class Builtin(Command):
     u"""組み込みコマンドのベースクラス。
     組み込みコマンドはコマンド宣言をファイルではなく

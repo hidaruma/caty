@@ -95,7 +95,7 @@ class CommandExecutor(BaseInterpreter):
 
     def _exec_command(self, node, exec_func):
         input = self.input
-        if 'deprecated' in node.annotations:
+        if 'deprecated' in node.annotations or 'deprecated' in node.defined_module.annotations:
             util.cout.writeln(u'[DEBUG] Deprecated: %s' % node.name)
             try:
                 name = self.__get_name(node)
@@ -250,7 +250,8 @@ class CommandExecutor(BaseInterpreter):
         except:
             if node.optional:
                 return caty.UNDEFINED
-            raise
+            else:
+                raise Exception(u'%d is not defined' % node.arg_num)
 
     def visit_when(self, node):
         node._prepare()

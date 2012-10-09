@@ -101,9 +101,18 @@ class RealPath(FileUtilMixin, Builtin):
         return unicode(self.open().real_path)
 
 class MakeDir(FileUtilMixin, Builtin):
+    def setup(self, opts, path):
+        FileUtilMixin.setup(self, path)
+        self.__mkdir = opts['mkdir']
 
     def execute(self):
-        self.opendir().create()
+        f = self.opendir()
+        if self.__mkdir:
+            for p in f.list_parents():
+                d = f.opener.opendir(p)
+                if not d.exists:
+                    d.create()
+        f.create()
 
 def namecmp(a, b):
     u"""FileObjectのソート用の比較関数。

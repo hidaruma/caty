@@ -83,4 +83,21 @@ command univ-pretty :: univ -> string
     refers python:caty.core.std.command.xjsonlib.Pretty;
 
 
+/** 配列またはオブジェクトを平坦化する
+ * タグ付きの配列／オブジェクトも処理できる。
+ * --rec オプションで再帰的に処理する。
+ */
+command flatten
+ {
+   /** オブジェクトも処理対象とするか */
+   @[default(false)]
+   "also-obj": boolean?,
 
+   /** 再帰的に処理するか */
+   @[default(false)]
+   "rec": boolean?,
+ }
+ :: @* (array | object) -> @* array 
+ 
+    refers python:caty.core.std.command.xjsonlib.Flatten
+ ;
