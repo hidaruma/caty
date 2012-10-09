@@ -83,7 +83,7 @@ command http-redirect
    string    => status-name-to-number
  } > sts;
  
- {"status": %sts, "location": %url} | signal
+ @HttpRedirect {"status": %sts, "location": %url} | signal
  
 };
 
