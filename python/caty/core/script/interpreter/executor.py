@@ -250,7 +250,8 @@ class CommandExecutor(BaseInterpreter):
         except:
             if node.optional:
                 return caty.UNDEFINED
-            raise
+            else:
+                raise Exception(u'%d is not defined' % node.arg_num)
 
     def visit_when(self, node):
         node._prepare()
