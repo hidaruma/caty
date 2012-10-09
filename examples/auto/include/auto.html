@@ -1,0 +1,22 @@
+<?caty-meta template="smarty-mx" ?><!-- -*- coding: utf-8 -*- 
+-->{*
+ autoのインデックスページ
+
+*}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>auto</title>
+  </head>
+  <body>
+    <h1>アプリケーション： {$app}</h1>
+    <h2>モジュール</h2>
+    <ol>
+    {foreach from=$mods item=mod}
+      <li><a href="auto-get.act?cmd=module&arg1={$mod}">{$mod}</a></li>
+    {/foreach}
+    </ol>
+  </body>
+</html>
+

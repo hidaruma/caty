@@ -1,0 +1,149 @@
+// -*- coding: utf-8 -*-
+/** auto モジュールファミリーのWebインターフェイス部分 
+ */
+module auto-web in cara;
+
+/** autoのエントリーポイントとなるHTMLリソース
+ */
+resource AutoIndex("/auto.html") {
+  /** エントリーポイントへのGETの処理 */
+  action get("/GET#dont-care") 
+  ::
+  @[in, out] #io void -> _ produces Index
+  {
+    do {
+       mpl:list-app-caras this | mpl:longnames >:"mods",
+       app | $.name >: "app",
+    }
+    | print include@auto:/auto.html
+  };
+
+};
+
+@[abstract, start]
+state sart :: any links {
+ index --> AutoIndex.get;
+ get   --> AutoGet.get;
+};
+
+state Index :: any links {
+ + module* --> AutoGet.get;
+};
+
+
+/** autoに対するGETリクエストを一手に引き受けるアクションリソース
+ */
+resource AutoGet("/auto-get.act") {
+  /** cmdパラメータ付きGETリクエストの処理 */
+  action get("/GET#dont-care") 
+  {
+    "cmd": string?,
+
+    "arg1": string?,
+    "arg2": string?,
+    "arg3": string?,
+  }
+  ::
+   @[in, out] #io void -> any produces [Module, Action, State, Index]
+  {
+    %cmd? |
+    when {
+     undefined => show-index,
+     string =>
+        /* cmdパラメーアごとに分岐する */
+        case {
+
+          "module" => show-module  %arg1?,
+          "state"  => show-state   %arg1? %arg2?,
+          "action" => show-action  %arg1? %arg2?,
+           *       => ["Unknown command:", pass] | text:concat | response --content-type="text/plain",
+        }
+     ,
+    }
+  };
+
+};
+
+/** エントリーポイント */
+command show-index :: void -> WebOutput {
+  do {
+     mpl:list-app-caras this | mpl:longnames >:"mods",
+     app | $.name >: "app",
+  }
+  | print include@auto:/auto.html
+};
+
+state Module :: amod:ModContext links {
+ + action* --> AutoGet.get;
+ + state*  --> AutoGet.get;
+ + index!  --> AutoGet.get;
+};
+
+
+/** 指定されたモジュールに関するメタ情報を表示する
+ */
+command show-module [string? qmod] :: void -> WebOutput {
+ %1? | 
+ when {
+   undefined => "Parameter not specified." | response --content-type="text/plain",
+   string => pass > qmod;
+    /*
+    do {
+     %qmod >: "mod",
+     amod:read-svg %qmod >: "svg",
+     amod:all-names %qmod >: "allNames",
+     mpl:list-app-caras this | mpl:longnames >:"mods"
+    }  */
+     
+    amod:read-context %qmod
+    | print include@auto:/show-module.html
+   ,
+ }
+};
+
+state State :: any links {
+ + action* --> AutoGet.get;
+ + state*  --> AutoGet.get;
+};
+
+/** 指定された状態に関するメタ情報を表示する
+ */
+command show-state [string? _stt, string? _qmod] :: void -> WebOutput {
+ %1? | 
+ when {
+   undefined => "First parameter not specified." | response --content-type="text/plain",
+   string => pass > stt;
+   %2? | 
+   when {
+     undefined => ["Second parameter not specified. (first=", %stt, ")"] |text:concat | response --content-type="text/plain",
+     string => pass > qmod;
+     astt:read-context %stt %qmod wiki
+     | print include@auto:/show-state.html
+     ,
+   }/*  /when */
+ }/* /when */
+};
+
+state Action :: any links {
+ + action* --> AutoGet.get;
+ + state*  --> AutoGet.get;
+};
+
+/** 指定されたアクションに関するメタ情報を表示する
+ */
+command show-action [string? act, string? mod] :: void -> WebOutput {
+ %1? | 
+ when {
+   undefined => "First parameter not specified." | response --content-type="text/plain",
+   string => pass > act;
+   %2? | 
+   when {
+     undefined => ["Second parameter not specified. (first=", %act, ")"] |text:concat | response --content-type="text/plain",
+     string => pass > qmod;
+     aact:read-context %act %qmod wiki
+     | print include@auto:/show-action.html
+     ,
+   }/*  /when */
+ }/* /when */
+
+};

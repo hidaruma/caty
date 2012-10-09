@@ -1,0 +1,129 @@
+// -*- coding: utf-8 -*-
+/** autoのトリガー処理部 */
+module atrig;
+
+type TriggerInfo = trig:TriggerInfo;
+
+/** 
+ * すべてのモジュールに対して、mod-trigger-mapの結果をファイルに書く
+ */
+command build-all
+ {
+   /** mafas上のpubファイルをインスタンスとして使用するか */
+   @[default(false)]
+   "use-files" : boolean?
+ }
+ [string? app] 
+ :: void -> void 
+{
+ %1? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app;
+
+ %use-files?=false |
+ cond {
+  true  =>
+    ["pub@", %app, ":/"] | text:concat > root  | dump --prefix="root";
+    file:list --rec --long %root | each {$.abspath},
+  false =>
+    [],
+ } > files | dump --prefix="files";
+
+ mpl:list-app-caras %app |
+ each {
+   pass > cara-mod | $.name > mod-name;
+   ["data@", %app, ":/_auto/", %mod-name, "/triggers.xjson"] | text:concat > db | dump --prefix=dbpath ;
+   [%cara-mod, %files] | trig:mod-trigger-map | xjson:pretty | file:write --mkdir %db
+ }
+};
+
+/** 
+ * 指定されたモジュールに対して、mod-trigger-mapの結果をファイルに書く
+ */
+command build
+ {
+   /** mafas上のpubファイルをインスタンスとして使用するか */
+   @[default(false)]
+   "use-files" : boolean?
+ }
+ [string mod, string? app] 
+ :: void -> void 
+{
+ %2? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app;
+
+ %1 > mod-name;
+
+ %use-files?=false |
+ cond {
+  true  =>
+    ["pub@", %app, ":/"] | text:concat > root  | dump --prefix="root";
+    file:list --rec --long %root | each {$.abspath},
+  false =>
+    [],
+ } > files | dump --prefix="files";
+
+ sreif:show-module %mod-name > cara-mod;
+ 
+ ["data@", %app, ":/_auto/", %mod-name, "/triggers.xjson"] | text:concat > db | dump --prefix=dbpath ;
+ [%cara-mod, %files] | trig:mod-trigger-map | xjson:pretty | file:write --mkdir %db
+
+};
+
+
+
+/** 内部使用 */
+command make-app-db-path [string? _app] :: void -> string {
+ %1? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app;
+
+ ["data@", %app, ":/_auto/"] | text:concat
+};
+
+/** 内部仕様 */
+command make-mod-db-path [string mod, string? _app] :: void -> string {
+ %2? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app;
+ %1 > mod-name;
+
+ ["data@", %app, ":/_auto/", %mod-name, "/"] | text:concat
+};
+
+/** トリガーDBから、指定されたモジュールのトリガーを読む 
+ * トリガーは、アクションのショートQNameをキーとして引ける。
+ */
+command read-mod-triggers [string _mod, string? _app] :: void -> {*:[TriggerInfo*]?} {
+ make-mod-db-path %1 %2? > db-path;
+ [%db-path, "triggers.xjson"] | text:concat > obj-path;
+ xjson:read %obj-path
+};
+
+/** トリガーDBに含まれるモジュールをリスとする */
+command db-modules [string? _app] :: void -> [string*] {
+ make-app-db-path %1? > db-path;
+ file:list --kind=dir %db-path | names
+};
+
+/** アプリケーション全体のトリガーDBを読む 
+ * トリガーは、モジュールごとにまとまっている。
+*/
+command read-triggers  [string? _app] :: void -> {*: {*:[TriggerInfo*]?}? } {
+ db-modules %1? > modules |
+ each {
+  pass > mod;
+  [%mod, read-mod-triggers %mod %1?]
+ } | array-to-object
+};
+
+// End of Module

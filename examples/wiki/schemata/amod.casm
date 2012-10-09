@@ -1,0 +1,182 @@
+// -*- coding: utf-8 -*-
+/** モジュールのメタ情報の収集と保存
+ * autoモジュールファミリーに属する。
+ */
+
+module amod;
+
+/** モジュールメタ情報ページのコンテキスト
+ */
+type ModContext = {
+ /** モジュールのパッケージ修飾付き名前 */
+ "qname": string,
+ /** qnameと同じ（互換性から） */
+ "mod": string,
+
+ /** モジュールのアプリケーション修飾付き名前（フルネーム） */
+ "fullname": string,
+
+ /** モジュールの短い説明 */
+ "description" : (string | null),
+ /** モジュールの長い説明 */
+ "moreDescription" : (string | null),
+
+ /** SVGによる図示 */
+ "svg": string,
+
+ /** アプリケーションに含まれるすべてのモジュール */
+  "mods": [string*],
+ /** モジュール内の状態とアクションの名前のリスト */
+  "allNames": [string*],
+
+
+};
+
+
+/** モジュールに含まれる実ファイル以外のインスタンスをファイルに保存する */
+command make-instances [string mod-name] :: void -> void { 
+ %1 > mod-name;
+
+ ["data@this:/_auto/", %mod-name, "/instances.xjson"] | text:concat > path;
+ sreif:list-resources %mod-name | each {[pass, []] | trig:res-instances} | list:concat | xjson:pretty | file:write --mkdir %path
+};
+
+command create-fs-entry [string path] :: void -> void {
+  %1 > path;
+  %path | text:regmatch "/$" |
+  when {
+    OK => file:mkdir %path,
+    NG => "" | file:write --mkdir %path,
+  }
+};
+
+
+
+command confirm-instances [string mod-name] :: void -> void { 
+  %1 > mod-name;
+  ["data@this:/_auto/", %mod-name, "/instances.xjson"] | text:concat > path;
+  xjson:read %path |
+  each {
+    pass > file;
+    file:exists %file | dump --prefix=instance-file |
+    when {
+      OK => void,
+      NG => "" | create-fs-entry %file; %file | dump --prefix="written",
+    }
+  }
+};
+
+
+/** モジュールメタ情報ディレクトリに画像ファイルを作る 
+ * 画像ファイルの名前は module.* 。
+ */
+command make-image :: reif:ModuleSummary -> void {
+ [
+   mpl:longname   > longname,
+ ];
+ 
+ ["data@this:/_auto/", %longname, "/module.svg"] | text:concat > modSvgPath
+ | dump ;
+ ["data@this:/_auto/", %longname, "/module.gif"] | text:concat > modGifPath
+ | dump ;
+
+ ["data@this:/_auto/", %longname, "/states.svg"] | text:concat > sttsSvgPath
+ | dump ;
+
+ aconf:FONT > font;
+ viva:draw /*--timefile=%modSvgPath --if-modified*/ --format=svge --font=%font %longname | file:write --mkdir %modSvgPath;
+ viva:draw /*--timefile=%modGifPath --if-modified*/ --format=gif  --font=%font %longname | file:write --mkdir %modGifPath;
+
+ viva:draw --node=state /*--timefile=%modGifPath --if-modified*/ --format=svge  --font=%font %longname | file:write --mkdir %sttsSvgPath;
+
+ void
+
+};
+
+/** モジュールメタ情報ディレクトリからコンテキストデータを作る 
+ */
+command to-context :: reif:ModuleSummary -> ModContext {
+  pass > modSumm | [$.location.pkg, $.name] | text:concat > qname;
+  
+  
+  %modSumm |
+  {
+   "qname": %qname,
+   "mod": %qname,
+   "fullname": mpl:fullname,
+
+   "description" : $.document.description?=null,
+
+   "moreDescription" : $.document.moreDescription? | when {undefined=>null, string=>text:creole},
+
+   "svg": read-svg %qname,
+   "mods": mpl:list-app-caras this | names,
+
+  "allNames": all-names %qname,
+
+  }
+};
+ 
+/** モジュールメタ情報ディレクトリにコンテキストファイルを作る 
+ * コンテキストファイルの名前は module.xjson 。
+ */
+command make-context :: reif:ModuleSummary -> void {
+  pass > modSumm | [$.location.pkg, $.name] | text:concat > qname;
+ 
+  ["data@this:/_auto/", %qname, "/module.xjson"] | text:concat > modCtxPath;
+  %modSumm | to-context | xjson:pretty | file:write --mkdir %modCtxPath
+};
+
+command build [string mod] :: void -> void {
+  sreif:show-module %1 > m;
+  %m | make-image;
+
+  %m | make-context;
+
+  %m | mpl:shortname > mod-name;
+  make-instances %mod-name;
+
+  void
+};
+
+command build-all :: void -> void {
+  mpl:list-app-caras this |
+  each {
+   pass> m;
+   %m | make-image;
+   %m |  make-context;
+   %m | mpl:shortname > mod-name;
+   make-instances %mod-name
+
+  }
+};
+
+command read-context [string qname] ::  void -> ModContext {
+  %1 > qname;
+  ["data@this:/_auto/", %qname, "/module.xjson"] | text:concat > modCtxPath;
+  xjson:read %modCtxPath
+};
+
+command read-svg [string qmod] ::  void -> string {
+  %1 > qmod;
+
+  ["data@this:/_auto/", %qmod, "/module.svg"] | text:concat > modSvgPath;
+  file:read %modSvgPath
+};
+
+command all-names [string qmod] :: void -> [string*] {
+ %1 > qmod;
+
+ sreif:list-states %qmod | mpl:shortnames > stateNames;
+
+ sreif:list-resources %qmod | each {mpl:longname>n; sreif:list-actions %n} | 
+ each {mpl:shortnames} | list:concat > actionNames;
+
+ [%stateNames, %actionNames] | list:concat
+
+};
+
+
+// End of Module
+
+

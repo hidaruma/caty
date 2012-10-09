@@ -1,0 +1,195 @@
+// -*- coding: utf-8 -*-
+/** オートメーション */
+module auto;
+
+@[register-public]
+command auto [string? arg] :: any -> any {
+  pass > web-in;
+
+  %ACTION? |
+  when {
+    undefined =>
+      %1? |
+      when {
+        undefined => void,
+        string => pass > ACT,
+      }
+    ,
+    string => pass > ACT
+    ,
+  };
+
+
+  %ACT? |
+  when {
+    undefined => "ACTION is not defined." | response --content-type="text/plain",
+    string =>
+      [%web-in, get-action-context %ACT ] | to-action-info |
+      print include@auto:/action-page.html
+    ,
+  }
+
+};
+
+@[register-public]
+command at-first [string? arg] :: univ -> univ {
+  pass > in;
+  %auto_? |
+  when {
+    undefined => %in,
+    *         => auto %1?
+  }
+};
+
+
+type typeText = string;
+
+
+type ActionInfo = {
+ /** モジュール */
+  "mod": string,
+ /** 生成する状態名のリスト 
+  */
+ "produces": [string*],
+
+ /** リダイレクト先のアクション／ポート名のリスト */
+ "redirects": [string*],
+
+ /** フォーワード先のアクション／ポート名のリスト （現在使用できない）*/
+ "forwards": [string*],
+
+ /*-- 基本情報 */
+
+ /* クラス修飾付き名前 */
+ "qname": string,
+
+ "fullname": string,
+ "description": string|null,
+ "moreDescription": string(remark="wiki")|null,
+ "method":string,
+ "verb":string,
+ "inputType": typeText,
+ "optsType": typeText?, 
+
+ /* 追加のフラグ */
+
+ "willProduce": boolean,
+ "willRedirect": boolean,
+
+
+ /*-- 以下は実行時の情報 */
+ "requestUrl": string,
+ "queryString": string?,
+
+ /* 文字列化されたデータ */
+ "inputData": string,
+ "optsData": string,
+
+ /* 生成するページの情報 */
+ "producingPages" : [PageInfo*] ?,
+
+
+};
+
+type PageInfo = {
+  "qname": string,
+  "fullname": string,
+  "description": (string|null),
+  "moreDescription": (string(remark="wiki")|null),
+  "realizedLinks": {*: [trig:TriggerLink* ]?},
+};
+  
+
+
+command get-action-context [string act] :: void -> aact:ActContext {
+  %1 > act | text:split ":" |
+  [
+    nth 1 > mod,
+    nth 2 > qname,
+  ];
+  aact:read-context %qname %mod 
+};
+
+command to-page-info [string mod] :: string(remark="ページを表す状態名") -> PageInfo {
+ pass > stt | dump  --prefix="to-page-info;stt" ;
+ %1   > mod  | dump  --prefix="to-page-info;mod" ;
+
+ astt:read-context %stt %mod |
+ {
+  "qname": $.qname,
+  "fullname": $.fullname,
+  "description": $.description,
+  "moreDescription": $.moreDescription,
+  "realizedLinks": $.realizedLinks,
+ }
+};
+
+command to-action-info :: [WebInput, aact:ActContext] -> ActionInfo {
+  [
+     nth 1 > webin,
+     nth 2 > actcon | $.mod > mod,
+  ];
+ %actcon |
+ {
+ "mod": $.mod,
+
+ "produces": $.produces,
+
+
+ "redirects": $.redirects,
+
+ "forwards": $.forwards,
+
+ /*-- 基本情報 */
+
+
+ "qname": $.qname,
+
+ "fullname": $.fullname,
+
+ "description": $.description,
+ "moreDescription": $.moreDescription,
+
+ "method": $.method,
+ "verb": $.verb,
+ "inputType": $.internalInputType,
+ "optsType": $.optsType?,
+
+ /* 追加のフラグ */
+
+ "willProduce": [$.produces, []] | eq --boolean | not,
+ "willRedirect": [$.redirects, []] | eq --boolean | not,
+
+
+  /*-- 以下は実行時の情報 */
+
+  "requestUrl": [%HOST_URL, %APP_PATH, %PATH_INFO] | text:concat,
+  "queryString": %QUERY_STRING?,
+  "inputData": %webin | xjson:pretty,
+  "optsData": %_OPTS | xjson:pretty,
+
+  /* 生成するページの情報 */
+  "producingPages" : $.produces | each {to-page-info %mod},
+
+ }
+
+};
+
+command build [string mod] :: void -> void {
+ %1 > mod;
+
+ atrig:build %mod; 
+ astt:build %mod; 
+ aact:build %mod;
+ amod:build %mod;
+ amod:confirm-instances %mod;
+
+ void
+};
+
+
+
+
+// End of Module
+
+

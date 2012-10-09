@@ -1,0 +1,125 @@
+<?caty-meta template="smarty-mx" ?><!-- -*- coding: utf-8 -*- 
+-->{*
+
+*}
+{function name=getLink}
+  <a href="{$hrefMain}?_verb={$verb}"><button>GET</button></a>
+{/function}
+{function name=postLink}
+  <form action="{$hrefMain}?_verb={$verb}" method="POST">
+    <input type=submit value="POST" >
+  </form>
+{/function}
+{function name=trigLink}
+{*
+"hrefMain": "http://localhost:8000/wiki/FrontPage.wiki", 
+                "help": "編集画面呼び出し", 
+                "title": "wiki::wiki:Wikiファイル.編集", 
+                "paramsType": "{\n    *: any?    \n}", 
+                "inputType": "void", 
+                "arg0": "/FrontPage.wiki", 
+                "verb": "edit", 
+                "command": "wiki::wiki:Wikiファイル.編集", 
+                "method": "GET", 
+                "class": "編集"
+*}
+  <tr><td>{if $method|eq:"GET"}{call name=getLink context=$CONTEXT}{else}{call name=postLink context=$CONTEXT}{/if}</td>
+  <td>{$help}</td><td>{$hrefMain}</td><td>"{$verb}"</td><td>{$inputType}</td><td>{$paramsType}</td></tr>
+{/function}
+{function name=prodPage}
+ <h3>{$qname} （{$fullname}）</h3>
+
+  <p>{if $description|notempty}{$description}{else}(Undocumented){/if}</p>
+  <div>{if $moreDescription|notempty}{$moreDescription}{/if}</div>
+
+  <p>このページ内には次のリンクが含まれる可能性があります。</p>
+  <ol>
+   {foreach from=$realizedLinks item=links key=linkCls}
+    <h4>{$linkCls}</h4>
+    <table border=1>
+    <tr><th>HTTPメソッド</th><th>説明</th><th>URL主要部</th><th>動詞</th><th>入力の型</th><th>パラメータの型</th></tr>
+     {foreach from=$links item=link}
+      {call name=trigLink context=$link}
+     {/foreach}
+    </table>
+   {/foreach}
+  <ol>
+{/function}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{$qname}</title>
+<style>{literal}
+
+{/literal}
+</style>
+
+<script>{literal}
+
+{/literal}
+</script>
+
+  </head>
+
+  <body >
+
+    <h1>{$qname}</h1>
+   <p>次のリクエストがされました。</p>
+
+   <table border=1>
+     <tr><th>メソッド</th><td>"{$method}"</td></tr>
+     <tr><th>動詞</th><td>"{$verb}"</td></tr>
+     <tr><th>URL</th><td>"{$requestUrl}"</td></tr>
+     <tr><th>クエリー文字列</th><td>"{$queryString}"</td></tr>
+   </table>
+
+   <p>このリクエストにより、次のアクションが起動されました。</p>
+
+   <table border=1>
+     <tr><th>フルネーム</th><td>{$fullname}</td></tr>
+     <tr><th>説明</th><td>{if $description|notempty}{$description}{else}(Undocumented){/if}</td></tr>
+     <tr><th>入力型</th><td>{$inputType}</td></tr>
+     <tr><th>オプション型</th><td>{$optsType}</td></tr>
+   </table>
+   
+   <p>このアクションへの入力（リクエスト・エンティティ・ボディ）とオプション（解析されたクエリー文字列）は次のとおりです。
+
+   <div><h3>入力</h3>
+    <pre>{$inputData}</pre>
+   </div>
+   <div><h3>オプション</h3>
+    <pre>{$optsData}</pre>
+   </div>
+
+ <h2>生成されるページ／リダイレクト先</h2>
+
+{if $willProduce}
+  <p>アクションの実行により、次のページ（複数の場合はどれか）が生成されます。</p>
+    <ul>
+    {foreach from=$produces item=target}
+      <li><a target="_blank" href="/wiki/auto-get.act?cmd=state&arg1={$target}&arg2={$mod}">{$target} （仕様）</a></li>
+    {/foreach}
+    </ul>
+
+  <p>以下にページの詳細：</p>
+    {foreach from=$producingPages item=page}
+     {call name=prodPage context=$page}
+    {/foreach}
+
+
+{/if}
+
+{if $willRedirect}
+  <p>アクションの実行により、次のアクション／ポートにリダイレクトされます。</p>
+
+    <ol>
+    {foreach from=$redirects item=target}
+      <li><a target="_blank" href="/wiki/auto-get.act?cmd=action&arg1={$target}&arg2={$mod}">{$target}</a></li>
+    {/foreach}
+    </ol>
+{/if}
+
+  </body>
+</html>
+

@@ -54,7 +54,7 @@ command gen-module-head :: {"name":string, "start": string, *:any?} -> string {
 };
 
 
-/** モジュールヘッドのテンプレート */
+/** モジュールヘッドのテンプレート （定数）*/
 const module-head-template = '''<?caty-meta template="smarty-mx" ?>
 /* -*- coding: utf-8 -*- */
 /** このモジュールは、Graph Compiler により自動生成されました 
@@ -89,7 +89,7 @@ command _finished :: TestPacket -> TestPacket {{
 '''; /* ---- ここまで ---- */
 
 
-/** コマンド定義のテンプレート */
+/** コマンド定義のテンプレート （定数）*/
 const cmd-def-template = '''<?caty-meta template="smarty-mx"?>
 command {$name} :: TestPacket -> never {{
   pass > pkt |
@@ -127,7 +127,7 @@ command {$name} :: TestPacket -> never {{
 }};
 '''; /* ---- ここまで ---- */
 
-/** 状態遷移グラフのサンプル */
+/** 状態遷移グラフのサンプル （定数）*/
 const sample :: TranGraph = {
  "name": "sample",
  "start": "a",
