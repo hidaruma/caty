@@ -1,0 +1,254 @@
+// -*- coding: utf-8 -*-
+/** casmモジュールの状態（state）をページとみなして扱うためのモジュール
+ * trigモジュールに依存して、autoモジュールファミリーに属する。
+ * **astt として再構成する。**
+ *
+ */
+module astt;
+
+/** 暫定 */
+type typeText = string;
+
+/** 状態メタ情報ページのコンテキスト
+ */
+type SttContext = {
+ /** 状態の名前、qnameだが修飾は付かない */
+ "qname": string,
+
+ /** 状態の完全修飾名（フルネーム） */
+ "fullname": string,
+
+ /** 状態の短い説明 */
+ "description" : (string | null),
+ /** 状態の長い説明 */
+ "moreDescription" : (string | null),
+
+ /** 状態の型 */
+ "type": typeText,
+
+ /** もともとのりンク情報 */
+ "originalLinkSpecs" : {*: object(remark="reif:Linkのタグ無し") },
+ 
+ /** 具体化されたリンク群 */
+ "realizedLinks" : {*: [trig:TriggerLink*]?},
+
+ /** 互換確保 */
+ @[deprecated]
+ "name": string?,
+
+ /** 互換確保 */
+ @[deprecated]
+ "location": any?,
+
+
+};
+
+
+/** 入力である「状態のlinks記述」を、引数のモジュール／アプリケーション文脈で具体化する 
+
+使用例：
+
+{{{
+ sreif:list-states a-mod | $.1.links | astt:realize-links a-mod
+ sreif:list-states app::a-mod | $.1.links | astt:realize-links a-mod app
+}}}
+
+*/
+command realize-links [string pkgmod, string? app] :: object(remark="reif:Linkのlinksプロパティ値") -> {*:[trig:TriggerLink*]?} {
+ pass > links;
+ %1 > pkgmod;
+ %2? | $?="this" > app;
+
+ %links |
+ each --obj {
+   untagged  > link-spec;
+   %_key > class-name;
+   %link-spec | $.targets |
+   each {
+     pass > act;
+     atrig:read-mod-triggers %pkgmod %app?
+     | pv %act | each {[trig:info-to-link, {"class":%class-name}] | json:merge}
+   } | list:concat
+ }
+};
+
+
+command to-context [string pkgmod, string? app] :: reif:StateSummary  -> SttContext {
+ pass > in;
+ %1 > pkgmod;
+ %2? > app;
+
+ %in |
+ {
+
+   "qname": $.name,
+
+   "fullname": mpl:fullname,
+
+   "description" : $.document.description?=null,
+
+   "moreDescription" : $.document.moreDescription?=null,
+
+   "type": $.type,
+
+   "originalLinkSpecs": $.links | each --obj {untagged} ,
+   "realizedLinks": $.links | dump | realize-links %pkgmod %app?,
+    
+
+   "location":$.location, 
+   "name": $.name,
+ }
+
+};
+
+command app-all-pages [string? app] :: void -> [SttContext*] {
+ %1? > app;
+ 
+ mpl:list-app-caras %app? |
+ each {
+   [
+     mpl:longname > pkgmod,
+     mpl:fullname > modPath
+   ];
+
+   sreif:list-states %modPath |
+   each {
+    to-context %pkgmod %app?
+   }
+
+ } 
+ | list:concat
+
+};
+
+command mod-all-pages [string pkgmod, string? app] :: void -> any {
+ %1 > pkgmod;
+ %2? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app;
+
+ [%app, "::", %pkgmod] | text:concat > modPath;
+ 
+
+ sreif:list-states %modPath |
+ each {
+   [
+     $.name,
+     to-context %pkgmod %app
+   ]
+ } | array-to-object
+
+};
+
+
+command build-all :: void -> void {
+ build-contexts;
+ split-contexts
+};
+
+command build [string mod] :: void -> void {
+ build-mod-context %1 ;
+ split-mod-context %1
+};
+
+
+
+command build-contexts
+ [string? app] 
+ :: void -> void 
+{
+ %1? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app | dump --prefix="app" ;
+
+ mpl:list-app-caras %app | dump --prefix="caras" |
+ each {
+   pass > cara-mod | $.name > mod-name;
+   ["data@", %app, ":/_auto/", %mod-name, "/state-page-contexts.xjson"] | text:concat > db | dump --prefix=dbpath ;
+   %cara-mod | mod-all-pages %mod-name %app | xjson:pretty | file:write --mkdir %db
+ }
+};
+
+command build-mod-context [string mod, string? app]
+ :: void -> void
+{
+  %2? |
+  when {
+    undefined => app | $.name,
+    * => pass,
+  } > app;
+
+  %1 >  mod-name;
+  sreif:show-module %mod-name > modSummary;
+
+  ["data@", %app, ":/_auto/", %mod-name, "/state-page-contexts.xjson"] | text:concat > db | dump --prefix=dbpath ;
+  %modSummary | mod-all-pages %mod-name %app | xjson:pretty | file:write --mkdir %db
+
+};
+
+command split-contexts
+ [string? app] 
+ :: void -> void 
+{
+ %1? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app | dump --prefix="app" ;
+
+ mpl:list-app-caras %app | dump --prefix="caras" |
+ each {
+   pass > cara-mod | $.name > mod-name;
+   ["data@", %app, ":/_auto/", %mod-name, "/state-page-contexts.xjson"] | text:concat > db | dump --prefix=dbpath ;
+   xjson:read %db > obj;
+   %obj | properties |
+   each {
+     pass > pageName;
+     ["data@", %app, ":/_auto/", %mod-name, "/state-page-ingredients/", %pageName, ".xjson"] | text:concat > pagePath | dump --prefix="pagePath";
+     %obj | pv %pageName  | xjson:pretty | file:write --mkdir %pagePath
+   }
+ }
+};
+
+command split-mod-context  [string mod, string? app]
+ :: void -> void
+{
+  %2? |
+  when {
+    undefined => app | $.name,
+    * => pass,
+  } > app;
+
+  %1 >  mod-name;
+  sreif:show-module %mod-name > modSummary;
+
+  ["data@", %app, ":/_auto/", %mod-name, "/state-page-contexts.xjson"] | text:concat > db | dump --prefix=dbpath ;
+  xjson:read %db > obj;
+  %obj | properties |
+  each {
+     pass > pageName;
+     ["data@", %app, ":/_auto/", %mod-name, "/state-page-ingredients/", %pageName, ".xjson"] | text:concat > pagePath | dump --prefix="pagePath";
+     %obj | pv %pageName  | xjson:pretty | file:write --mkdir %pagePath
+  }
+
+};
+
+command read-context [string stt, string qmod, string? app] :: void -> SttContext {
+ %1 > stt;
+ %2 > qmod;
+ %3? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app | dump --prefix="app" ;
+
+ ["data@", %app, ":/_auto/", %qmod, "/state-page-ingredients/", %stt, ".xjson"] | text:concat > pagePath;
+ xjson:read %pagePath
+
+};
+
+// End of Module

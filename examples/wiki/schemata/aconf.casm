@@ -1,0 +1,11 @@
+// -*- coding: utf-8 -*-
+/** autoモジュールファミリーの設定情報 
+ */
+module aconf;
+
+const FONT = "MS UI Gothic";
+
+
+// End of Module
+
+

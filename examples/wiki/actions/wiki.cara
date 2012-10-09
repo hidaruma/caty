@@ -18,13 +18,17 @@ resource Wikiファイル("*.wiki") {
 
     instance ["/FrontPage.wiki", "/HelpPage.wiki"];
 
-    /** 読み込み */
-    action 読み出し("/GET") :: @[in, out] #io void -> WikiPage produces HTMLページ { 
+    /** Wiki記事をHTMLとして読み出す */
+    action 読み出し("/GET") :: @[in, out] #io void -> WikiPage produces HTMLページ 
+    { /*auto*/
+
+
         #:io { file:read %1 | {
             "body": text:creole, 
             "title": %1 | text:rsplit "." | item 0 | text:trim /,
             "lastModified": file:lastmodified %1
         }} | print include@this:/page.html
+
     };
 
     /** 編集画面呼び出し */
@@ -43,11 +47,14 @@ resource Wikiファイル("*.wiki") {
         @[in] #translate WikiFile -> _,
         @[out] #ok _ -> never redirects Wikiファイル.読み出し,
         @[out] #ng _ -> never redirects Root.get 
-    {
+    {/*auto*/
+
+
         #: translate {translate wiki:WikiFile} | when {
             OK => #:ok{ ["/wiki", #:part {pv body} | file:write %1 | %1] | text:concat | redirect},
             NG => #:ng{ "/wiki/" | redirect}
         }
+
     };
 
     /** プレーンテキスト取得 */
@@ -75,12 +82,13 @@ resource Root("/") {
 resource 新規ファイル("/new") {
     action 雛形("/POST#dont-care") :: @[in, out] #io NewWiki -> WikiSkele produces 編集
     {
-        translate NewWiki | when {
-            OK => pv filename | text:regmatch "[A-Z][a-z0-9]" | when {
-                match => {"title": pv src, "body": ""} | print include@this:/編集.html,
-                fail => redirect /
-            },
-            NG => redirect /
+        translate wiki:NewWiki | when {
+            OK => pv filename | text:regmatch "[A-Z][A-Za-z0-9]*" | 
+                  when {
+                    OK => {"title": pv src, "body": ""} | print include@this:/edit.html,
+                    NG => redirect /wiki/
+                   },
+            NG => redirect /wiki/
         }
 
     };

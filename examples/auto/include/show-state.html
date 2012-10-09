@@ -1,0 +1,65 @@
+<?caty-meta template="smarty-mx" ?><!-- -*- coding: utf-8 -*- 
+-->{*
+
+*}
+{function name=link }
+  {$method}:
+  {if $method|eq:"GET"}
+   <a href="{$hrefMain}?_verb={$verb}">{$hrefMain}?_verb={$verb}</a>
+  {/if}
+{/function}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>state</title>
+<style>{literal}
+
+
+{/literal}
+</style>
+
+
+<script>{literal}
+
+
+{/literal}
+</script>
+
+  </head>
+
+  <body >
+
+    <h1>ページ：{$qname}</h1>
+{*
+    {if $description|notempty}<p>{$description}</p>{/if}
+    {if $moreDescription|notempty}<div>{$moreDescription|noescape}</idv>{/if}
+*}
+    <h2>データ型</h2>
+    <pre>{$type|noescape}</pre>
+
+
+    <h2>リンクの仕様</h2>
+
+    {foreach from=$originalLinkSpecs key=k item=link}
+      <h3>{$k}</h3>
+
+      {foreach from=$link key=kk item=x}
+       <pre>{$kk}:{$x}</pre><hr >
+      {/foreach}
+
+    {/foreach}
+
+
+    <h2>実際のリンク群</h2>
+    {foreach from=$realizedLinks key=k item=links}
+      <h3>{$k}</h3>
+      {foreach from=$links item=link}
+       <pre>{$link}</pre><hr >
+       {call name=link context=$link}
+      {/foreach}
+    {/foreach}
+
+  </body>
+</html>
+

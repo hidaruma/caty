@@ -1,0 +1,224 @@
+// -*- coding: utf-8 -*-
+/** 自動アクション Auto ACTion
+ */
+module aact;
+
+type typeText = string;
+
+/** アクションメタ情報ページのコンテキスト 
+ */
+type ActContext = {
+ /** モジュール名 */
+ "mod": string,
+ /** アクションのクラス修飾付き名前 */
+ "qname": string,
+ /** アクションの完全修飾名（フルネーム） */
+ "fullname": string,
+ /** アクションの短い説明 */
+ "description" : (string | null),
+ /** アクションの長い説明 */
+ "moreDescription" : (string | null),
+
+ /** SVGによる図示 */
+ "svg": string,
+
+ /** アクションから生成される状態 */
+ "produces": [string*],
+ /** アクションからリダイレクトされるアクション／ポート */
+ "redirects": [string*],
+ /** アクションからフォーワードされるアクション／ポート */
+ "forwards": [string*],
+
+ "internalInputType": typeText?,
+ "optsType": typeText?,
+ "pathPattern": [string*],
+ "method": httpMethod,
+ "verb": string,
+
+};
+
+/** 入力であるアクションをコンテキストに変換する */
+command to-context :: reif:ActionSummary -> ActContext {
+ pass > act |
+ [
+   [$.location.pkg, $.location.mod] | text:concat | text:split ":" | nth 1 | dump  > mod ,
+   [$.location.cls, $.name] | text:concat > qname,
+ ];
+
+ %act |
+ {
+   "mod": %mod,
+
+   "qname": %qname,
+
+   "fullname": mpl:fullname,
+
+   "description" : $.document.description?=null,
+
+   "moreDescription" : $.document.moreDescription? | when {undefined=>null, *=> text:creole},
+
+   "svg": read-svg %qname %mod,
+
+   "produces": $.produces,
+
+   "redirects": $.redirects,
+  
+   "forwards": $.forwards,
+
+
+   "internalInputType": $.profile.internalInput?,
+   "optsType": $.profile.opts?,
+   "pathPattern": $.pathPattern,
+   "method": $.invoker.method,
+   "verb": $.invoker.verb,
+ }
+};
+
+
+const FONT = "MS UI Gothic";
+
+/** 入力であるアクションの画像を作り保存する
+*/
+command make-image :: reif:ActionSummary -> void {
+ [
+   $.location.mod | text:split ":" | nth 1 > mod,
+   mpl:shortname  > shortname,
+   mpl:longname   > longname,
+ ];
+ 
+ ["data@this:/_auto/", %mod, "/action-page-ingredients/", %shortname, ".svg"] | text:concat > actionSvgPath
+ | dump ;
+ ["data@this:/_auto/", %mod, "/action-page-ingredients/", %shortname, ".gif"] | text:concat > actionGifPath
+ | dump ;
+
+ FONT > font;
+ viva:draw-action --format=svge --font=%font %longname | file:write --mkdir %actionSvgPath;
+ viva:draw-action --format=gif  --font=%font %longname | file:write --mkdir %actionGifPath;
+
+ void
+
+};
+
+/** 指定されたモジュールのすべてのアクションに対して画像を作り保存する */
+command build-mod-images [string mod] :: void -> void {
+ %1 > mod;
+
+ mpl:list-mod-actions %mod | dump --prefix="actions" |
+ each {
+   make-image
+ }
+};
+
+/** アプリケーションのすべてのアクションに対して画像を作り保存する */
+command build-images :: void -> void {
+ mpl:list-app-actions this | dump --prefix="actions" |
+ each {
+   make-image
+ }
+};
+
+/** 指定されたモジュールのすべてのアクションに対してコンテキストを作り保存する */
+command build-mod-contexts [string mod, string? app] 
+ :: void -> any /*void */
+{
+ %2? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app | dump --prefix="app" ;
+ %1 > mod;
+
+ mpl:list-mod-actions %mod | dump --prefix="actions" |
+ each {
+   pass > act 
+   |
+   [
+     mpl:shortname > qname,
+     [$.location.pkg, $.location.mod] | text:concat | text:split ":" | nth 1 > qmod | dump --prefix="qmod" ,
+   ];
+   ["data@", %app, ":/_auto/", %qmod, "/action-page-ingredients/", %qname ,".xjson"] | 
+    text:concat > actCtxPath | dump --prefix=ctx-path ;
+   %act | to-context | xjson:pretty | file:write %actCtxPath
+
+ }
+
+};
+
+
+/** アプリケーションのすべてのアクションに対してコンテキストを作り保存する */
+command build-contexts
+ [string? app] 
+ :: void -> void 
+{
+ %1? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app | dump --prefix="app" ;
+
+ mpl:list-app-actions %app | dump --prefix="actions" |
+ each {
+   pass > act |
+   [
+     mpl:shortname > qname,
+     [$.location.pkg, $.location.mod] | text:concat | text:split ":" | nth 1 > qmod,
+   ];
+   ["data@", %app, ":/_auto/", %qmod, "/action-page-ingredients/", %qname ,".xjson"] | 
+    text:concat > actCtxPath | dump --prefix=ctx-path ;
+   %act | to-context | xjson:pretty | file:write %actCtxPath
+ }
+};
+
+/** 指定されたモジュールに含まれるすべてのアクションのデータを作り保存する */
+command build [string mod]  :: void -> void {
+  %1 > mod;
+
+  build-mod-images %mod;
+  build-mod-contexts %mod
+};
+
+
+/** アプリケーションに含まれるすべてのアクションのデータを作り保存する */
+command build-all :: void -> void {
+  build-images;
+  build-contexts
+};
+
+/** 指定されたアクションのSVG画像を読む */
+command read-svg [string qact, string qmod] :: void -> string {
+ %1 > qact;
+ %2 > qmod;
+ %3? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app | dump --prefix="app" ;
+
+
+ ["data@this:/_auto/", %qmod, "/action-page-ingredients/", %qact, ".svg"] | text:concat > actionSvgPath;
+
+ file:read %actionSvgPath
+};
+
+/** 指定されたアクションのコンテキストを読む */
+command read-context [string act, string mod, string? app] :: void -> any {
+ %1 > qact;
+ %2 > qmod;
+ %3? |
+ when {
+   undefined => app | $.name,
+   * => pass,
+ } > app | dump --prefix="app" ;
+
+
+ ["data@this:/_auto/", %qmod, "/action-page-ingredients/", %qact, ".xjson"] | text:concat > actionCtxPath
+ | dump ;
+
+ xjson:read %actionCtxPath
+
+};
+
+
+// End of Module
+
+

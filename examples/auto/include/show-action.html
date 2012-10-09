@@ -1,0 +1,71 @@
+<?caty-meta template="smarty-mx" ?><!-- -*- coding: utf-8 -*- 
+-->{*
+
+*}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>action</title>
+<style>{literal}
+
+{/literal}
+</style>
+
+<script>{literal}
+
+{/literal}
+</script>
+
+  </head>
+
+  <body >
+
+    <h1>アクション：{$qname}</h1>
+
+    <p id=desc>{if $description|notempty}{$description}{/if}</p>
+
+    <div id=moreDesc>{if $moreDescription|notempty}{$moreDescription|noescape}{/if}</div>
+
+    <div id="svg-wrapper">
+     {$svg|noescape}
+    </div>
+    <h2>基本仕様</h2>
+
+    <table border=1>
+      <tr><th>パスパターン</ht><td>{foreach from=$pathPattern item=patt}{$patt} {/foreach}</td></tr>
+      <tr><th>起動方法</ht><td>動詞"{$verb}" / メソッド"{$method}"</td></tr>
+      <tr><th>入力データ</ht><td>{if $internalInputType|defined}{$internalInputType}{/if}</td></tr>
+    </table>
+{*
+    <h3>パスパターン</h3>
+    <p>{foreach from=$pathPattern item=patt}{$patt} {/foreach}</p>
+    
+    <h3>動詞/メソッド</h3>
+    <p>動詞"{$verb}" / メソッド"{$method}"</p>
+
+    <h3>入力データ型</h3>
+    <p>{if $internalInputType|defined}{$internalInputType}{/if}</p>
+*}
+
+
+    <h2>生成するページ</h5>
+    <ol>
+    {foreach from=$produces item=target}
+      <li><a target="_blank" href="auto-get.act?cmd=state&arg1={$target}&arg2={$mod}">{$target}</a></li>
+    {/foreach}
+    </ol>
+
+
+
+    <h2>リダイレクト先</h5>
+    <ol>
+    {foreach from=$redirects item=target}
+      <li><a target="_blank" href="auto-get.act?cmd=action&arg1={$target}&arg2={$mod}">{$target}</a></li>
+    {/foreach}
+    </ol>
+
+
+  </body>
+</html>
+

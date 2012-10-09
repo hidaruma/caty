@@ -1,0 +1,80 @@
+<?caty-meta template="smarty-mx" ?><!-- -*- coding: utf-8 -*- 
+-->{*
+  インストール先アプリケーションの pub/auto.js を必要とする。
+  pub@auto:/auto.js をコピーする必要がある。
+
+*}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>module</title>
+<style>{literal}
+nav {margin-bottom: 10px}
+nav ul
+{
+    display: -webkit-box;
+    display: -moz-box;
+    display: -o-box;
+    display: box;
+    margin: 0px auto;
+    
+    list-style: none;
+}
+
+nav li
+{
+    text-align: center;
+    border-left: 10px solid white
+}
+
+#preview {
+ width: 70%;
+ height: 1000px;
+}
+{/literal}
+</style>
+
+<script src="{$APP_PATH}/auto.js" ></script>
+<script>{literal}
+ if (!window.autoFig) window.autoFig = {};{/literal}
+ autoFig.allNames  = {$allNames|javascript};
+ autoFig.mod = {$mod|javascript};
+
+
+</script>
+
+  </head>
+
+  <body onload="autoFig.init()">
+
+    <h1>モジュール：{$qname}</h1>
+
+    <p id=desc>{if $description|notempty}{$description}{/if}</p>
+    <div id=moreDesc>{if $moreDescription|notempty}{$moreDescription|noescape}{/if} </div>
+
+<!--
+<nav>
+  <ul>
+    <li><a href="auto-get.act">Index</a></li>
+  <ul>
+</nav>
+-->
+
+    <div id="svg-wrapper">
+     {$svg|noescape}
+    </div>
+    <div>
+    <button title="{$APP_PATH}/auto.html" id="previewOtherWindow" onclick="autoFig.previewOtherWindow(this);">Open Other Window</button>  <a href="auto-get.act">Index</a>
+</div>
+    <iframe id="preview" src="{$APP_PATH}/auto-get.act"  ></iframe>
+    
+
+
+    <hr >
+    <pre>{$allNames|javascript}</pre>
+    <pre>{$mods|javascript}</pre>
+
+  </body>
+</html>
+
