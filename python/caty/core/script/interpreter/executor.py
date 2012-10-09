@@ -237,7 +237,7 @@ class CommandExecutor(BaseInterpreter):
             if self.facility_set['env'].exists(node.var_name):
                 r = self.facility_set['env'].get(node.var_name)
         if r is UNDEFINED and not node.optional:
-            raise Exception(u'%s is not defined' % node.var_name)
+            raise Exception(u'Variable %%%s is not defined' % node.var_name)
         if r is UNDEFINED and node.default is not UNDEFINED:
             r = node.default
         return r
@@ -251,7 +251,7 @@ class CommandExecutor(BaseInterpreter):
             if node.optional:
                 return caty.UNDEFINED
             else:
-                raise Exception(u'%d is not defined' % node.arg_num)
+                raise Exception(u'Variable %%%d is not defined' % node.arg_num)
 
     def visit_when(self, node):
         node._prepare()

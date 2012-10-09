@@ -500,7 +500,7 @@ class VarLoader(object):
                 return opts[opt.key]
             else:
                 if not opt.optional:
-                    raise InternalException(u'Option does not suffice: $opt', opt=opt.key)
+                    raise Exception(u'%%%s is not defined' % opt.key)
 
     def load(self, storage):
         from caty.core.spectypes import reduce_undefined
@@ -518,7 +518,7 @@ class VarLoader(object):
                     o[opt.key] = opts[opt.value.name]
                 else:
                     if not opt.optional:
-                        raise Exception(u'%s is not defined' % opt.value.name)
+                        raise Exception(u'Variable %%%s is not defined' % opt.value.name)
                     elif opt.default is not UNDEFINED:
                         o[opt.key] = opt.default
             elif opt.type == 'glob':
@@ -528,7 +528,7 @@ class VarLoader(object):
                     o[opt.key] = opts[opt.key]
                 else:
                     if not opt.optional:
-                        raise Exception(u'%s is not defined' % opt.key)
+                        raise Exception(u'Variable %%%s is not defined' % opt.key)
         return o.to_dict()
 
     def _load_args(self, opts, args):
@@ -541,7 +541,7 @@ class VarLoader(object):
                     a.append(args[arg.index])
                 else:
                     if not arg.optional:
-                        raise Exception(u'%d is not defined' % arg.index)
+                        raise Exception(u'Variable %%%d is not defined' % arg.index)
                     elif arg.default is not UNDEFINED:
                         a.append(arg.default)
             elif arg.type == 'glob':
@@ -551,7 +551,7 @@ class VarLoader(object):
                     a.append(opts[arg.key])
                 else:
                     if not arg.optional:
-                        raise Exception(u'%s is not defined' % arg.key)
+                        raise Exception(u'Variable %%%s is not defined' % arg.key)
                     elif arg.default is not UNDEFINED:
                         a.append(arg.default)
                     else:
