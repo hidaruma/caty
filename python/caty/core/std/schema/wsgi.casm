@@ -100,7 +100,7 @@ type Request = {
   "isText": boolean?,
 
   /** リクエストボディがテキストであるときの文字符号化方式 */
-  @[typical("utf-8")]
+  @[typical(["utf-8"])]
   "encoding": string?,
 
   /** リクエストボディ */

@@ -22,7 +22,7 @@ type email = string(remark = "email");
 type uri = string(remark = "uri");
 
 /** MIMEメディアタイプ型 */
-@[typical("text/plain")]
+@[typical(["text/plain"])]
 type mediaType = string(remark = "media-type");
 
 /** メッセージ型 */

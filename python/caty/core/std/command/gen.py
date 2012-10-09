@@ -173,7 +173,7 @@ class DataGenerator(TreeCursor):
     def __gen_string(self, node):
         import sys
         if 'typical' in node.annotations:
-            return node.annotations['typical'].value
+            return random.choice(node.annotations['typical'].value)
         elif 'default' in node.annotations:
             return node.annotations['default'].value
         elif self.__gen_str == 'rand':
