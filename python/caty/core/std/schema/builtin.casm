@@ -371,9 +371,9 @@ type CatyException = @* {
  "id" : (integer|string)?,
 
  // 実装言語のスタックトレースデータ
- "stackTrace" : any?,
+ "stackTrace" : univ?,
  
-  *: any?
+  *: univ?
 };
 
 /**
@@ -460,9 +460,9 @@ type Exception = @*! {
  "id" : (integer|string)?,
 
  /** 実装言語のスタックトレースデータ */
- "stackTrace" : any?,
+ "stackTrace" : univ?,
  
-  *: any?
+  *: univ?
 };
 
 /** 真、YES、成功などを表す型 */
@@ -763,7 +763,7 @@ exception Never = object;
  * 入力値が例外型でなかった場合はInvalidThrow例外が、
  * 例外型ではあるが未定義だった場合はExceptionNotFound例外が送出される。
  */
-command throw :: any -> never throws Exception
+command throw :: univ -> never throws Exception
     refers python:caty.core.std.command.builtin.Throw;
 
 /** 
