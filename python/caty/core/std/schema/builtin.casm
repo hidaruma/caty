@@ -5,7 +5,9 @@ module builtin in casm;
 
 type scalar  = null|boolean|number|string|binary;
 
-
+/** 
+ * JSONの標準データ。
+ */
 type StandardJson = string | number | null | boolean | StdArray | StdObject;
 
 type StdObject = {
@@ -14,9 +16,13 @@ type StdObject = {
 
 type StdArray = [StandardJson*];
 
-type StandardXJson = StandardJson | @*! scalar | @*! TaggedObject | @*! TaggedArray;
-type TaggedArray = [StandardXJson*];
-type TaggedObject = {*:StandardXJson?};
+/** 
+ * foreign, undefinedを含まない標準JSONに変換可能なXJSONデータ。
+ */
+type StandardXJson = scalar | XArray | XObject | TaggedData;
+type TaggedData = @*! scalar | @*! XObject | @*! XArray | @*! TaggedData;
+type XArray = [StandardXJson*];
+type XObject = {*:StandardXJson?};
 
 @[system, unquiet]
 type CatyExecMode = [string*];
