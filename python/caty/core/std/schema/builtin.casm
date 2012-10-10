@@ -8,7 +8,9 @@ type scalar  = null|boolean|number|string|binary;
 /** 
  * JSONの標準データ。
  */
-type StandardJson = string | number | null | boolean | StdArray | StdObject;
+type StandardJson =  JsonScalar | StdArray | StdObject;
+
+type JsonScalar = string | number | null | boolean;
 
 type StdObject = {
   *: StandardJson,
@@ -19,8 +21,8 @@ type StdArray = [StandardJson*];
 /** 
  * foreign, undefinedを含まない標準JSONに変換可能なXJSONデータ。
  */
-type StandardXJson = scalar | XArray | XObject | TaggedData;
-type TaggedData = @*! scalar | @*! XObject | @*! XArray | @*! TaggedData;
+type StandardXJson = JsonScalar | XArray | XObject | TaggedData;
+type TaggedData = @*! JsonScalar | @*! XObject | @*! XArray | @*! TaggedData;
 type XArray = [StandardXJson*];
 type XObject = {*:StandardXJson?};
 
