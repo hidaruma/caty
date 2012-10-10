@@ -44,6 +44,8 @@ class Untranslate(Command):
 
     def __convert_to_form(self, data):
         r = {}
+        if not isinstance(data, dict):
+            throw_caty_exception(u'BadInput', '$data', data=data)
         for k, v in obj2path(data).items():
             if k.endswith('.{}') or k.endswith('.[]') or v is None or v == u'': 
                 # 空のオブジェクトor配列、空文字列、nullはフォーム経由で送れない。

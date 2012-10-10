@@ -33,7 +33,7 @@ class Sample(Builtin):
                 app = self.current_app._system.get_app(app_name)
             mod = app._schema_module.get_module(mod_name)
         else:
-            mod = self.current_module
+            mod = self.current_module.schema_finder
         ast = ASTRoot(u'', [], as_parser(typedef).run(self.__type_repr, auto_remove_ws=True), Annotations([]), u'')
         sb = mod.make_schema_builder()
         rr = mod.make_reference_resolver()

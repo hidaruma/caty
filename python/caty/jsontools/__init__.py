@@ -630,7 +630,7 @@ def obj2path(obj):
         "b.c": 2
     }
     """
-    assert isinstance(obj, dict)
+    assert isinstance(obj, dict), obj
     def flatten(obj, parent='$'):
         if isinstance(obj, dict):
             n = 0
