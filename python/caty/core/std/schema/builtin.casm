@@ -21,7 +21,7 @@ type StdArray = [StandardJson*];
 /** 
  * foreign, undefinedを含まない標準JSONに変換可能なXJSONデータ。
  */
-type StandardXJson = JsonScalar | XArray | XObject | TaggedData;
+type StandardXJson = JsonScalar | XArray | XObject | TaggedData | @*! undefined;
 type TaggedData = @*! JsonScalar | @*! XObject | @*! XArray | @*! TaggedData;
 type XArray = [StandardXJson*];
 type XObject = {*:StandardXJson?};
@@ -1422,10 +1422,16 @@ command reject-non-json
  {
    /** 例外の代わりにundefineを出力するか */
    @[default(false)]
-   "safe": boolean?
+   "safe": boolean?,
+   /** JSONエンコード可能なデータ(タグ付きデータ)を認めるか */
+   @[default(false)]
+   "allow-encodable": boolean?,
  } :: univ -> any? throws Unsupported {
   $? > in;
-  %in? | validate<StandardXJson> | when {
+  %allow-encodable | case {
+    true => %in? | validate<StandardXJson>,
+    false => %in? | validate<StandardJson>
+  } | when {
     OK => %in,
     NG => %safe | case {true => undefined, false => @Unsupported {"message": "$data", "data": %in?} | throw}
   }
