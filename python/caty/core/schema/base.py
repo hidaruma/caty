@@ -581,6 +581,8 @@ _builtin_tags = [
     u'void',
     u'never',
     u'enum',
+    u'undefined',
+    u'foreign',
     ]
 
 class TagSchema(SchemaBase, Tag):
