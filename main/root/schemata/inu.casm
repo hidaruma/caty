@@ -29,7 +29,7 @@ command remote-gen-and-check-app-types
     ];
 
     gen:sample %--max-depth %--string --mod=%modPath %typePath > generatedData;
-    %generatedData | xjson:univ-pretty | dump --prefix="** generatedb:" ; /* この行はデバッグ専用 */
+    %generatedData | xjson:univ-pretty | dump --prefix="** generated data:" ; /* この行はデバッグ専用 */
     %generatedData | xjson:to-json |
     /* -- web部分開始 -- */
     webio:untranslate --format=json | webio:unparse | 
@@ -39,10 +39,10 @@ command remote-gen-and-check-app-types
     case {
      true  => void,
      false => %receivedData |
-       webio:translate --type=%typePath | 
+       webio:translate --type=%typePath | dump --prefix="** translated data:" |
        /* -- web部分終了 -- */
        xjson:from-json |
-       validate %typePath |
+       validate %typePath | dump --prefix="** validation result:" |
 
        when {
           OK => void,
