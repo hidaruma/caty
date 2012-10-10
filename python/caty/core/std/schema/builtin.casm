@@ -1416,10 +1416,10 @@ command reject-non-json
    @[default(false)]
    "safe": boolean?
  } :: univ -> any? throws Unsupported {
-  $ > in;
-  %in | validate<StandardXJson> | when {
+  $? > in;
+  %in? | validate<StandardXJson> | when {
     OK => %in,
-    NG => %safe | case {true => undefined, false => @Unsupported {"message": "$data", "data": %in} | throw}
+    NG => %safe | case {true => undefined, false => @Unsupported {"message": "$data", "data": %in?} | throw}
   }
 };
 
