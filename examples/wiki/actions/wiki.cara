@@ -20,23 +20,14 @@ resource Wikiファイル("*.wiki") {
 
     /** Wiki記事をHTMLとして読み出す */
     action 読み出し("/GET") :: @[in, out] #io void -> WikiPage produces HTMLページ 
-    { /*auto*/
-
-
-        #:io { file:read %1 | {
-            "body": text:creole, 
-            "title": %1 | text:rsplit "." | item 0 | text:trim /,
-            "lastModified": file:lastmodified %1
-        }} | print include@this:/page.html
+    { auto
 
     };
 
     /** 編集画面呼び出し */
-    action 編集("edit/GET")  :: @[in, out]#io void -> WikiSkele produces 編集 {
-        {
-            "body":file:read %1,
-            "title": %1 | text:rsplit "." | item 0 | text:trim /
-        } | print include@this:/edit.html
+    action 編集("edit/GET")  :: @[in, out]#io void -> WikiSkele produces 編集 
+    { auto
+
     };
 
     /** Wiki記事の書き込み 
@@ -47,22 +38,18 @@ resource Wikiファイル("*.wiki") {
         @[in] #translate WikiFile -> _,
         @[out] #ok _ -> never redirects Wikiファイル.読み出し,
         @[out] #ng _ -> never redirects Root.get 
-    {/*auto*/
+    { auto
 
-
-        #: translate {translate wiki:WikiFile} | when {
-            OK => #:ok{ ["/wiki", #:part {pv body} | file:write %1 | %1] | text:concat | redirect},
-            NG => #:ng{ "/wiki/" | redirect}
-        }
 
     };
 
     /** プレーンテキスト取得 */
     action 原稿("plain/GET") :: @[in, out] #io void -> Response produces 原稿
-    {
-        print %0
+    { auto
+
     };
 };
+
 
 /** 読者と筆者が閲覧するHTMLページ */
 state HTMLページ for [読者, 筆者] :: WikiPage links {
@@ -75,45 +62,36 @@ state HTMLページ for [読者, 筆者] :: WikiPage links {
 };
 
 resource Root("/") {
-    action get("/GET") :: @[in, out] #io void -> never redirects Wikiファイル.読み出し {
-        "/wiki/FrontPage.wiki" | redirect
+    action get("/GET") :: @[in, out] #io void -> never redirects Wikiファイル.読み出し 
+    { auto
+
     };
 };
 
 resource 新規ファイル("/new") {
     action 雛形("/POST#dont-care") :: @[in, out] #io NewWiki -> WikiSkele produces 編集
-    {
-        translate wiki:NewWiki | when {
-            OK => pv filename | text:regmatch "[A-Z][A-Za-z0-9]*" | 
-                  when {
-                    OK => {"title": pv src, "body": ""} | print include@this:/edit.html,
-                    NG => redirect /wiki/
-                   },
-            NG => redirect /wiki/
-        }
+    { auto
 
     };
 };
 
 resource AllPages("/all.html") {
-    action get("/GET") :: @[in, out] #io void -> WikiIndex produces 索引 {
-        lsdir / .wiki | each {
-            {
-                "file": pv name,
-                "title": pv name | text:rsplit "." | item 0 | text:trim /
-            }
-        } | print /all.html
+    action get("/GET") :: @[in, out] #io void -> WikiIndex produces 索引 
+    { auto
+
     };
 };
 
 /** Wiki記事の一覧 */
 state 索引 for 読者 :: WikiIndex links {
+   /** 新しいファイル*/
     + new --> 新規ファイル.雛形;
     + link --> Wikiファイル.読み出し;
 };
 
 /** 編集UIとなる画面 */
 state 編集 for 不明なユーザー :: WikiSkele links {
+/** サブミットする */
     submit --> Wikiファイル.書き込み;
     + cancel --> Wikiファイル.読み出し;
 };
@@ -123,11 +101,16 @@ state 原稿 for 読者 :: any;
 /** 便宜上の開始画面 */
 @[abstract]
 state start for 読者 :: any links {
+  /** 訪問 
+   * * 一番
+   * * 二番
+   */
   visit --> AllPages.get;
 };
  
 
 type NewWiki = {
+    @[typical(["A", "Aa", "AandB", "X01Y02", "FirstSecond", "OK"])]
     "filename": string(pattern="[a-zA-Z_][a-zA-Z0-9_-]*"),
 };
 

@@ -1,7 +1,15 @@
-<?caty-meta template="smarty-mx" ?><!-- -*- coding: utf-8 -*- 
+<?caty-meta template="smarty-mx" type="astt:SttContext"?><!-- -*- coding: utf-8 -*- 
 -->{*
 
 *}
+{function name=linkSpec type="astt:LinkObj"}
+ {if $description|notempty}<p>{$description}</p>{/if}
+ {if $moreDescriptionHtml|notempty}<div>{$moreDescriptionHtml|noescape}</idv>{/if}
+
+ リンクの責任：{if $becoming|eq:"additional"}デザイナ{elseif $becoming|eq:"embedded"}プログラマ{else}不明{/if}（{$becoming}）<br>
+ リンクの個数：最小 {$minOccurrs} / 最大 {$maxOccurrs} <br>
+ リンク先： {$targets}
+{/function}
 {function name=link }
   {$method}:
   {if $method|eq:"GET"}
@@ -31,10 +39,10 @@
   <body >
 
     <h1>ページ：{$qname}</h1>
-{*
+
     {if $description|notempty}<p>{$description}</p>{/if}
-    {if $moreDescription|notempty}<div>{$moreDescription|noescape}</idv>{/if}
-*}
+    {if $moreDescriptionHtml|notempty}<div>{$moreDescriptionHtml|noescape}</idv>{/if}
+
     <h2>データ型</h2>
     <pre>{$type|noescape}</pre>
 
@@ -43,10 +51,7 @@
 
     {foreach from=$originalLinkSpecs key=k item=link}
       <h3>{$k}</h3>
-
-      {foreach from=$link key=kk item=x}
-       <pre>{$kk}:{$x}</pre><hr >
-      {/foreach}
+      {call name=linkSpec context=$link }
 
     {/foreach}
 

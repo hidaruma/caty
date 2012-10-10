@@ -19,12 +19,15 @@ command auto [string? arg] :: any -> any {
     ,
   };
 
-
   %ACT? |
   when {
     undefined => "ACTION is not defined." | response --content-type="text/plain",
     string =>
-      [%web-in, get-action-context %ACT ] | to-action-info |
+      [
+         %web-in,
+         atrig:read-mod-triggers wiki, /* !!暫定!! */
+         get-action-context %ACT 
+      ] | to-action-info |
       print include@auto:/action-page.html
     ,
   }
@@ -54,6 +57,9 @@ type ActionInfo = {
 
  /** リダイレクト先のアクション／ポート名のリスト */
  "redirects": [string*],
+
+ /** リダイレクト先のURLのリスト */
+ "redirectUrls": [uri*],
 
  /** フォーワード先のアクション／ポート名のリスト （現在使用できない）*/
  "forwards": [string*],
@@ -124,10 +130,11 @@ command to-page-info [string mod] :: string(remark="ページを表す状態名"
  }
 };
 
-command to-action-info :: [WebInput, aact:ActContext] -> ActionInfo {
+command to-action-info :: [WebInput, {*:[trig:TriggerInfo*]?} modTriggers, aact:ActContext] -> ActionInfo {
   [
      nth 1 > webin,
-     nth 2 > actcon | $.mod > mod,
+     nth 2 > modTriggers,
+     nth 3 > actcon | $.mod > mod,
   ];
  %actcon |
  {
@@ -137,6 +144,8 @@ command to-action-info :: [WebInput, aact:ActContext] -> ActionInfo {
 
 
  "redirects": $.redirects,
+
+ "redirectUrls": $.redirects | each {pass> a; %modTriggers | pv %a | each {$.targetUrl | trig:to-href}} | list:concat ,
 
  "forwards": $.forwards,
 

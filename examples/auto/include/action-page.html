@@ -1,4 +1,4 @@
-<?caty-meta template="smarty-mx" ?><!-- -*- coding: utf-8 -*- 
+<?caty-meta template="smarty-mx" type="action:ActionInfo" ?><!-- -*- coding: utf-8 -*- 
 -->{*
 
 *}
@@ -71,7 +71,7 @@
      <tr><th>メソッド</th><td>"{$method}"</td></tr>
      <tr><th>動詞</th><td>"{$verb}"</td></tr>
      <tr><th>URL</th><td>"{$requestUrl}"</td></tr>
-     <tr><th>クエリー文字列</th><td>"{$queryString}"</td></tr>
+     <tr><th>クエリー文字列</th><td>{if $queryString|defined}"{$queryString}"{else}(ナシ){/if}</td></tr>
    </table>
 
    <p>このリクエストにより、次のアクションが起動されました。</p>
@@ -95,7 +95,7 @@
  <h2>生成されるページ／リダイレクト先</h2>
 
 {if $willProduce}
-  <p>アクションの実行により、次のページ（複数の場合はどれか）が生成されます。</p>
+  <p>アクションの実行により、次のページ（複数の場合はどれか）が<b>生成</b>されます。</p>
     <ul>
     {foreach from=$produces item=target}
       <li><a target="_blank" href="/wiki/auto-get.act?cmd=state&arg1={$target}&arg2={$mod}">{$target} （仕様）</a></li>
@@ -111,13 +111,22 @@
 {/if}
 
 {if $willRedirect}
-  <p>アクションの実行により、次のアクション／ポートにリダイレクトされます。</p>
+  <p>このアクションの実行により、次のアクション／ポートに<b>リダイレクト</b>されます。</p>
 
     <ol>
     {foreach from=$redirects item=target}
-      <li><a target="_blank" href="/wiki/auto-get.act?cmd=action&arg1={$target}&arg2={$mod}">{$target}</a></li>
+      <li><a target="_blank" href="/wiki/auto-get.act?cmd=action&arg1={$target}&arg2={$mod}">{$target} （仕様）</a></li>
     {/foreach}
     </ol>
+
+  <p>具体的なURLの候補は次のとおりです。</p>
+
+    <ol>
+    {foreach from=$redirectUrls item=url}
+      <li><a href="{$url}">{$url}</a></li>
+    {/foreach}
+    </ol>
+
 {/if}
 
   </body>

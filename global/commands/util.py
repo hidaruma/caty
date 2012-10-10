@@ -30,3 +30,16 @@ class FillWildcard(Command):
         result = _rand_insert(map(lambda lis: _rand_insert(lis, 100, 999), lislis), 1000, 9999)
         return result
 
+def narrow_object(obj, props):
+    new_obj = {}
+    for p in props:
+        new_obj[p] = obj[p]
+    return new_obj
+
+class Narrow(Command):
+    def setup(self, *args):
+        self.args = args;
+
+    def execute(self, obj):
+        return narrow_object(obj, self.args)
+
