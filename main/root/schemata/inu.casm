@@ -6,6 +6,39 @@
  */
 module inu;
 
+
+/* 指定されたアプリケーション内の型パラメータを持たないすべての型からデータを生成して、non-jsonデータを報告する 
+ */
+command check-app-non-json 
+ {
+  @[default("false")]
+  "no-check": boolean?,
+
+  @[default("rand")]
+  "string": ("rand" | "empty" | "implied")?,
+  @[default(5)]
+  "max-depth":	integer(minimum=1)?
+ }
+ [string app] :: void -> any
+{
+  %1 > app;
+  mpl:list-app-types %app | take {[$.typeParams, []] | eq} |
+  each {
+    [
+      [$.location.app, $.location.pkg, $.location.mod] | text:concat > modPath,
+      mpl:fullname > typePath | dump --prefix="\n\n** type path of test data:",
+    ];
+
+    gen:sample %--max-depth %--string --mod=%modPath %typePath > generatedData;
+    %generatedData | xjson:univ-pretty | dump --prefix="** generated data:" ; /* この行はデバッグ専用 */
+    %generatedData | reject-non-json --safe |
+    when {
+      undefined => %typePath,
+      * => undefined,
+    }
+  } | list:tighten
+};
+
 /** 指定されたアプリケーション内の型パラメータを持たないすべての型を列挙して、リモート方式で生成と検証をする
  */
 command remote-gen-and-check-app-types 
@@ -30,30 +63,34 @@ command remote-gen-and-check-app-types
 
     gen:sample %--max-depth %--string --mod=%modPath %typePath > generatedData;
     %generatedData | xjson:univ-pretty | dump --prefix="** generated data:" ; /* この行はデバッグ専用 */
-    %generatedData | xjson:to-json |
-    /* -- web部分開始 -- */
-    webio:untranslate --format=json | webio:unparse | 
-    dump --prefix="** the data transfered on the Web:" | 
-    webio:parse --format=json |dump --prefix="** received and parsed data:" > receivedData;
-    %no-check |
-    case {
-     true  => void,
-     false => %receivedData |
-       webio:translate --type=%typePath | dump --prefix="** translated data:" |
-       /* -- web部分終了 -- */
-       xjson:from-json |
-       validate %typePath | dump --prefix="** validation result:" |
-
-       when {
-          OK => void,
-          NG => @ImplementationBug {
-                  "message": "validation error",
-                  "reason": pass,
-                } | throw,
-       }
-    } /*/case */
+    %generatedData | reject-non-json --safe |
+    when {
+      undefined => /* やめる */
+       null | dump --prefix="** abort testing:"; /* この行はデバッグ専用 */
+       void ,
+      * =>         /* 続行する */
+        /* -- web部分開始 -- */
+        webio:untranslate --format=json | webio:unparse | 
+        dump --prefix="** the data transfered on the Web:" | 
+        webio:parse --format=json |dump --prefix="** received and parsed data:" > receivedData;
+        %no-check |
+        case {
+         true  => void,
+         false => %receivedData |
+           webio:translate --type=%typePath | dump --prefix="** translated data:" |
+           /* -- web部分終了 -- */
+           xjson:from-json |
+           validate %typePath | dump --prefix="** validation result:" |
+           when {
+              OK => void,
+              NG => @ImplementationBug {
+                      "message": "validation error",
+                      "reason": pass,
+                    } | throw,
+           }
+        } /* /case */
+    } /* /when */
   } /* /each */
-
 
 };
 
