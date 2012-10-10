@@ -21,13 +21,13 @@ type SttContext = {
  /** 状態の短い説明 */
  "description" : (string | null),
  /** 状態の長い説明 */
- "moreDescription" : (string | null),
+ "moreDescriptionHtml" : (string | null),
 
  /** 状態の型 */
  "type": typeText,
 
  /** もともとのりンク情報 */
- "originalLinkSpecs" : {*: object(remark="reif:Linkのタグ無し") },
+ "originalLinkSpecs" : {*: LinkObj? },
  
  /** 具体化されたリンク群 */
  "realizedLinks" : {*: [trig:TriggerLink*]?},
@@ -42,6 +42,35 @@ type SttContext = {
 
 
 };
+
+
+type LinkObj = {
+
+ "document":  reif:Doc?,
+
+ "name" : string,  // 構文的にはラベル
+
+ /** このリンク達がどのようにして作られるか */
+ "becoming": (
+    /** リンク情報が状態データに含まれる */
+    "embedded" 
+  |
+    /** リンクは状態データとは別に後から追加する必要がある */
+    "additional" 
+  | 
+    /** 未定、不明を意味する値 */
+    "indef"
+  ),
+
+  "minOccurs" : integer(minimum=0)?, 
+  "maxOccurs" : (integer(minimum=1)|"unbounded")?,
+
+
+  "targets": [string, string*], 
+
+  *: any?
+};
+
 
 
 /** 入力である「状態のlinks記述」を、引数のモジュール／アプリケーション文脈で具体化する 
@@ -87,7 +116,7 @@ command to-context [string pkgmod, string? app] :: reif:StateSummary  -> SttCont
 
    "description" : $.document.description?=null,
 
-   "moreDescription" : $.document.moreDescription?=null,
+   "moreDescriptionHtml" : $.document.moreDescription? | when{undefined=>null, string=>text:creole},
 
    "type": $.type,
 

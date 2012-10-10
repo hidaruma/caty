@@ -95,7 +95,7 @@
  <h2>生成されるページ／リダイレクト先</h2>
 
 {if $willProduce}
-  <p>アクションの実行により、次のページ（複数の場合はどれか）が生成されます。</p>
+  <p>アクションの実行により、次のページ（複数の場合はどれか）が<b>生成</b>されます。</p>
     <ul>
     {foreach from=$produces item=target}
       <li><a target="_blank" href="/wiki/auto-get.act?cmd=state&arg1={$target}&arg2={$mod}">{$target} （仕様）</a></li>
@@ -111,13 +111,22 @@
 {/if}
 
 {if $willRedirect}
-  <p>アクションの実行により、次のアクション／ポートにリダイレクトされます。</p>
+  <p>このアクションの実行により、次のアクション／ポートに<b>リダイレクト</b>されます。</p>
 
     <ol>
     {foreach from=$redirects item=target}
-      <li><a target="_blank" href="/wiki/auto-get.act?cmd=action&arg1={$target}&arg2={$mod}">{$target}</a></li>
+      <li><a target="_blank" href="/wiki/auto-get.act?cmd=action&arg1={$target}&arg2={$mod}">{$target} （仕様）</a></li>
     {/foreach}
     </ol>
+
+  <p>具体的なURLの候補は次のとおりです。</p>
+
+    <ol>
+    {foreach from=$redirectUrls item=url}
+      <li><a href="{$url}">{$url}</a></li>
+    {/foreach}
+    </ol>
+
 {/if}
 
   </body>

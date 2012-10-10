@@ -6,6 +6,45 @@
  */
 module inu;
 
+/** 指定されたアプリケーション内の型パラメータを持たないすべての型を列挙して、リモート方式で生成と検証をする
+ */
+command remote-gen-and-check-app-types 
+ {
+  @[default("rand")]
+  "string": ("rand" | "empty" | "implied")?,
+  @[default(5)]
+  "max-depth":	integer(minimum=1)?
+ }
+ [string app] :: void -> void 
+{
+  %1 > app;
+  mpl:list-app-types %app | take {[$.typeParams, []] | eq} |
+  each {
+    [
+      [$.location.app, $.location.pkg, $.location.mod] | text:concat > modPath,
+      mpl:fullname > typePath | dump --prefix=typePath,
+    ];
+
+    gen:sample %--max-depth %--string --mod=%modPath %typePath |
+    /* -- web部分開始 -- */
+    webio:untranslate --format=form | webio:unparse | 
+    dump --prefix=Web | 
+    webio:parse --format=form | webio:translate --type=%typePath | 
+    /* -- web部分終了 -- */
+    validate %typePath |
+
+    when {
+      OK => void,
+      NG => @ImplementationBug {
+              "message": "validation error",
+              "reason": pass,
+            } | throw,
+    }
+  }
+
+};
+
+
 type NoTypeParams = @* {
  "typeParams" : [],
  * : any?

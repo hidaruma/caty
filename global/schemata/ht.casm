@@ -129,12 +129,12 @@ command action-name-to-url :: string -> uri {
  sreif:show-action %act | $.pathPattern  > patts;
  [%patts | list:length, 1] | eq |
  when {
-   False => make-exception BadInput "pathPattern too long" | throw,
+   False => make-exception BadInput "pathPattern has too may items." | throw,
    True => %patts | nth 1 > patt,
  };
  %patt | text:regmatch "\\*" |
  when {
-   OK => make-exception BadInput "pathPattern has a wildcard" | throw,
+   OK => make-exception BadInput "pathPattern has a wildcard." | throw,
    NG => void,
  };
  
