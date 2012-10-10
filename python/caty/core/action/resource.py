@@ -57,7 +57,7 @@ class ResourceClass(object):
         raise SystemResourceNotFound(
             u'ActionNotFound',
             u'$actionName is not defined in $moduleName:$resourceName',
-            actionName=aname,
+            actionName=name,
             moduleName=self.module,
             resourceName=self.name
         )
