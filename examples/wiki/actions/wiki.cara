@@ -66,6 +66,7 @@ resource Wikiファイル("*.wiki") {
 
 /** 読者と筆者が閲覧するHTMLページ */
 state HTMLページ for [読者, 筆者] :: WikiPage links {
+    /** 編集ページへ遷移 */
     + 編集 --> Wikiファイル.編集;
     + ソース --> Wikiファイル.原稿;
     + 新規 --> 新規ファイル.雛形;

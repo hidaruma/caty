@@ -494,18 +494,7 @@ class Link(object):
             'type': self.type.replace('-link', '')
         }
 
-def is_doc_str(seq):
-    _ = seq.parse(option(docstring))
-    if _:
-        try:
-            seq.parse(skip_ws)
-            seq.parse(option(annotation))
-            seq.parse(skip_ws)
-            seq.parse(['resource', 'action', 'module', 'state', 'port', 'command', 'type', 'const'])
-            return True
-        except Exception, e:
-            return False
-    return False
+
 
 
 def name(seq):
@@ -623,4 +612,38 @@ class Port(object):
             "annotation": self.annotations.reify(),
         }
 
+
+def is_doc_str(seq):
+    _ = seq.parse(option(docstring))
+    if _:
+        try:
+            seq.parse(skip_ws)
+            seq.parse(option(annotation))
+            seq.parse(skip_ws)
+            seq.parse(['resource', 'action', 'module', 'state', 'port', 'command', 'type', 'const', _link_item_head])
+            return True
+        except Exception, e:
+            return False
+    return False
+
+_dummy_state_block = StateBlock()
+def _link_item_head(seq):
+    if option(S('+'))(seq):
+        seq.parse(skip_ws)
+        n = name(seq)
+        seq.parse(skip_ws)
+        o = option(choice([u'+', u'*', u'!', u'?']), u'!')(seq)
+    elif option(S('-'))(seq):
+        seq.parse(skip_ws)
+        n = name(seq)
+        seq.parse(skip_ws)
+        o = option(choice([u'+', u'*', u'!', u'?']), u'!')(seq)
+    else:
+        option(S('?'))(seq)
+        seq.parse(skip_ws)
+        n = name(seq)
+        seq.parse(skip_ws)
+        o = option(choice([u'+', u'*', u'!', u'?']), u'!')(seq)
+    seq.parse(skip_ws)
+    return S(u'-->')(seq)
 
