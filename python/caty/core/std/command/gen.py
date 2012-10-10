@@ -327,7 +327,10 @@ class DataGenerator(TreeCursor):
     def _visit_tag(self, node):
         r = node.body.accept(self)
         if r is not _EMPTY:
-            return json.tagged(node.tag, r)
+            if node.tag in ('*', '*!'):
+                return json.tagged(u'auto-gen-tag', r)
+            else:
+                return json.tagged(node.tag, r)
         else:
             return json.TagOnly(node.tag)
 
