@@ -47,7 +47,7 @@ command longname :: LocatedName -> string {
 === 対応関係
 
 |= TriggerInfo      |= TriggerLink |= Executable  |= Request   |= 備考 |
-| targetModule      |              |              |            | gen:sampleが使用 |
+| homeModule      |              |              |            | gen:sampleが使用 |
 | paramsType        |paramsType    | opts         | query      | 型を具体化 |
 | inputType         |inputType     | input        | body       | 型を具体化 |
 |targetUrl          |hrefMain      |              | path       | URL |
@@ -106,7 +106,7 @@ type TriggerInfo = {
   /** ターゲットアクションが所属するモジュール
    * gen:sample が型名の解決をするために必要。
    */
-  "targetModule": {
+  "homeModule": {
     "name": string,
     "location": reif:Location,
   },
@@ -124,7 +124,7 @@ type TriggerInfo = {
   },
 
   /** 説明 */
-  "description" : string?,
+  "actionDocument" : reif:Doc,
 
   /** ターゲットリソースのパスパターン*/
   "pathPattern": [string*],
@@ -158,7 +158,7 @@ type TriggerLink = {
   /** パラメータ（クエリー文字列）のセマンティック層における型 */
   "paramsType": typeText?,
   /** 型名解釈のベースとなるモジュールのフルネーム */
-  "baseModule": string,
+  "homeModuleFullname": string,
   /** UIの情報 */
   "ui": any?,
 
@@ -223,12 +223,12 @@ command info-to-link :: TriggerInfo -> TriggerLink {
   $.inputType >:  "inputType",
   $.paramsType >: "paramsType",
 
-  $.description?="(Undocumented)" >: "help",
+  $.actionDocument.description?="(Undocumented)" >: "help",
   $.targetAction | mpl:fullname  >: "title",
 
   $.targetAction | mpl:fullname  >: "command",
   $.targetUrl.pathInfo >: "arg0",
-  $.targetModule | mpl:fullname >: "baseModule",
+  $.homeModule | mpl:fullname >: "homeModuleFullname",
 
  }
 };
@@ -247,7 +247,7 @@ command get-trigger-if-captures [string path] :: reif:ActionSummary -> @True Tri
    $.location             > location,
    $.location.app         > app,
    $.pathPattern          > pathPattern,
-   $.document.description?=""          > description,
+   $.document             > actionDocument,
    $.profile.internalInput > inputType,
    $.profile.opts         > paramsType,
  ] ;
@@ -263,7 +263,7 @@ command get-trigger-if-captures [string path] :: reif:ActionSummary -> @True Tri
        "targetUrl":{"hostUrl":%HOST_URL, "appPath":%appPath, "pathInfo":%path},
        "verb": %verb,
        "method": %method,
-       "targetModule": {
+       "homeModule": {
          "name": %location | $.mod,
          "location": %location | {"app": $.app, "pkg": $.pkg?},
         },
@@ -271,7 +271,7 @@ command get-trigger-if-captures [string path] :: reif:ActionSummary -> @True Tri
        "paramsType": %paramsType,
 
        "pathPattern": %pathPattern,
-       "description": %description,
+       "actionDocument": %actionDocument,
        "targetAction": {
           "name": %name,
          "location": %location,
