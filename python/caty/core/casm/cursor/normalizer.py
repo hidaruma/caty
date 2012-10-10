@@ -284,6 +284,8 @@ class TypeCalcurator(_SubNormalizer):
             else:
                 return r.intersect(self._dereference(l))
         else:
+            if l in self.history and r in self.history:
+                return NeverSchema() # 再帰的定義
             return (l & r).accept(self)
 
     def _intersect_enum_and_scalar(self, enum, scalar):

@@ -118,7 +118,7 @@ command untranslate
    @[default("form")]
    "format" : GenericFormatName?,
  }
-:: any -> Generic throws [webio_InsufficientMetainfo, ConversionError]
+:: json:StandardJson -> Generic throws [webio_InsufficientMetainfo, ConversionError]
     refers python:webio.Untranslate;
 
 /** genericデータをrawデータにdownward変換する 
@@ -411,5 +411,11 @@ command decode-from-form-and-back
   json:response
 };
 
+type Formable = {
+  *: FormItem?
+};
+
+type FormItem = string | number | boolean | FormableArray | Formable;
+type FormableArray = [FormItem*];
 
 // End of Module

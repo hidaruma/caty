@@ -7,8 +7,6 @@ type list<X default any> = [X*];
 
 type record<X default any> = {*: X?};
 
-type scalar  = null|boolean|number|string|binary;
-
 type Logical<X> =(boolean | @True X | @False X );
 
 type Trilogical<X> =(triboolean | @True X | @False X | @Indef X);

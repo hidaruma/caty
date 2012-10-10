@@ -3,6 +3,8 @@
  */
 module builtin in casm; 
 
+type scalar  = null|boolean|number|string|binary;
+
 @[system, unquiet]
 type CatyExecMode = [string*];
 

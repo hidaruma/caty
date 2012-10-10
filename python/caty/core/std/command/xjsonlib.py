@@ -44,9 +44,15 @@ class Parse(Builtin):
     def execute(self, input):
         return xjson.loads(input)
 
-class Encode(Builtin):
+class ToJson(Builtin):
     def execute(self, input):
         return json.encode(input)
+
+
+class FromJson(Builtin):
+    def execute(self, input):
+        return json.decode(input)
+
 
 class Select(Builtin):
     def setup(self, opts, pathexp):
