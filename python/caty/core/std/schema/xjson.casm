@@ -4,10 +4,6 @@
 module xjson in casm;
 
 type AnyObject = {*:any};
-type StandardJson = json:StandardJson;
-type StandardXJson = StandardJson | @*! scalar | @*! TaggedObject | @*! TaggedArray;
-type TaggedArray = [StandardXJson*];
-type TaggedObject = {*:StandardXJson?};
 
 /**
  * 引数で指定されたファイルを JSON データとして読み込み、値を返す。

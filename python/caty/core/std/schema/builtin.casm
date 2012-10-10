@@ -5,6 +5,19 @@ module builtin in casm;
 
 type scalar  = null|boolean|number|string|binary;
 
+
+type StandardJson = string | number | null | boolean | StdArray | StdObject;
+
+type StdObject = {
+  *: StandardJson,
+};
+
+type StdArray = [StandardJson*];
+
+type StandardXJson = StandardJson | @*! scalar | @*! TaggedObject | @*! TaggedArray;
+type TaggedArray = [StandardXJson*];
+type TaggedObject = {*:StandardXJson?};
+
 @[system, unquiet]
 type CatyExecMode = [string*];
 
@@ -1387,6 +1400,28 @@ command keys :: array | object | @*! (array|object) -> [(string|integer)*] {
     untagged | each {%_key}
 };
 
+/** 入力が純粋JSONに変換不可能なときは例外またはundefined値とする
+ * 変換不可能な値とは：
+ *
+ * * binary
+ * * undefined
+ * * foreign
+ * * これらを含む複合型（タグオンリーはundefinedを含む）
+ *
+ * タグは変換できる。
+ */
+command reject-non-json
+ {
+   /** 例外の代わりにundefineを出力するか */
+   @[default(false)]
+   "safe": boolean?
+ } :: univ -> any? throws Unsupported {
+  $ > in;
+  %in | validate<StandardXJson> | when {
+    OK => %in,
+    NG => %safe | case {true => undefined, false => @Unsupported {"message": "$data", "data": %in} | throw}
+  }
+};
 
 /* アノテーション宣言 */
 /** アノテーションのターゲットタイプ 
