@@ -10,6 +10,7 @@ from caty import ForeignObject, UNDEFINED
 from decimal import Decimal
 from caty.core.language import split_colon_dot_path
 from caty.core.exception import throw_caty_exception
+from caty.core.casm.cursor.dump import TreeDumper
 
 class Sample(Builtin):
    
@@ -38,9 +39,13 @@ class Sample(Builtin):
         sb = mod.make_schema_builder()
         rr = mod.make_reference_resolver()
         cd = mod.make_cycle_detecter()
-        tn = mod.make_type_normalizer()
         ta = mod.make_typevar_applier()
-        t = ast.accept(sb).accept(rr).accept(cd).accept(ta).accept(tn).body
+        tn = mod.make_type_normalizer()
+        t = ast.accept(sb)
+        t = t.accept(rr)
+        t = t.accept(cd)
+        t = t.accept(ta)
+        t = t.accept(tn).body
         return self._empty_to_undefined(t.accept(DataGenerator(self._gen_options)))
 
     def _empty_to_undefined(self, o):
@@ -73,7 +78,7 @@ class DataGenerator(TreeCursor):
         self.cache = {}
         
     def __has_loop_ref(self, node, cache):
-        types = (Root, Tag, Ref)
+        types = (Root, Optional, Ref)
         if isinstance(node, types):
             if node in cache:
                 return True
@@ -90,6 +95,12 @@ class DataGenerator(TreeCursor):
             for k, v in node.items():
                 if self.__has_loop_ref(v, cache):
                     return True
+        elif isinstance(node, Tag):
+            pair = (node.tag, node.body)
+            if pair in cache:
+                return True
+            cache.add(pair)
+            return self.__has_loop_ref(node.body, cache)
         return False
 
     def __reduce_loop(self, node, cache):
@@ -112,6 +123,8 @@ class DataGenerator(TreeCursor):
                 return self.__reduce_loop(node.left, cache)
             except:
                 return self.__reduce_loop(node.right, cache)
+        elif isinstance(node, Optional):
+            return self.__reduce_loop(node.body, cache)
         return node
 
     def _visit_root(self, node):

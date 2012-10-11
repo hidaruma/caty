@@ -1333,6 +1333,11 @@ class NamedSchema(SchemaBase, Root):
     def __repr__(self):
         return 'NamedSchema:' + self.name + repr(self.body)
 
+    @property
+    def optional(self):
+        return self._schema.optional
+    
+
 class TypeReference(SchemaBase, Scalar, Ref):
 
     # 参照先がオブジェクトの可能性もあるので擬似タグをサポート
@@ -1434,6 +1439,10 @@ class TypeReference(SchemaBase, Scalar, Ref):
     def fill_default(self, value):
         return self.body.fill_default(value)
 
+    @property
+    def optional(self):
+        return self.body.optional if self.body else False
+    
 
 class OverlayedDict(object):
     def __init__(self, a, b):

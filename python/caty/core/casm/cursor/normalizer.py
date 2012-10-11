@@ -285,7 +285,7 @@ class TypeCalcurator(_SubNormalizer):
                 return r.intersect(self._dereference(l))
         else:
             if l in self.history and r in self.history:
-                return NeverSchema() # 再帰的定義
+                return NeverSchema() # 再帰的定義で止まってしまうのを修正
             return (l & r).accept(self)
 
     def _intersect_enum_and_scalar(self, enum, scalar):
@@ -354,7 +354,7 @@ class NeverChecker(_SubNormalizer):
         self.into_optional = into_optional
 
     def _visit_scalar(self, node):
-        if node.type == 'never':
+        if node.type == 'never' and not node.optional:
             return [[u'never']]
 
     def _visit_root(self, node):
