@@ -7,11 +7,16 @@
 module inu;
 
 
+
+
 /* 指定されたアプリケーション内の型パラメータを持たないすべての型からデータを生成して、non-jsonデータを報告する 
  */
 command check-app-non-json 
  {
-  @[default("false")]
+  @[default(false)]
+  "allow-encodable": boolean?,
+
+  @[default(false)]
   "no-check": boolean?,
 
   @[default("rand")]
@@ -30,8 +35,9 @@ command check-app-non-json
     ];
 
     gen:sample %--max-depth %--string --mod=%modPath %typePath > generatedData;
-    %generatedData | xjson:univ-pretty | dump --prefix="** generated data:" ; /* この行はデバッグ専用 */
-    %generatedData | reject-non-json --safe |
+    %generatedData | /*xjson:univ-pretty | */dump --prefix="** generated data:" ; /* この行はデバッグ専用 */
+    %typePath | dump --prefix="** type path again:" ; /* この行はデバッグ専用 */
+    %generatedData | reject-non-json --safe %--allow-encodable |
     when {
       undefined => %typePath,
       * => undefined,
@@ -39,11 +45,28 @@ command check-app-non-json
   } | list:tighten
 };
 
+/** ルーズ配列を除去するためのワークアラウンドコマンド */
+command _tighten :: univ  -> univ {
+ when {
+   array => 
+     each {
+       _tighten
+      } | list:tighten
+   ,
+   object => 
+     each --obj {
+       _tighten
+     }
+   ,
+   *     => pass,
+ }
+};
+
 /** 指定されたアプリケーション内の型パラメータを持たないすべての型を列挙して、リモート方式で生成と検証をする
  */
 command remote-gen-and-check-app-types 
  {
-  @[default("false")]
+  @[default(false)]
   "no-check": boolean?,
 
   @[default("rand")]
@@ -61,13 +84,15 @@ command remote-gen-and-check-app-types
       mpl:fullname > typePath | dump --prefix="\n\n** type path of sending data:",
     ];
 
-    gen:sample %--max-depth %--string --mod=%modPath %typePath > generatedData;
-    %generatedData | xjson:univ-pretty | dump --prefix="** generated data:" ; /* この行はデバッグ専用 */
-    %generatedData | reject-non-json --safe |
+    gen:sample %--max-depth %--string /*--mod=%modPath*/ %typePath > generatedData;
+    %generatedData | /* xjson:univ-pretty | */ dump --prefix="** generated data:" ; /* この行はデバッグ専用 */
+    %typePath | dump --prefix="** type path again:" ; /* この行はデバッグ専用 */
+    %generatedData | reject-non-json --safe | _tighten /* 暫定 */ |
     when {
       undefined => /* やめる */
-       null | dump --prefix="** abort testing:"; /* この行はデバッグ専用 */
-       void ,
+       ["*abort* ", %typePath] | text:concat > abort;
+       %abort | dump --prefix="** abort testing:"; /* この行はデバッグ専用 */
+       %abort ,
       * =>         /* 続行する */
         /* -- web部分開始 -- */
         webio:untranslate --format=json | webio:unparse | 
@@ -75,14 +100,13 @@ command remote-gen-and-check-app-types
         webio:parse --format=json |dump --prefix="** received and parsed data:" > receivedData;
         %no-check |
         case {
-         true  => void,
+         true  => %typePath,
          false => %receivedData |
            webio:translate --type=%typePath | dump --prefix="** translated data:" |
            /* -- web部分終了 -- */
-           xjson:from-json |
            validate %typePath | dump --prefix="** validation result:" |
            when {
-              OK => void,
+              OK => %typePath,
               NG => @ImplementationBug {
                       "message": "validation error",
                       "reason": pass,
@@ -93,6 +117,40 @@ command remote-gen-and-check-app-types
   } /* /each */
 
 };
+
+/** コピペしたコマンド、後で整理する */
+command remote-gen-and-check-one-type
+ {
+  @[default("rand")]
+  "string": ("rand" | "empty" | "implied")?,
+  @[default(5)]
+  "max-depth":	integer(minimum=1)?
+ }
+ [string typePath] :: void -> any
+{
+  %1 > typePath;
+
+    gen:sample %--max-depth %--string /*--mod=%modPath*/ %typePath > generatedData;
+    %generatedData | dump --prefix="** generated data:" ; /* この行はデバッグ専用 */
+    %typePath | dump --prefix="** type path again:" ; /* この行はデバッグ専用 */
+    %generatedData | reject-non-json --safe |
+    when {
+      undefined => /* やめる */
+       null | dump --prefix="** abort testing:"; /* この行はデバッグ専用 */
+       void ,
+      * =>         /* 続行する */
+        /* -- web部分開始 -- */
+        webio:untranslate --format=json | webio:unparse | 
+        dump --prefix="** the data transfered on the Web:" | 
+        webio:parse --format=json |dump --prefix="** received and parsed data:" > receivedData;
+
+        %receivedData |
+        webio:translate --type=%typePath | dump --prefix="** translated data:" |
+        /* -- web部分終了 -- */
+        validate %typePath | dump --prefix="** validation result:" 
+  }
+};
+
 
 
 type NoTypeParams = @* {

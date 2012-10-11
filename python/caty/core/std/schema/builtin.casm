@@ -730,7 +730,7 @@ exception SecurityError = object;
 /** 例外：コマンド実行エラー */
 exception CommandExecutionError = object;
 
-/** 例外：サポートされていない操作。 */
+/** 例外：サポートされていないデータまたは操作。 */
 exception Unsupported = object;
 
 /** 例外：タイムアウト。 */
