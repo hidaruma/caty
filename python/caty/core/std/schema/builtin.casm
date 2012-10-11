@@ -16,7 +16,7 @@ type StdObject = {
   *: StandardJson,
 };
 
-type StdArray = [StandardJson*];
+type StdArray = [StandardJson*](tight=true);
 
 /** 
  * foreign, undefinedを含まない標準JSONに変換可能なXJSONデータ。
