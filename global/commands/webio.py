@@ -89,11 +89,11 @@ class Translate(Command, TypeCalculator):
                     scm.validate(n)
                     return n
                 elif t == 'text':
-                    scm = self.schema['string']
+                    scm = self.schema.get_type('string')
                 elif t == 'bytes':
-                    scm = self.schema['binary']
+                    scm = self.schema.get_type('binary')
                 elif t == 'void':
-                    scm = self.schema['null']
+                    scm = self.schema.get_type('null')
                 scm.validate(v)
                 return v
             except JsonSchemaError, e:

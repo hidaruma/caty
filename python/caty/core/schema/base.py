@@ -1244,9 +1244,12 @@ class NamedSchema(SchemaBase, Root):
             return 
         self._schema.validate(value)
         if self._schema.format: # フォーマットの指定がある場合
-            r = self._module.get_plugin(self._schema.format).validate(value)
-            if r:
-                raise JsonSchemaError(r)
+            try:
+                r = self._module.get_plugin(self._schema.format).validate(value)
+                if r:
+                    raise JsonSchemaError(r)
+            except KeyError, e:
+                pass #XXX: formatの仕様変更が予定されているので一旦無視
 
     def convert(self, value):
         return self._schema.convert(value)
