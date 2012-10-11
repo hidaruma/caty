@@ -77,7 +77,7 @@ class ASTRoot(Root):
 
     @property
     def canonical_name(self):
-        mn = self.module.name
+        mn = self.module.canonical_name
         name = self.name
         name = '%s:%s' % (mn, name)
         return name
