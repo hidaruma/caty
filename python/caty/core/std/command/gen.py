@@ -11,6 +11,7 @@ from decimal import Decimal
 from caty.core.language import split_colon_dot_path
 from caty.core.exception import throw_caty_exception
 from caty.core.casm.cursor.dump import TreeDumper
+from caty.core.typeinterface import flatten_union
 
 class Sample(Builtin):
    
@@ -76,17 +77,19 @@ class DataGenerator(TreeCursor):
         self.__occur = gen_options['occur']
         self.__max_depth = gen_options['max-depth']
         self.cache = {}
+        self.depth = 0
         
     def __has_loop_ref(self, node, cache):
-        types = (Root, Optional, Ref)
-        if isinstance(node, types):
-            if node in cache:
+        if isinstance(node, (Root, Ref)):
+            if node.canonical_name in cache:
                 return True
             else:
-                cache.add(node)
+                cache.add(node.canonical_name)
             return self.__has_loop_ref(node.body, cache)
         elif isinstance(node, Union):
-            return self.__has_loop_ref(node.left, cache) or self.__has_loop_ref(node.right, cache)
+            for n in flatten_union(node, debug=True):
+                if self.__has_loop_ref(n, cache):
+                    return True
         elif isinstance(node, Array):
             for i in node:
                 if self.__has_loop_ref(i, cache):
@@ -95,34 +98,31 @@ class DataGenerator(TreeCursor):
             for k, v in node.items():
                 if self.__has_loop_ref(v, cache):
                     return True
-        elif isinstance(node, Tag):
-            pair = (node.tag, node.body)
-            if pair in cache:
-                return True
-            cache.add(pair)
+        elif isinstance(node, (Tag, Optional)):
             return self.__has_loop_ref(node.body, cache)
         return False
 
     def __reduce_loop(self, node, cache):
         types = (Root, Ref)
         if isinstance(node, types):
-            if node in cache:
+            if node.canonical_name in cache:
                 raise _MaximumRecursionError()
             else:
-                cache.add(node)
+                cache.add(node.canonical_name)
                 return self.__reduce_loop(node.body, cache)
 
         elif isinstance(node, Tag):
-            pair = (node.tag, node.body)
-            if pair in cache:
+            n = node.body.canonical_name
+            if n in cache:
                 raise _MaximumRecursionError()
-            cache.add(pair)
+            cache.add(n)
             return node.__class__(node.tag, self.__reduce_loop(node.body, cache))
         elif isinstance(node, Union):
-            try:
-                return self.__reduce_loop(node.left, cache)
-            except:
-                return self.__reduce_loop(node.right, cache)
+            for n in flatten_union(node, cache):
+                try:
+                    return self.__reduce_loop(n, cache)
+                except:
+                    return self.__reduce_loop(node.right, cache)
         elif isinstance(node, Optional):
             return self.__reduce_loop(node.body, cache)
         return node
