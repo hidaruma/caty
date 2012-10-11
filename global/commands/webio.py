@@ -66,6 +66,7 @@ class Untranslate(Command):
 class Translate(Command, TypeCalculator):
     def setup(self, opts):
         self.__type = opts.get('type')
+        self.mod = UNDEFINED
         if self.__type:
             self.set_schema(self.__type)
 
