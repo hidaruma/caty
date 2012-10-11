@@ -85,9 +85,9 @@ command remote-gen-and-check-app-types
     ];
 
     gen:sample %--max-depth %--string /*--mod=%modPath*/ %typePath > generatedData;
-    %generatedData | /* xjson:univ-pretty | */ dump --prefix="** generated data:" ; /* この行はデバッグ専用 */
+    %generatedData? | /* xjson:univ-pretty | */ dump --prefix="** generated data:" ; /* この行はデバッグ専用 */
     %typePath | dump --prefix="** type path again:" ; /* この行はデバッグ専用 */
-    %generatedData | reject-non-json --safe | _tighten /* 暫定 */ |
+    %generatedData? | reject-non-json --safe | _tighten /* 暫定 */ |
     when {
       undefined => /* やめる */
        ["*abort* ", %typePath] | text:concat > abort;
