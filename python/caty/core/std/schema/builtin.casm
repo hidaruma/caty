@@ -1427,7 +1427,7 @@ command reject-non-json
    @[default(false)]
    "allow-encodable": boolean?,
  } :: univ -> any? throws Unsupported {
-  $? > in;
+  xjson:normalize > in;
   %allow-encodable | case {
     true => %in? | validate<StandardXJson>,
     false => %in? | validate<StandardJson>

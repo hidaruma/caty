@@ -46,7 +46,7 @@ class Parse(Builtin):
 
 class ToJson(Builtin):
     def execute(self, input):
-        return json.encode(input)
+        return json.encode(json.normalize(input))
 
 
 class FromJson(Builtin):
@@ -134,3 +134,8 @@ class Flatten(Builtin):
         else:
             r.append(obj)
         return r
+
+class Normalize(Builtin):
+    def execute(self, data):
+        return json.normalize(data)
+

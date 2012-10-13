@@ -108,3 +108,8 @@ command flatten
  
     refers python:caty.core.std.command.xjsonlib.Flatten
  ;
+
+/** undefinedを含んだデータのうち、配列末尾とobjectのundefinedプロパティを削除する。 */
+command normalize :: univ -> univ
+    refers python:caty.core.std.command.xjsonlib.Normalize;
+
