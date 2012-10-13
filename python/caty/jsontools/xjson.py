@@ -220,6 +220,7 @@ def tag(seq):
 ascii = set(list("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&'()*+,-./:;<=>?@[]^_`{|}~ \t\n\r"))
 def binary(seq):
     seq.parse('b"')
+    end = False
     with strict():
         cs = []
         while not seq.eof:
@@ -239,9 +240,12 @@ def binary(seq):
                     cs.append(chr(int(a+b, 16)))
             elif seq.current == '"':
                 seq.next()
+                end = True
                 break
             else:
                 raise ParseError(seq, binary)
+        if not end:
+            raise ParseError(seq, binary)
         return ''.join(cs)
 
 parsers = [
