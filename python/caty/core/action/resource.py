@@ -103,7 +103,7 @@ def split_url_pattern(seq):
                     r.append(''.join(b))
             buf_list = [[]]
         elif c == '(':
-            sub = self._split_pattern(seq)
+            sub = split_url_pattern(seq)
             buf_list[0].append(sub.pop(0))
             for s in sub:
                 buf_list.append([])
