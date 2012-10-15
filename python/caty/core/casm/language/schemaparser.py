@@ -60,7 +60,7 @@ def term(seq):
     def _unary(s):
         k = choice(keyword(u'open'), keyword(u'close'), keyword(u'extract'))(s)
         if k == u'extract':
-            path = JSONPathSelectorParser(False, True)(seq)
+            path = CasmJSONPathSelectorParser()(seq)
             body = s.parse(typedef)
             return ExtractorNode(path, body)
         else:
@@ -275,4 +275,59 @@ def item(seq):
     if doc:
         s.docstring = doc
     return [k, s]
+
+from caty.jsontools.selector.stm import Nothing, Selector, SelectorWrapper, AllSelector
+class CasmJSONPathSelectorParser(JSONPathSelectorParser):
+    SelectorWrapper = SelectorWrapper
+    AllSelector = AllSelector
+    class PropertySelector(Selector):
+        def __init__(self, prop, opt=False):
+            Selector.__init__(self)
+            self.property = prop
+            self.is_optional = opt
+
+        def run(self, obj, ignored=False):
+            if isinstance(obj, Object):
+                if self.property in obj:
+                    yield obj[self.property]
+                else:
+                    raise KeyError(self.property)
+            else:
+                #if not self.is_optional:
+                raise Exception('not a object')
+
+        def _to_str(self):
+            return self.property if ' ' not in self.property else '"%s"' % self.property
+
+    class ItemSelector(Selector):
+        def __init__(self, prop, optional=False):
+            Selector.__init__(self)
+            self.property = prop
+            self.is_optional = optional
+
+        def run(self, obj, ignored=False):
+            if isinstance(obj, Array):
+                if len(obj) > self.property:
+                    yield obj[self.property]
+                else:
+                    raise IndexError(str(self.property))
+            else:
+                raise Exception('not a array')
+
+        def _to_str(self):
+            return str(self.property)
+
+    class TagContentSelector(Selector):
+        def __init__(self, src):
+            Selector.__init__(self)
+            self.src= src
+
+        def run(self, obj):
+            yield obj.body
+
+        def _to_str(self):
+            return self.src
+
+    def __init__(self):
+        JSONPathSelectorParser.__init__(self, False, True, self)
 

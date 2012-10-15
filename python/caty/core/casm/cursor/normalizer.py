@@ -357,12 +357,11 @@ class TypeCalcurator(_SubNormalizer):
                 op=node.operator, type=body.type)
 
         if node.operator == u'open':
-            print body
             body.wildcard = AnySchema()
         elif node.operator == u'close':
             body.wildcard = NeverSchema()
         else:
-            raise NotImplemented
+            return node.path.select(body).next()
         return res
 
 class NeverChecker(_SubNormalizer):

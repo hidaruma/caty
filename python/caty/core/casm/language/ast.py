@@ -197,6 +197,7 @@ class UnaryOpNode(Node, UnaryOperator):
 
 class ExtractorNode(Node, UnaryOperator):
     def __init__(self, path, body):
+        Node.__init__(self)
         self.path = path
         self._body = body
         self._operator = u'extract'

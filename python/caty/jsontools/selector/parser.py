@@ -1,14 +1,16 @@
 
 from topdown import *
-from caty.jsontools.selector.stm import *
 from caty.jsontools import stdjson
 from caty.jsontools import xjson
+from caty.jsontools.selector import stm as default_factory
+from caty import UNDEFINED
 
 class JSONPathSelectorParser(Parser):
-    def __init__(self, empty_when_error=False, ignore_rest=False):
+    def __init__(self, empty_when_error=False, ignore_rest=False, factory=None):
         Parser.__init__(self)
         self.empty_when_error = empty_when_error
         self.ignore_rest = ignore_rest
+        self.factory = factory if factory else default_factory
 
     def __call__(self, seq):
         o = chainl([self.all, 
@@ -22,7 +24,7 @@ class JSONPathSelectorParser(Parser):
                     self.itemwildcard, 
                     try_(self.oldtag),
                     ], self.dot)(seq)
-        o = SelectorWrapper(o)
+        o = self.factory.SelectorWrapper(o)
         optional = option(u'?')(seq)
         if optional and option('=')(seq):
             d = xjson.parse(seq)
@@ -48,13 +50,13 @@ class JSONPathSelectorParser(Parser):
 
     def all(self, seq):
         seq.parse('$')
-        return AllSelector()
+        return self.factory.AllSelector()
 
     def name(self, seq):
         key = seq.parse([self.namestr, lambda s:self.quoted(s, '"'), lambda s: self.quoted(s, "'")])
         optional = False
         #optional = option(u'?')(seq)
-        return PropertySelector(key, optional)
+        return self.factory.PropertySelector(key, optional)
 
     def namestr(self, seq):
         return seq.parse(Regex(r'[a-z_A-Z][-a-zA-Z_0-9]*'))
@@ -85,15 +87,15 @@ class JSONPathSelectorParser(Parser):
         idx = int(seq.parse(Regex(r'([0-9]+)')))
         optional = False
         #optional = option(u'?')(seq)
-        return ItemSelector(idx, optional)
+        return self.factory.ItemSelector(idx, optional)
 
     def namewildcard(self, seq):
         seq.parse('*')
-        return NameWildcardSelector()
+        return self.factory.NameWildcardSelector()
 
     def itemwildcard(self, seq):
         seq.parse('#')
-        return ItemWildcardSelector()
+        return self.factory.ItemWildcardSelector()
 
     def oldtag(self, seq):
         seq.parse('^')
@@ -103,23 +105,23 @@ class JSONPathSelectorParser(Parser):
         t = seq.parse(['*', '^'])
         if t == '*':
             e = seq.parse(option('!', None))
-            return TagSelector(None, bool(e))
+            return self.factory.TagSelector(None, bool(e))
         else:
             e = seq.parse(option('!', None))
-            return TagReplacer(None, bool(e))
+            return self.factory.TagReplacer(None, bool(e))
 
     def tag(self, seq):
         seq.parse('tag()')
-        return TagNameSelector(False)
+        return self.factory.TagNameSelector(False)
 
     def exp_tag(self, seq):
         seq.parse('exp-tag()')
-        return TagNameSelector(True)
+        return self.factory.TagNameSelector(True)
 
     def untagged(self, seq):
         v = seq.parse(choice('untagged()', 'content()'))
-        return TagContentSelector(v)
+        return self.factory.TagContentSelector(v)
 
     def length(self, seq):
         seq.parse('length()')
-        return LengthSelector()
+        return self.factory.LengthSelector()

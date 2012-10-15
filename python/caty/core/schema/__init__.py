@@ -99,6 +99,7 @@ __all__ = [
     "EnumSchema",
     "BagSchema",
     "UnaryOpSchema",
+    "ExtractorSchema",
     "types",
     "schemata",
 ]
