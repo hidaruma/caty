@@ -181,6 +181,34 @@ class OperatorNode(Node):
     def _reify(self):
         return {'left': self.left.reify(), 'right': self.right.reify()}
 
+class UnaryOpNode(Node, UnaryOperator):
+    def __init__(self, type, body):
+        Node.__init__(self)
+        self._operator = type
+        self._body = body
+
+    @property
+    def body(self):
+        return self._body
+
+    @property
+    def operator(self):
+        return self._operator
+
+class ExtractorNode(Node, UnaryOperator):
+    def __init__(self, path, body):
+        self.path = path
+        self._body = body
+        self._operator = u'extract'
+
+    @property
+    def body(self):
+        return self._body
+
+    @property
+    def operator(self):
+        return self._operator
+
 class UnionNode(OperatorNode, Union):
     reification_type = u'_union'
 

@@ -347,6 +347,24 @@ class TypeCalcurator(_SubNormalizer):
                     return True
         return False
 
+    @apply_annotation
+    def _visit_unary_op(self, node):
+        res = node.body.accept(self)
+        body = dereference(res)
+        if body.type != 'object':
+           raise CatyException(u'SCHEMA_COMPILE_ERROR', 
+                u'Unsupported operand type for $op: $type',
+                op=node.operator, type=body.type)
+
+        if node.operator == u'open':
+            print body
+            body.wildcard = AnySchema()
+        elif node.operator == u'close':
+            body.wildcard = NeverSchema()
+        else:
+            raise NotImplemented
+        return res
+
 class NeverChecker(_SubNormalizer):
     def __init__(self, module, safe=False, into_optional=False):
         _SubNormalizer.__init__(self, module)

@@ -1446,6 +1446,56 @@ class TypeReference(SchemaBase, Scalar, Ref):
     def optional(self):
         return self.body.optional if self.body else False
     
+class UnaryOpSchema(SchemaBase, UnaryOperator):
+    def __init__(self, operator, schema):
+        SchemaBase.__init__(self)
+        self._schema = schema
+        self._annotations = Annotations([])
+        self._docstring = u''
+        self._operator = operator
+
+    @property
+    def operator(self):
+        return self._operator
+
+    @property
+    def name(self):
+        return self._schema.name
+
+    @property
+    def body(self):
+        return self._schema
+
+    @property
+    def options(self):
+        return self._schema.options
+
+    def validate(self, value):
+        if not (value is caty.UNDEFINED):
+            self._schema.validate(value)
+
+    def convert(self, value):
+        if not (value is caty.UNDEFINED):
+            return self._schema.convert(value)
+
+    @property
+    def optional(self):
+        return True
+
+    def _clone(self, *args, **kwds):
+        return UnaryOpSchema(self._operator, self.body.clone(*args, **kwds))
+
+    def _deepcopy(self, checked):
+        return UnaryOpSchema(self._operator, self.body.clone(*args, **kwds))
+
+    @property
+    def type(self):
+        return self.body.type
+
+    @property
+    def tag(self):
+        return self.body.tag
+
 
 class OverlayedDict(object):
     def __init__(self, a, b):

@@ -77,6 +77,13 @@ class SchemaBuilder(TreeCursor):
         return EnumSchema(node.enum, node.options)
 
     @apply_annotation
+    def _visit_unary_op(self, node):
+        if node.operator == u'extract':
+            return ExtractorSchema(node.path, node.body.accept(self))
+        else:
+            return UnaryOpSchema(node.operator, node.body.accept(self))
+
+    @apply_annotation
     def _visit_object(self, node):
         o = {}
         for k, v in node.items():

@@ -58,3 +58,6 @@ class DependencyAnalizer(TreeCursor):
     def _visit_kind(self, node):
         return self.dependency_graph
 
+    def _visit_unary_op(self, node):
+        node.body.accept(self)
+

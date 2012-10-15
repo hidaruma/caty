@@ -71,6 +71,17 @@ class TreeDumper(TreeCursor):
         self._process_option(node, buff)
         return ''.join(buff)
 
+    def _visit_unary_op(self, node):
+        buff = []
+        buff.append(node.operator)
+        buff.append(' ')
+        if node.operator == u'extract':
+            buff.append(node.path.to_str())
+            buff.append(' ')
+        b = node.body.accept(self)
+        buff.append(b)
+        return ''.join(buff)
+
     def _process_option(self, node, buff):
         if node.options:
             items = [(k, v) for k, v in node.options.items() if k not in ('subName', 'minCount', 'maxCount', 'repeat', '__optional__')]

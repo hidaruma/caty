@@ -98,6 +98,7 @@ __all__ = [
     "PseudoTag",
     "EnumSchema",
     "BagSchema",
+    "UnaryOpSchema",
     "types",
     "schemata",
 ]

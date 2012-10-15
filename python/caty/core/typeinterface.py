@@ -80,6 +80,18 @@ class Updator(Operator):
     def accept(self, cursor):
         return cursor._visit_updator(self)
 
+class UnaryOperator(AbstractNode):
+    def accept(self, cursor):
+        return cursor._visit_unary_op(self)
+
+    @property
+    def body(self):
+        raise NotImplementedError
+
+    @property
+    def operator(self):
+        raise NotImplementedError
+
 class Tag(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_tag(self)

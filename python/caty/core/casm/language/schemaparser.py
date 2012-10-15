@@ -6,6 +6,7 @@ from topdown import *
 from caty.core.casm.language.ast import *
 from caty.core.language.util import *
 from caty.core.schema import schemata
+from caty.jsontools.selector.parser import JSONPathSelectorParser
 
 RESERVED = frozenset(schemata.keys() + ['type'])
 
@@ -56,6 +57,16 @@ def term(seq):
         v = s.parse(option(try_(term)))
         return TaggedNode(t, v)
 
+    def _unary(s):
+        k = choice(keyword(u'open'), keyword(u'close'), keyword(u'extract'))(s)
+        if k == u'extract':
+            path = JSONPathSelectorParser(False, True)(seq)
+            body = s.parse(typedef)
+            return ExtractorNode(path, body)
+        else:
+            body = s.parse(typedef)
+            return UnaryOpNode(k, body)
+
     def _type_name_tag(s):
         _= s.parse('@&')
         v = s.parse(term)
@@ -88,7 +99,7 @@ def term(seq):
         return ScalarNode(u'never', {}, [])
 
     doc = option(docstring)(seq)
-    s = seq.parse(map(try_, [_pseudo_tag, _type_name_tag, _tag, _never]) + [enum, _term, bag, object_, array, scalar])
+    s = seq.parse(map(try_, [_pseudo_tag, _type_name_tag, _tag, _never, _unary]) + [enum, _term, bag, object_, array, scalar])
     o = seq.parse(option('?'))
     if doc:
         s.docstring = doc
