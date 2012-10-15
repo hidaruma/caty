@@ -323,6 +323,12 @@ class CasmJSONPathSelectorParser(JSONPathSelectorParser):
             self.src= src
 
         def run(self, obj):
+            from caty.core.typeinterface import Tag
+            from caty.core.exception import throw_caty_exception
+            if not isinstance(obj, Tag):
+                throw_caty_exception(u'SchemaCompileError',
+                    u'Unsupported operand type for $op: $type',
+                    op=u'content', type=obj.type)
             yield obj.body
 
         def _to_str(self):

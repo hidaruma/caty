@@ -353,7 +353,7 @@ class TypeCalcurator(_SubNormalizer):
         body = dereference(res)
         if node.operator != u'extract':
             if body.type != 'object':
-               raise CatyException(u'SCHEMA_COMPILE_ERROR', 
+               raise CatyException(u'SchemaCompileError', 
                     u'Unsupported operand type for $op: $type',
                     op=node.operator, type=body.type)
         if node.operator == u'open':
