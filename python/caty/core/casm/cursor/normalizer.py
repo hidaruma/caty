@@ -351,11 +351,11 @@ class TypeCalcurator(_SubNormalizer):
     def _visit_unary_op(self, node):
         res = node.body.accept(self)
         body = dereference(res)
-        if body.type != 'object':
-           raise CatyException(u'SCHEMA_COMPILE_ERROR', 
-                u'Unsupported operand type for $op: $type',
-                op=node.operator, type=body.type)
-
+        if node.operator != u'extract':
+            if body.type != 'object':
+               raise CatyException(u'SCHEMA_COMPILE_ERROR', 
+                    u'Unsupported operand type for $op: $type',
+                    op=node.operator, type=body.type)
         if node.operator == u'open':
             body.wildcard = AnySchema()
         elif node.operator == u'close':
