@@ -86,6 +86,9 @@ class JsonSchemaError(ErrorObj, Exception):
         Exception.__init__(self, msg)
         ErrorObj.__init__(self, True, orig, val, msg)
 
+    def to_path(self, i18n):
+        return {u'$': self.to_dict(i18n)}
+
     def __repr__(self):
         return ErrorObj.__repr__(self)
 
@@ -128,10 +131,17 @@ class JsonSchemaErrorList(JsonSchemaError):
 
 
 class JsonSchemaUnionError(JsonSchemaError):
-    def __init__(self, e1, e2):
-        self.e1 = e1
-        self.e2 = e2
+    def __init__(self, *args):
+        self.errors = args
         self.is_error = True
+    
+    @property
+    def e1(self):
+        return self.errors[0]
+
+    @property
+    def e2(self):
+        return self.errors[1]
 
     def to_path(self, i18n):
         p = {}
@@ -139,9 +149,7 @@ class JsonSchemaUnionError(JsonSchemaError):
         return p
 
     def get_message(self, i18n, depth=0):
-        m1 = self.e1.get_message(i18n)
-        m2 = self.e2.get_message(i18n)
-        return m1 + u' / ' + m2
+        return u' / '.join([e.get_message(i18n) for e in self.errors])
 
     @property
     def error_message(self):
@@ -185,3 +193,62 @@ def _flatten(obj, i18n, parent='$'):
     else:
         yield parent, obj.to_dict(i18n)
 
+def normalize_errors(err):
+    # スキーマエラー情報を標準化する。
+    # * ユニオン型のエラーを展開し、もっとも深い所でエラーになったグループを取り出す。
+    # * 上記をリストやオブジェクトの中にも再帰的に適用する。
+    if isinstance(err, JsonSchemaUnionError):
+        errors = map(normalize_errors, _flatten_union(err))
+        return JsonSchemaUnionError(*_most_deep_group(errors))
+    elif isinstance(err, JsonSchemaErrorObject):
+        for k, v in err.items():
+            err[k] = normalize_errors(v)
+        return err
+    elif isinstance(err, JsonSchemaErrorList):
+        for i, e in enumerate(err):
+            err[i] = normalize_errors(e)
+        return err
+    else:
+        return err
+
+def _flatten_union(err):
+    if isinstance(err, JsonSchemaUnionError):
+        e1 = err.e1
+        e2 = err.e2
+        for e in _flatten_union(e1):
+            yield e
+        for e in _flatten_union(e2):
+            yield e
+    else:
+        yield err
+
+def _most_deep_group(errors):
+    map = {}
+    for e in errors:
+        depth = _error_depth(e)
+        if depth not in map:
+            map[depth] = []
+        map[depth].append(e)
+    return map[list(sorted(map.keys()))[0]]
+
+def _error_depth(e, depth=0):
+    if isinstance(e, JsonSchemaErrorObject):
+        depth = []
+        for k, v in e.items():
+            depth.append(_error_depth(v, depth+1))
+        depth.sort()
+        return depth[-1]
+    elif isinstance(e, JsonSchemaErrorList):
+        depth = []
+        for k, v in e:
+            depth.append(_error_depth(v, depth+1))
+        depth.sort()
+        return depth[-1]
+    elif isinstance(e, JsonSchemaUnionError):
+        depth = []
+        for k, v in e.errors:
+            depth.append(_error_depth(v, depth+1))
+        depth.sort()
+        return depth[-1]
+    else:
+        return depth

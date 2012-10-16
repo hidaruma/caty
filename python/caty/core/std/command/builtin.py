@@ -423,14 +423,12 @@ class TypeCalculator(object):
         return schemaparser.typename(seq)
 
     def error_report(self, e):
-        if hasattr(e, 'to_path'):
-            x = e.to_path(self.i18n)
-            r = {}
-            for k, v in x.items():
-                r[unicode(k)] = v['message'] if isinstance(v['message'], unicode) else unicode(str(v['message']))
-            return tagged(u'NG', r)
-        else:
-            return tagged(u'NG', e.get_message(self.i18n))
+        from caty.core.schema.errors import normalize_errors
+        x = normalize_errors(e).to_path(self.i18n)
+        r = {}
+        for k, v in x.items():
+            r[unicode(k)] = v['message'] if isinstance(v['message'], unicode) else unicode(str(v['message']))
+        return tagged(u'NG', r)
 
 class Translate(Builtin, TypeCalculator):
     
