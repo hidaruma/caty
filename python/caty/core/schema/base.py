@@ -380,15 +380,7 @@ class UnionSchema(OperatorSchema, Union):
             try:
                 self._right.validate(value)
             except JsonSchemaError, e2:
-                t = tag(value)
-                t1 = self._left.type.strip('@')
-                t2 = self._right.type.strip('@')
-                if t == t1:
-                    raise e1
-                elif t == t2:
-                    raise e2
-                else:
-                    raise JsonSchemaUnionError(e1, e2)
+                raise JsonSchemaUnionError(e1, e2)
             else:
                 return
         else:

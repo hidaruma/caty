@@ -176,20 +176,15 @@ def _flatten(obj, i18n, parent='$'):
             for r in _flatten(v, i18n, parent + '.' + str(i)):
                 yield r
     elif isinstance(obj, JsonSchemaUnionError):
-        t = []
-        for e in _flatten(obj.e1, i18n, parent):
-            t.append(e)
-        for e in _flatten(obj.e2, i18n, parent):
-            t.append(e)
-        r = t[0]
-        if isinstance(r, tuple):
-            parent = r[0]
-            r = r[1]
-        for _t in t[1:]:
-            if isinstance(_t, tuple):
-                _t = _t[1]
-            r['message'] = r['message'] + ' / ' + _t['message']
-        yield parent, r
+        from caty.util.collection import filled_zip
+        r = {}
+        for e in obj.errors:
+            for k, v in _flatten(e, i18n, parent):
+                if k not in r:
+                    r[k] = []
+                r[k].append(v)
+        for k, v in r.items():
+            yield k, v
     else:
         yield parent, obj.to_dict(i18n)
 
@@ -229,26 +224,26 @@ def _most_deep_group(errors):
         if depth not in map:
             map[depth] = []
         map[depth].append(e)
-    return map[list(sorted(map.keys()))[0]]
+    return map[list(sorted(map.keys()))[-1]]
 
 def _error_depth(e, depth=0):
     if isinstance(e, JsonSchemaErrorObject):
-        depth = []
+        depth_list = []
         for k, v in e.items():
-            depth.append(_error_depth(v, depth+1))
-        depth.sort()
-        return depth[-1]
+            depth_list.append(_error_depth(v, depth+1))
+        depth_list.sort()
+        return depth_list[-1]
     elif isinstance(e, JsonSchemaErrorList):
-        depth = []
+        depth_list = []
         for k, v in e:
-            depth.append(_error_depth(v, depth+1))
-        depth.sort()
-        return depth[-1]
+            depth_list.append(_error_depth(v, depth+1))
+        depth_list.sort()
+        return depth_list[-1]
     elif isinstance(e, JsonSchemaUnionError):
-        depth = []
+        depth_list = []
         for k, v in e.errors:
-            depth.append(_error_depth(v, depth+1))
-        depth.sort()
-        return depth[-1]
+            depth_list.append(_error_depth(v, depth+1))
+        depth_list.sort()
+        return depth_list[-1]
     else:
         return depth
