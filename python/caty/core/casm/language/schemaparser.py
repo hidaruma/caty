@@ -337,3 +337,26 @@ class CasmJSONPathSelectorParser(JSONPathSelectorParser):
     def __init__(self):
         JSONPathSelectorParser.__init__(self, False, True, self)
 
+    def namewildcard(self, seq):
+        t = seq.parse('*')
+        raise ParseError(seq, t)
+
+    def itemwildcard(self, seq):
+        t = seq.parse('#')
+        raise ParseError(seq, t)
+
+    def oldtag(self, seq):
+        t = seq.parse('^')
+        raise ParseError(seq, t)
+
+    def tag(self, seq):
+        t = seq.parse('tag()')
+        raise ParseError(seq, t)
+
+    def exp_tag(self, seq):
+        t = seq.parse('exp-tag()')
+        raise ParseError(seq, t)
+ 
+    def length(self, seq):
+        t = seq.parse('length()')
+        raise ParseError(seq, t)
