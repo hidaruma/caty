@@ -151,8 +151,10 @@ class Expand(Builtin, MafsMixin, PbcObject):
         execute = Contract(execute)
         execute.ensure += _not_property_changed
 
+
 class Expand2(Expand):
     pass
+
 
 class Response(Builtin):
     
@@ -191,6 +193,7 @@ class Response(Builtin):
             }
         }
 
+
 class Print(Expand):
     u"""組み込みの print コマンド。
     """
@@ -218,6 +221,7 @@ class Print(Expand):
             'encoding': encoding
         }
 
+
 class RequestTool(Internal):
     def setup(self, opts, path, *params):
         self._path = path
@@ -240,6 +244,7 @@ class RequestTool(Internal):
             app = self._system.get_app(n)
             path = self._path if p == '/' else join(p, self._path)
             return app, path
+
 
 class Request(RequestTool):
     
@@ -288,6 +293,7 @@ class Request(RequestTool):
                 v.merge_transaction(f[k])
         return cmd.result
 
+
 class SelectScript(RequestTool):
     def _sub_setup(self, opts, path, *params):
         self._no_check = not opts.get('check', caty.UNDEFINED)
@@ -311,6 +317,7 @@ class SelectScript(RequestTool):
         if entry:
             return entry.source
         return None
+
 
 class SelectAction(RequestTool):
     def _sub_setup(self, opts, path, *params):
@@ -338,6 +345,7 @@ class SelectAction(RequestTool):
                 return entry.source
             return entry.canonical_name
         return False
+
 
 class TraceDispatch(RequestTool):
     def _sub_setup(self, opts, path, *params):
@@ -434,6 +442,7 @@ class TypeCalculator(object):
             r[unicode(k)] = msg
         return tagged(u'NG', r)
 
+
 class Translate(Builtin, TypeCalculator):
     
     def setup(self, opts, schema_name):
@@ -476,6 +485,7 @@ class Translate(Builtin, TypeCalculator):
             d['$.'+k] = v
         return path2obj(d) if d else d
 
+
 class Validate(Builtin, TypeCalculator):
     
     def setup(self, opts, schema_name=u'univ'):
@@ -498,11 +508,11 @@ class Validate(Builtin, TypeCalculator):
             return self.error_report(e)
 
 
-
 class Void(Builtin):
     
     def execute(self, input):
         return None
+
 
 class Version(Builtin):
     
@@ -510,11 +520,12 @@ class Version(Builtin):
         return self.env.get('CATY_VERSION')
 
 
+
 class PassData(Builtin):
     
-   
     def execute(self, input):
         return input
+
 
 class Default(Builtin):
 
@@ -526,6 +537,7 @@ class Default(Builtin):
             return self.value
         else:
             return input
+
 
 class Nth(Builtin):
     
@@ -553,6 +565,7 @@ class Nth(Builtin):
                 throw_caty_exception(u'Undefined', unicode(str(n)))
         return x
 
+
 class Item(Builtin):
     
     def setup(self, opts, n):
@@ -572,6 +585,7 @@ class Item(Builtin):
             throw_caty_exception(u'Undefined', unicode(str(n)))
         return x
 
+
 class GetPV(Builtin):
     
     def setup(self, opts, key):
@@ -590,6 +604,7 @@ class GetPV(Builtin):
             throw_caty_exception(u'Undefined', self.key)
         return x
 
+
 class FindPV(Builtin):
     
     def setup(self, key):
@@ -600,6 +615,7 @@ class FindPV(Builtin):
             return tagged(u'EXISTS', input[self.key])
         else:
             return tagged(u'NO', None)
+
 
 class Equals(Builtin):
     def setup(self, opts):
@@ -631,6 +647,7 @@ class Equals(Builtin):
             return True
         return False
 
+
 class Eval(Builtin):
     
     def execute(self, input):
@@ -641,6 +658,7 @@ class Eval(Builtin):
             cmd = self.interpreter.build(input[1], transaction=PEND)
             return cmd(input[0])
         
+
 class DirIndex(Internal):
     
     def __init__(self, opt_list, arg_list, type_args=[], pos=(None, None), module=None):
@@ -670,15 +688,18 @@ class DirIndex(Internal):
             cmd = _interpreter.build(proxy.source, opts, [path, path])
         return cmd(input)
 
+
 class GetTag(Builtin):
     
     def execute(self, input):
         return tag(input)
 
+
 class Tagged(Builtin):
     
     def execute(self, input):
         return tagged(*input)
+
 
 class Untagged(Builtin):
     
@@ -692,6 +713,7 @@ class Untagged(Builtin):
                 raise Exception(ro.i18n.get(u'Not exptected tag: $expected!=$actual', expected=self.__tag ,actual=t))
         return untagged(input)
 
+
 class ConsoleOut(Builtin):
     def setup(self, opts):
         self.nonl = opts.get('no-nl', caty.UNDEFINED)
@@ -701,6 +723,7 @@ class ConsoleOut(Builtin):
         if (not self.nonl):
             self.stream.write('\n')
 
+
 class ConsoleIn(Builtin):
 # self.stream は使ってない
     def setup(self, prompt=u''):
@@ -709,10 +732,12 @@ class ConsoleIn(Builtin):
     def execute(self):
         return unicode(raw_input(self.prompt))
 
+
 class DisplayApp(Builtin):
     
     def execute(self):
         return self.env.get('CATY_APP')
+
 
 class DisplayApps(Builtin):
     
@@ -722,6 +747,7 @@ class DisplayApps(Builtin):
             s = self.current_app._system.get_app(n)
             siteInfoList.append({'group': s._group.name, 'description': s.description, 'name': s.name, 'path': unicode(s.web_path)})
         return siteInfoList
+
 
 class Home(Builtin):
     
@@ -734,22 +760,24 @@ class Home(Builtin):
         else:
             return os.path.basename(self.env.get('CATY_HOME'))
 
+
 class Location(Builtin):
-    
 
     def execute(self):
         return self.env.get('CATY_HOME')
 
+
 class Project(Builtin):
-    
 
     def execute(self):
         return self.env.get('CATY_PROJECT')
+
 
 class Manifest(Builtin):
     
     def execute(self):
         return self.current_app._manifest
+
 
 class ExecContext(Print):
     
@@ -766,6 +794,7 @@ class ExecContext(Print):
             self.fs = self.include
         template = Template(path, True, self.fs, self.schema)
         return self._load_context(path, input)
+
 
 class Assoc(Internal):
     
@@ -796,6 +825,7 @@ class Assoc(Internal):
                 return assoc.get(self.ext, {})
             return assoc.get(self.ext, {}).get(self.verb, None)
 
+
 class ShowFileType(Builtin):
     
     def setup(self, ext=None):
@@ -806,6 +836,7 @@ class ShowFileType(Builtin):
             return self.pub.all_types()
         else:
             return self.pub.all_types().get(self.ext, None)
+
 
 from caty.util.path import join
 class Redirect(Builtin):
@@ -824,14 +855,15 @@ class Redirect(Builtin):
             },
             'status': 302})
 
+
 class LocalSchema(Builtin):
     
     def execute(self, input):
         self.schema.add_local(input)
 
+
 class Binary(Builtin):
     
-
     def setup(self, format='base64'):
         self.format = format
 
@@ -842,18 +874,18 @@ class Binary(Builtin):
             import base64
             return base64.b64decode(input)
 
+
 class ListEnv(Builtin):
     
-
     def execute(self):
         r = {}
         for k, v in self.env.items():
             r[k] = v
         return r
 
+
 class Properties(Builtin):
     
-
     def execute(self, input):
         return map(unicode, input.keys())
 
@@ -887,10 +919,12 @@ def _type_of(input):
         type_name = u'foreign'
     return type_name
 
+
 class TypeOf(Builtin):
     
     def execute(self, input):
         return _type_of(input)
+
 
 class TypeIs(Builtin):
     
@@ -901,10 +935,12 @@ class TypeIs(Builtin):
         r = _type_of(input)
         return r == self.type_name
 
+
 class Undef(Builtin):
     
     def execute(self):
         return caty.UNDEFINED
+
 
 import itertools
 class Help(Builtin):
@@ -1166,6 +1202,7 @@ class Help(Builtin):
         else:
             return u''
 
+
 class MakeException(Builtin):
     def setup(self, name, msg):
         self.__name = name
@@ -1176,6 +1213,7 @@ class MakeException(Builtin):
             raise throw_caty_exception('ExceptionNotFound', u'Exception $type is not defined', type=self.__name)
         else:
             return CatyException(self.__name, self.__msg).to_json()
+
 
 class Throw(Builtin, TypeCalculator):
     def execute(self, input):
@@ -1209,6 +1247,7 @@ class Throw(Builtin, TypeCalculator):
             st = None
         throw_caty_exception(etype, msg, cls, id, st, **data)
 
+
 class ArrayToObject(Builtin):
     def setup(self, opts):
         self.multi = opts['multi']
@@ -1229,6 +1268,7 @@ class ArrayToObject(Builtin):
                 else:
                     throw_caty_exception(u'BadInput', u'$data', data=input)
             return r
+
 
 class ObjectToArray(Builtin):
     def setup(self, opts):
@@ -1255,6 +1295,7 @@ class Sleep(Builtin):
         time.sleep(sec)
         return input
 
+
 class ToString(Builtin):
     def execute(self, input):
         from caty.jsontools import raw_json as json
@@ -1266,14 +1307,17 @@ class ToString(Builtin):
         else:
             return unicode(str(v))
 
+
 from caty import ForeignObject
 class Foreign(Builtin):
     def execute(self):
         return ForeignObject()
 
+
 class Never(Builtin):
     def execute(self):
         throw_caty_exception(u'Never', u'never detected')
+
 
 class Signal(Builtin):
     def setup(self, opts):
@@ -1284,6 +1328,9 @@ class Signal(Builtin):
             data = json.tagged(u'runaway', data)
         send_caty_signal(data)
 
+
 class Fill(Builtin):
     def execute(self, data):
         return self.in_schema.fill_default(data)
+        
+

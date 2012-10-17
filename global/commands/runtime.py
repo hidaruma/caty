@@ -1,5 +1,5 @@
 #coding: utf-8
-from caty.core.command import Builtin
+from caty.core.command import Builtin, Internal
 from caty.core.exception import *
 
 class SysInstance(Builtin):
@@ -14,6 +14,7 @@ class AppInstance(Builtin):
         if not self.__app_name:
             return self.current_app
         return self.current_app._system.get_app(self.__app_name)
+
 
 
 

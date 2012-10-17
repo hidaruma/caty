@@ -69,11 +69,19 @@ type Executable = @* {
 
 };
 
-/** 実行可能なコマンドクロージャを実行する 
+/** 実行可能なクロージャを実行する 
  * eval, call と同様な能力を持つ
+ *
+ * 現時点では以下の制限あり。
+ *
+ * * callableにパス名は使えない。
+ * * typeArgsは使えない。
  */
 @[register-public]
-command exec :: Executable -> univ throws Exception signals univ;
-
+command exec :: Executable -> any 
+  throws Exception
+  signals any
+  refers python:exec.Exec
+;
 // End of Module
 
