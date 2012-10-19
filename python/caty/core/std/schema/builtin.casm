@@ -705,9 +705,9 @@ exception UnhandledSignal = {
  *: any?
 };
 
-/** 例外：uncloseでsetとunsetの競合が起きた。 */
+/** 例外：環境変数の設定でsetとunsetの競合が起きた。 */
 @[runaway]
-exception UncloseConflict = object;
+exception SetEnvConflict = object;
 
 
 /*

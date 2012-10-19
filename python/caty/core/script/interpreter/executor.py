@@ -561,7 +561,7 @@ class CommandExecutor(BaseInterpreter):
         additional_names = set(additional.keys())
         conflict = additional_names.intersection(set(unset))
         if conflict:
-            throw_caty_exception(u'UncloseConflict', u'$names', names=u', '.join(conflict))
+            throw_caty_exception(u'SetEnvConflict', u'$names', names=u', '.join(conflict))
         new_dict.update(env)
         new_dict.update(additional)
         for n in unset:

@@ -59,7 +59,7 @@ class Exec(Internal):
 
         conflict = additional_names.intersection(set(unset))
         if conflict:
-            throw_caty_exception(u'UncloseConflict', u'$names', names=u', '.join(conflict))
+            throw_caty_exception(u'SetEnvConflict', u'$names', names=u', '.join(conflict))
 
     def _compile_type(self, expr, app):
         from caty.core.casm.language.schemaparser import typedef
