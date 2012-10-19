@@ -12,7 +12,10 @@ class Exec(Internal):
             raise NotImplemented()
         cmd_class = app._schema_module.get_command(callable)
         input = executable['input']
-        type_args = [] #executable.get('typeArgs', [])
+        type_args_expr = executable.get('typeArgs', [])
+        type_args = []
+        for tap in type_args_expr:
+            type_args.append(self._compile_type(tap, app))
         opts_base = executable['opts']
         args_base = executable['args']
         opts = [Option('0', executable['arg0'])]
@@ -57,3 +60,22 @@ class Exec(Internal):
         conflict = additional_names.intersection(set(unset))
         if conflict:
             throw_caty_exception(u'UncloseConflict', u'$names', names=u', '.join(conflict))
+
+    def _compile_type(self, expr, app):
+        from caty.core.casm.language.schemaparser import typedef
+        from caty.core.casm.language.ast import ASTRoot
+        from caty.core.schema.base import Annotations
+        from topdown import as_parser
+        mod = app._schema_module
+        ast = ASTRoot(u'', [], as_parser(typedef).run(expr, auto_remove_ws=True), Annotations([]), u'')
+        sb = mod.make_schema_builder()
+        rr = mod.make_reference_resolver()
+        cd = mod.make_cycle_detecter()
+        ta = mod.make_typevar_applier()
+        tn = mod.make_type_normalizer()
+        t = ast.accept(sb)
+        t = t.accept(rr)
+        t = t.accept(cd)
+        t = t.accept(ta)
+        t = t.accept(tn)
+        return t
