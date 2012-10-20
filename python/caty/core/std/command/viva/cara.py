@@ -47,50 +47,61 @@ class DrawingMixin(object):
 
 class DrawModule(Builtin, DrawingMixin):
     _graph_config = {
+        # 全体のバックグラウンドのグラフ
         'graph': {
             'bgcolor': 'gainsboro',
             'fontsize': 20.0,
             'labelloc': 't',
         },
+        # リソースをまとめるサブグラフ
         'resource_subgraph': {
             'bgcolor': 'darkolivegreen4',
             'color': 'black',
             'fontsize': 14.0,
         },
+        #  ステートをまとめるサブグラフ
         'state_subgraph': {
             'fillcolor': '#ffff99',
             'color': 'black',
             'style': 'rounded,filled',
             'fontsize': 14.0,
         },
+        # エッジの属性
         'edge': {
+            # アクションからステートへのエッジ
             'action': {
                 'fontsize': 14.0,
                 'color': 'crimson'
             },
+            # ステートからアクションへのエッジ
             'link': {
                 'fontsize': 14.0,
                 'color': 'darkorchid3',
             },
+            # リダイレクトのエッジ
             'redirect': {
                 'fontsize': 14.0,
                 'color': 'blue3',
             },
+            # ユースケースのエッジ
             'usecase': {
                 'fontsize': 14.0,
                 'color': 'black',
                 'arrowhead': 'none',
             },
+            # 現在未使用
             'scenario': {
                 'fontsize': 14.0,
                 'color': 'black',
                 'arrowhead': 'none',
             },
+            # 存在しないアクションやステートの間のエッジ
             'missing': {
                 'fontsize': 14.0,
                 'color': '#333333',
                 'style': 'dotted',
             },
+            # 存在しないユーザーロールとの間のエッジ
             'missing-usecase': {
                 'fontsize': 14.0,
                 'color': '#333333',
@@ -98,6 +109,7 @@ class DrawModule(Builtin, DrawingMixin):
                 'arrowhead': 'none',
             },
         },
+        # アクションノード
         'action': {
             'fontsize': 14.0,
             'shape': u'ellipse',
@@ -105,6 +117,7 @@ class DrawModule(Builtin, DrawingMixin):
             'color': u'black',
             'fillcolor': u'darkseagreen2'
         }, 
+        # ポートノード
         'port': {
             'fontsize': 14.0,
             'shape': u'ellipse',
@@ -112,6 +125,7 @@ class DrawModule(Builtin, DrawingMixin):
             'color': u'black',
             'fillcolor': u'darkseagreen2'
         },
+        # 動的ポートノード
         'dyn-port': {
             'fontsize': 14.0,
             'shape': u'ellipse',
@@ -119,6 +133,7 @@ class DrawModule(Builtin, DrawingMixin):
             'color': u'black',
             'fillcolor': u'olivedrab1',
         },
+        # ステートノード
         'state': {
             'fontsize': 14.0,
             'shape': u'note',
@@ -126,6 +141,7 @@ class DrawModule(Builtin, DrawingMixin):
             'color': u'black',
             'fillcolor': u'gold'
         },
+        # 抽象ステートノード
         'abstract-state': {
             'fontsize': 14.0,
             'shape': u'note',
@@ -133,6 +149,7 @@ class DrawModule(Builtin, DrawingMixin):
             'color': u'black',
             'fillcolor': u'#ffe7a0'
         },
+        # ユーザーロールノード
         'userrole': {
             'fontsize': 14.0,
             'shape': u'octagon',
@@ -140,6 +157,7 @@ class DrawModule(Builtin, DrawingMixin):
             'color': u'black',
             'fillcolor': u'white'
         },
+        # 以下、missing-系は存在しないノードの属性
         'missing-action': {
             'fontsize': 14.0,
             'shape': u'ellipse',
@@ -167,6 +185,7 @@ class DrawModule(Builtin, DrawingMixin):
             'color': u'black',
             'fillcolor': u'gainsboro'
         },
+        # 外部モジュールノード
         'external': {
             'fontsize': 14.0,
             'shape': u'ellipse',
@@ -174,6 +193,7 @@ class DrawModule(Builtin, DrawingMixin):
             'color': u'black',
             'fillcolor': u'azure'
         },
+        # エッジの分岐を表現するための中間ノード
         'middle-point': {
             'shape': 'none',
             'height': '0.0',
