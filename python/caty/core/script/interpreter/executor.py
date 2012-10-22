@@ -604,23 +604,32 @@ class CommandExecutor(BaseInterpreter):
 
 from caty.command import MafsMixin
 class _CallCommand(MafsMixin, Internal):
-    def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None), module=None):
-        Internal.__init__(self, [], [args_ref[0]], type_args, pos, module)
+    def __init__(self, call_opts, callee_args, type_args=[], pos=(None, None), module=None):
+        args_ref = []
+        opts_ref = []
+        cmd = None
+        for arg in callee_args:
+            if 'arg' not in arg.type:
+                opts_ref.append(arg)
+            elif cmd == None:
+                cmd = arg
+            else:
+                args_ref.append(arg)
+        Internal.__init__(self, call_opts, [cmd], type_args, pos, module)
         self.__opts_ref = opts_ref
         self.__args_ref = args_ref[1:]
         self.__is_file = False
 
-    def setup(self, cmd_name):
+    def setup(self, opts, cmd_name):
         from caty.util.path import is_mafs_path
         self._cmd_name = cmd_name
+        self._app_name = opts['app']
         self.__is_file = is_mafs_path(cmd_name)
         if self.__is_file:
             if '@' not in cmd_name:
                 self._cmd_name = 'scripts@this:' + self._cmd_name
 
     def _make_cmd(self):
-        n = self._facilities['env'].get('CATY_APP')['name']
-        app = self._system.get_app(n)
         if self.__is_file:
             return self.__script()
         else:
@@ -630,19 +639,18 @@ class _CallCommand(MafsMixin, Internal):
         from caty.core.script.proxy import Proxy
         from caty.core.script.builder import CommandBuilder
         from caty.core.command import VarStorage
-        n = self._facilities['env'].get('CATY_APP')['name']
-        app = self._system.get_app(n)
-        m = self.current_module
-        if m:
-            profile = m.schema_finder.get_command(self._cmd_name)
+        if not self._app_name:
+            n = self._facilities['env'].get('CATY_APP')['name']
         else:
-            profile = app.schema_finder.get_command(self._cmd_name)
+            n = self._app_name
+        app = self._system.get_app(n)
+        profile = app.schema_finder.get_command(self._cmd_name)
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
             c = scriptwrapper(profile, lambda :cls.instantiate(CommandBuilder(self._facilities, app.schema_finder)))(self.__opts_ref, self.__args_ref)
         else:
             c = cls(self.__opts_ref, self.__args_ref)
-        c.set_facility(self._facilities)
+        c.set_facility(self._facilities, app)
         c.set_var_storage(self.var_storage)
         return CommandExecutor(c, app, self._facilities)
 

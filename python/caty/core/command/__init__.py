@@ -204,12 +204,12 @@ class Command(object):
     def arg0(self):
         return self.__arg0
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, target_app=None):
         u"""ファシリティの設定。
         フレームワーク側で行う処理なので、一般のコマンド実装者が直に使うべきではない。
         """
         _set = set()
-        self.__current_application = facilities.app
+        self.__current_application = target_app or facilities.app
         self.__i18n = I18nMessageWrapper(self._defined_application.i18n, facilities['env'])
         for mode, decl in self.profile_container.profiles[0].facilities:
             name = decl.name
@@ -220,7 +220,10 @@ class Command(object):
             facility = facilities[name].create(mode, param)
             # Dummy で定義されてない（=ユーザ定義）ファシリティは、
             # 定義元のアプリケーションへの参照に差し替える
-            if self._defined_application.name not in ('caty', 'global') and not 'volatile' in self._annotations:
+            if target_app:
+                facility.application = target_app
+                self.async_queue = target_app.async_queue
+            elif self._defined_application.name not in ('caty', 'global') and not 'volatile' in self._annotations:
                 facility.application = self._defined_application
                 self.async_queue = self._defined_application.async_queue
             else:
