@@ -617,7 +617,7 @@ class _CallCommand(MafsMixin, Internal):
                 args_ref.append(arg)
         Internal.__init__(self, call_opts, [cmd], type_args, pos, module)
         self.__opts_ref = opts_ref
-        self.__args_ref = args_ref[1:]
+        self.__args_ref = args_ref
         self.__is_file = False
 
     def setup(self, opts, cmd_name):
