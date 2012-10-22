@@ -474,7 +474,7 @@ class TestCase(object):
             if eobj.tag == self.exception:
                 case.ok()
                 return
-        if self.exception == u'Exception':
+        if self.exception.lower() == u'exception':
             case.ok()
         else:
             case.ng(eobj)

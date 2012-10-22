@@ -30,7 +30,7 @@ file モジュール以外のコマンドも例外ではない。以下、パス
 |file:read|/bar.txt|"あああ"| |
 |file:read|/not-exists.txt| |Exception|存在しないファイルへのアクセスはエラー|
 |file:read|foo.txt| |Exception|パス名は常に/で始まる|
-|file:read|/xxx/../foo.txt| |パス名は . や .. で相対パスを指定できない|
+|file:read|/xxx/../foo.txt| |Exception|パス名は . や .. で相対パスを指定できない|
 
 == file:write
 

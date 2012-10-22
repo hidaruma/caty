@@ -74,13 +74,13 @@ https://bitbucket.org/project_caty/dev/issue/13/undefined より：
 オブジェクトのプロパティでもトップレベルの値でも、挙動は同じになるべき。
 
 |=!input          |=!command      |=!output        |=!exception |=  備考 |
-| {"a":undefined} | xjson:get $.a |                | Exceptoin  | 例外となる |
+| {"a":undefined} | xjson:get $.a |                | Exception  | 例外となる |
 | {"a":undefined} |xjson:get --safe $.a |undefined |            | safeオプション |
 | {"a":undefined} |xjson:get --default=null $.a| null|          | defaultが指定されている |
 
 
 |=!input          |=!command      |=!output        |=!exception |=  備考 |
-| undefined       |xjson:get $    |                | Exceptoin  | 例外となる |
+| undefined       |xjson:get $    |                | Exception  | 例外となる |
 | undefined       |xjson:get --safe $| undefined   |            | safeオプション |
 | undefined       |xjson:get --default=null $| null|            |defaultが指定されている |
 
