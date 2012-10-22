@@ -191,29 +191,29 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 | nth -1    |[1, ,3,4] |         | Exception |
 | nth 0     |[1, ,3,4] |         | Exception |
 | nth 1     |[1, ,3,4] |1        ||
-| nth 2     |[1, ,3,4] |         | Exception |
+| nth 2     |[1, ,3,4] |         | Undefined |
 | nth 3     |[1, ,3,4] |3        ||
 | nth 4     |[1, ,3,4] |4        ||
-| nth 5     |[1, ,3,4] |         | Exception |
-| nth 6     |[1, ,3,4] |         | Exception |
+| nth 5     |[1, ,3,4] |         | IndexOutOfRange |
+| nth 6     |[1, ,3,4] |         | IndexOutOfRange |
 
 |= !command |= !input   |= !output|= !exception |
 | nth -2    |[1, ,3,4,] |         | Exception |
 | nth -1    |[1, ,3,4,] |         | Exception |
 | nth 0     |[1, ,3,4,] |         | Exception |
 | nth 1     |[1, ,3,4,] |1        ||
-| nth 2     |[1, ,3,4,] |         | Exception |
+| nth 2     |[1, ,3,4,] |         | Undefined|
 | nth 3     |[1, ,3,4,] |3        ||
 | nth 4     |[1, ,3,4,] |4        ||
-| nth 5     |[1, ,3,4,] |         | Exception |
-| nth 6     |[1, ,3,4,] |         | Exception |
+| nth 5     |[1, ,3,4,] |         | IndexOutOfRange |
+| nth 6     |[1, ,3,4,] |         | IndexOutOfRange |
 
---safeを付ければ例外は起きない。
+--safeを付ければ型エラーを除き例外は起きない。
 
 |= !command    |= !input  |= !output|= !exception |
-| nth --safe -2|[1, ,3,4] |undefined||
-| nth --safe -1|[1, ,3,4] |undefined||
-| nth --safe 0 |[1, ,3,4] |undefined||
+| nth -2    |[1, ,3,4] |         | Exception |
+| nth -1    |[1, ,3,4] |         | Exception |
+| nth 0     |[1, ,3,4] |         | Exception |
 | nth --safe 1 |[1, ,3,4] |1        ||
 | nth --safe 2 |[1, ,3,4] |undefined||
 | nth --safe 3 |[1, ,3,4] |3        ||
@@ -222,9 +222,9 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 | nth --safe 6 |[1, ,3,4] |undefined||
 
 |= !command    |= !input   |= !output|= !exception |
-| nth --safe -2|[1, ,3,4,] |undefined||
-| nth --safe -1|[1, ,3,4,] |undefined||
-| nth --safe 0 |[1, ,3,4,] |undefined||
+| nth -2    |[1, ,3,4,] |         | Exception |
+| nth -1    |[1, ,3,4,] |         | Exception |
+| nth 0     |[1, ,3,4,] |         | Exception |
 | nth --safe 1 |[1, ,3,4,] |1        ||
 | nth --safe 2 |[1, ,3,4,] |undefined||
 | nth --safe 3 |[1, ,3,4,] |3        ||

@@ -30,7 +30,7 @@ def error_to_ustr(e):
     v = float(sys.version.split(' ')[0].rsplit('.', 1)[0])
     from caty.core.exception import CatyException
     if isinstance(e, CatyException):
-        return e.get_message(ro.i18n)
+        return e.tag + u':' + e.get_message(ro.i18n)
     if v <= 2.5:
         return e.message if isinstance(e.message, unicode) else unicode(e.message, 'utf-8')
     else:

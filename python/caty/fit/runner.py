@@ -34,7 +34,7 @@ CatyFIT ドキュメントのうち、 Caty インタープリタで実行する
 """
 from caty.core.command import PipelineErrorExit, PipelineInterruption
 from caty.core.script import COMMIT, ROLLBACK, PEND
-from caty.core.exception import InternalException
+from caty.core.exception import InternalException, CatyException
 from caty.util import error_to_ustr
 from caty.fit.behparser import parser
 from caty.fit.document import make_document
@@ -285,7 +285,7 @@ class TestCase(object):
             cmd = self._interpreter.build(cmdline, transaction=self.runner.transaction)
         except Exception, e:
             if self.exception:
-                case.ok()
+                self.ok()
                 return
             if self.judge == 'suspend':
                 return
@@ -321,7 +321,7 @@ class TestCase(object):
             return
         except Exception, e:
             if self.exception:
-                case.ok()
+                self._check_exception(case, e)
                 return
             if self.judge != 'ignore':
                 import traceback
@@ -468,6 +468,18 @@ class TestCase(object):
 
     def _setup(self):
         return '[%s]' % (', '.join(self._prepare))
+
+    def _check_exception(self, case, eobj):
+        if isinstance(eobj, CatyException):
+            if eobj.tag == self.exception:
+                case.ok()
+                return
+        if self.exception == u'Exception':
+            case.ok()
+        else:
+            case.ng(error_to_ustr(eobj))
+                
+            
 
     @property
     def force(self):
