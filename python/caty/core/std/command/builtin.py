@@ -876,10 +876,20 @@ class Binary(Builtin):
 
 
 class ListEnv(Builtin):
-    
+    def setup(self, opts):
+        self.toplevel = opts['toplevel']
+
     def execute(self):
+        if self.toplevel:
+            from caty.env import Env
+            app = self.current_app
+            env = Env().create(u'uses')
+            facilities = {'env': env}
+            app.init_env(facilities, self.env['DEBUG'], self.env['CATY_EXEC_MODE'], app._system)
+        else:
+            env = self.env
         r = {}
-        for k, v in self.env.items():
+        for k, v in env.items():
             r[k] = v
         return r
 

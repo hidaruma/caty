@@ -1184,7 +1184,7 @@ command foreign :: void -> foreign
 /**
  * 環境変数の一覧の出力
  */
-command env :: void -> object
+command env {@[default(false)] "toplevel": boolean?} :: void -> object
     reads env
     refers python:caty.core.std.command.builtin.ListEnv;
 
