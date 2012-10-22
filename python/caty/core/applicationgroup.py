@@ -46,7 +46,7 @@ class ApplicationGroup(PbcObject):
             d = self._make_super_root(self.name).start()
             r = d.create(u'uses').opendir('/root')
             if not r.exists:
-                self.i18nt.write("Root application not exists, auto-generating")
+                self.i18n.write("Root application not exists, auto-generating")
                 r.create()
                 d.commit()
         if self._exists:
