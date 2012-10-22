@@ -125,7 +125,7 @@ class ScriptParser(Parser):
         k = lambda s: keyword(s, str_mod.ascii_letters + '_.')
         func = seq.parse([k(u'each'), k(u'take'), k(u'time'), k(u'start'), k(u'begin'), k(u'unclose')])
         try:
-            if func in ('unclose', 'each'):
+            if func in ('unclose', 'each', 'take'):
                 opts = self.options(seq)
             else:
                 opts = ()
