@@ -285,7 +285,7 @@ class TestCase(object):
             cmd = self._interpreter.build(cmdline, transaction=self.runner.transaction)
         except Exception, e:
             if self.exception:
-                self.ok()
+                case.ok()
                 return
             if self.judge == 'suspend':
                 return
@@ -477,7 +477,7 @@ class TestCase(object):
         if self.exception == u'Exception':
             case.ok()
         else:
-            case.ng(error_to_ustr(eobj))
+            case.ng(eobj)
                 
             
 
