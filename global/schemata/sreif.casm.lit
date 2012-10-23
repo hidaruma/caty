@@ -262,6 +262,23 @@ command list-types
  refers python:sreif.ListTypes
 ;
 
+command list-annotations
+  {
+    @[default(false)]
+    "rec": boolean?,
+    @[default(false)]
+    "aliases": boolean?,
+    "sub": typesSubnamespaceSort?,
+
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
+  [cdpath mod-cls]
+:: void -> [TypeSummary*]?
+ //refers python:sreif.ListAnnotations
+;
+
 command list-kinds
   {
     @[default(false)]

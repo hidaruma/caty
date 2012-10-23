@@ -671,6 +671,7 @@ class AnnotationDecl(object):
         a = Annotations([])
         for c in ann._annotations:
             a.add(c)
+        self.type = ASTRoot(name, None, type, ann, doc)
         #a.add(Annotation(u'__annotation'))
         #sp = ScriptParser()
         #script = sp.parse('void')
@@ -689,7 +690,9 @@ class AnnotationDecl(object):
         #                             [])
 
     def declare(self, module):
-        module.add_annotation(self)
+        module.declare_annotation(self)
 
+    def accept(self, visitor):
+        return self.type.accept(visitor)
 
 

@@ -52,6 +52,7 @@ class Module(Facility):
         self._app = app
         self.schema_ns = {}
         self.annotation_ns = {}
+        self.annotation_proto_ns = {}
         self.command_ns = {}
         self.class_ns = {}
         self.facility_ns = {}
@@ -109,6 +110,7 @@ class Module(Facility):
         self.get_facility = partial(self._get_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.has_facility = partial(self._has_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
 
+        self.declare_annotation = partial(self._add_resource, scope_func=lambda x:x.annotation_proto_ns, type=u'Annotation')
         self.add_annotation = partial(self._add_resource, scope_func=lambda x:x.annotation_ns, type=u'Annotation')
         self.get_annotation = partial(self._get_resource, scope_func=lambda x:x.annotation_ns, type=u'Annotation')
         self.has_annotation = partial(self._has_resource, scope_func=lambda x:x.annotation_ns, type=u'Annotation')
@@ -457,6 +459,7 @@ class Module(Facility):
                 self.application.cout.write(u'  * ' + self.application.i18n.get(u'Initializing types') + '...')
             try:
                 self._loop_exec(self.ast_ns, self.make_schema_builder, lambda k, v:self.add_schema(v))
+                self._loop_exec(self.annotation_proto_ns, self.make_schema_builder, lambda k, v:self.add_annotation(v))
             except:
                 self.application.cout.writeln(u'NG')
                 raise
@@ -471,6 +474,7 @@ class Module(Facility):
                 self.application.cout.write(u'  * ' + self.application.i18n.get(u'Resolving type references') + '...')
             try:
                 self._loop_exec(self.schema_ns, self.make_reference_resolver, lambda k, v:self.schema_ns.__setitem__(k, v))
+                self._loop_exec(self.annotation_ns, self.make_reference_resolver, lambda k, v:self.annotation_ns.__setitem__(k, v))
             except:
                 self.application.cout.writeln(u'NG')
                 raise
@@ -485,6 +489,7 @@ class Module(Facility):
                 self.application.cout.write(u'  * ' + self.application.i18n.get(u'Applying type parameters') + '...')
             try:
                 self._loop_exec(self.schema_ns, self.make_typevar_applier, lambda k, v:self.schema_ns.__setitem__(k, v))
+                self._loop_exec(self.annotation_ns, self.make_typevar_applier, lambda k, v:self.annotation_ns.__setitem__(k, v))
             except:
                 self.application.cout.writeln(u'NG')
                 raise
@@ -499,6 +504,7 @@ class Module(Facility):
                 self.application.cout.write(u'  * ' + self.application.i18n.get(u'Detecting illegal cyclic type definition') + '...')
             try:
                 self._loop_exec(self.schema_ns, self.make_cycle_detecter, lambda k, v: v)
+                self._loop_exec(self.annotation_ns, self.make_cycle_detecter, lambda k, v: v)
             except:
                 self.application.cout.writeln(u'NG')
                 raise
@@ -513,6 +519,7 @@ class Module(Facility):
                 self.application.cout.write(u'  * ' + self.application.i18n.get(u'Normalizing types') + '...')
             try:
                 self._loop_exec(self.schema_ns, self.make_type_normalizer, lambda k, v:self.schema_ns.__setitem__(k, v))
+                self._loop_exec(self.annotation_ns, self.make_type_normalizer, lambda k, v:self.annotation_ns.__setitem__(k, v))
             except:
                 self.application.cout.writeln(u'NG')
                 raise
@@ -528,6 +535,7 @@ class Module(Facility):
                 self.application.cout.write(u'  * ' + self.application.i18n.get(u'Checking dependencies') + '...')
             graph = set()
             self._loop_exec(self.schema_ns, self.make_dep_analizer, lambda k, v: graph.update(v) if v else v)
+            self._loop_exec(self.annotation_ns, self.make_dep_analizer, lambda k, v: graph.update(v) if v else v)
             marked = set()
             for a, b in graph:
                 if (b, a) in graph:
@@ -1072,6 +1080,8 @@ class LocalModule(Module):
             return n.strip()
 
         self.ast_ns = {}
+        self.annotation_ns = {}
+        self.annotation_proto_ns = {}
         self.proto_ns = {}
         self.class_ns = {}
         self.saved_st = {}
