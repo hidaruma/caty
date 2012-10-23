@@ -447,87 +447,148 @@ class Module(Facility):
     def _build_schema_tree(self):
         self.saved_st.update(self.ast_ns)
         if not self.compiled:
-            self._loop_exec(self.ast_ns, self.make_schema_builder, lambda k, v:self.add_schema(v))
+            if self.is_root:
+                self.application.cout.write(u'  * ' + self.application.i18n.get(u'Initializing types') + '...')
+            try:
+                self._loop_exec(self.ast_ns, self.make_schema_builder, lambda k, v:self.add_schema(v))
+            except:
+                self.application.cout.writeln(u'NG')
+                raise
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._build_schema_tree()
+        if self.is_root and not self.compiled:
+            self.application.cout.writeln(u'OK')
 
     def _resolve_reference(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, self.make_reference_resolver, lambda k, v:self.schema_ns.__setitem__(k, v))
+            if self.is_root:
+                self.application.cout.write(u'  * ' + self.application.i18n.get(u'Resolving type references') + '...')
+            try:
+                self._loop_exec(self.schema_ns, self.make_reference_resolver, lambda k, v:self.schema_ns.__setitem__(k, v))
+            except:
+                self.application.cout.writeln(u'NG')
+                raise
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._resolve_reference()
+        if self.is_root and not self.compiled:
+            self.application.cout.writeln(u'OK')
 
     def _apply_type_var(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, self.make_typevar_applier, lambda k, v:self.schema_ns.__setitem__(k, v))
+            if self.is_root:
+                self.application.cout.write(u'  * ' + self.application.i18n.get(u'Applying type parameters') + '...')
+            try:
+                self._loop_exec(self.schema_ns, self.make_typevar_applier, lambda k, v:self.schema_ns.__setitem__(k, v))
+            except:
+                self.application.cout.writeln(u'NG')
+                raise
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._apply_type_var()
+        if self.is_root and not self.compiled:
+            self.application.cout.writeln(u'OK')
 
     def _detect_cycle(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, self.make_cycle_detecter, lambda k, v: v)
+            if self.is_root:
+                self.application.cout.write(u'  * ' + self.application.i18n.get(u'Detecting illegal cyclic type definition') + '...')
+            try:
+                self._loop_exec(self.schema_ns, self.make_cycle_detecter, lambda k, v: v)
+            except:
+                self.application.cout.writeln(u'NG')
+                raise
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._detect_cycle()
+        if self.is_root and not self.compiled:
+            self.application.cout.writeln('OK')
 
     def _normalize(self):
         if not self.compiled:
-            self._loop_exec(self.schema_ns, self.make_type_normalizer, lambda k, v:self.schema_ns.__setitem__(k, v))
+            if self.is_root:
+                self.application.cout.write(u'  * ' + self.application.i18n.get(u'Normalizing types') + '...')
+            try:
+                self._loop_exec(self.schema_ns, self.make_type_normalizer, lambda k, v:self.schema_ns.__setitem__(k, v))
+            except:
+                self.application.cout.writeln(u'NG')
+                raise
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
             m._normalize()
+        if self.is_root and not self.compiled:
+            self.application.cout.writeln('OK')
 
     def _check_dependency(self):
+        msg = []
         if not self.compiled:
+            if self.is_root:
+                self.application.cout.write(u'  * ' + self.application.i18n.get(u'Checking dependencies') + '...')
             graph = set()
             self._loop_exec(self.schema_ns, self.make_dep_analizer, lambda k, v: graph.update(v) if v else v)
             marked = set()
             for a, b in graph:
                 if (b, a) in graph:
                     if b.name not in a.related or a.name not in b.related:
+                        self.application.cout.writeln('NG')
                         throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'A cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name)
                     else:
                         if a.related[b.name] or b.related[a.name]:
                             continue
                         a.related.mark(b.name)
                         b.related.mark(a.name)
-                        self.application.cout.writeln(u'[WARNING] ' + self.application.i18n.get(u'A cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name))
+                        msg.append(u'    [WARNING] ' + self.application.i18n.get(u'A cyclic dependency between $mod1 and $mod2 was detected', mod1=a.name, mod2=b.name))
         for name in self.related.names:
             mod = self.get_module(name)
             if self.name not in mod.related:
+                self.application.cout.writeln('NG')
                 throw_caty_exception(u'SCHEMA_COMPILE_ERROR', 
                                      u'Illegal `related` declaration at $name',
                                      name=self.name)
         for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
-            m._check_dependency()
-    
+            msg.extend(m._check_dependency())
+        if self.is_root and not self.compiled:
+            self.application.cout.writeln('OK')
+            for m in msg:
+                self.application.cout.writeln(m)
+        else:
+            return msg
+
     def _register_command(self):
         if not self.compiled:
+            if self.is_root:
+                self.application.cout.write(u'  * ' + self.application.i18n.get(u'Initializing commands') + '...')
             try:
                 for k, v in self.proto_ns.items():
                     try:
                         cursor = v.module.make_profile_builder()
                         self.add_command(cursor.visit(v))
                     except:
-                        print '[DEBUG]', k
+                        print '    [DEBUG]', k
                         raise
 
             except:
-                print '[ERROR]', u'%s::%s (%s)' % (self._app.name, self.canonical_name, self.type)
+                self.application.cout.writeln('NG')
+                print '    [ERROR]', u'%s::%s (%s)' % (self._app.name, self.canonical_name, self.type)
                 raise
 
         for m in self.class_ns.values() + self.sub_modules.values() + self.sub_packages.values():
             m._register_command()
+        if self.is_root and not self.compiled:
+            self.application.cout.writeln('OK')
 
     def _register_facility(self):
         if not self.compiled:
+            if self.is_root:
+                self.application.cout.write(u'  * ' + self.application.i18n.get(u'Initializing facilities') + '...')
             for k, v in self.facility_ns.items():
                 cls = self.get_class(v.clsname)
                 if u'facility-spec-for' not in cls.annotations:
+                    self.application.cout.writeln('NG')
                     raise Exception(self.application.i18n.get(u'Facility class is not specified: $name, $mod', name=v.clsname, mod=self.name))
 
                 facilty_class = self._load_facility_class(k, cls.annotations['facility-spec-for'].value)
                 self._app.register_facility(k, facilty_class, v.system_param)
         for m in self.sub_modules.values() + self.sub_packages.values():
             m._register_facility()
+        if self.is_root and not self.compiled:
+            self.application.cout.writeln('OK')
 
     def _load_facility_class(self, name, uri):
         from caty.core.casm.loader import dynamic_load

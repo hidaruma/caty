@@ -72,6 +72,22 @@
 
     "Reconfiguring schema: $name",
 
+    "Initializing types",
+
+    "Resolving type references",
+
+    "Checking dependencies",
+
+    "Detecting illegal cyclic type definition",
+
+    "Applying type parameters",
+
+    "Normalizing types",
+
+    "Initializing commands",
+
+    "Initializing facilities",
+
     /*******************************
      ******* Builtin exception *********
      *******************************/

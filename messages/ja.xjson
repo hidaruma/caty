@@ -77,6 +77,23 @@
 
     "Reconfiguring schema: $name": "スキーマを再設定しています: $name",
 
+    "Initializing types": "型情報を初期化しています",
+
+    "Resolving type references": "型参照を解決しています",
+
+    "Checking dependencies": "依存関係をチェックしています",
+
+    "Detecting illegal cyclic type definition": "不正な再帰的型定義を検出しています",
+
+    "Applying type parameters": "型パラメータを計算しています",
+
+    "Normalizing types": "型の正規化を行っています",
+
+    "Initializing commands": "コマンドを初期化しています",
+
+    "Initializing facilities": "ファシリティを初期化してます",
+
+
     /*******************************
      ******* 組み込み例外 *********
      *******************************/
