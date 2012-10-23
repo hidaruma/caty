@@ -111,6 +111,7 @@ class Module(Facility):
         self.has_facility = partial(self._has_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
 
         self.declare_annotation = partial(self._add_resource, scope_func=lambda x:x.annotation_proto_ns, type=u'Annotation')
+        self.get_annotation_proto = partial(self._get_resource, scope_func=lambda x:x.annotation_proto_ns, type=u'Annotation')
         self.add_annotation = partial(self._add_resource, scope_func=lambda x:x.annotation_ns, type=u'Annotation')
         self.get_annotation = partial(self._get_resource, scope_func=lambda x:x.annotation_ns, type=u'Annotation')
         self.has_annotation = partial(self._has_resource, scope_func=lambda x:x.annotation_ns, type=u'Annotation')

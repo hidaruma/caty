@@ -690,6 +690,7 @@ class AnnotationDecl(object):
         #                             [])
 
     def declare(self, module):
+        self.type.module = module
         module.declare_annotation(self)
 
     def accept(self, visitor):

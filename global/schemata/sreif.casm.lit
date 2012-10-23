@@ -276,7 +276,7 @@ command list-annotations
   }
   [cdpath mod-cls]
 :: void -> [TypeSummary*]?
- //refers python:sreif.ListAnnotations
+ refers python:sreif.ListAnnotations
 ;
 
 command list-kinds
@@ -474,6 +474,19 @@ command show-type
 :: void -> TypeSummary?
  refers python:sreif.ShowType
 ;
+
+command show-annotation
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
+  [cdpath typ]
+:: void -> TypeSummary?
+ refers python:sreif.ShowAnnotation
+;
+
+
 
 command show-kind
   {
