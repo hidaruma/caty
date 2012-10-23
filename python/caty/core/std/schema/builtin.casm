@@ -1489,51 +1489,35 @@ type TargetType = (
  * このアノテーションが指定されないときは、ANY_TARGET となる。
  */
 @[target("ANNOTATION_DECL")]
-annotation target = {
- "value" : (TargetType | [TargetType, TargetType*])
-};
+annotation target = (TargetType | [TargetType, TargetType*]);
 
 @[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL"])]
-annotation register-public = {"value": boolean};
+annotation register-public = boolean;
 
 @[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL"])]
-annotation override-public = {"value": boolean};
+annotation override-public = boolean;
 
 @[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL"])]
-annotation override = {"value": boolean};
+annotation override = boolean;
 
 @[target("PROPERTY")]
-annotation without = {
-  "value" : (string | [string, string*])
-};
+annotation without = (string | [string, string*]);
 
 @[target("PROPERTY")]
-annotation with = {
-  "value" : (string | [string, string*])
-};
+annotation with = (string | [string, string*]);
 
 @[target(["PROPERTY", "TYPE", "ITEM"])]
-annotation default = {
-  "value" : univ 
-};
+annotation default = univ;
 
 @[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL", "ITEM", "PROPERTY"])]
-annotation deprecated = {
-  "value" : boolean
-};
+annotation deprecated = boolean;
 
 @[target("COMMAND_DECL")]
-annotation filter = {
-  "value": boolean
-};
+annotation filter = boolean;
 
 @[target("COMMAND_DECL")]
-annotation no-auto-fill = {
-  "value": boolean
-};
+annotation no-auto-fill = boolean;
 
 @[target("COMMAND_DECL")]
-annotation interactive = {
-  "value": boolean
-};
+annotation interactive = boolean;
 

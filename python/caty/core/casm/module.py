@@ -51,6 +51,7 @@ class Module(Facility):
     def __init__(self, app, parent=None):
         self._app = app
         self.schema_ns = {}
+        self.annotation_ns = {}
         self.command_ns = {}
         self.class_ns = {}
         self.facility_ns = {}
@@ -107,6 +108,11 @@ class Module(Facility):
         self.add_facility = partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.get_facility = partial(self._get_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.has_facility = partial(self._has_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
+
+        self.add_annotation = partial(self._add_resource, scope_func=lambda x:x.annotation_ns, type=u'Annotation')
+        self.get_annotation = partial(self._get_resource, scope_func=lambda x:x.annotation_ns, type=u'Annotation')
+        self.has_annotation = partial(self._has_resource, scope_func=lambda x:x.annotation_ns, type=u'Annotation')
+
         self.__related = Module.Relation()
 
     @property
@@ -652,6 +658,7 @@ class Module(Facility):
         self.schema_ns = {}
         self.command_ns = {}
         self.saved_st = {}
+        self.annotation_ns = {}
 
         for k, v in self.proto_ns.items():
             v.profile_container = None

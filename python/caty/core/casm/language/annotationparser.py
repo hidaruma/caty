@@ -7,6 +7,6 @@ def annotation_decl(seq):
     keyword(u'annotation')(seq)
     name = name_token(seq)
     S(u'=')(seq)
-    type = object_(seq)
+    type = typedef(seq)
     S(u';')(seq)
     return AnnotationDecl(name, type, doc, annotations)
