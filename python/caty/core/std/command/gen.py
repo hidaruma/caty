@@ -226,18 +226,58 @@ class DataGenerator(TreeCursor):
         return random.choice(node.enum)
 
     def _visit_object(self, node):
-        r = {}
-        for k, v in node.items():
-            r[k] = v.accept(self)
-            if ((r[k] is not _EMPTY) and r[k] == u'string' 
+        def generate(k, v):
+            d = v.accept(self)
+            if ((d is not _EMPTY) and d == u'string' 
                 and v.type == 'string' 
                 and self.__gen_str == 'implied'
                 and 'default' not in v.annotations 
                 and 'typical' not in v.annotations):
-                r[k] = k
+                return k
+            else:
+                return d
+        r = {}
+        for k, v in node.items():
+            r[k] = generate(k, v)
         for k, v in r.items():
             if v is _EMPTY:
                 del r[k]
+        # withの項目を埋める
+        for k, v in r.items():
+            mandatory = set()
+            a = node[k].annotations
+            self.__check_with_without(a, u'with', mandatory)
+            for m in mandatory:
+                while r.get(m) in (None, _EMPTY):
+                    r[m] = generate(m, node[m])
+        # withoutの項目を削除
+        for k, v in r.items():
+            reject = set()
+            a = node[k].annotations
+            self.__check_with_without(a, u'without', reject)
+            for j in reject:
+                if j in r:
+                    if random.choice([True, False]):
+                        del r[j]
+                    else:
+                        if k in r:
+                            del r[k]
+        # withの対象のない項目を削除
+        deleted = [None]
+        while deleted:
+            deleted = []
+            for k, v in r.items():
+                mandatory = set()
+                a = node[k].annotations
+                self.__check_with_without(a, u'with', mandatory)
+                for m in mandatory:
+                    if m not in r:
+                        if k in r:
+                            del r[k]
+                            deleted.append(k)
+            if not deleted:
+                break
+
         if node.wildcard.type != 'never':
             num = 0
             upper = random.randint(node.minProperties if node.minProperties != -1 else 0, 
@@ -246,6 +286,19 @@ class DataGenerator(TreeCursor):
                 r[u'$random_gen_%d' % num] = node.wildcard.body.accept(self)
                 num += 1
         return r
+
+    def __check_with_without(self, a, t, ls):
+        w = a.get(t)
+        if w:
+            if isinstance(w.value, basestring):
+               ls.add(w.value)
+            else:
+                mode, val = json.split_tag(w.value)
+                if mode == '_AND':
+                  for v in val:
+                      ls.add(v)
+                else:
+                    ls.add(random.choice(val))
 
     def _visit_array(self, node):
         r = []

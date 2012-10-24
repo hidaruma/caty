@@ -646,6 +646,8 @@ exception Undefined = object;
 /** 例外：タグが存在しない。 */
 exception TagNotExist = object;
 
+/** 例外：型のアノテーションが矛盾している。 */
+exception IncompatibleAnnotation = object;
 
 /* 
  * --- IOエラー
@@ -1501,10 +1503,10 @@ annotation override-public = boolean;
 annotation override = boolean;
 
 @[target("PROPERTY")]
-annotation without = (string | [string, string*]);
+annotation with = (string | @_AND [string, string*] | @_OR [string, string*]);
 
 @[target("PROPERTY")]
-annotation with = (string | [string, string*]);
+annotation without = (string | @_AND [string, string*] | @_OR [string, string*]);
 
 @[target(["PROPERTY", "TYPE", "ITEM"])]
 annotation default = univ;
