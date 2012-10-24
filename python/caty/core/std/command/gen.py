@@ -1,7 +1,7 @@
 #coding:utf-8
 from caty.core.command import Builtin
 from caty.core.typeinterface import *
-from caty.core.schema import TagSchema, StringSchema, NamedSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema, NeverSchema, UndefinedSchema
+from caty.core.schema import TagSchema, StringSchema, NamedSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema, NeverSchema, UndefinedSchema, ArraySchema, ObjectSchema
 from caty.core.schema import types as reserved
 import caty.jsontools as json
 import random
@@ -47,7 +47,10 @@ class Sample(Builtin):
         t = t.accept(cd)
         t = t.accept(ta)
         t = t.accept(tn).body
-        return self._empty_to_undefined(t.accept(DataGenerator(self._gen_options)))
+        re = ReferenceExpander(self._gen_options)
+        t = re.expand(t)
+        data = t.accept(DataGenerator(self._gen_options))
+        return self._empty_to_undefined(data)
 
     def _empty_to_undefined(self, o):
         if o is _EMPTY:
@@ -67,6 +70,80 @@ class Sample(Builtin):
         else:
             return o
 
+from caty.core.casm.cursor.base import SchemaBuilder, apply_annotation
+class ReferenceExpander(SchemaBuilder):
+    def __init__(self, gen_options):
+        self.__max_depth = gen_options['max-depth']
+        self._history = {}
+
+    def expand(self, type):
+        count = 0
+        while count < self.__max_depth:
+            type = type.accept(self)
+            self._history = {}
+            count += 1
+        return type.accept(ReferenceDeleter(None))
+
+    def _visit_root(self, node):
+        return node.body.accept(self)
+
+    @apply_annotation
+    def _visit_scalar(self, node):
+        if isinstance(node, TypeReference):
+            if node.canonical_name in self._history:
+                return node
+            else:
+                self._history[node.canonical_name] = True
+                return node.body.accept(self)
+        return node
+
+    @apply_annotation
+    def _visit_object(self, node):
+        o = {}
+        for k, v in node.items():
+            h = {}
+            h.update(self._history)
+            old = self._history
+            self._history = h
+            o[k] = v.accept(self)
+            self._history = old
+        w = node.wildcard.accept(self)
+        return ObjectSchema(o, w, node.options)
+
+    @apply_annotation
+    def _visit_array(self, node):
+        r = []
+        for c in node:
+            h = {}
+            h.update(self._history)
+            old = self._history
+            self._history = h
+            r.append(c.accept(self))
+            self._history = old
+        return ArraySchema(r, node.options)
+
+    @apply_annotation
+    def _visit_bag(self, node):
+        r = []
+        for c in node:
+            h = {}
+            h.update(self._history)
+            old = self._history
+            self._history = h
+            r.append(c.accept(self))
+            self._history = old
+        return BagSchema(r, node.options)
+
+class ReferenceDeleter(SchemaBuilder):
+    @apply_annotation
+    def _visit_scalar(self, node):
+        if isinstance(node, TypeReference):
+            return NeverSchema()
+        return node
+
+    def _visit_root(self, node):
+        assert False, u'This is a bug'
+
 class _EMPTY(object): pass # undefinedではない、存在しない事を表すアトム
 
 class _MaximumRecursionError(Exception):pass
@@ -75,17 +152,13 @@ class DataGenerator(TreeCursor):
     def __init__(self, gen_options):
         self.__gen_str = gen_options['string']
         self.__occur = gen_options['occur']
-        self.__max_depth = gen_options['max-depth']
         self.cache = {}
         self.depth = 0
         
     def __has_loop_ref(self, node, cache):
         if isinstance(node, (Root, Ref)):
-            if node.canonical_name in cache:
-                return True
-            else:
-                cache.add(node.canonical_name)
-            return self.__has_loop_ref(node.body, cache)
+            print node
+            assert False, u'This is a bug'
         elif isinstance(node, Union):
             for n in flatten_union(node, debug=True):
                 if self.__has_loop_ref(n, cache):
@@ -359,7 +432,7 @@ class DataGenerator(TreeCursor):
         assert False, u'This method must not called'
 
     def _visit_union(self, node):
-        l = self.__flatten_union(node)
+        l = [i for i in self.__flatten_union(node) if i.type != 'never']
         o = random.choice(l)
         while True:
             try:
