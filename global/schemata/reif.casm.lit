@@ -141,7 +141,7 @@ type QualifierMixin = {
   /** ドキュメンテーションコメント */
   "document": Doc?, // いずれ必須にすべき
   /** アノテーション */
-  "annotations": object?, // いずれ必須にすべき
+  "anno": object?, // いずれ必須にすべき
 
    *: any?
 };
@@ -475,6 +475,10 @@ type Module = @module (ModuleSummary & {
   @[namespace]
   "classes": NamespaceOf<Class>,
 
+  /** アノテーションの名前空間(型は暫定的にtypesと同様にしてある) */
+  @[namespace]
+  "annotations": NamespaceOf<TypeSpec>,
+
   /** ポートの部分名前空間
    * commandsと名前空間は同じ
    * 部分名前空間をレイファイするかどうかは未定
@@ -483,7 +487,7 @@ type Module = @module (ModuleSummary & {
   "ports": NamespaceOf<Port>?,
 
   /** カインドの部分名前空間 
-   * commandsと名前空間は同じ
+   * typesと名前空間は同じ
    */
   @[subnamespace]
   "kinds": NamespaceOf<Kind>?,
@@ -511,7 +515,7 @@ type Module = @module (ModuleSummary & {
 /** クラスの基本情報 */
 type ClassSummary = LocatedQualifierMixin & {
   "document": Doc?,
-  "annotations": object?,  // アノテーションもサマリーに必要
+  "anno": object?,  // アノテーションもサマリーに必要
 
   /** クラス名 */
   "name": string,
@@ -1038,7 +1042,7 @@ type State = @state (StateSummary & {
  * ハイパーリンク辺の集合を表現する
  */
 type Link = @link {
- "annotations": object?,
+ "anno": object?,
 
  "document":  Doc?,
 

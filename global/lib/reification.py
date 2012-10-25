@@ -48,7 +48,7 @@ class ShallowReifier(object):
             u'name': a.name,
             u'group': a._group.name if a._group else None,
             u'path': a.web_path,
-            u'annotations': a._annotations,
+            u'anno': a._annotations,
         }
         if a.parent:
             r[u'visibleParent'] = a.parent.name
@@ -73,7 +73,7 @@ class ShallowReifier(object):
         return {
             u'name': s.name,
             u'document': make_structured_doc(s.docstring),
-            u'annotations': self.reify_annotations(s.annotations),
+            u'anno': self.reify_annotations(s.annotations),
             u'type': s.type.name,
             u'location': self._get_localtion(s),
             u'links': links,
@@ -85,7 +85,7 @@ class ShallowReifier(object):
                 u'name': s.name,
                 u'document': make_structured_doc(s.docstring),
                 u'pathPattern': s.url_patterns,
-                u'annotations': self.reify_annotations(s.annotations),
+                u'anno': self.reify_annotations(s.annotations),
                 u'instances': s.instances,
                 u'location': self._get_localtion(s),
         }
@@ -96,7 +96,7 @@ class ShallowReifier(object):
                 u'document': make_structured_doc(s.docstring),
                 u'implemented': s.implemented,
                 u'invoker': s.invoker_obj,
-                u'annotations': self.reify_annotations(s.annotations),
+                u'anno': self.reify_annotations(s.annotations),
                 u'location': self._get_localtion(s),
                 u'pathPattern': s.parent.url_patterns,
                 u'produces': reduce(lambda x, y: x+y, [p._next_states for p in s.profiles]),
@@ -123,7 +123,7 @@ class ShallowReifier(object):
             u'place': p,
             u'syntax': m.type,
             u'literate': m.literate,
-            u'annotations': self.reify_annotations(m.annotations),
+            u'anno': self.reify_annotations(m.annotations),
             u'document': make_structured_doc(m.docstring),
             u'location': self._get_localtion(m),
             u'loadOn': m.timing,
@@ -139,14 +139,14 @@ class ShallowReifier(object):
             u'name': m.name,
             u'place': p,
             u'document': conditional_dict(lambda k,v: v is not None, {'description': m.docstring, 'moreDescription': m.more_docstring}),
-            u'annotations': self.reify_annotations(m.annotations),
+            u'anno': self.reify_annotations(m.annotations),
             u'location': self._get_localtion(m),
         }
 
     def reify_class(self, c):
         return {
             u'document': make_structured_doc(c.docstring),
-            u'annotations': self.reify_annotations(c.annotations),
+            u'anno': self.reify_annotations(c.annotations),
             u'name': c.name,
             u'arg0': self._dump_schema(c._clsrestriction),
             u'location': self._get_localtion(c),
@@ -157,7 +157,7 @@ class ShallowReifier(object):
             u'name': t.name,
             u'document': make_structured_doc(t.docstring),
             u'deprecated': 'deprecated' in t.annotations,
-            u'annotations': self.reify_annotations(t.annotations),
+            u'anno': self.reify_annotations(t.annotations),
             u'typeParams': [self.reify_type_param(p) for p in t.type_params],
             u'location': self._get_localtion(t),
         }
@@ -166,7 +166,7 @@ class ShallowReifier(object):
         return {
             u'name': c.name,
             u'document': make_structured_doc(c.docstring),
-            u'annotations': self.reify_annotations(c.annotations),
+            u'anno': self.reify_annotations(c.annotations),
             u'implemented': c.implemented,
             u'profile': self._make_profile(c),
             u'typeParams': [self.reify_type_param(p) for p in c.type_params],
