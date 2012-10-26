@@ -214,23 +214,35 @@ class Action(object):
 
 @as_parser
 def verb_parser(seq):
-    v = seq.parse(option(verb, u''))
-    m = seq.parse(option(method, u'GET'))
-    e = seq.parse(option(parent, 0))
+    v = until(['/', '#'])(seq)
+    if option(peek('/'))(seq):
+        S('/')(seq)
+        m = method(seq)
+    else:
+        if v[0].istitle():
+            m = v
+            v = ''
+            if m not in ('GET', 'POST', 'PUT', 'DELETE'):
+                raise ParseError(seq, u', '.join(('GET', 'POST', 'PUT', 'DELETE')))
+        else:
+            m = u'GET'
+    e = seq.parse(option(parent, NO_CARE))
     if not seq.eof:
         raise CatyException(u'CARA_PARSE_ERROR', u'Unknown checker: $checker', checker=seq.rest)
     return v, m, e
 
 def verb(seq):
-    return seq.parse(Regex(u'[a-zA-Z0-9_-]*'))
+    return seq.parse(Regex(u'[a-z][a-zA-Z0-9_-]*'))
 
 def method(seq):
-    return seq.parse([u'/GET', u'/POST', u'/PUT', u'/DELETE'])[1:]
+    return seq.parse([u'GET', u'POST', u'PUT', u'DELETE'])[1:]
 
 def parent(seq):
-    x = seq.parse(['#exists-parent', '#dont-care'])
+    x = seq.parse(['#exists-parent', '#dont-care', '#exists'])
     if x == '#exists-parent':
         return PARENT
+    elif x == '#exists':
+        return 0
     else:
         return NO_CARE
 
