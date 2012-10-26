@@ -11,6 +11,7 @@ command sample {
     @[default("rand")]"string": ("rand"|"empty"|"implied")?,
     @[default(5)] "max-depth": integer(minimum=1)?,
     @[default(50)] "max-nodes": integer(minimum=1)?,
+    @[default(5)] "max-branches": integer(minimum=2)?,
     "mod": string?,
   } [string typename] :: void -> univ
   reads schema

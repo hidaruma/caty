@@ -75,6 +75,7 @@ class ReferenceExpander(SchemaBuilder):
     def __init__(self, gen_options):
         self.__max_depth = gen_options['max-depth']
         self.__max_node_num = gen_options['max-nodes']
+        self.__max_branches = gen_options['max-branches']
         self._history = {}
 
     def expand(self, type):
@@ -139,8 +140,21 @@ class ReferenceExpander(SchemaBuilder):
             self._history = old
         return BagSchema(r, node.options)
 
+    def _visit_union(self, node):
+        nodes = list(self.__flatten_union(node))
+        new_nodes = random.sample(nodes, min(self.__max_branches, len(nodes)))
+        return reduce(lambda x, y: UnionSchema(x, y), [n.accept(self) for n in new_nodes])
+
+    def __flatten_union(self, node):
+        if isinstance(node, UnionSchema):
+            for l in self.__flatten_union(node.left):
+                yield l
+            for r in self.__flatten_union(node.right):
+                yield r
+        else:
+            yield node
+
 class ReferenceDeleter(SchemaBuilder):
-    @apply_annotation
     def _visit_scalar(self, node):
         if isinstance(node, TypeReference):
             return NeverSchema()
@@ -149,7 +163,6 @@ class ReferenceDeleter(SchemaBuilder):
     def _visit_root(self, node):
         assert False, u'This is a bug'
 
-    @apply_annotation
     def _visit_union(self, node):
         l = node.left.accept(self)
         r = node.left.accept(self)
@@ -158,7 +171,9 @@ class ReferenceDeleter(SchemaBuilder):
         elif r.type == 'never':
             return l
         else:
-            return UnionSchema(l, r, node.options)
+            node._left = l
+            node._right = r
+            return node
 
 class _EMPTY(object): pass # undefinedではない、存在しない事を表すアトム
 
