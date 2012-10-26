@@ -32,7 +32,11 @@ class ErrorObj(object):
         self._properties[k] = v
 
     def __getitem__(self, k):
-        return self._properties[k]
+        try:
+            return self._properties[k]
+        except:
+            print self, self._properties
+            raise
 
     def values(self):
         return self._properties.values()
@@ -235,13 +239,13 @@ def _error_depth(e, depth=0):
         return depth_list[-1]
     elif isinstance(e, JsonSchemaErrorList):
         depth_list = []
-        for k, v in e:
+        for v in e:
             depth_list.append(_error_depth(v, depth+1))
         depth_list.sort()
         return depth_list[-1]
     elif isinstance(e, JsonSchemaUnionError):
         depth_list = []
-        for k, v in e.errors:
+        for v in e.errors:
             depth_list.append(_error_depth(v, depth+1))
         depth_list.sort()
         return depth_list[-1]

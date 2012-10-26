@@ -433,6 +433,8 @@ class DataGenerator(TreeCursor):
 
     def _visit_union(self, node):
         l = [i for i in self.__flatten_union(node) if i.type != 'never']
+        if not l:
+            return _EMPTY
         o = random.choice(l)
         while True:
             try:

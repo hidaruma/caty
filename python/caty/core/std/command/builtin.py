@@ -431,14 +431,17 @@ class TypeCalculator(object):
         return schemaparser.typename(seq)
 
     def error_report(self, e):
+        def _message(v):
+            if isinstance(v, list):
+                msg = u' / '.join([_message(e) for e in v])
+            else:
+                msg = v['message'] if isinstance(v['message'], unicode) else unicode(str(v['message']))
+            return msg
         from caty.core.schema.errors import normalize_errors
         x = normalize_errors(e).to_path(self.i18n)
         r = {}
         for k, v in x.items():
-            if isinstance(v, list):
-                msg = u' / '.join([e['message'] for e in v])
-            else:
-                msg = v['message'] if isinstance(v['message'], unicode) else unicode(str(v['message']))
+            msg = _message(v)
             r[unicode(k)] = msg
         return tagged(u'NG', r)
 
