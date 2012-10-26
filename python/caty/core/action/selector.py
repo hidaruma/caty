@@ -219,7 +219,7 @@ def verb_parser(seq):
         S('/')(seq)
         m = method(seq)
     else:
-        if v[0].istitle():
+        if v[0].isupper():
             m = v
             v = ''
             if m not in ('GET', 'POST', 'PUT', 'DELETE'):
@@ -235,7 +235,7 @@ def verb(seq):
     return seq.parse(Regex(u'[a-z][a-zA-Z0-9_-]*'))
 
 def method(seq):
-    return seq.parse([u'GET', u'POST', u'PUT', u'DELETE'])[1:]
+    return seq.parse([u'GET', u'POST', u'PUT', u'DELETE'])
 
 def parent(seq):
     x = seq.parse(['#exists-parent', '#dont-care', '#exists'])
