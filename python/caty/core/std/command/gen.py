@@ -74,6 +74,7 @@ from caty.core.casm.cursor.base import SchemaBuilder, apply_annotation
 class ReferenceExpander(SchemaBuilder):
     def __init__(self, gen_options):
         self.__max_depth = gen_options['max-depth']
+        self.__max_node_num = gen_options['max-node-num']
         self._history = {}
 
     def expand(self, type):
@@ -82,6 +83,10 @@ class ReferenceExpander(SchemaBuilder):
             type = type.accept(self)
             self._history = {}
             count += 1
+            nc = NodeCounter()
+            type.accept(nc)
+            if nc.node_num > self.__max_node_num:
+                break
         return type.accept(ReferenceDeleter(None))
 
     def _visit_root(self, node):
@@ -158,6 +163,47 @@ class ReferenceDeleter(SchemaBuilder):
 class _EMPTY(object): pass # undefinedではない、存在しない事を表すアトム
 
 class _MaximumRecursionError(Exception):pass
+
+class NodeCounter(TreeCursor):
+    def __init__(self):
+        self.node_num = 0
+
+    def _visit_scalar(self, node):
+        if node.type != 'never':
+            self.node_num += 1
+
+    def _visit_tag(self, node):
+        node.body.accept(self)
+
+    _visit_option = _visit_tag
+
+    def _visit_union(self, node):
+        old = self.node_num
+        node.left.accept(self)
+        l = self.node_num
+        self.node_num = old
+        node.right.accept(self)
+        r = self.node_num
+        self.node_num = max(l, r)
+
+    def _visit_object(self, node):
+        num = 0
+        for k, v in node.items():
+            v.accept(self)
+            num += 1
+        node.wildcard.body.accept(self)
+
+
+    def _visit_array(self, node):
+        for v in node:
+            v.accept(self)
+
+    def _visit_bag(self, node):
+        for v in node:
+            v.accept(self)
+
+    def _visit_enum(self, node):
+        self.node_num += 1
 
 class DataGenerator(TreeCursor):
     def __init__(self, gen_options):
