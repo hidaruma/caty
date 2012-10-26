@@ -144,6 +144,17 @@ class ReferenceDeleter(SchemaBuilder):
     def _visit_root(self, node):
         assert False, u'This is a bug'
 
+    @apply_annotation
+    def _visit_union(self, node):
+        l = node.left.accept(self)
+        r = node.left.accept(self)
+        if l.type == 'never':
+            return r
+        elif r.type == 'never':
+            return l
+        else:
+            return UnionSchema(l, r, node.options)
+
 class _EMPTY(object): pass # undefinedではない、存在しない事を表すアトム
 
 class _MaximumRecursionError(Exception):pass
