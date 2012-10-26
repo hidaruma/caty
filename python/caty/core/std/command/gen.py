@@ -74,7 +74,7 @@ from caty.core.casm.cursor.base import SchemaBuilder, apply_annotation
 class ReferenceExpander(SchemaBuilder):
     def __init__(self, gen_options):
         self.__max_depth = gen_options['max-depth']
-        self.__max_node_num = gen_options['max-node-num']
+        self.__max_node_num = gen_options['max-nodes']
         self._history = {}
 
     def expand(self, type):
