@@ -12,7 +12,7 @@ resource Dump("/dump") {
 };
 
 resource Data("*.data") {
-  action get("/GET") :: {
+  action get("/GET#exists") :: {
     json:read %1 | json:response
   };
 };
