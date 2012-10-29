@@ -102,7 +102,7 @@ class Run(Internal, MafsMixin):
         f.close()
 
     def _get_app_name(self):
-        return self.env.get('CATY_APP')['name']
+        return self.env.get('APPLICATION')['name']
 
     def _list_summary(self, d):
         r = []
@@ -171,7 +171,7 @@ class ClearReport(Internal):
         self.__all_apps = opts.get('all-apps', caty.UNDEFINED)
 
     def execute(self):
-        app = self.env.get('CATY_APP')['name']
+        app = self.env.get('APPLICATION')['name']
         if self.__all_apps:
             self.run_all()
         elif self.__path:
@@ -195,7 +195,7 @@ class ClearReport(Internal):
 
     def _delete_garbage(self):
         from caty.core.exception import FileNotFound
-        app = self.env.get('CATY_APP')['name']
+        app = self.env.get('APPLICATION')['name']
         if self.__path:
             beh_dir = self.behaviors.opendir(self.__path)
             fit_dir = self.pub.opendir('fit-view:/%s%s' % (app, self.__path))
@@ -260,9 +260,9 @@ class SendReport(Builtin):
     def _collect_report(self):
         apps = {}
         if not self._all:
-            d = self.pub.opendir(u'fit-view:/%s/' % self.env.get('CATY_APP')['name'])
+            d = self.pub.opendir(u'fit-view:/%s/' % self.env.get('APPLICATION')['name'])
             if not d.exists:
-                print u'%sのCatyFITは実行されていません' % self.env.get('CATY_APP')['name']
+                print u'%sのCatyFITは実行されていません' % self.env.get('APPLICATION')['name']
                 return 
         else:
             d = self.pub.opendir(u'fit-view:/')

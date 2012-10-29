@@ -610,15 +610,14 @@ class Application(PbcObject):
     def init_env(self, facilities, is_debug, modes, system, environ={}):
         env = facilities['env']
         env.put(u'APP_ENCODING', unicode(self.encoding))
-        env.put(u'SYSTEM_ENCODING', unicode(self.sysencoding))
+        env.put(u'SYS_ENCODING', unicode(self.sysencoding))
         env.put(u'APP_PATH', unicode(self.web_path))
-        env.put(u'CATY_APP', {'group': self._group.name, 'description':self.description, 'name':self.name, 'path': unicode(self.web_path)})
+        env.put(u'APPLICATION', {'group': self._group.name, 'description':self.description, 'name':self.name, 'path': unicode(self.web_path)})
         env.put(u'DEBUG', system.debug)
         env.put(u'HOST_URL', unicode(self.host_url))
         env.put(u'CATY_VERSION', unicode(caty.__version__))
-        env.put(u'CATY_EXEC_MODE', modes)
-        env.put(u'CATY_HOME', unicode(os.getcwd(), self._system.sysencoding))
-        env.put(u'CATY_PROJECT', self._system.project_name)
+        env.put(u'RUN_MODE', modes)
+        env.put(u'PROJECT', {'name': self._system.project_name, 'home': unicode(os.getcwd(), self._system.sysencoding)})
         env.put(u'OS_PLATFORM', unicode(platform.system()))
         if 'CONTENT_TYPE' in environ:
             env.put(u'CONTENT_TYPE', unicode(environ['CONTENT_TYPE']))
@@ -630,6 +629,8 @@ class Application(PbcObject):
             env.put(u'LANGUAGE', unicode(self._system._global_config.language))
         if environ.get('QUERY_STRING'):
             env.put(u'QUERY_STRING', u'?' + environ['QUERY_STRING'])
+        else:
+            env.put(u'QUERY_STRING', u'')
         if 'SERVER_SOFTWARE' in environ:
             env.put(u'SERVER_SOFTWARE', unicode(environ['SERVER_SOFTWARE']))
         env.put(u'SERVER_MODULE', self._system.server_module_name)

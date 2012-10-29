@@ -324,6 +324,14 @@ type PrjManifest = {
 
 };
 
+/** プロジェクトの情報
+ * とりあえず暫定的に
+ */
+type Project = {
+    "name": string,
+    "home": string,
+};
+
 @[system]
 type Assoc = {
     // プロパティ名はverb名、デフォルトのverb名（無名）は""
@@ -1109,7 +1117,7 @@ command location :: void -> string
 /**
  * プロジェクト名を返す。
  */
-command proj :: void -> string
+command proj :: void -> Project
     reads env
     refers python:caty.core.std.command.builtin.Project;
 

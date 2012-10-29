@@ -158,7 +158,7 @@ class ConstNode(object):
         self.cmd.set_value(value)
 
     def set_facility(self, facilities):
-        self.name = self.name if isinstance(self.name, unicode) else unicode(self.name, facilities['env'].create(u'reads').get('SYSTEM_ENCODING'))
+        self.name = self.name if isinstance(self.name, unicode) else unicode(self.name, facilities['env'].create(u'reads').get('SYS_ENCODING'))
    
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
@@ -173,7 +173,7 @@ class CommandNode(object):
 
     def set_facility(self, facilities):
         self.cmd.set_facility(facilities)
-        self.name = self.name if isinstance(self.name, unicode) else unicode(self.name, facilities['env'].create(u'reads').get('SYSTEM_ENCODING'))
+        self.name = self.name if isinstance(self.name, unicode) else unicode(self.name, facilities['env'].create(u'reads').get('SYS_ENCODING'))
 
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)

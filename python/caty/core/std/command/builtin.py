@@ -239,8 +239,8 @@ class RequestTool(Internal):
             app = dispatcher.dispatch(self._path)
             return app, self._path
         else:
-            n = self._facilities['env'].get('CATY_APP')['name']
-            p = self._facilities['env'].get('CATY_APP')['path']
+            n = self._facilities['env'].get('APPLICATION')['name']
+            p = self._facilities['env'].get('APPLICATION')['path']
             app = self._system.get_app(n)
             path = self._path if p == '/' else join(p, self._path)
             return app, path
@@ -739,7 +739,7 @@ class ConsoleIn(Builtin):
 class DisplayApp(Builtin):
     
     def execute(self):
-        return self.env.get('CATY_APP')
+        return self.env.get('APPLICATION')
 
 
 class DisplayApps(Builtin):
@@ -767,13 +767,13 @@ class Home(Builtin):
 class Location(Builtin):
 
     def execute(self):
-        return self.env.get('CATY_HOME')
+        return self.env.get('PROJECT')['home']
 
 
 class Project(Builtin):
 
     def execute(self):
-        return self.env.get('CATY_PROJECT')
+        return self.env.get('PROJECT')
 
 
 class Manifest(Builtin):
@@ -888,7 +888,7 @@ class ListEnv(Builtin):
             app = self.current_app
             env = Env().create(u'uses')
             facilities = {'env': env}
-            app.init_env(facilities, self.env['DEBUG'], self.env['CATY_EXEC_MODE'], app._system)
+            app.init_env(facilities, self.env['DEBUG'], self.env['RUN_MODE'], app._system)
         else:
             env = self.env
         r = {}

@@ -112,7 +112,7 @@ class CommandExecutor(BaseInterpreter):
                 msg = u'%s (other infomation is lacking)' % node.name
                 self.app._system.deprecate_logger.debug(msg)
         if node._mode: # @console など、特定のモードでしか動かしてはいけないコマンドのチェック処理
-            mode = node.env.get('CATY_EXEC_MODE', [])
+            mode = node.env.get('RUN_MODE', [])
             if not node._mode.intersection(set(mode)):
                 if mode:
                     raise InternalException(u"Command $name can not use while running mode $mode", 
@@ -640,7 +640,7 @@ class _CallCommand(MafsMixin, Internal):
         from caty.core.script.builder import CommandBuilder
         from caty.core.command import VarStorage
         if not self._app_name:
-            n = self._facilities['env'].get('CATY_APP')['name']
+            n = self._facilities['env'].get('APPLICATION')['name']
         else:
             n = self._app_name
         app = self._system.get_app(n)

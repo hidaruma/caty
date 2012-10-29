@@ -13,7 +13,7 @@ class Dump(Builtin):
         self._prefix = opts['prefix']
 
     def execute(self, input):
-        e = self.env.get('SYSTEM_ENCODING')
+        e = self.env.get('SYS_ENCODING')
         if self.env.get('DEBUG') or self._force:
             r = json.prettyprint(input).encode(e)
             if self._prefix:
