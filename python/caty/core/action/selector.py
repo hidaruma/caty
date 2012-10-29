@@ -174,6 +174,7 @@ class VerbMatcher(object):
             else:
                 return PATH_MATCHED, None, None
         f = fs.opendir(path) if self._matcher.is_dir else fs.open(path)
+        print f.path, path, f.exists
         if not f.exists:
             if e['parent'] == PARENT and not no_check:
                 p = dirname(path) + '/' if dirname(path) not in ('/', '') else '/'
@@ -184,7 +185,6 @@ class VerbMatcher(object):
                     return MATCHED, self._matcher, e['command']
             elif e['parent'] == NO_CARE or no_check:
                 return MATCHED, self._matcher, e['command']
-                
             return NOT_MATCHED, self._matcher, ResourceActionEntry(None, u'http:not-found %0', u'not-found')
         else:
             return MATCHED, self._matcher, e['command']
