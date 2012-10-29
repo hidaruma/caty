@@ -174,7 +174,6 @@ class VerbMatcher(object):
             else:
                 return PATH_MATCHED, None, None
         f = fs.opendir(path) if self._matcher.is_dir else fs.open(path)
-        print f.path, path, f.exists
         if not f.exists:
             if e['parent'] == PARENT and not no_check:
                 p = dirname(path) + '/' if dirname(path) not in ('/', '') else '/'

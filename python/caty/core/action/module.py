@@ -313,7 +313,7 @@ class ResourceModule(Module):
                         e = {u'from': act.resource_name + '.' + act.name, u'to': to_name, u'type': u'redirect'}
                     edges.append(e)
                 for st in act.profiles.next_states:
-                    if s.name in self._states:
+                    if st in self._states:
                         break
                     else:
                         nodes.append({u'name': st, u'label': st, u'type': u'missing-state'})
