@@ -81,7 +81,7 @@ class SchemaBuilder(TreeCursor):
         if node.operator == u'extract':
             return ExtractorSchema(node.path, node.body.accept(self))
         else:
-            return UnaryOpSchema(node.operator, node.body.accept(self))
+            return UnaryOpSchema(node.operator, node.body.accept(self), [t.accept(self) for t in node.type_args])
 
     @apply_annotation
     def _visit_object(self, node):

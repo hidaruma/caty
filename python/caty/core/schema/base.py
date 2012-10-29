@@ -1439,12 +1439,17 @@ class TypeReference(SchemaBase, Scalar, Ref):
         return self.body.optional if self.body else False
     
 class UnaryOpSchema(SchemaBase, UnaryOperator):
-    def __init__(self, operator, schema):
+    def __init__(self, operator, schema, type_args):
         SchemaBase.__init__(self)
         self._schema = schema
         self._annotations = Annotations([])
         self._docstring = u''
         self._operator = operator
+        self._type_args = type_args
+
+    @property
+    def type_args(self):
+        return self._type_args
 
     @property
     def operator(self):

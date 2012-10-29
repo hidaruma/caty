@@ -182,10 +182,11 @@ class OperatorNode(Node):
         return {'left': self.left.reify(), 'right': self.right.reify()}
 
 class UnaryOpNode(Node, UnaryOperator):
-    def __init__(self, type, body):
+    def __init__(self, type, body, type_args=()):
         Node.__init__(self)
         self._operator = type
         self._body = body
+        self._type_args = type_args
 
     @property
     def body(self):
@@ -194,6 +195,10 @@ class UnaryOpNode(Node, UnaryOperator):
     @property
     def operator(self):
         return self._operator
+
+    @property
+    def type_args(self):
+        return self._type_args
 
 class ExtractorNode(Node, UnaryOperator):
     def __init__(self, path, body):

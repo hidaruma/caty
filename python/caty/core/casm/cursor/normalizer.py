@@ -357,7 +357,10 @@ class TypeCalcurator(_SubNormalizer):
                     u'Unsupported operand type for $op: $type',
                     op=node.operator, type=body.type)
         if node.operator == u'open':
-            body.wildcard = AnySchema()
+            if node.type_args:
+                body.wildcard = node.type_args[0]
+            else:
+                body.wildcard = AnySchema()
         elif node.operator == u'close':
             body.wildcard = NeverSchema()
         else:

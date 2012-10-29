@@ -63,9 +63,15 @@ def term(seq):
             path = CasmJSONPathSelectorParser()(seq)
             body = s.parse(typedef)
             return ExtractorNode(path, body)
-        else:
+        elif k == u'close':
             body = s.parse(typedef)
-            return UnaryOpNode(k, body)
+            return UnaryOpNode(k, body, [])
+        else:
+            t = seq.parse(option(type_var, []))
+            if len(t) > 1:
+                raise ParseError(s, _unary)
+            body = s.parse(typedef)
+            return UnaryOpNode(k, body, t)
 
     def _type_name_tag(s):
         _= s.parse('@&')
