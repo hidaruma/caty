@@ -493,7 +493,6 @@ class Application(PbcObject):
 
     def _init_action(self):
         self._create_dispatcher()
-        self._extract_casm_from_cara()  # .caraで定義されたコマンド、スキーマの登録。
 
     def finish_setup(self):
         self.cout.writeln(self.i18n.get("Initializing '$name'", name=self.name))
@@ -545,11 +544,6 @@ class Application(PbcObject):
     def _create_bindings(self):
         from caty.core.camb import create_bindings
         create_bindings(self._actions.start().create(u'reads'), self)
-
-    def _extract_casm_from_cara(self):
-        for mod in self._dispatcher.get_modules():
-            if u'.' not in mod.canonical_name:
-                self._schema_module.add_sub_module(mod)
 
     def __exec_callback(self, callback_class_name):
         import copy

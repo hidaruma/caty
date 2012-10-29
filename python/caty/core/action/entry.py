@@ -55,7 +55,7 @@ class ResourceActionEntry(object):
         return self.instance is not None
 
     def __repr__(self):
-        return repr(self.source)
+        return object.__repr__(self) + repr(self.source)
 
 
     @property

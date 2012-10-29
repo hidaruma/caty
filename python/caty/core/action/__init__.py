@@ -34,6 +34,7 @@ def read_cara_files(rmc, action_fs, facility, target, app, current_package=None)
                     current_package.add_sub_module(resource_module)
                 else:
                     resource_module.parent = app._schema_module
+                    app._schema_module.add_sub_module(resource_module)
                 for res in resource_module.resources:
                     app.update_filetypes(res.filetypes)
                 rmc.add_module(resource_module)

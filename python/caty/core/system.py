@@ -304,6 +304,11 @@ class CoreApplication(Application):
         self._extract_casm_from_cara()
         self._schema_module.resolve()
 
+    def _extract_casm_from_cara(self):
+        for mod in self._dispatcher.get_modules():
+            if u'.' not in mod.canonical_name:
+                self._schema_module.add_sub_module(mod)
+
     def _create_system_dispatcher(self):
         from caty.core.action.module import ResourceModuleContainer, ResourceModule
         from caty.core.std.action import create_default_resources

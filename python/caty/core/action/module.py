@@ -166,6 +166,31 @@ class ResourceModule(Module):
         clsnode = ResourceNode(res.name, member, ScalarNode(u'string', {u'remark': res.url_pattern}), CommandURI([(u'python', u'')]), res.docstring, res.annotations)
         clsnode.declare(self)
 
+    def _register_command(self):
+        Module._register_command(self)
+        for k, v in self._resources.items():
+            for a in v.actions:
+                for p in a.profiles:
+                    self._compile_type(p._input_type)
+                    self._compile_type(p._output_type)
+
+    def _compile_type(self, type):
+        from caty.core.casm.language.ast import ASTRoot
+        from caty.core.schema.base import Annotations
+        if not type or type == '_':
+            return
+        ast = ASTRoot(u'', [], type, Annotations([]), u'')
+        sb = self.make_schema_builder()
+        rr = self.make_reference_resolver()
+        cd = self.make_cycle_detecter()
+        ta = self.make_typevar_applier()
+        tn = self.make_type_normalizer()
+        t = ast.accept(sb)
+        t = t.accept(rr)
+        t = t.accept(cd)
+        t = t.accept(ta)
+        t = t.accept(tn)
+
     def add_state(self, st):
         if st.name in self._states:
             throw_caty_exception(
