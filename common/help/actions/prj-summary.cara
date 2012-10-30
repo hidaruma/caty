@@ -78,7 +78,7 @@ command gen :: void -> Summary {
      $.document > appDocument,
    ];
    [%appName, "::"] | text:concat > app;
-   sreif:list-packages %app |
+   sreif:list-packages --rec %app |
    list:sort --key=name > orig-pkgs | each {$.name} > pkgNames;
    %orig-pkgs |
    each {
@@ -90,7 +90,7 @@ command gen :: void -> Summary {
       }
    } > pkgs;
 
-   sreif:list-modules %app | 
+   sreif:list-modules --rec %app | 
    take {[$.name, "public"] | eq --boolean | not} | list:sort --key=name > orig-mods | each {$.name} > modNames;
    %orig-mods |
    each {
@@ -123,6 +123,7 @@ command gen :: void -> Summary {
 type Type = {
     "document": Doc,
     "name": string,
+    "body": string?,
 };
 
 /** 型パラメータ */
@@ -153,14 +154,32 @@ command modify-type-info :: reif:TypeSummary -> Type {
  }
 };
 
+command modify-type-info-2 :: reif:Type -> Type {
+ untagged |
+ do {
+   $.name        >: "name",
+   $.document  | doc-to-html >: "document",
+   $.body        >: "body",
+ }
+};
 
 command modify-command-info :: reif:CommandSummary -> Command {
  do {
-   $.name        >: "name",
+   mpl:shortname     >: "name",
    $.typeParams  >: "typeParams",
    $.document  | doc-to-html >: "document",
    $.profile  >: "profile",
  }
+};
+
+
+command print-mod-offline  [string app, string mod] :: void -> string {
+ "/show-mod.html" > TEMPLATE;
+ [
+   %1 > app,
+   %2 > mod,
+ ];
+ show-mod %app %mod | expand %TEMPLATE
 };
 
 /**/
@@ -178,18 +197,23 @@ command show-mod [string app, string mod] :: void -> ModInfo {
    $.document   > document,
    $.place      > place,
  ];
- sreif:list-types %modPath |each {modify-type-info}  > types | each{$.name} > typeNames;
- sreif:list-commands %modPath > commands | each{$.name} > commandNames;
+ sreif:list-types %modPath | 
+ each {
+   mpl:fullname > typePath;
+   reif:reify-type %typePath | modify-type-info-2
+ }  
+ > types | each{$.name} > typeNames;
+ sreif:list-commands --rec %modPath > commands | each{$.name} > commandNames;
  
  do {
    %deprecated >: "deprecated",
    %mod      >: "name",
    %app      >: "appName",
    %document | doc-to-html >: "document",
-   %typeNames>: "typeNames",
-   %types    >: "types",
-   %commandNames>: "commandNames",
-   %commands | each {modify-command-info}  >: "commands",
+   %typeNames | list:sort >: "typeNames",
+   %types | list:sort --key=name   >: "types",
+   %commandNames | list:sort >: "commandNames",
+   %commands | each {modify-command-info}  | list:sort --key=name  >: "commands",
  }
 
 };

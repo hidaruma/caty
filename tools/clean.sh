@@ -2,4 +2,4 @@
 
 rm -f log.txt log.txt.* storage.db
 
-find -name '*.ctpl' -or -name '*.icaty' -or -name '*.pyc' -print0 | xargs -0 rm
+find -name '*.log' -or -name '*.ctpl' -or -name '*.icaty' -or -name '*.pyc' | tee gomi.list | xargs rm

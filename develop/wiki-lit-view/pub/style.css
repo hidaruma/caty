@@ -1,40 +1,26 @@
 body {
  background-color : #CCFFFF;
  line-height: 1.3;
- margin-left: 5em;
 }
 
-body > h1 {
+h1 {
  padding-left: 4px;
  border-left : 4px gray solid;
  border-bottom : 2px gray solid;
- background-color : Cornsilk; /*Honeydew; */
- margin-left: -2em;
+ background-color : #FFFF66;
 }
 
-body > h2 {
+h2 {
  padding-left: 2px;
  border-left : 2px gray solid;
  border-bottom : 1px gray solid;
- background-color : Cornsilk;
- margin-left: -2em;
+ background-color : #FFFF99;
 }
 
-body > h3 {
+h3 {
  padding-left: 2px;
  border-left : 2px gray solid;
  /*border-bottom : 1px gray solid;*/
- margin-left: -2em;
-}
-
-blockquote h1,
-blockquote h2,
-blockquote h3,
-blockquote h4,
-blockquote h5,
-blockquote h6
-{
-  background-color: Khaki; /*Ivory; /*#FFFF66;/*GreenYellow*/
 }
 
 pre {
@@ -56,22 +42,10 @@ table td {
 
 table th {
  border: 2px solid lightGrey;
- background-color : Cornsilk;
+ background-color : #FFFF99;
 }
 
 em {
  font-style : normal;
  text-decoration : underline;
 }
-
-blockquote {
- background-color: Aquamarine;
-}
-
-span.desc {
- font-weight:bold;
- /*color: darkblue;*/
- /*text-decoration: underline;*/
-}
-
-.deprecated {color:red;}

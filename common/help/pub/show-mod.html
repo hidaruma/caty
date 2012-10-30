@@ -3,6 +3,10 @@
     <h2 id="t-{$name}">型 {$name}</h2>
     <p ><b>概要：</b> <span class="desc">{$document.description}</span></p>
     {if $document.moreDescription|notempty}<hr /><blockquote>{$document.moreDescription|noescape}</blockquote>{/if}
+    {if $body|notempty}
+      <h3>定義内容</h3>
+      <pre>{$body}</pre>
+    {/if}
 
 {/function}
 {function name=cmdDoc type="prj-summary:Command"}

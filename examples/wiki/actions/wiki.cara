@@ -19,41 +19,51 @@ resource Wikiファイル("*.wiki") {
     instance ["/FrontPage.wiki", "/HelpPage.wiki"];
 
     /** Wiki記事をHTMLとして読み出す */
-    action 読み出し("/GET") :: @[in, out] #io void -> WikiPage produces HTMLページ 
-    { auto
+    action 読み出し("GET") :: @[in, out] #io void -> WikiPage produces 記事ページ 
+    {
+        #:io { file:read %1 | {
+            "body": text:creole, 
+            "title": %1 | text:rsplit "." | item 0 | text:trim /,
+            "lastModified": file:lastmodified %1
+        }} | print include@this:/page.html
 
     };
 
     /** 編集画面呼び出し */
     action 編集("edit/GET")  :: @[in, out]#io void -> WikiSkele produces 編集 
-    { auto
-
+    {
+        {
+            "body":file:read %1,
+            "title": %1 | text:rsplit "." | item 0 | text:trim /
+        } | print include@this:/edit.html
     };
 
     /** Wiki記事の書き込み 
      * * トランスレートが成功すれば書き込まれた記事にリダイレクト
      * * トンススレートが失敗すればルートにリダイレクト
      */
-    action 書き込み("/POST#exists-parent") {"ignore": boolean} :: 
+    action 書き込み("POST#exists-parent") {"ignore": boolean} :: 
         @[in] #translate WikiFile -> _,
         @[out] #ok _ -> never redirects Wikiファイル.読み出し,
         @[out] #ng _ -> never redirects Root.get 
-    { auto
+    {
 
+        #: translate {translate wiki:WikiFile} | when {
+            OK => #:ok{ ["/wiki", #:part {pv body} | file:write %1 | %1] | text:concat | redirect},
+            NG => #:ng{ "/wiki/" | redirect}
+        }
 
     };
 
     /** プレーンテキスト取得 */
     action 原稿("plain/GET") :: @[in, out] #io void -> Response produces 原稿
-    { auto
-
+    {
+        print %0
     };
 };
 
-
 /** 読者と筆者が閲覧するHTMLページ */
-state HTMLページ for [読者, 筆者] :: WikiPage links {
-    /** 編集ページへ遷移 */
+state 記事ページ for [読者, 筆者] :: WikiPage links {
     + 編集 --> Wikiファイル.編集;
     + ソース --> Wikiファイル.原稿;
     + 新規 --> 新規ファイル.雛形;
@@ -62,36 +72,45 @@ state HTMLページ for [読者, 筆者] :: WikiPage links {
 };
 
 resource Root("/") {
-    action get("/GET") :: @[in, out] #io void -> never redirects Wikiファイル.読み出し 
-    { auto
-
+    action get("GET") :: @[in, out] #io void -> never redirects Wikiファイル.読み出し {
+        "/wiki/FrontPage.wiki" | redirect
     };
 };
 
 resource 新規ファイル("/new") {
-    action 雛形("/POST#dont-care") :: @[in, out] #io NewWiki -> WikiSkele produces 編集
-    { auto
+    action 雛形("POST#dont-care") :: @[in, out] #io NewWiki -> WikiSkele produces 編集
+    {
+        translate wiki:NewWiki | when {
+            OK => pv filename | text:regmatch "[A-Z][A-Za-z0-9]*" | 
+                  when {
+                    OK => {"title": pv src, "body": ""} | print include@this:/edit.html,
+                    NG => redirect /wiki/
+                   },
+            NG => redirect /wiki/
+        }
 
     };
 };
 
 resource AllPages("/all.html") {
-    action get("/GET") :: @[in, out] #io void -> WikiIndex produces 索引 
-    { auto
-
+    action get("GET") :: @[in, out] #io void -> WikiIndex produces 索引 {
+        lsdir / .wiki | each {
+            {
+                "file": pv name,
+                "title": pv name | text:rsplit "." | item 0 | text:trim /
+            }
+        } | print /all.html
     };
 };
 
 /** Wiki記事の一覧 */
 state 索引 for 読者 :: WikiIndex links {
-   /** 新しいファイル*/
     + new --> 新規ファイル.雛形;
     + link --> Wikiファイル.読み出し;
 };
 
 /** 編集UIとなる画面 */
 state 編集 for 不明なユーザー :: WikiSkele links {
-/** サブミットする */
     submit --> Wikiファイル.書き込み;
     + cancel --> Wikiファイル.読み出し;
 };
@@ -101,10 +120,6 @@ state 原稿 for 読者 :: any;
 /** 便宜上の開始画面 */
 @[abstract]
 state start for 読者 :: any links {
-  /** 訪問 
-   * * 一番
-   * * 二番
-   */
   visit --> AllPages.get;
 };
  

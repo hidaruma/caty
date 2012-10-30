@@ -210,6 +210,7 @@ command mod-to-tgraph [string mod] :: void -> TranGraph {
  }
 };
 
+/** モジュール名を引数にして、そのモジュールの遷移グラフを描く */
 command view-module  [string mod] :: void -> void {
  %1 > mod;
  grc-conf:FONT > font;

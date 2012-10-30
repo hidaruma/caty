@@ -183,6 +183,19 @@ command list-app-types [string appPath] :: void -> [reif:TypeSummary*] {
  } | list:concat
 };
 
+/** 引数で指定したモジュールに属するすべての型を完全に列挙する */
+command reify-mod-types [string modPath] :: void -> [reif:Type*] {
+  %1 > modPath;
+  sreif:list-types %modPath |
+  each {
+     mpl:fullname > typePath;
+     reif:reify-type %typePath
+  }
+};
+
+
+
+
 
 /*== */
 

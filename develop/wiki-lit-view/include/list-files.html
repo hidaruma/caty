@@ -1,0 +1,21 @@
+<?caty-meta template="smarty" type="specdocs:DirInfo" ?>
+<html><!-- -*- coding: utf-8 -*- -->
+  <head>
+    <title>{$title}</title>
+  </head>
+  <body>
+    <h1>{$title}</h1>
+    <ol>
+      {foreach from=$wikifiles item=name}
+      <li><a href="{$name}">{$name}</a></li>
+      {/foreach}
+    </ol>
+    <hr />
+    <ul>
+      {foreach from=$subdirs item=name}
+      <li><a href="{$name}/">{$name}/</a></li>
+      {/foreach}
+    </ul>
+
+  </body>
+</html>
