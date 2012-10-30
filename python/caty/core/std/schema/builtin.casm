@@ -324,12 +324,62 @@ type PrjManifest = {
 
 };
 
-/** プロジェクトの情報
- * とりあえず暫定的に
- */
-type Project = {
-    "name": string,
-    "home": string,
+
+/** プロジェクトの情報 */
+@[system]
+type PrjInfo = {
+ /** プロジェクト名
+  * projコマンドの出力と同じ。
+  */
+ "name": string,
+ /** OSファイルシステム内での位置 
+  * locationコマンドの出力と同じ。
+  */
+ "location": string,
+ /** 説明
+  * prj-manifest.xjson から取得
+  */
+ "description": string?, 
+};
+
+/** 環境変数 */
+@[system]
+type CatyEnviron = {
+ /** WebリクエストのHTTPメソッド */
+ "REQUEST_METHOD": string,
+ /** Webリクエストのホスト部 */
+ "HOST_URL": string,
+ /** Webリクエストのアプリケーションパス部 */
+ "APP_PATH": string,
+ /** Webリクエストのアプリケーション内のパス部 */
+ "PATH_INFO": string,
+ /** Webリクエストのクエリ文字 */
+ "QUERY_STRING": string,
+ /** WebリクエストのContentLength */
+ "CONTENT_LENGTH": string,
+ /** Webサーバーのモジュール名 */
+ "SERVER_MODULE": string,
+
+ /** OSの種類 */
+ "OS_PLATFORM": string,
+ /** Catyのバージョン */
+ "CATY_VERSION": string,
+ /** Catyの実行モード */
+ "RUN_MODE": [string*],
+ /** 現在のプロジェクト */
+ "PROJECT": PrjInfo,
+ /** 現在のアプリケーション */
+ "APPLICATION": AppInfo,
+ /** 使用している言語 */
+ "LANGUAGE": string,
+ /** デバッグモードかどうか */
+ "DEBUG": boolean,
+ /** システム（OS）の文字符号化方式 */
+ "SYS_ENCODING": string,
+ /** アプリケーションの文字符号化方式 */
+ "APP_ENCODING": string,
+
+ *: any?
 };
 
 @[system]
@@ -650,6 +700,9 @@ exception InvalidInput = object;
 
 /** 例外：入力が（なんらかの意味で）不正である。*/
 exception BadInput = object;
+
+/** 例外：処理を続行できない状況である。*/
+exception BadSituation = object; 
 
 /** 例外：ルーズ配列である。 */
 exception LooseArray = object;
@@ -1123,7 +1176,7 @@ command location :: void -> string
 /**
  * プロジェクト名を返す。
  */
-command proj :: void -> Project
+command proj :: void -> string
     reads env
     refers python:caty.core.std.command.builtin.Project;
 
