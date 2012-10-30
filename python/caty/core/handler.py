@@ -184,12 +184,9 @@ class PipelineAdaptor(object):
         except PipelineErrorExit, e:
             result = e.json_obj
             transaction = False
-        except SubCatyException, e:
-            result = self._dispatch_error(e)
-            transaction = False
         except CatyException, e:
             transaction = False
-            result = self._make_error_response(e)
+            result = self._dispatch_error(e)
         except JsonSchemaError, e:
             transaction = False
             result = {
@@ -240,7 +237,7 @@ class PipelineAdaptor(object):
             return {
                 'status': 404,
                 'header': {
-                    'content-type': 'text/plain; charset=utf-8'
+                    'content-type': u'text/plain; charset=utf-8'
                 },
                 'body': e.get_message(self.i18n)
             }
@@ -248,33 +245,30 @@ class PipelineAdaptor(object):
             return {
                 'status': 403,
                 'header': {
-                    'content-type': 'text/plain; charset=utf-8'
+                    'content-type': u'text/plain; charset=utf-8'
                 },
                 'body': e.get_message(self.i18n)
             }
-        else:
+        elif e.tag == 'VerbUnmatched':
             return {
-                'status': 500,
-                'header': {
-                    'content-type': 'text/plain; charset=utf-8'
+                'status': 403,
+                "header": {
+                    'content-type': u'text/plain; charset=utf-8'
                 },
-                'body': e.get_message(self.i18n)
+                'body': CatyException(u'UnableToAccess', u'Can not access to $path', path=e.error_obj['path']).get_message(self.i18n)
             }
-
-    def _make_error_response(self, e):
-        tag = e.tag
-        value = e.error_obj
-        if tag.startswith('HTTP_'):
-            status = int(tag.replace('HTTP_', ''))
         else:
-            status = 500
-        result = {
-            'status': status,
-            'body': e.get_message(self.i18n),
-            'header': {
-                'content-type': u'text/plain; charset=utf-8',
+            if e.tag.startswith('HTTP_'):
+                status = int(e.tag.replace('HTTP_', ''))
+            else:
+                status = 500
+            result = {
+                'status': status,
+                'body': e.get_message(self.i18n),
+                'header': {
+                    'content-type': u'text/plain; charset=utf-8',
+                }
             }
-        }
         return result
 
     def __lock(self, lock_dir, recur=5):
@@ -305,10 +299,8 @@ class ExceptionAdaptor(PipelineAdaptor):
         e = self.__error_obj
         if debug:
             print self.__tb
-        if isinstance(e, SubCatyException):
+        if isinstance(e, CatyException):
             result = self._dispatch_error(e)
-        elif isinstance(e, CatyException):
-            result = self._make_error_response(e)
         else:
             self.error_logger.write(self.__tb)
             result = {

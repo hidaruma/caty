@@ -605,6 +605,12 @@ exception ExceptionNotFound  = {
  *: any?
 };
 
+exception VerbUnmatched = {
+  "path": string,
+  "verb": string,
+  "method": string,
+  *:any?
+};
 
 
 /* 

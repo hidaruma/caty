@@ -40,7 +40,7 @@ class ResourceModuleContainer(object):
             if matched:
                 return matched.resource_class_entry
         throw_caty_exception(
-            u'HTTP_403',
+            u'VerbUnmatched',
             u'Not matched to verb dispatch: path=$path, verb=$verb, method=$method',
             path=path,
             verb=verb,

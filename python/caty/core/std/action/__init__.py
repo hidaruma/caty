@@ -38,7 +38,7 @@ def _file_actions(module):
     actions = {
         u'/GET#exists': ResourceActionEntry(parser.parse(u'print --raw %0'), u'print --raw %0', u'get', rbody=rbody),
     }
-    r = DefaultResource(module.app, u'**.*', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
+    r = DefaultResource(module.app, u'**.*|**', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
     module.add_resource(r)
 
 def _template_actions(module):
