@@ -617,7 +617,7 @@ class Application(PbcObject):
         env.put(u'HOST_URL', unicode(self.host_url))
         env.put(u'CATY_VERSION', unicode(caty.__version__))
         env.put(u'RUN_MODE', modes)
-        env.put(u'PROJECT', {'name': self._system.project_name, 'home': unicode(os.getcwd(), self._system.sysencoding)})
+        env.put(u'PROJECT', {'name': self._system.project_name, 'location': unicode(os.getcwd(), self._system.sysencoding)})
         env.put(u'OS_PLATFORM', unicode(platform.system()))
         if 'CONTENT_TYPE' in environ:
             env.put(u'CONTENT_TYPE', unicode(environ['CONTENT_TYPE']))
