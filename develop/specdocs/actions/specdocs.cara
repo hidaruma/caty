@@ -58,7 +58,7 @@ command dir-get [string dir-location, string file-ext] :: void -> DirInfo {
   %2 > file-ext;
   ["**", %file-ext] | text:concat > file-patt;
 
-  %CATY_APP  | $.name > app;
+  %APPLICATION  | $.name > app;
   { 
     "wikifiles" : file:list %dir-location %file-patt  | each {pv name},
     "subdirs"  :  file:list --kind=dir %dir-location | each {pv name},
