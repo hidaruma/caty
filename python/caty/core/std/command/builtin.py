@@ -759,15 +759,15 @@ class Home(Builtin):
 
     def execute(self):
         if self.full_path:
-            return self.env.get('CATY_HOME')
+            return self.env.get('PROJECT')['location']
         else:
-            return os.path.basename(self.env.get('CATY_HOME'))
+            return os.path.basename(self.env.get('PROJECT')['location'])
 
 
 class Location(Builtin):
 
     def execute(self):
-        return self.env.get('PROJECT')['home']
+        return self.env.get('PROJECT')['location']
 
 
 class Project(Builtin):
