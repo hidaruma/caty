@@ -2,6 +2,7 @@
 /** オートメーション */
 module auto;
 
+/** 自動アクションを実現するコマンド */
 @[register-public]
 command auto [string? arg] :: any -> any {
   pass > web-in;
@@ -184,6 +185,7 @@ command to-action-info :: [WebInput, {*:[trig:TriggerInfo*]?} modTriggers, aact:
 
 };
 
+/** モジュール名を引数にして、そのモジュールのautoデータを完全に生成する */
 command build [string mod] :: void -> void {
  %1 > mod;
 

@@ -21,6 +21,8 @@ type SttContext = {
  /** 状態の短い説明 */
  "description" : (string | null),
  /** 状態の長い説明 */
+ "moreDescription" : (string | null),
+ /** 状態の長い説明 HTML */
  "moreDescriptionHtml" : (string | null),
 
  /** 状態の型 */
@@ -117,6 +119,8 @@ command to-context [string pkgmod, string? app] :: reif:StateSummary  -> SttCont
    "description" : $.document.description?=null,
 
    "moreDescriptionHtml" : $.document.moreDescription? | when{undefined=>null, string=>text:creole},
+
+   "moreDescription" : $.document.moreDescription?=null, 
 
    "type": $.type,
 

@@ -2,7 +2,7 @@
 This file contains utf-8 encoded Japanese text.
 
 
-* 現状のCatyの問題点は、EXCUSE.txt をご覧ください。
+* 現状のCatyの問題点は、DOCS/EXCUSE.txt をご覧ください。
 
 // 注意：アーカイブの名前が違う
 

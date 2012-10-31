@@ -219,7 +219,7 @@ command caras [string? app] :: void -> [inspect:Module*] {
 };
 
 /** オブジェクトのリストがあるとき、そのオブジェクト達の名前のリストを出力する */
-command names :: [object*] -> [string*] {
+command names :: [(@* object)*] -> [string*] {
  each {$.name}
 };
 
@@ -229,3 +229,22 @@ command which [string cmdName] :: void -> string {
 
 command narrow [string* args] :: object -> object
  refers python:util.Narrow;
+
+/** select-actionの別名 */
+command lookup-action
+    {
+        "fullpath": boolean?,
+        "exception": boolean?,
+        "verb": string?,
+        "check": boolean?,
+        "method": ("GET" | "POST" | "PUT" | "DELETE" | "HEAD")?,
+        *: never?
+    }
+    [string path] 
+:: void ->  (string | false) 
+{
+  select-action %--fullpath %--exception %--verb %--check %--method %1
+};
+
+
+

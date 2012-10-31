@@ -1,0 +1,13 @@
+// -*- coding: utf-8 -*-
+
+{
+  "disabled": true,
+
+  "description": ".wki, .litファイルの閲覧システム",
+
+  "moreDescription": '''
+このアプリケーションは、単独で使用するのではなくて、フィーチャを提供する。
+
+'''
+}
+

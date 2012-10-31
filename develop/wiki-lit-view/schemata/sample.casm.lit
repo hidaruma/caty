@@ -1,0 +1,17 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= サンプル
+
+<<{
+/**
+ *
+ */
+module sample; 
+
+type Sample = deferred;
+
+
+}>>
+
+
+
