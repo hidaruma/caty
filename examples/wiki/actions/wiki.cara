@@ -122,3 +122,7 @@ type WikiSkele = {
 type WikiFile = {
     "body": string,
 };
+
+type WikiPage = object;
+
+type WikiIndex = deferred array;
