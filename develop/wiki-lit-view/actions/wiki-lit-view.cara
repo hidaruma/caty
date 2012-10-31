@@ -3,12 +3,6 @@
 module wiki-lit-view in cara;
 
 /* 
- * カスタマイズ用定数
- */
-
-const LIT_TARGET = "/Lit/";
-
-/* 
  * == 型 == 
  */
 
@@ -131,28 +125,27 @@ resource ファイル("*.wiki") {
   };
 };
 
-resource Litファイル ("/Lit/*.casm.lit") {
+resource Schemataディレクトリ ("/schemata/") {
+ /** ディレクトリへのGETリクエスト */
+ action get("/GET") 
+ :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
+ {
+   "schemata@this:/" > lit-dir;
+   #:0 {dir-get %lit-dir .lit } | print include@this:/list-files.html
+ };
+};
 
-  /** LiterateファイルへのGETリクエスト */
+resource SchemataLitファイル ("/schemata/*.casm.lit") {
+
+  /** literateファイルへのGETリクエスト */
   action get("/GET#exists-parent")
   :: @[in, out] #0 void -> FileInfo produces ファイル内容
   {
     %0 | path:trunk > title;
     %0 | path:base > base;
-    [LIT_TARGET, %base] | text:concat > lit-file;
+    ["schemata@this:/", %base] | text:concat > lit-file;
 
     #:0 {wiki-get %lit-file %title} | print include@this:/show-wiki.html
   };
 
 };
-
-resource Litディレクトリ ("/Lit/") {
- /** ディレクトリへのGETリクエスト */
- action get("/GET") 
- :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
- {
-   LIT_TARGET > lit-target;
-   #:0 {dir-get %lit-target .lit } | print include@this:/list-files.html
- };
-};
-
