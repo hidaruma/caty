@@ -100,7 +100,7 @@ class RequestHandler(object):
             if proxy is None:
                 _f = self._file.opendir(path + '/')
                 if _f.exists:
-                    cmd = self._interpreter.build(u'http:found %0', 
+                    cmd = self._interpreter.build(u'webio:found %0', 
                                                   None, 
                                                   [join(self._env['HOST_URL'], self._app_path, path) + '/'], 
                                                   transaction=transaction)

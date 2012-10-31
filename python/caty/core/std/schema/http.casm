@@ -1,44 +1,135 @@
+// -*- coding: utf-8 -*-
 /**
- * HTTPレスポンス処理のコマンド群
+ * HTTP処理のコマンド群
  */
 module http in casm;
 
-/**
- * 与えられたパスに対しての302 Foundレスポンスを出力する。
- */
-command found [string] :: void -> Redirect
-    refers python:caty.core.std.command.http.Found;
+//
+// webreq:Resp = Response
+//
+/** レスポンス */
+type Resp = WebOutput;
 
-/**
- * 与えられたパスに対しての403 Forbiddenを出力する。
- */
-command forbidden [string] :: void -> never
-    refers python:caty.core.std.command.http.Forbidden;
+/** URL */
+type url = common:uri;
 
-/**
- * 与えられたパスに対しての404 Forbiddenを出力する。
- */
-command not-found [string] :: void -> never
-    refers python:caty.core.std.command.http.NotFound;
+/** ヘッダの指定 */
+type Headers = {*: (integer|string)?};
 
-/**
- * 与えられたパスに対しての400 Bad Requestを出力する。
- */
-command bad-request [string path, string method] :: void -> never
-    refers python:caty.core.std.command.http.BadRequest;
+/** エンティティボディのデータ */
+type bodyContent = (null|string|binary);
 
-/**
- * 与えられたパスに対しての405 Method Not Allowedを出力する。
- */
-command not-allowed [string path, string method] :: void -> never
-    refers python:caty.core.std.command.http.NotAllowed;
 
-/**
- * application/x-www-form-urlencodedへの変換
- * 入力値をパス形式に直し、その後空値を全て除去する。
- * またboolean値は全て文字列となる仕様である。
+/** HEADリクエスト */
+command head 
+ {
+   /** リクエストタイムアウト時間（秒数、小数可能）*/
+   "timeout" : number?,
+ }
+ [url] :: void -> Resp
+  refers python:caty.core.std.command.http.Head
+;
+
+
+/** GETリクエスト */
+command get 
+ {
+   /** リクエストタイムアウト時間（秒数、小数可能）*/
+   "timeout" : number?,
+ }
+ [url] :: void -> Resp
+  refers python:caty.core.std.command.http.Get
+;
+
+/** POSTリクエスト */
+command post
+ {
+   "content-type": string?,
+   /** リクエストタイムアウト時間（秒数、小数可能）*/
+   "timeout" : number?,
+ }
+ [url] :: bodyContent -> Resp
+  refers python:caty.core.std.command.http.Post
+;
+
+/** PUTリクエスト */
+command put 
+ {
+   "content-type": string?,
+   /** リクエストタイムアウト時間（秒数、小数可能）*/
+   "timeout" : number?,
+ }
+ [url] :: bodyContent -> Resp
+  refers python:caty.core.std.command.http.Put
+;
+
+/** DELETEリクエスト */
+command delete
+ {
+   /** リクエストタイムアウト時間（秒数、小数可能）*/
+   "timeout" : number?,
+ }
+ [url] :: void -> Resp
+//  refers python:caty.core.std.command.http.Delete
+;
+
+
+/* == */
+
+type UrlEncodable = {
+ * : (string|number)?
+};
+
+type UrlDecoded = {
+ * : (string | [string*])?
+};
+
+
+/** JSONオブジェクトのurlエンコード */
+command urlencode :: UrlEncodable -> string
+  refers python:caty.core.std.command.http.UrlEncode
+;
+
+/** urlエンコードされたJSONオブジェクトのデコード */
+command urldecode
+ {
+   @[default(false)]
+   "flat" : boolean?,
+   @[default(false)]
+   "keep-illegal" : boolean?
+ }
+ :: string -> UrlDecoded
+  refers python:caty.core.std.command.http.UrlDecode
+;
+
+/** クエリ文字列のパーズ 
+ * 先頭の'?'を許す以外は、urldecodeと同じ処理
  */
-command urlencode {@[default("utf-8")]"encoding": string?} :: object -> string
-    refers python:caty.core.std.command.http.URLEncode;
+command parse-qs 
+ {
+   @[default(false)]
+   "flat" : boolean?,
+   @[default(false)]
+   "keep-illegal" : boolean?
+ }
+ :: string -> UrlDecoded
+  refers python:caty.core.std.command.http.ParseQS
+;
+
+
+/** Content-Type のパーズ */
+command parse-content-type :: string -> object
+  refers python:caty.core.std.command.http.ParseContentType
+;
+
+/** Catyの動詞をURLに付加する
+ * 既に動詞があるときは上書きされる。
+ * 引数が指定されない場合は何もしない
+ */
+command push-verb [string? verb] :: uri -> uri
+ refers python:caty.core.std.command.http.PushVerb;
+
+
+// End of Module
 
 

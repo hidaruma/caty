@@ -17,8 +17,8 @@ def _script_actions(module):
     actions = {
         u'/GET#exists': ResourceActionEntry(parser.parse(u'call %0'), u'call %0', u'get', rbody=rbody),
         u'/POST#exists': ResourceActionEntry(parser.parse(u'call %0'), u'call %0', u'post', rbody=rbody),
-        u'/PUT#exists': ResourceActionEntry(parser.parse(u'http:not-allowed %0 PUT'), u'http:not-allowed %0 PUT', u'put', rbody=rbody),
-        u'/DELETE#exists': ResourceActionEntry(parser.parse(u'http:not-allowed %0 PUT'), u'http:not-allowed %0 DELETE', u'delete', rbody=rbody),
+        u'/PUT#exists': ResourceActionEntry(parser.parse(u'webio:not-allowed %0 PUT'), u'webio:not-allowed %0 PUT', u'put', rbody=rbody),
+        u'/DELETE#exists': ResourceActionEntry(parser.parse(u'webio:not-allowed %0 PUT'), u'webio:not-allowed %0 DELETE', u'delete', rbody=rbody),
     }
     r = DefaultResource(module.app, u'**.cgi|**.act|**.do', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
     module.add_resource(r)

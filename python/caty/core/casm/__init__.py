@@ -8,6 +8,7 @@ import types
 def initialize(system, interpreter_module):
     builtin_schema = create_builtin_schema(interpreter_module)
     std_modules = [u'authutil',
+                   u'common',
                    u'debug',
                    u'file',
                    u'filter',
@@ -27,6 +28,7 @@ def initialize(system, interpreter_module):
                    u'text',
                    u'user',
                    u'viva',
+                   u'webio',
                    u'wsgi',
                    u'xjson',
     ]

@@ -50,11 +50,11 @@ class ResourceModuleContainer(object):
         if not path.endswith('/') and fs.open(path + '/').exists:
             if self._app.web_config['missingSlash'] == 'dont-care':
                 if fs.application.name != 'root':
-                    return ResourceActionEntry(None, u'http:not-found /%s%s' % (fs.application.name, path), u'not-found')
-                return ResourceActionEntry(None, u'http:not-found %s' % (path), u'not-found')
+                    return ResourceActionEntry(None, u'webio:not-found /%s%s' % (fs.application.name, path), u'not-found')
+                return ResourceActionEntry(None, u'webio:not-found %s' % (path), u'not-found')
             if fs.application.name != 'root':
-                return ResourceActionEntry(None, u'http:found /%s%s/' % (fs.application.name, path), u'not-found')
-            return ResourceActionEntry(None, u'http:found %s/' % (path), u'not-found')
+                return ResourceActionEntry(None, u'webio:found /%s%s/' % (fs.application.name, path), u'not-found')
+            return ResourceActionEntry(None, u'webio:found %s/' % (path), u'not-found')
         return None
 
     def _get_trace(self, fs, path, verb, method, no_check=False):
@@ -170,16 +170,22 @@ class ResourceModule(Module):
         Module._register_command(self)
         for k, v in self._resources.items():
             for a in v.actions:
-                for p in a.profiles:
-                    self._compile_type(p._input_type)
-                    self._compile_type(p._output_type)
+                try:
+                    for p in a.profiles:
+                        self._compile_type(a.name, p._input_type)
+                        self._compile_type(a.name, p._output_type, False)
+                except:
+                    print '    [DEBUG]', k
+                    self.application.cout.writeln('NG')
+                    print '    [ERROR]', u'%s::%s (%s)' % (self._app.name, self.canonical_name, self.type)
+                    raise
 
-    def _compile_type(self, type):
+    def _compile_type(self, name, type, check_never=True):
         from caty.core.casm.language.ast import ASTRoot
         from caty.core.schema.base import Annotations
         if not type or type == '_':
             return
-        ast = ASTRoot(u'', [], type, Annotations([]), u'')
+        ast = ASTRoot(self.name+'.'+name, [], type, Annotations([]), u'')
         sb = self.make_schema_builder()
         rr = self.make_reference_resolver()
         cd = self.make_cycle_detecter()
@@ -189,7 +195,8 @@ class ResourceModule(Module):
         t = t.accept(rr)
         t = t.accept(cd)
         t = t.accept(ta)
-        t = t.accept(tn)
+        if check_never:
+            t = t.accept(tn)
 
     def add_state(self, st):
         if st.name in self._states:
