@@ -195,7 +195,7 @@ class ResourceModule(Module):
         t = t.accept(rr)
         t = t.accept(cd)
         t = t.accept(ta)
-        if check_never:
+        if t.body.name != 'never' or check_never:
             t = t.accept(tn)
 
     def add_state(self, st):
