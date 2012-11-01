@@ -11,5 +11,6 @@ Wiki記法としてはcreoleを採用している。詳細はHelpページを参
         "commands" : "commands",
         "schemata" : "schemata"
     },
+    "anno": {"foo":1}
 }
 

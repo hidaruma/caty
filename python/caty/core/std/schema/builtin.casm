@@ -186,6 +186,11 @@ type AppManifest = {
         *:string,
     }?,
 
+    /**
+     * アノテーション
+     */
+    "anno": object?,
+
     /** ディレクトリに対するインデックスファイルの名前 */
     "indexFiles": [string(remark="ファイル名")*]?,
 
@@ -211,7 +216,7 @@ type PkgManifest = {
     /**
      * アノテーション
      */
-    "annotations": object?,
+    "anno": object?,
 
 };
 
@@ -246,7 +251,7 @@ type PrjManifest = {
     /**
      * アノテーション
      */
-    "annotations": object?,
+    "anno": object?,
 
     /**
      * mafs実装のモジュール名
