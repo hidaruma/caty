@@ -9,7 +9,7 @@ resource AutoIndex("/auto.html") {
   /** エントリーポイントへのGETの処理 */
   action get("/GET#dont-care") 
   ::
-  @[in, out] #io void -> any produces Index
+  @[in, out] #io void -> _ produces Index
   {
     do {
        mpl:list-app-caras this | mpl:longnames >:"mods",

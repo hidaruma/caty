@@ -235,15 +235,9 @@ class ResourceBodyBlock(Parser):
         relay_list = []
         redirects = []
         link = []
-        if io_type in ('in', 'io'):
-            in_type = typedef(seq)
-        else:
-            in_type = choice('_', typedef)(seq)
+        in_type = choice('_', typedef)(seq)
         seq.parse('->')
-        if io_type in ('out', 'io'):
-            out_type = option(typedef)(seq)
-        else:
-            out_type = choice('_', typedef)(seq)
+        out_type = choice('_', typedef)(seq)
         if io_type == 'in':
             link = unordered(self.relays, self.redirects)(seq)
         if io_type in ('io', 'out'):
