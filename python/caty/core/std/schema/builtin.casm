@@ -1570,56 +1570,56 @@ type TargetType = (
  * このアノテーションが指定されないときは、ANY_TARGET となる。
  */
 @[target("ANNOTATION_DECL")]
-annotation target = (TargetType | [TargetType, TargetType*]);
+annotation target :: (TargetType | [TargetType, TargetType*]);
 
 @[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL"])]
-annotation register-public = boolean;
+annotation register-public :: boolean?;
 
 @[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL"])]
-annotation override-public = boolean;
+annotation override-public :: boolean?;
 
 @[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL"])]
-annotation override = boolean;
+annotation override :: boolean?;
 
 @[target("PROPERTY")]
-annotation with = (string | @_AND [string, string*] | @_OR [string, string*]);
+annotation with :: (string | @_AND [string, string*] | @_OR [string, string*]);
 
 @[target("PROPERTY")]
-annotation without = (string | @_AND [string, string*] | @_OR [string, string*]);
+annotation without :: (string | @_AND [string, string*] | @_OR [string, string*]);
 
 @[target(["PROPERTY", "TYPE", "ITEM"])]
-annotation default = univ;
+annotation default :: univ;
 
 @[target(["COMMAND_DECL", "TYPE_DECL", "CONST_DECL", "MODULE_DECL", "CLASS_DECL", "ITEM", "PROPERTY"])]
-annotation deprecated = boolean;
+annotation deprecated :: boolean?;
 
 @[target(["COMMAND_DECL", "PROPERTY"])]
-annotation not-implemented = boolean;
+annotation not-implemented :: boolean?;
 
 @[target("COMMAND_DECL")]
-annotation filter = boolean;
+annotation filter :: boolean?;
 
 @[target("COMMAND_DECL")]
-annotation no-auto-fill = boolean;
+annotation no-auto-fill :: boolean?;
 
 @[target("COMMAND_DECL")]
-annotation test = boolean;
+annotation test :: boolean?;
 
 @[target("COMMAND_DECL")]
-annotation console = boolean;
+annotation console :: boolean?;
 
 @[target("COMMAND_DECL")]
-annotation interactive = boolean;
+annotation interactive :: boolean?;
 
 @[target("PROPERTY")]
-annotation typical = [univ*];
+annotation typical :: [univ*];
 
 @[target("TYPE_DECL")]
-annotation runaway = boolean;
+annotation runaway :: boolean?;
 
 @[target(["TYPE_DECL", "COMMAND_DECL"])]
-annotation system = boolean;
+annotation system :: boolean?;
 
 @[target("TYPE_DECL")]
-annotation unquiet = boolean;
+annotation unquiet :: boolean?;
 
