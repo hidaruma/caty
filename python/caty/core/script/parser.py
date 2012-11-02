@@ -242,10 +242,13 @@ class ScriptParser(Parser):
         return r
 
     def named_block(self, seq):
+        o = choice(S(u'{'), S(u'('))(seq)
         fragment = fragment_name(seq)
-        S(u'{')(seq)
         p = self.make_pipeline(seq)
-        S(u'}')(seq)
+        if o == '{':
+            S(u'}')(seq)
+        else:
+            S(u')')(seq)
         return PipelineFragment(p, fragment)
 
     def make_pipeline(self, seq):

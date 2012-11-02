@@ -21,7 +21,7 @@ resource Wikiファイル("*.wiki") {
     /** Wiki記事をHTMLとして読み出す */
     action 読み出し("GET") :: WebInput -> WebOutput produces 記事ページ @[in, out] #io void -> WikiPage produces 記事ページ 
     {
-        #:io { file:read %1 | {
+        {#io file:read %1 | {
             "body": text:creole, 
             "title": %1 | text:rsplit "." | item 0 | text:trim /,
             "lastModified": file:lastmodified %1
@@ -48,9 +48,9 @@ resource Wikiファイル("*.wiki") {
         @[out] #ng _ -> never redirects Root.get 
     {
 
-        #: translate {translate wiki:WikiFile} | when {
-            OK => #:ok{ ["/wiki", #:part {pv body} | file:write %1 | %1] | text:concat | redirect},
-            NG => #:ng{ "/wiki/" | redirect}
+        {#translate translate wiki:WikiFile} | when {
+            OK => {#ok ["/wiki",  {#part pv body} | file:write %1 | %1] | text:concat | redirect},
+            NG => (#ng "/wiki/" | redirect)
         }
 
     };
