@@ -37,8 +37,9 @@ class ResourceActionEntry(object):
             'verb': v,
             'method': m,
             'checkers': {
-                'exists-parent': e == PARENT,
-                'dont-care': e == NO_CARE,
+                'existance': u'exists-parent' if e == PARENT else
+                            u'dont-care' if e == NO_CARE else
+                            u'exists',
                 'secure': False,
             }
         }

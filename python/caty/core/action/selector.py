@@ -220,7 +220,7 @@ def verb_parser(seq):
     else:
         if v[0].isupper():
             m = v
-            v = ''
+            v = u''
             if m not in ('GET', 'POST', 'PUT', 'DELETE'):
                 raise ParseError(seq, u', '.join(('GET', 'POST', 'PUT', 'DELETE')))
         else:
