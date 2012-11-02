@@ -591,9 +591,9 @@ class CommandExecutor(BaseInterpreter):
     def out_schema(self):
         return self.cmd.out_schema
 
-    def set_facility(self, f):
+    def set_facility(self, f, target_app=None):
         self.facility_set = f
-        self.cmd.set_facility(f)
+        self.cmd.set_facility(f, target_app)
 
     @property
     def var_storage(self):
@@ -603,7 +603,9 @@ class CommandExecutor(BaseInterpreter):
         self.cmd.set_var_storage(v)
 
 from caty.command import MafsMixin
-class _CallCommand(MafsMixin, Internal):
+from caty.core.script.builder import CommandBuilder
+
+class _CallCommand(MafsMixin, CommandBuilder, Internal):
     def __init__(self, call_opts, callee_args, type_args=[], pos=(None, None), module=None):
         args_ref = []
         opts_ref = []
@@ -644,12 +646,9 @@ class _CallCommand(MafsMixin, Internal):
         else:
             n = self._app_name
         app = self._system.get_app(n)
+        CommandBuilder.__init__(self, self._facilities, app.schema_finder)
         profile = app.schema_finder.get_command(self._cmd_name)
-        cls = profile.get_command_class()
-        if isinstance(cls, Proxy):
-            c = scriptwrapper(profile, lambda :cls.instantiate(CommandBuilder(self._facilities, app.schema_finder)))(self.__opts_ref, self.__args_ref)
-        else:
-            c = cls(self.__opts_ref, self.__args_ref)
+        c = CommandBuilder.make_cmd(self, profile, [], self.__opts_ref, self.__args_ref, (self.col, self.line), None)
         c.set_facility(self._facilities, app)
         c.set_var_storage(self.var_storage)
         return CommandExecutor(c, app, self._facilities)

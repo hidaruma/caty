@@ -9,6 +9,7 @@
 |%%cmd1-2  | {"q": {"foo": "bar"}, "a": ["/dump", "/dump"]} | | #dont-caraの指定されたリソース |
 |%%cmd2   | ["a", "b", "c"]|  |
 |%%cmd2-2   | ["a", "b", "c"]|  |
+|%%cmd2-3   | ["a", "b", "c"]|  |
 |%%cmd3   | {"status": 404}|  |
 |%%cmd3-2   | | Exception ||
 
@@ -43,6 +44,11 @@
     sample:Data.get /foo.data| $.body | json:parse
 }}}
 
+== !name:cmd2-3
+
+{{{
+    call sample:Data.get --0=/foo.data| $.body | json:parse
+}}}
 
 == !name:cmd3-2
 

@@ -62,9 +62,9 @@ class CommandCombinator(Command):
     def convert(self, value):
         return self.bf.convert(value)
 
-    def set_facility(self, facilities):
-        self.bf.set_facility(facilities)
-        self.af.set_facility(facilities)
+    def set_facility(self, facilities, app=None):
+        self.bf.set_facility(facilities, app)
+        self.af.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         self.bf.set_var_storage(storage)

@@ -42,7 +42,7 @@ class ListBuilder(Syntax):
                 s.set_value(v)
                 self.values.append(s)
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, ignore=None):
         for v in self.values:
             v.set_facility(facilities)
    
@@ -70,9 +70,9 @@ class ObjectBuilder(Syntax):
             raise KeyError(node.name)
         self.__nodes[node.name] = node
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, app=None):
         for n in self.__nodes.values():
-            n.set_facility(facilities)
+            n.set_facility(facilities, app)
 
    
     def set_var_storage(self, storage):
@@ -157,7 +157,7 @@ class ConstNode(object):
         self.cmd = ScalarBuilder()
         self.cmd.set_value(value)
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, ignore=None):
         self.name = self.name if isinstance(self.name, unicode) else unicode(self.name, facilities['env'].create(u'reads').get('SYS_ENCODING'))
    
     def set_var_storage(self, storage):
@@ -171,8 +171,8 @@ class CommandNode(object):
         self.name = name
         self.cmd = cmd
 
-    def set_facility(self, facilities):
-        self.cmd.set_facility(facilities)
+    def set_facility(self, facilities, app=None):
+        self.cmd.set_facility(facilities, app)
         self.name = self.name if isinstance(self.name, unicode) else unicode(self.name, facilities['env'].create(u'reads').get('SYS_ENCODING'))
 
     def set_var_storage(self, storage):
@@ -222,9 +222,9 @@ class Dispatch(Syntax):
             raise Exception(case.tag)
         self.__cases[case.tag] = case
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, app=None):
         for k ,v in self.__cases.items():
-            v.set_facility(facilities)
+            v.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)
@@ -254,8 +254,8 @@ class TagBuilder(Syntax):
         self.command = cmd
         self.tag = tag
 
-    def set_facility(self, facilities):
-        self.command.set_facility(facilities)
+    def set_facility(self, facilities, app=None):
+        self.command.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)
@@ -272,7 +272,7 @@ class UnaryTagBuilder(Syntax):
         Syntax.__init__(self)
         self.tag = tag
     
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, ignore=None):
         pass
 
     def accept(self, visitor):
@@ -283,8 +283,8 @@ class Case(object):
         self.tag= tag
         self.cmd = cmd
 
-    def set_facility(self, facilities):
-        self.cmd.set_facility(facilities)
+    def set_facility(self, facilities, app=None):
+        self.cmd.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
@@ -322,11 +322,11 @@ class TypeCase(Syntax):
     def add_case(self, case):
         self.__cases.append(case)
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, app=None):
         if self.via:
-            self.via.set_facility(facilities)
+            self.via.set_facility(facilities, app)
         for v in self.__cases:
-            v.set_facility(facilities)
+            v.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)
@@ -344,8 +344,8 @@ class Branch(object):
         self.type = type
         self.cmd = cmd
 
-    def set_facility(self, facilities):
-        self.cmd.set_facility(facilities)
+    def set_facility(self, facilities, app=None):
+        self.cmd.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
@@ -379,8 +379,8 @@ class Each(Syntax):
     def prop(self):
         return self.__prop
 
-    def set_facility(self, facilities):
-        self.cmd.set_facility(facilities)
+    def set_facility(self, facilities, app=None):
+        self.cmd.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)
@@ -406,8 +406,8 @@ class Begin(Syntax):
     def _prepare(self):
         Command._prepare(self)
 
-    def set_facility(self, facilities):
-        self.cmd.set_facility(facilities)
+    def set_facility(self, facilities, app=None):
+        self.cmd.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)
@@ -420,7 +420,7 @@ class Repeat(Syntax):
     command_decl = u"""command __repeat :: void -> never
                         refers python:caty.core.script.node.Repeat;"""
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, ignore=None):
         pass
 
     def accept(self, visitor):
@@ -448,8 +448,8 @@ class Try(Syntax):
         else:
             self.wall = self.SOFT
 
-    def set_facility(self, facilities):
-        self.pipeline.set_facility(facilities)
+    def set_facility(self, facilities, app=None):
+        self.pipeline.set_facility(facilities, app)
 
     def _prepare(self):
         Command._prepare(self)
@@ -469,7 +469,7 @@ class Unclose(Syntax):
         Syntax.__init__(self, opts_ref)
         self.pipeline = pipeline
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, ignore=None):
         pass
 
     def _prepare(self):
@@ -493,10 +493,10 @@ class Catch(Syntax):
         Syntax.__init__(self)
         self.handler = handler
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, app=None):
         if self.handler:
             for v in self.handler.values():
-                v.set_facility(facilities)
+                v.set_facility(facilities, app)
 
     def _prepare(self):
         Command._prepare(self)
@@ -526,9 +526,9 @@ class Time(Syntax):
     def setup(self, opts, *ignore):
         self.verbose = opts.get('verbose', False)
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, app=None):
         Syntax.set_facility(self, facilities)
-        self.cmd.set_facility(facilities)
+        self.cmd.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
@@ -562,8 +562,8 @@ class Take(Syntax):
     def indef(self):
         return self.__indef
 
-    def set_facility(self, facilities):
-        self.cmd.set_facility(facilities)
+    def set_facility(self, facilities, app=None):
+        self.cmd.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)
@@ -581,9 +581,9 @@ class Start(Syntax):
         Syntax.__init__(self)
         self.cmd = cmd
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, app=None):
         Syntax.set_facility(self, facilities)
-        self.cmd.set_facility(facilities)
+        self.cmd.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         self.cmd.set_var_storage(storage)
@@ -602,8 +602,8 @@ class PipelineFragment(Syntax):
         self.cmd = cmd
         self._name = fragment_name
 
-    def set_facility(self, facilities):
-        self.cmd.set_facility(facilities)
+    def set_facility(self, facilities, app=None):
+        self.cmd.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)
@@ -626,8 +626,8 @@ class ActionEnvelope(Syntax):
         self.cmd = script
         self.action_name = name
 
-    def set_facility(self, facilities):
-        self.cmd.set_facility(facilities)
+    def set_facility(self, facilities, app=None):
+        self.cmd.set_facility(facilities, app)
         env = facilities['env']
         env._dict['ACTION'] = self.action_name
 
@@ -651,7 +651,7 @@ class JsonPath(Syntax):
         self.stm = stm
         self.path = stm.to_str()
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, ignore=None):
         pass
 
     def set_var_storage(self, storage):
@@ -699,9 +699,9 @@ class ChoiceBranch(Syntax):
     def add_case(self, case):
         self.__cases.append(case)
 
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, app=None):
         for v in self.__cases:
-            v.set_facility(facilities)
+            v.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)

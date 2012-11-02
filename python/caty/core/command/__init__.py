@@ -351,7 +351,7 @@ class Internal(Builtin):
     そのようなコマンドはこのクラスを継承すること。
     ユーザ定義コマンドは基本的に使ってはいけない。
     """
-    def set_facility(self, facilities):
+    def set_facility(self, facilities, target=None):
         self._facilities = facilities
         self._system = facilities.system
         self._app = facilities.app
@@ -410,8 +410,8 @@ def scriptwrapper(profile, scriptfactory):
         def set_var_storage(self, storage):
             Command.set_var_storage(self, storage)
 
-        def set_facility(self, facilities):
-            Command.set_facility(self, facilities)
+        def set_facility(self, facilities, target_app=None):
+            Command.set_facility(self, facilities, target_app)
             self.facilities = facilities
 
     return Wrapper
