@@ -322,7 +322,7 @@ class ActionProfile(object):
         }
         if self._name:
             r['name'] = self.name
-        if self._io_type:
+        if self._io_type and self._io_type != u'whole':
             r['io_type'] = self._io_type
         if self._input_type:
             r['input_type'] = u'_' if self._input_type == '_' else self._input_type.reify()

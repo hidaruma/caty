@@ -226,10 +226,32 @@ class ResourceBodyBlock(Parser):
         return name
 
     def profiles(self, seq):
-        profs = [p for p in split(self.profile, ',', allow_last_delim=True)(seq) if p]
-        return ActionProfiles(profs)
+        prof = option(try_(self.profile))(seq)
+        profs = [p for p in option(split(self.internal_profile, ',', allow_last_delim=True), [])(seq) if p]
+        if prof:
+            return ActionProfiles([prof]+profs)
+        else:
+            return ActionProfiles(profs)
 
     def profile(self, seq):
+        next_states = []
+        relay_list = []
+        redirects = []
+        link = []
+        in_type = choice('_', typedef)(seq)
+        seq.parse('->')
+        out_type = choice('_', typedef)(seq)
+        link = unordered(self.relays, self.produces, self.redirects)(seq)
+        for t, v in link:
+            if t == 'relays':
+                relay_list = v
+            elif t == 'redirects':
+                redirects = v
+            elif t == 'produces':
+                next_states = v
+        return ActionProfile(u'whole', u'', in_type, out_type, relay_list, next_states, redirects)
+
+    def internal_profile(self, seq):
         io_type, fragment = seq.parse(self.fragment_name)
         next_states = []
         relay_list = []
