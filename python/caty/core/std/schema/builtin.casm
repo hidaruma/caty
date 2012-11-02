@@ -1212,12 +1212,6 @@ command pkg-manifest [string pkg] :: void -> PkgManifest
 command prj-manifest :: void -> PrjManifest
     refers python:caty.core.std.command.builtin.PrjManifest;
 
-/**  
- */
-command manifest :: void -> AppManifest {
-    app-manifest
-};
-
 /**
  * ファイルに関連付けられたスクリプトを実行する。
  *
