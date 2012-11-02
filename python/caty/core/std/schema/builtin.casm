@@ -599,6 +599,13 @@ exception ModuleNotFound = {
   *: any?
 };
 
+/** 例外：パッケージが存在しない */
+exception PackageNotFound = {
+  "packageName": string,
+  "appName": string,
+  *: any?
+};
+
 /** 例外：リソースが存在しない */
 exception ResourceNotFound = {
   "moduleName": string,
