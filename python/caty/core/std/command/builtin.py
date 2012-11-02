@@ -777,10 +777,33 @@ class Project(Builtin):
 
 
 class Manifest(Builtin):
-    
+    def setup(self, app_name=None):
+        self.__app_name = app_name
+
     def execute(self):
+        if self.__app_name:
+            return self.current_app._system.get_app(self.__app_name)._manifest
         return self.current_app._manifest
 
+class PkgManifest(Builtin):
+    def setup(self, pkg_name):
+        self.__pkg_name = pkg_name
+
+    def execute(self):
+        if '::' in self.__pkg_name:
+            app_name, pkg_name = self.__pkg_name.split('::', 1)
+        else:
+            app_name = None
+            pkg_name = self.__pkg_name
+        if app_name:
+            app = self.current_app._system.get_app(app_name)
+        else:
+            app = self.current_app
+        return app._schema_module.get_package(pkg_name)._manifest
+
+class PrjManifest(Builtin):
+    def execute(self):
+        return self.current_app._system._global_config._raw_data
 
 class ExecContext(Print):
     

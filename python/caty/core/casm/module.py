@@ -887,6 +887,7 @@ class AppModule(Module):
                 annotations = pkginfo.get('annotations', {})
                 for k, v in annotations.items():
                     mod.annotations.add(Annotation(k, v))
+                mod._manifest = pkginfo
         self.sub_packages[mod.name] = mod
         return mod
 
@@ -1017,6 +1018,7 @@ class Package(AppModule):
     def __init__(self, *args, **kwds):
         AppModule.__init__(self, *args, **kwds)
         self.more_docstring = None
+        self._manifest = {}
 
     def _get_module_class(self):
         return AppModule

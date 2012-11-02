@@ -16,6 +16,7 @@ class GlobalConfig(object):
     }
     """
     def __init__(self, obj, encoding):
+        self._raw_data = obj
         fs = obj['mafsModule']
         self._mafs_module = fs
         session_conf = obj.get('session', {'type':'memory', 'expire': 3600})

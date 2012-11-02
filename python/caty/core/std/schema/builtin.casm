@@ -1192,14 +1192,31 @@ command proj :: void -> string
     reads env
     refers python:caty.core.std.command.builtin.Project;
 
-/**
- * 現在のアプリケーションのマニフェストを返す。
- * これは通常 _manifest.json に書かれている情報である。
- * _manifest.json が存在しない場合、 Caty が自動生成した設定が表示される。
+/** app-manifest.xjsonを出力
+ * 引数はアプリケーションのコロンドットパス
+ * 引数が省略された場合は現在のアプリケーション
  */
-@[console] command manifest :: void -> AppManifest
+command app-manifest [string? app] :: void -> AppManifest
+  throws ApplicationNotFound
     reads env
     refers python:caty.core.std.command.builtin.Manifest;
+
+/** pkg-manifest.xjsonを出力
+ * 引数はパッケージのコロンドットパス
+ */
+command pkg-manifest [string pkg] :: void -> PkgManifest
+  throws PackageNotFound
+    refers python:caty.core.std.command.builtin.PkgManifest;
+
+/** prj-manifest.xjson を出力 */
+command prj-manifest :: void -> PrjManifest
+    refers python:caty.core.std.command.builtin.PrjManifest;
+
+/**  
+ */
+command manifest :: void -> AppManifest {
+    app-manifest
+};
 
 /**
  * ファイルに関連付けられたスクリプトを実行する。
