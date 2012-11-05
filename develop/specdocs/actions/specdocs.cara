@@ -89,7 +89,7 @@ resource ディレクトリ("/" | "*/") {
   action get("/GET") 
   :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
   {
-   #:0 {dir-get %PATH_INFO .wiki } | print /list-files.html
+    {#0 dir-get %PATH_INFO .wiki } | print /list-files.html
   };
 };
 
@@ -98,7 +98,7 @@ resource SysSpecsディレクトリ ("/SysSpecs/") {
  action get("/GET") 
  :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
  {
-   #:0 {dir-get schemata@SysSpecs:/ .lit } | print /list-files.html
+   {#0 dir-get schemata@SysSpecs:/ .lit } | print /list-files.html
  };
 };
 
@@ -108,7 +108,7 @@ resource instantディレクトリ ("/instant/") {
  action get("/GET") 
  :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
  {
-   #:0 {dir-get schemata@instant:/ .lit } |  print /list-files.html
+   {#0 dir-get schemata@instant:/ .lit } |  print /list-files.html
  };
 };
 
@@ -117,7 +117,7 @@ resource newディレクトリ ("/new/") {
  action get("/GET") 
  :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
  {
-   #:0 {dir-get schemata@new:/ .lit } | dump --prefix="dir-get /new/" | print /list-files.html
+   {#0 dir-get schemata@new:/ .lit } | dump --prefix="dir-get /new/" | print /list-files.html
  };
 };
 
@@ -126,7 +126,7 @@ resource Globalディレクトリ ("/global/") {
  action get("/GET") 
  :: @[in, out] #0 void -> DirInfo produces ディレクトリ・リスト
  {
-   #:0 {dir-get schemata@global:/ .lit } | print /list-files.html
+   {#0 dir-get schemata@global:/ .lit } | print /list-files.html
  };
 };
 
@@ -142,7 +142,7 @@ resource ファイル("*.wiki") {
   {
     %0 | path:trunk > title;
 
-    #:0 {wiki-get %0 %title } | print /show-wiki.html
+    {#0 wiki-get %0 %title } | print /show-wiki.html
   };
 };
 
@@ -156,7 +156,7 @@ resource SysSpecsファイル ("/SysSpecs/*.casm.lit") {
     %0 | path:base > base;
     ["schemata@SysSpecs:/", %base] | text:concat > lit-file;
 
-    #:0 {wiki-get %lit-file %title} | print /show-wiki.html
+    {#0 wiki-get %lit-file %title} | print /show-wiki.html
   };
 
 };
@@ -171,7 +171,7 @@ resource newファイル ("/new/*.casm.lit") {
     %0 | path:base > base;
     ["schemata@new:/", %base] | text:concat > lit-file;
 
-    #:0 {wiki-get %lit-file %title} | print /show-wiki.html
+    {#0 wiki-get %lit-file %title} | print /show-wiki.html
   };
 
 };
@@ -199,7 +199,7 @@ resource instantファイル ("/instant/*.casm.lit") {
   action get("/GET#exists-parent")
   :: @[in, out] #0 void -> FileInfo produces ファイル内容
   {
-    #:0 {show-lit %0 instant} | print /show-wiki.html
+    {#0 show-lit %0 instant} | print /show-wiki.html
   };
 };
 
@@ -213,7 +213,7 @@ resource Globalファイル ("/global/*.casm.lit") {
     %0 | path:base > base;
     ["schemata@global:/", %base] | text:concat > lit-file;
 
-    #:0 {wiki-get %lit-file %title} | print /show-wiki.html
+    {#0 wiki-get %lit-file %title} | print /show-wiki.html
 
   };
 
