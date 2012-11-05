@@ -298,6 +298,9 @@ class CasmJSONPathSelectorParser(JSONPathSelectorParser):
                     yield obj[self.property]
                 else:
                     raise KeyError(self.property)
+            elif isinstance(obj, Tag):
+                for r in self.run(obj.body):
+                    yield r
             else:
                 #if not self.is_optional:
                 raise Exception('not a object')
@@ -317,6 +320,9 @@ class CasmJSONPathSelectorParser(JSONPathSelectorParser):
                     yield obj[self.property]
                 else:
                     raise IndexError(str(self.property))
+            elif isinstance(obj, Tag):
+                for r in self.run(obj.body):
+                    yield r
             else:
                 raise Exception('not a array')
 
