@@ -28,5 +28,6 @@ def make_base_opt_parser(mode):
     parser.add_option('--goodbye', action='store_true', help=u'起動直後に終了する')
     parser.add_option('--no-ambient', dest='no_ambient', action='store_true', help=u'スキーマやアクションを読み込まずに起動する')
     parser.add_option('--no-app', dest='no_app', action='store_true', help=u'起動時に--appで指定されたなかったアプリケーションを読み込まない\n--appが未指定の場合、rootだけが読み込まれる')
+    parser.add_option('-u', '--unleash-wildcats', action='store_true', help=u'')
     return parser
 

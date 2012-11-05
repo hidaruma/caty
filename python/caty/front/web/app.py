@@ -119,7 +119,10 @@ class CatyApp(object):
             input = None
         facilities = self._app.create_facilities(lambda : self.create_session(environ))
         del environ['PATH_INFO'] # init_envで生PATH_INFOを使わせない
-        self._app.init_env(facilities, self.is_debug, [u'web'], self._system, environ)
+        if self._system.wildcat:
+            self._app.init_env(facilities, self.is_debug, [u'web', u'test'], self._system, environ)
+        else:
+            self._app.init_env(facilities, self.is_debug, [u'web'], self._system, environ)
         handler = RequestHandler(facilities['interpreter'], 
                                  facilities['env'],
                                  self._app)

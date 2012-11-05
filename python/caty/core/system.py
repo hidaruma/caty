@@ -23,10 +23,12 @@ class System(PbcObject):
                  no_ambient=False, 
                  no_app=False, 
                  app_names=(u'root',),
-                 force_app=None):
+                 force_app=None,
+                 wildcat=False):
         make_custom_import()
         caty.core.runtimeobject.i18n = I18nMessage({}, writer=cout, lang='en') # フォールバック
         self.force_app = force_app
+        self.wildcat = wildcat
         if quiet:
             class NullWriter(object):
                 def write(self, *args):

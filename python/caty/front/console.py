@@ -568,7 +568,6 @@ def make_console_opt_parser():
     parser.add_option('-e', '--eval', dest='script', help=u'SCRIPTをCatyScriptと解釈して実行し、プロセスを終了する')
     parser.add_option('-f', '--file', dest='files', action='append', help=u'FILEの中身をCatyScriptと解釈して実行し、プロセスを終了する')
     parser.add_option('--dribble', action='store_true', help=u'コンソール操作の履歴をファイルに書き出す。(ファイル名のフォーマット: console.[YYYYmmddHHMMSS].log')
-    parser.add_option('-u', '--unleash-wildcats', action='store_true', help=u'')
     return parser
 
 def setup_shell(args, cls=CatyShell):
@@ -581,7 +580,7 @@ def setup_shell(args, cls=CatyShell):
     options, _ = parser.parse_args(args)
     script = options.script
     init_writer(options.system_encoding)
-    system = System(options.system_encoding, options.debug, options.quiet, options.no_ambient, options.no_app, options.apps or ['root'], options.force_app)
+    system = System(options.system_encoding, options.debug, options.quiet, options.no_ambient, options.no_app, options.apps or ['root'], options.force_app, options.unleash_wildcats)
     if options.goodbye:
         print
         print options.goodbye
