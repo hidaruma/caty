@@ -77,7 +77,11 @@ class WhiteListParser(object):
                 if dirent:
                     yield dirent
                     dirent = None
-                yield self.parseline(line)
+                e = self.parseline(line)
+                if isinstance(e, WhiteListItemContainer):
+                    dirent = e
+                else:
+                    yield e
         if dirent:
             yield dirent
 
@@ -112,10 +116,16 @@ class WhiteListItemContainer(WhiteListItem):
     def includes(self, path):
         for e in self._excl:
             if e.includes(path):
-                return False
+                if not 'excl' in self.directives:
+                    return False
+                else:
+                    return True
         for i in self._incl:
             if i.includes(path):
-                return True
+                if not 'excl' in self.directives:
+                    return True
+                else:
+                    return False
         return WhiteListItem.includes(self, path)
 
 
