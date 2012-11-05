@@ -3,6 +3,7 @@ from topdown import *
 from caty.core.script.parser import ScriptParser
 from caty.core.casm.language.casmparser import module_decl
 from caty.core.casm.language.schemaparser import object_, typedef
+from caty.core.casm.language.commandparser import resource
 from caty.core.language.util import docstring, annotation, action_fragment_name, annotation, identifier_token, identifier_token_m, name_token, some_token
 from caty.jsontools.xjson import obj
 from caty.core.action.resource import ResourceClass
@@ -156,6 +157,7 @@ class ResourceBodyBlock(Parser):
         opts = option(object_, ObjectNode({}))(seq)
         seq.parse('::')
         prof = option(try_(self.profiles))(seq)
+        resource_decl = many(resource)(seq)
         c = choice('{', ';')(seq)
         if c == ';':
             source = u'pass'
