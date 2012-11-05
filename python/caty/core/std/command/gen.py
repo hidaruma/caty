@@ -425,8 +425,9 @@ class DataGenerator(TreeCursor):
 
         if node.wildcard.type != 'never':
             num = 0
-            upper = random.randint(node.minProperties if node.minProperties != -1 else 0, 
-                                   node.maxProperties if node.maxProperties != -1 else node.minProperties + 2)
+            mi = node.minProperties if node.minProperties != -1 else len(r)
+            ma = node.maxProperties if node.maxProperties != -1 else mi + 2
+            upper = random.randint(mi, ma)
             while len(r) < upper:
                 r[u'$random_gen_%d' % num] = node.wildcard.body.accept(self)
                 num += 1
