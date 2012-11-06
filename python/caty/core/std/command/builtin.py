@@ -277,7 +277,10 @@ class Request(RequestTool):
                 content_type = 'application/octet-stream'
         app, path = self.find_app_and_path()
         f = app.create_facilities(lambda: self._facilities['session'])
-        app.init_env(f, caty.DEBUG, [u'web'], self._system, {'CONTENT_TYPE': content_type})
+        mode = [u'web']
+        if u'test' in self.env.get('RUN_MODE'):
+            mode.append(u'test')
+        app.init_env(f, caty.DEBUG, mode, self._system, {'CONTENT_TYPE': content_type})
         for k, v in f.items():
             v.merge_transaction(self._facilities[k])
         handler = RequestHandler(f['interpreter'], 
