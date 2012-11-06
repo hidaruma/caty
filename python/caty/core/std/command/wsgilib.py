@@ -32,11 +32,14 @@ class MakeEnv(Builtin):
         script_name = self.current_app.name
         path = self.__path
         istream = StringIO()
-        if len(chunk) >= 2 and self.__fullpath:
+        if self.__fullpath:
             top = chunk.pop(0)
             if top in system.app_names and top not in (u'caty', u'global'):
                 script_name = top
-            path = u'/' + u'/'.join(chunk)
+                path = u'/' + u'/'.join(chunk)
+            else:
+                path = self.__path
+                script_name = u''
         elif script_name == u'root':
             script_name = u''
         if isinstance(input, unicode):
