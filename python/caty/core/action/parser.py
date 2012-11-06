@@ -157,7 +157,6 @@ class ResourceBodyBlock(Parser):
         opts = option(object_, ObjectNode({}))(seq)
         seq.parse('::')
         prof = option(try_(self.profiles))(seq)
-        resource_decl = many(resource)(seq)
         c = choice('{', ';')(seq)
         if c == ';':
             source = u'pass'
@@ -243,6 +242,7 @@ class ResourceBodyBlock(Parser):
         in_type = choice('_', typedef)(seq)
         seq.parse('->')
         out_type = choice('_', typedef)(seq)
+        resource_decl = many(resource)(seq)
         link = unordered(self.relays, self.produces, self.redirects)(seq)
         for t, v in link:
             if t == 'relays':

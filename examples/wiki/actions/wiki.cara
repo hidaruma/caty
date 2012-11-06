@@ -19,7 +19,9 @@ resource Wikiファイル("*.wiki") {
     instance ["/FrontPage.wiki", "/HelpPage.wiki"];
 
     /** Wiki記事をHTMLとして読み出す */
-    action 読み出し("GET") :: WebInput -> WebOutput produces 記事ページ @[in, out] #io void -> WikiPage produces 記事ページ 
+    action 読み出し("GET") :: WebInput -> WebOutput 
+        reads pub
+        produces 記事ページ @[in, out] #io void -> WikiPage produces 記事ページ 
     {
         {#io file:read %1 | {
             "body": text:creole, 
