@@ -155,7 +155,7 @@ def res_name(seq):
     return FacilityDecl(n, p, a)
 
 def res_param(seq):
-    seq.parse(u'(u')
+    seq.parse(u'(')
     p = seq.parse(xjson.parsers)
     seq.parse(u')')
     return p

@@ -4,6 +4,11 @@ from caty.core.language.util import make_structured_doc
 from caty.jsontools import tagged
 from caty.util.collection import conditional_dict
 from caty.core.casm.cursor.dump import TreeDumper
+_modemap = {
+    u'reads': u'read',
+    u'updates': u'update',
+    u'uses': u'use'
+}
 
 class ShallowReifier(object):
     def _get_localtion(self, obj):
@@ -171,7 +176,19 @@ class ShallowReifier(object):
             u'profile': self._make_profile(c),
             u'typeParams': [self.reify_type_param(p) for p in c.type_params],
             u'location': self._get_localtion(c),
+            u'facilityUsages': self.reifiy_facility_usages(c.profiles[0]),
         }
+
+    def reifiy_facility_usages(self, profile):
+        r = {}
+        for mode, fcl in profile.facilities:
+            r[fcl.alias or fcl.name] = {
+                    u'registeredName': fcl.name,
+                    u'name': fcl.alias or fcl.name,
+                    u'mode': _modemap[mode],
+                    u'userParam': fcl.param,
+                }
+        return r
 
     def reify_type_param(self, p):
         from caty.util.collection import conditional_dict
