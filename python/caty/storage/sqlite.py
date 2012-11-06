@@ -438,10 +438,7 @@ class CollectionManipulator(object):
                 if not ap:
                     return self._finder.get_type(sn)
                 else:
-                    if ':' in sn:
-                        return self._finder.get_type(ap + ':' + sn)
-                    else:
-                        return self._finder.get_type(ap + '::' + sn) # public モジュールのスキーマを他のアプリケーションから参照するので
+                    return self._finder.get_type(ap + '::' + sn)
             except KeyError:
                 return None
         else:
