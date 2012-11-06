@@ -44,6 +44,7 @@ class CatyArchiver(OptionParser):
                 incl.append(arcpath)
         for r, d, f in os.walk(self.origin):
             for e in f:
+                src = r.rstrip(os.path.sep)+os.path.sep+e.strip(os.path.sep)
                 path = r.strip(os.path.sep)+os.path.sep+e.strip(os.path.sep)
                 if self.whitelist.includes(path):
                     arcpath = path[len(self.origin):]
@@ -51,9 +52,11 @@ class CatyArchiver(OptionParser):
                         for i in incl:
                             if arcpath.startswith(i):
                                 if self.list:
-                                    print path
+                                    print src
                                 else:
-                                    outfile.write(path, arcpath)
+                                    outfile.write(src, arcpath)
+        if self.outfile:
+            outfile.close()
 
 class WhiteListItem(object):
     def __init__(self, pattern, directives=()):
