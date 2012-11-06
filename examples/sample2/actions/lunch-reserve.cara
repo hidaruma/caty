@@ -127,7 +127,7 @@ resource 予約処理 ("/process.cgi") {
   :: @[in, out] #0 void -> void redirects 終了 ;
 
   action メニュー登録 ("register/POST")
-  :: @[in, out] #0 void -> deferred redirects 終了 ;
+  :: @[in, out] #0 void -> _ redirects 終了 ;
 };
 
 // End of module
