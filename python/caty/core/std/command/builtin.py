@@ -645,14 +645,31 @@ class Equals(Builtin):
     def __eq(self, a, b):
         a = reduce_undefined(a)
         b = reduce_undefined(b)
-        if a == b:
-            if (isinstance(a, bool) and not isinstance(b, bool)) or (isinstance(b, bool) and not isinstance(a, bool)):
-                return False
-            if (isinstance(a, str) and not isinstance(b, str)) or (isinstance(b, str) and not isinstance(a, str)):
-                return False
-            return True
-        return False
+        return self.__rec_eq(a, b)
 
+    def __rec_eq(self, a, b):
+        if isinstance(a, dict):
+            if not isinstance(b, dict):
+                return False
+            else:
+                if a.keys()!= b.keys():
+                    return False
+                return all([self.__rec_eq(a[k], b[k]) for k in a.keys()])
+        elif isinstance(a, (tuple, list)):
+            if not isinstance(b, (tuple, list)):
+                return False
+            if len(a) != len(b):
+                return False
+            return all([self.__rec_eq(p[0], p[1]) for p in zip(a, b)])
+        elif _type_of(a) == _type_of(b) == 'foreign':
+            return True
+        else:
+            if a == b:
+                if (isinstance(a, bool) and not isinstance(b, bool)) or (isinstance(b, bool) and not isinstance(a, bool)):
+                    return False
+                if (isinstance(a, str) and not isinstance(b, str)) or (isinstance(b, str) and not isinstance(a, str)):
+                    return False
+            return True
 
 class Eval(Builtin):
     
