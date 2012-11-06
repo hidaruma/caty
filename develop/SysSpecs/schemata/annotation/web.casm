@@ -5,8 +5,8 @@ module annotation.web;
 /** このコマンドの第1引数はURL起原である
  * コマンドがアクションから使用されることを想定している。
  */
-@[annotation, target(["COMMAND_DECL"])]
-type arg1-from-url = {};
+@[target(["COMMAND_DECL"])]
+annotation  arg1-from-url :: boolean?;
 
 // End of Module
 

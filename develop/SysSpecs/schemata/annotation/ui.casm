@@ -22,18 +22,15 @@ type UiControl = (
 );
 
 /** 使用すべきUIコントロールを指定 */
-@[annotation, target("PROPERTY")]
-type ui = {
- "value" : UiControl
-};
+@[target("PROPERTY")]
+annotation ui :: UiControl;
 
 /** ユーザーインターフェースで使うラベル文字列を指定 */
-@[annotation, target(["OBJECT", "PROPERTY"])]
-type label = {
- "value" : string
-};
+@[target(["OBJECT", "PROPERTY"])]
+annotation label :: string;
 
 /** 選択肢のなかでチェックされているものを指定 */
-@[annotation, target("CHOICE")]
-type checked = {};
+@[target("CHOICE")]
+annotation checked :: boolean?;
+
 
