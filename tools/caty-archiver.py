@@ -72,7 +72,7 @@ class WhiteListItem(object):
         self.init_matcher()
 
     def includes(self, path):
-        return self.matcher.search(path)
+        return self.matcher.search(path.replace('\\', '/'))
 
 class WhiteListParser(object):
     def feed(self, c):
