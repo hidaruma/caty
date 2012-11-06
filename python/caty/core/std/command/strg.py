@@ -1,23 +1,10 @@
 #coding: utf-8
 from caty.core.command import Builtin
+from caty.core.exception import throw_caty_exception
 from caty.jsontools import *
 from caty.jsontools.path import build_query
 
-name = 'strg'
-schema = u"""
-type DumpInfo = {
-    "collectionName": string,
-    "schema": string,
-    "data": [object*]
-};
-
-type Collection = {
-    "collectionName": string,
-    "schema": string,
-    "appName": string | null,
-};
-
-"""
+import re
 
 class StorageAccessor(object):
 
@@ -37,8 +24,11 @@ class CreateCollection(Builtin):
         self.schema.get_type(schema_name)
         self._collection_name = collection_name if collection_name else schema_name
         self._global = opts['as-global']
+        self.collection_pattern = re.compile(u'[a-zA-Z][a-zA-Z0-9_-]*$')
 
     def execute(self):
+        if not self.collection_pattern.match(self._collection_name):
+            throw_caty_exception(u'BadArg', self._collection_name)
         self.storage(self._collection_name).create_collection(self._schema_name, self._global)
 
 class DropCollection(Builtin, StorageAccessor):
