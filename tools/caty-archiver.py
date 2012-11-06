@@ -36,14 +36,24 @@ class CatyArchiver(OptionParser):
     def archive(self):
         if self.outfile:
             outfile = ZipFile(self.outfile, u'w', ZIP_DEFLATED)
+        incl = []
+        for n in os.listdir(self.origin):
+            path = self.origin.strip(os.path.sep)+os.path.sep+n.strip(os.path.sep) + os.path.sep
+            if self.whitelist.includes(path):
+                arcpath = path[len(self.origin):]
+                incl.append(arcpath)
         for r, d, f in os.walk(self.origin):
             for e in f:
                 path = r.strip(os.path.sep)+os.path.sep+e.strip(os.path.sep)
                 if self.whitelist.includes(path):
-                    if self.list:
-                        print path
-                    else:
-                        outfile.write(path, path[len(self.origin):])
+                    arcpath = path[len(self.origin):]
+                    if os.path.sep in arcpath:
+                        for i in incl:
+                            if arcpath.startswith(i):
+                                if self.list:
+                                    print path
+                                else:
+                                    outfile.write(path, arcpath)
 
 class WhiteListItem(object):
     def __init__(self, pattern, directives=()):
@@ -65,6 +75,8 @@ class WhiteListParser(object):
     def feed(self, c):
         dirent = None
         for n, line in enumerate(c.splitlines()):
+            if not line.strip():
+                continue
             # remove comment
             if u'#' in line:
                 line = line[:line.find(u'#')]
@@ -179,6 +191,20 @@ class DefaultWhiteListItemContainer(WhiteListItemContainer):
             WhiteListItem('*.xml'),
             WhiteListItem('*.zip'),
         ]
+
+    def includes(self, path):
+        for e in self._excl:
+            if e.includes(path):
+                if not 'excl' in self.directives:
+                    return False
+                else:
+                    return True
+        for i in self._incl:
+            if i.includes(path):
+                if not 'excl' in self.directives:
+                    return True
+                else:
+                    return False
 
 if __name__ == '__main__':
     main(sys.argv)
