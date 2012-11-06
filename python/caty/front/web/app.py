@@ -80,7 +80,7 @@ class CatyApp(object):
             enc = json.get('encoding')
             ct = json['header'].get('content-type', '')
             if 'text/' in ct and 'charset' not in ct and enc:
-                json['header']['content-type'] = ct + ' charset=%s' % enc
+                json['header']['content-type'] = ct + '; charset=%s' % enc
             headers = list(self.create_header(json['header']))
             if 'Set-Cookie' not in json['header']:
                 cookie = self._extend_cookie(environ) 
