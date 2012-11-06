@@ -24,7 +24,7 @@ class CreateCollection(Builtin):
         self.schema.get_type(schema_name)
         self._collection_name = collection_name if collection_name else schema_name
         self._global = opts['as-global']
-        self.collection_pattern = re.compile(u'[a-zA-Z][a-zA-Z0-9_-]*$')
+        self.collection_pattern = re.compile(u'[a-zA-Z][a-zA-Z0-9_]*$')
 
     def execute(self):
         if not self.collection_pattern.match(self._collection_name):
