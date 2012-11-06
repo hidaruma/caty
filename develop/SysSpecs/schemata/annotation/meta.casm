@@ -75,38 +75,37 @@ type TargetType = (
  * どの構文構成素に対してアノテートするかを指定する。
  * このアノテーションが指定されないときは、ANY_TARGET となる。
  */
-@[annotation, target("ANNOTATION_DECL")]
-type target = {
- "value" : (TargetType | [TargetType, TargetType*])
-};
+@[ target("ANNOTATION_DECL")]
+annotation target :: (TargetType | [TargetType, TargetType*]);
+
 
 /** アノテーションパラメータのなかで、名前を省略できるパラメータを指定
  * このアノテーションは、高々1つのアノテーションパラメータにだけに付けられる。
  * このアノテーションが指定されないときは、"value" という名前のパラメータ（プロパティ）が
  * 名前省略可能なパラメータである。
  */
-@[annotation, target("ANNOTATION_PARAM")]
-type annotation-value = {};
+@[target("ANNOTATION_PARAM")]
+annotation annotation-value :: boolean?;
 
 /** このアノテーションはimporの際に削除すべきことを示す
  */
-@[annotation, target("ANNOTATION_DECL")]
-type strip-off-when-import = {};
+@[ target("ANNOTATION_DECL")]
+annotation strip-off-when-import :: boolean?;
 
 /** このアノテーションは式（構文的表現）のパーシングに影響を与える
  */
-@[annotation, target("ANNOTATION_DECL")]
-type affect-parsing = {};
+@[ target("ANNOTATION_DECL")]
+annotation affect-parsing :: boolean?;
 
 /** このアノテーションは妥当性検証に影響を与える
  */
-@[annotation, target("ANNOTATION_DECL")]
-type affect-validation = {};
+@[ target("ANNOTATION_DECL")]
+annotation affect-validation :: boolean?;
 
 /** このアノテーションはアンビエントの管理に影響を与える
  */
-@[annotation, target("ANNOTATION_DECL")]
-type affect-management = {};
+@[ target("ANNOTATION_DECL")]
+annotation affect-management :: boolean?;
 
 
 // End of Module

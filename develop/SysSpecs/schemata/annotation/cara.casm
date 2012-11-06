@@ -6,25 +6,25 @@ module annotation.cara;
 /** 動的なポートである
  * dynamicから変更
  */
-@[annotation, target(["PORT_DECL"]) ]
-type indirect = {};
+@[target(["PORT_DECL"]) ]
+annotation indirect :: boolean?;
 
 
 /** 抽象状態である
  */
-@[annotation, target(["STATE_DECL"]) ]
-type abstract = {};
+@[target(["STATE_DECL"]) ]
+annotation abstract :: boolean?;
 
 
 /** アクション核の入力境界となるフラグメントである
  */
-@[annotation, target(["FRAGMENT_PROFILE_DECL"]) ]
-type in = {};
+@[target(["FRAGMENT_PROFILE_DECL"]) ]
+annotation in :: boolean?;
 
 /** アクション核の出力境界となるフラグメントである
  */
-@[annotation, target(["FRAGMENT_PROFILE_DECL"]) ]
-type out = {};
+@[target(["FRAGMENT_PROFILE_DECL"]) ]
+annotation out :: boolean?;
 
 
 // End of Module

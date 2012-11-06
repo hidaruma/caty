@@ -14,7 +14,6 @@ type RemapSpec = {
 /** @[anchor], @[form] に共通の定義 */
 type TriggerAnnotationObj = {
  /** トリガー名 */
- @[annotation-value] // 属性名を省略可能
  "name" : string(format="caty-std-name"),
 
  /** リネームの指定 */
@@ -23,12 +22,12 @@ type TriggerAnnotationObj = {
 };
 
 /** アンカーであることを示すアノテーション */
-@[annotation, target("PROPERTY")]
-type anchor = TriggerAnnotationObj;
+@[target("PROPERTY")]
+annotation anchor :: TriggerAnnotationObj;
 
 /** フォームであることを示すアノテーション */
 @[annotation, target("PROPERTY")]
-type form = TriggerAnnotationObj;
+annotation form :: TriggerAnnotationObj;
 
 // End of Module
 
