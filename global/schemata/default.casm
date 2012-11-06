@@ -247,4 +247,33 @@ command lookup-action
 };
 
 
+/** sreif:show-resource の別名 */
+command res [string res] :: void -> reif:ResourceSummary? {
+  sreif:show-resource --safe %1
+};
+
+/** sreif:list-resources の別名 */
+command ress [string mod] :: void -> [reif:ResourceSummary*]? {
+  sreif:list-resources --safe %1
+};
+
+/** sreif:show-state の別名 */
+command stt [string stt] :: void -> reif:StateSummary? {
+  sreif:show-state --safe %1
+};
+
+/** sreif:list-states の別名 */
+command stts [string mod] :: void -> [reif:StateSummary*]? {
+  sreif:list-states --safe %1
+};
+
+/** sreif:show-action の別名 */
+command act [string act] :: void -> reif:ActionSummary? {
+  sreif:show-action --safe %1
+};
+
+/** sreif:list-actions の別名 */
+command acts [string mod] :: void -> [reif:ActionSummary*]? {
+  sreif:list-actions --safe %1
+};
 

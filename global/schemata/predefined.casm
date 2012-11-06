@@ -61,7 +61,7 @@ Hello, this is '{$actionName}' in '{$appName}'.
 
  do {
    %ACTION?="(Unknown action)" >: "actionName",
-   %CATY_APP | $.name          >: "appName",
+   %APPLICATION | $.name          >: "appName",
  } > context;
 
  [%context, (%template-text | template:compile)] | template:expand |
