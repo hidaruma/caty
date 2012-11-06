@@ -24,6 +24,7 @@ type bodyContent = (null|string|binary);
 command head 
  {
    /** リクエストタイムアウト時間（秒数、小数可能）*/
+   @[default(60.0)]
    "timeout" : number?,
  }
  [url] :: void -> Resp
@@ -35,6 +36,7 @@ command head
 command get 
  {
    /** リクエストタイムアウト時間（秒数、小数可能）*/
+   @[default(60.0)]
    "timeout" : number?,
  }
  [url] :: void -> Resp
@@ -46,6 +48,7 @@ command post
  {
    "content-type": string?,
    /** リクエストタイムアウト時間（秒数、小数可能）*/
+   @[default(60.0)]
    "timeout" : number?,
  }
  [url] :: bodyContent -> Resp
@@ -57,6 +60,7 @@ command put
  {
    "content-type": string?,
    /** リクエストタイムアウト時間（秒数、小数可能）*/
+   @[default(60.0)]
    "timeout" : number?,
  }
  [url] :: bodyContent -> Resp
@@ -67,6 +71,7 @@ command put
 command delete
  {
    /** リクエストタイムアウト時間（秒数、小数可能）*/
+   @[default(60.0)]
    "timeout" : number?,
  }
  [url] :: void -> Resp
