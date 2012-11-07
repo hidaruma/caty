@@ -126,6 +126,17 @@ class FacilityNode(object):
     def declare(self, module):
         module.add_facility(self)
 
+class EntityNode(object):
+    def __init__(self, name, fname, value, doc, annotations):
+        self.name= name
+        self.facility_name= fname
+        self.user_param = value
+        self.docstring = doc
+        self.annotations = annotations
+
+    def declare(self, module):
+        module.add_entity(self)
+
 class Node(object):
     def __init__(self, options=None):
         self.options = {} if options is None else options

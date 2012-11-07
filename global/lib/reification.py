@@ -182,12 +182,13 @@ class ShallowReifier(object):
     def reifiy_facility_usages(self, profile):
         r = {}
         for mode, fcl in profile.facilities:
-            r[fcl.alias or fcl.name] = {
+            r[fcl.alias or fcl.name] = conditional_dict(lambda k, v: v is not None, {
                     u'registeredName': fcl.name,
                     u'name': fcl.alias or fcl.name,
                     u'mode': _modemap[mode],
                     u'userParam': fcl.param,
-                }
+                    u'entityName': fcl.entity_name,
+                })
         return r
 
     def reify_type_param(self, p):

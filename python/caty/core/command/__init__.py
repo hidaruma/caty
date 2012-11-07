@@ -214,10 +214,16 @@ class Command(object):
         for mode, decl in self.profile_container.profiles[0].facilities:
             name = decl.name
             key = decl.alias if decl.alias else name
-            param = None#decl.param
+            param = decl.param
             if name not in facilities:
                 throw_caty_exception('FacilityNotDefined', u'Facility $name is not defined', name=name)
-            facility = facilities[name].create(mode, param)
+            factory = facilities[name]
+            if factory.is_entity:
+                if param:
+                    throw_caty_exception('InvalidOperation', u'Entity takes no parameter: $name', name=name)
+                facility = factory.create(mode)
+            else:
+                facility = factory.create(mode, param)
             # Dummy で定義されてない（=ユーザ定義）ファシリティは、
             # 定義元のアプリケーションへの参照に差し替える
             if target_app:

@@ -56,6 +56,7 @@ class Module(Facility):
         self.command_ns = {}
         self.class_ns = {}
         self.facility_ns = {}
+        self.entity_ns = {}
         self.command_loader = None
         self.sub_modules = {}
         self.sub_packages = {}
@@ -109,6 +110,10 @@ class Module(Facility):
         self.add_facility = partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.get_facility = partial(self._get_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.has_facility = partial(self._has_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
+
+        self.add_entity = partial(self._add_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
+        self.get_entity = partial(self._get_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
+        self.has_entity = partial(self._has_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
 
         self.declare_annotation = partial(self._add_resource, scope_func=lambda x:x.annotation_proto_ns, type=u'Annotation')
         self.get_annotation_proto = partial(self._get_resource, scope_func=lambda x:x.annotation_proto_ns, type=u'Annotation')
@@ -304,12 +309,13 @@ class Module(Facility):
             for k, v in m.ast_ns.items():
                 if u'register-public' in v.annotations:
                     m.find_root().ast_ns.pop(k)
-        for k in m.facility_ns:
+        for k in m.facility_ns.keys() + m.entity_ns.keys():
             m.app._facility_classes.pop(k)
         m.ast_ns = {}
         m.proto_ns = {}
         m.class_ns = {}
         m.facility_ns = {}
+        m.entity_ns = {}
         m.clear_namespace()
         try:
             m.force = True
@@ -330,13 +336,14 @@ class Module(Facility):
                     r = m.find_root()
                     if k in r.ast_ns:
                         r.ast_ns.pop(k)
-        for k in m.facility_ns:
+        for k in m.facility_ns.keys() + self.entity_ns.keys():
             if k in m.app._facility_classes:
                 m.app._facility_classes.pop(k)
         m.ast_ns = {}
         m.proto_ns = {}
         m.class_ns = {}
         m.facility_ns = {}
+        m.entity_ns = {}
         m.clear_namespace()
 
     def has_package(self, name):
@@ -604,6 +611,8 @@ class Module(Facility):
             m._register_facility()
         if self.is_root and not self.compiled:
             self.application.cout.writeln('OK')
+        for k, v in self.entity_ns.items():
+            self._app.register_entity(k, v.facility_name, v.user_param)
 
     def _load_facility_class(self, name, uri):
         from caty.core.casm.loader import dynamic_load
@@ -677,7 +686,7 @@ class Module(Facility):
             m.clear_namespace()
         for m in self.class_ns.values():
             m.clear_namespace()
-        for k in self.facility_ns:
+        for k in self.facility_ns.keys() + self.entity_ns.keys():
             m.app._facility_classes.pop(k)
 
 class _FaciltyLoader(object):

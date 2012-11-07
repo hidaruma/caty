@@ -33,6 +33,10 @@ class Facility(object):
 
     __properties__ = ['mode']
 
+    @property
+    def is_entity(self):
+        return False
+
     def __init__(self, mode=READ):
         self._mode = mode
         self._app = None
@@ -83,6 +87,22 @@ class Facility(object):
 
     def clone(self):
         raise NotImplementedError(repr(self))
+
+class EntityProxy(Facility):
+
+    def __init__(self, base, user_param):
+        self.base = base
+        self.user_param = user_param
+
+    def start(self):
+        return EntityProxy(self.base.start(), self.user_param)
+
+    def create(self, mode):
+        return self.base.create(mode, self.user_param)
+
+    @property
+    def is_entity(self):
+        return True
 
 class ReadOnlyFacility(Facility):
     _mode = READ

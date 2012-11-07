@@ -1,6 +1,6 @@
 #coding: utf-8
 from caty.core.async import AsyncQueue
-from caty.core.facility import Facility, AccessManager, FakeFacility, ReadOnlyFacility
+from caty.core.facility import Facility, AccessManager, FakeFacility, ReadOnlyFacility, EntityProxy
 from caty.util import cout, error_to_ustr, brutal_error_printer
 from caty.util.path import join
 from caty import mafs, storage, session
@@ -483,6 +483,14 @@ class Application(PbcObject):
             raise Exception(self.i18n.get("Facility name conflicted: $name at $app", name=name, app=self.name))
         self._facility_classes[name] = (cls, system_param)
 
+    def register_entity(self, name, facility_name, user_param):
+        if name in self._facility_classes:
+            raise Exception(self.i18n.get("Entity name conflicted: $name at $app", name=name, app=self.name))
+        if facility_name not in self._facility_classes:
+            raise Exception(self.i18n.get("Unknown facility: $name at $app", name=name, app=self.name))
+        cls, sys_param = self._facility_classes[facility_name]
+        self._facility_classes[name] = (cls, sys_param, user_param)
+
     def _init_facilities(self):
         for k, v in self._facility_classes.items():
             v[0].initialize(self, None)
@@ -588,7 +596,10 @@ class Application(PbcObject):
             'sysfiles': self._create_sysfiles(),
         }
         for k, v in self._facility_classes.items():
-            facilities[k] = v[0].instance(self, v[1])
+            if len(v) == 2:
+                facilities[k] = v[0].instance(self, v[1])
+            else:
+                facilities[k] = EntityProxy(v[0].instance(self, v[1]), v[2])
         vcs = self._vcs(self, facilities['pub'], facilities['data'])
         facilities['vcs'] = vcs
         facilities['token'] = RequestToken(facilities['session'])
