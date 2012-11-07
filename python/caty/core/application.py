@@ -489,7 +489,7 @@ class Application(PbcObject):
         if facility_name not in self._facility_classes:
             raise Exception(self.i18n.get("Unknown facility: $name at $app", name=name, app=self.name))
         cls, sys_param = self._facility_classes[facility_name]
-        self._facility_classes[name] = (cls, sys_param, user_param)
+        self._facility_classes[name] = (cls, sys_param, user_param, facility_name)
 
     def _init_facilities(self):
         for k, v in self._facility_classes.items():

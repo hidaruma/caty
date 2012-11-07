@@ -176,19 +176,29 @@ class ShallowReifier(object):
             u'profile': self._make_profile(c),
             u'typeParams': [self.reify_type_param(p) for p in c.type_params],
             u'location': self._get_localtion(c),
-            u'facilityUsages': self.reifiy_facility_usages(c.profiles[0]),
+            u'facilityUsages': self.reifiy_facility_usages(c.profiles[0], c.defined_application),
         }
 
-    def reifiy_facility_usages(self, profile):
+    def reifiy_facility_usages(self, profile, app):
         r = {}
         for mode, fcl in profile.facilities:
-            r[fcl.alias or fcl.name] = conditional_dict(lambda k, v: v is not None, {
+            entry = app._facility_classes[fcl.name]
+            if len(entry) == 2:
+                o = {
                     u'registeredName': fcl.name,
                     u'name': fcl.alias or fcl.name,
                     u'mode': _modemap[mode],
                     u'userParam': fcl.param,
-                    u'entityName': fcl.entity_name,
-                })
+                }
+            else:
+                o = {
+                    u'registeredName': entry[3],
+                    u'name': fcl.alias or fcl.name,
+                    u'entityName': fcl.alias or fcl.name,
+                    u'mode': _modemap[mode],
+                    u'userParam': entry[2],
+                }
+            r[fcl.alias or fcl.name] = o
         return r
 
     def reify_type_param(self, p):
