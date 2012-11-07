@@ -82,7 +82,7 @@ command delete
 /* == */
 
 type UrlEncodable = {
- * : (string|number)?
+ * : (string|number|boolean|null)?
 };
 
 type UrlDecoded = {
@@ -92,6 +92,7 @@ type UrlDecoded = {
 
 /** JSONオブジェクトのurlエンコード */
 command urlencode :: UrlEncodable -> string
+  reads env
   refers python:caty.core.std.command.http.UrlEncode
 ;
 

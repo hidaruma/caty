@@ -30,8 +30,8 @@ def make_response(resp):
 
 
 def push_verb(url, verb=None):
-    print "url=" + unicode(url)
-    print "verb=" + unicode(verb)
+    # print "url=" + unicode(url)
+    # print "verb=" + unicode(verb)
     if verb is None:
         return url
     s = url.split('?')
@@ -118,15 +118,24 @@ class Put(Command):
 import urllib
 import urlparse
 
+def _quote(x):
+    if isinstance(x, unicode):
+       return  urllib.quote_plus(x.encode('utf-8'))
+    elif x is None:
+        return "null"
+    elif x is True:
+        return "true"
+    elif x is False:
+        return "false"
+    else:
+        return x
+
 def urlencode(jsonobj):
-    u_quote = lambda u: urllib.quote_plus(u.encode('utf-8'))
-    quote = lambda x: u_quote(x) if isinstance(x, unicode) else x
-    
     keys = jsonobj.keys()
     q = {}
     for k in keys:
-        qk = u_quote(k)
-        qv = quote(jsonobj[k])
+        qk = _quote(k)
+        qv = _quote(jsonobj[k])
         q[qk] = qv
     return urllib.urlencode(q)
 
