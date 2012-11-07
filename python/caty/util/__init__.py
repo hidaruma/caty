@@ -96,10 +96,12 @@ class ConsoleWriter(object):
         self.encoding = encoding
 
     def _to_str(self, arg):
+        from codecs import getencoder
         assert self.encoding is not None
         assert isinstance(arg, (unicode, Exception, str)) or arg is traceback, type(arg)
         if isinstance(arg, unicode):
-            return arg.encode(self.encoding)
+            r = getencoder(self.encoding)(arg, 'replace')
+            return r[0]
         elif isinstance(arg, Exception):
             return get_message(arg, self.encoding)
         elif isinstance(arg, str):
