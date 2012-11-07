@@ -351,19 +351,28 @@ type Application = @application (ApplicationSummary & {
   *: any?
 });
 
+
+
+
+
 /** ファシリティの基本情報 */
 type FacilitySummary = LocatedQualifierMixin & {
 
   /** ファシリティの登録名 */
   "name" : string, // 必須
 
-  /** スペッククラスのコロンドットパス */
+  /** スペッククラスのコロンドットパス 
+   * CDパス形式で、クラスののフルネーム
+   */
   "specClass": string(remark="CDパス"),
 
-  /** システムパラメータ */
+  /** システムパラメータ 
+   * パラメータが明示的に指定されてないときはnullとなる。
+   */
   "systemParam" : any,
 
-  /** @[deprecated]アノテーションの値をコピーする */
+  /** @[deprecated]アノテーションの値をコピーする、廃止予定
+   */
   @[deprecated, default(false)]
   "deprecated": boolean?,
 
@@ -381,6 +390,22 @@ type Facility = @facility (FacilitySummary & {
   // サブツリーなし
 
    *: any?
+});
+
+/** エンティティの基本情報 */
+type EntitySummary = FacilitySummary & {
+  /** ファシリティのユーザーパラメータ 
+   * パラメータが明示的に指定されてないときはnullとなる。
+   */
+   "userParam": any,
+
+   *: any?
+};
+
+
+/** エンティティ */
+type Entity = @entity (EntitySummary & {
+ *: any?
 });
 
 /** パッケージの基本情報 */
@@ -639,8 +664,15 @@ type implemented = (
 type FacilityUsage = {
     /** ファシリティ名（登録名）
      * キー（オブジェクトのプロパティ）としてはインジェクション名を使う
+     * ファシリティがエンティティとして具体化されているとき、
+     * 登録名は、entity宣言からコピーする。
      */
     "registeredName": string,
+
+    /** エンティティ名
+     * ファシリティがエンティティとして具体化されているときは、エンティティ名も添える。
+     */
+    "entityName": string?,
 
     /** インジェクションのときに使う名前
      * キーとしてはインジェクション名を使う
@@ -651,9 +683,10 @@ type FacilityUsage = {
     /** アクセスのモード */
     "mode": ("read" | "update" | "use"),
 
-    /** ファシリティのユーザーパラメータ */
-    @[default(null)]
-    "userParam": any?,
+    /** ファシリティのユーザーパラメータ 
+     * ファシリティがエンティティとして具体化されているときは、entity宣言からコピーする。
+     */
+    "userParam": any,
 };
 
 /** 実装 */
@@ -734,6 +767,11 @@ type ExceptionTypes = (@only [TypeSpec*]) | (@likely [TypeSpec*]);
 
 }>>
 
+== ファシリティ
+
+<<{
+
+}>>
 
 == リソース、アクション、状態
 
