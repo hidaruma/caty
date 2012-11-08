@@ -10,6 +10,7 @@ def main(argv):
     caar = CatyArchiver(usage='usage: python %s [OPTIONS] output' % argv[0])
     caar.add_option('--list', action='store_true', default=False)
     caar.add_option('--filter', action='store', default=None)
+    caar.add_option('--meta', action='append', default=[])
     caar.add_option('--origin', action='store', default=os.getcwd())
     caar.add_option('-q', '--quiet', action='store_true')
     options, args = caar.parse_args(argv[1:])
@@ -17,6 +18,7 @@ def main(argv):
     caar.filter = options.filter
     caar.origin = options.origin
     caar.quiet = options.quiet
+    caar.meta = options.meta
     if not caar.list:
         caar.outfile = args[0]
     else:
@@ -50,11 +52,21 @@ class CatyArchiver(OptionParser):
                     arcpath = path[len(self.origin):]
                     if os.path.sep in arcpath:
                         for i in incl:
+                            if arcpath.strip(os.path.sep).startswith('META-INF' + os.path.sep):
+                                continue
                             if arcpath.startswith(i):
                                 if self.list:
                                     print src
                                 else:
                                     outfile.write(src, arcpath)
+        for m in self.meta:
+            if not os.path.exists(m):
+                print u'[Warning]', m, 'not exists'
+                continue
+            if os.path.isdir(m):
+                print u'[Warning]', m, 'is directory'
+                continue
+            outfile.write(m, 'META-INF/' + m.split(os.path.sep)[-1])
         if self.outfile:
             outfile.close()
 
