@@ -182,7 +182,7 @@ class ShallowReifier(object):
     def reifiy_facility_usages(self, profile, app):
         r = {}
         for mode, fcl in profile.facilities:
-            entry = app._facility_classes[fcl.name]
+            entry = app._facility_classes.get(fcl.name, [None, None]) # system facility
             if len(entry) == 2:
                 o = {
                     u'registeredName': fcl.name,
