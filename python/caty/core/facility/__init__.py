@@ -378,10 +378,7 @@ class FacilitySet(object):
         return self._facilities[k]
 
     def get(self, k, default=None):
-        u"""不明なキーへのアクセスは常にエラー。
-        フレームワーク内部でしか基本的に使わないクラスではあるが、一応。
-        """
-        return self._facilities[k]
+        return self._facilities.get(k, default)
 
     def keys(self):
         return self._facilities.keys()

@@ -216,8 +216,12 @@ class Command(object):
             key = decl.alias if decl.alias else name
             param = decl.param
             if name not in facilities:
+                e = self.profile_container.module.get_facility_or_entity(name)
+                if e:
+                    name = e.canonical_name
+            factory = facilities.get(name)
+            if not factory:
                 throw_caty_exception('FacilityNotDefined', u'Facility $name is not defined', name=name)
-            factory = facilities[name]
             if factory.is_entity:
                 if param:
                     throw_caty_exception('InvalidOperation', u'Entity takes no parameter: $name', name=name)

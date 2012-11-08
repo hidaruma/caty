@@ -492,8 +492,12 @@ class Application(PbcObject):
         self._facility_classes[name] = (cls, sys_param, user_param, facility_name)
 
     def _init_facilities(self):
+        initialized = set()
         for k, v in self._facility_classes.items():
+            if v[0] in initialized:
+                continue
             v[0].initialize(self, None)
+            initialized.add(v[0])
 
     def get_logger(self, type):
         assert type in LOG_TYPES

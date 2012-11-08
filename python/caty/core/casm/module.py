@@ -107,13 +107,15 @@ class Module(Facility):
         self.get_class = partial(self._get_resource, scope_func=lambda x:x.class_ns, type=u'Class')
         self.has_class = partial(self._has_resource, scope_func=lambda x:x.class_ns, type=u'Class')
  
-        self.add_facility = partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
+        self.add_facility = partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility', see_register_public=True)
         self.get_facility = partial(self._get_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.has_facility = partial(self._has_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
 
-        self.add_entity = partial(self._add_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
+        self.add_entity = partial(self._add_resource, scope_func=lambda x:x.entity_ns, type=u'Entity', see_register_public=True)
         self.get_entity = partial(self._get_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
         self.has_entity = partial(self._has_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
+
+        
 
         self.declare_annotation = partial(self._add_resource, scope_func=lambda x:x.annotation_proto_ns, type=u'Annotation')
         self.get_annotation_proto = partial(self._get_resource, scope_func=lambda x:x.annotation_proto_ns, type=u'Annotation')
@@ -606,13 +608,14 @@ class Module(Facility):
                     raise Exception(self.application.i18n.get(u'Facility class is not specified: $name, $mod', name=v.clsname, mod=self.name))
 
                 facilty_class = self._load_facility_class(k, cls.annotations['facility-spec-for'].value)
-                self._app.register_facility(k, facilty_class, v.system_param)
+                self._app.register_facility(v.canonical_name if not self.is_root else v.name, facilty_class, v.system_param)
         for m in self.sub_modules.values() + self.sub_packages.values():
             m._register_facility()
         if self.is_root and not self.compiled:
             self.application.cout.writeln('OK')
         for k, v in self.entity_ns.items():
-            self._app.register_entity(k, v.facility_name, v.user_param)
+            fname = self.get_facility(v.facility_name).canonical_name
+            self._app.register_entity(v.canonical_name if not self.is_root else v.name, fname, v.user_param)
 
     def _load_facility_class(self, name, uri):
         from caty.core.casm.loader import dynamic_load
@@ -621,6 +624,12 @@ class Module(Facility):
         uri = uri.replace('python:', '')
         loader = _FaciltyLoader(uri, name, self)
         return loader.load()
+
+    def get_facility_or_entity(self, name):
+        if self.has_facility(name):
+            return self.get_facility(name)
+        if self.has_entity(name):
+            return self.get_entity(name)
 
     def _loop_exec(self, target, cursor_factory, callback):
         try:

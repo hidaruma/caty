@@ -149,7 +149,7 @@ def uses(seq):
     return _.strip(), seq.parse([lambda s:[res_name(s)], namelist])
 
 def res_name(seq):
-    n = seq.parse(name)
+    n = identifier_token_a(seq)
     p = option(res_param)(seq)
     a = option(alias)(seq)
     return FacilityDecl(n, p, a)

@@ -124,7 +124,12 @@ class FacilityNode(object):
         self.annotations = annotations
 
     def declare(self, module):
+        self.module = module
         module.add_facility(self)
+
+    @property
+    def canonical_name(self):
+        return self.module.canonical_name + ':' + self.name
 
 class EntityNode(object):
     def __init__(self, name, fname, value, doc, annotations):
@@ -135,7 +140,12 @@ class EntityNode(object):
         self.annotations = annotations
 
     def declare(self, module):
+        self.module = module
         module.add_entity(self)
+
+    @property
+    def canonical_name(self):
+        return self.module.canonical_name + ':' + self.name
 
 class Node(object):
     def __init__(self, options=None):
