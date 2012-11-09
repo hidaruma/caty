@@ -137,7 +137,7 @@ def resource(seq):
     return seq.parse([uses, reads, updates])
 
 def updates(seq):
-    _ = seq.parse(keyword(u'uses'))
+    _ = seq.parse(keyword(u'updates'))
     return _.strip(), seq.parse([lambda s:[res_name(s)], namelist])
 
 def reads(seq):
@@ -145,7 +145,7 @@ def reads(seq):
     return _.strip(), seq.parse([lambda s:[res_name(s)], namelist])
 
 def uses(seq):
-    _ = seq.parse(keyword(u'updates'))
+    _ = seq.parse(keyword(u'uses'))
     return _.strip(), seq.parse([lambda s:[res_name(s)], namelist])
 
 def res_name(seq):

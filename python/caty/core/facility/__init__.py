@@ -204,6 +204,9 @@ class TransactionalAccessManager(AccessManager):
 
 
     def execute(self, obj, name, *args, **kwds):
+        if not self._get_function(obj, name):
+            raise InternalException(u'Operation not allowed: object=$obj, method=$method, mode=$mode',
+                                    obj=repr(obj), method=str(name), mode=str(obj.mode))
         fun = getattr(obj.__class__, name)
         if name in self.updator:
             return self.do_update(obj, fun, *args, **kwds)

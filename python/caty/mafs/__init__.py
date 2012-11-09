@@ -62,6 +62,11 @@ class MafsFactory(Facility, ResourceFinder, PbcObject):
                            self._type,
                            self._access_manager)
 
+    def create(self, mode, user_param=None):
+        o = Facility.create(self, mode)
+        o._access_manager._apply_facility(o)
+        return o
+
     def commit(self):
         self._access_manager.commit()
  
@@ -199,8 +204,9 @@ class MafsFactory(Facility, ResourceFinder, PbcObject):
             return mf.create(u'reads')
         elif self.mode == UPDATE:
             return mf.create(u'updates')
-        else:
+        elif self.mode == DUAL:
             return mf.create(u'uses')
+        assert False, u'invalid mode: ' + str(self.mode)
 
     def _apply_access_manager_to_file(self, fo):
         Facility.__init__(fo, self.mode)
