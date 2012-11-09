@@ -18,7 +18,7 @@ command draw {
 
  /** 図示するノード */
  @[default("any")]
- "node" : ("state" | "action" | "userrole" | "any")?,
+ "node" : ("state" | "action" | "userrole" | "any" | "facility")?,
 
   /** データ最終変更の日時 */
   @[without("timefile")]

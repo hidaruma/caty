@@ -32,7 +32,9 @@ resource Wikiファイル("*.wiki") {
     };
 
     /** 編集画面呼び出し */
-    action 編集("edit/GET")  :: WebInput -> WebOutput produces 編集 
+    action 編集("edit/GET")  :: WebInput -> WebOutput
+        reads pub
+        produces 編集 
     {
         {
             "body":file:read %1,
@@ -45,6 +47,7 @@ resource Wikiファイル("*.wiki") {
      * * トンススレートが失敗すればルートにリダイレクト
      */
     action 書き込み("POST#exists-parent") {"ignore": boolean} :: 
+        uses pub
         @[in] #translate WikiFile -> _,
         @[out] #ok _ -> never redirects Wikiファイル.読み出し,
         @[out] #ng _ -> never redirects Root.get 
@@ -58,7 +61,10 @@ resource Wikiファイル("*.wiki") {
     };
 
     /** プレーンテキスト取得 */
-    action 原稿("plain/GET") :: @[in, out] #io void -> Response produces 原稿
+    action 原稿("plain/GET") :: WebInput -> WebOutput
+        reads pub
+        @[in, out] #io void -> Response
+        produces 原稿
     {
         print %0
     };

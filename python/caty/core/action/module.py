@@ -450,3 +450,6 @@ class ResourceModule(Module):
         root['subgraphs'] = subgraphs
         return root
 
+    def make_facility_graph(self):
+        pass
+

@@ -279,6 +279,8 @@ class DrawModule(Builtin, DrawingMixin):
         rm = rmc.get_module(self._module_name)
         if self._node == 'userrole':
             return rm.make_userrole_graph()
+        elif self.node == 'facility':
+            return rm.make_facility_graph()
         else:
             return rm.make_graph()
 

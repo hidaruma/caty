@@ -3,7 +3,7 @@ from topdown import *
 from caty.core.script.parser import ScriptParser
 from caty.core.casm.language.casmparser import module_decl
 from caty.core.casm.language.schemaparser import object_, typedef
-from caty.core.casm.language.commandparser import resource
+from caty.core.casm.language.commandparser import resource, jump
 from caty.core.language.util import docstring, annotation, action_fragment_name, annotation, identifier_token, identifier_token_m, name_token, some_token
 from caty.jsontools.xjson import obj
 from caty.core.action.resource import ResourceClass
@@ -227,21 +227,20 @@ class ResourceBodyBlock(Parser):
         return name
 
     def profiles(self, seq):
-        prof = option(try_(self.profile))(seq)
+        prof, jmp, fcl_usage = option(try_(self.profile), (None, [], []))(seq)
         profs = [p for p in option(split(self.internal_profile, ',', allow_last_delim=True), [])(seq) if p]
         if prof:
-            return ActionProfiles([prof]+profs)
+            return ActionProfiles([prof]+profs, jmp, fcl_usage)
         else:
-            return ActionProfiles(profs)
+            return ActionProfiles(profs, jmp, fcl_usage)
 
     def profile(self, seq):
         next_states = []
         relay_list = []
         redirects = []
         link = []
-        in_type = choice('_', typedef)(seq)
-        seq.parse('->')
-        out_type = choice('_', typedef)(seq)
+        in_type, out_type = option(try_(self.__io_type), (None, None))(seq)
+        jmp = jump(seq)
         resource_decl = many(resource)(seq)
         link = unordered(self.relays, self.produces, self.redirects)(seq)
         for t, v in link:
@@ -251,7 +250,19 @@ class ResourceBodyBlock(Parser):
                 redirects = v
             elif t == 'produces':
                 next_states = v
-        return ActionProfile(u'whole', u'', in_type, out_type, relay_list, next_states, redirects)
+        if in_type:
+            p = ActionProfile(u'whole', u'', in_type, out_type, relay_list, next_states, redirects)
+        elif link:
+            p = ActionProfile(u'whole', u'', u'_', u'_', relay_list, next_states, redirects)
+        else:
+            p = None
+        return p, jmp, resource_decl
+
+    def __io_type(self, seq):
+        in_type = choice('_', typedef)(seq)
+        seq.parse('->')
+        out_type = choice('_', typedef)(seq)
+        return in_type, out_type
 
     def internal_profile(self, seq):
         io_type, fragment = seq.parse(self.fragment_name)

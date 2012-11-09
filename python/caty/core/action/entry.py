@@ -224,12 +224,14 @@ class InternalError(Exception):
         self.placeholder = placeholder
 
 class ActionProfiles(object):
-    def __init__(self, profiles):
+    def __init__(self, profiles, jmp_decl=(), fcl_usage=()):
         self._profiles = profiles
         self._next_states = []
         self._input_type = None
         self._output_types = []
         self._redirects = []
+        self._jmp_decl = jmp_decl
+        self._fcl_usage = fcl_usage
         for p in profiles:
             if p.io_type != 'in':
                 self._next_states.extend(p.next_states)
