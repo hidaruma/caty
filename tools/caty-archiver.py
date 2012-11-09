@@ -20,6 +20,10 @@ def main(argv):
     caar.quiet = options.quiet
     caar.meta = options.meta
     if not caar.list:
+        if len(args) == 0:
+            print u'[Error]', u'missing output file'
+            caar.print_help()
+            sys.exit(1)
         caar.outfile = args[0]
     else:
         caar.outfile = None
