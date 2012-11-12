@@ -675,7 +675,8 @@ def path2obj(obj):
         return reduce(lambda a, b: merge_dict(a, b), split_path(o))
 
     def is_array(v):
-        return try_parse(int, v.keys()[0]) != None
+        if v:
+            return try_parse(int, v.keys()[0]) != None
     
     def make_array(o):
         l = range(len(o))
