@@ -623,7 +623,8 @@ class Module(Facility):
             fname = self.get_facility(v.facility_name).canonical_name
             self._app.register_entity(v.canonical_name if not self.is_root else v.name, fname, v.user_param)
         for e in emsgs:
-            self.application.cout.writeln(u'  [Waring]' + e)
+            self.application.cout.writeln(u'')
+            self.application.cout.writeln(u'  [Warning] ' + e)
 
     def _load_facility_class(self, name, uri):
         from caty.core.casm.loader import dynamic_load
