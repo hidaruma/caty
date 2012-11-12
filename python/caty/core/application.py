@@ -494,6 +494,8 @@ class Application(PbcObject):
     def _init_facilities(self):
         initialized = set()
         for k, v in self._facility_classes.items():
+            if v[0] is None:
+                continue
             if v[0] in initialized:
                 continue
             v[0].initialize(self, None)
@@ -793,7 +795,8 @@ class Application(PbcObject):
 
     def finalize(self):
         for f in set([v[0] for v in self._facility_classes.values()]):
-            f.finalize(self)
+            if f:
+                f.finalize(self)
 
 class StdStream(object):
     def __init__(self, encoding):

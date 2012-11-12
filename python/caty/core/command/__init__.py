@@ -208,6 +208,7 @@ class Command(object):
         u"""ファシリティの設定。
         フレームワーク側で行う処理なので、一般のコマンド実装者が直に使うべきではない。
         """
+        if self.profile_container.implemented == 'none': return
         _set = set()
         self.__current_application = target_app or facilities.app
         self.__i18n = I18nMessageWrapper(self._defined_application.i18n, facilities['env'])

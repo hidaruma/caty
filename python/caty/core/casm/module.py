@@ -598,16 +598,22 @@ class Module(Facility):
             self.application.cout.writeln('OK')
 
     def _register_facility(self):
+        emsgs = []
         if not self.compiled:
             if self.is_root:
                 self.application.cout.write(u'  * ' + self.application.i18n.get(u'Initializing facilities') + '...')
             for k, v in self.facility_ns.items():
                 cls = self.get_class(v.clsname)
                 if u'facility-spec-for' not in cls.annotations:
-                    self.application.cout.writeln('NG')
-                    raise Exception(self.application.i18n.get(u'Facility class is not specified: $name, $mod', name=v.clsname, mod=self.name))
+                    emsgs.append(self.application.i18n.get(u'Facility class not specified: $name', name=k))
 
-                facilty_class = self._load_facility_class(k, cls.annotations['facility-spec-for'].value)
+                    facilty_class = None
+                else:
+                    try:
+                        facilty_class = self._load_facility_class(k, cls.annotations['facility-spec-for'].value)
+                    except:
+                        emsgs.append(self.application.i18n.get(u'Failed to load facility class: $name', name=cls.annotations['facility-spec-for'].value))
+                        facilty_class = None
                 self._app.register_facility(v.canonical_name if not self.is_root else v.name, facilty_class, v.system_param)
         for m in self.sub_modules.values() + self.sub_packages.values():
             m._register_facility()
@@ -616,6 +622,8 @@ class Module(Facility):
         for k, v in self.entity_ns.items():
             fname = self.get_facility(v.facility_name).canonical_name
             self._app.register_entity(v.canonical_name if not self.is_root else v.name, fname, v.user_param)
+        for e in emsgs:
+            self.application.cout.writeln(u'  [Waring]' + e)
 
     def _load_facility_class(self, name, uri):
         from caty.core.casm.loader import dynamic_load
