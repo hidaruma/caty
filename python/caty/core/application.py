@@ -602,6 +602,7 @@ class Application(PbcObject):
             'sysfiles': self._create_sysfiles(),
         }
         for k, v in self._facility_classes.items():
+            if v[0] is None: continue
             if len(v) == 2:
                 facilities[k] = v[0].instance(self, v[1])
             else:
