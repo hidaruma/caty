@@ -103,7 +103,7 @@ command select<T default object> {
  * 検索結果が一件でない場合、 @Error が出力値となる。
  *
  */
-command select1<T default object> [string] :: any -> T | @Error string
+command select1<T default object> [string] :: any -> T | (@Error string)
     reads storage
     refers python:caty.core.std.command.strg.Select1;
 

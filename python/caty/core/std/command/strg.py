@@ -105,14 +105,15 @@ class Select1(Builtin, StorageAccessor):
 
     def setup(self, collection_name):
         self._collection_name = collection_name
-        self._out_schema = self.collection.schema | TagSchema('NG', NullSchema())
 
     def execute(self, input):
         if not input: input = TagOnly('_ANY')
         r = list(self.collection.select(input, -1, 0))
         if len(r) != 1:
-            return tagged(u'Error', u'要素数が1つではありません: %d' % (len(r)))
-        return r[0]
+            r = tagged(u'Error', u'要素数が1つではありません: %d' % (len(r)))
+        else:
+            r = r[0]
+        return r
 
 class Insert(Builtin, StorageAccessor):
 
