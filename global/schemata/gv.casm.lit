@@ -135,6 +135,9 @@ type ClusterAttributes = GraphAttributes;
 == グラフとその構成要素
 
 <<{
+type ElementList = [(Node | Edge | Cluster | ElementList)*];
+
+
 /** 有向グラフ */
 type Digraph = @digraph {
  "id" : elementId,
@@ -149,7 +152,7 @@ type Digraph = @digraph {
  "edge"  : EdgeAttributes?,
 
  /** グラフを構成するノード、辺、クラスター */
- "elements" : [(Node | Edge | Cluster)*]
+ "elements" : ElementList
 };
 
 /** ノード
@@ -395,7 +398,7 @@ command graph
    "id": %id,
 
    "graph" : [%_OPTS, {"label" : %id}] | json:merge --mode=fst,
-   "elements" : %elements
+   "elements" : %elements | when {array=>xjson:flatten, *=> pass} // これは、のdrawコマンドで対処して欲しい。
   }
 
 };
