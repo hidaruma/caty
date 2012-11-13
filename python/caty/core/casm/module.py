@@ -622,8 +622,9 @@ class Module(Facility):
         for k, v in self.entity_ns.items():
             fname = self.get_facility(v.facility_name).canonical_name
             self._app.register_entity(v.canonical_name if not self.is_root else v.name, fname, v.user_param)
-        for e in emsgs:
+        if emsgs:
             self.application.cout.writeln(u'')
+        for e in emsgs:
             self.application.cout.writeln(u'  [Warning] ' + e)
 
     def _load_facility_class(self, name, uri):

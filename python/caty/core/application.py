@@ -506,7 +506,8 @@ class Application(PbcObject):
         return logger.get(str(self.name), str(type))
 
     def _init_action(self):
-        self._create_dispatcher()
+        self._create_dispatcher() 
+        self._create_bindings()  # ポートのバインド(cambの読み込み)
 
     def finish_setup(self):
         self.cout.writeln(self.i18n.get("Initializing '$name'", name=self.name))
@@ -521,12 +522,12 @@ class Application(PbcObject):
         try:
             if not self._no_ambient:
                 self._schema_module.resolve()  # 型参照は最終的にここで解決される。
+                self._binder.resolve(self._schema_module, self._dispatcher)
                 self._init_facilities()        # カスタムファシリティの初期化
         except Exception, e:
   #msg = error_to_ustr(e)
   #cout.writeln(e)
             raise
-        self._create_bindings()  # ポートのバインド(cambの読み込み)
         self._init_interpreter()  # ユーザ定義コマンドが解決されたので再度初期化
         self._init_mafs()  # action定義でファイルタイプが加わっている可能性があるので再度初期化。
         if self._no_ambient:
@@ -557,7 +558,7 @@ class Application(PbcObject):
 
     def _create_bindings(self):
         from caty.core.camb import create_bindings
-        create_bindings(self._actions.start().create(u'reads'), self)
+        self._binder = create_bindings(self._actions.start().create(u'reads'), self)
 
     def __exec_callback(self, callback_class_name):
         import copy

@@ -63,13 +63,16 @@ class Parser(object):
         cs = CharSeq(text, **options)
         return cs.parse(self)
 
-class Regex(object):
+class Regex(Parser):
     def __init__(self, pattern, *options, **optkwds):
         self.pattern = pattern
         self.regex = re.compile(pattern, *options, **optkwds)
 
     def match(self, text):
         return self.regex.match(text)
+
+    def __call__(self, cs):
+        return cs.parse(self)
 
 class ParserHook(object):
     def __init__(self, *hooks):

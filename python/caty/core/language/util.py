@@ -19,3 +19,7 @@ def make_structured_doc(s):
         if b:
             r['moreDescription'] = b
     return r
+
+def path_string(seq):
+    return Regex(u'/[^/ \t\r\n;]*/?')(seq)
+
