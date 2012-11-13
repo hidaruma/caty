@@ -110,10 +110,8 @@ class Select1(Builtin, StorageAccessor):
         if not input: input = TagOnly('_ANY')
         r = list(self.collection.select(input, -1, 0))
         if len(r) != 1:
-            r = tagged(u'Error', u'要素数が1つではありません: %d' % (len(r)))
-        else:
-            r = r[0]
-        return r
+            throw_caty_exception(u'BadSituation', u'Number of elements not 1: $num', num=len(r))
+        return r[0]
 
 class Insert(Builtin, StorageAccessor):
 

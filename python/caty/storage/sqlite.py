@@ -31,7 +31,7 @@ import os
 import sqlite3
 from caty.jsontools import *
 from caty.jsontools.path import build_query
-from caty.core.exception import InternalException
+from caty.core.exception import InternalException, throw_caty_exception
 from caty.util import to_unicode, try_parse
 from decimal import Decimal
 from itertools import islice
@@ -451,7 +451,7 @@ class CollectionManipulator(object):
         c.execute(query, [self._collection_name, self._app_name, self._collection_name])
         t = self._fetch_collection(c)
         if not t:
-            raise InternalException(u'Collection does not found: collection name=$colname, defined at $denined, called by $callee', colname=self._collection_name, defined=self._app_name, callee=self._current_app_name)
+            throw_caty_exception(u'CollectionNotFound', u'Collection does not found: collection name=$colname, defined at $denined, called by $callee', colname=self._collection_name, defined=self._app_name, callee=self._current_app_name)
         return t.split('__')
 
     def _fetch_collection(self, c):

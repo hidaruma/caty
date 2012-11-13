@@ -100,10 +100,11 @@ command select<T default object> {
 /**
  * 一件のデータ取得。
  * クエリの指定の仕方は select と同様である。
- * 検索結果が一件でない場合、 @Error が出力値となる。
+ * 検索結果が一件でない場合、例外が送出される。
  *
  */
-command select1<T default object> [string] :: any -> T | (@Error string)
+command select1<T default object> [string] :: any -> T
+    throws [CollectionNotFound, BadSituation]
     reads storage
     refers python:caty.core.std.command.strg.Select1;
 
