@@ -678,7 +678,7 @@ type FacilityUsage = {
      * キーとしてはインジェクション名を使う
      * 同一の登録名のファシリティが異なるインジェクション名で使われることがある。
      */
-    "name": string?,
+    "name": string,
 
     /** アクセスのモード */
     "mode": ("read" | "update" | "use"),

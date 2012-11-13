@@ -53,15 +53,6 @@ class ReadFile(FileUtilMixin, Builtin):
     def execute(self):
         return self.open().read()
         
-class ReadFileI(FileUtilMixin, Builtin):
-
-    def setup(self, opts):
-        self.dir = opts['dir']
-
-    def execute(self, input):
-        self.path = input
-        return self.open().read()
-
 class WriteFile(FileUtilMixin, Builtin):
 
 
