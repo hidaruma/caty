@@ -20,18 +20,11 @@ command exists {@[default(false)]"pred": boolean?} [string] :: void -> @OK strin
     refers python:caty.core.std.command.file.Exists;
 
 /**
- * 引数で指定したファイルを読み込み、その値を返す。ファイルがバイナリファイルの場合の動作は保証しない。
+ * 引数で指定したファイルを読み込み、その値を返す。
  */
 command read [string] :: void -> string | binary
     reads [data, include, pub, behaviors, scripts, sysfiles]
     refers python:caty.core.std.command.file.ReadFile;
-
-/**
- * 入力で指定したファイルを読み込み、その値を返す。ファイルがバイナリファイルの場合の動作は保証しない。
- */
-command read-i [] :: string -> string | binary
-    reads [data, include, pub, behaviors, scripts]
-    refers python:caty.core.std.command.file.ReadFileI;
 
 /**
  * 引数で指定したファイルに入力値を書き込む。
