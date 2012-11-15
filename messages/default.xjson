@@ -88,6 +88,8 @@
 
     "Initializing facilities",
 
+    "Current application could not be removed",
+
     /*******************************
      ******* Builtin exception *********
      *******************************/

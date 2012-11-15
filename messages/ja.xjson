@@ -93,6 +93,7 @@
 
     "Initializing facilities": "ファシリティを初期化してます",
 
+    "Current application could not be removed": "カレントアプリケーションは削除できません",
 
     /*******************************
      ******* 組み込み例外 *********
