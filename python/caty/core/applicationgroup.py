@@ -110,7 +110,27 @@ class ApplicationGroup(PbcObject):
     def cout(self):
         return self._system.cout
 
-    
+    def find_app(self, name):
+        app_group_root = self._make_super_root(self.name)
+        for d in app_group_root.start().create(u'reads').opendir('/').read():
+            if d.is_dir and not d.basename[0] in ('.', '_') and not d.basename in self._system.ignore_names:
+                if name == d.path.strip('/'):
+                    return True
+        return False
+
+    def init_app(self, name):
+        a = Application(name, self._system.no_ambient, self, self._system)
+        if a.enabled:
+            a.finish_setup()
+        self._apps.append(a)
+
+    def remove_app(self, name):
+        target = None
+        for a in self._apps:
+            if a.name == name:
+                target = a
+        self._apps.remove(target)
+
     def __invariant__(self):
         if self.exists:
             assert self._global_config

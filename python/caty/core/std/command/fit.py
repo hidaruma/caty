@@ -130,7 +130,7 @@ class Run(Internal, MafsMixin):
         }
 
     def run_all(self):
-        apps = self.current_app._system._apps
+        apps = self.current_app._system.get_apps()
         for app in apps:
             self._run(app)
 
@@ -231,7 +231,7 @@ class ClearReport(Internal):
             fit_dir.delete(True)
 
     def run_all(self):
-        apps = self.current_app._system._apps
+        apps = self.current_app._system.get_apps()
         for app in apps:
             self._run(app)
 

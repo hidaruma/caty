@@ -177,35 +177,6 @@ Alias: ch, cd
     do_cd = do_change
 
     @catch
-    def do_reload(self, line):
-        u"""
-Usage: reload [--this]
-Alias: l
-commands, schemata などの再読み込みを行う。
---thisオプションを付けると親アプリケーションの再読み込みを行わない。
-        """
-        if line.strip() != u'--this':
-            if line.strip():
-                self._echo(u'Unknown option: %s' % line)
-                return
-            self.app.parent.reload()
-        self.app.reload()
-        self.set_prompt()
-        self.interpreter = None
-        return False
-
-    @catch
-    def do_fl(self, line):
-        u"""
-Usage: force-load module_name
-Alias: fl
-
-on demand宣言されたモジュールを読み込む。
-        """
-        self.app.force_load(line.strip())
-        return False
-
-    @catch
     def do_debug(self, line):
         u"""
 Usage: debug [on|off]
@@ -324,7 +295,6 @@ Web サーバの起動・停止を行う
         else:
             self._echo(u'未知の引数: %s' % cmd)
             usage()
-    do_l = do_reload
 
     def default(self, line):
         if self.continue_setenv:
@@ -526,7 +496,49 @@ Web サーバの起動・停止を行う
             del self.env[name]
         self.deleted_env.add(name)
 
+
+    @catch
+    def do_reload(self, line):
+        u"""
+Usage: reload [--this]
+Alias: l
+commands, schemata などの再読み込みを行う。
+--thisオプションを付けると親アプリケーションの再読み込みを行わない。
+        """
+        if line.strip() != u'--this':
+            if line.strip():
+                self._echo(u'Unknown option: %s' % line)
+                return
+            self.app.parent.reload()
+        self.app.reload()
+        self.set_prompt()
+        self.interpreter = None
+        return False
+
+    do_l = do_reload
+
+    @catch
+    def do_fl(self, line):
+        u"""
+Usage: force-load module_name
+Alias: fl
+
+on demand宣言されたモジュールを読み込む。
+        """
+        self.app.force_load(line.strip())
+        return False
+
+    def do_ia(self, line):
+        name = line.strip()
+        self.system.init_app(name)
+
+    def do_ra(self, line):
+        name = line.strip()
+        self.system.remove_app(name)
+
 setattr(CatyShell, 'do_force-load', CatyShell.do_fl)
+setattr(CatyShell, 'do_init-app', CatyShell.do_ia)
+setattr(CatyShell, 'do_remove-app', CatyShell.do_ra)
 
 import threading
 class ServerThread(threading.Thread):

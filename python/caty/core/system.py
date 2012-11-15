@@ -28,6 +28,7 @@ class System(PbcObject):
         make_custom_import()
         caty.core.runtimeobject.i18n = I18nMessage({}, writer=cout, lang='en') # フォールバック
         self.force_app = force_app
+        self.no_ambient = no_ambient
         self.wildcat = wildcat
         if quiet:
             class NullWriter(object):
@@ -54,9 +55,6 @@ class System(PbcObject):
         messages = self._load_system_messages()
         self.i18n = I18nMessage(messages, writer=cout, lang=self._global_config.language)
         caty.core.runtimeobject.i18n = self.i18n # 改めて設定
-        self._app_map = {}
-        self._apps = []
-        self.__app_names = []
         # catyアプリケーション
         self._core_app = CoreApplication(self)
         self.__cout.writeln(self.i18n.get('Loading system data'))
@@ -77,23 +75,15 @@ class System(PbcObject):
                 ApplicationGroup('develop', self._global_config, no_ambient, no_app, app_names, self),
             ] if ag.exists
         ]
-        self._apps.extend(reduce(operator.add, map(ApplicationGroup.apps.fget, self._app_groups)))
-        self.__app_names.extend([app.name for app in self._apps])
         if is_debug:
             caty.DEBUG = True
         self.__debug = is_debug
-        for app in self._apps:
-            if app.name in self._app_map:
-                raise Exception(self.i18n.get('Application name conflicted: $name', name=app.name))
-            self._app_map[app.name] = app
-        for app in self._app_map.values():
-            app.finish_setup()
+        self._init_app_map()
+        for grp in self._app_groups:
+            for app in grp.apps:
+                app.finish_setup()
         self._app_map[u'global'] = self._global_app
-        self.__app_names.append(u'global')
-        self._apps.append(self._global_app)
         self._app_map[u'caty'] = self._core_app
-        self.__app_names.append(u'caty')
-        self._apps.append(self._core_app)
 
         #for app in self._app_map.values():
         #    app.finish_setup()
@@ -102,12 +92,23 @@ class System(PbcObject):
         self.__cout = cout
         PbcObject.__init__(self)
 
+    def _init_app_map(self):
+        self._app_map = {}
+        for grp in self._app_groups:
+            for app in grp.apps:
+                if app.name in self._app_map:
+                    raise Exception(self.i18n.get('Application name conflicted: $name', name=app.name))
+                self._app_map[app.name] = app
+
     def get_app(self, app_name):
         from caty.core.exception import throw_caty_exception
         if app_name not in self._app_map:
             throw_caty_exception('ApplicationNotFound', u'$appName', appName=app_name)
         app = self._app_map[app_name]
         return app
+
+    def get_apps(self):
+        return self._app_map.values()
 
     def _load_system_messages(self):
         from glob import glob
@@ -151,7 +152,7 @@ class System(PbcObject):
 
     @property
     def app_names(self):
-        return [n for n in self.__app_names if n != 'caty']
+        return [a.name for a in self.get_apps() if a.name != 'caty']
 
     @property
     def server_module_name(self):
@@ -254,7 +255,7 @@ class System(PbcObject):
 
     def __invariant__(self):
         assert len(self._app_groups) > 0
-        assert len(self._apps) > 0
+        assert len(self.get_apps()) > 0
 
     def debug_on(self):
         caty.DEBUG = True
@@ -278,8 +279,20 @@ class System(PbcObject):
             }
         }
 
+    def init_app(self, name):
+        for g in self._app_groups:
+            if g.find_app(name):
+                g.init_app(name)
+        self._init_app_map()
+
+    def remove_app(self, name):
+        for g in self._app_groups:
+            if g.find_app(name):
+                g.remove_app(name)
+        self._init_app_map()
+
     def finalize(self):
-        for app in self._apps:
+        for app in self.get_apps():
             app.finalize()
 
 class CoreApplication(Application):

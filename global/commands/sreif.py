@@ -13,7 +13,7 @@ class ListApplications(Command):
         reifier = ShallowReifier()
         system = self.current_app._system
         r = []
-        for a in system._apps:
+        for a in system.get_apps():
             r.append(reifier.reify_app(a))
         return r
 
