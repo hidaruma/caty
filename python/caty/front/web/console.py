@@ -131,12 +131,13 @@ class HTTPConsoleApp(object):
                 target = chunk.pop(0)
                 result = True
                 status = '200 OK'
-            except:
+            except Exception as e:
+                print e
                 result = False
                 status = '400 Bad Request'
             else:
                 self._init_app_rpc(target)
-        elif cmd == 'init-app':
+        elif cmd == 'remove-app':
             try:
                 target = chunk.pop(0)
                 result = True
@@ -150,3 +151,6 @@ class HTTPConsoleApp(object):
             result = False
             status = '400 Bad Request'
         return result, status
+
+
+

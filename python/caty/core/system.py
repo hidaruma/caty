@@ -280,12 +280,17 @@ class System(PbcObject):
         }
 
     def init_app(self, name):
+        grp = None
         for g in self._app_groups:
             if g.find_app(name):
-                g.init_app(name)
-                break
-        else:
+                if grp:
+                    self.cout.writeln(self.i18n.get('Application name conflicted: $name', name=name))
+                    return
+                else:
+                    grp = g
+        if not grp:
             self.cout.writeln(self.i18n.get(u'Application does not exists: $name', name=name))
+        grp.init_app(name)
         self._init_app_map()
 
     def remove_app(self, name):

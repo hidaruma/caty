@@ -528,10 +528,12 @@ on demand宣言されたモジュールを読み込む。
         self.app.force_load(line.strip())
         return False
 
+    @catch
     def do_ia(self, line):
         name = line.strip()
         self.system.init_app(name)
 
+    @catch
     def do_ra(self, line):
         name = line.strip()
         self.system.remove_app(name)
