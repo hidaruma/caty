@@ -55,6 +55,14 @@ class HTTPConsoleApp(object):
     def __init__(self, system, is_debug):
         self._system = system
         self.is_debug = is_debug
+        self._init_app_rpc = system.init_app
+        self._remove_app_rpc = system.remove_app
+
+    def set_init_app_rpc(self, func):
+        self._init_app_rpc = func
+    
+    def set_remove_app_rpc(self, func):
+        self._remove_app_rpc = func
 
     def __call__(self, environ, start_response):
         content_type = environ.get('CONTENT_TYPE', 'text/plain')
@@ -94,6 +102,8 @@ class HTTPConsoleApp(object):
         return [body]
 
     def _process(self, app_name, input, environ):
+        if app_name == 'system':
+            return self.system_function(input)
         app = self._system.get_app(app_name)
         facilities = app.create_facilities()
         app.init_env(facilities, True, [u'console'], self._system, environ)
@@ -113,3 +123,30 @@ class HTTPConsoleApp(object):
                 status = '500 Internal Server Error'
         return result, status
 
+    def system_function(self, input):
+        chunk = input.split(' ')
+        cmd = chunk.pop(0)
+        if cmd == 'init-app':
+            try:
+                target = chunk.pop(0)
+                result = True
+                status = '200 OK'
+            except:
+                result = False
+                status = '400 Bad Request'
+            else:
+                self._init_app_rpc(target)
+        elif cmd == 'init-app':
+            try:
+                target = chunk.pop(0)
+                result = True
+                status = '200 OK'
+            except:
+                result = False
+                status = '400 Bad Request'
+            else:
+                self._remove_app_rpc(target)
+        else:
+            result = False
+            status = '400 Bad Request'
+        return result, status

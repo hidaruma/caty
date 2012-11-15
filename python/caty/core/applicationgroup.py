@@ -61,7 +61,7 @@ class ApplicationGroup(PbcObject):
         elif self.exists:
             app_group_root = self._make_super_root(self.name)
             for d in app_group_root.start().create(u'reads').opendir('/').read():
-                if d.is_dir and not d.basename[0] in ('.', '_') and not d.basename in self._system.ignore_names:
+                if d.is_dir and not d.basename[0] in ('.', '_') and not d.basename in self._system.ignore_names and '.' not in d.basename:
                     name = d.path.strip('/')
                     if name not in app_names and no_app and self._system.force_app != name:
                         continue
@@ -113,7 +113,7 @@ class ApplicationGroup(PbcObject):
     def find_app(self, name):
         app_group_root = self._make_super_root(self.name)
         for d in app_group_root.start().create(u'reads').opendir('/').read():
-            if d.is_dir and not d.basename[0] in ('.', '_') and not d.basename in self._system.ignore_names:
+            if d.is_dir and not d.basename[0] in ('.', '_') and not d.basename in self._system.ignore_names and '.' not in name:
                 if name == d.path.strip('/'):
                     return True
         return False
