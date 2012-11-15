@@ -93,7 +93,11 @@
 
     "Initializing facilities": "ファシリティを初期化してます",
 
-    "Current application could not be removed": "カレントアプリケーションは削除できません",
+    "Current application can not be removed": "カレントアプリケーションは削除できません",
+
+    "$name can not be removed": "$nameは削除できません",
+
+    "$name can not be re-initialized manually": "$nameは手動で再初期化できません",
 
     /*******************************
      ******* 組み込み例外 *********
