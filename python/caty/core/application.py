@@ -65,6 +65,7 @@ class Application(PbcObject):
         self._physical_path = join(group.name, name)
         self.importer = AppSpecLibraryImporter(os.path.abspath(self._physical_path))
         sys.meta_path.append(self.importer) # {$apDir}/libの読み込みに使う
+        self._loaded = False
         self._initialize(name, group, system)
         self._initialized = True
 
@@ -148,6 +149,7 @@ class Application(PbcObject):
                 self.cout.writeln(self.i18n.get(u'Failed to force-load. Reloading system data'))
             try:
                 self.reinit_schema()
+                self._loaded = True
             except:
                 self.cout.writeln(traceback)
                 self.cout.writeln(self.i18n.get(u'Failed to force-load. Reloading system data'))
@@ -532,6 +534,7 @@ class Application(PbcObject):
         self._init_mafs()  # action定義でファイルタイプが加わっている可能性があるので再度初期化。
         if self._no_ambient:
             return
+        self._loaded = True
         if self._app_spec:
             if not '$typename' in self._app_spec:
                 raise Exception(self.i18n.get("Schema for AppSpec is not specified: $app", app=self.name))

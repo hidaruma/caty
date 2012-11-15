@@ -324,7 +324,11 @@ type ApplicationSummary =  QualifierMixin & {
   @[deprecated, default(false)]
   "deprecated": boolean?,
 
-
+  /** アプリケーションのモジュール群が既にロードされているか 
+   * アプリケーションが存在しても、モジュール群がロードされてないときもある。
+   */
+  "loaded": boolean?,
+  
   *: any?
 };
 

@@ -54,6 +54,7 @@ class ShallowReifier(object):
             u'group': a._group.name if a._group else None,
             u'path': a.web_path,
             u'anno': a._annotations,
+            u'loaded': a._loaded,
         }
         if a.parent:
             r[u'visibleParent'] = a.parent.name

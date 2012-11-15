@@ -317,6 +317,7 @@ class CoreApplication(Application):
         self._system_resource_actions = []
         self.i18n = system.i18n
         self._facility_classes = {}
+        self._loaded = True
 
     def _init(self):
         self._schema_module = self._system._casm._core
