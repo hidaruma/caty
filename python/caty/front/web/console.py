@@ -95,11 +95,11 @@ class HTTPConsoleApp(object):
         result, status = self._process(app_name, input, environ)
         body = stdjson.dumps(result)
         headers = {
-            'content-type': 'application/json',
-            'content-length': str(len(body))
+            'Content-type': 'application/json',
+            'Content-length': str(len(body))
         }
-        start_response(status, headers.items())
-        return [body]
+        start_response(status, list(headers.items()))
+        return [body.encode('unicode-escape')]
 
     def _process(self, app_name, input, environ):
         if app_name == 'system':
@@ -131,8 +131,7 @@ class HTTPConsoleApp(object):
                 target = chunk.pop(0)
                 result = True
                 status = '200 OK'
-            except Exception as e:
-                print e
+            except Exception:
                 result = False
                 status = '400 Bad Request'
             else:
