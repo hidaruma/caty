@@ -283,12 +283,18 @@ class System(PbcObject):
         for g in self._app_groups:
             if g.find_app(name):
                 g.init_app(name)
+                break
+        else:
+            self.cout.writeln(self.i18n.get(u'Application does not exists: $name', name=name))
         self._init_app_map()
 
     def remove_app(self, name):
         for g in self._app_groups:
             if g.find_app(name):
                 g.remove_app(name)
+                break
+        else:
+            self.cout.writeln(self.i18n.get(u'Application does not exists: $name', name=name))
         self._init_app_map()
 
     def finalize(self):
