@@ -50,6 +50,7 @@ uwsgi.register_signal(SIG_REMOVE_APP, 'workers', remove_app_callback)
 def init_app_sender(name):
     uwsgi.queue_set(SLOT_INIT_APP, name)
     uwsgi.signal(SIG_INIT_APP)
+    uwsgi.signal_wait()
     uwsgi.queue_pop(SLOT_INIT_APP)
 
 

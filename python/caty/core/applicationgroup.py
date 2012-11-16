@@ -122,6 +122,9 @@ class ApplicationGroup(PbcObject):
         a = Application(name, self._system.no_ambient, self, self._system)
         if a.enabled:
             a.finish_setup()
+        for app in self._apps:
+            if a.name == app.name:
+                return
         self._apps.append(a)
 
     def remove_app(self, name):
