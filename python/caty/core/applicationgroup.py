@@ -132,7 +132,8 @@ class ApplicationGroup(PbcObject):
         for a in self._apps:
             if a.name == name:
                 target = a
-        self._apps.remove(target)
+        if target:
+            self._apps.remove(target)
 
     def __invariant__(self):
         if self.exists:
