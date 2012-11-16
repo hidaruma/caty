@@ -122,6 +122,8 @@ class ApplicationGroup(PbcObject):
         a = Application(name, self._system.no_ambient, self, self._system)
         if a.enabled:
             a.finish_setup()
+        else:
+            return None
         for app in self._apps:
             if a.name == app.name:
                 return
