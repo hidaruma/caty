@@ -303,12 +303,17 @@ class System(PbcObject):
         if name in ('caty', 'global'):
             self.cout.writeln(self.i18n.get('$name can not be removed', name=name))
             return
+        grp = None
         for g in self._app_groups:
             if g.find_app(name):
-                g.remove_app(name)
-                break
-        else:
+                if grp:
+                    self.cout.writeln(self.i18n.get('Application name conflicted: $name', name=name))
+                    return
+                else:
+                    grp = g
+        if not grp:
             self.cout.writeln(self.i18n.get(u'Application does not exists: $name', name=name))
+        grp.remove_app(name)
         self._init_app_map()
 
     def finalize(self):
