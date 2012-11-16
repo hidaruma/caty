@@ -300,6 +300,27 @@ class System(PbcObject):
         grp.init_app(name)
         self._init_app_map()
 
+    def setup_app(self, name):
+        grp = None
+        if name == 'global':
+            self._global_app.reload()
+            return
+        if name == 'caty':
+            self.cout.writeln(self.i18n.get('$name can not be re-initialized manually', name=name))
+            return
+        for g in self._app_groups:
+            if g.find_app(name):
+                if grp:
+                    self.cout.writeln(self.i18n.get('Application name conflicted: $name', name=name))
+                    return
+                else:
+                    grp = g
+        if not grp:
+            self.cout.writeln(self.i18n.get(u'Application does not exists: $name', name=name))
+            return None
+        grp.setup_app(name)
+        self._init_app_map()
+
     def remove_app(self, name):
         if name in ('caty', 'global'):
             self.cout.writeln(self.i18n.get('$name can not be removed', name=name))

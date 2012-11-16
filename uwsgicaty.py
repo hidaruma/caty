@@ -36,10 +36,10 @@ SIG_INIT_APP = 98
 SLOT_INIT_APP = 1
 SIG_REMOVE_APP = 99
 SLOT_REMOVE_APP = 2
-def init_app_callback(num):
+def setup_app_callback(num):
     name = uwsgi.queue_get(SLOT_INIT_APP)
-    system.init_app(name)
-uwsgi.register_signal(SIG_INIT_APP, 'workers', init_app_callback)
+    system.setup_app(name)
+uwsgi.register_signal(SIG_INIT_APP, 'workers', setup_app_callback)
 
 
 def remove_app_callback(num):
@@ -47,7 +47,7 @@ def remove_app_callback(num):
     system.remove_app(name)
 uwsgi.register_signal(SIG_REMOVE_APP, 'workers', remove_app_callback)
 
-def init_app_sender(name):
+def setup_app_sender(name):
     uwsgi.queue_set(SLOT_INIT_APP, name)
     uwsgi.signal(SIG_INIT_APP)
     uwsgi.signal_wait()
@@ -63,7 +63,7 @@ if name:
     if not name.startswith('/'):
         name = '/'+name
     http_console = HTTPConsoleApp(system, is_debug)
-    http_console.set_init_app_rpc(init_app_sender)
+    http_console.set_setup_app_rpc(setup_app_sender)
     http_console.set_remove_app_rpc(remove_app_sender)
     uwsgi.applications[name] = http_console
 

@@ -119,7 +119,14 @@ class ApplicationGroup(PbcObject):
         return False
 
     def init_app(self, name):
-        a = Application(name, self._system.no_ambient, self, self._system)
+        for app in self._apps:
+            if name == app.name:
+                return
+        a = Application(name, True, self, self._system)
+        self._apps.append(a)
+
+    def setup_app(self, name):
+        a = Application(name, False, self, self._system)
         if a.enabled:
             a.finish_setup()
         else:

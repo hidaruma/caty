@@ -534,6 +534,11 @@ on demand宣言されたモジュールを読み込む。
         self.system.init_app(name)
 
     @catch
+    def do_sa(self, line):
+        name = line.strip()
+        self.system.setup_app(name)
+
+    @catch
     def do_ra(self, line):
         name = line.strip()
         if name == self.app.name or name == 'this':
@@ -543,6 +548,7 @@ on demand宣言されたモジュールを読み込む。
 
 setattr(CatyShell, 'do_force-load', CatyShell.do_fl)
 setattr(CatyShell, 'do_init-app', CatyShell.do_ia)
+setattr(CatyShell, 'do_setup-app', CatyShell.do_sa)
 setattr(CatyShell, 'do_remove-app', CatyShell.do_ra)
 
 import threading

@@ -55,14 +55,14 @@ class HTTPConsoleApp(object):
     def __init__(self, system, is_debug):
         self._system = system
         self.is_debug = is_debug
-        self._init_app_rpc = system.init_app
         self._remove_app_rpc = system.remove_app
-
-    def set_init_app_rpc(self, func):
-        self._init_app_rpc = func
+        self._setup_app_rpc = system.setup_app
     
     def set_remove_app_rpc(self, func):
         self._remove_app_rpc = func
+
+    def set_setup_app_rpc(self, func):
+        self._setup_app_rpc = func
 
     def __call__(self, environ, start_response):
         content_type = environ.get('CONTENT_TYPE', 'text/plain')
@@ -135,7 +135,7 @@ class HTTPConsoleApp(object):
                 result = False
                 status = '400 Bad Request'
             else:
-                self._init_app_rpc(target)
+                self._setup_app_rpc(target)
         elif cmd == 'remove-app':
             try:
                 target = chunk.pop(0)
