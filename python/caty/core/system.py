@@ -82,8 +82,6 @@ class System(PbcObject):
         for grp in self._app_groups:
             for app in grp.apps:
                 app.finish_setup()
-        self._app_map[u'global'] = self._global_app
-        self._app_map[u'caty'] = self._core_app
 
         #for app in self._app_map.values():
         #    app.finish_setup()
@@ -99,6 +97,8 @@ class System(PbcObject):
                 if app.name in self._app_map:
                     raise Exception(self.i18n.get('Application name conflicted: $name', name=app.name))
                 self._app_map[app.name] = app
+        self._app_map[u'global'] = self._global_app
+        self._app_map[u'caty'] = self._core_app
 
     def get_app(self, app_name):
         from caty.core.exception import throw_caty_exception
