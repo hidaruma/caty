@@ -296,6 +296,7 @@ class System(PbcObject):
                     grp = g
         if not grp:
             self.cout.writeln(self.i18n.get(u'Application does not exists: $name', name=name))
+            return None
         grp.init_app(name)
         self._init_app_map()
 
@@ -313,6 +314,7 @@ class System(PbcObject):
                     grp = g
         if not grp:
             self.cout.writeln(self.i18n.get(u'Application does not exists: $name', name=name))
+            return None
         grp.remove_app(name)
         self._init_app_map()
 
