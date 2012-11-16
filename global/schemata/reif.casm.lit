@@ -328,7 +328,7 @@ type ApplicationSummary =  QualifierMixin & {
    * アプリケーションが存在しても、モジュール群がロードされてないときもある。
    */
   "loaded": boolean?,
-  
+
   *: any?
 };
 

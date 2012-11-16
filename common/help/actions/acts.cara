@@ -233,7 +233,8 @@ resource CoreCmds("/core-cmds.html") {
    do {
     "Core Commands"  >: "title",
      help:core        >: "mods",
-   }} | print /cmds1.html
+   }
+  } | print /cmds1.html
  };
 };
 
