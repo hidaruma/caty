@@ -537,7 +537,7 @@ on demand宣言されたモジュールを読み込む。
     def do_ra(self, line):
         name = line.strip()
         if name == self.app.name or name == 'this':
-            self.app.cout.writeln(self.app.i18n.get(u'Current application could not be removed'))
+            self.app.cout.writeln(self.app.i18n.get(u'Current application can not be removed'))
             return
         self.system.remove_app(name)
 
