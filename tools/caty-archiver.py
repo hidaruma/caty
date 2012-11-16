@@ -42,27 +42,26 @@ class CatyArchiver(OptionParser):
     def archive(self):
         if self.outfile:
             outfile = ZipFile(self.outfile, u'w', ZIP_DEFLATED)
-        incl = []
-        for n in os.listdir(self.origin):
-            path = self.origin.strip(os.path.sep)+os.path.sep+n.strip(os.path.sep) + os.path.sep
-            if self.whitelist.includes(path):
-                arcpath = path[len(self.origin):]
-                incl.append(arcpath)
-        for r, d, f in os.walk(self.origin):
-            for e in f:
-                src = r.rstrip(os.path.sep)+os.path.sep+e.strip(os.path.sep)
-                path = r.strip(os.path.sep)+os.path.sep+e.strip(os.path.sep)
-                if self.whitelist.includes(path):
-                    arcpath = path[len(self.origin):]
-                    if os.path.sep in arcpath:
-                        for i in incl:
-                            if arcpath.strip(os.path.sep).startswith('META-INF' + os.path.sep):
-                                continue
-                            if arcpath.startswith(i):
-                                if self.list:
-                                    print src
-                                else:
-                                    outfile.write(src, arcpath)
+        for file in self.whitelist.files:
+            path = file.pattern.lstrip('/')
+            src = self.origin.rstrip(os.path.sep)+os.path.sep+path.strip(os.path.sep)
+            if self.list:
+                print src
+            else:
+                outfile.write(src, path)
+        for directory in self.whitelist.directories:
+            base_dir = self.origin.rstrip(os.path.sep) + os.path.sep + directory.pattern.strip(os.path.sep)
+            for r, d, f in os.walk(base_dir):
+                for e in f:
+                    src = r.rstrip(os.path.sep)+os.path.sep+e.strip(os.path.sep)
+                    if directory.includes(src):
+                        arcpath = src[len(self.origin):]
+                        if arcpath.strip(os.path.sep).startswith('META-INF' + os.path.sep):
+                            continue
+                        if self.list:
+                            print src
+                        else:
+                            outfile.write(src, arcpath)
         for m in self.meta:
             if not os.path.exists(m):
                 print u'[Warning]', m, 'not exists'
@@ -83,12 +82,16 @@ class WhiteListItem(object):
     def init_matcher(self):
         self.matcher = re.compile(re.escape(self.pattern).replace(u'\\*', u'[^/]*') + '$')
 
-    def set_parent(self, parent):
-        self.pattern = parent.pattern+self.pattern
-        self.init_matcher()
-
     def includes(self, path):
         return self.matcher.search(path.replace('\\', '/'))
+
+    @property
+    def is_glob(self):
+        return '*' in self.pattern
+
+    @property
+    def is_file(self):
+        return True
 
 class WhiteListParser(object):
     def feed(self, c):
@@ -101,7 +104,7 @@ class WhiteListParser(object):
                 line = line[:line.find(u'#')]
             if line.startswith(' '):
                 if not dirent:
-                    raise Exception('Syntax error ato line %d' % n)
+                    raise Exception('Syntax error at line %d' % n)
                 else:
                     dirent.add(self.parseline(line))
             else:
@@ -132,7 +135,32 @@ class WhiteListItemContainer(WhiteListItem):
         self._incl = []
         self._excl = []
         self._stack = []
+        self.parent = None
         WhiteListItem.__init__(self, pattern, directive)
+
+    @property
+    def is_file(self):
+        return False
+
+    @property
+    def is_glob(self):
+        return False
+
+    @property
+    def files(self):
+        for e in self._incl:
+            if e.is_file and not e.is_glob:
+                yield e
+
+    @property
+    def directories(self):
+        found = False
+        for e in self._incl:
+            if not e.is_file:
+                found = True
+                yield e
+        if not found:
+            yield self
 
     def init_matcher(self):
         self.matcher = re.compile(re.escape(self.pattern).replace(u'\\*', u'[^/]*'))
@@ -142,23 +170,37 @@ class WhiteListItemContainer(WhiteListItem):
             self._incl.append(item)
         else:
             self._excl.append(item)
-        item.set_parent(self)
+        item.parent = self
 
     def includes(self, path):
-        for e in self._excl:
+        for e in self._list_exclude():
             if e.includes(path):
                 if not 'excl' in self.directives:
                     return False
                 else:
                     return True
-        for i in self._incl:
+        for i in self._list_include():
             if i.includes(path):
                 if not 'excl' in self.directives:
                     return True
                 else:
                     return False
-        return WhiteListItem.includes(self, path)
 
+    def _list_include(self):
+        if self.parent:
+            for i in self.parent._list_include():
+                if i.is_file:
+                    yield i
+        for i in self._incl:
+            yield i
+
+    def _list_exclude(self):
+        if self.parent:
+            for i in self.parent._list_exclude():
+                if i.is_file:
+                    yield i
+        for i in self._excl:
+            yield i
 
 class DefaultWhiteListItemContainer(WhiteListItemContainer):
     def __init__(self):
