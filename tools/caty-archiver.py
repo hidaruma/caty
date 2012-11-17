@@ -137,6 +137,8 @@ class WhiteListItemContainer(WhiteListItem):
         self._stack = []
         self.parent = None
         WhiteListItem.__init__(self, pattern, directive)
+        self.path_matcher = WhiteListItem(pattern, directive)
+        self.path_matcher.matcher = self.matcher
 
     @property
     def is_file(self):
@@ -199,8 +201,12 @@ class WhiteListItemContainer(WhiteListItem):
             for i in self.parent._list_exclude():
                 if i.is_file:
                     yield i
+                else:
+                    yield i.path_matcher
         for i in self._excl:
             yield i
+        if 'excl' in self.directives:
+            yield self.path_matcher
 
 class DefaultWhiteListItemContainer(WhiteListItemContainer):
     def __init__(self):
