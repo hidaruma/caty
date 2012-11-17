@@ -69,7 +69,7 @@ class System(PbcObject):
                 },
                 "mafsModule": u"caty.mafs.stdfs"
             }
-            open('prh-manifest.xjson', 'wb').write(xjson.dumps(gcfg))
+            open('prj-manifest.xjson', 'wb').write(xjson.dumps(gcfg))
         self._global_config = GlobalConfig(gcfg, 
                                            self._validate_encoding(encoding))
         self._global_app = None
