@@ -97,11 +97,11 @@ class WhiteListParser(object):
     def feed(self, c):
         dirent = None
         for n, line in enumerate(c.splitlines()):
-            if not line.strip():
-                continue
             # remove comment
             if u'#' in line:
                 line = line[:line.find(u'#')]
+            if not line.strip():
+                continue
             if line.startswith(' '):
                 if not dirent:
                     raise Exception('Syntax error at line %d' % n)
