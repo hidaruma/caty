@@ -44,11 +44,32 @@ class System(PbcObject):
         self._init_temp()
         self._init_logger()
         global_file = ['_global.xjson', 'prj-manifest.xjson']
+        gcfg = None
         for f in global_file:
             if os.path.exists(f):
                 gcfg = xjson.load(open(f))
                 if f == '_global.xjson':
                     self._deprecate_logger.warning(u'_global.xjson is deprecated.')
+        if not gcfg:
+            import random
+            import string
+            gcfg = {
+                "serverModule": u"caty.front.web.simple",
+                "language": u"ja",
+                "enableScriptCache": False,
+                "projectName": unicode(os.path.basename(os.getcwd())),
+                "encoding": u"utf-8",
+                "hostUrl": u"http://localhost:8000",
+                "useMultiprocessing": False,
+                "secretKey": u''.join([random.choice(string.ascii_letters+string.digits) for c in range(29)]),
+                "enableHTTPMethodTunneling": True,
+                "session": {
+                    "expire": 3600,
+                    "type": u"memory"
+                },
+                "mafsModule": u"caty.mafs.stdfs"
+            }
+            open('prh-manifest.xjson', 'wb').write(xjson.dumps(gcfg))
         self._global_config = GlobalConfig(gcfg, 
                                            self._validate_encoding(encoding))
         self._global_app = None

@@ -893,6 +893,8 @@ class SysFiles(ReadOnlyFacility):
 
 class GlobalApplication(Application):
     def __init__(self, name, no_ambient, group, system):
+        if not os.path.exists('global'):
+            os.mkdir('global')
         self._initialized = False
         self._no_ambient = False  # 常にFalse
         self._physical_path = join(group.name, name)
