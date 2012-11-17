@@ -34,7 +34,7 @@ class CatyArchiver(OptionParser):
     def read_filter_file(self):
         self.whitelist = DefaultWhiteListItemContainer()
         if self.filter:
-            c = open(self.filter, 'r').read()
+            c = unicode(open(self.filter, 'r').read(), 'utf-8')
             wlp = WhiteListParser()
             for i in wlp.feed(c):
                 self.whitelist.add(i)
