@@ -794,7 +794,7 @@ class Location(Builtin):
 class Project(Builtin):
 
     def execute(self):
-        return self.env.get('PROJECT')
+        return self.env.get('PROJECT')['name']
 
 
 class Manifest(Builtin):
