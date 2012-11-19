@@ -32,7 +32,7 @@ def make_response(resp):
 def push_verb(url, verb=None):
     # print "url=" + unicode(url)
     # print "verb=" + unicode(verb)
-    if verb is None:
+    if not verb:
         return url
     s = url.split('?')
     main = s[0]
