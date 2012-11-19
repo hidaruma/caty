@@ -25,22 +25,6 @@ class CommandBuilder(object):
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
             obj = scriptwrapper(profile, lambda :cls.instantiate(self))
-            if isinstance(cls, EnvelopeProxy):
-                opts_ref = opts_ref[:]
-                if args_ref:
-                    if args_ref[0].type == 'arg':
-                        arg0 = Option(u'0', args_ref[0].value)
-                    elif args_ref[0].type == 'narg':
-                        arg0 = OptionVarLoader(u'0', VarRef(args_ref[0].key, False, None), False, None)
-                    opts_ref.append(arg0)
-                elif opts_ref:
-                    for opt in opts_ref:
-                        if opt.key == u'0':
-                            if opt.type == 'option':
-                                arg0 = Argument(opt.value)
-                            elif opt.type == 'var':
-                                arg0 = NamedArg(opt.value.name, opt.optional, opt.default)
-                            args_ref = [arg0]
             cmd = obj(opts_ref, args_ref, type_args, pos, module)
         else:
             cmd = cls(opts_ref, args_ref, type_args, pos, module)

@@ -149,7 +149,7 @@ class ResourceModule(Module):
         for act in res.actions:
             script = act.instance
             opt = act.opts
-            arg = ArrayNode([ScalarNode(u'string', {u'remark': act.parent.url_pattern})], {'repeat': False})
+            arg = []
             c = CommandNode(act.name, 
                             [CallPattern(opt, 
                                          arg, 

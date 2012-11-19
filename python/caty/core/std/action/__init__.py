@@ -27,7 +27,7 @@ def _dir_actions(module):
     parser = ScriptParser()
     rbody = DummyResourceBodyBlock(module, u'dir', u'Directory')
     actions = {
-        u'/GET#exists': ResourceActionEntry(parser.parse(u'dir-index %0 GET'), u'dir-index %0 GET', u'get', rbody=rbody),
+        u'/GET#exists': ResourceActionEntry(parser.parse(u'dir-index %0 GET'), u'dir-index %0', u'get', rbody=rbody),
     }
     r = DefaultResource(module.app, u'**/|/', actions, rbody._module_name, rbody.rcname, rbody.docstring, rbody.annotations)
     module.add_resource(r)

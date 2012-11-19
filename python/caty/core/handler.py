@@ -108,7 +108,7 @@ class RequestHandler(object):
                     raise IOError(path)
             else:
                 if proxy.lock_cmd: # 排他制御
-                    cmd = self._interpreter._instantiate(proxy.lock_cmd, opts, [path, path], transaction=transaction)
+                    cmd = self._interpreter._instantiate(proxy.lock_cmd, opts, [path], transaction=transaction)
                     lock_file = cmd(None)
                 else:
                     lock_file = None
@@ -116,7 +116,7 @@ class RequestHandler(object):
                 if 'deprecated' in proxy.annotations:
                     self._app._system.deprecate_logger.debug('path: %s verb: %s' % (path, verb))
                 if proxy.compiled:
-                    cmd = self._interpreter._instantiate(proxy.instance, opts, [path, path], transaction=transaction)
+                    cmd = self._interpreter._instantiate(proxy.instance, opts, [path], transaction=transaction)
                 else:
                     cmd = self._interpreter.build(proxy.source, opts, [path, path], transaction=transaction)
         except Exception, e:
