@@ -47,6 +47,7 @@ command get
 /** POSTリクエスト */
 command post
  {
+   @[default("application/octet-stream")]
    "content-type": string?,
    /** リクエストタイムアウト時間（秒数、小数可能）*/
    @[default(60.0)]
@@ -60,6 +61,7 @@ command post
 /** PUTリクエスト */
 command put 
  {
+   @[default("application/octet-stream")]
    "content-type": string?,
    /** リクエストタイムアウト時間（秒数、小数可能）*/
    @[default(60.0)]

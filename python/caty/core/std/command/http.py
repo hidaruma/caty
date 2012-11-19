@@ -86,7 +86,7 @@ class Post(Command):
     def setup(self, opts, url):
         self.url = url
         self.timeout = opts.get('timeout', None)
-        self.content_type = opts.get('content-type', 'application/octet-stream')
+        self.content_type = opts.get('content-type')
         self.verb = opts.get('verb', None)
         self.debug = opts.get('debug', False)
         if self.debug:
