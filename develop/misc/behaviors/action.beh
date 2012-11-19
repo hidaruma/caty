@@ -8,7 +8,6 @@
 |%%cmd1  | {"q": {"foo": "bar"}, "a": ["/dump", "/dump"]} | | #dont-caraの指定されたリソース |
 |%%cmd1-2  | {"q": {"foo": "bar"}, "a": ["/dump", "/dump"]} | | #dont-caraの指定されたリソース |
 |%%cmd2   | ["a", "b", "c"]|  |
-|%%cmd2-2   | ["a", "b", "c"]|  |
 |%%cmd2-3   | ["a", "b", "c"]|  |
 |%%cmd3   | {"status": 404}|  |
 |%%cmd3-2   | | Exception ||
@@ -35,14 +34,9 @@
 == !name:cmd1-2
 
 {{{
-    sample:Dump.get --foo=bar /dump| $.body | json:parse
+    sample:Dump.get --foo=bar --0=/dump| $.body | json:parse
 }}}
 
-== !name:cmd2-2
-
-{{{
-    sample:Data.get /foo.data| $.body | json:parse
-}}}
 
 == !name:cmd2-3
 
