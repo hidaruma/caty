@@ -7,17 +7,20 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 
 def main(argv):
-    caar = CatyArchiver(usage='usage: python %s [OPTIONS] output' % argv[0])
-    caar.add_option('--list', action='store_true', default=False)
-    caar.add_option('--filter', action='store', default=None)
-    caar.add_option('--meta', action='append', default=[])
-    caar.add_option('--origin', action='store', default=os.getcwd())
-    caar.add_option('-q', '--quiet', action='store_true')
-    options, args = caar.parse_args(argv[1:])
+    o = OptionParser(usage='usage: python %s [OPTIONS] output' % argv[0])
+    o.add_option('--list', action='store_true', default=False)
+    o.add_option('--filter', action='store', default=None)
+    o.add_option('--meta', action='append', default=[])
+    o.add_option('--project', action='store', default=None)
+    o.add_option('--origin', action='store', default=os.getcwd())
+    o.add_option('-q', '--quiet', action='store_true')
+    options, args = o.parse_args(argv[1:])
+    caar = CatyArchiver()
     caar.list = options.list
     caar.filter = options.filter
     caar.origin = options.origin
     caar.quiet = options.quiet
+    caar.project = options.project
     caar.meta = options.meta
     if not caar.list:
         if len(args) == 0:
@@ -30,7 +33,7 @@ def main(argv):
     caar.read_filter_file()
     caar.archive()
 
-class CatyArchiver(OptionParser):
+class CatyArchiver(object):
     def read_filter_file(self):
         self.whitelist = DefaultWhiteListItemContainer()
         if self.filter:
@@ -40,6 +43,7 @@ class CatyArchiver(OptionParser):
                 self.whitelist.add(i)
 
     def archive(self):
+        self.setup_origin_dir()
         if self.outfile:
             outfile = ZipFile(self.outfile, u'w', ZIP_DEFLATED)
         for file in self.whitelist.files:
@@ -72,6 +76,29 @@ class CatyArchiver(OptionParser):
             outfile.write(m, 'META-INF/' + m.split(os.path.sep)[-1])
         if self.outfile:
             outfile.close()
+
+    def setup_origin_dir(self):
+        if not self.project:
+            return
+        else:
+            for ag in os.listdir(self.project):
+                if ag.strip(os.path.sep) in GROUP_NAMES:
+                    pd = os.path.join(self.project.rstrip(os.path.sep), ag)
+                    for a in os.listdir(pd):
+                        if a == self.origin:
+                            self.origin = os.path.join(pd, a)
+                            return
+            else:
+                if self.origin == 'global':
+                    self.origin = os.path.join(self.project.rstrip(os.path.sep), self.origin)
+                elif self.origin == 'caty':
+                    print u'[Error]', 'Application name `caty` is defined'
+                    sys.exit(1)
+                else:
+                    print u'[Error]', 'Application name `%s` does not exist' % self.origin
+                    sys.exit(1)
+
+GROUP_NAMES = ['examples', 'main', 'develop', 'extra', 'common']
 
 class WhiteListItem(object):
     def __init__(self, pattern, directives=()):

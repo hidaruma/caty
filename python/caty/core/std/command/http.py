@@ -85,9 +85,9 @@ class Get(Command):
 class Post(Command):
     def setup(self, opts, url):
         self.url = url
-        self.timeout = opts.get('timeout', None)
+        self.timeout = opts.get('timeout')
         self.content_type = opts.get('content-type')
-        self.verb = opts.get('verb', None)
+        self.verb = opts.get('verb')
         self.debug = opts.get('debug', False)
         if self.debug:
             _option_warning(u'debug')
