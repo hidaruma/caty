@@ -169,14 +169,6 @@ class CatyApp(object):
             input = raw_input
         return input, query, method, new_env
                 
-    def _process_input(self, input, tp):
-        if tp.startswith('application/json'):
-            return json.tagged(u'json', xjson.loads(input))
-        elif tp.startswith('text/plain'):
-            return input
-        else:
-            return input
-
     def create_header(self, h):
         for k, v in h.iteritems():
             if isinstance(v, unicode):

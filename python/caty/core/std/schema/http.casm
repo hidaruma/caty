@@ -38,6 +38,7 @@ command get
    /** リクエストタイムアウト時間（秒数、小数可能）*/
    @[default(60.0)]
    "timeout" : number?,
+   "verb": string?,
  }
  [url] :: void -> Resp
   refers python:caty.core.std.command.http.Get
@@ -50,6 +51,7 @@ command post
    /** リクエストタイムアウト時間（秒数、小数可能）*/
    @[default(60.0)]
    "timeout" : number?,
+   "verb": string?,
  }
  [url] :: bodyContent -> Resp
   refers python:caty.core.std.command.http.Post
@@ -62,6 +64,7 @@ command put
    /** リクエストタイムアウト時間（秒数、小数可能）*/
    @[default(60.0)]
    "timeout" : number?,
+   "verb": string?,
  }
  [url] :: bodyContent -> Resp
   refers python:caty.core.std.command.http.Put
@@ -73,6 +76,7 @@ command delete
    /** リクエストタイムアウト時間（秒数、小数可能）*/
    @[default(60.0)]
    "timeout" : number?,
+   "verb": string?,
  }
  [url] :: void -> Resp
 //  refers python:caty.core.std.command.http.Delete

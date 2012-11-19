@@ -349,7 +349,7 @@ class WebInputParser(object):
         from caty.jsontools import stdjson
         from StringIO import StringIO
         from caty.util.web import find_encoding
-        method = environ.get('REQUEST_METHOD')
+        method = environ.get('REQUEST_METHOD').upper()
         content_type = environ.get('CONTENT_TYPE', u'')
         if input is None:
             input = environ['wsgi.input']
