@@ -32,7 +32,7 @@ def main(argv):
     if not caar.list:
         if len(args) == 0:
             print u'[Error]', u'missing output file'
-            caar.print_help()
+            o.print_help()
             sys.exit(1)
         caar.outfile = args[0]
     else:
