@@ -12,7 +12,7 @@ def main(argv):
     o.add_option('--filter', action='store', default=None)
     o.add_option('--meta', action='append', default=[])
     o.add_option('--project', action='store', default=None)
-    o.add_option('--origin', action='store', default=os.getcwd())
+    o.add_option('--origin', action='store', default=None)
     o.add_option('--ignore-absence', action='store_true', dest='ignore_absence')
     o.add_option('-q', '--quiet', action='store_true')
     options, args = o.parse_args(argv[1:])
@@ -24,6 +24,11 @@ def main(argv):
     caar.project = options.project
     caar.meta = options.meta
     caar.ignore_absence = options.ignore_absence
+    if not caar.origin:
+        if not caar.project:
+            caar.origin = os.getcwd()
+        else:
+            caar.origin = 'project'
     if not caar.list:
         if len(args) == 0:
             print u'[Error]', u'missing output file'
