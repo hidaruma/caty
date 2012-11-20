@@ -94,6 +94,8 @@ class CatyArchiver(object):
                 elif self.origin == 'caty':
                     print u'[Error]', 'Application name `caty` is defined'
                     sys.exit(1)
+                elif self.origin == 'project':
+                    self.origin = self.project
                 else:
                     print u'[Error]', 'Application name `%s` does not exist' % self.origin
                     sys.exit(1)
