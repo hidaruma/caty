@@ -56,14 +56,14 @@ class CatyArchiver(object):
         for file in self.whitelist.files:
             path = file.pattern.lstrip('/')
             src = self.origin.rstrip(os.path.sep)+os.path.sep+path.strip(os.path.sep)
+            if not os.path.exists(src):
+                if self.ignore_absence or 'optional' in file.directives:
+                    if not self.quiet:
+                        print u'[Warning]', src, 'does not exist'
+                    continue
             if self.list:
                 print src
             else:
-                if not os.path.exists(src):
-                    if self.ignore_absence or 'optional' in file.directives:
-                        if not self.quiet:
-                            print u'[Warning]', src, 'does not exist'
-                        continue
                 outfile.write(src, path)
         for directory in self.whitelist.directories:
             base_dir = self.origin.rstrip(os.path.sep) + os.path.sep + directory.pattern.strip(os.path.sep)
