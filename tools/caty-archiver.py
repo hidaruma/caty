@@ -55,7 +55,7 @@ class CatyArchiver(object):
                 print src
             else:
                 if not os.path.exists(src):
-                    if self.ignore_absence:
+                    if self.ignore_absence or 'optional' in file.directives:
                         print u'[Warning]', src, 'does not exist'
                         continue
                 outfile.write(src, path)
@@ -157,13 +157,23 @@ class WhiteListParser(object):
     def parseline(self, line):
         line = line.strip()
         directive = []
-        if line.startswith('-'):
-            directive = ['excl']
-            line = line.lstrip(' -\t')
+        line, directive = self.parse_directive(line, directive)
         if line.endswith(u'/'):
             return WhiteListItemContainer(line, directive)
         else:
             return WhiteListItem(line, directive)
+
+    def parse_directive(self, line, directive):
+        if line.startswith('-'):
+            directive.append('excl')
+            line = line.lstrip(' -\t')
+            return self.parse_directive(line, directive)
+        elif line.startswith('?'):
+            directive.append('optional')
+            line = line.lstrip(' ?\t')
+            return self.parse_directive(line, directive)
+        else:
+            return line, directive
 
 class WhiteListItemContainer(WhiteListItem):
     def __init__(self, pattern, directive=()):
