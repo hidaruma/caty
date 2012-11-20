@@ -451,5 +451,35 @@ class ResourceModule(Module):
         return root
 
     def make_facility_graph(self):
-        pass
+        facilities = set()
+        root = {
+            u'name': self.name,
+        }
+        subgraphs = self._make_subgraphs()
+        edges = []
+        nodes = []
+        for rc in self.resources:
+            for act in rc.entries.values():
+                act_name = act.resource_name+'.'+act.name
+                for usage in act.profiles._fcl_usage:
+                    mode, names = usage
+                    for n in names:
+                        node_name = u'__facility__.' + n.name
+                        facilities.add((node_name, n.alias or n.name))
+                        if mode == u'reads':
+                            e = {u'from': act_name, u'to': node_name, u'type': u'read', u'label': u'reads'}
+                        elif mode == u'updates':
+                            e = {u'from': act_name, u'to': node_name, u'type': u'update', u'label': u'updates'}
+                        else:
+                            e = {u'from': act_name, u'to': node_name, u'type': u'use', u'label': u'uses'}
+                        edges.append(e)
+        for node_name, fcl_name in facilities:
+            if self.app.has_facility(fcl_name):
+                nodes.append({u'name': node_name, u'label': fcl_name, u'type': u'facility'})
+            else:
+                nodes.append({u'name': node_name, u'label': fcl_name, u'type': u'missing-facility'})
+        root['nodes'] = nodes
+        root['edges'] = edges
+        root['subgraphs'] = subgraphs
+        return root
 

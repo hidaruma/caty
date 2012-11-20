@@ -622,6 +622,34 @@ class Application(PbcObject):
         facilities['interpreter'] = self._interpreter.file_mode(fset)
         return fset
 
+    def has_facility(self, name):
+        if name in self._facility_classes:
+            return True
+        reserved = set([
+            'pub',
+            'env',
+            'stream',
+            'session',
+            'scripts',
+            'include',
+            'schema',
+            'data',
+            'storage',
+            'behaviors',
+            'schemata',
+            'config',
+            'memory',
+            'logger',
+            'sysfiles',
+            'user',
+            'interpreter',
+            'token',
+            'vcs',
+            'session',]
+        )
+        if name in reserved:
+            return True
+        return False
 
     def _create_sysfiles(self):
         return SysFiles(

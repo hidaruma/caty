@@ -108,6 +108,14 @@ class DrawModule(Builtin, DrawingMixin):
                 'style': 'dotted',
                 'arrowhead': 'none',
             },
+            # ファシリティ関係
+            'read': {
+                'dir': 'back'
+            },
+            'update': {},
+            'use': {
+                'dir': 'both'
+            },
         },
         # アクションノード
         'action': {
@@ -200,6 +208,13 @@ class DrawModule(Builtin, DrawingMixin):
             'width': '0.0',
             'label': ''
         },
+        # ファシリティ/エンティティ
+        'facility': {
+            'shape': u'Mcircle',
+            'style': u'filled',
+            'color': u'black',
+            'fillcolor': u'darkorange3'
+        },
     }
     def setup(self, opts, module_name):
         self._module_name = module_name
@@ -279,7 +294,7 @@ class DrawModule(Builtin, DrawingMixin):
         rm = rmc.get_module(self._module_name)
         if self._node == 'userrole':
             return rm.make_userrole_graph()
-        elif self.node == 'facility':
+        elif self._node == 'facility':
             return rm.make_facility_graph()
         else:
             return rm.make_graph()
@@ -354,7 +369,12 @@ class DrawModule(Builtin, DrawingMixin):
             conf.update(self._graph_config['edge'][edge['type']])
             if edge.get('is-middle-point', False):
                 conf['arrowhead'] = 'none'
-            if 'trigger' not in edge or self._node == 'action':
+            if 'label' in edge:
+                RG.add_edge(edge['from'], 
+                            edge['to'], 
+                            label=edge['label'],
+                            **conf)
+            elif 'trigger' not in edge or self._node == 'action':
                 RG.add_edge(edge['from'], 
                             edge['to'], 
                             **conf)
