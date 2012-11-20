@@ -61,7 +61,8 @@ class CatyArchiver(object):
             else:
                 if not os.path.exists(src):
                     if self.ignore_absence or 'optional' in file.directives:
-                        print u'[Warning]', src, 'does not exist'
+                        if not self.quiet:
+                            print u'[Warning]', src, 'does not exist'
                         continue
                 outfile.write(src, path)
         for directory in self.whitelist.directories:
@@ -79,10 +80,12 @@ class CatyArchiver(object):
                             outfile.write(src, arcpath)
         for m in self.meta:
             if not os.path.exists(m):
-                print u'[Warning]', m, 'not exists'
+                if not self.quiet:
+                    print u'[Warning]', m, 'not exists'
                 continue
             if os.path.isdir(m):
-                print u'[Warning]', m, 'is directory'
+                if not self.quiet:
+                    print u'[Warning]', m, 'is directory'
                 continue
             outfile.write(m, 'META-INF/' + m.split(os.path.sep)[-1])
         if self.outfile:
