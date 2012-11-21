@@ -8,7 +8,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 def main(argv):
     o = OptionParser(usage='usage: python %s [OPTIONS] output' % argv[0])
-    o.add_option('--list', action='store_true', default=False)
+    o.add_option('--dry-run', dest='list', action='store_true', default=False)
     o.add_option('--filter', action='store', default=None)
     o.add_option('--meta', action='append', default=[])
     o.add_option('--project', action='store', default=None)
