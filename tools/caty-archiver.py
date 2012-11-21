@@ -14,7 +14,7 @@ def main(argv):
     o.add_option('--meta', action='append', default=[])
     o.add_option('--project', action='store', default=None)
     o.add_option('--origin', action='store', default=None)
-    o.add_option('--ignore-absence', action='store_true', dest='ignore_absence')
+    o.add_option('--ignore-missing', action='store_true', dest='ignore_missing')
     o.add_option('-q', '--quiet', action='store_true')
     options, args = o.parse_args(argv[1:])
     caar = CatyArchiver()
@@ -24,7 +24,7 @@ def main(argv):
     caar.quiet = options.quiet
     caar.project = options.project
     caar.meta = options.meta
-    caar.ignore_absence = options.ignore_absence
+    caar.ignore_missing = options.ignore_missing
     if not caar.origin:
         if not caar.project:
             caar.origin = os.getcwd()
@@ -58,12 +58,15 @@ class CatyArchiver(object):
             path = file.pattern.lstrip('/')
             src = self.origin.rstrip(os.path.sep)+os.path.sep+path.strip(os.path.sep)
             if not os.path.exists(src):
-                if self.ignore_absence or 'optional' in file.directives:
+                if self.ignore_missing or 'optional' in file.directives:
                     if not self.quiet:
                         print >>cout, u'[Warning]', src, 'does not exist'
                     continue
             if self.list:
-                print >>cout, src
+                if not os.path.exists(src):
+                    print >>cout, u'[Warning]', src, 'does not exist'
+                else:
+                    print >>cout, src
             else:
                 outfile.write(src, path)
         for directory in self.whitelist.directories:
