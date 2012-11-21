@@ -105,8 +105,8 @@ class ShallowReifier(object):
                 u'anno': self.reify_annotations(s.annotations),
                 u'location': self._get_localtion(s),
                 u'pathPattern': s.parent.url_patterns,
-                u'produces': reduce(lambda x, y: x+y, [p._next_states for p in s.profiles]),
-                u'redirects': reduce(lambda x, y: x+y, [p._redirects for p in s.profiles]),
+                u'produces': reduce(lambda x, y: x+y, [p._next_states for p in s.profiles], []),
+                u'redirects': reduce(lambda x, y: x+y, [p._redirects for p in s.profiles], []),
                 u'forwards': [], 
                 u'profile': self._reify_action_profile(s),
         })
