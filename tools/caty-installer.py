@@ -3,7 +3,9 @@ import re
 import sys
 from optparse import OptionParser
 from zipfile import ZipFile
-
+import locale
+import codecs
+cout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
 
 def main(argv):
@@ -21,7 +23,7 @@ def main(argv):
     cai.update = options.update
     cai.dry_run = options.dry_run
     if not args:
-        print u'[Error]', u'missing archive file'
+        print >>cout, u'[Error]', u'missing archive file'
         o.print_help()
         sys.exit(1)
     cai.install(args[0])
@@ -37,7 +39,7 @@ class CatyInstaller(object):
             base_dir = os.path.join(self.project.rstrip(os.path.sep), 'main', self.dest)
         if not os.path.exists(base_dir):
             if self.dry_run:
-                print base_dir
+                print >>cout, base_dir
             else:
                 os.mkdir(base_dir)
         for file in files:
@@ -45,7 +47,7 @@ class CatyInstaller(object):
             if self._not_modified(file, base_dir):
                 continue
             if self.dry_run:
-                print file.filename
+                print >>cout, file.filename
             else:
                 open(os.path.join(base_dir, file.filename), 'wb').write(zp.read(file.filename))
 
@@ -57,7 +59,7 @@ class CatyInstaller(object):
             if not os.path.exists(target):
                 if self.dry_run:
                     if target not in self.__memo:
-                        print target
+                        print >>cout, target
                         self.__memo.add(target)
                 else:
                     os.mkdir(target)

@@ -3,8 +3,9 @@ import re
 import sys
 from optparse import OptionParser
 from zipfile import ZipFile, ZIP_DEFLATED
-
-
+import locale
+import codecs
+cout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
 def main(argv):
     o = OptionParser(usage='usage: python %s [OPTIONS] output' % argv[0])
@@ -31,7 +32,7 @@ def main(argv):
             caar.origin = 'project'
     if not caar.list:
         if len(args) == 0:
-            print u'[Error]', u'missing output file'
+            print >>cout, u'[Error]', u'missing output file'
             o.print_help()
             sys.exit(1)
         caar.outfile = args[0]
@@ -59,10 +60,10 @@ class CatyArchiver(object):
             if not os.path.exists(src):
                 if self.ignore_absence or 'optional' in file.directives:
                     if not self.quiet:
-                        print u'[Warning]', src, 'does not exist'
+                        print >>cout, u'[Warning]', src, 'does not exist'
                     continue
             if self.list:
-                print src
+                print >>cout, src
             else:
                 outfile.write(src, path)
         for directory in self.whitelist.directories:
@@ -75,17 +76,17 @@ class CatyArchiver(object):
                         if arcpath.strip(os.path.sep).startswith('META-INF' + os.path.sep):
                             continue
                         if self.list:
-                            print src
+                            print >>cout, src
                         else:
                             outfile.write(src, arcpath)
         for m in self.meta:
             if not os.path.exists(m):
                 if not self.quiet:
-                    print u'[Warning]', m, 'not exists'
+                    print >>cout, u'[Warning]', m, 'not exists'
                 continue
             if os.path.isdir(m):
                 if not self.quiet:
-                    print u'[Warning]', m, 'is directory'
+                    print >>cout, u'[Warning]', m, 'is directory'
                 continue
             outfile.write(m, 'META-INF/' + m.split(os.path.sep)[-1])
         if self.outfile:
@@ -106,12 +107,12 @@ class CatyArchiver(object):
                 if self.origin == 'global':
                     self.origin = os.path.join(self.project.rstrip(os.path.sep), self.origin)
                 elif self.origin == 'caty':
-                    print u'[Error]', 'Application name `caty` is defined'
+                    print >>cout, u'[Error]', 'Application name `caty` is defined'
                     sys.exit(1)
                 elif self.origin == 'project':
                     self.origin = self.project
                 else:
-                    print u'[Error]', 'Application name `%s` does not exist' % self.origin
+                    print >>cout, u'[Error]', 'Application name `%s` does not exist' % self.origin
                     sys.exit(1)
 
 GROUP_NAMES = ['examples', 'main', 'develop', 'extra', 'common']
