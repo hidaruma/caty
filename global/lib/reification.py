@@ -58,6 +58,8 @@ class ShallowReifier(object):
         }
         if a.parent:
             r[u'visibleParent'] = a.parent.name
+        if a.deprecated:
+            r['anno']['deprecated'] = a.deprecated
         return r
 
     def reify_state(self, s):

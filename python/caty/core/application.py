@@ -277,7 +277,7 @@ class Application(PbcObject):
         self._app_spec = AppConfig()
         self._app_spec.update(cfg.get('appProp', {}))
         self._annotations = cfg.get('anno', {})
-        self._deprecated = self._annotations.get('deprecated', False)
+        self._deprecated = cfg.get('deprecated', False)
         self._manifest = cfg
         self._lock_wait_limit = cfg.get('lockWaitLimit', 60)
 
