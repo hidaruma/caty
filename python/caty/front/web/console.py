@@ -102,7 +102,7 @@ class HTTPConsoleApp(object):
         return [body.encode('unicode-escape')]
 
     def _process(self, app_name, input, environ):
-        if app_name == 'system':
+        if app_name == 'project':
             return self.system_function(input)
         app = self._system.get_app(app_name)
         facilities = app.create_facilities()

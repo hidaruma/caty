@@ -498,24 +498,21 @@ Web サーバの起動・停止を行う
 
 
     @catch
-    def do_reload(self, line):
+    def do_l(self, line):
         u"""
-Usage: reload [--this]
+Usage: load-mods <APP_NAME>
 Alias: l
 commands, schemata などの再読み込みを行う。
---thisオプションを付けると親アプリケーションの再読み込みを行わない。
         """
-        if line.strip() != u'--this':
-            if line.strip():
-                self._echo(u'Unknown option: %s' % line)
-                return
-            self.app.parent.reload()
-        self.app.reload()
+        app_name = line.strip()
+        if not app_name:
+            app = self.app
+        else:
+            app = self.app._system.get_app(app_name)
+        app.reload()
         self.set_prompt()
         self.interpreter = None
         return False
-
-    do_l = do_reload
 
     @catch
     def do_fl(self, line):
@@ -546,7 +543,8 @@ on demand宣言されたモジュールを読み込む。
             return
         self.system.remove_app(name)
 
-setattr(CatyShell, 'do_force-load', CatyShell.do_fl)
+setattr(CatyShell, 'do_load-mods', CatyShell.do_fl)
+setattr(CatyShell, 'do_force-load-mod', CatyShell.do_fl)
 setattr(CatyShell, 'do_init-app', CatyShell.do_ia)
 setattr(CatyShell, 'do_setup-app', CatyShell.do_sa)
 setattr(CatyShell, 'do_remove-app', CatyShell.do_ra)
