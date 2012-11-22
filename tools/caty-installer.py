@@ -36,7 +36,8 @@ def main(argv):
 
 class CatyInstaller(object):
     def install(self, path):
-        self._init_log()
+        if self.log:
+            self._init_log()
         zp = ZipFile(open(path))
         files = zp.infolist()
         self.__memo = set()
