@@ -2,7 +2,7 @@ import os
 import re
 import sys
 from optparse import OptionParser
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 import locale
 import codecs
 import time
@@ -40,7 +40,7 @@ class CatyInstaller(object):
     def install(self, path):
         bksuffix = time.strftime('%Y%m%d%H%M%S')+'.bak'
         self.bksuffix = bksuffix
-        zp = ZipFile(open(path))
+        zp = ZipFile(open(path, 'rb'))
         files = zp.infolist()
         self.__memo = set()
         if not self.project:
