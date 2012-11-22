@@ -7,6 +7,8 @@ import locale
 import codecs
 import time
 import hashlib
+import shutil
+import datetime
 cout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
 
@@ -36,8 +38,8 @@ def main(argv):
 
 class CatyInstaller(object):
     def install(self, path):
-        if self.log:
-            self._init_log()
+        bksuffix = time.strftime('%Y%m%d%H%M%S')+'.bak'
+        self.bksuffix = bksuffix
         zp = ZipFile(open(path))
         files = zp.infolist()
         self.__memo = set()
@@ -50,24 +52,32 @@ class CatyInstaller(object):
                 print >>cout, base_dir
             else:
                 os.mkdir(base_dir)
+        if self.log:
+            self._init_log()
         log_contents = []
         for file in files:
             self._make_dir(file.filename, base_dir)
             if self._not_modified(file, base_dir):
-                continue
-            if self.dry_run:
+                mode = '*'
+                digest = ''
+            elif self.dry_run:
                 print >>cout, file.filename
+                continue
             else:
                 c = zp.read(file.filename)
-                open(os.path.join(base_dir, file.filename), 'wb').write(c)
+                destfile = os.path.join(base_dir, file.filename)
+                mode = '+'
+                if os.path.exists(destfile):
+                    shutil.copyfile(destfile, destfile+'.' + bksuffix)
+                    mode = '!'
+                open(destfile, 'wb').write(c)
                 if not self.no_md5:
                     md5 = hashlib.md5()
                     md5.update(c)
-                    log_contents.append((u'/'+file.filename, md5.hexdigest()))
-                else:
-                    log_contents.append((u'/'+file.filename, ''))
+                    digest = md5.hexdigest()
+            log_contents.append((file, os.path.abspath(destfile), digest, mode))
         if self.log:
-            self._write_header(path, base_dir)
+            self._write_header(path, base_dir, bksuffix)
         if self.log:
             self._write_file(log_contents)
             self.logfile.close()
@@ -78,9 +88,10 @@ class CatyInstaller(object):
         self.logfile = open(self.log, 'wb')
         self.logwriter = codecs.getwriter(locale.getpreferredencoding())(self.logfile)
 
-    def _write_header(self, path, base_dir):
+    def _write_header(self, path, base_dir, bksuffix):
         if self.dry_run:
             return
+        self.logwriter.write(u'Operation: install\n')
         self.logwriter.write(u'Dist-Package-Name: %s\n' % os.path.basename(path).rsplit('.', 1)[0])
         if self.project:
             self.logwriter.write(u'Project-Dir: %s\n' % os.path.abspath(self.project))
@@ -89,6 +100,7 @@ class CatyInstaller(object):
             self.logwriter.write(u'Destination-Dir: %s\n' % os.path.abspath(base_dir))
             if self.dest:
                 self.logwriter.write(u'Destination-Name: %s\n' % self.dest)
+        self.logwriter.write(u'Backup-Suffix: .%s\n' % bksuffix)
         self.logwriter.write(u'Installed-Date: %s\n' % time.strftime('%Y-%m-%dT%H:%M:%S'))
         self.logwriter.write('\n')
 
@@ -96,7 +108,10 @@ class CatyInstaller(object):
         if self.dry_run:
             return
         for l in log_contents:
-            self.logwriter.write(u' - '.join(l)+u'\n')
+            c = ['/' + l[0].filename, str(l[0].file_size), time.strftime('%Y-%m-%dT%H:%M:%S', datetime.datetime(*l[0].date_time).timetuple()), l[2], l[1], l[3], '']
+            if l[3] == '!':
+                c[-1] = l[1] + self.bksuffix
+            self.logwriter.write(u'|'.join(c)+u'\n')
 
     def _make_dir(self, filename, base_dir):
         chunk = filename.split(os.path.sep)[:-1]
@@ -112,8 +127,6 @@ class CatyInstaller(object):
                     os.mkdir(target)
 
     def _not_modified(self, file, base_dir):
-        import datetime
-        import time
         if not self.update:
             return False
         target = os.path.join(base_dir, file.filename)
