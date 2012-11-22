@@ -80,7 +80,8 @@ class CatyInstaller(object):
             self._write_header(path, base_dir, bksuffix)
         if self.log:
             self._write_file(log_contents)
-            self.logfile.close()
+            if not self.dry_run:
+                self.logfile.close()
 
     def _init_log(self):
         if self.dry_run:
