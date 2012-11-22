@@ -11,6 +11,10 @@ import shutil
 import datetime
 cout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
+def normalize_path(path):
+    if sys.platform == 'win32':
+        return path.replace('/', '\\')
+    return path
 
 def main(argv):
     o = OptionParser(usage='usage: python %s [OPTIONS] output' % argv[0])
@@ -36,6 +40,7 @@ def main(argv):
         sys.exit(1)
     cai.install(args[0])
 
+
 class CatyInstaller(object):
     def install(self, path):
         bksuffix = time.strftime('%Y%m%d%H%M%S')+'.bak'
@@ -56,16 +61,16 @@ class CatyInstaller(object):
             self._init_log()
         log_contents = []
         for file in files:
-            self._make_dir(file.filename, base_dir)
+            self._make_dir(normalize_path(file.filename), base_dir)
             if self._not_modified(file, base_dir):
                 mode = '*'
                 digest = ''
             elif self.dry_run:
-                print >>cout, file.filename
+                print >>cout, normalize_path(file.filename)
                 continue
             else:
-                c = zp.read(file.filename)
-                destfile = os.path.join(base_dir, file.filename)
+                c = zp.read(normalize_path(file.filename))
+                destfile = os.path.join(base_dir, normalize_path(file.filename))
                 mode = '+'
                 if os.path.exists(destfile):
                     shutil.copyfile(destfile, destfile+'.' + bksuffix)
@@ -130,7 +135,7 @@ class CatyInstaller(object):
     def _not_modified(self, file, base_dir):
         if not self.update:
             return False
-        target = os.path.join(base_dir, file.filename)
+        target = os.path.join(base_dir, normalize_path(file.filename))
         if not os.path.exists(target):
             return False
         desttime = os.stat(target).st_mtime
