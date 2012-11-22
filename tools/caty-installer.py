@@ -69,7 +69,7 @@ class CatyInstaller(object):
                 print >>cout, normalize_path(file.filename)
                 continue
             else:
-                c = zp.read(normalize_path(file.filename))
+                c = zp.read(file.filename)
                 destfile = os.path.join(base_dir, normalize_path(file.filename))
                 mode = '+'
                 if os.path.exists(destfile):
