@@ -543,7 +543,7 @@ on demand宣言されたモジュールを読み込む。
             return
         self.system.remove_app(name)
 
-setattr(CatyShell, 'do_load-mods', CatyShell.do_fl)
+setattr(CatyShell, 'do_load-mods', CatyShell.do_l)
 setattr(CatyShell, 'do_force-load-mod', CatyShell.do_fl)
 setattr(CatyShell, 'do_init-app', CatyShell.do_ia)
 setattr(CatyShell, 'do_setup-app', CatyShell.do_sa)
