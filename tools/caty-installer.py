@@ -5,6 +5,8 @@ from optparse import OptionParser
 from zipfile import ZipFile
 import locale
 import codecs
+import time
+import hashlib
 cout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
 
@@ -14,6 +16,8 @@ def main(argv):
     o.add_option('--dest', action='store', default=None)
     o.add_option('--update', action='store_true')
     o.add_option('--dry-run', action='store_true', dest='dry_run')
+    o.add_option('--log', action='store', default=None)
+    o.add_option('--no-md5', action='store_true', dest='no_md5')
     o.add_option('-q', '--quiet', action='store_true')
     options, args = o.parse_args(argv[1:])
     cai = CatyInstaller()
@@ -22,6 +26,8 @@ def main(argv):
     cai.quiet = options.quiet
     cai.update = options.update
     cai.dry_run = options.dry_run
+    cai.log = options.log
+    cai.no_md5 = options.no_md5
     if not args:
         print >>cout, u'[Error]', u'missing archive file'
         o.print_help()
@@ -30,6 +36,7 @@ def main(argv):
 
 class CatyInstaller(object):
     def install(self, path):
+        self._init_log()
         zp = ZipFile(open(path))
         files = zp.infolist()
         self.__memo = set()
@@ -42,6 +49,7 @@ class CatyInstaller(object):
                 print >>cout, base_dir
             else:
                 os.mkdir(base_dir)
+        log_contents = []
         for file in files:
             self._make_dir(file.filename, base_dir)
             if self._not_modified(file, base_dir):
@@ -49,7 +57,45 @@ class CatyInstaller(object):
             if self.dry_run:
                 print >>cout, file.filename
             else:
-                open(os.path.join(base_dir, file.filename), 'wb').write(zp.read(file.filename))
+                c = zp.read(file.filename)
+                open(os.path.join(base_dir, file.filename), 'wb').write(c)
+                if not self.no_md5:
+                    md5 = hashlib.md5()
+                    md5.update(c)
+                    log_contents.append((u'/'+file.filename, md5.hexdigest()))
+                else:
+                    log_contents.append((u'/'+file.filename, ''))
+        if self.log:
+            self._write_header(path, base_dir)
+        if self.log:
+            self._write_file(log_contents)
+            self.logfile.close()
+
+    def _init_log(self):
+        if self.dry_run:
+            return
+        self.logfile = open(self.log, 'wb')
+        self.logwriter = codecs.getwriter(locale.getpreferredencoding())(self.logfile)
+
+    def _write_header(self, path, base_dir):
+        if self.dry_run:
+            return
+        self.logwriter.write(u'Dist-Package-Name: %s\n' % os.path.basename(path).rsplit('.', 1)[0])
+        if self.project:
+            self.logwriter.write(u'Project-Dir: %s\n' % os.path.abspath(self.project))
+
+        if self.project:
+            self.logwriter.write(u'Destination-Dir: %s\n' % os.path.abspath(base_dir))
+            if self.dest:
+                self.logwriter.write(u'Destination-Name: %s\n' % self.dest)
+        self.logwriter.write(u'Installed-Date: %s\n' % time.strftime('%Y-%m-%dT%H:%M:%S'))
+        self.logwriter.write('\n')
+
+    def _write_file(self, log_contents):
+        if self.dry_run:
+            return
+        for l in log_contents:
+            self.logwriter.write(u' - '.join(l)+u'\n')
 
     def _make_dir(self, filename, base_dir):
         chunk = filename.split(os.path.sep)[:-1]
