@@ -65,6 +65,7 @@ class CatyInstaller(object):
             if self._not_modified(file, base_dir):
                 mode = '*'
                 digest = ''
+                destfile = ''
             elif self.dry_run:
                 print >>cout, normalize_path(file.filename)
                 continue
