@@ -10,7 +10,6 @@
 |%%cmd2   | ["a", "b", "c"]|  |
 |%%cmd2-3   | ["a", "b", "c"]|  |
 |%%cmd3   | {"status": 404}|  |
-|%%cmd3-2   | | Exception ||
 
 == !name:cmd1
 
@@ -43,12 +42,4 @@
 {{{
     call sample:Data.get --0=/foo.data| $.body | json:parse
 }}}
-
-== !name:cmd3-2
-
-{{{
-    sample:Data.get /x.data
-}}}
-
-
 
