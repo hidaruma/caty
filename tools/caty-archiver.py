@@ -7,6 +7,11 @@ import locale
 import codecs
 cout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
+def normalize_path(path):
+    if sys.platform == 'win32':
+        return path.replace('/', '\\')
+    return path
+
 def main(argv):
     o = OptionParser(usage='usage: python %s [OPTIONS] output' % argv[0])
     o.add_option('--dry-run', dest='list', action='store_true', default=False)
@@ -94,6 +99,7 @@ class CatyArchiver(object):
                 if not self.quiet:
                     print >>cout, u'[Warning]', m, 'is directory'
                 continue
+            m = normalize_path(m)
             fname = m.split(os.path.sep)[-1] 
             outfile.write(m, 'META-INF/' + fname)
             if fname == 'package.json':
