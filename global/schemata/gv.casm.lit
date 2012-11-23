@@ -135,6 +135,7 @@ type ClusterAttributes = GraphAttributes;
 == グラフとその構成要素
 
 <<{
+/** グラフ要素の配列、入れ子を許す */
 type ElementList = [(Node | Edge | Cluster | ElementList)*];
 
 
