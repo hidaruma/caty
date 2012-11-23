@@ -10,7 +10,7 @@ cout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 def main(argv):
     o = OptionParser(usage='usage: python %s [OPTIONS] output' % argv[0])
     o.add_option('--dry-run', dest='list', action='store_true', default=False)
-    o.add_option('--filter', action='store', default=None)
+    o.add_option('--fset', action='store', default=None)
     o.add_option('--meta', action='append', default=[])
     o.add_option('--project', action='store', default=None)
     o.add_option('--origin', action='store', default=None)
@@ -19,7 +19,7 @@ def main(argv):
     options, args = o.parse_args(argv[1:])
     caar = CatyArchiver()
     caar.list = options.list
-    caar.filter = options.filter
+    caar.fset = options.fset
     caar.origin = options.origin
     caar.quiet = options.quiet
     caar.project = options.project
@@ -38,14 +38,14 @@ def main(argv):
         caar.outfile = args[0]
     else:
         caar.outfile = None
-    caar.read_filter_file()
+    caar.read_fset_file()
     caar.archive()
 
 class CatyArchiver(object):
-    def read_filter_file(self):
+    def read_fset_file(self):
         self.whitelist = DefaultWhiteListItemContainer()
-        if self.filter:
-            c = unicode(open(self.filter, 'r').read(), 'utf-8')
+        if self.fset:
+            c = unicode(open(self.fset, 'r').read(), 'utf-8')
             wlp = WhiteListParser()
             for i in wlp.feed(c):
                 self.whitelist.add(i)
