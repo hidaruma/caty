@@ -19,7 +19,7 @@ def normalize_path(path):
 def main(argv):
     o = OptionParser(usage='usage: python %s [OPTIONS] output' % argv[0])
     o.add_option('--project', action='store', default=None)
-    o.add_option('--dest', action='store', default=None)
+    o.add_option('--dest', action='store', default='project')
     o.add_option('--update', action='store_true')
     o.add_option('--compare', choices=['digest', 'timestamp'], default='digest')
     o.add_option('--dry-run', action='store_true', dest='dry_run')
@@ -52,6 +52,8 @@ class CatyInstaller(object):
         self.__memo = set()
         if not self.project:
             base_dir = self.dest
+        elif self.dest == 'project':
+            base_dir = self.project.rstrip(os.path.sep)
         else:
             base_dir = os.path.join(self.project.rstrip(os.path.sep), 'main', self.dest)
         if not os.path.exists(base_dir):
