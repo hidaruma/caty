@@ -60,7 +60,26 @@ class CatyInstaller(object):
         if self.log:
             self._init_log()
         log_contents = []
+        pkg = None
         for file in files:
+            if file.filename == 'META-INF/package.json':
+                if pkg:
+                    p = zp.read(file.filename)
+                    if p != pkg:
+                        print '[Error]', 'confliction between /package.json and /META-INF/package.json'
+                    else:
+                        pkg = p
+                continue
+            if file.filename.startswith('META-INF/'):
+                continue
+            if file.filename == 'package.json':
+                if pkg:
+                    p = zp.read(file.filename)
+                    if p != pkg:
+                        print '[Error]', 'confliction between /package.json and /META-INF/package.json'
+                    else:
+                        pkg = p
+                continue
             self._make_dir(normalize_path(file.filename), base_dir)
             if self._not_modified(file, base_dir):
                 mode = '*'

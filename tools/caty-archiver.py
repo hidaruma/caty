@@ -69,6 +69,7 @@ class CatyArchiver(object):
                     print >>cout, src
             else:
                 outfile.write(src, path)
+        pkg = None
         for directory in self.whitelist.directories:
             base_dir = self.origin.rstrip(os.path.sep) + os.path.sep + directory.pattern.strip(os.path.sep)
             for r, d, f in os.walk(base_dir):
@@ -82,6 +83,8 @@ class CatyArchiver(object):
                             print >>cout, src
                         else:
                             outfile.write(src, arcpath)
+                        if arcpath == 'package.json':
+                            pkg = open(src).read()
         for m in self.meta:
             if not os.path.exists(m):
                 if not self.quiet:
@@ -91,7 +94,12 @@ class CatyArchiver(object):
                 if not self.quiet:
                     print >>cout, u'[Warning]', m, 'is directory'
                 continue
-            outfile.write(m, 'META-INF/' + m.split(os.path.sep)[-1])
+            fname = m.split(os.path.sep)[-1] 
+            outfile.write(m, 'META-INF/' + fname)
+            if fname == 'package.json':
+                if pkg:
+                    if pkg != open(m).read():
+                        print '[Error]', 'confliction between /package.json and /META-INF/package.json'
         if self.outfile:
             outfile.close()
 
