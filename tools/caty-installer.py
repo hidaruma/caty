@@ -21,6 +21,7 @@ def main(argv):
     o.add_option('--project', action='store', default=None)
     o.add_option('--dest', action='store', default=None)
     o.add_option('--update', action='store_true')
+    o.add_option('--compare', choices=['digest', 'timestamp'], default='digest')
     o.add_option('--dry-run', action='store_true', dest='dry_run')
     o.add_option('--log', action='store', default=None)
     o.add_option('--no-md5', action='store_true', dest='no_md5')
@@ -33,6 +34,7 @@ def main(argv):
     cai.update = options.update
     cai.dry_run = options.dry_run
     cai.log = options.log
+    cai.compare = options.compare
     cai.no_md5 = options.no_md5
     if not args:
         print >>cout, u'[Error]', u'missing archive file'
@@ -153,14 +155,18 @@ class CatyInstaller(object):
                     os.mkdir(target)
 
     def _not_modified(self, file, base_dir):
+        import binascii
         if not self.update:
             return False
         target = os.path.join(base_dir, normalize_path(file.filename))
         if not os.path.exists(target):
             return False
-        desttime = os.stat(target).st_mtime
-        srctime = time.mktime(datetime.datetime(*file.date_time).timetuple())
-        return desttime > srctime
+        if self.compare == 'timestamp':
+            desttime = os.stat(target).st_mtime
+            srctime = time.mktime(datetime.datetime(*file.date_time).timetuple())
+            return desttime > srctime
+        else:
+            return file.CRC == (binascii.crc32(open(target).read()) & 0xffffffff)
 
 if __name__ == '__main__':
     main(sys.argv)
