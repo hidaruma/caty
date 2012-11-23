@@ -277,3 +277,7 @@ command acts [string mod] :: void -> [reif:ActionSummary*]? {
   sreif:list-actions --safe %1
 };
 
+/** モジュールをロード済みのアプリケーション */
+command loaded-apps :: void -> [reif:ApplicationSummary*] {
+  sreif:list-applications | take {$.loaded}
+};
