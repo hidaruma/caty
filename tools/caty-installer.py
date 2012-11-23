@@ -168,7 +168,7 @@ class CatyInstaller(object):
             srctime = time.mktime(datetime.datetime(*file.date_time).timetuple())
             return desttime > srctime
         else:
-            return file.CRC == (binascii.crc32(open(target).read()) & 0xffffffff)
+            return file.CRC == (binascii.crc32(open(target, 'rb').read()) & 0xffffffff)
 
 if __name__ == '__main__':
     main(sys.argv)
