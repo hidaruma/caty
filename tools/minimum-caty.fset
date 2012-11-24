@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# minimum-caty.list
+# minimum-caty.fset
 
 # グローバルな除外パターン
 - *.tmp
