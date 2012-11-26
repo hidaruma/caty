@@ -17,9 +17,10 @@ def main(argv):
     o.add_option('--dry-run', dest='list', action='store_true', default=False)
     o.add_option('--fset', action='store', default=None)
     o.add_option('--meta', action='append', default=[])
+    o.add_option('--package-json', action='store', default=None)
     o.add_option('--project', action='store', default=None)
     o.add_option('--origin', action='store', default=None)
-    o.add_option('--ignore-missing', action='store_true', dest='ignore_missing')
+    o.add_option('--ignore-missing', action='store_true')
     o.add_option('-q', '--quiet', action='store_true')
     options, args = o.parse_args(argv[1:])
     caar = CatyArchiver()
@@ -30,6 +31,7 @@ def main(argv):
     caar.project = options.project
     caar.meta = options.meta
     caar.ignore_missing = options.ignore_missing
+    caar.package_json = options.package_json
     if not caar.origin:
         if not caar.project:
             caar.origin = os.getcwd()
@@ -106,6 +108,10 @@ class CatyArchiver(object):
                 if pkg:
                     if pkg != open(m).read():
                         print '[Error]', 'confliction between /package.json and /META-INF/package.json'
+        if self.package_json:
+            if not os.path.exists(self.package_json):
+                print '[Error]', '%s does not exists' % self.package_json
+            outfile.write(self.package_json, 'META-INF/package.json')
         if self.outfile:
             outfile.close()
 
