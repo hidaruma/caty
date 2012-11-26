@@ -287,7 +287,7 @@ class WhiteListItemContainer(WhiteListItem):
 
 class DefaultWhiteListItemContainer(WhiteListItemContainer):
     def __init__(self):
-        WhiteListItemContainer.__init__(self, u'/')
+        WhiteListItemContainer.__init__(self, u'')
         self._incl = [
             WhiteListItem('*.atom'),
             WhiteListItem('*.beh'),
@@ -335,6 +335,7 @@ class DefaultWhiteListItemContainer(WhiteListItemContainer):
             WhiteListItem('*.xml'),
             WhiteListItem('*.zip'),
         ]
+        self._orig_len = len(self._incl)
 
     def includes(self, path):
         for e in self._excl:
@@ -357,7 +358,7 @@ class DefaultWhiteListItemContainer(WhiteListItemContainer):
             if not e.is_file:
                 found = True
                 yield e
-        if not found and not self._incl:
+        if not found and len(self._incl) == self._orig_len:
             yield self
 
 if __name__ == '__main__':
