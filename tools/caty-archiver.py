@@ -281,7 +281,7 @@ class WhiteListItemContainer(WhiteListItem):
 
 class DefaultWhiteListItemContainer(WhiteListItemContainer):
     def __init__(self):
-        WhiteListItemContainer.__init__(self, u'')
+        WhiteListItemContainer.__init__(self, u'/')
         self._incl = [
             WhiteListItem('*.atom'),
             WhiteListItem('*.beh'),
@@ -343,6 +343,16 @@ class DefaultWhiteListItemContainer(WhiteListItemContainer):
                     return True
                 else:
                     return False
+
+    @property
+    def directories(self):
+        found = False
+        for e in self._incl:
+            if not e.is_file:
+                found = True
+                yield e
+        if not found and not self._incl:
+            yield self
 
 if __name__ == '__main__':
     main(sys.argv)
