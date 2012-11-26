@@ -20,36 +20,40 @@ def main(argv):
     o = OptionParser(usage='usage: python %s [OPTIONS] output' % argv[0])
     o.add_option('--project', action='store', default=None)
     o.add_option('--dest', action='store', default='project')
-    o.add_option('--update', action='store_true')
     o.add_option('--compare', choices=['digest', 'timestamp'], default='digest')
     o.add_option('--dry-run', action='store_true', dest='dry_run')
-    o.add_option('--log', action='store', default=None)
-    o.add_option('--no-md5', action='store_true', dest='no_md5')
+    o.add_option('--log-dir', action='store', default=os.getcwd())
+    o.add_option('--no-overwrite', action='store_true')
     o.add_option('-q', '--quiet', action='store_true')
     options, args = o.parse_args(argv[1:])
     cai = CatyInstaller()
     cai.project = options.project
     cai.dest = options.dest
     cai.quiet = options.quiet
-    cai.update = options.update
     cai.dry_run = options.dry_run
-    cai.log = options.log
+    cai.log_dir = normalize_path(options.log_dir)
+    cai.no_overwrite = options.no_overwrite
     cai.compare = options.compare
-    cai.no_md5 = options.no_md5
     if not args:
         print >>cout, u'[Error]', u'missing archive file'
         o.print_help()
+        sys.exit(1)
+    if os.path.sep in cai.dest:
+        print >>cout, u'[Error]', u'--dest takes only name token not directory'
         sys.exit(1)
     cai.install(args[0])
 
 
 class CatyInstaller(object):
     def install(self, path):
+        self.arcfile = path
+        self.object_name = os.path.basename(self.arcfile).rsplit('.', 1)[0]
         bksuffix = time.strftime('%Y%m%d%H%M%S')+'.bak'
         self.bksuffix = bksuffix
         zp = ZipFile(open(path, 'rb'))
         files = zp.infolist()
         self.__memo = set()
+        transaction = []
         if not self.project:
             base_dir = self.dest
         elif self.dest == 'project':
@@ -61,8 +65,7 @@ class CatyInstaller(object):
                 print >>cout, base_dir
             else:
                 os.mkdir(base_dir)
-        if self.log:
-            self._init_log()
+        self._init_log()
         log_contents = []
         pkg = None
         for file in files:
@@ -100,39 +103,36 @@ class CatyInstaller(object):
                     shutil.copyfile(destfile, destfile+'.' + bksuffix)
                     mode = '!'
                 open(destfile, 'wb').write(c)
-                if not self.no_md5:
-                    md5 = hashlib.md5()
-                    md5.update(c)
-                    digest = md5.hexdigest()
+                md5 = hashlib.md5()
+                md5.update(c)
+                digest = md5.hexdigest()
             log_contents.append((file, os.path.abspath(destfile), digest, mode))
-        if self.log:
-            self._write_header(path, base_dir, bksuffix)
-        if self.log:
-            self._write_file(log_contents)
-            if not self.dry_run:
-                self.logfile.close()
+        self.end_time = time.localtime()
+        self._write_header(path, base_dir, bksuffix)
+        self._write_file(log_contents)
+        if not self.dry_run:
+            self._flush_log()
 
     def _init_log(self):
         if self.dry_run:
             return
-        self.logfile = open(self.log, 'wb')
-        self.logwriter = codecs.getwriter(locale.getpreferredencoding())(self.logfile)
+        self._log_buffer = []
+        if not os.path.exists(self.log_dir):
+            print >>cout, u'[Error]', u'log directory deos not exists'
+            sys.exit(1)
 
     def _write_header(self, path, base_dir, bksuffix):
         if self.dry_run:
             return
-        self.logwriter.write(u'Operation: install\n')
-        self.logwriter.write(u'Dist-Package-Name: %s\n' % os.path.basename(path).rsplit('.', 1)[0])
-        if self.project:
-            self.logwriter.write(u'Project-Dir: %s\n' % os.path.abspath(self.project))
-
-        if self.project:
-            self.logwriter.write(u'Destination-Dir: %s\n' % os.path.abspath(base_dir))
-            if self.dest:
-                self.logwriter.write(u'Destination-Name: %s\n' % self.dest)
-        self.logwriter.write(u'Backup-Suffix: .%s\n' % bksuffix)
-        self.logwriter.write(u'Installed-Date: %s\n' % time.strftime('%Y-%m-%dT%H:%M:%S'))
-        self.logwriter.write('\n')
+        self._log_buffer.append(u'Operation: install\n')
+        self._log_buffer.append(u'Dist-Package-Name: %s\n' % self.object_name)
+        self._log_buffer.append(u'Project-Dir: %s\n' % os.path.abspath(self.project))
+        self._log_buffer.append(u'Destination-Dir: %s\n' % os.path.abspath(base_dir))
+        self._log_buffer.append(u'Destination-Name: %s\n' % self.dest)
+        self._log_buffer.append(u'Local-Timestamp: %s\n' % time.strftime('%Y%m%d%H%M%S', self.end_time))
+        self._log_buffer.append(u'Backup-Suffix: .%s\n' % bksuffix)
+        self._log_buffer.append(u'Date: %s\n' % time.strftime('%Y-%m-%dT%H:%M:%S:%z', self.end_time))
+        self._log_buffer.append('\n')
 
     def _write_file(self, log_contents):
         if self.dry_run:
@@ -141,7 +141,14 @@ class CatyInstaller(object):
             c = ['/' + l[0].filename, str(l[0].file_size), time.strftime('%Y-%m-%dT%H:%M:%S', datetime.datetime(*l[0].date_time).timetuple()), l[2], l[1], l[3], '']
             if l[3] == '!':
                 c[-1] = l[1] + self.bksuffix
-            self.logwriter.write(u'|'.join(c)+u'\n')
+            self._log_buffer.append(u'|'.join(c)+u'\n')
+
+    def _flush_log(self):
+        log_name = '%s.%s.install.log' % (self.object_name, time.strftime('%Y%m%d%H%M%S', self.end_time))
+        with open(os.path.join(self.log_dir, log_name), 'wb') as logfile:
+            logwriter = codecs.getwriter(locale.getpreferredencoding())(logfile)
+            for l in self._log_buffer:
+                logwriter.write(l)
 
     def _make_dir(self, filename, base_dir):
         chunk = filename.split(os.path.sep)[:-1]
@@ -158,8 +165,6 @@ class CatyInstaller(object):
 
     def _not_modified(self, file, base_dir):
         import binascii
-        if not self.update:
-            return False
         target = os.path.join(base_dir, normalize_path(file.filename))
         if not os.path.exists(target):
             return False
