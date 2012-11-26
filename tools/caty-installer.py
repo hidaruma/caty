@@ -124,12 +124,17 @@ class CatyInstaller(object):
     def _write_header(self, path, base_dir, bksuffix):
         if self.dry_run:
             return
+        
+        md5 = hashlib.md5()
+        md5.update(open(path, 'rb').read())
+        digest = md5.hexdigest()
         self._log_buffer.append(u'Operation: install\n')
-        self._log_buffer.append(u'Dist-Package-Name: %s\n' % self.object_name)
+        self._log_buffer.append(u'Dist-Archive-Name: %s\n' % os.path.basename(normalize_path(self.arcfile)))
+        self._log_buffer.append(u'Dist-Archive-Digest: %s\n' % digest)
         self._log_buffer.append(u'Project-Dir: %s\n' % os.path.abspath(self.project))
         self._log_buffer.append(u'Destination-Dir: %s\n' % os.path.abspath(base_dir))
         self._log_buffer.append(u'Destination-Name: %s\n' % self.dest)
-        self._log_buffer.append(u'Local-Timestamp: %s\n' % time.strftime('%Y%m%d%H%M%S', self.end_time))
+        self._log_buffer.append(u'Local-Identifier: %s\n' % time.strftime('%Y%m%d%H%M%S', self.end_time))
         self._log_buffer.append(u'Backup-Suffix: .%s\n' % bksuffix)
         self._log_buffer.append(u'Date: %s\n' % time.strftime('%Y-%m-%dT%H:%M:%S:%z', self.end_time))
         self._log_buffer.append('\n')
@@ -144,7 +149,7 @@ class CatyInstaller(object):
             self._log_buffer.append(u'|'.join(c)+u'\n')
 
     def _flush_log(self):
-        log_name = '%s.%s.install.log' % (self.object_name, time.strftime('%Y%m%d%H%M%S', self.end_time))
+        log_name = '%s@%s.install.log' % (self.object_name, time.strftime('%Y%m%d%H%M%S', self.end_time))
         with open(os.path.join(self.log_dir, log_name), 'wb') as logfile:
             logwriter = codecs.getwriter(locale.getpreferredencoding())(logfile)
             for l in self._log_buffer:
@@ -168,6 +173,8 @@ class CatyInstaller(object):
         target = os.path.join(base_dir, normalize_path(file.filename))
         if not os.path.exists(target):
             return False
+        if self.no_overwrite:
+            return True
         if self.compare == 'timestamp':
             desttime = os.stat(target).st_mtime
             srctime = time.mktime(datetime.datetime(*file.date_time).timetuple())
