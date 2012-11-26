@@ -136,7 +136,7 @@ class CatyInstaller(object):
         self._log_buffer.append(u'Destination-Name: %s\n' % self.dest)
         self._log_buffer.append(u'Local-Identifier: %s\n' % time.strftime('%Y%m%d%H%M%S', self.end_time))
         self._log_buffer.append(u'Backup-Suffix: .%s\n' % bksuffix)
-        self._log_buffer.append(u'Date: %s\n' % time.strftime('%Y-%m-%dT%H:%M:%S:%z', self.end_time))
+        self._log_buffer.append(u'Date: %s:%s\n' % (time.strftime('%Y-%m-%dT%H:%M:%S', self.end_time), tz_to_str(time.timezone)))
         self._log_buffer.append('\n')
 
     def _write_file(self, log_contents):
@@ -181,6 +181,9 @@ class CatyInstaller(object):
             return desttime > srctime
         else:
             return file.CRC == (binascii.crc32(open(target, 'rb').read()) & 0xffffffff)
+
+def tz_to_str(t):
+    return '%+05d' % (-t/(60*60.0) * 100)
 
 if __name__ == '__main__':
     main(sys.argv)
