@@ -60,6 +60,8 @@ class CatyInstaller(object):
             base_dir = self.project.rstrip(os.path.sep)
         else:
             base_dir = os.path.join(self.project.rstrip(os.path.sep), 'main', self.dest)
+        if self.no_overwrite: 
+            self._validate_iso(zp, base_dir)
         if not os.path.exists(base_dir):
             if self.dry_run:
                 print >>cout, base_dir
@@ -114,6 +116,13 @@ class CatyInstaller(object):
         self._write_file(log_contents)
         if not self.dry_run:
             self._flush_log()
+
+    def _validate_iso(self, zpfile, base_dir):
+        for file in zpfile.infolist():
+            destfile = os.path.join(base_dir, normalize_path(file.filename))
+            if os.path.exists(destfile):
+                print '[Error]', file.filename, 'exists'
+                sys.exit(1)
 
     def _init_log(self):
         if self.dry_run:
@@ -175,8 +184,6 @@ class CatyInstaller(object):
         target = os.path.join(base_dir, normalize_path(file.filename))
         if not os.path.exists(target):
             return False
-        if self.no_overwrite:
-            return True
         if self.compare == 'timestamp':
             desttime = os.stat(target).st_mtime
             srctime = time.mktime(datetime.datetime(*file.date_time).timetuple())
