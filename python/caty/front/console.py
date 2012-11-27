@@ -425,6 +425,7 @@ Web サーバの起動・停止を行う
             self.hcon.stop()
         self.system.finalize()
 
+    @catch
     def do_setenv(self, line):
         from caty.core.language.util import name_token, CharSeq, option, S, ParseFailed
         from caty.core.script.parser import ScriptParser, NothingTodo
@@ -438,7 +439,7 @@ Web サーバの起動・停止を行う
             facilities = self.start_pipeline()
             name = name_token(seq)
             if name[0] in string.ascii_uppercase + '_' and not force:
-                self._echo('Invalid env name: %s' % name)
+                self._echo('[Error] Invalid env name: %s' % name)
                 self.continue_setenv = u''
                 return
             seq.parse('{')
@@ -476,16 +477,20 @@ Web サーバの起動・停止を行う
             except:
                 import traceback
                 traceback.print_exc()
-                self._echo(u'Some error occuered')
+                self._echo(u'[Error ]Some error occuered')
                 self.continue_setenv = u''
             finally:
                 self.continue_setenv = None
                 self.set_prompt()
 
+    @catch
     def do_unsetenv(self, line):
         from caty.core.language.util import name_token, CharSeq, option, S, ParseFailed
         from caty.core.script.parser import ScriptParser, NothingTodo
         import string
+        if not line.strip():
+            print u'[Error] Missing argment'
+            return
         seq = CharSeq(line, auto_remove_ws=True)
         force = option(S('--force'))(seq)
         name = name_token(seq)
