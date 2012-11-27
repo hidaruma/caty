@@ -26,6 +26,7 @@ def main(argv):
     o.add_option('--backup-dir', action='store', default='.')
     o.add_option('--no-overwrite', action='store_true')
     o.add_option('-q', '--quiet', action='store_true')
+    o.add_option('--meta-inf', action='store', default=None)
     options, args = o.parse_args(argv[1:])
     cai = CatyInstaller()
     cai.project = options.project
@@ -36,6 +37,7 @@ def main(argv):
     cai.no_overwrite = options.no_overwrite
     cai.backup_dir = options.backup_dir
     cai.compare = options.compare
+    cai.meta_inf = options.meta_inf
     if not args:
         print >>cout, u'[Error]', u'missing archive file'
         o.print_help()
@@ -74,32 +76,27 @@ class CatyInstaller(object):
         log_contents = []
         pkg = None
         for file in files:
-            if file.filename == 'META-INF/package.json':
-                if pkg:
-                    p = zp.read(file.filename)
-                    if p != pkg:
-                        print '[Error]', 'confliction between /package.json and /META-INF/package.json'
-                    else:
-                        pkg = p
-                continue
             if file.filename.startswith('META-INF/'):
+                if self.meta_inf:
+                    if not os.path.exists(self.meta_inf):
+                        os.mkdir(self.meta_inf)
+                    trunc = file.filename.split('/')[-1]
+                    destfile = normalize_path(os.path.join(self.meta_inf, trunc))
+                    if not self._not_modified(file, destfile):
+                        if not self.dry_run:
+                            open(destfile, 'wb').write(zp.read(file))
+                        else:
+                            print >>cout, normalize_path(file.filename), mode
                 continue
-            if file.filename == 'package.json':
-                if pkg:
-                    p = zp.read(file.filename)
-                    if p != pkg:
-                        print '[Error]', 'confliction between /package.json and /META-INF/package.json'
-                    else:
-                        pkg = p
-                continue
-            self._make_dir(normalize_path(file.filename), base_dir)
-            if self._not_modified(file, base_dir):
+            if not self.dry_run:
+                self._make_dir(normalize_path(file.filename), base_dir)
+            destfile = os.path.join(base_dir, normalize_path(file.filename))
+            if self._not_modified(file, destfile):
                 mode = '*'
                 digest = ''
                 destfile = ''
             else:
                 c = zp.read(file.filename)
-                destfile = os.path.join(base_dir, normalize_path(file.filename))
                 bkfile = normalize_path(os.path.normpath(os.path.join(self.backup_dir, file.filename))) + '.' + bksuffix
                 mode = '+'
                 if os.path.exists(destfile):
@@ -189,9 +186,8 @@ class CatyInstaller(object):
                 else:
                     os.mkdir(target)
 
-    def _not_modified(self, file, base_dir):
+    def _not_modified(self, file, target):
         import binascii
-        target = os.path.join(base_dir, normalize_path(file.filename))
         if not os.path.exists(target):
             return False
         if self.compare == 'timestamp':
