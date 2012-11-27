@@ -121,7 +121,7 @@ class CatyInstaller(object):
         for file in zpfile.infolist():
             destfile = os.path.join(base_dir, normalize_path(file.filename))
             if os.path.exists(destfile):
-                print '[Error]', file.filename, 'exists'
+                print '[Error]', file.filename, 'conflicts'
                 sys.exit(1)
 
     def _init_log(self):
