@@ -92,20 +92,22 @@ class CatyInstaller(object):
                 mode = '*'
                 digest = ''
                 destfile = ''
-            elif self.dry_run:
-                print >>cout, normalize_path(file.filename)
-                continue
             else:
                 c = zp.read(file.filename)
                 destfile = os.path.join(base_dir, normalize_path(file.filename))
                 mode = '+'
                 if os.path.exists(destfile):
-                    shutil.copyfile(destfile, destfile+'.' + bksuffix)
+                    if not self.dry_run:
+                        shutil.copyfile(destfile, destfile+'.' + bksuffix)
                     mode = '!'
-                open(destfile, 'wb').write(c)
-                md5 = hashlib.md5()
-                md5.update(c)
-                digest = md5.hexdigest()
+                if not self.dry_run:
+                    open(destfile, 'wb').write(c)
+                    md5 = hashlib.md5()
+                    md5.update(c)
+                    digest = md5.hexdigest()
+            if self.dry_run:
+                print >>cout, normalize_path(file.filename), mode
+                continue
             log_contents.append((file, os.path.abspath(destfile), digest, mode))
         self.end_time = time.localtime()
         self._write_header(path, base_dir, bksuffix)
