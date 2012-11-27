@@ -46,10 +46,10 @@ def main(argv):
         print >>cout, u'[Error]', u'--dest takes only name token not directory'
         sys.exit(1)
     if cai.dest == 'caty':
-        print u'[Error] Not implimented'
+        print >>cout,  u'[Error] Not implimented'
         sys.exit(1)
     if cai.backup_dir and not os.path.exists(cai.backup_dir):
-        print u'[Error]', 'backup directory does not exists:', cai.backup_dir
+        print >>cout, u'[Error]', 'backup directory does not exists:', cai.backup_dir
         sys.exit(1)
     cai.install(args[0])
 
@@ -73,7 +73,7 @@ class CatyInstaller(object):
         if self.no_overwrite: 
             self._validate_iso(zp, base_dir)
         if not os.path.exists(base_dir):
-            print '[Error]', base_dir, 'does not exists'
+            print >>cout, '[Error]', base_dir, 'does not exists'
             sys.exit(1)
         self._init_log()
         log_contents = []
@@ -126,7 +126,7 @@ class CatyInstaller(object):
         for file in zpfile.infolist():
             destfile = os.path.join(base_dir, normalize_path(file.filename))
             if os.path.exists(destfile):
-                print '[Error]', file.filename, 'conflicts'
+                print >>cout, '[Error]', file.filename, 'conflicts'
                 sys.exit(1)
 
     def _init_log(self):
@@ -164,9 +164,9 @@ class CatyInstaller(object):
             c = ['/' + l[0].filename, str(l[0].file_size), time.strftime('%Y-%m-%dT%H:%M:%S', datetime.datetime(*l[0].date_time).timetuple()), l[2], l[1], l[3], '']
             if l[3] == '!':
                 if self.backup_dir == '.':
-                    c[-1] = l[1] + self.bksuffix
+                    c.append(l[1] + self.bksuffix)
                 else:
-                    c[-1] = os.path.abspath(normalize_path(os.path.join(self.backup_dir, l[0].filename))) + '.' + self.bksuffix
+                    c.append(os.path.abspath(normalize_path(os.path.join(self.backup_dir, l[0].filename))) + '.' + self.bksuffix)
             self._log_buffer.append(u'|'.join(c)+u'\n')
 
     def _flush_log(self):

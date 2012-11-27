@@ -107,10 +107,10 @@ class CatyArchiver(object):
             if fname == 'package.json':
                 if pkg:
                     if pkg != open(m).read():
-                        print '[Error]', 'confliction between /package.json and /META-INF/package.json'
+                        print >>cout, '[Error]', 'confliction between /package.json and /META-INF/package.json'
         if self.package_json:
             if not os.path.exists(self.package_json):
-                print '[Error]', '%s does not exists' % self.package_json
+                print >> cout, '[Error]', '%s does not exists' % self.package_json
             if self.outfile:
                 outfile.write(self.package_json, 'META-INF/package.json')
         if self.outfile:
