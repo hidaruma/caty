@@ -48,6 +48,9 @@ def main(argv):
     if cai.dest == 'caty':
         print u'[Error] Not implimented'
         sys.exit(1)
+    if cai.backup_dir and not os.path.exists(cai.backup_dir):
+        print u'[Error]', 'backup directory does not exists:', cai.backup_dir
+        sys.exit(1)
     cai.install(args[0])
 
 
