@@ -112,7 +112,7 @@ class CatyArchiver(object):
             if not os.path.exists(self.package_json):
                 print '[Error]', '%s does not exists' % self.package_json
             if self.outfile:
-                self.outfile.write(self.package_json, 'META-INF/package.json')
+                outfile.write(self.package_json, 'META-INF/package.json')
         if self.outfile:
             outfile.close()
 
