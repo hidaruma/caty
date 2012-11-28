@@ -66,6 +66,8 @@ class CatyInstaller(object):
             base_dir = self.dest
         elif self.dest == 'project':
             base_dir = self.project.rstrip(os.path.sep)
+        elif self.dest == 'global':
+            base_dir = os.path.join(self.project.rstrip(os.path.sep), self.dest)
         else:
             base_dir = os.path.join(self.project.rstrip(os.path.sep), 'main', self.dest)
         self.meta_inf = normalize_path(os.path.join(self.log_dir, self.object_name + '.META-INF'))
