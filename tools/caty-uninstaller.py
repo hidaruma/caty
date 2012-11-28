@@ -40,7 +40,10 @@ class CatyUninstaller(object):
                 if os.path.exists(rec.destfile):
                     rec.result = '-'
                     if self._modified(rec):
-                        rec.msg = 'modified'
+                        bk = rec.destfile + (header['Backup-Suffix'].rsplit('.', 1)[0] + '.chg')
+                        rec.msg = 'modified ' + bk 
+                        if not self.dry_run:
+                            shutil.copyfile(rec.destfile, bk)
                     if not self.dry_run:
                         os.unlink(rec.destfile)
                 else:
