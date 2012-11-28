@@ -112,10 +112,11 @@ class CatyUninstaller(object):
         for h in ['Local-Timestamp', 'Project-Dir', 'Destination-Dir', 'Destination-Name', 'Backup-Dir']:
             if h in header:
                 self._log_buffer.append('%s: %s\n' % (h, header[h]))
+        self._log_buffer.append('Uninstall-Backup-Suffix: %s\n' % header['Backup-Suffix'].rsplit('.', 1)[0] + '.chg')
         self._log_buffer.append(u'Date: %s:%s\n' % (time.strftime('%Y-%m-%dT%H:%M:%S', self.end_time), tz_to_str(time.timezone)))
         self._log_buffer.append('\n')
         for c in contents:
-            self._log_buffer.append('|'.join(c) + '\n')
+            self._log_buffer.append(c + '\n')
         with open(install_log_name.replace('install.log', 'uninstall.log'), 'wb') as logfile:
             logwriter = codecs.getwriter(locale.getpreferredencoding())(logfile)
             for l in self._log_buffer:
