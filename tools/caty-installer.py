@@ -152,7 +152,7 @@ class CatyInstaller(object):
         self._log_buffer.append(u'Local-Identifier: %s\n' % time.strftime('%Y%m%d%H%M%S', self.end_time))
         self._log_buffer.append(u'Backup-Suffix: .%s\n' % bksuffix)
         if self.backup_dir != '.':
-            self._log_buffer.append(u'Backup-Dir: .%s\n' % os.path.abspath(self.backup_dir))
+            self._log_buffer.append(u'Backup-Dir: %s\n' % os.path.abspath(self.backup_dir))
         self._log_buffer.append(u'Date: %s:%s\n' % (time.strftime('%Y-%m-%dT%H:%M:%S', self.end_time), tz_to_str(time.timezone)))
         self._log_buffer.append('\n')
 
