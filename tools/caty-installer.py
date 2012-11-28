@@ -26,7 +26,6 @@ def main(argv):
     o.add_option('--backup-dir', action='store', default='.')
     o.add_option('--no-overwrite', action='store_true')
     o.add_option('-q', '--quiet', action='store_true')
-    o.add_option('--meta-inf', action='store', default=None)
     options, args = o.parse_args(argv[1:])
     cai = CatyInstaller()
     cai.project = options.project
@@ -37,7 +36,6 @@ def main(argv):
     cai.no_overwrite = options.no_overwrite
     cai.backup_dir = options.backup_dir
     cai.compare = options.compare
-    cai.meta_inf = options.meta_inf
     if not args:
         print >>cout, u'[Error]', u'missing archive file'
         o.print_help()
@@ -70,26 +68,27 @@ class CatyInstaller(object):
             base_dir = self.project.rstrip(os.path.sep)
         else:
             base_dir = os.path.join(self.project.rstrip(os.path.sep), 'main', self.dest)
+        self.meta_inf = normalize_path(os.path.join(base_dir, self.object_name + '.META-INF'))
         if self.no_overwrite: 
             self._validate_iso(zp, base_dir)
         if not os.path.exists(base_dir):
             print >>cout, '[Error]', base_dir, 'does not exists'
             sys.exit(1)
+        if not os.path.exists(self.meta_inf) and not self.dry_run:
+            os.mkdir(self.meta_inf)
         self._init_log()
         log_contents = []
         pkg = None
         for file in files:
             if file.filename.startswith('META-INF/'):
-                if self.meta_inf:
-                    if not os.path.exists(self.meta_inf):
-                        os.mkdir(self.meta_inf)
-                    trunc = file.filename.split('/')[-1]
-                    destfile = normalize_path(os.path.join(self.meta_inf, trunc))
-                    if not self._not_modified(file, destfile):
-                        if not self.dry_run:
-                            open(destfile, 'wb').write(zp.read(file))
-                        else:
-                            print >>cout, normalize_path(file.filename), mode
+                
+                trunc = file.filename.split('/')[-1]
+                destfile = normalize_path(os.path.join(self.meta_inf, trunc))
+                if not self._not_modified(file, destfile):
+                    if not self.dry_run:
+                        open(destfile, 'wb').write(zp.read(file))
+                    else:
+                        print >>cout, normalize_path(file.filename), mode
                 continue
             if not self.dry_run:
                 self._make_dir(normalize_path(file.filename), base_dir)
