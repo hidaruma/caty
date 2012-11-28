@@ -69,7 +69,13 @@ class CatyInstaller(object):
         elif self.dest == 'global':
             base_dir = os.path.join(self.project.rstrip(os.path.sep), self.dest)
         else:
-            base_dir = os.path.join(self.project.rstrip(os.path.sep), 'main', self.dest)
+            for p in ['main', 'extra', 'examples', 'common', 'develop']:
+                base_dir = os.path.join(self.project.rstrip(os.path.sep), p, self.dest)
+                if os.path.exists(base_dir):
+                    break
+            else:
+                print '[Error]', self.dest, 'does not exists'
+                sys.exit(1)
         self.meta_inf = normalize_path(os.path.join(self.log_dir, self.object_name + '.META-INF'))
         if self.no_overwrite: 
             self._validate_iso(zp, base_dir)
