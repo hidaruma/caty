@@ -68,7 +68,7 @@ class CatyInstaller(object):
             base_dir = self.project.rstrip(os.path.sep)
         else:
             base_dir = os.path.join(self.project.rstrip(os.path.sep), 'main', self.dest)
-        self.meta_inf = normalize_path(os.path.join(base_dir, self.object_name + '.META-INF'))
+        self.meta_inf = normalize_path(os.path.join(self.log_dir, self.object_name + '.META-INF'))
         if self.no_overwrite: 
             self._validate_iso(zp, base_dir)
         if not os.path.exists(base_dir):
