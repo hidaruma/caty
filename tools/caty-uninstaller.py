@@ -122,7 +122,7 @@ class CatyUninstaller(object):
 
     def _flush_log(self, install_log_name, header, contents):
         self._log_buffer.append('Operation: uninstall\n')
-        for h in ['Local-Timestamp', 'Project-Dir', 'Destination-Dir', 'Destination-Name', 'Backup-Dir']:
+        for h in ['Backup-Dir', 'Dist-Archive-Name', 'Dist-Archive-Diget', 'Project-Dir', 'Destination-Dir', 'Destination-Name', 'Local-Identifier']:
             if h in header:
                 self._log_buffer.append('%s: %s\n' % (h, header[h]))
         self._log_buffer.append('Uninstall-Backup-Suffix: %s\n' % (self.bksuffix))
