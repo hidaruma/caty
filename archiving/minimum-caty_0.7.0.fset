@@ -1,0 +1,32 @@
+# -*- coding: utf-8 -*-
+# minimum-caty.fset
+
+# グローバルな除外パターン
+- *.tmp
+- *.pyc
+- *.ctpl
+- *.icaty
+
+- python/test/
+- python/caty/testutil/
+
+# アーカイブ対象となるディレクトリ
+# --origin をルートとみなした 絶対パス形式相対パス
+
+/python/
+  - *.html
+/messages/
+
+/lib/win32cls.py
+
+# 個別ファイル
+# --origin をルートとみなした 絶対パス形式相対パス
+
+/LICENSE.txt
+/stdcaty.py
+/uwsgicaty.py
+/dependencies_python2.txt
+
+
+
+

@@ -1,0 +1,29 @@
+# -*- coding: utf-8 -*-
+
+
+# グローバルな除外パターン
+- *.tmp
+- *.pyc
+- *.ctpl
+- *.icaty
+- *.log
+
+# アーカイブ対象となるディレクトリ
+# --origin をルートとみなした 絶対パス形式相対パス
+
+/tools/execme.py
+/tools/pkg-check.py
+
+/tools/caty-archiver.py
+/tools/caty-installer.py
+/tools/caty-uninstaller.py
+/tools/car.sh
+/tools/cdm.sh
+
+
+/dists/README.txt
+/features/README.txt
+/backup/README.txt
+
+
+
