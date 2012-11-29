@@ -23,6 +23,11 @@ def main(argv):
         sys.exit(1)
     cau.uninstall(args[0])
 
+def normalize_path(path):
+    if sys.platform == 'win32':
+        return path.replace('/', '\\')
+    return path
+
 class CatyUninstaller(object):
     def uninstall(self, log_file):
         log = open(log_file).read().replace('\r\n', '\n').replace('\r', '\n')
@@ -34,15 +39,19 @@ class CatyUninstaller(object):
             traceback.print_exc()
             print '[Error] Invalid log format'
             sys.exit(1)
+        self.backup_dir = header.get('Backup-Dir', header['Destination-Dir'])
         log_contents = []
+        self.bksuffix = header['Backup-Suffix'].rsplit('.', 1)[0] + '.chg'
+        bksuffix = self.bksuffix
         for rec in records:
             if rec.result == '+':
                 if os.path.exists(rec.destfile):
                     rec.result = '-'
                     if self._modified(rec):
-                        bk = rec.destfile + (header['Backup-Suffix'].rsplit('.', 1)[0] + '.chg')
+                        bk = normalize_path(self.backup_dir + rec.arcfile) + bksuffix
                         rec.msg = 'modified ' + bk 
                         if not self.dry_run:
+                            self._make_dir(rec.arcfile, self.backup_dir)
                             shutil.copyfile(rec.destfile, bk)
                     if not self.dry_run:
                         os.unlink(rec.destfile)
@@ -68,6 +77,7 @@ class CatyUninstaller(object):
                         if self._modified(rec):
                             rec.msg = 'modified&backup-missing ' + rec.bkfile.rsplit('.', 1)[0] + '.chg'
                             if not self.dry_run:
+                                self._make_dir(rec.bkfile.rsplit('.', 1)[0] + '.chg', '')
                                 shutil.copyfile(rec.destfile, rec.bkfile.rsplit('.', 1)[0] + '.chg')
                         else:
                             rec.msg = 'backup-missing'
@@ -115,7 +125,7 @@ class CatyUninstaller(object):
         for h in ['Local-Timestamp', 'Project-Dir', 'Destination-Dir', 'Destination-Name', 'Backup-Dir']:
             if h in header:
                 self._log_buffer.append('%s: %s\n' % (h, header[h]))
-        self._log_buffer.append('Uninstall-Backup-Suffix: %s\n' % (header['Backup-Suffix'].rsplit('.', 1)[0] + '.chg'))
+        self._log_buffer.append('Uninstall-Backup-Suffix: %s\n' % (self.bksuffix))
         self._log_buffer.append(u'Date: %s:%s\n' % (time.strftime('%Y-%m-%dT%H:%M:%S', self.end_time), tz_to_str(time.timezone)))
         self._log_buffer.append('\n')
         for c in contents:
@@ -132,6 +142,19 @@ class CatyUninstaller(object):
         md5.update(open(rec.destfile, 'rb').read())
         digest = md5.hexdigest()
         return digest != rec.md5
+
+    def _make_dir(self, filename, base_dir):
+        chunk = filename.split(os.path.sep)[:-1]
+        target = base_dir
+        for c in chunk:
+            target = os.path.join(target, c)
+            if not os.path.exists(target):
+                if self.dry_run:
+                    if target not in self.__memo:
+                        print >>cout, target
+                        self.__memo.add(target)
+                else:
+                    os.mkdir(target)
 
 class LogRecord(object):
     def __init__(self, arcfile, size, date, md5, destfile, result, msg, bkfile=None):
