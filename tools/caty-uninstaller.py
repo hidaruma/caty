@@ -51,7 +51,7 @@ class CatyUninstaller(object):
                         bk = normalize_path(self.backup_dir + rec.arcfile) + bksuffix
                         rec.msg = 'modified ' + bk 
                         if not self.dry_run:
-                            self._make_dir(rec.arcfile, self.backup_dir)
+                            self._make_dir(normalize_path(rec.arcfile), self.backup_dir)
                             shutil.copyfile(rec.destfile, bk)
                     if not self.dry_run:
                         os.unlink(rec.destfile)
