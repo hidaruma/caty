@@ -18,7 +18,7 @@ def main(argv):
     cau = CatyUninstaller()
     cau.dry_run = options.dry_run
     if not args:
-        print >>cout, u'[Error]', u'missing archive file'
+        print >>cout, u'[Error]', u'missing log file'
         o.print_help()
         sys.exit(1)
     cau.uninstall(args[0])
