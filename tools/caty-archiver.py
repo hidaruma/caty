@@ -5,6 +5,7 @@ from optparse import OptionParser
 from zipfile import ZipFile, ZIP_DEFLATED
 import locale
 import codecs
+import time
 cout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
 def normalize_path(path):
@@ -113,6 +114,7 @@ class CatyArchiver(object):
                 print >> cout, '[Error]', '%s does not exists' % self.package_json
             if self.outfile:
                 outfile.write(self.package_json, 'META-INF/package.json')
+        outfile.writestr('META-INF/timezone.txt', tz_to_str(time.timezone))
         if self.outfile:
             outfile.close()
 
@@ -160,6 +162,9 @@ class WhiteListItem(object):
     @property
     def is_file(self):
         return True
+
+def tz_to_str(t):
+    return '%+05d' % (-t/(60*60.0) * 100)
 
 class WhiteListParser(object):
     def feed(self, c):

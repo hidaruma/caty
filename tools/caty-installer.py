@@ -22,8 +22,8 @@ def main(argv):
     o.add_option('--dest', action='store', default='project')
     o.add_option('--compare', choices=['digest', 'timestamp'], default='digest')
     o.add_option('--dry-run', action='store_true', dest='dry_run')
-    o.add_option('--log-dir', action='store', default=os.getcwd())
-    o.add_option('--backup-dir', action='store', default='.')
+    o.add_option('--log-dir', action='store', default='features')
+    o.add_option('--backup-dir', action='store', default='backup')
     o.add_option('--no-overwrite', action='store_true')
     o.add_option('-q', '--quiet', action='store_true')
     options, args = o.parse_args(argv[1:])
@@ -160,7 +160,7 @@ class CatyInstaller(object):
         self._log_buffer.append(u'Local-Identifier: %s\n' % time.strftime('%Y%m%d%H%M%S', self.end_time))
         self._log_buffer.append(u'Backup-Suffix: .%s\n' % bksuffix)
         if self.backup_dir != '.':
-            self._log_buffer.append(u'Backup-Dir: %s\n' % os.path.abspath(self.backup_dir))
+            self._log_buffer.append(u'Backup-Dir: %s\n' % os.path.abspath(self.backup_dir)[len(os.path.abspath(self.project)):])
         self._log_buffer.append(u'Date: %s:%s\n' % (time.strftime('%Y-%m-%dT%H:%M:%S', self.end_time), tz_to_str(time.timezone)))
         self._log_buffer.append('\n')
 
@@ -168,7 +168,7 @@ class CatyInstaller(object):
         if self.dry_run:
             return
         for l in log_contents:
-            c = ['/' + l[0].filename, str(l[0].file_size), time.strftime('%Y-%m-%dT%H:%M:%S', datetime.datetime(*l[0].date_time).timetuple()), l[2], l[1], l[3], '']
+            c = ['/' + l[0].filename, str(l[0].file_size), time.strftime('%Y-%m-%dT%H:%M:%S', datetime.datetime(*l[0].date_time).timetuple()), l[2], '/'+l[0].filename, l[3], '']
             if l[3] == '!':
                 if self.backup_dir == '.':
                     c.append(l[1] + self.bksuffix)

@@ -14,8 +14,10 @@ cout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 def main(argv):
     o = OptionParser(usage='usage: python %s [OPTIONS] output' % argv[0])
     o.add_option('--dry-run', action='store_true', dest='dry_run')
+    o.add_option('--project', action='store', default='.')
     options, args = o.parse_args(argv[1:])
     cau = CatyUninstaller()
+    cau.project = options.project
     cau.dry_run = options.dry_run
     if not args:
         print >>cout, u'[Error]', u'missing log file'
@@ -39,7 +41,7 @@ class CatyUninstaller(object):
             traceback.print_exc()
             print '[Error] Invalid log format'
             sys.exit(1)
-        self.backup_dir = header.get('Backup-Dir', header['Destination-Dir'])
+        self.backup_dir = normalize_path(os.path.join(self.project, header.get('Backup-Dir', header['Destination-Dir']))[1:])
         log_contents = []
         self.bksuffix = header['Backup-Suffix'].rsplit('.', 1)[0] + '.chg'
         bksuffix = self.bksuffix
@@ -117,7 +119,7 @@ class CatyUninstaller(object):
         for l in data.split('\n'):
             if l:
                 chunk = l.split('|')
-                r.append(LogRecord(*chunk))
+                r.append(LogRecord(*chunk, project=self.project))
         return r
 
     def _flush_log(self, install_log_name, header, contents):
@@ -157,12 +159,12 @@ class CatyUninstaller(object):
                     os.mkdir(target)
 
 class LogRecord(object):
-    def __init__(self, arcfile, size, date, md5, destfile, result, msg, bkfile=None):
+    def __init__(self, arcfile, size, date, md5, destfile, result, msg, bkfile=None, project=''):
         self.arcfile = arcfile
         self.size = size
         self.date = date
         self.md5 = md5
-        self.destfile = destfile
+        self.destfile = os.path.abspath(normalize_path(os.path.join(os.path.abspath(project), destfile[1:])))
         self.result = result
         self.msg = msg
         self.bkfile = bkfile
