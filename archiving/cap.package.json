@@ -1,0 +1,43 @@
+{
+   "name": "cap",
+   "version": "0.1.0",
+   "uuid" : "332ab752-d53d-4bb2-9dc2-394ee256259e",
+   "description": "Caty basic package manager.",
+   "maintainers": [
+       {
+           "name": "HIYAMA, Masayuki",
+           "email": "hiyama@chimaira.org",
+           "web": "http://www.chimaira.org" 
+       },
+       {
+           "name": "Kuwata, Chikara",
+           "email": "chikara.kuwata@gmail.com",
+           "web": "http://return0.info" 
+       }
+   ],
+   "bugs": {
+       "web": "https://bitbucket.org/project_caty/dev/issues"
+   },
+   "licenses": [
+       {
+           "type": "MIT",
+           "url": "http://www.opensource.org/licenses/mit-license.php" 
+       } 
+   ],
+   "repositories": [
+       {
+           "type": "hg",
+           "url": "https://bitbucket.org/project_caty/dev/" 
+       } 
+   ],
+   "os": ["linux", "macos", "win"],
+   "cpu": ["x86", "ppc", "x86_64"],
+   "engines": ["python2.5", "python2.6"],
+   "scripts": {
+       "install": "./tools/install.py"
+   },
+   "directories": {
+       "packages": "../packages/",
+       "features": "./features/"
+   } 
+}

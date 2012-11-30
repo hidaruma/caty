@@ -1,28 +1,23 @@
 # -*- coding: utf-8 -*-
-# minimum-caty.fset
+# projec-skeleton.fset
 
 # グローバルな除外パターン
 - *.tmp
 - *.pyc
 - *.ctpl
 - *.icaty
-
-- python/test/  # これは効く？
-- python/caty/testutil/
+- *.log
 
 # アーカイブ対象となるディレクトリ
 # --origin をルートとみなした 絶対パス形式相対パス
 
-/python/
-  - *.html
-/messages/
+/dists/
+/features/ 
+/backup/
 
 # 個別ファイル
 # --origin をルートとみなした 絶対パス形式相対パス
 
-/LICENSE.txt
-/uwsgicaty.py
-/stdcaty.py
 /dependencies_python2.txt
 /tools/pkg-check.py
 

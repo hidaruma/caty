@@ -1,0 +1,38 @@
+# -*- coding: utf-8 -*-
+
+/schemata/base64.casm
+/schemata/bin.casm
+/schemata/browser.casm
+/schemata/ct.casm
+/schemata/default.casm
+/schemata/exec.casm
+/schemata/gv.casm.lit
+/schemata/mpl.casm.lit
+/schemata/mvo.casm
+/schemata/num.casm
+/schemata/predefined.casm
+/schemata/reif.casm.lit
+/schemata/sreif.casm.lit
+/schemata/treif.casm.lit
+/schemata/kreif.casm.lit
+/schemata/util.casm
+# /schemata/zip.casm
+
+/commands/base64cmd.py
+/commands/bincmd.py
+/commands/browser.py
+/commands/cls.py
+/commands/exec.py
+/commands/gv.py
+/commands/image.py
+/commands/mvo.py
+/commands/numcmd.py
+/commands/reif.py
+/commands/sreif.py
+# /commands/strcmd.py
+# /commands/systemcmd.py
+/commands/util.py
+# /commands/zipcmd.py
+
+/lib/reification.py
+
