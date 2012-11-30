@@ -961,9 +961,11 @@ command request {
                 "debug": boolean?,
                 "fullpath": boolean?,
                 "content-type": string?} [string path, string? query] :: WebInput -> WebOutput
-    reads [env, schema]
-    uses interpreter
-    refers python:caty.core.std.command.builtin.Request;
+{
+  [{"DEBUG": %debug?=false}] | unclose {
+    wsgi:make-env %--verb? %--content-type? %--fullpath? %1 %2? | wsgi:lookup-and-exec
+  }
+};
 
 /**
  * 引数で指定された型に入力値を変換して返す。

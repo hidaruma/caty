@@ -10,6 +10,7 @@ import os
 import time
 from wsgiref.simple_server import make_server, WSGIRequestHandler
 import traceback
+from decimal import Decimal
 
 import caty
 import caty.jsontools as json
@@ -17,7 +18,7 @@ import caty.jsontools.xjson as xjson
 from caty.jsontools import jstypes
 from caty.session.value import create_variable, SessionInfo, SessionInfoWrapper
 from caty.core.command.exception import *
-from caty.util import error_to_ustr
+from caty.util import error_to_ustr, try_parse
 from caty.util.path import join
 from caty.util.web import HTTP_STATUS
 from caty.core.handler import AppDispatcher, RequestHandler
@@ -144,7 +145,7 @@ class CatyApp(object):
         qs = environ['QUERY_STRING']
         d = {}
         for k, v in cgi.parse_qs(qs).items():
-            d[k] = unicode(v[0], self._app.encoding) if isinstance(v[0], str) else v[0]
+            d[k] = try_parse(Decimal, try_parse(int, unicode(v[0], self._app.encoding) if isinstance(v[0], str) else v[0] ))
         method = environ['REQUEST_METHOD']
         return d
 

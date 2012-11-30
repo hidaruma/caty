@@ -4,6 +4,7 @@ from caty.core.typeinterface import Object
 import caty.core.runtimeobject as ro
 import caty.jsontools as json
 import random
+from caty.core.spectypes import UNDEFINED
 
 class ObjectSchema(SchemaBase, Object):
     u"""JSON オブジェクトの妥当性検証を行うクラス。
@@ -256,7 +257,9 @@ class ObjectSchema(SchemaBase, Object):
         if not isinstance(value, dict):
             raise JsonSchemaError(dict(msg='value should be $type', type='object'))
         for k, v in value.iteritems():
-            if k not in self.schema_obj:
+            if v is UNDEFINED:
+                result[k] = v
+            elif k not in self.schema_obj:
                 if self.wildcard is None:
                     errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Unknown property: $name', name=k))
                     is_error = True

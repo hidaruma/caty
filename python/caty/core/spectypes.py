@@ -8,6 +8,11 @@ class _Undefined(object):
     def __repr__(self):
         return '#undefined'
 
+    def __deepcopy__(self, memo):
+        return UNDEFINED
+
+    def __copy__(self):
+        return UNDEFINED
 
 class ForeignObject(object):
     def __repr__(self):
