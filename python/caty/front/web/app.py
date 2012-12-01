@@ -145,7 +145,7 @@ class CatyApp(object):
         qs = environ['QUERY_STRING']
         d = {}
         for k, v in cgi.parse_qs(qs).items():
-            d[k] = try_parse(Decimal, try_parse(int, unicode(v[0], self._app.encoding) if isinstance(v[0], str) else v[0] ))
+            d[k] = try_parse(Decimal, v, try_parse(int, v, unicode(v[0], self._app.encoding) if isinstance(v[0], str) else v[0] ))
         method = environ['REQUEST_METHOD']
         return d
 
