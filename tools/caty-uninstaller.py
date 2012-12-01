@@ -41,7 +41,7 @@ class CatyUninstaller(object):
             traceback.print_exc()
             print '[Error] Invalid log format'
             sys.exit(1)
-        self.backup_dir = normalize_path(os.path.join(self.project, header.get('Backup-Dir', header['Destination-Dir']))[1:])
+        self.backup_dir = os.path.normpath(normalize_path(os.path.sep.join([os.path.abspath(self.project), header.get('Backup-Dir', header['Destination-Dir'])])))
         log_contents = []
         self.bksuffix = header['Backup-Suffix'].rsplit('.', 1)[0] + '.chg'
         bksuffix = self.bksuffix
