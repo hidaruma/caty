@@ -155,7 +155,7 @@ class CatyInstaller(object):
         self._log_buffer.append(u'Dist-Archive-Name: %s\n' % os.path.basename(normalize_path(self.arcfile)))
         self._log_buffer.append(u'Dist-Archive-Digest: %s\n' % digest)
         self._log_buffer.append(u'Project-Dir: %s\n' % os.path.abspath(self.project))
-        self._log_buffer.append(u'Destination-Dir: %s\n' % os.path.abspath(base_dir))
+        self._log_buffer.append(u'Destination-Dir: /%s\n' % os.path.abspath(base_dir)[len(os.path.abspath(self.project)):])
         self._log_buffer.append(u'Destination-Name: %s\n' % self.dest)
         self._log_buffer.append(u'Local-Identifier: %s\n' % time.strftime('%Y%m%d%H%M%S', self.end_time))
         self._log_buffer.append(u'Backup-Suffix: .%s\n' % bksuffix)
