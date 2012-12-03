@@ -175,7 +175,10 @@ class WhiteListItem(object):
         self.init_matcher()
 
     def init_matcher(self):
-        self.matcher = re.compile(re.escape(self.pattern).replace(u'\\*', u'[^/]*') + '$')
+        if self.pattern.startswith('.'):
+            self.matcher = re.compile('/\\.' + re.escape(self.pattern[1:]).replace(u'\\*', u'[^/]*') + '$')
+        else:
+            self.matcher = re.compile(re.escape(self.pattern).replace(u'\\*', u'[^/]*') + '$')
 
     def includes(self, path):
         return self.matcher.search(path.replace('\\', '/'))
