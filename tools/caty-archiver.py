@@ -17,6 +17,7 @@ def main(argv):
     o = OptionParser(usage='usage: python %s [OPTIONS] output' % argv[0])
     o.add_option('--dry-run', dest='list', action='store_true', default=False)
     o.add_option('--fset', action='store', default=None)
+    o.add_option('--help-exts', action='store_true', help=u'Outputs default pattern')
     o.add_option('--meta', action='append', default=[])
     o.add_option('--meta-inf', action='store')
     o.add_option('--package-json', action='store', default=None)
@@ -35,6 +36,11 @@ def main(argv):
     caar.meta_inf = options.meta_inf
     caar.ignore_missing = options.ignore_missing
     caar.package_json = options.package_json
+    caar.help_exts = options.help_exts
+    if caar.help_exts:
+        for i in DefaultWhiteListItemContainer()._incl:
+            print i.pattern
+        sys.exit(0)
     if not caar.origin:
         if not caar.project:
             caar.origin = os.getcwd()
