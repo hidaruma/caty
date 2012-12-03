@@ -82,7 +82,7 @@ class CatyArchiver(object):
                 if not os.path.exists(src):
                     print >>cout, u'[Warning]', src, 'does not exist'
                 else:
-                    print >>cout, src
+                    print >>cout,  path
             else:
                 outfile.write(src, path)
         pkg = None
@@ -96,7 +96,7 @@ class CatyArchiver(object):
                         if arcpath.strip(os.path.sep).startswith('META-INF' + os.path.sep):
                             continue
                         if self.list:
-                            print >>cout, src
+                            print >>cout, arcpath.lstrip('/\\')
                         else:
                             outfile.write(src, arcpath)
                         if arcpath == 'package.json':
@@ -112,7 +112,10 @@ class CatyArchiver(object):
                 continue
             m = normalize_path(m)
             fname = m.split(os.path.sep)[-1] 
-            outfile.write(m, 'META-INF/' + fname)
+            if self.list:
+                print >>cout, ('META-INF/' + fname)
+            else:
+                outfile.write(m, 'META-INF/' + fname)
             if fname == 'package.json':
                 if pkg:
                     if pkg != open(m).read():
@@ -130,7 +133,7 @@ class CatyArchiver(object):
                         if self.outfile:
                             outfile.write(os.path.join(r, e), 'META-INF/' + e)
                         else:
-                            print >>cout, os.path.join(r, e)
+                            print >>cout, 'META-INF/' + e
         if self.package_json:
             if not os.path.exists(self.package_json):
                 print >> cout, '[Error]', '%s does not exists' % self.package_json
