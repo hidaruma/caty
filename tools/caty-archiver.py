@@ -114,8 +114,8 @@ class CatyArchiver(object):
                 print >> cout, '[Error]', '%s does not exists' % self.package_json
             if self.outfile:
                 outfile.write(self.package_json, 'META-INF/package.json')
-        outfile.writestr('META-INF/timezone.txt', tz_to_str(time.timezone))
         if self.outfile:
+            outfile.writestr('META-INF/timezone.txt', tz_to_str(time.timezone))
             outfile.close()
 
     def setup_origin_dir(self):
