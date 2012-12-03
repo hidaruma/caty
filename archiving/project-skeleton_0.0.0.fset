@@ -11,13 +11,20 @@
 # アーカイブ対象となるディレクトリ
 # --origin をルートとみなした 絶対パス形式相対パス
 
-/dists/
-/features/ 
-/backup/
+/dists/README.txt
+/features/README.txt
+/backup/README.txt
 
 # 個別ファイル
 # --origin をルートとみなした 絶対パス形式相対パス
 
 /dependencies_python2.txt
 /tools/pkg-check.py
+/tools/execme.py
+/tools/caty-archiver.py
+/tools/caty-installer.py
+/tools/caty-uninstaller.py
+/tools/car.sh
+/tools/cdm.sh
+
 
