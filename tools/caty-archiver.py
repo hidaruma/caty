@@ -18,6 +18,7 @@ def main(argv):
     o.add_option('--dry-run', dest='list', action='store_true', default=False)
     o.add_option('--fset', action='store', default=None)
     o.add_option('--meta', action='append', default=[])
+    o.add_option('--meta-inf', action='store')
     o.add_option('--package-json', action='store', default=None)
     o.add_option('--project', action='store', default=None)
     o.add_option('--origin', action='store', default=None)
@@ -31,6 +32,7 @@ def main(argv):
     caar.quiet = options.quiet
     caar.project = options.project
     caar.meta = options.meta
+    caar.meta_inf = options.meta_inf
     caar.ignore_missing = options.ignore_missing
     caar.package_json = options.package_json
     if not caar.origin:
@@ -109,9 +111,26 @@ class CatyArchiver(object):
                 if pkg:
                     if pkg != open(m).read():
                         print >>cout, '[Error]', 'confliction between /package.json and /META-INF/package.json'
+                        if self.outfile:
+                            outfile.close()
+                            os.unlink(self.outfile)
+        if self.meta_inf:
+            if not os.path.exists(self.meta_inf):
+                if not self.quiet:
+                    print >>cout, u'[Warning]', self.meta_inf, 'not exists'
+            else:
+                for r, d, f in os.walk(self.meta_inf):
+                    for e in f:
+                        if self.outfile:
+                            outfile.write(os.path.join(r, e), 'META-INF/' + e)
+                        else:
+                            print >>cout, os.path.join(r, e)
         if self.package_json:
             if not os.path.exists(self.package_json):
                 print >> cout, '[Error]', '%s does not exists' % self.package_json
+                if self.outfile:
+                    outfile.close()
+                    os.unlink(self.outfile)
             if self.outfile:
                 outfile.write(self.package_json, 'META-INF/package.json')
         if self.outfile:
