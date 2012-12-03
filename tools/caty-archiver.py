@@ -235,6 +235,9 @@ class WhiteListParser(object):
             directive.append('optional')
             line = line.lstrip(' ?\t')
             return self.parse_directive(line, directive)
+        elif line.startswith('+'):
+            line = line.lstrip(' +\t')
+            return line, directive
         else:
             return line, directive
 
