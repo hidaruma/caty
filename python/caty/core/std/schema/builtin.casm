@@ -791,6 +791,10 @@ exception SetEnvConflict = object;
  * --- セキュリティ
  */
 
+
+/** 例外：アクセスできない */
+exception UnableToAccess = object;
+
 /** 例外：認証失敗 */
 exception CertificationFailed = object;
 
