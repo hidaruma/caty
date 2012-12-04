@@ -96,7 +96,7 @@ class CatyArchiver(object):
                         if arcpath.strip(os.path.sep).startswith('META-INF' + os.path.sep):
                             continue
                         if self.list:
-                            print >>cout, arcpath.lstrip('/\\')
+                            print >>cout, arcpath.lstrip('/\\').replace('\\', '/')
                         else:
                             outfile.write(src, arcpath)
                         if arcpath == 'package.json':
@@ -140,8 +140,12 @@ class CatyArchiver(object):
                 if self.outfile:
                     outfile.close()
                     os.unlink(self.outfile)
+            if self.list:
+                print >>cout, 'META-INF/package.json'
             if self.outfile:
                 outfile.write(self.package_json, 'META-INF/package.json')
+        if self.list:
+                print >>cout, 'META-INF/timezone.txt'
         if self.outfile:
             outfile.writestr('META-INF/timezone.txt', tz_to_str(time.timezone))
             outfile.close()
