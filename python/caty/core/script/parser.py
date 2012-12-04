@@ -206,7 +206,7 @@ class ScriptParser(Parser):
         return opts
 
     def pipe(self, seq):
-        _ = seq.parse(['|','>@', '>:', '>', ';'])
+        _ = seq.parse(['>@', '>:', '>', ';', '||', '|&', '|>', '|=', '|', ';;'])
         if _ == '>:':
             raise ParseFailed(seq, self.pipe)
         return _
@@ -233,6 +233,8 @@ class ScriptParser(Parser):
             elif a == '>':
                 n = seq.parse(self.name)
                 r.append(VarStore(n))
+            else:
+                raise ParseFailed(seq, '`%s` is reserved token' % a)
         return combine_proxy(r)
 
     def group(self, seq):
