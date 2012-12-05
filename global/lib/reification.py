@@ -1,9 +1,12 @@
+# coding:utf-8
 from caty.command import *
 from caty.core.language import split_colon_dot_path
 from caty.core.language.util import make_structured_doc
 from caty.jsontools import tagged
 from caty.util.collection import conditional_dict
+from caty.core.typeinterface import *
 from caty.core.casm.cursor.dump import TreeDumper
+
 _modemap = {
     u'reads': u'read',
     u'updates': u'update',
@@ -271,15 +274,134 @@ class ShallowReifier(object):
             r[an.name] = an.value
         return r
 
+class StringReifier(ShallowReifier):
+    def reify_type(self, t):
+        sr = ShallowReifier.reify_type(self, t)
+        sr['body'] = TreeDumper().visit(t.body)
+        return tagged(u'type', sr)
+
 class FullReifier(ShallowReifier):
     def reify_type(self, t):
         sr = ShallowReifier.reify_type(self, t)
-        sr['body'] = TypeBodyReifier().reify(t.body)
+        sr['body'] = TypeBodyReifier(sr['location']).visit(t.body)
         return tagged(u'type', sr)
 
-class TypeBodyReifier(object):
-    def reify(self, t):
-        return TreeDumper().visit(t)
+from caty.core.spectypes import UNDEFINED
+
+def format_result(t):
+    def _format_result(f):
+        def __format_result(*args, **kwds):
+            r = f(*args, **kwds)
+            r = conditional_dict(lambda k, v: v is not UNDEFINED, r)
+            return tagged(t, r)
+        return __format_result
+    return _format_result
+
+class TypeBodyReifier(TreeCursor):
+    def __init__(self, default_loc):
+        self.default_loc = default_loc
+
+    def _extract_common_data(self, node):
+        r = {}
+        for k, v in node.options.items():
+            r[k] = v
+        if isinstance(node, Ref):
+            r['recursive'] = node.recursive
+            r['location'] = node.module.canonical_name + ':' + node.name
+        elif isinstance(node, Root):
+            r['location'] = node.canonical_name
+        else:
+            r['location'] = self.default_loc
+        return r
+
+    @format_result(u'params')
+    def __reify_params(self, params):
+        r = []
+        for p in params:
+            r.append({
+                u'name': p.name,
+                u'kind':  UNDEFINED,
+                u'default': p.default.accept(self) if p.default else UNDEFINED
+            })
+        return r
+
+    @format_result(u'kind')
+    def __reify_kind(self, node):
+        # XXX:仕様の問題: kindへの参照を表現するオブジェクトがない
+        return {
+            'name': node.name
+        }
+
+    def _visit_root(self, node):
+        r = self._extract_common_data(node)
+        r['params'] = self.__reify_params(node._type_params)
+        r['expr'] = node.body.accept(self)
+        return tagged(u'type', r)
+
+    def _visit_scalar(self, node):
+        if isinstance(node, Ref):
+            return self.__reify_ref(node)
+        else:
+            return self.__reify_builtin(node)
+
+    @format_result(u'builtin')
+    def __reify_builtin(self, node):
+        r = self._extract_common_data(node)
+        r['typeName'] = node.name
+        return r
+
+    def __reify_ref(self, node):
+        raise NotImplementedError(u'{0}.__reify_ref'.format(self.__class__.__name__))
+
+    @format_result(u'optional')
+    def _visit_option(self, node):
+        return {'operand': node.body.accept(self)}
+
+    def _visit_enum(self, node):
+        raise NotImplementedError(u'{0}._visit_enum'.format(self.__class__.__name__))
+
+    @format_result(u'object-of')
+    def _visit_object(self, node):
+        r = self._extract_common_data(node)
+        r['specified'] = {}
+        for k, v in node.items():
+            r['specified'][k] = v.accept(self)
+        r['additional'] = node.wildcard.accept(self)
+        return r
+
+    @format_result(u'array-of')
+    def _visit_array(self, node):
+        r['specified'] = []
+        for k, v in node.items():
+            r['specified'].append(v.accept(self))
+        if r['repeat']:
+            r['additional'] = r['specified'].pop(-1)
+            del r['repeat']
+        return r
+
+    def _visit_bag(self, node):
+        raise NotImplementedError(u'{0}._visit_bag'.format(self.__class__.__name__))
+
+    def _visit_intersection(self, node):
+        raise NotImplementedError(u'{0}._visit_intersection'.format(self.__class__.__name__))
+
+    def _visit_union(self, node):
+        raise NotImplementedError(u'{0}._visit_union'.format(self.__class__.__name__))
+
+    def _visit_updator(self, node):
+        raise NotImplementedError(u'{0}._visit_updator'.format(self.__class__.__name__))
+
+    def _visit_tag(self, node):
+        raise NotImplementedError(u'{0}._visit_tag'.format(self.__class__.__name__))
+
+    def _visit_pseudo_tag(self, node):
+        raise NotImplementedError(u'{0}._visit_pseudo_tag'.format(self.__class__.__name__))
+
+    def _visit_function(self, node):
+        raise NotImplementedError(u'{0}._visit_function'.format(self.__class__.__name__))
+
+    def _visit_kind(self, node):
+        raise NotImplementedError(u'{0}._visit_kind'.format(self.__class__.__name__))
 
 class SafeReifier(Command):
     def setup(self, opts, cdpath):

@@ -1247,6 +1247,9 @@ command reify-type
     /** 指定されたシステム要素が存在しないときはundefinedを返すか */
     @[default(false)]
     "safe": boolean?,
+    /** 文字列表現としてレイフィケーションイメージを返すか */
+    @[default(false)]
+    "to-string": boolean?,
   }
   [cdpath typ]
 :: void -> Type?
