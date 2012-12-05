@@ -1,0 +1,53 @@
+module mail in casm;
+
+/** 電子メールメッセージ */
+type Message = {
+  /** メールの本文
+   * テキストのみ
+   */
+  "body": string,
+
+  /** 添付ファイル
+   * 存在しないときと、値が空リストのときは同じ扱い。
+   */
+  @[default([])]
+  "attachments" : [Attachment*]?,
+
+  /** メールヘッダ 
+   * メールの仕様に従う。
+   */
+  "header": {
+      *: string?
+  },
+
+};
+
+/** 添付ファイル(未定) */
+type Attachment = deferred object;
+
+
+/** メールを送信する
+
+コマンドライン引数が指定されている場合は、
+ヘッダTo:を**無視して**、引数で指定された送り先に送る。
+このとき、ヘッダに改変は加えない（To:もそのまま）。
+
+これは、OSのsendmailコマンドと同じ仕様である。
+
+OSのsendmailコマンドとは異なり、ピリオドのみの行を認識しない（従って、-iオプション相当もない）。
+
+To:以外の Cc:、Bcc:は常にヘッダから採用する。これは、OSのsendmailコマンドに -t オプションが指定されたときと同じ挙動になる。
+
+コマンドライン引数に宛先指定がないときは、ヘッダTo:を宛先とする。
+
+*/
+command send {
+    @[default("caty.system@localhost")]
+    "from": string?,
+    @[default("localhost:25")]
+    "server": string?,
+    } [string* to-addrs] :: Message -> void throws Exception
+    reads env
+    refers python:caty.core.std.command.mail.Send;
+
+
