@@ -1,7 +1,14 @@
 {"$comment": "-*- coding: utf-8 -*-",
  
-   "name": "caty-bootstrap",
-   "version": "0.1.0",
-   "installTarget": "project"
+    "name": "caty-bootstrap",
+    "version": "0.1.0",
+    "installTarget": "project",
+    "dependencies": {
+        "python2": {
+            "requests": "0.12.0",
+            "pygraphviz": "1.1",
+            "PIL": "1.1.7"
+        }
+    }
 }
 
