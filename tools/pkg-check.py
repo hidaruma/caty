@@ -58,7 +58,7 @@ def main():
     ok = True
     for pkg, version in extractor(f):
         if pkg in pkgmap:
-            if newer(version, pkgmap[pkg]):
+            if newer(version, pkgmap[pkg]) < 1:
                 if options.verbose:
                     print '[OK]', pkg, pkgmap[pkg]
                 continue
@@ -73,7 +73,7 @@ def newer(v1, v2):
         if len(a) != len(b):
             return cmp(len(a), len(b))
         return cmp(a, b)
-    return 1
+    return 0
 
 def extract_from_text(f):
     for l in open(f):
