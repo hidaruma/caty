@@ -2,7 +2,7 @@
 from caty.command import *
 from caty.core.language import split_colon_dot_path
 from caty.core.language.util import make_structured_doc
-from caty.jsontools import tagged
+from caty.jsontools import tagged, split_tag
 from caty.util.collection import conditional_dict
 from caty.core.typeinterface import *
 from caty.core.casm.cursor.dump import TreeDumper
@@ -300,18 +300,16 @@ def format_result(t):
 class TypeBodyReifier(TreeCursor):
     def __init__(self, default_loc):
         self.default_loc = default_loc
+        self.root_found = False
 
     def _extract_common_data(self, node):
         r = {}
         for k, v in node.options.items():
             r[k] = v
-        if isinstance(node, Ref):
-            r['recursive'] = node.recursive
-            r['location'] = node.module.canonical_name + ':' + node.name
-        elif isinstance(node, Root):
+        if isinstance(node, Root):
             r['location'] = node.canonical_name
         else:
-            r['location'] = self.default_loc
+            r['location'] = node.module.canonical_name + ':' + node.name
         return r
 
     @format_result(u'params')
@@ -333,10 +331,14 @@ class TypeBodyReifier(TreeCursor):
         }
 
     def _visit_root(self, node):
-        r = self._extract_common_data(node)
-        r['params'] = self.__reify_params(node._type_params)
-        r['expr'] = node.body.accept(self)
-        return tagged(u'type', r)
+        if not self.root_found:
+            self.root_found = True
+            r = self._extract_common_data(node)
+            r['params'] = self.__reify_params(node._type_params)
+            r['expr'] = node.body.accept(self)
+            return tagged(u'type', r)
+        else:
+            return node.body.accept(self)
 
     def _visit_scalar(self, node):
         if isinstance(node, Ref):
@@ -348,10 +350,16 @@ class TypeBodyReifier(TreeCursor):
     def __reify_builtin(self, node):
         r = self._extract_common_data(node)
         r['typeName'] = node.name
+        del r['location'] # 組み込み型には不要
         return r
 
+    @format_result(u'type-ref')
     def __reify_ref(self, node):
-        raise NotImplementedError(u'{0}.__reify_ref'.format(self.__class__.__name__))
+        r = self._extract_common_data(node)
+        r['ref'] = node.name
+        if node.body.kind:
+            r['kind'] = self.__reify_kind(node.body.kind)
+        if node.type_args:
 
     @format_result(u'optional')
     def _visit_option(self, node):
@@ -379,20 +387,33 @@ class TypeBodyReifier(TreeCursor):
             del r['repeat']
         return r
 
+    @format_result(u'bag')
     def _visit_bag(self, node):
-        raise NotImplementedError(u'{0}._visit_bag'.format(self.__class__.__name__))
+        items = []
+        r = self._extract_common_data(node)
+        for i in node:
+            o = i.accept(self)
+            t, s = split_tag(o)
+            mi = s.pop('minCount', 1)
+            ma = s.pop('maxCount', u'unbounded')
+            items.append(tagged('bag-item', {'minOccurs': mi, 'maxOccurs': ma, 'type': tagged(t, s)}))
+        r['items'] = items
+        return r
 
+    @format_result(u'intersection')
     def _visit_intersection(self, node):
-        raise NotImplementedError(u'{0}._visit_intersection'.format(self.__class__.__name__))
+        return {'operand': [node.left.accept(self), node.right.accept(self)]}
 
     def _visit_union(self, node):
         raise NotImplementedError(u'{0}._visit_union'.format(self.__class__.__name__))
 
+    @format_result(u'merge')
     def _visit_updator(self, node):
-        raise NotImplementedError(u'{0}._visit_updator'.format(self.__class__.__name__))
+        return {'operand': [node.left.accept(self), node.right.accept(self)]}
 
+    @format_result(u'tagged')
     def _visit_tag(self, node):
-        raise NotImplementedError(u'{0}._visit_tag'.format(self.__class__.__name__))
+        return {'tag': node.tag, 'content': node.body.accept(self)}
 
     def _visit_pseudo_tag(self, node):
         raise NotImplementedError(u'{0}._visit_pseudo_tag'.format(self.__class__.__name__))

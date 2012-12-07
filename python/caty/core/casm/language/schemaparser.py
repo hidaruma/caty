@@ -36,7 +36,7 @@ def schema(seq):
         if isinstance(definition, NamedTaggedNode):
             definition._tag = name_of_type
     c = seq.parse(';')
-    return ASTRoot(name_of_type, type_args, definition, annotations, doc)
+    return ASTRoot(name_of_type, type_args, definition, annotations, doc, k_of)
 
 def typedef(seq):
     return chainl(term, op, allow_trailing_operator=True)(seq)

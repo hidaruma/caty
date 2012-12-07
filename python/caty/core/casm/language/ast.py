@@ -43,7 +43,7 @@ class ModuleName(object):
             return u'stop'
 
 class ASTRoot(Root):
-    def __init__(self, name, type_params, ast, annotation, docstring):
+    def __init__(self, name, type_params, ast, annotation, docstring, kind=None):
         self._name = name
         self._reference_schema = None
         self._type_params = type_params if type_params else ()
@@ -51,6 +51,7 @@ class ASTRoot(Root):
         self.options = None
         self.__annotation = annotation
         self.__docstring = docstring if docstring else u''
+        self.kind = None
 
     #def clone(self):
     #    return TypeLambda(self._name, self._type_params, self.__definition, self.__annotation, self.__docstring)
@@ -152,6 +153,7 @@ class Node(object):
         self.options = {} if options is None else options
         self.annotations = Annotations([])
         self.docstring = u''
+        self.kind = None
 
     @property
     def optional(self):
