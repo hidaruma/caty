@@ -359,7 +359,7 @@ class TypeBodyReifier(TreeCursor):
         r['ref'] = node.name
         if node.body.kind:
             r['kind'] = self.__reify_kind(node.body.kind)
-        if node.type_args:
+        return r
 
     @format_result(u'optional')
     def _visit_option(self, node):
