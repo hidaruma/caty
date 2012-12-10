@@ -47,27 +47,33 @@ def main():
     e = extractor(f)
     pkgmap = init_pkg_map()
     featuremap = init_feature_map(options.project)
-    for pkg, version in e.python2:
+    for pkg, versions in e.python2:
+        found = False
         if pkg in pkgmap:
-            if compatible(version, pkgmap[pkg]):
-                if options.verbose:
-                    print '[OK]', pkg, pkgmap[pkg]
-                continue
-        ok = False
-        print '[NG]', pkg, version, 'is not installed.'
-    for feature, version in e.features:
+            for ver in versions:
+                if compatible(ver, pkgmap[pkg]):
+                    if options.verbose:
+                        print '[OK]', pkg, ver
+                    found = True
+                    break
+        if not found:
+            ok = False
+            print '[NG]', pkg, ', '.join(versions), 'is not installed.'
+    for feature, versions in e.features:
         found = False
         if feature in featuremap:
-            for ver in featuremap[feature]:
-                if compatible(version, ver):
-                    if options.verbose:
-                        print '[OK]', feature, version
-                    found = True
+            for ver in versions:
+                for installed in featuremap[featuremap]:
+                    if compatible(ver, installed):
+                        if options.verbose:
+                            print '[OK]', feature, ver
+                        found = True
+                        break
                 if found:
                     break
         if not found:
             ok = False
-            print '[NG]', feature, version, 'is not installed.'
+            print '[NG]', feature, ', '.join(versions), 'is not installed.'
     return ok
 
 def init_pkg_map():
@@ -153,6 +159,8 @@ def _extract_from_json(c):
     p2 = d.pop('python2', {}).items()
     f = []
     for name, val in d.items():
+        if isinstance(val, basestring):
+            val = [val]
         f.append((name, val))
     return Requierement(p2, f)
 
