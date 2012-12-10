@@ -102,7 +102,7 @@ def init_feature_map(base_dir):
     for f in os.listdir(d):
         if f.endswith('.install.log'):
             name, version = f.rsplit('_', 1)
-            version = version.replace('.install.log', '')
+            version = version.rsplit('.', 1)[0]
             if name in map:
                 map[name].add(version)
             else:
@@ -110,7 +110,7 @@ def init_feature_map(base_dir):
     for f in os.listdir(d):
         if f.endswith('.uninstall.log'):
             name, version = f.rsplit('_', 1)
-            version = version.replace('.uninstall.log', '')
+            version = version.rsplit('.', 1)[0]
             if version in map.get(name, []):
                 map[name].discard(version)
     return map
