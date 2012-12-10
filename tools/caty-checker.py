@@ -63,7 +63,7 @@ def main():
         found = False
         if feature in featuremap:
             for ver in versions:
-                for installed in featuremap[featuremap]:
+                for installed in featuremap[feature]:
                     if compatible(ver, installed):
                         if options.verbose:
                             print '[OK]', feature, ver
