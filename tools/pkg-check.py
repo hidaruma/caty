@@ -1,6 +1,8 @@
 import subprocess
 import sys
 import json
+import os
+from zipfile import ZipFile
 from optparse import OptionParser
 
 example = """pkg-list-file example(plain text):
@@ -28,7 +30,47 @@ def main():
     argv = sys.argv
     o = OptionParser(usage='usage: python %s [OPTIONS] pkg-list-file\n%s' % (argv[0], example))
     o.add_option('--verbose', action='store_true', default=None)
+    o.add_option('--project', action='store', default='.')
     options, args = o.parse_args(argv[1:])
+    if len(args) < 1:
+        print '[Error] package list is not specified'
+        o.print_help()
+        sys.exit(1)
+    f = args[0]
+    if f.endswith('.json'):
+        extractor = extract_from_json
+    elif f.endswith('.zip'):
+        extractor = extract_from_zip
+    else:
+        extractor = extract_from_text
+    ok = True
+    e = extractor(f)
+    pkgmap = init_pkg_map()
+    featuremap = init_feature_map(options.project)
+    for pkg, version in e.python2:
+        if pkg in pkgmap:
+            if compatible(version, pkgmap[pkg]):
+                if options.verbose:
+                    print '[OK]', pkg, pkgmap[pkg]
+                continue
+        ok = False
+        print '[NG]', pkg, version, 'is not installed.'
+    for feature, version in e.features:
+        found = False
+        if feature in featuremap:
+            for ver in featuremap[feature]:
+                if compatible(version, ver):
+                    if options.verbose:
+                        print '[OK]', feature, version
+                    found = True
+                if found:
+                    break
+        if not found:
+            ok = False
+            print '[NG]', feature, version, 'is not installed.'
+    return ok
+
+def init_pkg_map():
     try:
         subp = subprocess.Popen(['pip', 'freeze'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except OSError:
@@ -46,25 +88,26 @@ def main():
         if l:
             a, b = l.split('==')
             pkgmap[a] = b
-    if len(args) < 1:
-        print '[Error] package list is not specified'
-        o.print_help()
-        sys.exit(1)
-    f = args[0]
-    if f.endswith('.json'):
-        extractor = extract_from_json
-    else:
-        extractor = extract_from_text
-    ok = True
-    for pkg, version in extractor(f):
-        if pkg in pkgmap:
-            if compatible(version, pkgmap[pkg]):
-                if options.verbose:
-                    print '[OK]', pkg, pkgmap[pkg]
-                continue
-        ok = False
-        print '[NG]', pkg, version, 'is not installed.'
-    return ok
+    return pkgmap
+
+def init_feature_map(base_dir):
+    d = os.path.join(base_dir.rstrip('\\/'), 'features')
+    map = {}
+    for f in os.listdir(d):
+        if f.endswith('.install.log'):
+            name, version = f.rsplit('_', 1)
+            version = version.replace('.install.log', '')
+            if name in map:
+                map[name].add(version)
+            else:
+                map[name] = set([version])
+    for f in os.listdir(d):
+        if f.endswith('.uninstall.log'):
+            name, version = f.rsplit('_', 1)
+            version = version.replace('.uninstall.log', '')
+            if version in map.get(name, []):
+                map[name].discard(version)
+    return map
 
 def compatible(required, installed):
     if required.startswith('~'):
@@ -93,15 +136,38 @@ def fix(s):
         return '.'.join(chunk).strip()
 
 def extract_from_text(f):
+    r = []
     for l in open(f):
         l = l.strip()
         if l:
             pkg, version = map(lambda s: s.strip(), l.split('=='))
-            yield pkg, version
+            r.append((pkg, version))
+    return Requierement(r)
 
 def extract_from_json(f):
-    j = json.loads(open(f).read())
-    return j.get('dependencies', {}).get('python2', {}).items()
+    return _extract_from_json(open(f).read())
+
+def _extract_from_json(c):
+    j = json.loads(c)
+    d = j.get('dependencies', {})
+    p2 = d.pop('python2', {}).items()
+    f = []
+    for name, val in d.items():
+        f.append((name, val))
+    return Requierement(p2, f)
+
+def extract_from_zip(f):
+    zp = ZipFile(open(f, 'rb'))
+    for info in zp.infolist():
+        if info.filename == 'META-INF/package.json':
+            return _extract_from_json(zp.read(info))
+    print '[Error] META-INF/package.json does not exists'
+    sys.exit(1)
+
+class Requierement(object):
+    def __init__(self, python2, anythingelse=()):
+        self.python2 = python2
+        self.features = anythingelse
 
 if __name__ == '__main__':
     if main():
