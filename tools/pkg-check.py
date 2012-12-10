@@ -58,13 +58,21 @@ def main():
     ok = True
     for pkg, version in extractor(f):
         if pkg in pkgmap:
-            if newer(version, pkgmap[pkg]) < 1:
+            if compatible(version, pkgmap[pkg]):
                 if options.verbose:
                     print '[OK]', pkg, pkgmap[pkg]
                 continue
         ok = False
         print '[NG]', pkg, version, 'is not installed.'
     return ok
+
+def compatible(required, installed):
+    if required.startswith('~'):
+        return newer(fix(required[1:]), fix(installed)) < 1
+    elif required.startswith('='):
+        return fix(required[1:]) == fix(installed)
+    else:
+        return newer(fix(required), fix(installed)) < 1
 
 def newer(v1, v2):
     for a, b in zip(v1.split('.'), v2.split('.')):
@@ -74,6 +82,15 @@ def newer(v1, v2):
             return cmp(len(a), len(b))
         return cmp(a, b)
     return 0
+
+def fix(s):
+    chunk = s.split('.')
+    if len(chunk) >= 3:
+        return s.strip()
+    else:
+        for i in range(3-len(chunk)):
+            chunk.append('0')
+        return '.'.join(chunk).strip()
 
 def extract_from_text(f):
     for l in open(f):
