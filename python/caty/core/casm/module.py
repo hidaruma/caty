@@ -107,11 +107,11 @@ class Module(Facility):
         self.get_class = partial(self._get_resource, scope_func=lambda x:x.class_ns, type=u'Class')
         self.has_class = partial(self._has_resource, scope_func=lambda x:x.class_ns, type=u'Class')
  
-        self.add_facility = partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility', see_register_public=True)
+        self.add_facility = lambda *args, **kwds: None # partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility', see_register_public=True)
         self.get_facility = partial(self._get_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.has_facility = partial(self._has_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
 
-        self.add_entity = partial(self._add_resource, scope_func=lambda x:x.entity_ns, type=u'Entity', see_register_public=True)
+        self.add_entity = lambda *args, **kwds: None # partial(self._add_resource, scope_func=lambda x:x.entity_ns, type=u'Entity', see_register_public=True)
         self.get_entity = partial(self._get_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
         self.has_entity = partial(self._has_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
 

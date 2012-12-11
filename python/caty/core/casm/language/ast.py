@@ -117,10 +117,18 @@ class ClassNode(object):
         module.add_class(self)
 
 class FacilityNode(object):
-    def __init__(self, name, clsname, value, doc, annotations):
+    def __init__(self, 
+                 name, 
+                 clsname, # ファシリティ実装クラス(Python)
+                 sys_param_type, # 抽象エンティティ生成パラメータ型(例: pub = stdmafs("pub"))
+                 config_param_type, # ファシリティオブジェクト生成時のパラメータ型
+                 indices_param_type, # 具体エンティティ(リクエスター)生成パラメータ型(例: root_dir = pub("/"))
+                 doc, annotations):
         self.name= name
         self.clsname= clsname
-        self.system_param = value
+        self.sys_param_type = sys_param_type
+        self.config_param_type = config_param_type
+        self.indices_param_type = indices_param_type
         self.docstring = doc
         self.annotations = annotations
 

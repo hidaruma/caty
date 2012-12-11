@@ -1,6 +1,7 @@
 # coding: utf-8
 from caty.core.casm.language.constparser import *
 from caty.core.casm.language.constparser import _undefined
+from caty.core.casm.language.commandparser import refer
 from caty.core.casm.language.ast import FacilityNode
 from caty.jsontools import xjson
 from caty import UNDEFINED
@@ -17,14 +18,45 @@ def _facility(seq):
         n = seq.parse(name_token)
         if n in RESERVED:
             raise ParseFailed(seq, command, '%s is reserved.' % n)
-        seq.parse('=')
-        clsname = seq.parse(name_token)
-        if option(keyword(u'with'))(seq):
-            value = choice(_undefined, xjson.parse)(seq) # undefinedとxjsonだけの出現を確認する
-        else:
-            value = UNDEFINED
+        seq.parse('(')
+        sys_param_type = typename(seq)
+        seq.parse(')')
+        config_type = option(parse_config_type, ScalarNode(u'null'))(seq)
+        indices_type = option(parse_indices_type, {})(seq)
+        clsname = refer(seq)[1]
         _ = seq.parse(';')
-        return FacilityNode(n, clsname, value, doc, a)
+        return FacilityNode(n, clsname, sys_param_type, config_type, indices_type, doc, a)
+
+def parse_config_type(seq):
+    keyword(u'along')(seq)
+    return typedef(seq)
+
+def parse_indices_type(seq):
+    keyword(u'conforms')(seq)
+    return choice(conditional_indices, indices)(seq)
+
+def conditional_indices(seq):
+    r = {}
+    S('{')(seq)
+    for type, cls_name in split(indices_item, u',', True)(seq):
+        r[type] = cls_name
+    S('}')(seq)
+    return r
+
+def indices_item(seq):
+    t = typedef(seq)
+    S('=>')(seq)
+    i = indices(seq)
+    return t, i
+
+def indices(seq):
+    return choice(index_list, typename)(seq)
+
+def index_list(seq):
+    S('[')(seq)
+    r = split(typename, ',', True)
+    S(']')(seq)
+    return r
 
 @try_
 def _entity(seq):
@@ -36,7 +68,8 @@ def _entity(seq):
         raise ParseFailed(seq, command, '%s is reserved.' % n)
     seq.parse('=')
     ename = seq.parse(name_token)
-    keyword(u'with')(seq)
+    S(u'(')(seq)
     value = choice(_undefined, xjson.parse)(seq) # undefinedとxjsonだけの出現を確認する
+    S(u')')(seq)
     _ = seq.parse(';')
     return EntityNode(n, ename, value, doc, a)
