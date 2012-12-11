@@ -7,7 +7,7 @@ import locale
 import codecs
 import time
 cout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
-
+universal_path_sep = '/\\'
 def normalize_path(path):
     if sys.platform == 'win32':
         return path.replace('/', '\\')
@@ -72,7 +72,7 @@ class CatyArchiver(object):
             outfile = ZipFile(self.outfile, u'w', ZIP_DEFLATED)
         for file in self.whitelist.files:
             path = file.pattern.lstrip('/')
-            src = self.origin.rstrip(os.path.sep)+os.path.sep+path.strip(os.path.sep)
+            src = self.origin.rstrip(universal_path_sep)+os.path.sep+path.strip(universal_path_sep)
             if not os.path.exists(src):
                 if self.ignore_missing or 'optional' in file.directives:
                     if not self.quiet:
@@ -87,13 +87,13 @@ class CatyArchiver(object):
                 outfile.write(src, path)
         pkg = None
         for directory in self.whitelist.directories:
-            base_dir = self.origin.rstrip(os.path.sep) + os.path.sep + directory.pattern.strip(os.path.sep)
+            base_dir = self.origin.rstrip(universal_path_sep) + os.path.sep + directory.pattern.strip(universal_path_sep)
             for r, d, f in os.walk(base_dir):
                 for e in f:
-                    src = r.rstrip(os.path.sep)+os.path.sep+e.strip(os.path.sep)
+                    src = r.rstrip(universal_path_sep)+os.path.sep+e.strip(universal_path_sep)
                     if directory.includes(src):
                         arcpath = src[len(self.origin):]
-                        if arcpath.strip(os.path.sep).startswith('META-INF' + os.path.sep):
+                        if arcpath.strip(universal_path_sep).startswith('META-INF' + os.path.sep):
                             continue
                         if self.list:
                             print >>cout, arcpath.lstrip('/\\').replace('\\', '/')
@@ -155,15 +155,15 @@ class CatyArchiver(object):
             return
         else:
             for ag in os.listdir(self.project):
-                if ag.strip(os.path.sep) in GROUP_NAMES:
-                    pd = os.path.join(self.project.rstrip(os.path.sep), ag)
+                if ag.strip(universal_path_sep) in GROUP_NAMES:
+                    pd = os.path.join(self.project.rstrip(universal_path_sep), ag)
                     for a in os.listdir(pd):
                         if a == self.origin:
                             self.origin = os.path.join(pd, a)
                             return
             else:
                 if self.origin == 'global':
-                    self.origin = os.path.join(self.project.rstrip(os.path.sep), self.origin)
+                    self.origin = os.path.join(self.project.rstrip(universal_path_sep), self.origin)
                 elif self.origin == 'caty':
                     print >>cout, u'[Error]', 'Application name `caty` is defined'
                     sys.exit(1)
