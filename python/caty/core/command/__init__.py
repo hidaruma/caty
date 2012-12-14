@@ -100,13 +100,13 @@ class Command(object):
         try:
             self.__arg0_schema.validate(self.__arg0)
         except JsonSchemaError, e:
-            info = e.error_report(self.app.i18n)
+            info = e.error_report(self.i18n)
             throw_caty_exception(u'Arg0TypeError', prettyprint(info), errorInfo=info)
         if self.profile.opts_schema.type == 'object':
             try:
                 self._opts = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(self._opts), True)
             except JsonSchemaError, e:
-                info = e.error_report(self.app.i18n)
+                info = e.error_report(self.i18n)
                 throw_caty_exception(u'OptsTypeError', prettyprint(info), errorInfo=info)
         else:
             self._opts = None
@@ -114,7 +114,7 @@ class Command(object):
             try:
                 self._args = self.profile.args_schema.convert(self._args)
             except JsonSchemaError, e:
-                info = e.error_report(self.app.i18n)
+                info = e.error_report(self.i18n)
                 throw_caty_exception(u'ArgsTypeError', prettyprint(info), errorInfo=e.error_report(self.i18n))
         else:
             self._args = None
