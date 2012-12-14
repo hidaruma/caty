@@ -18,6 +18,7 @@ from caty.core.exception import *
 import caty
 import caty.core.schema as schema
 from caty.core.spectypes import reduce_undefined
+from caty.core.schema.errors import JsonSchemaError
 
 from caty.core.script.interpreter.base import BaseInterpreter
 from caty.core.script.interpreter.typevar import TypeVarApplier
@@ -130,7 +131,11 @@ class CommandExecutor(BaseInterpreter):
                 self.input = None
                 r = exec_func(node)
             else:
-                node.in_schema.validate(input)
+                try:
+                    node.in_schema.validate(input)
+                except JsonSchemaError, e:
+                    info = e.error_report(self.app.i18n)
+                    throw_caty_exception(u'InputTypeError', prettyprint(info), errorInfo=info)
                 if u'no-auto-fill' in node.annotations:
                     r = exec_func(node, input)
                 else:
@@ -138,7 +143,11 @@ class CommandExecutor(BaseInterpreter):
             if node.out_schema.type == 'void':
                 r = None
             else:
-                node.out_schema.validate(r)
+                try:
+                    node.out_schema.validate(r)
+                except JsonSchemaError, e:
+                    info = e.error_report(self.app.i18n)
+                    throw_caty_exception(u'OutputTypeError', prettyprint(info), errorInfo=info)
             if 'commit-point' in node.profile_container.get_annotations():
                 for n in node.facility_names:
                     getattr(node, n).commit()

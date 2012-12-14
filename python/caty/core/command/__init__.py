@@ -11,6 +11,7 @@ import types
 import caty.util as util
 from caty.core.exception import InternalException
 from caty.util.collection import OverlayedDict, MultiMap
+from caty.core.schema.errors import JsonSchemaError
 from caty import UNDEFINED
 
 __all__ = ['Command', 'Builtin', 'ScriptError', 'PipelineInterruption', 'PipelineErrorExit', 'compile_builtin']
@@ -95,13 +96,26 @@ class Command(object):
             self.__arg0 = self.__var_loader.load_arg0(self.__arg0_ref, self.__var_storage)
 
     def _finish_opts(self):
-        self.__arg0_schema.validate(self.__arg0)
+        from caty.jsontools import prettyprint
+        try:
+            self.__arg0_schema.validate(self.__arg0)
+        except JsonSchemaError, e:
+            info = e.error_report(self.app.i18n)
+            throw_caty_exception(u'Arg0TypeError', prettyprint(info), errorInfo=info)
         if self.profile.opts_schema.type == 'object':
-            self._opts = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(self._opts), True)
+            try:
+                self._opts = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(self._opts), True)
+            except JsonSchemaError, e:
+                info = e.error_report(self.app.i18n)
+                throw_caty_exception(u'OptsTypeError', prettyprint(info), errorInfo=info)
         else:
             self._opts = None
         if self.profile.args_schema.type == 'array':
-            self._args = self.profile.args_schema.convert(self._args)
+            try:
+                self._args = self.profile.args_schema.convert(self._args)
+            except JsonSchemaError, e:
+                info = e.error_report(self.app.i18n)
+                throw_caty_exception(u'ArgsTypeError', prettyprint(info), errorInfo=e.error_report(self.i18n))
         else:
             self._args = None
 
