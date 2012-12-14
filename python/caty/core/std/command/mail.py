@@ -21,6 +21,8 @@ class Send(Builtin):
         enc = self.env.get('APP_ENCODING')
         msg = MIMEText(message['body'].encode(enc))
         to_addrs = list(self._to_addrs)
+        for v in message.get('recipients', []):
+            to_addrs.append(v)
         for k, v in message['header'].items():
             if k == 'body': 
                 continue
