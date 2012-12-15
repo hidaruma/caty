@@ -137,6 +137,7 @@ if [ ! -f "$fset" ]; then
 fi
 
 package_json=$origin_dir/archiving/$dist_name.package.json
+meta_inf=$origin_dir/archiving/$dist_name.META-INF
 
 if [ ! -f "$package_json" ]; then
     echo "Cannot find package.json file: $package_json"
@@ -147,5 +148,5 @@ echo  $caty_home/dists/$dist_name.$SUBEXT.zip
 
 python $caty_home/tools/caty-archiver.py \
  --project=$project_dir --origin=$origin \
- --fset=$fset --package-json=$package_json \
+ --fset=$fset --package-json=$package_json --meta-inf=$meta_inf \
  $caty_home/dists/$dist_name.$SUBEXT.zip

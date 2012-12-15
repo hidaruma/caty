@@ -1,6 +1,9 @@
 #!/bin/sh
 # -*- coding: utf-8 -*-
 
+# アプリケーションフィーチャのインストールが出来ない
+# do_install_prj以外に、do_install_app, do_istall_glb が必要。
+
 DEFAULT_CATY_HOME=../caty
 
 
@@ -64,7 +67,7 @@ function check_dist {
 }
     
 
-function do_install { # dist_package, project_dir => 
+function do_intall_prj { # dist_package, project_dir => 
     if [ -z "$2" ]; then
 	echo Usage: $0 install dist_package project_dir [target]
 	exit 1
@@ -173,6 +176,6 @@ if [ -z "$3" ]; then
 fi
 
 project_dir=$3
-do_install $target $dist $project_dir
+do_intall_prj $target $dist $project_dir
 
 
