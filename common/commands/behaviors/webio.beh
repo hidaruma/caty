@@ -160,6 +160,18 @@ format情報は、parseにとって「**努力目標**」として指定され�
 |["CONTENT_TYPE"]| "12"        | parse      |--format=form |           | |suspend |
 |["CONTENT_TYPE"]| "12"        | parse      |--format=json | @json 12  | | |
 
+== untranslae コマンド
+
+=== !exec 
+
+|= !input             |= !command        |= !params              |= !output                 |= 備考|= !judge |
+| {"a":"a", "b":"b"}  |webio:untranslate | --format=form         | @form {"a":["a"], "b":["b"]} | | |
+| {"a":1, "b":2}      |webio:untranslate | --format=form         | @form {"a":["1"], "b":["2"]} | | |
+| {"a":1, "b":2}      |webio:untranslate |                       | @form {"a":["1"], "b":["2"]} |デフォルトはformatはform | |
+| {"a":true, "b":false}|webio:untranslate |                      | @form {"a":["true"],"b":["false"]} | | |
+
+
+
 
 
 <<ignore |@void null         |webio:unparse  |                           |null      |例外的にnullとする | >>
