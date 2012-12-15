@@ -838,6 +838,23 @@ exception CompileError = object;
 /** 例外：neverが検出された */
 exception Never = object;
 
+type TypeErrorInfo = {"errorInfo": MiniErrorInfo, *:any?};
+
+@[runaway]
+exception InputTypeError = TypeErrorInfo;
+
+@[runaway]
+exception OutputTypeError = TypeErrorInfo;
+
+@[runaway]
+exception OptsTypeError = TypeErrorInfo;
+
+@[runaway]
+exception ArgsTypeError = TypeErrorInfo;
+
+@[runaway]
+exception Arg0TypeError = TypeErrorInfo;
+
 
 /** 
  * 入力値を例外として送出する。

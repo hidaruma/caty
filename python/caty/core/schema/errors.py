@@ -96,6 +96,21 @@ class JsonSchemaError(ErrorObj, Exception):
     def __repr__(self):
         return ErrorObj.__repr__(self)
 
+    def error_report(self, i18n):
+        from caty.jsontools import tagged
+        def _message(v):
+            if isinstance(v, list):
+                msg = u' / '.join([_message(e) for e in v])
+            else:
+                msg = v['message'] if isinstance(v['message'], unicode) else unicode(str(v['message']))
+            return msg
+        x = normalize_errors(self).to_path(i18n)
+        r = {}
+        for k, v in x.items():
+            msg = _message(v)
+            r[unicode(k)] = msg
+        return r 
+
 class JsonSchemaErrorObject(JsonSchemaError):
     def __init__(self, *args, **kwds):
         JsonSchemaError.__init__(self, *args, **kwds)

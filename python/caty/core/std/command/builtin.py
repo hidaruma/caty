@@ -433,22 +433,6 @@ class TypeCalculator(object):
     def type_name(self, seq):
         return schemaparser.typename(seq)
 
-    def error_report(self, e):
-        def _message(v):
-            if isinstance(v, list):
-                msg = u' / '.join([_message(e) for e in v])
-            else:
-                msg = v['message'] if isinstance(v['message'], unicode) else unicode(str(v['message']))
-            return msg
-        from caty.core.schema.errors import normalize_errors
-        x = normalize_errors(e).to_path(self.i18n)
-        r = {}
-        for k, v in x.items():
-            msg = _message(v)
-            r[unicode(k)] = msg
-        return tagged(u'NG', r)
-
-
 class Translate(Builtin, TypeCalculator):
     
     def setup(self, opts, schema_name):
@@ -481,9 +465,9 @@ class Translate(Builtin, TypeCalculator):
                     scm.validate(n)
                     return tagged(u'OK', n)
                 except JsonSchemaError, e:
-                    return self.error_report(e)
+                    return tagged(u'NG', e.error_report(self.i18n))
         except JsonSchemaError, e:
-            return self.error_report(e)
+            return tagged(u'NG', e.error_report(self.i18n))
 
     def _to_nested(self, input):
         d = {}
@@ -511,7 +495,7 @@ class Validate(Builtin, TypeCalculator):
         except JsonSchemaError, e:
             if self.pred:
                 return False
-            return self.error_report(e)
+            return tagged(u'NG', e.error_report(self.i18n))
 
 
 class Void(Builtin):
