@@ -57,7 +57,10 @@ class Untranslate(Command):
                     # 配列項目は一つにまとめ直す。
                     k = k.rstrip('0123456789.')
                 if not isinstance(v, basestring):
-                    v = str(v)
+                    if isinstance(v, bool):
+                        v = unicode(str(v)).lower()
+                    else:
+                        v = unicode(str(v))
                 if k[2:] not in r:
                     r[k[2:]] = [v]
                 else:
