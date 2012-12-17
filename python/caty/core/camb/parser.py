@@ -50,7 +50,7 @@ class BindingParser(Parser):
         return dest, tp
 
     def command(self, seq):
-        tp = keyword(u'action')(seq)
+        tp = keyword(u'command')(seq)
         name = identifier_token_a(seq)
         return name, tp
 
