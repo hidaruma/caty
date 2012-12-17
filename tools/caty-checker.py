@@ -174,7 +174,11 @@ def extract_from_zip(f):
 
 class Requierement(object):
     def __init__(self, python2, anythingelse=()):
-        self.python2 = python2
+        self.python2 = []
+        for k, v in python2:
+            if isinstance(v, basestring):
+                v = [v]
+            self.python2.append((k, v))
         self.features = anythingelse
 
 if __name__ == '__main__':
