@@ -65,6 +65,7 @@ class CatyArchiver(object):
             wlp = WhiteListParser()
             for i in wlp.feed(c):
                 self.whitelist.add(i)
+                self.whitelist.default = False
 
     def archive(self):
         self.setup_origin_dir()
@@ -332,6 +333,7 @@ class WhiteListItemContainer(WhiteListItem):
 class DefaultWhiteListItemContainer(WhiteListItemContainer):
     def __init__(self):
         WhiteListItemContainer.__init__(self, u'')
+        self.default = True
         self._incl = [
             WhiteListItem('*.atom'),
             WhiteListItem('*.beh'),
@@ -402,7 +404,7 @@ class DefaultWhiteListItemContainer(WhiteListItemContainer):
             if not e.is_file:
                 found = True
                 yield e
-        if not found and len(self._incl) == self._orig_len:
+        if not found and len(self._incl) == self._orig_len and not self.default:
             yield self
 
 if __name__ == '__main__':
