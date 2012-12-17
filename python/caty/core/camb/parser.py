@@ -1,6 +1,6 @@
 from caty.core.casm.language.casmparser import module_decl
 from caty.core.camb.binding import ModuleBinder, Binding
-from caty.core.language.util import docstring, annotation, fragment_name, annotation, identifier_token, identifier_token_m, identifier_token_a, name_token, some_token, annotation, path_string
+from caty.core.language.util import docstring, annotation, fragment_name, annotation, identifier_token, identifier_token_m, identifier_token_a, name_token, some_token, annotation, path_string, string
 from topdown import *
 from topdown.util import quoted_string
 
@@ -46,7 +46,7 @@ class BindingParser(Parser):
 
     def path(self, seq):
         tp = choice(keyword(u'fullpath'), keyword(u'path'))(seq)
-        dest = path_string(seq)
+        dest = choice(quoted_string, path_string)(seq)
         return dest, tp
 
     def command(self, seq):
