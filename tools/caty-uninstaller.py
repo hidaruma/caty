@@ -128,7 +128,7 @@ class CatyUninstaller(object):
             if h in header:
                 self._log_buffer.append('%s: %s\n' % (h, header[h]))
         self._log_buffer.append('Uninstall-Backup-Suffix: %s\n' % (self.bksuffix))
-        self._log_buffer.append(u'Date: %s:%s\n' % (time.strftime('%Y-%m-%dT%H:%M:%S', self.end_time), tz_to_str(time.timezone)))
+        self._log_buffer.append(u'Date: %s%s\n' % (time.strftime('%Y-%m-%dT%H:%M:%S', self.end_time), tz_to_str(time.timezone)))
         self._log_buffer.append('\n')
         for c in contents:
             self._log_buffer.append(c + '\n')
@@ -164,7 +164,7 @@ class LogRecord(object):
         self.size = size
         self.date = date
         self.md5 = md5
-        self.destfile = os.path.abspath(normalize_path(os.path.join(os.path.abspath(project), destfile[1:])))
+        self.destfile = normalize_path(os.path.abspath(normalize_path(os.path.join(os.path.abspath(project), destfile[1:]))))
         self.result = result
         self.msg = msg
         self.bkfile = bkfile
