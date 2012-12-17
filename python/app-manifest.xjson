@@ -1,0 +1,17 @@
+// -*- coding: utf-8 -*-
+
+{
+  "description": "Caty Core",
+  "assign": {
+      "commands": "caty/core/std/command",
+      "schemata": "caty/core/std/schema",
+
+      "behaviors": null,
+      "messages": null,
+      "actions": null,
+      "pub": null,
+      "scripts": null,
+      "include": null,
+      "data": null,
+  },
+}

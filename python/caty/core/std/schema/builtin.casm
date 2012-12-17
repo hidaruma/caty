@@ -178,7 +178,7 @@ type AppManifest = {
      * pub, dataなどのデータの設定。
      */
     "assign": {
-        *:string,
+        *: (null|string)?,
     }?,
 
     /**
