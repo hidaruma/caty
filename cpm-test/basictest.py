@@ -28,7 +28,7 @@ def test01():
     arcfile = 'minimum-caty_0.7.0.zip'
     if os.path.exists(arcfile):
         os.remove(arcfile)
-    fset = os.path.join('..', 'products', 'minimum-caty_0.7.0.fset')
+    fset = os.path.join('..', 'products', 'caty-core', 'files.fset')
     rmtree('tmp-project')
     os.mkdir('tmp-project')
     os.mkdir('tmp-project/backup')
