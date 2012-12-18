@@ -1,9 +1,8 @@
 #!/bin/sh
+# -*- coding: utf-8 -*-
 
 DEFAULT_CATY_HOME=../caty
-
-
-function find_caty_home { # => caty_home
+function find_caty_home { # () => caty_home
     if [ -n "$CATY_HOME" ]; then
 	caty_home=$CATY_HOME
     elif [ -d $DEFAULT_CATY_HOME ]; then
@@ -12,141 +11,117 @@ function find_caty_home { # => caty_home
 	caty_home=.
     fi
 }
+find_caty_home
+source $caty_home/tools/functions.sh
 
-function find_app { # => app_path
-
-  app_path=""
-
-  prj_dir=$1
-  app=$2
-  for grp in main develop common extra examples; do
-      if [ -d $prj_dir/$grp/$app ]; then
-	  app_path=$prj_dir/$grp/$app
-	  return 
-      fi
-  done
-}
-
-function list_apps { # => apps
-
-  prj_dir=$1
-
-  if [ -d $prj_dir/prods ]; then
-      echo project
-  fi
-  if [ -d $prj_dir/global/prods ]; then
-      echo global
-  fi
-
-  for grp in main develop common extra examples; do
-      if [ -d $prj_dir/$grp/ ]; then
-	  list=`/bin/ls -F $prj_dir/$grp/ | grep '/$' | sed -e 's@/@@'`
-	  for app in $list; do
-	      if [ -d $prj_dir/$grp/$app/prods ]; then
-		  echo $app
-	      fi
-	  done
-      fi
-  done
-}
-
-
-function list_dists {
-  project_dir=$1
-  origin=$2
-
-  case "$origin" in
-      project)
-	  origin_dir=$project_dir
-	  ;;
-      global)
-	  origin_dir=$project_dir/global
-	  ;;
-      *)
-	  find_app $project_dir $origin
-	  origin_dir=$app_path
-	  ;;
-  esac
-
-  prods=$origin_dir/prods
-  echo $prods
-  list=`/bin/ls $prods/*.package.json 2>/dev/null`
-  for f in $list; do
-      basename $f .package.json
-  done
-}
+# You can use functions in $caty_home/tools/functions.sh
 
 # ==== main ====
 
+
+prj_dir=.
+semver=
+
+while [ -n "$1" ]; do
+    case "$1" in
+	--project)
+	    if [ -z "$2" ]; then
+		echo "need option value for $1"; exit 1
+	    else
+		prj_dir=$2
+		shift
+	    fi
+	    shift;;
+	--semver)
+	    if [ -z "$2" ]; then
+		echo "need option value for $1"; exit 1
+	    else
+		semver=$2
+		shift
+	    fi
+	    shift;;
+	-*) echo "iilegal option $1"; exit 1;;
+	*)  break;; # while ループを抜ける
+    esac
+done
+
+echo "DEBUG: prj_dir=$prj_dir"
+echo "DEBUG: semver=$semver"
+
 if [ -z "$1" ]; then
-    echo Usage: $0 project_dir [origin [dist_name]]
+    echo **Origins**:
+    list_origins $prj_dir
+    echo ""
+    echo **Usage**: $0 OPTIONS origin prod
     exit 1
 fi
+origin=$1
 
-project_dir=$1
-origin=$2
-dist_name=$3
+if [ -z "$2" ]; then
+    echo **Products**:
+    list_prods $prj_dir $origin
+    echo ""
+    echo **Usage**: $0 OPTIONS origin prod
+    exit 1
+fi
+prod=$2
 
-if [ -z "$origin" ]; then
-    list_apps $project_dir
-    exit 0
+echo "DEBUG: origin=$origin"
+echo "DEBUG: prod=$prod"
+
+case $origin in
+    project)
+	SUBEXT=caty-prj
+	prod_dir=$prj_dir/prods/$prod ;;
+    global)
+	SUBEXT=caty-glb
+	prod_dir=$prj_dir/global/prods/$prod ;;
+    *)
+	SUBEXT=caty-app
+	app_dir=$(find_app $prj_dir $origin)
+	prod_dir=$app_dir/prods/$prod ;;
+esac
+
+echo "DEBUG: prod_dir=$prod_dir"
+
+if [ ! -d $prod_dir ]; then
+    echo "$prod_dir does not exist"; exit 1
 fi
 
-
-if [ -z "$dist_name" ]; then
-    list_dists $project_dir $origin
-    exit 0
-fi
-
-
-find_caty_home
 if [ ! -f $caty_home/tools/caty-archiver.py ]; then
     echo "cannot find archiver"
     exit 1
 fi
 
 
-case "$origin" in
- project)
-  origin_dir=$project_dir
-  SUBEXT=caty-prj
-  ;;
- global)
-  origin_dir=$project_dir/global
-  SUBEXT=caty-glb
-  ;;
- *)
-  find_app $project_dir $origin
-  origin_dir=$app_path
-  SUBEXT=caty-app
-  ;;
-esac
-
-echo $origin_dir
-
-if [ -z "$origin_dir" ]; then
-    echo "Cannot find origin dir"
-    exit 1
-fi
-
-fset=$origin_dir/prods/$dist_name.fset
+fset=$prod_dir/files.fset
 
 if [ ! -f "$fset" ]; then
     echo "Cannot find fset file: $fset"
     exit 1
 fi
 
-package_json=$origin_dir/prods/$dist_name.package.json
-meta_inf=$origin_dir/prods/$dist_name.META-INF
+confirm_version $prod_dir $semver
+expand_template $prod_dir
+
+
+package_json=$prod_dir/package.json
+echo "DEBUG: package_json=$package_json"
 
 if [ ! -f "$package_json" ]; then
     echo "Cannot find package.json file: $package_json"
     exit 1
 fi
 
-echo  $caty_home/dists/$dist_name.$SUBEXT.zip
+archive_name=$(make_archive_name $prod_dir $SUBEXT)
+
+echo "DEBUG: archive_name=$archive_name"
+
 
 python $caty_home/tools/caty-archiver.py \
- --project=$project_dir --origin=$origin \
- --fset=$fset --package-json=$package_json --meta-inf=$meta_inf \
- $caty_home/dists/$dist_name.$SUBEXT.zip
+ --project=$prj_dir \
+ --origin=$origin \
+ --fset=$fset \
+ --meta-inf=$prod_dir \
+ $caty_home/dists/$archive_name
+
