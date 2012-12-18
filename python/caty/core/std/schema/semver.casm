@@ -1,0 +1,141 @@
+// -*- coding: utf-8 -*-
+
+/** Semantic Versioning 
+ * 参考： [[http://semver.org/|Semantic Versioning]]
+ */
+module semver;
+
+/*
+
+ 外部コマンド（OSから起動）からも使うので、共有のPythonライブラリとする。
+
+ @[should-be-implemented]アノテーションが付いているコマンドはPython実装を必要とする。
+
+*/
+
+/** バージョン文字列の構文エラーの報告
+ * 例外型と同じ構造。
+ */
+type SemverSyntaxError = extract $.content() Exception;
+
+/** バージョン文字列のパーズ結果
+ */
+type ParsedVersion = {
+ "major-ver": integer(minimum=0),
+ "minor-ver": integer(minimum=0),
+ "patch-ver": integer(minimum=0),
+ "prerelease-ver": string?,
+ "build-ver": string?,
+};
+
+/** バージョン文字列をパーズする
+ */
+@[shuold-be-implemented] /* スクリプトはダミー!!! */
+command parse :: string -> ParsedVersion throws SyntaxError {
+  util:rand-index 2 |
+  cond {
+    0 => gen:sample --string=implied semver:ParsedVersion ,
+    1 => gen:sample --string=implied SyntaxError | throw  ,
+  }
+}
+// refers python:
+;
+
+/** バージョン文字列が正しいかどうかを検証する
+ */
+command verify :: string -> (@OK string | @NG SemverSyntaxError) {
+ pass > in;
+ %in | try {semver:parse} |
+ when {
+   normal => @OK %in      ,
+   except => @NG content ,
+ }
+}
+;
+
+/** メジャーバージョンを整数値として取り出す
+ */
+command major-ver :: string -> integer(minimum=0) throws SyntaxError {
+  parse | $.major-ver
+}
+;
+
+/** マイナーバージョンを整数値として取り出す
+ */
+command minor-ver :: string -> integer(minimum=0) throws SyntaxError {
+  parse | $.minor-ver
+}
+;
+
+/** パッチバージョンを整数値として取り出す
+ */
+command patch-ver :: string -> integer(minimum=0) throws SyntaxError {
+  parse | $.patch-ver
+}
+;
+
+/** プレスリリースバージョンを文字列として取り出す
+ * 存在しないときは undefined を返す。
+ */
+command prerelease-ver :: string -> string? throws SyntaxError {
+  parse | $.prerelease-ver?
+}
+;
+
+/** ビルドバージョンを文字列として取り出す
+ * 存在しないときは undefined を返す。
+ */
+command build-ver :: string -> string? throws SyntaxError {
+  parse | $.build-ver?
+}
+;
+
+/** 安定バージョン（major ≧ 1）かどうかを判定する
+ */
+command stable :: string -> boolean throws SyntaxError {
+  major-ver > major;
+  [%major, 1] | num:ge --boolean
+}
+;
+
+/** SemVerの順序において ver1 < ver2 かどうか判定する
+ * 判定不能なときは indef を返す。
+ */
+@[should-be-implemented]
+command lt :: [string ver1, string ver2] -> triboolean throws SyntaxError
+// refers python:
+;
+
+/** SemVerの順序において ver1 <= ver2 かどうか判定する
+ * 判定不能なときは indef を返す。
+ */
+@[should-be-implemented] /* スクリプト実装も容易ではあるが */
+command le :: [string ver1, string ver2] -> triboolean throws SyntaxError
+// refers python:
+;
+
+/** SemVerの順序において ver1 > ver2 かどうか判定する
+ * 判定不能なときは indef を返す。
+ */
+command gt :: [string ver1, string ver2] -> triboolean throws SyntaxError {
+ [$.1, $.0] | semver:lt
+}
+;
+
+/** SemVerの順序において ver1 >= ver2 かどうか判定する
+ * 判定不能なときは indef を返す。
+ */
+command ge :: [string ver1, string ver2] -> triboolean throws SyntaxError {
+ [$.1, $.0] | semver:le
+}
+;
+
+/** ver1 が ver2 と互換性を持つかどうかを判定する
+ * 判定不能なときは indef を返す。
+ */
+@[should-be-implemented]
+command compat :: [string ver1, string ver2] -> triboolean throws SyntaxError
+// refers python:
+;
+
+// End of Module

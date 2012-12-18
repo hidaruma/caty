@@ -23,6 +23,7 @@ def initialize(system, interpreter_module):
                    u'mos',
                    u'os',
                    u'path',
+                   u'semver',
                    u'set',
                    u'strg',
                    u'template',

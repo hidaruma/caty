@@ -308,7 +308,7 @@ class TypeBodyReifier(TreeCursor):
             r[k] = v
         if isinstance(node, Root):
             r['location'] = node.canonical_name
-        else:
+        elif isinstance(node, Ref):
             r['location'] = node.module.canonical_name + ':' + node.name
         return r
 
@@ -350,7 +350,6 @@ class TypeBodyReifier(TreeCursor):
     def __reify_builtin(self, node):
         r = self._extract_common_data(node)
         r['typeName'] = node.name
-        del r['location'] # 組み込み型には不要
         return r
 
     @format_result(u'type-ref')
