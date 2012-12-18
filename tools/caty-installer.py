@@ -16,6 +16,9 @@ def normalize_path(path):
         return path.replace('/', '\\')
     return path
 
+def universal_path(path):
+    return path.replace('\\', '/')
+
 def main(argv):
     o = OptionParser(usage='usage: python %s [OPTIONS] output' % argv[0])
     o.add_option('--project', action='store', default=None)
@@ -154,12 +157,12 @@ class CatyInstaller(object):
         self._log_buffer.append(u'Operation: install\n')
         self._log_buffer.append(u'Dist-Archive-Name: %s\n' % os.path.basename(normalize_path(self.arcfile)))
         self._log_buffer.append(u'Dist-Archive-Digest: %s\n' % digest)
-        self._log_buffer.append(u'Destination-Dir: %s%s\n' % (os.path.sep, os.path.abspath(base_dir)[len(os.path.abspath(self.project)):].strip(os.path.sep)))
+        self._log_buffer.append(u'Destination-Dir: %s%s\n' % (os.path.sep, universal_path(os.path.abspath(base_dir)[len(os.path.abspath(self.project)):].strip(os.path.sep))))
         self._log_buffer.append(u'Destination-Name: %s\n' % self.dest)
         self._log_buffer.append(u'Local-Identifier: %s\n' % time.strftime('%Y%m%d%H%M%S', self.end_time))
         self._log_buffer.append(u'Backup-Suffix: .%s\n' % bksuffix)
         if self.backup_dir != '.':
-            self._log_buffer.append(u'Backup-Dir: %s\n' % os.path.abspath(self.backup_dir)[len(os.path.abspath(self.project)):])
+            self._log_buffer.append(u'Backup-Dir: %s\n' % universal_path(os.path.abspath(self.backup_dir)[len(os.path.abspath(self.project)):]))
         self._log_buffer.append(u'Date: %s%s\n' % (time.strftime('%Y-%m-%dT%H:%M:%S', self.end_time), tz_to_str(time.timezone)))
         self._log_buffer.append('\n')
 
@@ -172,7 +175,7 @@ class CatyInstaller(object):
                 if self.backup_dir == '.':
                     c.append(l[1] + self.bksuffix)
                 else:
-                    c.append(os.path.abspath(normalize_path(os.path.join(self.backup_dir, l[0].filename))) + '.' + self.bksuffix)
+                    c.append(universal_path(normalize_path(os.path.join(self.backup_dir, l[0].filename))) + '.' + self.bksuffix)
             self._log_buffer.append(u'|'.join(c)+u'\n')
 
     def _flush_log(self):
