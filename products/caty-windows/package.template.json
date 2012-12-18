@@ -1,0 +1,19 @@
+{"$$comment": "-*- coding: utf-8 -*-",
+
+   "name": "caty-windows",
+   "version": "$version",
+   "description": "OSがWindowsの場合の依存ライブラリ",
+   "installTarget": "project",
+   "dependencies" : {
+     "python2": {
+         "pyreadline": "=1.7.1"
+     },
+     "caty-core": "*"
+   },
+
+   "os": ["win"],
+   "cpu": ["x86", "x86_64"],
+   "engines": ["python2.5", "python2.6", "python2.7"],
+
+"$$end": null
+}
