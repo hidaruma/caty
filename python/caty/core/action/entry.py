@@ -30,6 +30,12 @@ class ResourceActionEntry(object):
         return self.parent.app
 
     @property
+    def internal_profiles(self):
+        for p in self.profiles:
+            if p.io_type != 'whole':
+                yield p
+
+    @property
     def invoker_obj(self):
         from caty.core.action.selector import verb_parser, PARENT, NO_CARE
         v, m, e = verb_parser.run(self.invoker, auto_remove_ws=True)
@@ -102,7 +108,7 @@ class ResourceActionEntry(object):
             }
             G['subgraphs'].append(self.profiles.make_relay_graph())
 
-            for profile in self.profiles:
+            for profile in self.internal_profiles:
                 if profile.input_type == u'_':
                     G['edges'].append({u'from': None, u'to': profile.name, u'type': u'relay'})
                 if profile.output_type == u'_':
