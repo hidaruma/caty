@@ -123,7 +123,8 @@ class ApplicationGroup(PbcObject):
             if name == app.name:
                 return
         a = Application(name, True, self, self._system)
-        self._apps.append(a)
+        if a.enabled:
+            self._apps.append(a)
 
     def setup_app(self, name):
         a = Application(name, False, self, self._system)
