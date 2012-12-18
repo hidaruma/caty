@@ -23,6 +23,6 @@ else
 
     echo ""
     echo "python command not found."
-    echo "Please install the Python version 2.5 or 2.6"
+    echo "Please install the Python version 2.5, 2.6 or 2.7"
     echo ""
 fi

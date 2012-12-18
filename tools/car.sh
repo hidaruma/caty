@@ -31,10 +31,10 @@ function list_apps { # => apps
 
   prj_dir=$1
 
-  if [ -d $prj_dir/archiving ]; then
+  if [ -d $prj_dir/prods ]; then
       echo project
   fi
-  if [ -d $prj_dir/global/archiving ]; then
+  if [ -d $prj_dir/global/prods ]; then
       echo global
   fi
 
@@ -42,7 +42,7 @@ function list_apps { # => apps
       if [ -d $prj_dir/$grp/ ]; then
 	  list=`/bin/ls -F $prj_dir/$grp/ | grep '/$' | sed -e 's@/@@'`
 	  for app in $list; do
-	      if [ -d $prj_dir/$grp/$app/archiving ]; then
+	      if [ -d $prj_dir/$grp/$app/prods ]; then
 		  echo $app
 	      fi
 	  done
@@ -68,9 +68,9 @@ function list_dists {
 	  ;;
   esac
 
-  archiving=$origin_dir/archiving
-  echo $archiving
-  list=`/bin/ls $archiving/*.package.json 2>/dev/null`
+  prods=$origin_dir/prods
+  echo $prods
+  list=`/bin/ls $prods/*.package.json 2>/dev/null`
   for f in $list; do
       basename $f .package.json
   done
@@ -129,15 +129,15 @@ if [ -z "$origin_dir" ]; then
     exit 1
 fi
 
-fset=$origin_dir/archiving/$dist_name.fset
+fset=$origin_dir/prods/$dist_name.fset
 
 if [ ! -f "$fset" ]; then
     echo "Cannot find fset file: $fset"
     exit 1
 fi
 
-package_json=$origin_dir/archiving/$dist_name.package.json
-meta_inf=$origin_dir/archiving/$dist_name.META-INF
+package_json=$origin_dir/prods/$dist_name.package.json
+meta_inf=$origin_dir/prods/$dist_name.META-INF
 
 if [ ! -f "$package_json" ]; then
     echo "Cannot find package.json file: $package_json"
