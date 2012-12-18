@@ -1,8 +1,8 @@
 #!/bin/sh
 # -*- coding: utf-8 -*-
 
-# アプリケーションフィーチャのインストールが出来ない
-# do_install_prj以外に、do_install_app, do_istall_glb が必要。
+# アプリケーションフィーチャのインストールが出来ない??
+
 
 DEFAULT_CATY_HOME=../caty
 
@@ -67,7 +67,7 @@ function check_dist {
 }
     
 
-function do_intall_prj { # dist_package, project_dir => 
+function do_install { # dist_package, project_dir => 
     if [ -z "$2" ]; then
 	echo Usage: $0 install dist_package project_dir [target]
 	exit 1
@@ -76,6 +76,9 @@ function do_intall_prj { # dist_package, project_dir =>
     target=$1
     dist_package=$2
     project_dir=$3
+    dest=$4
+
+    echo "debug: target=$target, dist_package=$dist_package, project_dir=$project_dir, dest=$dest"
 
 
     if [ -z "$target" ]; then
@@ -93,7 +96,7 @@ function do_intall_prj { # dist_package, project_dir =>
        ;;
      *)
        SUBEXT=caty-app
-       dest=$target
+       dest=$dest
        ;;
      *)
        echo "*** ERROR ***"
@@ -176,6 +179,13 @@ if [ -z "$3" ]; then
 fi
 
 project_dir=$3
-do_intall_prj $target $dist $project_dir
+
+if [ -z "$4" ]; then
+    dest
+else
+    dest=$4
+fi
+
+do_install $target $dist $project_dir $dest
 
 
