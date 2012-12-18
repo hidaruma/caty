@@ -257,6 +257,7 @@ class ActionProfiles(object):
     def make_relay_graph(self):
         G = {u'name': u'cluster_relay', u'label': u'', u'nodes': [], u'edges': [], u'subgraphs': []}
         for p in self._profiles:
+            if p.io_type == 'whole': continue
             G['nodes'].append({u'name': p.name, u'type': u'fragment'})
             if p.io_type == 'in':
                 for e in self._make_in_to_out_edges(p):
