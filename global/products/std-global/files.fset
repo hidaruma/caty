@@ -29,7 +29,7 @@
 /commands/numcmd.py
 /commands/reif.py
 /commands/sreif.py
-# /commands/strcmd.py
+/commands/strcmd.py
 # /commands/systemcmd.py
 /commands/util.py
 # /commands/zipcmd.py

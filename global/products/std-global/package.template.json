@@ -1,0 +1,15 @@
+{ "$$comment": "-*- coding: utf-8 -*- ",
+
+  "name": "std-global",
+  "version": "$version",
+  "installTarget": "global",
+
+  "description": "標準的なglobal",
+
+   "dependencies": {
+     "caty-core": "*"
+   },
+
+
+"$$end": null
+}
