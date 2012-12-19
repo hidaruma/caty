@@ -17,7 +17,7 @@ ARCHIVER = os.path.join('..', 'tools', 'caty-archiver.py')
 INSTALLER = os.path.join('..', 'tools', 'caty-installer.py')
 UNINSTALLER = os.path.join('..', 'tools', 'caty-uninstaller.py')
 
-def test01():
+def test01_caty_core():
     """
     基本的なインストーラーのテスト
 
@@ -49,7 +49,7 @@ def test01():
         print 'installer error'
         sys.exit(1)
 
-    log = glob(os.path.join('tmp-project', 'features', '*.install.log'))[-1]
+    log = glob(os.path.join('tmp-project', 'features', 'minimum-caty_*.install.log'))[-1]
     os.system('python %s %s --project=tmp-project' % (UNINSTALLER, log))
 
     if not ret == 0:
@@ -59,8 +59,41 @@ def test01():
         print 'uninstaller error'
         sys.exit(1)
 
+def test02_app():
+    arcfile = 'wiki_0.0.0.zip'
+    if os.path.exists(arcfile):
+        os.remove(arcfile)
+    fset = os.path.join('..', 'products', 'std-app.fset')
+    rmtree(os.path.join('tmp-project', 'extra'))
+    os.mkdir(os.path.join('tmp-project', 'extra'))
+    os.mkdir(os.path.join('tmp-project', 'extra', 'wiki'))
+    ret = os.system('python %s --project=.. --origin=wiki --fset=%s %s' % (ARCHIVER, fset, arcfile))
+    if not ret == 0:
+        sys.exit(ret)
+    if not os.path.exists(arcfile):
+        print 'archiver error'
+        sys.exit(1)
+    log_dir = os.path.join('tmp-project', 'features')
+    bk_dir = os.path.join('tmp-project', 'backup')
+    os.system('python %s --project=tmp-project --dest=wiki --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
+    if not ret == 0:
+        sys.exit(ret)
+    
+    if not os.path.exists(os.path.join('tmp-project', 'extra', 'wiki', 'app-manifest.xjson')):
+        print 'installer error'
+        sys.exit(1)
 
+    log = glob(os.path.join('tmp-project', 'features', 'wiki_*.install.log'))[-1]
+    os.system('python %s %s --project=tmp-project' % (UNINSTALLER, log))
+
+    if not ret == 0:
+        sys.exit(ret)
+
+    if os.path.exists(os.path.join('tmp-project', 'extra', 'wiki', 'app-manifest.xjson')):
+        print 'uninstaller error'
+        sys.exit(1)
 
 if __name__ == '__main__':
-    test01()
+    test01_caty_core()
+    test02_app()
 

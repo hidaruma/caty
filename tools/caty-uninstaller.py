@@ -112,6 +112,7 @@ class CatyUninstaller(object):
         for l in data.split('\n'):
             name, val = l.split(':', 1)
             r[name.strip()] = val.strip()
+        self.dest = r['Destination-Dir']
         return r
 
     def _parse_contents(self, data):
@@ -119,7 +120,7 @@ class CatyUninstaller(object):
         for l in data.split('\n'):
             if l:
                 chunk = l.split('|')
-                r.append(LogRecord(*chunk, project=self.project))
+                r.append(LogRecord(*chunk, project=self.project, dest=self.dest))
         return r
 
     def _flush_log(self, install_log_name, header, contents):
@@ -159,12 +160,12 @@ class CatyUninstaller(object):
                     os.mkdir(target)
 
 class LogRecord(object):
-    def __init__(self, arcfile, size, date, md5, destfile, result, msg, bkfile=None, project=''):
+    def __init__(self, arcfile, size, date, md5, destfile, result, msg, bkfile=None, project='', dest=''):
         self.arcfile = arcfile
         self.size = size
         self.date = date
         self.md5 = md5
-        self.destfile = normalize_path(os.path.abspath(normalize_path(os.path.join(os.path.abspath(project), destfile[1:]))))
+        self.destfile = normalize_path(os.path.abspath(normalize_path(os.path.join(os.path.abspath(project), dest.strip('/'), destfile[1:]))))
         self.result = result
         self.msg = msg
         self.bkfile = bkfile
