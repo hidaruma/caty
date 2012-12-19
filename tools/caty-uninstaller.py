@@ -165,7 +165,7 @@ class LogRecord(object):
         self.size = size
         self.date = date
         self.md5 = md5
-        self.destfile = normalize_path(os.path.abspath(normalize_path(os.path.join(os.path.abspath(project), dest.strip('/'), destfile[1:]))))
+        self.destfile = normalize_path(os.path.abspath(normalize_path(os.path.join(os.path.abspath(project), dest.strip('/'), arcfile[1:]))))
         self.result = result
         self.msg = msg
         self.bkfile = bkfile

@@ -128,7 +128,7 @@ class CatyInstaller(object):
             log_contents.append((file, os.path.abspath(destfile), digest, mode))
         self.end_time = time.localtime()
         self._write_header(path, base_dir, bksuffix)
-        self._write_file(log_contents)
+        self._write_file(log_contents, base_dir)
         if not self.dry_run:
             self._flush_log()
 
@@ -166,11 +166,19 @@ class CatyInstaller(object):
         self._log_buffer.append(u'Date: %s%s\n' % (time.strftime('%Y-%m-%dT%H:%M:%S', self.end_time), tz_to_str(time.timezone)))
         self._log_buffer.append('\n')
 
-    def _write_file(self, log_contents):
+    def _write_file(self, log_contents, base_dir):
         if self.dry_run:
             return
         for l in log_contents:
-            c = ['/' + l[0].filename, str(l[0].file_size), time.strftime('%Y-%m-%dT%H:%M:%S', datetime.datetime(*l[0].date_time).timetuple()), l[2], '/'+l[0].filename, l[3], '']
+            absp = '/' + (universal_path(os.path.abspath(base_dir)[len(os.path.abspath(self.project)):].strip(os.path.sep)))+'/'+l[0].filename
+            absp = absp.replace('//', '/')
+            c = ['/' + l[0].filename, 
+                 str(l[0].file_size), 
+                 time.strftime('%Y-%m-%dT%H:%M:%S', datetime.datetime(*l[0].date_time).timetuple()), 
+                 l[2], 
+                 absp, 
+                 l[3], 
+                 '']
             if l[3] == '!':
                 if self.backup_dir == '.':
                     c.append(l[1] + self.bksuffix)
