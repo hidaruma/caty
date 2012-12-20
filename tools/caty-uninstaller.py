@@ -51,7 +51,7 @@ class CatyUninstaller(object):
                     rec.result = '-'
                     if self._modified(rec):
                         bk = normalize_path(self.backup_dir + rec.arcfile) + bksuffix
-                        rec.msg = 'modified ' + bk 
+                        rec.msg = 'modified ' + self._to_relpath(bk) 
                         if not self.dry_run:
                             self._make_dir(normalize_path(rec.arcfile), self.backup_dir)
                             shutil.copyfile(rec.destfile, bk)
@@ -68,7 +68,7 @@ class CatyUninstaller(object):
                     if os.path.exists(rec.bkfile):
                         rec.result = '-'
                         if self._modified(rec):
-                            rec.msg = 'modified ' + rec.bkfile.rsplit('.', 1)[0] + '.chg'
+                            rec.msg = 'modified ' + self._to_relpath(rec.bkfile.rsplit('.', 1)[0] + '.chg')
                             if not self.dry_run:
                                 shutil.copyfile(rec.destfile, rec.bkfile.rsplit('.', 1)[0] + '.chg')
                         if not self.dry_run:
@@ -77,7 +77,7 @@ class CatyUninstaller(object):
                     else:
                         rec.result = '-'
                         if self._modified(rec):
-                            rec.msg = 'modified&backup-missing ' + rec.bkfile.rsplit('.', 1)[0] + '.chg'
+                            rec.msg = 'modified&backup-missing ' + self._to_relpath(rec.bkfile.rsplit('.', 1)[0] + '.chg')
                             if not self.dry_run:
                                 self._make_dir(rec.bkfile.rsplit('.', 1)[0] + '.chg', '')
                                 shutil.copyfile(rec.destfile, rec.bkfile.rsplit('.', 1)[0] + '.chg')
@@ -159,6 +159,11 @@ class CatyUninstaller(object):
                 else:
                     os.mkdir(target)
 
+    def _to_relpath(self, path):
+        if path.startswith(os.path.abspath(self.project)):
+            return '/' + path[len(os.path.abspath(self.project)):].strip('/')
+        return path
+
 class LogRecord(object):
     def __init__(self, arcfile, size, date, md5, destfile, result, msg, bkfile=None, project='', dest=''):
         self.arcfile = arcfile
@@ -166,12 +171,13 @@ class LogRecord(object):
         self.date = date
         self.md5 = md5
         self.destfile = normalize_path(os.path.abspath(normalize_path(os.path.join(os.path.abspath(project), dest.strip('/'), arcfile[1:]))))
+        self.orig_dest = destfile
         self.result = result
         self.msg = msg
         self.bkfile = bkfile
 
     def to_str(self):
-        return '|'.join([self.arcfile, self.size, self.date, self.md5, self.destfile, self.result, self.msg])
+        return '|'.join([self.arcfile, self.size, self.date, self.md5, self.orig_dest, self.result, self.msg])
 
 def tz_to_str(t):
     return '%+05d' % (-t/(60*60.0) * 100)
