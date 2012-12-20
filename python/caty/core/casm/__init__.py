@@ -5,35 +5,8 @@ import os
 import sys
 import types
 
-def initialize(system, interpreter_module):
+def initialize(system, std_modules, interpreter_module):
     builtin_schema = create_builtin_schema(interpreter_module)
-    std_modules = [u'authutil',
-                   u'common',
-                   u'debug',
-                   u'file',
-                   u'filter',
-                   u'fit',
-                   u'gen',
-                   u'http',
-                   u'inspect',
-                   u'json',
-                   u'list',
-                   u'logging',
-                   u'mail',
-                   u'mos',
-                   u'os',
-                   u'path',
-                   u'semver',
-                   u'set',
-                   u'strg',
-                   u'template',
-                   u'text',
-                   u'user',
-                   u'viva',
-                   u'webio',
-                   u'wsgi',
-                   u'xjson',
-    ]
     std_schema = map(lambda m:(m, create_std_schema(m)), std_modules)
     module = IntegratedModule(system)
     module.compile(builtin_schema, None)

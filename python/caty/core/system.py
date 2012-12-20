@@ -78,8 +78,6 @@ class System(PbcObject):
         caty.core.runtimeobject.i18n = self.i18n # 改めて設定
         # catyアプリケーション
         self._core_app = CoreApplication(self)
-        self.__cout.writeln(self.i18n.get('Loading system data'))
-        self._casm = casm.initialize(self, node)
 
         self._core_app._init()
         gag = ApplicationGroup('', self._global_config, no_ambient, no_app, app_names, self)
@@ -383,6 +381,36 @@ class CoreApplication(Application):
         self._loaded = True
 
     def _init(self):
+        self._system.cout.writeln(self.i18n.get('Loading system data'))
+        mafs_init = lambda type, path: self._global_config.mafs_initializer(self, self._system, type)('python', path, {}, self._system.appencoding)
+        try:
+            runtime_manifest = xjson.loads(open('python/app-manifest.xjson').read())
+        except:
+            self._system.cout.writeln(u'[Warning] ' + self.i18n.get(u'app-manifest of Caty Core is not found or invalid'))
+            runtime_manifest = {
+              "description": "Caty Core",
+              "assign": {
+                  "commands": "caty/core/std/command",
+                  "schemata": "caty/core/std/schema",
+
+                  "behaviors": null,
+                  "messages": null,
+                  "actions": null,
+                  "pub": null,
+                  "scripts": null,
+                  "include": null,
+                  "data": null,
+                  "lib": "lib",
+              },
+            }
+        schema_fs = mafs_init('schemata', runtime_manifest['assign']['schemata']).start()
+        modules = []
+        for e in schema_fs.opendir('/').read():
+            if e.path.endswith('.casm') or e.path.endswith('.casm.lit'):
+                modules.append(e.basename.split('.')[0])
+        if 'builtin' in modules:
+            modules.remove('builtin')
+        self._system._casm = casm.initialize(self._system, modules, node)
         self._schema_module = self._system._casm._core
         self._web_path = u''
         self._interpreter = script.initialize(self._schema_module, self, self._system)
