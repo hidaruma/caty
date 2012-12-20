@@ -161,7 +161,7 @@ class CatyUninstaller(object):
 
     def _to_relpath(self, path):
         if path.startswith(os.path.abspath(self.project)):
-            return '/' + path[len(os.path.abspath(self.project)):].strip('/')
+            return '/' + path[len(os.path.abspath(self.project)):].replace('\\', '/').strip('/')
         return path
 
 class LogRecord(object):
