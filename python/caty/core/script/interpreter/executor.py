@@ -152,8 +152,6 @@ class CommandExecutor(BaseInterpreter):
                 for n in node.facility_names:
                     getattr(node, n).commit()
             return r
-        except SystemResourceNotFound as e:
-            raise
         except ContinuationSignal as e:
             #node.signal_schema.validate(e.data)
             raise
@@ -163,6 +161,8 @@ class CommandExecutor(BaseInterpreter):
         except CatyException as e:
             import sys
             info = sys.exc_info()[2]
+            if e.tag in ('UnexpectedArg', 'UnexpectedOption', 'MissingArg', 'MissingOption'):
+                raise # このエラーの時はプロファイルが決定できないのでonly句のチェックなどは無理
             try:
                 node.throw_schema.validate(e.to_json())
             except Exception:

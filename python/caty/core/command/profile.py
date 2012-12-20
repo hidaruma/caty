@@ -4,6 +4,7 @@ from caty.jsontools import stdjson
 from caty.util import debug, brutal_encode
 from caty.util.optionparser import OptionParser, OptionParseFailed
 import caty.core.runtimeobject as ro
+from caty.core.exception import throw_caty_exception
 from caty.core.command.param import Option
 from caty.core.command import new_dummy, Syntax
 from caty.core.schema.base import UnivSchema
@@ -71,7 +72,7 @@ class ProfileContainer(object):
             if not err_msg:
                 return p.clone()
         else:
-            raise CommandUsageError(err_msg, self)
+            throw_caty_exception(*err_msg)
 
     def get_command_class(self):
         return self.command_class
@@ -197,11 +198,11 @@ class CommandProfile(object):
             found_key = set()
             for k, v in opts.items():
                 if k not in o_s and not has_wildcard:
-                    return ro.i18n.get('Unknwon option: $key', key=k)
+                    return u'UnexpectedOption', ro.i18n.get('Unknwon option: $key', key=k)
                 found_key.add(k)
             for k in key_set - found_key:
                 if not o_s[k].optional:
-                    return ro.i18n.get(u'Missing option: $key', key=k)
+                    return u'MissingOption', ro.i18n.get(u'Missing option: $key', key=k)
         if self.args_schema.type == 'null' and (args):
             return ro.i18n.get(u'$name takes no arguments', name=name)
         if self.args_schema.type == 'array':
@@ -211,9 +212,9 @@ class CommandProfile(object):
             min_len = (len(filter(lambda s: not s.optional, self.args_schema.schema_list)) 
                         - int(self.args_schema.repeat))
             if max_len is not None and len(args) > max_len:
-                return ro.i18n.get(u'$name takes only the arguments up to $max', max=max_len, name=name)
+                return u'UnexpectedArg', ro.i18n.get(u'$name takes only the arguments up to $max', max=max_len, name=name)
             if min_len > len(args):
-                return ro.i18n.get(u'$name requires $min or more arguments', min=min_len, name=name)
+                return u'MissingArg', ro.i18n.get(u'$name requires $min or more arguments', min=min_len, name=name)
         return u''
 
     def get_command_class(self):
