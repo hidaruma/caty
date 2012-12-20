@@ -53,7 +53,7 @@ def main():
             for ver in versions:
                 if compatible(ver, pkgmap[pkg]):
                     if options.verbose:
-                        print '[OK]', pkg, ver
+                        print '[OK]', pkg, pkgmap[pkg]
                     found = True
                     break
         if not found:
@@ -66,7 +66,7 @@ def main():
                 for installed in featuremap[feature]:
                     if compatible(ver, installed):
                         if options.verbose:
-                            print '[OK]', feature, ver
+                            print '[OK]', feature, installed
                         found = True
                         break
                 if found:
@@ -120,6 +120,8 @@ def compatible(required, installed):
         return newer(fix(required[1:]), fix(installed)) < 1
     elif required.startswith('='):
         return fix(required[1:]) == fix(installed)
+    elif required == '*':
+        return True
     else:
         return newer(fix(required), fix(installed)) < 1
 
