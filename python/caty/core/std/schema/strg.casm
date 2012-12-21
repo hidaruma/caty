@@ -25,21 +25,21 @@ type Collection = {
 command create-collection {@[default(false)]"as-global": boolean?} [string, string?] :: void -> void
     reads schema
     updates storage
-    refers python:caty.core.std.command.strg.CreateCollection;
+    refers python:strg.CreateCollection;
 
 /**
  * コレクションの削除。
  */
 command drop-collection [string] :: void -> void
     updates storage
-    refers python:caty.core.std.command.strg.DropCollection;
+    refers python:strg.DropCollection;
 
 /**
  * コレクション名とそのスキーマ一覧の表示。
  */
 command list-collections :: void -> [Collection*]
     reads storage
-    refers python:caty.core.std.command.strg.List;
+    refers python:strg.List;
 
 /**
  * JSON ストレージの検索。
@@ -95,7 +95,7 @@ command select<T default object> {
                 "offset": pinteger?,
                } [string, string*] :: any -> [T*]
     reads storage
-    refers python:caty.core.std.command.strg.Select;
+    refers python:strg.Select;
 
 /**
  * 一件のデータ取得。
@@ -106,7 +106,7 @@ command select<T default object> {
 command select1<T default object> [string] :: any -> T
     throws [CollectionNotFound, BadSituation]
     reads storage
-    refers python:caty.core.std.command.strg.Select1;
+    refers python:strg.Select1;
 
 /**
  * JSON コレクションに入力値を挿入する。
@@ -116,7 +116,7 @@ command select1<T default object> [string] :: any -> T
  */
 command insert<T default object> {@[default(false)]"allow-dup": boolean?} [string] :: T -> @OK null | @NG null
     uses storage
-    refers python:caty.core.std.command.strg.Insert;
+    refers python:strg.Insert;
 
 /**
  * JSON ストレージの更新。
@@ -124,7 +124,7 @@ command insert<T default object> {@[default(false)]"allow-dup": boolean?} [strin
  */
 command update [string] :: [any, any] -> null
     uses storage
-    refers python:caty.core.std.command.strg.Update;
+    refers python:strg.Update;
 
 /**
  * JSON コレクションの値の削除。
@@ -132,7 +132,7 @@ command update [string] :: [any, any] -> null
  */
 command delete [string] :: any -> null
     updates storage
-    refers python:caty.core.std.command.strg.Delete;
+    refers python:strg.Delete;
 
 /**
  * コレクションのダンプ。
@@ -141,7 +141,7 @@ command delete [string] :: any -> null
 command dump 
     [string] :: void -> DumpInfo
     reads storage
-    refers python:caty.core.std.command.strg.Dump;
+    refers python:strg.Dump;
 
 /**
  * ダンプされた情報のリストア。
@@ -150,4 +150,4 @@ command dump
  */
 command restore :: DumpInfo -> void
     uses storage
-    refers python:caty.core.std.command.strg.Restore;
+    refers python:strg.Restore;

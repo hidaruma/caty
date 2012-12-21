@@ -156,13 +156,13 @@ command make-env
   [string path, string? query]
 :: (null|string|binary) -> Environ
     throws InvalidInput
-    refers python:caty.core.std.command.wsgilib.MakeEnv
+    refers python:wsgilib.MakeEnv
 ;
 
 
 command req-to-env :: Request -> Environ
     throws InvalidInput
-    refers python:caty.core.std.command.wsgilib.ReqToEnv
+    refers python:wsgilib.ReqToEnv
 ;
 
 
@@ -187,17 +187,17 @@ command call-application
     "no-middle": boolean?,
   }
 :: Environ -> Response
-  refers python:caty.core.std.command.wsgilib.CallApplication
+  refers python:wsgilib.CallApplication
 ;
 
 command process-env
 :: Environ -> Environ
-  refers python:caty.core.std.command.wsgilib.ProcessEnv
+  refers python:wsgilib.ProcessEnv
 ;
 
 command lookup-and-exec :: Environ -> any
   throws [ApplicationNotFound, FileNotFound, ActionNotFound]
-  refers python:caty.core.std.command.wsgilib.LookupAndExec
+  refers python:wsgilib.LookupAndExec
 ;
 
 

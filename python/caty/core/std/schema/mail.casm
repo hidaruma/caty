@@ -56,6 +56,6 @@ command send {
     "server": string?,
     } [string* to-addrs] :: Message -> void throws Exception
     reads env
-    refers python:caty.core.std.command.mail.Send;
+    refers python:mail.Send;
 
 

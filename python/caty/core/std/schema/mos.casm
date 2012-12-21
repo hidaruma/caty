@@ -16,7 +16,7 @@ command fullpath
    "as": CDPathContext?
  }
 :: string -> string throws [InvalidInput, MissingOption]
-    refers python:caty.core.std.command.mos.FullPath;
+    refers python:mos.FullPath;
 
 /** メタオブジェクトから完全修飾名を取り出す。 */
 command get-canonical-name :: @* {"name": string, "location": {*:string}, *:any?} -> string {

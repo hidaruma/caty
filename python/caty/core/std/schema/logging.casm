@@ -9,7 +9,7 @@ module logging in casm;
  */
 command debug {@[default(false)]"cout": boolean?} :: string -> void
     uses [stream, logger]
-    refers python:caty.core.std.command.logginglib.Debug;
+    refers python:logginglib.Debug;
 
 /**
  * app.logにインフォメーションログを書き込む。
@@ -17,7 +17,7 @@ command debug {@[default(false)]"cout": boolean?} :: string -> void
  */
 command info {@[default(false)]"cout": boolean?} :: string -> void
     uses [stream, logger]
-    refers python:caty.core.std.command.logginglib.Info;
+    refers python:logginglib.Info;
 
 /**
  * app.logに警告ログを書き込む。
@@ -25,7 +25,7 @@ command info {@[default(false)]"cout": boolean?} :: string -> void
  */
 command warning {@[default(false)]"cout": boolean?} :: string -> void
     uses [stream, logger]
-    refers python:caty.core.std.command.logginglib.Warning;
+    refers python:logginglib.Warning;
 
 /**
  * app.logにエラーログを書き込む。
@@ -33,7 +33,7 @@ command warning {@[default(false)]"cout": boolean?} :: string -> void
  */
 command error {@[default(false)]"cout": boolean?} :: string -> void
     uses [stream, logger]
-    refers python:caty.core.std.command.logginglib.Error;
+    refers python:logginglib.Error;
 
 
 

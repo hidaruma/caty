@@ -18,14 +18,14 @@ command dump<T default univ>
  }
  :: T -> T 
     reads env
-    refers python:caty.core.std.command.debug.Dump;
+    refers python:debug.Dump;
 
 /**
  * セッションの値をすべて出力する。
  */
  command dump-session :: void -> object
     reads session
-    refers python:caty.core.std.command.debug.DumpSession;
+    refers python:debug.DumpSession;
 
 /**
  * セッションから指定されたキーの値を取得する。
@@ -33,28 +33,28 @@ command dump<T default univ>
  */
  command get-session<T default any> {"nullable": boolean?} [string] :: void -> T
     reads session
-    refers python:caty.core.std.command.debug.GetSession;
+    refers python:debug.GetSession;
 
 /**
  * スキーマ定義のダンプ
  */
 command dump-schema {@[default(false)]"deep": boolean?} [string] :: void -> void
     reads [interpreter, schema]
-    refers python:caty.core.std.command.debug.DumpSchema;
+    refers python:debug.DumpSchema;
 
 /**
  * コマンドの入出力型のダンプ
  */
 command dump-cmd {@[default(false)]"deep": boolean?} [string] :: void -> void
     reads [interpreter, schema]
-    refers python:caty.core.std.command.debug.DumpCmd;
+    refers python:debug.DumpCmd;
 
 /**
  * メモリ使用状況のプロファイルを行う。
  * このコマンドを使うにはguppy (http://pypi.python.org/pypi/guppy)が必要となる。
  */
 command profile {"tree": boolean?} :: void -> string
-    refers python:caty.core.std.command.debug.Profile;
+    refers python:debug.Profile;
 
 type FuserReport = {
     "total": integer,
@@ -65,7 +65,7 @@ type FuserReport = {
  * Catyの開いているファイルの数を確認する。(Linuxのみ)
  */
 command fuser :: void -> FuserReport
-    refers python:caty.core.std.command.debug.Fuser;
+    refers python:debug.Fuser;
 
 /**
  * Catyスクリプトに型情報の注釈を付ける。
@@ -75,7 +75,7 @@ command fuser :: void -> FuserReport
  */
 command annotate [string path] :: void -> string
     reads [scripts, pub, data, interpreter]
-    refers python:caty.core.std.command.debug.Annotate;
+    refers python:debug.Annotate;
 
 /**
  * デバッガを起動する。
@@ -84,11 +84,11 @@ command annotate [string path] :: void -> string
  */
 @[interactive]
 command debugger :: void -> void
-    refers python:caty.core.std.command.debug.Debugger;
+    refers python:debug.Debugger;
 
 /**
  * コンパイル済みテンプレートのオブジェクトコードを命令コード名に変換する。
  */
 command disasm-template :: string|binary -> string
-    refers python:caty.core.std.command.debug.DisasmTemplate;
+    refers python:debug.DisasmTemplate;
 

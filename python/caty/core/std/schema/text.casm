@@ -13,13 +13,13 @@ type RegexpMatch = {
  * 入力値の先頭と末尾から空白と改行を除去して返す。
  */
 command chop :: string -> string
-    refers python:caty.core.std.command.text.Chop;
+    refers python:text.Chop;
 
 /**
  * 入力値の先頭と末尾から引数の文字を除去して返す。
  */
 command trim [string] :: string -> string
-    refers python:caty.core.std.command.text.Trim;
+    refers python:text.Trim;
 
 /**
  * 入力値を creole 記法の Wiki テキストだとみなし、 HTML に変換して返す。
@@ -27,38 +27,38 @@ command trim [string] :: string -> string
  * 応用的な理容には creole モジュールと xjx モジュールを使用すること。
  */
 command creole :: string -> string
-    refers python:caty.core.std.command.text.Creole;
+    refers python:text.Creole;
 
 /**
  * 引数を区切り文字として入力値を連結して返す。
  */
 command join [string]:: [string*] -> string
-    refers python:caty.core.std.command.text.Join;
+    refers python:text.Join;
 
 /**
  * 入力値を連結して返す。
  */
 command concat :: [string*] -> string
-    refers python:caty.core.std.command.text.Concat;
+    refers python:text.Concat;
 
 /**
  * 入力値を大文字にして返す。
  */
 command toupper :: string -> string
-    refers python:caty.core.std.command.text.ToUpper;
+    refers python:text.ToUpper;
 
 /**
  * 入力値を小文字にして返す。
  */
 command tolower :: string -> string
-    refers python:caty.core.std.command.text.ToLower;
+    refers python:text.ToLower;
 
 /**
  * 入力値を引数の文字列で分割して返す。
  * 第二引数が与えられた場合、それ+1が分割数の最大値となる。
  */
 command split [string, integer?] :: string -> [string*]
-    refers python:caty.core.std.command.text.Split;
+    refers python:text.Split;
 
 /**
  * 入力値を引数の文字列で分割して返す。
@@ -66,7 +66,7 @@ command split [string, integer?] :: string -> [string*]
  * text:split との差異は、こちらは文字列を末尾から分割していく事である。
  */
 command rsplit [string, integer?] :: string -> [string*]
-    refers python:caty.core.std.command.text.RSplit;
+    refers python:text.RSplit;
 
 /**
  * 入力文字列が引数の正規表現パターンに合致するかどうかを返す。
@@ -74,7 +74,7 @@ command rsplit [string, integer?] :: string -> [string*]
  * 合致していなければ @fail タグの付いた入力文字列が返る。
  */
 command regmatch [string] :: string -> @OK RegexpMatch | @NG string
-    refers python:caty.core.std.command.text.RegMatch;
+    refers python:text.RegMatch;
 
 /** 不正文字（非文字）の報告
  */
@@ -102,9 +102,9 @@ command verify-chars
   @[default(100)]
   "max" : integer(minimum=0)?
 } :: (string|binary) -> (@OK [] | @NG [IllegalCharReport, IllegalCharReport*])
-refers python:caty.core.std.command.text.VerifyChars;
+refers python:text.VerifyChars;
 
 
 /** 文字列から、引数で与えられた接頭辞を取り除く */
 command rest [string prefix] :: string -> (string|null)
-  refers python:caty.core.std.command.text.Rest;
+  refers python:text.Rest;

@@ -30,14 +30,14 @@ type TargetForm = string | Response;
  */
 command embed-token :: TargetForm -> TargetForm
     uses [session, token]
-    refers python:caty.core.std.command.authutil.EmbedToken;
+    refers python:authutil.EmbedToken;
 
 /**
  * リクエストトークンの生成。
  */
 command gen-token :: void -> string
     uses [session, token]
-    refers python:caty.core.std.command.authutil.GenerateToken;
+    refers python:authutil.GenerateToken;
 
 /**
  * セキュリティトークンチェック。
@@ -48,5 +48,5 @@ command gen-token :: void -> string
 command check-token<T default any> :: TokenEmbeded -> TokenCheckResult<T>
     reads token
     uses session
-    refers python:caty.core.std.command.authutil.CheckToken;
+    refers python:authutil.CheckToken;
 

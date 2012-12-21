@@ -16,12 +16,12 @@ type TemplateContext = univ;
  * 入力文字列が不正かつエラー回復不能なテンプレート構文であった場合、例外が送出される。
  */
 command compile :: TemplateText -> TemplateObject
-    refers python:caty.core.std.command.template.Compile
+    refers python:template.Compile
 ;
 
 command expand :: [TemplateContext, TemplateObject] -> string
     reads [interpreter, schema, env]
     uses [include, pub]
-    refers python:caty.core.std.command.template.Expand
+    refers python:template.Expand
 ;
 

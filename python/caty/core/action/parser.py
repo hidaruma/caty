@@ -127,7 +127,6 @@ class ResourceBodyBlock(Parser):
         self.parent = parent
         self.implemented = u'none'
         self._invoker = None
-        self.actname = None
 
     def __call__(self, seq):
         option(self.filetype_)(seq)
@@ -153,7 +152,6 @@ class ResourceBodyBlock(Parser):
                     u'Duplicated action name: $name resource: $resource module: $module', 
                     name=n, resource=self.rcname, module=self._module_name)
         self.names.add(n)
-        self.actname = n
         invoker = option(self.invoker)(seq)
 
         opts = option(object_, ObjectNode({}))(seq)
@@ -253,9 +251,9 @@ class ResourceBodyBlock(Parser):
             elif t == 'produces':
                 next_states = v
         if in_type:
-            p = ActionProfile(u'whole', self.actname, in_type, out_type, relay_list, next_states, redirects)
+            p = ActionProfile(u'whole', u'', in_type, out_type, relay_list, next_states, redirects)
         elif link:
-            p = ActionProfile(u'whole', self.actname, u'_', u'_', relay_list, next_states, redirects)
+            p = ActionProfile(u'whole', u'', u'_', u'_', relay_list, next_states, redirects)
         else:
             p = None
         return p, jmp, resource_decl

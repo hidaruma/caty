@@ -7,31 +7,31 @@ type ext  = deferred string;
 
 /** Pythonの os.path.join と同じでよかんべ */
 command join :: [path*] -> path
-    refers python:caty.core.std.command.path.Join;
+    refers python:path.Join;
 
 /** Pythonの os.path.split と同じでよかんべ */
 command split :: path -> [path head, path tail]
-    refers python:caty.core.std.command.path.Split;
+    refers python:path.Split;
 
 /** ディレクトリ部 */
 command dir :: path -> path
-    refers python:caty.core.std.command.path.Dir;
+    refers python:path.Dir;
 
 /** ベース名 */
 command base :: path -> path
-    refers python:caty.core.std.command.path.Base;
+    refers python:path.Base;
 
 /** 拡張子 */
 command ext :: path -> ext
-    refers python:caty.core.std.command.path.Ext;
+    refers python:path.Ext;
 
 /** ディレクトリと拡張子を除いた部分 */
 command trunk :: path -> path
-    refers python:caty.core.std.command.path.Trunk;
+    refers python:path.Trunk;
 
 /** 拡張子だけ取り替える */
 command replace-ext :: [path, ext] -> path
-    refers python:caty.core.std.command.path.ReplaceExt;
+    refers python:path.ReplaceExt;
 
 type path = string(remark="file-path");
 
@@ -43,4 +43,4 @@ command matches
   }
   [string] 
   :: string -> (@True string | @False string) | boolean
-  refers python:caty.core.std.command.path.Matches;
+  refers python:path.Matches;

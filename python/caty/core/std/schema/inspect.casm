@@ -88,7 +88,7 @@ command list-cmd
  }
  [string moduleName] :: void -> [ShortProfile*]
  throws ModuleNotFound
- refers python:caty.core.std.command.inspect.ListCommands;
+ refers python:inspect.ListCommands;
 
 /** モジュール情報 */
 type Module = {
@@ -118,14 +118,14 @@ type Module = {
 command list-mod
  [string appName] :: void -> [Module*]
  throws ApplicationNotFound
- refers python:caty.core.std.command.inspect.ListModules;
+ refers python:inspect.ListModules;
 
 /** モジュールの情報を取得する。
  */
 command mod-info
  [string appName] :: void -> Module
  throws ApplicationNotFound
- refers python:caty.core.std.command.inspect.ModuleInfo;
+ refers python:inspect.ModuleInfo;
 
 /**
  * 引数の型に対するレイフィケーションイメージを出力する。
@@ -133,7 +133,7 @@ command mod-info
 command reify-type [string typeName] :: void -> ReifiedTypeTerm | RTypeDef
     throws [ApplicationNotFound, ModuleNotFound, TypeNotFound]
     reads schema
-    refers python:caty.core.std.command.inspect.ReifyType;
+    refers python:inspect.ReifyType;
 
 /**
  * 引数のコマンドに対するレイフィケーションイメージを出力する。
@@ -142,21 +142,21 @@ command reify-type [string typeName] :: void -> ReifiedTypeTerm | RTypeDef
 command reify-cmd [string cmdName] :: void -> ReifiedCommand
     throws [ApplicationNotFound, ModuleNotFound, CommandNotFound]
     reads schema
-    refers python:caty.core.std.command.inspect.ReifyCmd;
+    refers python:inspect.ReifyCmd;
 
 /**
  * スキーマモジュールのレイフィケーションイメージを出力する。
  */
 command reify-module [string modName] :: void -> ReifiedModule
     throws [ApplicationNotFound, ModuleNotFound, BadArg]
-    refers python:caty.core.std.command.inspect.ReifyModule;
+    refers python:inspect.ReifyModule;
 
 /** 
  * コマンドの所属するモジュールの完全修飾名を出力する。
  * 主にregister-publicやoverrideで登録されたコマンドの所在を確認するのに使う。
  */
 command where-is [string cmdName] :: void -> string
-    refers python:caty.core.std.command.inspect.Whereis;
+    refers python:inspect.Whereis;
 
 /*レイフィケーション関係*/
 

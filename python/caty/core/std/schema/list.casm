@@ -10,7 +10,7 @@ module list in casm;
  * このコマンドは unzip と対になっている。
  */
 command zip<S default any, T default any> :: [[S*], [T*]] -> [[S, T]*]
-        refers python:caty.core.std.command.listlib.Zip;
+        refers python:listlib.Zip;
 
 /**
  * zipと同様な機能を持つが、三のリストを入力として受け取る。
@@ -20,7 +20,7 @@ command zip<S default any, T default any> :: [[S*], [T*]] -> [[S, T]*]
  * このコマンドは unzip3 と対になっている。
  */
 command zip3<S default any, T default any, U default any> :: [[S*],[T*],[U*]] -> [[S, T, U]*]
-        refers python:caty.core.std.command.listlib.Zip3;
+        refers python:listlib.Zip3;
 
 /**
  * 2要素のタプルのリストを受け取り、それらを二つのリストのタプルにして返す。
@@ -29,7 +29,7 @@ command zip3<S default any, T default any, U default any> :: [[S*],[T*],[U*]] ->
  * このコマンドは zip コマンドと対になっている。
  */
 command unzip<S default any, T default any> :: [[S, T]*] -> [[S*], [T*]]
-    refers python:caty.core.std.command.listlib.UnZip;
+    refers python:listlib.UnZip;
 
 /**
  * 3要素のタプルのリストを受け取り、それらを三つのリストのタプルにして返す。
@@ -39,26 +39,26 @@ command unzip<S default any, T default any> :: [[S, T]*] -> [[S*], [T*]]
  * このコマンドは zip3 コマンドと対になっている。
  */
 command unzip3<S default any, T default any, U default any> :: [[S, T, U]*] -> [[S*],[T*],[U*]] 
-    refers python:caty.core.std.command.listlib.UnZip3;
+    refers python:listlib.UnZip3;
 
 /**
  * 入力値の長さを返す。
  */
 command length<S default any> :: [S*] -> integer
-    refers python:caty.core.std.command.listlib.Length;
+    refers python:listlib.Length;
 
 /**
  * 入力値を引数の回数分だけ繰り返したリストを返す。
  */
 command cycle<T default any> [integer] :: T -> [T*]
-    refers python:caty.core.std.command.listlib.Cycle;
+    refers python:listlib.Cycle;
 
 /**
  * 入力値を添字のリストと zip した値を返す。
  * 例えば ["x", "y", "z"] という入力に対しては [(0, "x"), (1, "y"), (2, "z")] という値が返る。
  */
 command enumerate<T default any> :: [T*] -> [[integer, T]*]
-    refers python:caty.core.std.command.listlib.Enumerate;
+    refers python:listlib.Enumerate;
 
 /**
  * 入力値をソートして返す。
@@ -66,7 +66,7 @@ command enumerate<T default any> :: [T*] -> [[integer, T]*]
  * key にあたるプロパティがソートキーとして使われる（JSON パス式には未対応）。
  */
 command sort<T default any>  {"key":string?, @[default(false)]"reverse": boolean?} :: [T*] -> [T*]
-    refers python:caty.core.std.command.listlib.Sort;
+    refers python:listlib.Sort;
 
 /**
  * 入力値のスライスを返す。
@@ -74,13 +74,13 @@ command sort<T default any>  {"key":string?, @[default(false)]"reverse": boolean
  * 第二引数は省略可能で、その場合は配列の最終要素までのスライスが返される。
  */
 command slice<T default any> [integer, integer?] :: [T*] -> [T*]
-    refers python:caty.core.std.command.listlib.Slice;
+    refers python:listlib.Slice;
 
 /**
  * いくつかの配列を結合した新しい配列を返す。
  */
 command concat :: [[any*]*] -> [any*]
-    refers python:caty.core.std.command.listlib.Concat;
+    refers python:listlib.Concat;
 
 /**
  * 入力値の第一要素が、第二要素を含むかどうか返す。
@@ -91,13 +91,13 @@ command contains
    "boolean" : boolean?
  }
 :: [[any*], any] -> boolean | @True [[any*], any] | @False [[any*], any]
-    refers python:caty.core.std.command.listlib.Contains;
+    refers python:listlib.Contains;
 
 /**
  * ルーズ配列(undefinedを含んだ配列)をundefinedを含まない配列にして返す。
  */
 command tighten :: [any*] -> [any*]
-    refers python:caty.core.std.command.listlib.Tighten;
+    refers python:listlib.Tighten;
 
 /**
  * 連続する整数値からなる配列を返す。
@@ -109,11 +109,11 @@ command range
     "up-to": boolean?
   } 
   [integer start, integer end] :: void  -> [integer*]
-    refers python:caty.core.std.command.listlib.Range;
+    refers python:listlib.Range;
 
 /**
  * 配列の要素を逆順にする。
  */
 command reverse<T default any> :: [T*] -> [T*]
-    refers python:caty.core.std.command.listlib.Reverse;
+    refers python:listlib.Reverse;
 

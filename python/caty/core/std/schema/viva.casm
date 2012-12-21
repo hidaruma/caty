@@ -46,7 +46,7 @@ command draw {
      throws [ModuleNotFound]
      reads env
      updates pub
-    refers python:caty.core.std.command.viva.cara.DrawModule;
+    refers python:viva.cara.DrawModule;
 
 /** 
  * アクションモジュール（.caraファイル）の個別アクションを視覚化する。
@@ -90,7 +90,7 @@ command draw-action {
      throws [ModuleNotFound, ResourceNotFound, ActionNotFound]
      reads env
      updates pub
-    refers python:caty.core.std.command.viva.cara.DrawAction;
+    refers python:viva.cara.DrawAction;
 
 /**
  * 名前ツリーのXJSON表現。
@@ -118,7 +118,7 @@ command draw-nt {
  "font": string?
 } :: void -> void | binary | string | NameNode
     updates pub
-    refers python:caty.core.std.command.viva.nt.DrawNT;
+    refers python:viva.nt.DrawNT;
 
 /**
  * まだ出来てないよ
@@ -144,5 +144,5 @@ command draw-scenarios {
   } [string startAction, string userrole] :: void -> void | binary | string
      throws [ModuleNotFound, ResourceNotFound, ActionNotFound]
      uses pub
-    refers python:caty.core.std.command.viva.cara.Scenarios;
+    refers python:viva.cara.Scenarios;
 

@@ -20,35 +20,35 @@ type RegistryInfo = UserInfo & {
  */
 command exists :: string -> boolean
     reads storage
-    refers python:caty.core.std.command.user.ExistsUser;
+    refers python:user.ExistsUser;
 
 /**
  * 新規ユーザの登録を行う。
  */
 command add :: RegistryInfo -> boolean
                uses storage
-               refers python:caty.core.std.command.user.AddUser;
+               refers python:user.AddUser;
 
 /**
  * ユーザの削除を行う。入力値はユーザのアカウント名である。
  */
 command delete :: string -> boolean
         uses storage
-        refers python:caty.core.std.command.user.DelUser;
+        refers python:user.DelUser;
 
 /**
  * パスワードの変更を行う。
  */
 command password :: RegistryInfo -> boolean
     uses storage
-    refers python:caty.core.std.command.user.ChangePassword;
+    refers python:user.ChangePassword;
 
 /**
  * ユーザ情報の取得を行う。
  **/
 command info :: void -> UserInfo
     reads user
-    refers python:caty.core.std.command.user.GetUserInfo;
+    refers python:user.GetUserInfo;
     
 /**
  * ユーザ情報を最新の情報に更新する。
@@ -56,7 +56,7 @@ command info :: void -> UserInfo
 command update-info :: void -> void
     reads storage
     uses user
-    refers python:caty.core.std.command.user.UpdateInfo;
+    refers python:user.UpdateInfo;
 
 
 type LoginForm = {
@@ -76,7 +76,7 @@ type LoginForm = {
 command login :: LoginForm -> @OK Redirect | @NG string
                 reads [storage, env]
                 uses [user, session]
-                refers python:caty.core.std.command.user.Login;
+                refers python:user.Login;
 
 /**
  * ログインしているか否かのチェックを行う。
@@ -87,7 +87,7 @@ command login :: LoginForm -> @OK Redirect | @NG string
  */
 command loggedin<T default any> {@[default("")]"userid":string?} :: T -> @OK T | @NG T
                                 reads user
-                                refers python:caty.core.std.command.user.Loggedin;
+                                refers python:user.Loggedin;
 
 
 /**
@@ -98,6 +98,6 @@ command loggedin<T default any> {@[default("")]"userid":string?} :: T -> @OK T |
 command logout :: string -> Redirect
     reads env
     uses [user, session]
-    refers python:caty.core.std.command.user.Logout;
+    refers python:user.Logout;
 
 

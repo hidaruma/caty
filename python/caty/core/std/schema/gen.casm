@@ -15,7 +15,7 @@ command sample {
     "mod": string?,
   } [string typename] :: void -> univ
   reads schema
-  refers python:caty.core.std.command.gen.Sample;
+  refers python:gen.Sample;
 
 /**
  * 与えられたパスパターンからURLを生成する。
@@ -23,6 +23,6 @@ command sample {
 command url [PathPattern pathPattern] :: void -> string
     throws BadArg
     reads env
-    refers python:caty.core.std.command.gen.Url;
+    refers python:gen.Url;
 
 type PathPattern = string;

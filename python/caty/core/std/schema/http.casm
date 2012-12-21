@@ -28,7 +28,7 @@ command head
    "timeout" : number?,
  }
  [url] :: void -> Resp
-  refers python:caty.core.std.command.http.Head
+  refers python:http.Head
 ;
 
 
@@ -41,7 +41,7 @@ command get
    "verb": string?,
  }
  [url] :: void -> Resp
-  refers python:caty.core.std.command.http.Get
+  refers python:http.Get
 ;
 
 /** POSTリクエスト */
@@ -55,7 +55,7 @@ command post
    "verb": string?,
  }
  [url] :: bodyContent -> Resp
-  refers python:caty.core.std.command.http.Post
+  refers python:http.Post
 ;
 
 /** PUTリクエスト */
@@ -69,7 +69,7 @@ command put
    "verb": string?,
  }
  [url] :: bodyContent -> Resp
-  refers python:caty.core.std.command.http.Put
+  refers python:http.Put
 ;
 
 /** DELETEリクエスト */
@@ -81,7 +81,7 @@ command delete
    "verb": string?,
  }
  [url] :: void -> Resp
-//  refers python:caty.core.std.command.http.Delete
+//  refers python:http.Delete
 ;
 
 
@@ -99,7 +99,7 @@ type UrlDecoded = {
 /** JSONオブジェクトのurlエンコード */
 command urlencode :: UrlEncodable -> string
   reads env
-  refers python:caty.core.std.command.http.UrlEncode
+  refers python:http.UrlEncode
 ;
 
 /** urlエンコードされたJSONオブジェクトのデコード */
@@ -111,7 +111,7 @@ command urldecode
    "keep-illegal" : boolean?
  }
  :: string -> UrlDecoded
-  refers python:caty.core.std.command.http.UrlDecode
+  refers python:http.UrlDecode
 ;
 
 /** クエリ文字列のパーズ 
@@ -125,13 +125,13 @@ command parse-qs
    "keep-illegal" : boolean?
  }
  :: string -> UrlDecoded
-  refers python:caty.core.std.command.http.ParseQS
+  refers python:http.ParseQS
 ;
 
 
 /** Content-Type のパーズ */
 command parse-content-type :: string -> object
-  refers python:caty.core.std.command.http.ParseContentType
+  refers python:http.ParseContentType
 ;
 
 /** Catyの動詞をURLに付加する
@@ -139,7 +139,7 @@ command parse-content-type :: string -> object
  * 引数が指定されない場合は何もしない
  */
 command push-verb [string? verb] :: uri -> uri
- refers python:caty.core.std.command.http.PushVerb;
+ refers python:http.PushVerb;
 
 
 // End of Module

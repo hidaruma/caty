@@ -15,6 +15,8 @@ class CommandLoader(object):
 
 class BuiltinLoader(object):
     def get(self, pkg, cls):
+        if not pkg.startswith('caty.'):
+            pkg = 'caty.core.std.command.' + pkg
         mod = __import__(pkg, fromlist=[cls])
         return getattr(mod, cls)
 

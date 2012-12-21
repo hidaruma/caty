@@ -12,7 +12,7 @@ type AnyObject = {*:any};
  */
 command read {@[default(false)]"with-doc": boolean?} [string] :: void -> any
     reads [pub, data, sysfiles]
-    refers python:caty.core.std.command.xjsonlib.ReadJson;
+    refers python:xjsonlib.ReadJson;
 
 /**
  * 引数で指定されたファイルに JSON データを書き込む。
@@ -21,36 +21,36 @@ command read {@[default(false)]"with-doc": boolean?} [string] :: void -> any
  */
 command write {@[default(false)]"encode-json": boolean?} [string] :: any -> void
     updates [data, pub]
-    refers python:caty.core.std.command.xjsonlib.WriteJson;
+    refers python:xjsonlib.WriteJson;
 
 /**
  * 入力値文字列をパースして、JSONオブジェクトを出力する。
  */
 command parse :: string -> any
     reads env
-    refers python:caty.core.std.command.xjsonlib.Parse;
+    refers python:xjsonlib.Parse;
 
 /**
  * XJSON->JSONの変換
  */
 command to-json :: StandardXJson ->StandardJson
-    refers python:caty.core.std.command.xjsonlib.ToJson;
+    refers python:xjsonlib.ToJson;
 
 /**
  * JSON->XJSONの変換
  */
 command from-json ::  StandardJson -> StandardXJson
-    refers python:caty.core.std.command.xjsonlib.FromJson;
+    refers python:xjsonlib.FromJson;
 
 
 /**
  * XJSONパスを用いてXJSONオブジェクトの項目を取り出す。
  */
 command select {@[default(false)] "strict": boolean?} [string pathexp] :: any -> [any*]
-    refers python:caty.core.std.command.xjsonlib.Select;
+    refers python:xjsonlib.Select;
 
 command to-xml :: any -> string
-    refers python:caty.core.std.command.xjsonlib.ToXML;
+    refers python:xjsonlib.ToXML;
 
 type pathExpr = deferred string; // format="xjson-simple-path"
 
@@ -63,7 +63,7 @@ command get
     "default": (integer|null|boolean|number|string)?,
 } [pathExpr? path_expr] :: univ -> univ
 throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist ]
-refers python:caty.core.std.command.xjsonlib.Get;
+refers python:xjsonlib.Get;
 
 /** パス式により、データの当該成分に値を代入する */
 command put 
@@ -73,7 +73,7 @@ command put
     "allow-loose" : boolean?
 } [pathExpr path_expr] :: [univ data, univ val] -> univ
 throws [ BadArg, IndexOutOfRange, PropertyNotExist, Undefined, TagNotExist, ConsistencyViolation ]
-refers python:caty.core.std.command.xjsonlib.Put;
+refers python:xjsonlib.Put;
 
 /**
  * 入力値のXJSONオブジェクトを整形して返す。
@@ -87,7 +87,7 @@ command pretty :: any -> string {
  * prettyとは違い、undefinedやforeignも出力できる。
  */
 command univ-pretty :: univ -> string
-    refers python:caty.core.std.command.xjsonlib.Pretty;
+    refers python:xjsonlib.Pretty;
 
 
 /** 配列またはオブジェクトを平坦化する
@@ -106,10 +106,10 @@ command flatten
  }
  :: @* (array | object) -> @* array 
  
-    refers python:caty.core.std.command.xjsonlib.Flatten
+    refers python:xjsonlib.Flatten
  ;
 
 /** undefinedを含んだデータのうち、配列末尾とobjectのundefinedプロパティを削除する。 */
 command normalize :: univ -> univ
-    refers python:caty.core.std.command.xjsonlib.Normalize;
+    refers python:xjsonlib.Normalize;
 

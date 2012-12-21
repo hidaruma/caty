@@ -7,40 +7,40 @@ module set in casm;
  * 二つの配列a, bを入力に取り、それらを集合として扱い、bに含まれていないaの要素を返す。
  */
 command diff :: [Set a, Set b] -> Set
-    refers python:caty.core.std.command.setlib.Diff;
+    refers python:setlib.Diff;
 
 /** 配列だが、ここでは集合と解釈する */
 type Set = array(tight=true);
 
 /** 集合の合併 */
 command union :: [Set*] -> Set
- refers python:caty.core.std.command.setlib.Union;
+ refers python:setlib.Union;
 
 /** 集合の合併（別名） */
 command join :: [Set*] -> Set
- refers python:caty.core.std.command.setlib.Union;
+ refers python:setlib.Union;
 
 /** 集合の共通部分 */
 command meet :: [Set*] -> Set
- refers python:caty.core.std.command.setlib.Meet;
+ refers python:setlib.Meet;
 
 /** 集合の共通部分（別名） */
 command intersection :: [Set*] -> Set
- refers python:caty.core.std.command.setlib.Meet;
+ refers python:setlib.Meet;
 
 /** 空集合を生成 */
 command empty :: void -> Set
- refers python:caty.core.std.command.setlib.Empty;
+ refers python:setlib.Empty;
 
 /** 空集合かどうかを判定 */
 command is-empty :: Set -> (@True Set | @False Set)
- refers python:caty.core.std.command.setlib.IsEmpty;
+ refers python:setlib.IsEmpty;
 
 /** 2つの集合の共通部分が空かどうかを判定 */
 command are-disjoint :: [Set, Set] -> (@True [Set, Set] | @False [Set, Set])
- refers python:caty.core.std.command.setlib.AreDisjoint;
+ refers python:setlib.AreDisjoint;
 
 /** 配列を集合として正規化 */
 command normalize :: array -> Set
- refers python:caty.core.std.command.setlib.Normalize;
+ refers python:setlib.Normalize;
 

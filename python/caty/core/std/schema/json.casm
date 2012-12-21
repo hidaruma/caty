@@ -23,7 +23,7 @@ type selection = {
  */
 command read [string] :: void -> any
     reads [pub, data, sysfiles]
-    refers python:caty.core.std.command.jsonlib.ReadJson;
+    refers python:jsonlib.ReadJson;
 
 /**
  * 引数で指定されたファイルに JSON データを書き込む。
@@ -31,13 +31,13 @@ command read [string] :: void -> any
  */
 command write [string] :: any -> void
     updates [data, pub]
-    refers python:caty.core.std.command.jsonlib.WriteJson;
+    refers python:jsonlib.WriteJson;
 
 /**
  * 入力値のJSONオブジェクトを整形して返す。
  */
 command pretty :: StandardJson -> string
-    refers python:caty.core.std.command.jsonlib.Pretty;
+    refers python:jsonlib.Pretty;
 
 /**
  * 二つの object をマージする。
@@ -48,23 +48,23 @@ command pretty :: StandardJson -> string
  * * "error": エラーとして扱い、 null を返す
  */
 command merge {@[default("fst")]"mode": string?} :: [AnyObject*] -> AnyObject | null
-    refers python:caty.core.std.command.jsonlib.Merge;
+    refers python:jsonlib.Merge;
 
 /**
  * 入力値を application/json フォーマットで出力する。
  */
 command response {@[default(200)] "status": integer?, @[default("utf-8")]"encoding": string?} :: StandardJson -> Response
-    refers python:caty.core.std.command.jsonlib.JsonResponse;
+    refers python:jsonlib.JsonResponse;
 
 /**
  * 入力値文字列をパースして、JSONオブジェクトを出力する。
  */
 command parse :: string -> any
     reads env
-    refers python:caty.core.std.command.jsonlib.Parse;
+    refers python:jsonlib.Parse;
 
 /** 入力データのselectionを確定値に直して出力 */
 command fix-on-selection :: any -> any
     throws BadSelection
-    refers python:caty.core.std.command.jsonlib.FixOnSelection;
+    refers python:jsonlib.FixOnSelection;
 
