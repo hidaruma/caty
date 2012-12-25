@@ -644,5 +644,4 @@ alpha = Regex(r'[a-zA-Z_]+')
 number = Regex(r'[0-9]+')
 alphanum = Regex(r'[a-zA-Z_0-9]+')
 
-import topdown.test
 
