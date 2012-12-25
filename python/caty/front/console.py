@@ -509,12 +509,22 @@ Usage: load-mods <APP_NAME>
 Alias: l
 commands, schemata などの再読み込みを行う。
         """
-        app_name = line.strip()
-        if not app_name:
+        app_names = line.strip()
+        loaded = set()
+        if not app_names:
             app = self.app
+            app.reload()
         else:
-            app = self.app._system.get_app(app_name)
-        app.reload()
+            for app_name in app_names.split(' '):
+                app_name = app_name.strip()
+                if app_name in loaded:
+                    continue
+                if app_name == 'this':
+                    app = self.app
+                else:
+                    app = self.app._system.get_app(app_name)
+                app.reload()
+                loaded.add(app_name)
         self.set_prompt()
         self.interpreter = None
         return False
