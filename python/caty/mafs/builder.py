@@ -70,10 +70,7 @@ class FileObject(fileobject.FileObject, Facility, Resource):
     def __init__(self, path, mode, module):
         fileobject.FileObject.__init__(self, path, mode, module)
         Resource.__init__(self)
-
-    def __invariant__(self):
         assert self.path.startswith('/'), self.path
-        fileobject.FileObject.__invariant__(self)
 
     @property
     def exists(self):
@@ -106,8 +103,6 @@ class DirectoryObject(fileobject.DirectoryObject, Facility, Resource):
         else:
             fileobject.DirectoryObject.__init__(self, path.rstrip('/'), module)
         Resource.__init__(self)
-
-    def __invariant__(self):
         assert self.path.startswith('/'), self.path
 
     @property
