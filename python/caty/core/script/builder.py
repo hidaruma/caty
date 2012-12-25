@@ -1,5 +1,6 @@
 # coding:utf-8
 from caty.core.command import Builtin, Command, scriptwrapper
+from caty.core.exception import CatyException
 class CommandBuilder(object):
     def __init__(self, facilities, namespace):
         self.facilities = facilities
@@ -9,14 +10,16 @@ class CommandBuilder(object):
     def build(self, proxy, type_args, opts_ref, args_ref, pos, module):
         u"""コマンド文字のチャンクをコマンド名と引数のリストに分割し、呼び出し可能なコマンドオブジェクトを返す。
         """
-        if proxy.module:
-            try:
+        try:
+            if proxy.module:
                 profile = proxy.module.schema_finder.get_command(proxy.name)
-            except:
-                raise
-        else:
-            profile = self.namespace.get_command(proxy.name)
-        return self.make_cmd(profile, type_args, opts_ref, args_ref, pos, module)
+            else:
+                profile = self.namespace.get_command(proxy.name)
+            return self.make_cmd(profile, type_args, opts_ref, args_ref, pos, module)
+        except CatyException as e:
+            if e.tag == 'CommandNotFound':
+                return NullCommand(e)
+            raise
 
     def make_cmd(self, profile, type_args, opts_ref, args_ref, pos, module):
         from caty.core.script.proxy import Proxy, EnvelopeProxy
@@ -34,6 +37,19 @@ class CommandBuilder(object):
         u"""Syntax オブジェクトなど、通常の処理経路をたどらないオブジェクトにファシリティを追加する。
         """
         c.set_facility(self.facilities)
+
+class NullCommand(object):
+    def __init__(self, e):
+        self.orig = e
+
+    def set_facility(self, *args):
+        pass
+
+    def set_var_storage(self, *args):
+        pass
+
+    def accept(self, visitor):
+        raise self.orig
 
 
 class CommandCombinator(Command):

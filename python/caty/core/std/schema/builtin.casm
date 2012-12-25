@@ -588,6 +588,7 @@ type UncloseInputArr = [
  */
 
 /** 例外：モジュールが存在しない */
+@[runaway]
 exception ModuleNotFound = {
   "moduleName": string,
   "moduleType": "cara" | "casm",
@@ -596,6 +597,7 @@ exception ModuleNotFound = {
 };
 
 /** 例外：パッケージが存在しない */
+@[runaway]
 exception PackageNotFound = {
   "packageName": string,
   "appName": string,
@@ -603,6 +605,7 @@ exception PackageNotFound = {
 };
 
 /** 例外：リソースが存在しない */
+@[runaway]
 exception ResourceNotFound = {
   "moduleName": string,
   "resourceName": string,
@@ -611,6 +614,7 @@ exception ResourceNotFound = {
 
 
 /** 例外：型が存在しない */
+@[runaway]
 exception TypeNotFound = {
   "moduleName": string,
   "typeName": string,
@@ -618,6 +622,7 @@ exception TypeNotFound = {
 };
 
 /** 例外：コマンドが存在しない */
+@[runaway]
 exception CommandNotFound = {
   "moduleName": string,
   "cmdName": string,
@@ -625,6 +630,7 @@ exception CommandNotFound = {
 };
 
 /** 例外：アクションが存在しない */
+@[runaway]
 exception ActionNotFound = {
   "moduleName": string,
   "actionName": string,
@@ -633,6 +639,7 @@ exception ActionNotFound = {
 };
 
 /** 例外：ユーザーロールが存在しない */
+@[runaway]
 exception UserroleNotFound = {
   "moduleName": string,
   "userrole": string,
@@ -640,6 +647,7 @@ exception UserroleNotFound = {
 };
 
 /** 例外：アプリケーションが存在しない */
+@[runaway]
 exception ApplicationNotFound = {
   "appName": string,
   *: any?,
@@ -657,12 +665,14 @@ exception CollectionNotFound = object;
 /** 例外：そういう例外型は存在しない
  * 例外型（Excetpion）のデータではあるが、タグが登録されてない。
  */
+@[runaway]
 exception ExceptionNotFound  = {
  /** throwに入力されたデータ */
  "inputData" : Exception,
  *: any?
 };
 
+@[runaway]
 exception VerbUnmatched = {
   "path": string,
   "verb": string,
