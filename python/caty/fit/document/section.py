@@ -101,16 +101,11 @@ class FitCommand(FitSection):
     def _cmd_has_value(self, *args, **kwds):
         assert self.cmd != u''
 
-    apply_macro.require += _cmd_is_empty
-    apply_macro.ensure += _cmd_has_value
-
     def accept(self, test_runner):
         test_runner.add(self)
         for n in self._node_list:
             n.accept(test_runner)
     
-    accept.require += _cmd_has_value
-
 class FitLiteral(FitSection):
 
     def add(self, node):
