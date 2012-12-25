@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from topdown import *
 from topdown.util import line_by_itself
 from creole.syntax.base import BlockParser

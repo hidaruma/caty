@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from topdown import *
 from creole.tree import Element
 import string

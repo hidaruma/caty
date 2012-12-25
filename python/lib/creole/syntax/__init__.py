@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from topdown import *
 from creole.syntax.heading import Heading
 from creole.syntax.blockquote import BlockQuote

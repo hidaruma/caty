@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from topdown import *
 from topdown.util import *
 from creole.syntax.base import WikiParser, BlockParser
