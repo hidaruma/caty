@@ -250,6 +250,8 @@ class CharSeq(object):
             r = self._method
         elif isinstance(p, Parser):
             return p
+        else:
+            assert False, p
         self._method_cache[c] = r
         return r
 
