@@ -6,7 +6,6 @@ from caty.fit.document.literal import *
 from caty.fit.document.section import *
 from caty.fit.document.setup import *
 from caty.fit.document.triple import *
-from pbc import *
 import caty.core.runtimeobject as ro
 from caty.core.exception import InternalException
 
@@ -41,21 +40,17 @@ def make_document(seq):
     fitdoc.compose_setup()
     return fitdoc
 
-class FitDocument(PbcObject):
+class FitDocument(object):
     u"""Caty FIT のテストランナーが処理対象とするツリーのルートノード。
     """
     
-    __properties__ = ['size']
-
     def __init__(self):
         u"""ツリーの初期化。
         内部的には Wiki 文書の各要素に対応したノードとマクロ定義の辞書を持つ。
         """
         self._fit_nodes = []
         self._node_maker = NodeMaker(self)
-        PbcObject.__init__(self)
 
-    @Contract
     def add(self, node):
         u"""Wiki 文書の要素を受け取り、 Caty FIT の要素に変換し、ツリーに加える。
         Wiki の要素と異なり Caty FIT の要素はマクロの定義/参照を行い、
@@ -79,9 +74,6 @@ class FitDocument(PbcObject):
         u"""Caty FIT のルート直下要素は FitTitle とする。
         """
         assert isinstance(self._fit_nodes[0], FitTitle), (node.type, node.lineno)
-    
-    add.ensure += _is_title_is_unique
-    add.ensure += _is_1st_element_title
 
     def apply_macro(self):
         u"""マクロのツリー全体への適用。
@@ -100,7 +92,6 @@ class FitDocument(PbcObject):
         for n in self._fit_nodes:
             n.accept(test_runner)
 
-    @Contract
     def compose_triple(self):
         u"""preCond, body, postCond を triple にまとめる。
         """
@@ -150,9 +141,6 @@ class FitDocument(PbcObject):
         assert bodies == 0
         assert postconds == 0
 
-    compose_triple.ensure += _no_precond_or_body_or_postcond
-
-    @Contract
     def compose_setup(self):
         u"""file, storage などをすべて setup 配下に納める
         """
@@ -180,8 +168,6 @@ class FitDocument(PbcObject):
         strgs = len([n for n in self._fit_nodes if n.type == 'storage']) 
         assert files == 0
         assert strgs == 0
-
-    compose_setup.ensure += _no_file_or_storage
 
     @property
     def size(self):

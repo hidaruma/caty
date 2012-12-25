@@ -6,8 +6,6 @@ from caty.core.exception import throw_caty_exception
 from caty.util import bind1st
 import caty
 
-from pbc import PbcObject, Contract
-
 import types
 import weakref
 def initialize(app, system, type, **kwds):
@@ -16,7 +14,7 @@ def initialize(app, system, type, **kwds):
     access_manager_factory = fs.access_manager_factory
     return MafsFactory(fs, root, access_manager_factory, app, system, type)
 
-class MafsFactory(Facility, ResourceFinder, PbcObject):
+class MafsFactory(Facility, ResourceFinder):
     def __init__(self, 
                  module,
                  root,
@@ -35,7 +33,6 @@ class MafsFactory(Facility, ResourceFinder, PbcObject):
         self._type = type
         self.__closed = False
         self.__origin = origin
-        PbcObject.__init__(self)
     
     ################################################
     # ファシリティが定義しなければならないメソッド #
@@ -236,30 +233,6 @@ class MafsFactory(Facility, ResourceFinder, PbcObject):
         fo.application = self.application
         self._access_manager.add(fo)
         return fo
-
-    def __invariant__(self):
-        assert self._type in ('pub', 
-                              'include', 
-                              'scripts', 
-                              'data', 
-                              'behaviors',
-                              'commands',
-                              'schemata',
-                              'messages',
-                              'actions',
-                              'root'), self._type
-        # root はシステム初期化時にのみ使われる特殊な値
-
-    if caty.DEBUG:
-        def _access_manager_not_none(self, path):
-            assert self._access_manager is not None
-
-        def _same_type(self, result, old, path):
-            assert result._type == self._type
-
-        _another_mafs = Contract(_another_mafs)
-        _another_mafs.require += _access_manager_not_none
-        _another_mafs.ensure += _same_type
 
     def to_name_tree(self):
         r = {

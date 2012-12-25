@@ -5,9 +5,8 @@ from datetime import datetime
 from caty.mafs import stdfs
 from caty.mafs.metadata import timestamp_from_utime
 from caty.util import path
-from pbc import PbcObject, Contract
 
-class FileObject(PbcObject):
+class FileObject(object):
     u"""mafs のファイルオブジェクト。
     このクラス自体はファイルシステムへのアクセス機能を持たず、
     個々の mafs 実装で定義された関数へのラッパーオブジェクトとして機能する。
@@ -21,10 +20,6 @@ class FileObject(PbcObject):
         self.__read = False
         self.__buffer = []
         self.__deleted = False
-        PbcObject.__init__(self)
-
-    def __invariant__(self):
-        assert self.__mode in ('rb', 'wb'), slef.__mode
 
     def list_parents(self):
         return list(path.list_hierarchy(self.__path))[:-1]
@@ -188,13 +183,12 @@ class FileObject(PbcObject):
     def real_path(self):
         return self.__module.realPath(self.path)
 
-class DirectoryObject(PbcObject):
+class DirectoryObject(object):
     u"""mafs におけるディレクトリ。
     """
     def __init__(self, path, module):
         self.__path = path if path.endswith('/') else path + '/'
         self.__module = module
-        PbcObject.__init__(self)
 
     @property
     def path(self):

@@ -1,12 +1,10 @@
 #coding:utf-8
-from pbc import PbcObject, Contract
 from caty.util import escape_html
 
-class FitNode(PbcObject):
+class FitNode(object):
     def __init__(self, node, node_maker):
         self._node_maker = node_maker
         self._build(node)
-        PbcObject.__init__(self)
 
     def accept(self, test_runner):
         u"""必ずサブクラスで実装すること

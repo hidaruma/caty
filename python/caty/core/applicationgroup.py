@@ -1,5 +1,4 @@
 # coding:utf-8
-from pbc import PbcObject, Contract
 from caty.core.application import *
 from caty.util import cout, error_to_ustr, brutal_error_printer
 
@@ -14,7 +13,7 @@ import time
 import tempfile
 
 
-class ApplicationGroup(PbcObject):
+class ApplicationGroup(object):
     u"""Caty アプリケーションをグループ化するオブジェクト。
     管理上の理由により、 Caty のアプリケーションは以下の四つに分類される。
 
@@ -26,8 +25,6 @@ class ApplicationGroup(PbcObject):
     ApplicationGroup のインスタンスはこれらのアプリケーショングループに対して一つ作成され、
     自身の配下にあるアプリケーションの初期化を行うものとする。
     """
-
-    __properties__ = ['name', 'apps', 'global_config']
 
     def __init__(self, group_name, global_config, no_ambient, no_app, app_names, system):
         self._name = unicode(group_name)
@@ -51,7 +48,6 @@ class ApplicationGroup(PbcObject):
                 d.commit()
         if self._exists:
             self._apps = list(self._load_apps(no_ambient, no_app, app_names))
-            PbcObject.__init__(self)
 
     def _load_apps(self, no_ambient, no_app, app_names):
         if self._name == '':
@@ -144,12 +140,5 @@ class ApplicationGroup(PbcObject):
                 target = a
         if target:
             self._apps.remove(target)
-
-    def __invariant__(self):
-        if self.exists:
-            assert self._global_config
-        else:
-            assert self._global_config
-            assert len(self._apps) == 0
 
 

@@ -6,14 +6,12 @@ from caty.util.path import join
 from caty.core.script import node
 from customimporter import make_custom_import
 
-from pbc import PbcObject, Contract
 
-class System(PbcObject):
+class System(object):
     u"""Caty のコアシステム。
     システム起動時に初期化され、内部に全ての Caty アプリケーションを包含する。
     System オブジェクトは一つの Caty プロセスについて一つだけ作成されるものとする。
     """
-    __properties__ = ['app_names']
 
     @brutal_error_printer
     def __init__(self, 
@@ -107,7 +105,6 @@ class System(PbcObject):
         for group in self._app_groups:
             group.exec_rc_script()
         self.__cout = cout
-        PbcObject.__init__(self)
 
     def _init_app_map(self):
         self._app_map = {}
@@ -271,10 +268,6 @@ class System(PbcObject):
                 os.remove(os.path.join(root, name))
             for name in dirs:
                 os.rmdir(os.path.join(root, name))
-
-    def __invariant__(self):
-        assert len(self._app_groups) > 0
-        assert len(self.get_apps()) > 0
 
     def debug_on(self):
         caty.DEBUG = True

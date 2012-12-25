@@ -6,7 +6,6 @@ from caty.fit.behparser import HeaderCell, DataCell
 from caty.jsontools import pp
 from caty.util import escape_html
 import caty.core.runtimeobject as ro
-from pbc import *
 
 class FitTriple(FitNode):
     def __init__(self, precond, body, postcond, node_maker):

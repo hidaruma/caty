@@ -26,7 +26,6 @@ from caty.core.i18n import I18nMessage
 from caty.core.action.dispatcher import resource_class_from_assocs, ResourceActionEntry
 import caty.core.runtimeobject
 import caty.core.logger as logger
-from pbc import PbcObject, Contract
 
 from copy import deepcopy
 from operator import truth as _
@@ -46,7 +45,7 @@ ROOT = 'root'
 USER = 'main'
 LOG_TYPES = ['app', 'performance', 'exec']
 
-class Application(PbcObject):
+class Application(object):
     u"""Caty アプリケーションオブジェクト。
     Caty アプリケーションは自身に特有なファイルシステム、スキーマ、コマンドなどを格納し、
     外部からの入力に応答して出力を返すオブジェクトである（実際の主たる処理は interpreter に委譲する）。
@@ -98,7 +97,6 @@ class Application(PbcObject):
         else:
             self.cout.writeln(u'* ' + system.i18n.get("$name is set not to start", name=self._name))
         self.async_queue = AsyncQueue(self)
-        PbcObject.__init__(self)
         self._lock_set = set()
 
     def set_parent(self, system):
@@ -571,17 +569,6 @@ class Application(PbcObject):
         exec 'from %s import %s as _callback' % (modname, clsname) in gd
         cb = gd['_callback'](self._app_spec.clone())
 
-    def __invariant__(self):
-        assert self._name == '' or _(self._name)
-        assert _(self._group_name)
-        assert _(self._global_config)
-        assert _(self._physical_path)
-        assert _(self._app_map)
-        if self._finished:
-            pass
-        else:
-            pass
-
     def create_facilities(self, session_maker=None):
         from caty.session.value import create_variable
         from caty.env import Env
@@ -781,8 +768,6 @@ class Application(PbcObject):
     def more_description(self):
         return self._more_description
 
-    def __invariant__(self):
-        assert '/' not in self.name
     
     @property
     def manifest(self):

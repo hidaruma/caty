@@ -3,7 +3,6 @@ from caty.core.resource import Resource
 from caty.jsontools import TaggedValue, tag, tagged, untagged, obj2path
 from caty.util import merge_dict, error_to_ustr, bind2nd, to_unicode
 from caty.core.schema.errors import *
-from pbc import *
 import caty
 import caty.core.runtimeobject as ro
 from caty.core.typeinterface import *
@@ -14,7 +13,7 @@ from decimal import Decimal
 from caty.jsontools import TaggedValue, TagOnly
 from types import NoneType
 
-class SchemaBase(Resource, PbcObject):
+class SchemaBase(Resource):
     u"""あらゆるスキーマクラスのベースクラス。
     スキーマオブジェクトは以下の振る舞いについて何らかの定義がなされていなければならない。
 
@@ -54,14 +53,6 @@ class SchemaBase(Resource, PbcObject):
 
     """
 
-    __properties__ = [
-        'options',
-        'remarks',
-        'name',
-        'definition',
-        'type',
-    ]
-
     __options__ = set(['remark', 'minCount', 'maxCount', 'subName'])
 
     def __init__(self, options=None):
@@ -69,7 +60,6 @@ class SchemaBase(Resource, PbcObject):
         self._options = options if options else {}
         self._annotations = Annotations([])
         self._verify_option()
-        PbcObject.__init__(self)
         self._docstring = u''
 
     def annotations():
@@ -475,12 +465,6 @@ class UnionSchema(OperatorSchema, Union):
                 return self._right
             else:
                 return NeverSchema()
-
-    if caty.DEBUG:
-        def __invariant__(self):
-            SchemaBase.__invariant__(self)
-            self._left.__invariant__
-            self._right.__invariant__
 
 class IntersectionSchema(OperatorSchema, Intersection):
     u"""インターセクションスキーマ。

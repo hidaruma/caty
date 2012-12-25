@@ -1,7 +1,6 @@
 #coding: utf-8
 from caty.fit.document.base import *
 from caty.fit.document.literal import *
-from pbc import *
 import caty.core.runtimeobject as ro
 
 class FitTitle(FitNode):
@@ -44,10 +43,6 @@ class FitSection(FitNode):
     def add(self, node):
         self._node_list.append(self._node_maker.make(node))
     
-    def __invariant__(self):
-        for n in self._node_list:
-            assert isinstance(n, FitNode)
-
     def apply_macro(self, macro):
         for n in self._node_list:
             n.apply_macro(macro)
@@ -87,7 +82,6 @@ class FitCommand(FitSection):
             n = self._node_maker.make(node)
         self._node_list.append(n)
 
-    @Contract
     def apply_macro(self, macro):
         seq = self.text.strip().split(':', 1)[1].strip().split(' ')
         r = []
@@ -110,7 +104,6 @@ class FitCommand(FitSection):
     apply_macro.require += _cmd_is_empty
     apply_macro.ensure += _cmd_has_value
 
-    @Contract
     def accept(self, test_runner):
         test_runner.add(self)
         for n in self._node_list:

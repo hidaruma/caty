@@ -27,18 +27,13 @@ from optparse import Values
 from StringIO import StringIO
 from threading import RLock
 
-from pbc import PbcObject, Contract
-   
-class Expand(Builtin, MafsMixin, PbcObject):
+class Expand(Builtin, MafsMixin):
     
-    __properties__ = ['path']
-
     def setup(self, opts, path):
         self.path, self.fs = self.parse_canonical_path(path)
         self.raw = opts.get('raw', caty.UNDEFINED)
         self.resolve = not bool(opts.get('no-script', caty.UNDEFINED))
         self.mode = opts.get('mode', caty.UNDEFINED)
-        PbcObject.__init__(self)
 
     def execute(self, input):
         return self._expand(input)
@@ -139,18 +134,6 @@ class Expand(Builtin, MafsMixin, PbcObject):
         except PlainFile:
             self.raw = True
             return self._expand(input)
-
-    if caty.DEBUG:
-        def __invariant__(self):
-            assert self.path != None
-            assert self.fs != None
-
-        def _not_property_changed(self, r, old, *args, **kwds):
-            assert self.path == old.path
-
-        execute = Contract(execute)
-        execute.ensure += _not_property_changed
-
 
 class Expand2(Expand):
     pass
