@@ -188,7 +188,7 @@ class CommandProfile(object):
         この時点では変数参照が解決されていないため、オプション名と引数の数のみで判別する。
         """
         if self.opts_schema.type == 'null' and opts:
-            return ro.i18n.get(u'$name takes no options', name=name)
+            return u'UnexpectedArg', ro.i18n.get(u'$name takes no options', name=name)
         if self.opts_schema.type == 'object':
             if opts is None:
                 opts = {}
