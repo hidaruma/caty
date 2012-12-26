@@ -296,6 +296,7 @@ Web サーバの起動・停止を行う
             self._echo(u'未知の引数: %s' % cmd)
             usage()
 
+    @catch
     def default(self, line):
         if self.continue_setenv:
             return self.do_setenv(line)

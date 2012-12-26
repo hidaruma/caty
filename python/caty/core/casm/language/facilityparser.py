@@ -23,7 +23,7 @@ def _facility(seq):
         seq.parse(')')
         config_type = option(parse_config_type, ScalarNode(u'null'))(seq)
         indices_type = option(parse_indices_type, {})(seq)
-        clsname = refer(seq)[1]
+        clsname = ':'.join(refer(seq))
         _ = seq.parse(';')
         return FacilityNode(n, clsname, sys_param_type, config_type, indices_type, doc, a)
 

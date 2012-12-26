@@ -593,11 +593,17 @@ class Application(object):
             'sysfiles': self._create_sysfiles(),
         }
         for k, v in self._facility_classes.items():
-            if v[0] is None: continue
-            if len(v) == 2:
-                facilities[k] = v[0].instance(self, v[1])
-            else:
-                facilities[k] = EntityProxy(v[0].instance(self, v[1]), v[2])
+            try:
+                if v[0] is None: continue
+                if len(v) == 2:
+                    facilities[k] = EntityProxy(v[0].instance(self, v[1]), None)
+                else:
+                    facilities[k] = EntityProxy(v[0].instance(self, v[1]), v[2])
+            except:
+                import traceback
+                traceback.print_exc()
+                self.cout.writeln(self.i18n.get(u'Failed to initialize facility class: $name', name=k))
+                
         vcs = self._vcs(self, facilities['pub'], facilities['data'])
         facilities['vcs'] = vcs
         facilities['token'] = RequestToken(facilities['session'])

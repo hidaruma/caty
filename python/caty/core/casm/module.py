@@ -79,6 +79,7 @@ class Module(Facility):
         self.loaded = True
         self.annotations = Annotations([])
         self.package_root_path = u'/'
+        self.facility_classes = {}
 
         self.add_schema = partial(self._add_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
         self.get_type = partial(self._get_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
@@ -107,11 +108,11 @@ class Module(Facility):
         self.get_class = partial(self._get_resource, scope_func=lambda x:x.class_ns, type=u'Class')
         self.has_class = partial(self._has_resource, scope_func=lambda x:x.class_ns, type=u'Class')
  
-        self.add_facility = lambda *args, **kwds: None # partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility', see_register_public=True)
+        self.add_facility = partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility', see_register_public=True)
         self.get_facility = partial(self._get_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.has_facility = partial(self._has_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
 
-        self.add_entity = lambda *args, **kwds: None # partial(self._add_resource, scope_func=lambda x:x.entity_ns, type=u'Entity', see_register_public=True)
+        self.add_entity = partial(self._add_resource, scope_func=lambda x:x.entity_ns, type=u'Entity', see_register_public=True)
         self.get_entity = partial(self._get_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
         self.has_entity = partial(self._has_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
 
@@ -603,25 +604,32 @@ class Module(Facility):
             if self.is_root:
                 self.application.cout.write(u'  * ' + self.application.i18n.get(u'Initializing facilities') + '...')
             for k, v in self.facility_ns.items():
-                cls = self.get_class(v.clsname)
-                if u'facility-spec-for' not in cls.annotations:
+                if not v.clsname:
                     emsgs.append(self.application.i18n.get(u'Facility class not specified: $name', name=k))
 
-                    facilty_class = None
+                    facility_class = None
                 else:
                     try:
-                        facilty_class = self._load_facility_class(k, cls.annotations['facility-spec-for'].value)
+                        facility_class = self._load_facility_class(k, v.clsname)
                     except:
-                        emsgs.append(self.application.i18n.get(u'Failed to load facility class: $name', name=cls.annotations['facility-spec-for'].value))
-                        facilty_class = None
-                self._app.register_facility(v.canonical_name if not self.is_root else v.name, facilty_class, v.system_param)
+                        import traceback
+                        traceback.print_exc()
+                        emsgs.append(self.application.i18n.get(u'Failed to load facility class: $name', name=v.clsname))
+                        facility_class = None
+                self.facility_classes[v.name] = facility_class
         for m in self.sub_modules.values() + self.sub_packages.values():
             m._register_facility()
         if self.is_root and not self.compiled:
             self.application.cout.writeln('OK')
+
         for k, v in self.entity_ns.items():
-            fname = self.get_facility(v.facility_name).canonical_name
-            self._app.register_entity(v.canonical_name if not self.is_root else v.name, fname, v.user_param)
+            if self.has_facility(v.facility_name): # entiry name = FacilityName;形式。 ここでは抽象エンティティ
+                self._app.register_facility(v.canonical_name if not self.is_root else v.name, self.facility_classes[v.facility_name], v.user_param)
+
+        for k, v in self.entity_ns.items():
+            if not self.has_facility(v.facility_name): # 具体エンティティ
+                fname = self.get_entity(v.facility_name).canonical_name # ファシリティ名は抽象エンティティより取得
+                self._app.register_entity(v.canonical_name if not self.is_root else v.name, fname, v.user_param)
         if emsgs:
             self.application.cout.writeln(u'')
         for e in emsgs:
