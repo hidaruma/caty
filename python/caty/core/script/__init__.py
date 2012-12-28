@@ -228,8 +228,11 @@ class ShellCommandCompiler(AbstractCommandCompiler):
     def _ends_with_empty(self, pipeline):
         from caty.core.script.proxy import EmptyProxy as Empty
         from caty.core.script.proxy import CombinatorProxy as Combinator
+        from caty.core.script.proxy import DiscardProxy as Discard
         if isinstance(pipeline, Combinator):
             return self._ends_with_empty(pipeline.b)
+        elif isinstance(pipeline, Discard):
+            return self._ends_with_empty(pipeline.target)
         elif isinstance(pipeline, Empty):
             return True
         return False
