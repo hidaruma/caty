@@ -188,7 +188,7 @@ class CommandProfile(object):
         この時点では変数参照が解決されていないため、オプション名と引数の数のみで判別する。
         """
         if self.opts_schema.type == 'null' and opts:
-            return u'UnexpectedArg', ro.i18n.get(u'$name takes no options', name=name)
+            return u'UnexpectedOption', ro.i18n.get(u'$name takes no options', name=name)
         if self.opts_schema.type == 'object':
             if opts is None:
                 opts = {}
@@ -204,7 +204,7 @@ class CommandProfile(object):
                 if not o_s[k].optional:
                     return u'MissingOption', ro.i18n.get(u'Missing option: $key', key=k)
         if self.args_schema.type == 'null' and (args):
-            return ro.i18n.get(u'$name takes no arguments', name=name)
+            return u'UnexpectedArg',  ro.i18n.get(u'$name takes no arguments', name=name)
         if self.args_schema.type == 'array':
             if args is None:
                 args = []
