@@ -1,9 +1,8 @@
 #coding:utf-8
 from topdown import *
-from caty.core.script.parser import ScriptParser
 from caty.core.casm.language.casmparser import module_decl
 from caty.core.casm.language.schemaparser import object_, typedef
-from caty.core.casm.language.commandparser import resource, jump
+from caty.core.casm.language.commandparser import resource, jump, CommandScriptParser
 from caty.core.language.util import docstring, annotation, action_fragment_name, annotation, identifier_token, identifier_token_m, name_token, some_token
 from caty.jsontools.xjson import obj
 from caty.core.action.resource import ResourceClass
@@ -19,7 +18,7 @@ from caty.core.exception import InternalException
 
 class ResourceActionDescriptorParser(Parser):
     def __init__(self, path, facility, lit=False):
-        self._script_parser = ScriptParser(facility)
+        self._script_parser = CommandScriptParser(facility)
         self._path = path
         self._app = facility.app
         self._lit = lit

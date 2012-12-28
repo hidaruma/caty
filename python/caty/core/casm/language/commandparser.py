@@ -177,9 +177,19 @@ def refer(seq):
     return l.strip(u':'), seq.parse(Regex(r'([a-zA-Z][a-zA-Z0-9]*(\.[a-zA-Z][a-zA-Z0-9]*)*)'))
 
 def script(seq):
-    from caty.core.script.parser import ScriptParser
     seq.parse(u'{')
-    p = ScriptParser()(seq)
+    p = CommandScriptParser()(seq)
     seq.parse(u'}')
     return p
+
+from caty.core.script.parser import ScriptParser
+class CommandScriptParser(ScriptParser):
+    def __call__(self, seq):
+        self.continue_to_parse = True
+        from caty.core.script.proxy import EmptyProxy as Empty
+        try:
+            r = ScriptParser.__call__(self, seq)
+        except:
+            r = Empty()
+        return r
 
