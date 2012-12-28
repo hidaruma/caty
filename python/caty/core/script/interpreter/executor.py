@@ -592,6 +592,10 @@ class CommandExecutor(BaseInterpreter):
         c = random.choice(node.cases)
         return c.cmd.accept(self)
 
+    def visit_empty(self, node):
+        node._prepare()
+        return self.input
+
     @property
     def in_schema(self):
         return self.cmd.in_schema

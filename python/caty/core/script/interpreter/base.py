@@ -76,3 +76,6 @@ class BaseInterpreter(object):
 
     def visit_choice_branch(self, node):
         raise NotImplementedError(u'{0}#visit_choice_branch'.format(self.__class__.__name__))
+
+    def visit_empty(self, node):
+        raise NotImplementedError(u'{0}#visit_empty'.format(self.__class__.__name__))

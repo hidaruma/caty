@@ -34,6 +34,7 @@ from caty.core.script.proxy import CatchProxy as Catch
 from caty.core.script.proxy import UncloseProxy as Unclose
 from caty.core.script.proxy import ChoiceBranchProxy as ChoiceBranch
 from caty.core.script.proxy import ChoiceBranchItemProxy as ChoiceBranchItem
+from caty.core.script.proxy import EmptyProxy as Empty
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
@@ -42,6 +43,8 @@ from caty.core.command.param import *
 from caty.core.language.util import fragment_name, identifier_token_a, name_token
 from caty.jsontools.selector.parser import JSONPathSelectorParser
 import caty
+
+_OPERATORS = ['>@', '>:', '>', ';', '||', '|&', '|>', '|=', '|', ';;']
 
 class NothingTodo(Exception):
     u"""コメントのみの入力など、何もしないときのシグナル
@@ -57,6 +60,7 @@ class ScriptParser(Parser):
     BEGIN_REPEAT = 1
     def __init__(self, facilities=None):
         self._context = [self.DEFAULT]
+        self.continue_to_parse = True
 
     def parse(self, text):
         if not text:
@@ -206,7 +210,7 @@ class ScriptParser(Parser):
         return opts
 
     def pipe(self, seq):
-        _ = seq.parse(['>@', '>:', '>', ';', '||', '|&', '|>', '|=', '|', ';;'])
+        _ = seq.parse(_OPERATORS)
         if _ == '>:':
             raise ParseFailed(seq, self.pipe)
         return _
@@ -217,7 +221,7 @@ class ScriptParser(Parser):
         if seq.eof:
             raise NothingTodo()
         r.append(seq.parse([self.term, self.group]))
-        while True:
+        while self.continue_to_parse:
             a = option(try_(self.pipe), None)(seq)
             if not a:
                 break
@@ -258,6 +262,7 @@ class ScriptParser(Parser):
 
     def term(self, seq):
         parsers = map(try_, [
+                    self.empty,
                     self.exception_handle,
                     self.catch,
                     self.functor,
@@ -679,6 +684,15 @@ class ScriptParser(Parser):
         if self._context[-1] != self.BEGIN_REPEAT:
             raise ParseError(seq, u'repeat')
         return Repeat()
+
+    def empty(self, seq):
+        if seq.eof:
+            self.continue_to_parse = False
+            return Empty()
+        o = option(peek(_OPERATORS))(seq)
+        if o in ('|', ';'):
+            return Empty()
+        raise ParseFailed(seq, self.pipeline)
 
 def anything(l):
     return filter(lambda i: i!= None, l)

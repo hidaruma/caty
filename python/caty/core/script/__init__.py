@@ -206,6 +206,9 @@ class ShellCommandCompiler(AbstractCommandCompiler):
         parser = ScriptParser(self.facilities)
         try:
             pipeline = parser.parse(string)
+            if self._ends_with_empty(pipeline):
+                self.prev_string = string
+                return None
         except NothingTodo:
             self.prev_string = u''
             raise
@@ -222,6 +225,14 @@ class ShellCommandCompiler(AbstractCommandCompiler):
     def update_facility(self, facilities):
         self.facilities = facilities
 
+    def _ends_with_empty(self, pipeline):
+        from caty.core.script.proxy import EmptyProxy as Empty
+        from caty.core.script.proxy import CombinatorProxy as Combinator
+        if isinstance(pipeline, Combinator):
+            return self._ends_with_empty(pipeline.b)
+        elif isinstance(pipeline, Empty):
+            return True
+        return False
 
 class ScriptCommandCompiler(AbstractCommandCompiler):
     def _compile(self, string):

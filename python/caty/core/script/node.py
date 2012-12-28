@@ -712,3 +712,12 @@ class ChoiceBranch(Syntax):
     def accept(self, visitor):
         return visitor.visit_choice_branch(self)
 
+class Empty(Syntax):
+    command_decl = u"""command __empty<T default univ> :: T -> T
+                        refers python:caty.core.script.node.Empty;
+    """
+    def __init__(self, *args, **kwds):
+        Syntax.__init__(self)
+
+    def accept(self, visitor):
+        return visitor.visit_empty(self)

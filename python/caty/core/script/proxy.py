@@ -592,6 +592,17 @@ class ChoiceBranchProxy(Proxy):
             o[n.name] = n.reify()
         return o
 
+class EmptyProxy(Proxy):
+    reification_type = u'_empty'
+    def __init__(self):
+        pass
+
+    def instantiate(self, builder):
+        return Empty()
+
+    def set_module(self, module):
+        pass
+
 def combine_proxy(args):
     return reduce(CombinatorProxy, args)
 
