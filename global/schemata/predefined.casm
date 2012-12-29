@@ -68,4 +68,13 @@ Hello, this is '{$actionName}' in '{$appName}'.
  response --content-type="text/plain"
 };
 
+command prj-name :: void -> string {
+  %PROJECT | $.name
+};
+
+command prj-location :: void -> string {
+  %PROJECT | $.location
+};
+
+
 // End of Module

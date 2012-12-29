@@ -1,0 +1,50 @@
+// -*- coding: utf-8 -*-
+/** HTTP Console */
+module hcon;
+
+/** HTML Console (HCon) の入力 */
+@[register-public]
+type HConInput = {
+
+  /** アプリケーション */
+  @[default("root")]
+  "targetApp" : string?,
+
+  /** 実行すべきスクリプトコード 
+   * シェルのコマンドライン
+   */
+  @[default("")]
+  "script" : string?,
+
+  /** 追加または上書きの環境変数
+   * 実行時に、これで指定された環境変数がセットされる。
+   */
+  @[default({})]
+  "additionalEnv" : {*:any?}?,
+
+  /** レスポンスのデータ形式
+   * 現在は application/json のみ。
+   */
+  @[default("application/json")]
+  "responseeType" : "application/json"?,
+
+  /** レスポンスを制御するオプション
+   * 現在は未使用
+   */
+  @[default({})]
+  "responseOptions" : {*:any?}?,
+
+};
+
+/** hconに対してPOSTする */
+command post [string hcon-url] :: HConInput -> WebOutput {
+  pass > in;
+  %1 > hcon-url;
+
+  %in
+  | webio:untranslate --format=json | webio:unparse --content-type=application/json
+  | http:post --content-type=application/json %hcon-url
+};
+
+// End of Module
+
