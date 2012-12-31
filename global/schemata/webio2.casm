@@ -143,7 +143,7 @@ command unparse
  }
 :: Generic -> Raw throws [webio_InsufficientMetainfo, ConversionError]
     reads env
-    refers python:webio.Unparse
+//    refers python:webio.Unparse
 ;
 
 /** rawデータをgenericデータにupward変換する 
@@ -169,7 +169,7 @@ command parse
  }
 :: Raw -> Generic throws [webio_InsufficientMetainfo, ConversionError]
     reads env
-    refers python:webio.Parse
+//    refers python:webio.Parse
 ;
 
 /** genericデータをsemanticデータにupward変換する 
@@ -315,7 +315,7 @@ type FormableArray = [FormItem*];
  * またboolean値は全て文字列となる仕様である。
  */
 command urlencode {@[default("utf-8")]"encoding": string?} :: object -> string
-    refers python:webio.URLEncode
+//    refers python:webio.URLEncode
 ;
 
 
@@ -563,35 +563,35 @@ command status-name-to-number :: string -> integer(minimum=0, maximum=599)?
  * 与えられたパスに対しての302 Foundレスポンスを出力する。
  */
 command found [string] :: void -> Redirect
-    refers python:webio.Found
+//    refers python:webio.Found
 ;
 
 /**
  * 与えられたパスに対しての403 Forbiddenを出力する。
  */
 command forbidden [string] :: void -> never
-    refers python:webio.Forbidden
+//    refers python:webio.Forbidden
 ;
 
 /**
  * 与えられたパスに対しての404 Forbiddenを出力する。
  */
 command not-found [string] :: void -> never
-    refers python:webio.NotFound
+//    refers python:webio.NotFound
 ;
 
 /**
  * 与えられたパスに対しての400 Bad Requestを出力する。
  */
 command bad-request [string path, string method] :: void -> never
-    refers python:webio.BadRequest
+//    refers python:webio.BadRequest
 ;
 
 /**
  * 与えられたパスに対しての405 Method Not Allowedを出力する。
  */
 command not-allowed [string path, string method] :: void -> never
-    refers python:webio.NotAllowed
+//    refers python:webio.NotAllowed
 ;
 
 // End of Module
