@@ -1,0 +1,597 @@
+// -*- coding: utf-8 -*-
+/**
+ * Webからの入力を内部的なデータに変換する、またはその逆
+ */
+module webio2;
+
+/* 注意 TODO：
+ *
+ * webResponseのwebは不要かも
+ * 例外に webio_ を付けたのはタグ名の衝突回避のためだが、そもそもここで例外定義は不要か？
+ * サンプルが入っている。
+ *
+ */
+
+/* == 階層間のデータ変換
+ 
+階層（レイヤー）
+ 
+# semantic -- 応用固有のセマンティクスを持つデータ型
+# generic -- 汎用のフォーマット
+# raw -- (null | string | binary)、ただし、content-type によるメタ情報は持つ
+
+# semantic階層では、Caty型システムがそのまま使われる。
+# semantic階層では、CatyのGeneric型が使われが、さらにフォーマット名（実体はタグ名）により細分類される。
+# raw階層（転送階層）では、MIMEメディア型の分類システムが使われる。
+
+=== コマンドのネーミング
+
+# semantic → generic : unconstrue
+# generic → raw : unparse
+# raw → generic ：parse
+# generic → semantic ： construe
+
+型／フォーマットの情報はオプションとして渡す。引数では、順序を間違う恐れがある。
+
+*/
+
+/* === 例外 === */
+
+/** 与えられたメタ情報が少なすぎるので、変換ができない 
+ * 一般的な例外として、InsufficientInfo を設けるべきかもしれない。
+*/
+exception webio_InsufficientMetainfo = Exception;
+
+/* === データ型 === */
+
+/** MIMEメディア型の名前 */
+type mediaType = common:mediaType;
+
+/** raw階層（転送階層）で使われるデータ */
+type Raw = (null | string | binary);
+
+/** フォームを表現するオブジェクト */
+type FormObj = {
+    *: [(string|binary), (string|binary)*],
+};
+
+
+/** generic階層に属するデータ、フォーマットで分類されてる
+ * 必要に応じて拡張する。
+ */
+type Generic = (
+ /** データがないとき */
+  @void null |
+
+ /** JSONデータ */
+  @json any |
+
+ /** フォームデータ */
+  @form FormObj |
+
+// /** XMLデータ */
+//  @xml XJX |
+
+ /** プレーンテキストとみなせるデータ */
+  @text string |
+
+ /** その他のバイナリ、不明な場合も含む */
+  @bytes binary |
+);
+
+/** Generic型の種別（フォーマットと呼ぶ）を表す文字列表現 */
+type GenericFormatName = (
+ /** データがないとき */
+  "void" |
+
+ /** JSONデータ */
+  "json" |
+
+ /** フォームデータ */
+  "form" |
+
+// /** XMLデータ */
+//  "xm" |
+
+ /** プレーンテキストとみなせるデータ */
+  "text" |
+
+ /** その他のバイナリ、不明な場合も含む */
+  "bytes" |
+);
+
+
+/* === 変換コマンド === */
+
+/** semanticデータをgenericデータにdownward変換する 
+
+--formatの値により変換アルゴリズムを選択する。
+--typeが指定されていれば、型情報を変換に利用するかもしれない。
+--typeが指定されていないときは、型情報なしで行える変換を試みる。
+
+例： webio:unconstrue --format=form
+
+*/
+command unconstrue
+ {
+   /** Caty型システムの型名 */
+   "type" : typeName?,
+  
+   /** フォーマット名（タグ名）
+    * 有限個の候補から選ぶ。
+    */
+   @[default("form")]
+   "format" : GenericFormatName?,
+ }
+:: json:StandardJson -> Generic throws [webio_InsufficientMetainfo, ConversionError]
+//    refers python:webio.Unconstrue
+;
+
+/** genericデータをrawデータにdownward変換する 
+
+入力のタグ名（フォーマット名）により変換アルゴリズムを選択する。
+--content-typeが指定されれば、そのメディア型に対する変換を行う。
+--content-typeが指定されないときは、もっとも適切なメディア型が選ばれる。
+
+例： webio:unparse --content-type=application/xml
+
+*/
+command unparse
+ {
+   /** MIMEメディア型 */
+   "content-type" : mediaType?,
+ }
+:: Generic -> Raw throws [webio_InsufficientMetainfo, ConversionError]
+    reads env
+    refers python:webio.Unparse
+;
+
+/** rawデータをgenericデータにupward変換する 
+
+--content-typeが指定されてないときは、環境変数CONTENT_TYPEの値を使う。
+CONTENT_TYPEもないときは、コマンドがメディア型を（なんらかの方法で）決める。
+
+--formatが指定されてないときは、もっとも適切なフォーマットが選ばれる。
+
+例： webio:parse --format=json
+
+*/
+@[register-public]
+command parse
+ {
+   /** MIMEメディア型 */
+   "content-type" : mediaType?,
+
+   /** フォーマット名（タグ名）
+    * 有限個の候補から選ぶ。
+    */
+   "format" : GenericFormatName?,
+ }
+:: Raw -> Generic throws [webio_InsufficientMetainfo, ConversionError]
+    reads env
+    refers python:webio.Parse
+;
+
+/** genericデータをsemanticデータにupward変換する 
+
+--typeが指定されていれば、型情報を使って変換を試みる。
+--typeが指定されてないときは、型情報なしでできる範囲の変換を試みる。。
+またはまったく変換しない。
+
+例： construe --type=my:LunchOrder
+
+*/
+command construe
+ {
+   /** Caty型システムの型名 */
+   "type" : typeName?,
+ }
+:: Generic -> any throws [webio_InsufficientMetainfo, ConversionError]
+//    refers python:webio.Construe
+;
+
+
+/* == リクエスト発行 == 
+
+リクエスト発行コマンドは、raw階層からの通信をスタートさせ、
+サーバーからのレスポンスを出力する。
+
+generic階層／semantic階層のデータを扱うときは、
+階層間でのデータ変換コマンドを併用する。
+
+ネットワーク接続がされてないときは、例外が発生する。
+
+*/
+
+
+/* === データ型 === */
+
+/** リクエストに対するレスポンスの型 */
+type WebResponse = deferred WebOutput;
+
+
+/* === コマンド === */
+
+/** レスポンスを返す 
+ * publicモジュールのresponseと基本的に同じだが、
+ * このモジュールを自己完結的にするために含める。
+ * --extオプションは便利機能なので入れてない。
+ */
+command response
+ {
+   /** レスポンスのステータスコード */
+   @[default(200)]
+   "status": integer?,
+
+   /** 入力（Webへの出力）データのメディア型
+    * 省略されると、環境変数CONTENT_TYPEの値を使用する。
+    * 環境変数CONTENT_TYPEもないときは、text/plainかapplication/octet-streamが使われる。
+    */
+   "content-type": string?,
+  
+ /** エンコーディング（文字符号化方式）
+    * エンコーディングが指定されると、文字列を指定のエンコーディングでencodeしてからWebに出力する。
+    * Content-Typeヘッダのcharsetパラメータもセットされる。
+    * テキストではないメディア型（例：image/gif）に指定したときの挙動は保証されない。
+    * エンコーディングのデフォルトは、環境変数APP_ENCODINGが使われる。
+    */
+   "encoding": string?,
+ }
+:: Raw -> WebResponse
+{
+  public:response %--status?  %--content-type? %--encoding?
+}
+;
+
+
+/* == サンプル == */
+
+/** 汎用エコーバック 
+ * アクションボディに、このコマンドだけを書けば
+ * リクエスト内容のエコーバックができる。
+ */
+@[sample]
+command echo-back
+:: (null|binary|string) -> Response
+{
+  response --content-type=%CONTENT_TYPE
+};
+
+/** 汎用ダンプコマンド
+ * このコマンドが呼ばれた時の環境をダンプして返す。
+ * 結果はJSONデータ
+ */
+@[sample]
+command dump {*:any?}[any*]
+:: (null|binary|string) -> Response
+{
+  pass > in;
+  {
+    "input": %in,
+    "env": env,
+    "opts": %_OPTS,
+    "argv": %_ARGV,
+  } | json:response
+};
+
+
+/** JSONオブジェトをフォームにエンコードしてPOSTで送り、戻りを返す
+ */
+@[sample]
+command encode-to-form-and-request
+:: object -> Response
+{
+  webio:unconstrue --format=form | 
+  webio:unparse |
+  webio:post --content-type=application/x-www-form-urlencoded
+};
+
+
+/** フォームデータをオブジェトにデコードし、その結果をJSONで戻す
+ * このコマンドはactionに入れて使う。
+ */
+@[sample]
+command decode-from-form-and-back
+ [typeName myType]
+:: string -> object
+{
+  %1 > myType;
+
+  webio:parse --format=form | 
+  webio:construe --type=%myType |
+  json:response
+};
+
+type Formable = {
+  *: FormItem?
+};
+
+type FormItem = string | number | boolean | FormableArray | Formable;
+type FormableArray = [FormItem*];
+
+/**
+ * application/x-www-form-urlencodedへの変換
+ * 入力値をパス形式に直し、その後空値を全て除去する。
+ * またboolean値は全て文字列となる仕様である。
+ */
+command urlencode {@[default("utf-8")]"encoding": string?} :: object -> string
+    refers python:webio.URLEncode
+;
+
+
+
+/** 例外： HTTPエラー 
+ */
+exception HttpError = {
+  "status": integer(minimum=400, maximum=599),
+  "pathInfo": string?,
+  "appPath": string?,
+  "method": httpMethod?,
+
+  *: any?
+};
+
+/** HTTPリダイレクトを指示するシグナルデータ 
+ */
+@[register-public]
+type HttpRedirect = @& {
+ "status": integer(minimum=300, maximum=399),
+ "location": uri,
+ *: any?
+};
+
+/** HTTPリダイレクトのステータスコード（番号または名前）
+ */
+type httpRedirectStatus = (
+ /** 301 Moved Permanently */
+ 301 | "moved-permanently" |
+
+ /** 302 Found */
+ 302 | "found" |
+
+ /** 303 See Other */
+ 303 | "see-other" |
+
+ /** 307 Temporary Redirect */
+ 307 | "temporary-redirect" |
+);
+
+/** HTTPエラーのステータスコード（番号または名前）
+ */
+type httpErrorStatus = (
+ /** 400 Bad Request */
+ 400 | "bad-request" |
+
+ /* 403 Forbidden */
+ 403 | "forbidden" |
+
+ /** 405 Method Not Allowed */
+ 405 | "method-not-allowed" |
+
+ /** 404 Not Found */
+ 404 | "not-found" |
+);
+
+/** HTTPリダイレクトをシグナルで伝える
+ */
+@[register-public]
+command http-redirect 
+ {
+   "status": httpRedirectStatus?,
+ }
+ [string target] 
+ :: void -> never signals HttpRedirect
+{
+ %1 > target;
+ %target | text:regmatch "/" |
+ when {
+   OK => pv src,
+   NG => pass | action-name-to-url
+ } > url;
+ 
+ %status? |
+ when {
+   undefined => 302,
+   number    => pass,
+   string    => status-name-to-number
+ } > sts;
+ 
+ @HttpRedirect {"status": %sts, "location": %url} | signal
+ 
+};
+
+/** HTTPエラーを例外で伝える
+ */
+@[register-public]
+command http-error
+ {
+   "status": httpErrorStatus?,
+ }
+ [string? msg]
+ :: void -> never throws HttpError
+{
+ %status? |
+ when {
+   undefined => 500,
+   number    => pass,
+   string    => status-name-to-number
+ } > sts;
+
+ %1? |
+ when {
+   undefined => %sts | status-number-to-name,
+   string  => pass,
+ } > msg;
+
+ @HttpError {
+  "status": %sts,
+  "pathInfo": %PATH_INFO,
+  "appPath": %APP_PATH,
+  "method": %REQUEST_METHOD?,
+  "message": %msg,
+ } | throw
+};
+
+/** アクション名をURLに変換する
+*
+* いずれ、ポートにも対応する必要が生じる。
+* ポートの場合は、バインディング先の情報をAPIで取得する必要がある。
+*/
+command action-name-to-url :: string -> uri {
+ pass > act;
+ sreif:show-action %act | $.pathPattern  > patts;
+ [%patts | list:length, 1] | eq |
+ when {
+   False => make-exception BadInput "pathPattern has too may items." | throw,
+   True => %patts | nth 1 > patt,
+ };
+ %patt | text:regmatch "\\*" |
+ when {
+   OK => make-exception BadInput "pathPattern has a wildcard." | throw,
+   NG => void,
+ };
+ 
+ [%HOST_URL, %APP_PATH, %patt] | text:concat
+};
+
+/** ステータス名からステータス番号への対応表
+ */
+const _status-name-to-number = {
+    "ok": 200,
+    "created": 201,
+    "moved-permanently": 301,
+    "found": 302,
+    "see-other": 303,
+    "temporary-redirect": 307,
+    "bad-request": 400,
+    "forbidden": 403,
+    "not-found": 404,
+    "method-not-allowed": 405,
+    "internal-server-error": 500,
+    "not-implemented": 501,
+    "service-unavailable": 503,
+};
+
+
+/** ステータス番号からステータス名への対応表
+ */
+const _status-number-to-name = [
+  /* 0 */
+  [],
+
+  /* 100 */
+  [],
+
+  /* 200 */
+  [
+    /* 200 OK */
+    "ok",
+    /* 201 Created */
+    "created",
+  ],
+
+  /* 300 */
+  [
+    /* 301 Moved Permanently */
+    "moved-permanently",
+    /* 302 Found */
+    "found",
+    /* 303 See Other */
+    "see-other",
+    /* 304 */
+    ,
+    /* 305 */
+    ,
+    /* 306 */
+    ,
+    /* 307 Temporary Redirect */
+    "temporary-redirect",
+  ],
+
+  /* 400 */
+  [
+    /* 400 Bad Request */
+    "bad-request",
+    /* 401 */
+    ,
+    /* 402 */
+    ,
+    /* 403 Forbidden */
+    "forbidden",
+    /* 404 Not Found */
+    "not-found",
+    /* 405 Method Not Allowed */
+    "method-not-allowed",
+
+  ],
+
+  /* 500 */
+  [
+    /* 500 Internal Server Error */
+    "internal-server-error",
+    /* 501 Not Implemented */
+    "not-implemented",
+    /* 502 */
+    ,
+    /* 503 Service Unavailable */
+    "service-unavailable",
+  ],
+];
+
+/** ステータス番号からステータス名へ変換する
+ */
+command status-number-to-name :: integer(minimum=0, maximum=599) -> string? 
+{
+ [pass, 100] | [num:div --integer > x, num:mod > y];
+
+ _status-number-to-name | item %x | item --safe %y
+};
+
+/** ステータス名からステータス番号へ変換する
+ */
+command status-name-to-number :: string -> integer(minimum=0, maximum=599)?
+{
+  pass > nm;
+
+  _status-name-to-number | pv --safe %nm
+};
+
+
+//  commands for compatibility
+
+/**
+ * 与えられたパスに対しての302 Foundレスポンスを出力する。
+ */
+command found [string] :: void -> Redirect
+    refers python:webio.Found
+;
+
+/**
+ * 与えられたパスに対しての403 Forbiddenを出力する。
+ */
+command forbidden [string] :: void -> never
+    refers python:webio.Forbidden
+;
+
+/**
+ * 与えられたパスに対しての404 Forbiddenを出力する。
+ */
+command not-found [string] :: void -> never
+    refers python:webio.NotFound
+;
+
+/**
+ * 与えられたパスに対しての400 Bad Requestを出力する。
+ */
+command bad-request [string path, string method] :: void -> never
+    refers python:webio.BadRequest
+;
+
+/**
+ * 与えられたパスに対しての405 Method Not Allowedを出力する。
+ */
+command not-allowed [string path, string method] :: void -> never
+    refers python:webio.NotAllowed
+;
+
+// End of Module
