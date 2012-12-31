@@ -156,7 +156,7 @@ CONTENT_TYPEもないときは、コマンドがメディア型を（なんら�
 例： webio:parse --format=json
 
 */
-@[register-public]
+//@[register-public]
 command parse
  {
    /** MIMEメディア型 */
@@ -333,7 +333,7 @@ exception HttpError = {
 
 /** HTTPリダイレクトを指示するシグナルデータ 
  */
-@[register-public]
+//@[register-public]
 type HttpRedirect = @& {
  "status": integer(minimum=300, maximum=399),
  "location": uri,
@@ -374,7 +374,7 @@ type httpErrorStatus = (
 
 /** HTTPリダイレクトをシグナルで伝える
  */
-@[register-public]
+//@[register-public]
 command http-redirect 
  {
    "status": httpRedirectStatus?,
@@ -402,7 +402,7 @@ command http-redirect
 
 /** HTTPエラーを例外で伝える
  */
-@[register-public]
+//@[register-public]
 command http-error
  {
    "status": httpErrorStatus?,
