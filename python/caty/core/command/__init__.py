@@ -516,11 +516,6 @@ class VarLoader(object):
         elif opt.type == 'var':
             if opt.value.name in opts:
                 return opts[opt.value.name]
-            else:
-                if not opt.optional:
-                    raise KeyError(opt.value.name)
-                elif opt.default is not UNDEFINED:
-                    return opt.default
             elif opt.type == 'var_arg':
                 i = int(opt.value.name)
                 if i < len(args):
@@ -530,6 +525,11 @@ class VarLoader(object):
                         raise Exception(u'Argument %%%d is not defined' % i)
                     elif opt.default is not UNDEFINED:
                         return opt.default
+            else:
+                if not opt.optional:
+                    raise KeyError(opt.value.name)
+                elif opt.default is not UNDEFINED:
+                    return opt.default
 
         elif opt.type == 'glob':
             return opts['_OPTS']
