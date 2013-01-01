@@ -101,7 +101,7 @@ class Construe(Command, TypeCalculator):
                 scm.validate(v)
                 return v
             except JsonSchemaError, e:
-                er = untagged(self.error_report(e))
+                er = untagged(e.error_report(self.i18n))
                 if self.__type:
                     throw_caty_exception('ConversionError', u'failed to convert data to $type:\n$errorObj\nsource:$source', errorObj=er, source=generic_data, type=self.__type)
                 else:
