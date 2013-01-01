@@ -15,7 +15,7 @@ module webio;
  
 # semantic -- 応用固有のセマンティクスを持つデータ型
 # generic -- 汎用のフォーマット
-# raw -- (string | binary)、ただし、content-type によるメタ情報は持つ
+# raw -- (null | string | binary)、ただし、content-type によるメタ情報は持つ
 
 # semantic階層では、Caty型システムがそのまま使われる。
 # semantic階層では、CatyのGeneric型が使われが、さらにフォーマット名（実体はタグ名）により細分類される。
@@ -23,10 +23,10 @@ module webio;
 
 === コマンドのネーミング
 
-# semantic → generic : untranslate
+# semantic → generic : unconstrue
 # generic → raw : unparse
 # raw → generic ：parse
-# generic → semantic ： translate
+# generic → semantic ： construe
 
 型／フォーマットの情報はオプションとして渡す。引数では、順序を間違う恐れがある。
 
@@ -104,10 +104,10 @@ type GenericFormatName = (
 --typeが指定されていれば、型情報を変換に利用するかもしれない。
 --typeが指定されていないときは、型情報なしで行える変換を試みる。
 
-例： webio:untranslate --format=form
+例： webio:unconstrue --format=form
 
 */
-command untranslate
+command unconstrue
  {
    /** Caty型システムの型名 */
    "type" : typeName?,
@@ -119,7 +119,7 @@ command untranslate
    "format" : GenericFormatName?,
  }
 :: json:StandardJson -> Generic throws [webio_InsufficientMetainfo, ConversionError]
-    refers python:webio.Untranslate;
+    refers python:webio.UnConstrue;
 
 /** genericデータをrawデータにdownward変換する 
 
@@ -170,16 +170,49 @@ command parse
 --typeが指定されてないときは、型情報なしでできる範囲の変換を試みる。。
 またはまったく変換しない。
 
-例： translate --type=my:LunchOrder
+例： construe --type=my:LunchOrder
 
 */
-command translate
+command construe
  {
    /** Caty型システムの型名 */
    "type" : typeName?,
  }
 :: Generic -> any throws [webio_InsufficientMetainfo, ConversionError]
-    refers python:webio.Translate;
+    refers python:webio.Construe;
+
+//@[register-public]
+command translate  {
+   /** MIMEメディア型 */
+   "content-type" : mediaType?,
+
+   /** フォーマット名（タグ名）
+    * 有限個の候補から選ぶ。
+    */
+   "format" : GenericFormatName?,
+
+   /** Caty型システムの型名 */
+   "type" : typeName?,
+ } :: Raw -> any throws [webio_InsufficientMetainfo, ConversionError] {
+    parse --content-type=%content-type? --format=%format? | construe --type=%type?
+};
+
+//@[register-public]
+command untranslate  {
+   /** MIMEメディア型 */
+   "content-type" : mediaType?,
+
+   /** フォーマット名（タグ名）
+    * 有限個の候補から選ぶ。
+    */
+   "format" : GenericFormatName?,
+
+   /** Caty型システムの型名 */
+   "type" : typeName?,
+ } :: any -> Raw throws [webio_InsufficientMetainfo, ConversionError] {
+    unconstrue --format=%format? --type=%type? | unparse --content-type=%content-type?
+};
+
 
 
 /* == リクエスト発行 == 
@@ -272,7 +305,7 @@ command dump {*:any?}[any*]
 command encode-to-form-and-request
 :: object -> Response
 {
-  webio:untranslate --format=form | 
+  webio:unconstrue --format=form | 
   webio:unparse |
   webio:post --content-type=application/x-www-form-urlencoded
 };
@@ -289,7 +322,7 @@ command decode-from-form-and-back
   %1 > myType;
 
   webio:parse --format=form | 
-  webio:translate --type=%myType |
+  webio:construe --type=%myType |
   json:response
 };
 

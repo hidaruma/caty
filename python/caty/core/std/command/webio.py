@@ -15,7 +15,7 @@ CT_TEXT = u'text/plain'
 CT_BIN = u'application/octet-stream'
 
 
-class Untranslate(Command):
+class UnConstrue(Command):
     def setup(self, opts):
         self.__format = opts['format']
         self.__type = opts.get('type')
@@ -67,7 +67,7 @@ class Untranslate(Command):
                     r[k[2:]].append(v)
         return r
 
-class Translate(Command, TypeCalculator):
+class Construe(Command, TypeCalculator):
     def setup(self, opts):
         self.__type = opts.get('type')
         self.mod = UNDEFINED
