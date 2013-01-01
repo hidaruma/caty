@@ -344,7 +344,7 @@ class ScriptParser(Parser):
     def opt(self, seq):
         seq.ignore_hook = True
         try:
-            o = seq.parse([self.longopt, self.parameter_opt, self.arg0])
+            o = seq.parse(map(try_, [self.longopt, self.parameter_opt, self.arg0]))
             skip_ws(seq)
             return o
         finally:
@@ -373,10 +373,13 @@ class ScriptParser(Parser):
                   xjson.multiline_string,
                   self.unquoted_maybe_num, 
                   self._undefined_literal,
-                  self.var_ref,
+                  try_(self.var_ref),
+                  self.arg_ref,
                   )(seq)
         if isinstance(v, VarRef):
             return OptionVarLoader(o, v, v.optional, v.default)
+        if isinstance(v, ArgRef):
+            return ArgVarLoader(o, v, v.optional)
         return Option(o, v)
 
     def _undefined_literal(self, seq):

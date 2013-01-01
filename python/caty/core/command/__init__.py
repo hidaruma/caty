@@ -521,6 +521,16 @@ class VarLoader(object):
                     raise KeyError(opt.value.name)
                 elif opt.default is not UNDEFINED:
                     return opt.default
+            elif opt.type == 'var_arg':
+                i = int(opt.value.name)
+                if i < len(args):
+                    return args[i]
+                else:
+                    if not opt.optional:
+                        raise Exception(u'Argument %%%d is not defined' % i)
+                    elif opt.default is not UNDEFINED:
+                        return opt.default
+
         elif opt.type == 'glob':
             return opts['_OPTS']
         else:
@@ -532,11 +542,11 @@ class VarLoader(object):
 
     def load(self, storage):
         from caty.core.spectypes import reduce_undefined
-        opts = self._load_opts(storage.opts)
+        opts = self._load_opts(storage.opts, storage.args)
         args = self._load_args(storage.opts, storage.args)
         return reduce_undefined(opts), reduce_undefined(args)
 
-    def _load_opts(self, opts):
+    def _load_opts(self, opts, args):
         o = MultiMap()
         for opt in self.opts:
             if opt.type == 'option':
@@ -549,6 +559,16 @@ class VarLoader(object):
                         raise Exception(u'Variable %%%s is not defined' % opt.value.name)
                     elif opt.default is not UNDEFINED:
                         o[opt.key] = opt.default
+            elif opt.type == 'var_arg':
+                i = int(opt.value.name)
+                if i < len(args):
+                    o[opt.key] = args[i]
+                else:
+                    if not opt.optional:
+                        raise Exception(u'Argument %%%d is not defined' % i)
+                    elif opt.default is not UNDEFINED:
+                        o[opt.key] = opt.default
+
             elif opt.type == 'glob':
                 o.update(opts['_OPTS'])
             else:
@@ -569,7 +589,7 @@ class VarLoader(object):
                     a.append(args[arg.index])
                 else:
                     if not arg.optional:
-                        raise Exception(u'Variable %%%d is not defined' % arg.index)
+                        raise Exception(u'Argument %%%d is not defined' % arg.index)
                     elif arg.default is not UNDEFINED:
                         a.append(arg.default)
             elif arg.type == 'glob':

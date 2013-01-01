@@ -191,10 +191,8 @@ command translate  {
     */
    "format" : GenericFormatName?,
 
-   /** Caty型システムの型名 */
-   "type" : typeName?,
- } :: Raw -> any throws [webio_InsufficientMetainfo, ConversionError] {
-    parse --content-type=%content-type? --format=%format? | construe --type=%type?
+ } [string typeName] :: Raw -> any throws [webio_InsufficientMetainfo, ConversionError] {
+    parse --content-type=%content-type? --format=%format? | construe --type=%1
 };
 
 //@[register-public]

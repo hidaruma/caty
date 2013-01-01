@@ -1,4 +1,5 @@
 from caty.jsontools import tagged
+from caty.core.spectypes import UNDEFINED
 class Param(object): pass
 
 
@@ -23,6 +24,17 @@ class OptionLoader(Param):
 class OptionVarLoader(Param):
     type = 'var'
     def __init__(self, key, value, optional, default):
+        self.key = key.lstrip('-')
+        self.value = value
+        self.optional = optional
+        self.default = default
+
+    def reify(self):
+        return tagged(u'_optVarLoader', {'key': self.key, 'value': self.value, 'optional': self.optional})
+
+class ArgVarLoader(Param):
+    type = 'var_arg'
+    def __init__(self, key, value, optional, default=UNDEFINED):
         self.key = key.lstrip('-')
         self.value = value
         self.optional = optional
