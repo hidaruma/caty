@@ -262,7 +262,7 @@ Usage: server start|stop
 Web サーバの起動・停止を行う
         """
         def usage():
-            self._echo(u'使い方: hcon start port または hcon stop')
+            self._echo(u'使い方: hcon start port または hcon stop(デフォルトポートは9090)')
         from caty.front.web.console import HTTPConsoleThread
         cmd = line.strip()
         if ' ' in cmd:
@@ -271,11 +271,13 @@ Web サーバの起動・停止を行う
             rest = ''
         if cmd == 'start':
             if not rest:
-                usage()
-                return
+                rest = '9090'
             if self.hcon is None:
                 from caty.util import try_parse
                 port = try_parse(int, rest)
+                if not port:
+                    usage()
+                    return
                 self.hcon = HTTPConsoleThread(self.system, port)
                 self.hcon.start()
             else:
