@@ -204,6 +204,8 @@ class Parse(Command):
         else:
             cs = self.env.get('APP_ENCODING', 'utf-8')
         if type == CT_BIN:
+            if not isinstance(raw_data, str):
+                raw_data = raw_data.encode(cs)
             return tagged('bytes', raw_data)
         elif type.startswith('text/'):
             return tagged('text', raw_data)
@@ -212,6 +214,8 @@ class Parse(Command):
                 data = unicode(raw_data, cs)
             else:
                 data = raw_data
+            if not raw_data:
+                data = '{}'
             return tagged('json', stdjson.loads(data))
         elif type == CT_FORM or type == CT_MULTI:
             import cgi

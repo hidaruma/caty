@@ -999,13 +999,6 @@ command request {
 };
 
 /**
- * 引数で指定された型に入力値を変換して返す。
- */
-command translate {"content-type": string?} [string] :: WebInput -> @OK any | @NG MiniErrorInfo
-    reads [env, schema]
-    refers python:builtin.Translate;
-
-/**
  * 引数で指定された型で入力値を検証する。
  */
 command validate<T default univ> {"mod": string?, "boolean": boolean?} [string?] :: univ -> @OK univ | @NG MiniErrorInfo | boolean

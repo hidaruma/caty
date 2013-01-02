@@ -416,49 +416,6 @@ class TypeCalculator(object):
     def type_name(self, seq):
         return schemaparser.typename(seq)
 
-class Translate(Builtin, TypeCalculator):
-    
-    def setup(self, opts, schema_name):
-        self.schema_name = schema_name
-        self.mod = caty.UNDEFINED
-        self.__content_type = opts.get('content-type', None)
-        self.set_schema(schema_name)
-
-    def execute(self, raw_input):
-        try:
-            e = self.env._dict
-            if raw_input is None:
-                n = None
-                scm = self.converter
-                scm.validate(n)
-                return tagged(u'OK', n)
-            if self.__content_type:
-                e = dict(e)
-                e['CONTENT_TYPE'] = self.__content_type
-            if 'CONTENT_TYPE' not in e:
-                e['CONTENT_TYPE'] = u'application/json'
-            input = WebInputParser(e, self.env['APP_ENCODING'], raw_input).read()
-            t, v = split_tag(input)
-            scm = self.converter
-            if t == 'form':
-                return tagged(u'OK', scm.convert(self._to_nested(v)))
-            elif t == 'json':
-                try:
-                    n = scm.fill_default(v)
-                    scm.validate(n)
-                    return tagged(u'OK', n)
-                except JsonSchemaError, e:
-                    return tagged(u'NG', e.error_report(self.i18n))
-        except JsonSchemaError, e:
-            return tagged(u'NG', e.error_report(self.i18n))
-
-    def _to_nested(self, input):
-        d = {}
-        for k, v in input.items():
-            d['$.'+k] = v
-        return path2obj(d) if d else d
-
-
 class Validate(Builtin, TypeCalculator):
     
     def setup(self, opts, schema_name=u'univ'):

@@ -181,9 +181,10 @@ command construe
 :: Generic -> any throws [webio_InsufficientMetainfo, ConversionError]
     refers python:webio.Construe;
 
-//@[register-public]
+@[register-public]
 command translate  {
    /** MIMEメディア型 */
+   @[default("application/json")]
    "content-type" : mediaType?,
 
    /** フォーマット名（タグ名）
@@ -195,7 +196,7 @@ command translate  {
     parse --content-type=%content-type? --format=%format? | construe --type=%1
 };
 
-//@[register-public]
+@[register-public]
 command untranslate  {
    /** MIMEメディア型 */
    "content-type" : mediaType?,
