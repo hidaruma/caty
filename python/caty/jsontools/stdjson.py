@@ -23,4 +23,9 @@ def dumps(obj, **kwds):
     else:
         return unicode(v)
 
-
+def dump_bytes(obj, **kwds):
+    v = json.dumps(obj, cls=CatyEncoder, **kwds)
+    if isinstance(v, unicode):
+        return v.encode('unicode-escape')
+    else:
+        return v

@@ -93,13 +93,16 @@ class HTTPConsoleApp(object):
                 return [body]
 
         result, status = self._process(app_name, input, environ)
-        body = stdjson.dumps(result)
+        if status.startswith('500 '):
+            body = result
+        else:
+            body = stdjson.dump_bytes(result)
         headers = {
             'Content-type': 'application/json',
             'Content-length': str(len(body))
         }
         start_response(status, list(headers.items()))
-        return [body.encode('unicode-escape')]
+        return [body]
 
     def _process(self, app_name, input, environ):
         if app_name == 'project':

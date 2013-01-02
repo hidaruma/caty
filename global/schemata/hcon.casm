@@ -42,7 +42,7 @@ command post [string hcon-url] :: HConInput -> WebOutput {
   %1 > hcon-url;
 
   %in
-  | webio:untranslate --format=json | webio:unparse --content-type=application/json
+  | webio:unconstrue --format=json | webio:unparse --content-type=application/json
   | http:post --content-type=application/json %hcon-url
 };
 
