@@ -106,15 +106,11 @@ class SessionInfoWrapper(Facility):
         Facility.__init__(self)
 
     @property
-    def key(self):
-        return self.__session.key
-
-    @property
     def storage(self):
         return self.__session.storage
 
     @property
-    def key(self):
+    def id(self):
         return self.__session.key
 
     @property

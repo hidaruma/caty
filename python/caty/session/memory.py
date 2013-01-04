@@ -61,6 +61,18 @@ class SessionStorage(SessionStorage):
     def delete(self, session_key):
         pass
 
+    def create_session(self, environ):
+        session = None
+        if 'HTTP_COOKIE' in environ:
+            c = environ['HTTP_COOKIE']
+            cookie = SimpleCookie()
+            cookie.load(c)
+            if 'sessionid' in cookie:
+                session = self.restore(cookie['sessionid'].value)
+        if session == None:
+            session = SessionInfoWrapper(SessionInfo('session_scope', self))
+        return session
+
 from Cookie import SimpleCookie, Morsel
 from caty.session.value import create_variable, SessionInfo, SessionInfoWrapper
 class WSGISessionWrapper(object):
@@ -75,7 +87,7 @@ class WSGISessionWrapper(object):
                 if cookie:
                     headers.append(('Set-Cookie', cookie))
                 return start_response(status, headers, exc_info)
-            environ['caty.session'] = self._create_session(environ)
+            environ['caty.session'] = self.dispatcher._system._global_config.session.storage.create_session(environ)
             return self.dispatcher(environ, session_start_response)
         except:
             import traceback
@@ -100,14 +112,4 @@ class WSGISessionWrapper(object):
         m['path'] = '/'
         return m.OutputString()
 
-    def _create_session(self, environ):
-        session = None
-        if 'HTTP_COOKIE' in environ:
-            c = environ['HTTP_COOKIE']
-            cookie = SimpleCookie()
-            cookie.load(c)
-            if 'sessionid' in cookie:
-                session = self.dispatcher._system._global_config.session.storage.restore(cookie['sessionid'].value)
-        if session == None:
-            session = SessionInfoWrapper(SessionInfo('session_scope', self.dispatcher._system._global_config.session.storage))
-        return session
+

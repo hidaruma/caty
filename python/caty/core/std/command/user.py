@@ -144,7 +144,7 @@ class Login(Builtin):
             redirect = {
             'header': {
                 'Location': unicode(join(self.env.get('HOST_URL'), redirect_path)),
-                'Set-Cookie': unicode(self._mk_cookie(session.key)),
+                'Set-Cookie': unicode(self._mk_cookie(session.id)),
             },
             'status': 302}
             return tagged(u'OK', redirect)
@@ -177,7 +177,7 @@ class Loggedin(Builtin):
 class Logout(Builtin):
 
     def execute(self, input):
-        key = self.session.key
+        key = self.session.id
         if self.user.loggedin:
             self.session.clear()
             self.user.clear()

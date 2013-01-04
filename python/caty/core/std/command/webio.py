@@ -180,6 +180,9 @@ class Parse(Command):
     def execute(self, raw_data):
         if raw_data is None:
             return tagged('void', None)
+        if self.__format == 'void' and raw_data:
+            return tagged('void', raw_data)
+            
         if self.__content_type is UNDEFINED and self.env.exists('CONTENT_TYPE'):
             self.__content_type = self.env.get('CONTENT_TYPE')
         type = self.__content_type
@@ -188,6 +191,9 @@ class Parse(Command):
                 type = CT_BIN
             else:
                 type = CT_TEXT
+        elif type == CT_BIN:
+            if not isinstance(raw_data, str):
+                raw_data = raw_data.encode(cs)
         if self.__format is not UNDEFINED:
             if self.__format == 'json':
                 type = CT_JSON
@@ -204,8 +210,6 @@ class Parse(Command):
         else:
             cs = self.env.get('APP_ENCODING', 'utf-8')
         if type == CT_BIN:
-            if not isinstance(raw_data, str):
-                raw_data = raw_data.encode(cs)
             return tagged('bytes', raw_data)
         elif type.startswith('text/'):
             return tagged('text', raw_data)

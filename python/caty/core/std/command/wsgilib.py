@@ -182,7 +182,9 @@ class CallApplication(Builtin):
             path = u'/%s%s' % (app_name, path) if path else u'/%s/' % app_name
         environ['PATH_INFO'] = path
         response_handler = ResponseHandler()
-        wsgi_app = wsgi_app_cls(app, system.debug, system)
+        wsgi_app = system._global_config.session.wrapper(
+                            wsgi_app_cls(app, system.debug, system),
+                            system._global_config.session.conf)
         output = wsgi_app.start(environ, response_handler.start_response)
         return response_handler.make_response(output)
 
@@ -248,5 +250,6 @@ class LookupAndExec(Builtin):
         if app_name != u'root':
             path = u'/%s%s' % (app_name, path) if path else u'/%s/' % app_name
         environ['PATH_INFO'] = path
+        environ['caty.session'] = system._global_config.session.storage.create_session(environ)
         wsgi_app = wsgi_app_cls(app, system.debug, system)
         return wsgi_app.main(environ)

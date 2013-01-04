@@ -43,7 +43,7 @@ class RequestToken(Facility):
 
 class TokenGeneratorMixin(object):
     def _generate_and_set_token(self):
-        key = self.session.key
+        key = self.session.id
         token = unicode(sha1(reduce(lambda a, b: a + b,
                         [str(random.randint(0, sys.maxint - 1)),
                         str(random.randint(0, sys.maxint - 1)),
