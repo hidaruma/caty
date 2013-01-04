@@ -334,7 +334,7 @@ type SimpleSessionConf = {
  * 各項目の詳細はhttp://beaker.readthedocs.org/en/latest/configuration.htmlを参照
  */
 type BeakerSessionConf = {
-    "module": "caty.extension.beakersession",
+    "module": "caty.extension.session.beaker",
     "conf": {
         "data_dir": string?,
         "lock_dir": string,
