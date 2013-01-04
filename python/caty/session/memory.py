@@ -10,16 +10,15 @@ from time import time
 import random
 import sys
 
-class OnMemoryStorage(SessionStorage):
+class SessionStorage(SessionStorage):
     u"""セッションデータ一覧を保持し、セッション情報の取得と永続化を行う。
     このクラスはセッション情報をファイルシステムなどに永続化することはせず、
     常にオンメモリで情報を保持する。
     """
     
-    def __init__(self, obj, key):
+    def __init__(self, obj):
         self.__sessions = {}
         self.__expire = obj['expire']
-        self.secret_key = key
 
     @property
     def expire(self):
@@ -62,3 +61,53 @@ class OnMemoryStorage(SessionStorage):
     def delete(self, session_key):
         pass
 
+from Cookie import SimpleCookie, Morsel
+from caty.session.value import create_variable, SessionInfo, SessionInfoWrapper
+class WSGISessionWrapper(object):
+    def __init__(self, dispatcher, opts):
+        self.dispatcher = dispatcher
+        self.opts = opts
+
+    def __call__(self, environ, start_response):
+        try:
+            def session_start_response(status, headers, exc_info=None):
+                cookie = self._extend_cookie(environ) 
+                if cookie:
+                    headers.append(('Set-Cookie', cookie))
+                return start_response(status, headers, exc_info)
+            environ['caty.session'] = self._create_session(environ)
+            return self.dispatcher(environ, session_start_response)
+        except:
+            import traceback
+            traceback.print_exc()
+            raise
+
+    def _extend_cookie(self, environ):
+        if 'HTTP_COOKIE' in environ:
+            c = environ['HTTP_COOKIE']
+            cookie = SimpleCookie()
+            cookie.load(c)
+            if 'sessionid' in cookie:
+                session = self.dispatcher._system._global_config.session.storage.restore(cookie['sessionid'].value)
+                session.create(u'updates').update_time()
+            else:
+                return ''
+        else:
+            return ''
+        m = Morsel()
+        m.set('sessionid', session.key, session.key)
+        m['expires'] = session.storage.expire
+        m['path'] = '/'
+        return m.OutputString()
+
+    def _create_session(self, environ):
+        session = None
+        if 'HTTP_COOKIE' in environ:
+            c = environ['HTTP_COOKIE']
+            cookie = SimpleCookie()
+            cookie.load(c)
+            if 'sessionid' in cookie:
+                session = self.dispatcher._system._global_config.session.storage.restore(cookie['sessionid'].value)
+        if session == None:
+            session = SessionInfoWrapper(SessionInfo('session_scope', self.dispatcher._system._global_config.session.storage))
+        return session

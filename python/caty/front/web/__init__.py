@@ -156,7 +156,7 @@ class CatyServerFacade(object):
         self.is_debug = is_debug
         server_class = server_module.get_server(system, is_debug)
         handler_class = server_module.get_handler(system, is_debug)
-        dispatcher = server_module.get_dispatcher(system, is_debug)
+        dispatcher = system._global_config.session.wrapper(server_module.get_dispatcher(system, is_debug), system._global_config.session.conf)
         self.httpd = make_server('', 
                                  port, 
                                  dispatcher, 

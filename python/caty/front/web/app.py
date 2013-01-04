@@ -2,7 +2,6 @@
 u"""Caty の Web フロントエンド。
 """
 from copy import deepcopy
-from Cookie import SimpleCookie, Morsel
 import wsgiref
 import cgi
 import sys
@@ -83,12 +82,6 @@ class CatyApp(object):
             if 'text/' in ct and 'charset' not in ct and enc:
                 json['header']['content-type'] = ct + '; charset=%s' % enc
             headers = list(self.create_header(json['header']))
-            if 'Set-Cookie' not in json['header']:
-                cookie = self._extend_cookie(environ) 
-            else:
-                cookie = ''
-            if cookie:
-                headers.append(('Set-Cookie', cookie))
         except Exception, e:
             print traceback.format_exc()
             print e
@@ -122,7 +115,7 @@ class CatyApp(object):
         
         if method not in (u'POST', u'PUT'):
             input = None
-        facilities = self._app.create_facilities(lambda : self.create_session(environ))
+        facilities = self._app.create_facilities(lambda : environ['caty.session'])
         del environ['PATH_INFO'] # init_envで生PATH_INFOを使わせない
         if self._system.wildcat:
             self._app.init_env(facilities, self.is_debug, [u'web', u'test'], self._system, environ)
@@ -176,18 +169,6 @@ class CatyApp(object):
                 yield str(k), v.encode('utf-8')
             else:
                 yield str(k), str(v)
-
-    def create_session(self, environ):
-        session = None
-        if 'HTTP_COOKIE' in environ:
-            c = environ['HTTP_COOKIE']
-            cookie = SimpleCookie()
-            cookie.load(c)
-            if 'sessionid' in cookie:
-                session = self._app.session_storage.restore(cookie['sessionid'].value)
-        if session == None:
-            session = SessionInfoWrapper(SessionInfo('session_scope', self._app.session_storage))
-        return session
 
     def error_500(self, e, env):
         msg = u'500 Internal Server Error'
@@ -247,23 +228,6 @@ class CatyApp(object):
                     }
                 }
 
-    def _extend_cookie(self, environ):
-        if 'HTTP_COOKIE' in environ:
-            c = environ['HTTP_COOKIE']
-            cookie = SimpleCookie()
-            cookie.load(c)
-            if 'sessionid' in cookie:
-                session = self._app.session_storage.restore(cookie['sessionid'].value)
-                session.create(u'updates').update_time()
-            else:
-                return ''
-        else:
-            return ''
-        m = Morsel()
-        m.set('sessionid', session.key, session.key)
-        m['expires'] = session.storage.expire
-        m['path'] = '/'
-        return m.OutputString()
 
 class NotFound(Exception):
     def __init__(self, path):

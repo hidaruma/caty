@@ -458,7 +458,7 @@ class Application(object):
         self._interpreter = script.initialize(self._schema_module, self, self._system)
 
     def _init_session(self):
-        self._session_storage = self._global_config.session_storage
+        self._session_storage = self._global_config.session.storage
 
     def _init_storage(self):
         self._storage = storage.initialize(self._global_config.storage_conf)

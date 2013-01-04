@@ -262,17 +262,7 @@ type PrjManifest = {
     /**
      * セッションの設定
      */
-    "session": {
-        /**
-         * セッションのタイプ。"memory"のみ現在は対応。
-         */
-        "type": string,
-
-        /**
-         * セッションの保持される期間
-         */
-        "expire": integer,
-    },
+    "session": SimpleSessionConf | BeakerSessionConf,
 
     /**
      * パスワード生成などでsaltの一部に用いる文字列
@@ -323,6 +313,41 @@ type PrjManifest = {
     "addrsDenied": [string*]?,
 
 
+};
+
+/**
+ * Catyコアに組み込まれているセッション機能
+ * テスト目的で適当に作ったのでBeakerの使用を推奨。
+ */
+type SimpleSessionConf = {
+    "module": "caty.session.memory",
+    "conf": {
+        /**
+         * セッションの保持される期間
+         */
+        "expire": integer,
+    },
+};
+
+/**
+ * Beakerを用いたセッション管理
+ * 各項目の詳細はhttp://beaker.readthedocs.org/en/latest/configuration.htmlを参照
+ */
+type BeakerSessionConf = {
+    "module": "caty.extension.beakersession",
+    "conf": {
+        "data_dir": string?,
+        "lock_dir": string,
+        "memchache_module": string?,
+        "type": "file" | "dbm" | "memory" | "ext:memchached" | "ext:database" | "ext:google",
+        "webtest_varname": string?,
+        "url": string?,
+        "cookie_expires": (boolean | integer)?, // Beakerの物と違ってdatetime, timedeltaはサポートしていない
+        "cookie_domain": string?,
+        "key": string?,
+        "secret": string?,
+        "secure": boolean?,
+    },
 };
 
 

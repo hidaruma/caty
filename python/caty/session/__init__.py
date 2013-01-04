@@ -1,27 +1,18 @@
 #coding: utf-8
-from caty.session.memory import OnMemoryStorage
-from caty.session.value import *
-from caty.core.exception import InternalException
-TYPE_MAPPING = {
-    'memory': OnMemoryStorage,
-}
-
 def initialize(obj):
-    u"""セッションモジュールの初期化。
-    セッションモジュールは以下の要素により成り立っている。
+    try:
+        exec 'import %s as sessionimpl' % obj['module']
+    except:
+        import traceback
+        traceback.print_exc()
+        print '[Warning] No module named %s. Use caty.session.memory insted' % obj['module']
+        import caty.session.memory as sessionimpl
+    session = SessionMiddleWare(sessionimpl.SessionStorage(obj['conf']), sessionimpl.WSGISessionWrapper, obj['conf'])
+    return session
 
-    * SessionStorage
-    * SessionInfo
-
-    これらのうち SessionStorage だけが設定によって差し替え可能となる。
-    デフォルトではメモリ内にセッション情報を保持する揮発性のセッションとなる。
-
-    """
-    t = obj['session']['type']
-    storage_class = TYPE_MAPPING.get(t, None)
-    if not storage_class:
-        raise InternalException(u'Unknwon session type: $type', type=t)
-    storage = storage_class(obj['session'], obj['key'])
-    return storage
-
+class SessionMiddleWare(object):
+    def __init__(self, storage, wrapper, conf):
+        self.storage = storage
+        self.wrapper = wrapper
+        self.conf = conf
 

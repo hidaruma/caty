@@ -1,7 +1,7 @@
 #coding: utf-8
-from caty import mafs, session
 from caty.util.path import join
 
+from caty import mafs, session
 from copy import deepcopy
 import locale
 import os
@@ -19,9 +19,9 @@ class GlobalConfig(object):
         self._raw_data = obj
         fs = obj['mafsModule']
         self._mafs_module = fs
-        session_conf = obj.get('session', {'type':'memory', 'expire': 3600})
+        session_conf = obj.get('session', {'module': 'caty.session', 'conf': {'type':'memory', 'expire': 3600}})
         secret_key = obj['secretKey']
-        self._session_storage = session.initialize({'session': session_conf, 'key': secret_key})
+        self.session = session.initialize(session_conf)
         self._filetypes = mafs.metadata.default_types
         self._encoding = obj.get('encoding', u'utf-8')
         self.server_port = 80
@@ -77,10 +77,6 @@ class GlobalConfig(object):
         else:
             self.server_name = host
             self.server_port = int(port)
-
-    @property
-    def session_storage(self):
-        return self._session_storage
 
     @property
     def host_url(self):
