@@ -62,8 +62,10 @@ class System(object):
                 "secretKey": u''.join([random.choice(string.ascii_letters+string.digits) for c in range(29)]),
                 "enableHTTPMethodTunneling": True,
                 "session": {
-                    "expire": 3600,
-                    "type": u"memory"
+                    "module": "caty.session.memory",
+                    "conf": {
+                        "expire": 3600,
+                    }
                 },
                 "mafsModule": u"caty.mafs.stdfs"
             }
