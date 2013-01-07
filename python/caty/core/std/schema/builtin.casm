@@ -337,7 +337,7 @@ type BeakerSessionConf = {
     "module": "caty.extension.session.beaker",
     "conf": {
         "data_dir": string?,
-        "lock_dir": string,
+        "lock_dir": string?,
         "memchache_module": string?,
         "type": "file" | "dbm" | "memory" | "ext:memchached" | "ext:database" | "ext:google",
         "webtest_varname": string?,

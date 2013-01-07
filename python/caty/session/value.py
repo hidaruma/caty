@@ -127,12 +127,14 @@ class SessionInfoWrapper(Facility):
     __in__ = exists
 
     @am.read
-    def get(self, name):
+    def get(self, name, default=None):
         u"""name に対応した値を返す。
         """
-        return self.__session.get(name)
+        return self.__session.get(name, default)
 
-    __getitem__ = get
+    @am.read
+    def __getitem__(self, name):
+        return sefl.__session[name]
 
     @am.read
     def find(self, name, sjpath):

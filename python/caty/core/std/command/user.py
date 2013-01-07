@@ -144,20 +144,12 @@ class Login(Builtin):
             redirect = {
             'header': {
                 'Location': unicode(join(self.env.get('HOST_URL'), redirect_path)),
-                'Set-Cookie': unicode(self._mk_cookie(session.id)),
             },
             'status': 302}
             return tagged(u'OK', redirect)
         else:
             msg = self.i18n.get(u'User id or password is incorrect')
             return tagged(u'NG', msg)
-
-    def _mk_cookie(self, sessionid):
-        m = Morsel()
-        m.set('sessionid', sessionid, sessionid)
-        m['expires'] = self.session.storage.expire
-        m['path'] = '/'
-        return m.OutputString()
 
 class Loggedin(Builtin):
 

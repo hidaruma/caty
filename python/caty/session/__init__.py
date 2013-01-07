@@ -7,7 +7,8 @@ def initialize(obj):
         traceback.print_exc()
         print '[Warning] No module named %s. Use caty.session.memory insted' % obj['module']
         import caty.session.memory as sessionimpl
-    session = SessionMiddleWare(sessionimpl.SessionStorage(obj['conf']), sessionimpl.WSGISessionWrapper, obj['conf'])
+    conf = obj['conf']
+    session = SessionMiddleWare(sessionimpl.SessionStorage(sessionimpl.convert_conf(conf)), sessionimpl.WSGISessionWrapper, conf)
     return session
 
 class SessionMiddleWare(object):

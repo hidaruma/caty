@@ -1,7 +1,7 @@
 # coding: utf-8
 from __future__ import with_statement
 from caty.session.value import SessionInfo, SessionInfoWrapper
-from caty.session.base import SessionStorage
+from caty.session.base import SessionStorageBase
 from caty.jsontools import json
 from caty.jsontools.path import build_query
 from threading import RLock
@@ -10,7 +10,7 @@ from time import time
 import random
 import sys
 
-class SessionStorage(SessionStorage):
+class SessionStorage(SessionStorageBase):
     u"""セッションデータ一覧を保持し、セッション情報の取得と永続化を行う。
     このクラスはセッション情報をファイルシステムなどに永続化することはせず、
     常にオンメモリで情報を保持する。
@@ -112,4 +112,7 @@ class WSGISessionWrapper(object):
         m['path'] = '/'
         return m.OutputString()
 
+
+def convert_conf(cfg):
+    return cfg
 
