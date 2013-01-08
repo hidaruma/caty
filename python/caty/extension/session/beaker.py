@@ -175,3 +175,6 @@ class WSGISessionWrapper(SessionMiddleware):
                         headers.append(('Set-cookie', cookie))
             return start_response(status, headers, exc_info)
         return self.wrap_app(environ, session_start_response)
+
+    start = __call__
+
