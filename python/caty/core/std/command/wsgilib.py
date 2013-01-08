@@ -253,3 +253,4 @@ class LookupAndExec(Builtin):
         environ['caty.session'] = system._global_config.session.storage.create_session(environ)
         wsgi_app = wsgi_app_cls(app, system.debug, system)
         return wsgi_app.main(environ)
+

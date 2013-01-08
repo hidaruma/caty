@@ -1,7 +1,7 @@
 #coding: utf-8
 from caty.util.web import *
 from caty.util import error_to_ustr, brutal_encode
-from caty.core.facility import COMMIT
+from caty.core.facility import COMMIT, ROLLBACK, PEND
 from caty.core.i18n import I18nMessageWrapper
 from caty.util.path import splitext, dirname, join
 from caty.core.command.exception import *
@@ -121,7 +121,7 @@ class RequestHandler(object):
                     cmd = self._interpreter.build(proxy.source, opts, [path, path], transaction=transaction)
         except Exception, e:
             return ExceptionAdaptor(e, traceback.format_exc(), self, error_logger)
-        return PipelineAdaptor(cmd, self._interpreter.facilities['schema'], self, error_logger, lock_file)
+        return PipelineAdaptor(cmd, self._interpreter, self, error_logger, lock_file, transaction)
     
     def _verify_access(self, path, method):
         if path.endswith('/'): return
@@ -137,15 +137,17 @@ class RequestHandler(object):
 class PipelineAdaptor(object):
     u"""コマンドを実行した後で適切なエラーハンドリングを行う。
     """
-    def __init__(self, cmd, schema, handler, error_logger, lock_file=None):
+    def __init__(self, cmd, interpreter, handler, error_logger, lock_file=None, transaction=COMMIT):
         self.__command = cmd
         self.__result = None
         self.__succeed = False
-        self.__schema = schema
+        self.__interpreter = interpreter
+        self.__schema = interpreter.facilities['schema']
         self.i18n = I18nMessageWrapper(handler._app.i18n, handler._env)
         self.env = handler._env
         self.app = handler._app
         self.error_logger = error_logger
+        self.__transaction = transaction
         import hashlib
         import os, tempfile
         if lock_file:
@@ -184,18 +186,26 @@ class PipelineAdaptor(object):
         except PipelineErrorExit, e:
             result = e.json_obj
             transaction = False
+        except CatySignal as e:
+            transaction = False
+            if self.schema.has_command_type('map-signal') and not self.scheam._is_runaway_signal(e):
+                cmd = self.__interpreter.build(u'map-signal', 
+                                              None, 
+                                              None, 
+                                              transaction=self.__transaction)
+                result = cmd(e.raw_data)
+            else:
+                result = self._dispatch_signal(e)
         except CatyException, e:
             transaction = False
-            result = self._dispatch_error(e)
-        except JsonSchemaError, e:
-            transaction = False
-            result = {
-                'status': 400,
-                'body': e.get_message(self.i18n),
-                'header': {
-                    'content-type': u'text/plain; charset=utf-8'
-                }
-            }
+            if self.schema.has_command_type('map-exception') and not self.schema._is_runaway_exception(e):
+                cmd = self.__interpreter.build(u'map-exception', 
+                                              None, 
+                                              None, 
+                                              transaction=self.__transaction)
+                result = cmd(e.raw_data)
+            else:
+                result = self._dispatch_error(e)
         except Exception, e:
             tb = traceback.format_exc()
             transaction = False
@@ -233,7 +243,15 @@ class PipelineAdaptor(object):
                 self.__unlock(self.lock_file)
 
     def _dispatch_error(self, e):
-        if e.tag == 'FileNotFound':
+        if e.tag == 'ConversionError' or e.tag == 'InputTypeError':
+            return {
+                'status': 400,
+                'header': {
+                    'content-type': u'text/plain; charset=utf-8',
+                },
+                'body': e.get_message(self.i18n)
+            }
+        elif e.tag == 'FileNotFound':
             return {
                 'status': 404,
                 'header': {
@@ -270,6 +288,15 @@ class PipelineAdaptor(object):
                 }
             }
         return result
+
+    def _dispatch_signal(self, e):
+        return {
+            'status': 500,
+            'body': self.i18n.get(u'Uncaught signal: $data', data=e),
+            'header': {
+                'content-type': u'text/plain; charset=utf-8',
+            }
+        }
 
     def __lock(self, lock_dir, recur=5):
         import os, random, time

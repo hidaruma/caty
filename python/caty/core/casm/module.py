@@ -716,6 +716,16 @@ class Module(Facility):
         for k in self.facility_ns.keys() + self.entity_ns.keys():
             m.app._facility_classes.pop(k)
 
+    def _is_runaway_exception(self, e):
+        try:
+            return u'runaway' in self.get_type(e.tag).annotations
+        except:
+            return False
+
+    def _is_runaway_signal(self, e):
+        import caty.jsontools as json
+        return isinstance(e.raw_data, json.TaggedValue) and e.raw_data.tag == u'runaway'
+
 class _FaciltyLoader(object):
     def __init__(self, clsref, facility_name, module):
         self.path = facility_name + '.py'

@@ -54,6 +54,8 @@ class CatyApp(object):
             j, h = self._start_proc(environ)
         return self._end_proc(j, h, start_response)
 
+    __call__ = start
+
     def _ip_address_denied(self, environ):
         ip = environ['REMOTE_ADDR']
         for deny in self.addrsDenied:

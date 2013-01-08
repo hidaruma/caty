@@ -346,3 +346,12 @@ class URLEncode(Builtin):
             o[k] = v
         return unicode(urllib.urlencode(o))
 
+class MapException(Builtin):
+    def execute(self, input):
+        pass
+
+
+class MapSignal(Builtin):
+    def execute(self, input):
+        pass
+
