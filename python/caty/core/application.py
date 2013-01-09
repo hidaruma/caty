@@ -676,6 +676,7 @@ class Application(object):
             env.put(u'QUERY_STRING', u'')
         if 'SERVER_SOFTWARE' in environ:
             env.put(u'SERVER_SOFTWARE', unicode(environ['SERVER_SOFTWARE']))
+        env.put(u'SECURE', environ.get('X-Forwarded-Proto') == 'https')
         env.put(u'SERVER_MODULE', self._system.server_module_name)
         env.put(u'REQUEST_METHOD', unicode(environ.get('REQUEST_METHOD', 'POST')))
         env.put(u'CONTENT_LENGTH', unicode(environ.get('CONTENT_LENGTH', '-1')))

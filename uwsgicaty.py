@@ -1,12 +1,6 @@
 import sys
 sys.path.insert(0, './python')
-sys.path.insert(1, './python/lib/BeautifulSoup')
-sys.path.insert(1, './python/lib/antlr')
-sys.path.insert(1, './python/lib/topdown')
-sys.path.insert(1, './python/lib/simplejson')
-sys.path.insert(1, './python/lib/csslib')
-sys.path.insert(1, './python/lib/pbc')
-sys.path.insert(1, './python/lib/creole')
+sys.path.insert(1, './python/lib/')
 sys.path.insert(1, './lib/')
 
 import os
@@ -24,7 +18,10 @@ import uwsgi
 system, is_debug, port, name = setup(sys.argv[1:])
 server_module_name = system.server_module_name
 exec 'import %s as server_module' % server_module_name
-main_app = server_module.get_dispatcher(system, is_debug)
+main_app = system._global_config.session.wrapper(
+                server_module.get_dispatcher(system, is_debug),
+                system._global_config.session.conf
+           )
 uwsgi.applications = {
     '': main_app,
 }
