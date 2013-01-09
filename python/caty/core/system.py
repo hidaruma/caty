@@ -28,6 +28,8 @@ class System(object):
         self.force_app = force_app
         self.no_ambient = no_ambient
         self.wildcat = wildcat
+        self.hcon_port = None
+        self.hcon_name = None
         if quiet:
             class NullWriter(object):
                 def write(self, *args):
@@ -356,6 +358,16 @@ class System(object):
     def finalize(self):
         for app in self.get_apps():
             app.finalize()
+
+    def get_hcon_url(self):
+        if self.hcon_name == self.hcon_port == None:
+            return None
+        if self.hcon_port:
+            from urlparse import urlsplit
+            r = urlsplit(self._global_config.host_url)
+            return '%s://%s:%s' % (r.scheme, r.netloc.split(':')[0], self.hcon_port)
+        elif self.hcon_name:
+            return '%s/%s' % (self._global_config.host_url, self.hcon_name)
 
 class CoreApplication(Application):
     def __init__(self, system):

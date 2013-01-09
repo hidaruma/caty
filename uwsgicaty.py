@@ -16,6 +16,7 @@ import uwsgi
 #### Initialize Caty Core System #####
 ######################################
 system, is_debug, port, name = setup(sys.argv[1:])
+system.hcon_name = name
 server_module_name = system.server_module_name
 exec 'import %s as server_module' % server_module_name
 main_app = system._global_config.session.wrapper(

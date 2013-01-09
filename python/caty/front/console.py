@@ -280,6 +280,7 @@ Web サーバの起動・停止を行う
                     return
                 self.hcon = HTTPConsoleThread(self.system, port)
                 self.hcon.start()
+                self.app._system.hcon_port = rest
             else:
                 self._echo(u'サーバは既に起動しています')
         elif cmd == 'stop':
@@ -287,6 +288,7 @@ Web サーバの起動・停止を行う
                 self.hcon.shutdown()
                 self.hcon.stop()
                 self.hcon = None
+                self.app._system.hcon_port = None
             else:
                 self._echo(u'サーバが起動していません')
         elif cmd == 'status' or cmd == '':

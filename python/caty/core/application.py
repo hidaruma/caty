@@ -680,6 +680,7 @@ class Application(object):
         env.put(u'SERVER_MODULE', self._system.server_module_name)
         env.put(u'REQUEST_METHOD', unicode(environ.get('REQUEST_METHOD', 'POST')))
         env.put(u'CONTENT_LENGTH', unicode(environ.get('CONTENT_LENGTH', '-1')))
+        env.put(u'HCON_URL', self._system.get_hcon_url())
 
     @property
     def cout(self):

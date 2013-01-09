@@ -29,6 +29,7 @@ def main(args):
     while terminator.continue_process == Terminator.CONTINUE:
         try:
             system, is_debug, port, hcon_port = setup(args)
+            system.hcon_port = hcon_port
         except HelpFound:
             return 0
         except Exception, e:
