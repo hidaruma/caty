@@ -6,6 +6,7 @@ from caty.util.path import join
 from caty.core.script import node
 from customimporter import make_custom_import
 
+from glob import glob
 
 class System(object):
     u"""Caty のコアシステム。
@@ -87,15 +88,13 @@ class System(object):
         self._global_app.finish_setup()
         # アプリケーショングループの順序は rc.caty の実行順序に関わる
         # common, main, extra, examples という順序は固定
-        self._app_groups = [
-            ag for ag in [
-                ApplicationGroup('common', self._global_config, no_ambient, no_app, app_names, self),
-                ApplicationGroup(USER, self._global_config, no_ambient, no_app, app_names, self),
-                ApplicationGroup('extra', self._global_config, no_ambient, no_app, app_names, self),
-                ApplicationGroup('examples', self._global_config, no_ambient, no_app, app_names, self),
-                ApplicationGroup('develop', self._global_config, no_ambient, no_app, app_names, self),
-            ] if ag.exists
-        ]
+        self._app_groups = []
+        for g in glob('*.group'):
+            name = g.split('.')[0]
+            if name in ('common', 'extra', 'examples', 'develop', 'main'):
+                self._app_groups.append(ApplicationGroup(name, self._global_config, no_ambient, no_app, app_names, self))
+            else:
+                raise Exception(self.i18n.get('Unauthorized Group: $name', name=name))
         if is_debug:
             caty.DEBUG = True
         self.__debug = is_debug

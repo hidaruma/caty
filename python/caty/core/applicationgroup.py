@@ -30,17 +30,17 @@ class ApplicationGroup(object):
         self._name = unicode(group_name)
         self._global_config = global_config
         self._system = system
-        self._exists = self._make_super_root(self.name).start().create(u'reads').opendir('/').exists
+        self._exists = self._make_super_root(self.path).start().create(u'reads').opendir('/').exists
         self.i18n = system.i18n
         if not self.exists:
             if self._name in (USER):
                 self.i18n.write("Application gourp '$name' not exists, auto-generating", name=self._name)
                 d = self._make_super_root('').start()
-                d.create(u'uses').opendir('/'+self.name).create()
+                d.create(u'uses').opendir('/'+self.path).create()
                 d.commit()
                 self._exists = True
         if self._name == USER:
-            d = self._make_super_root(self.name).start()
+            d = self._make_super_root(self.path).start()
             r = d.create(u'uses').opendir('/root')
             if not r.exists:
                 self.i18n.write("Root application not exists, auto-generating")
@@ -55,7 +55,7 @@ class ApplicationGroup(object):
             if a.enabled:
                 yield a
         elif self.exists:
-            app_group_root = self._make_super_root(self.name)
+            app_group_root = self._make_super_root(self.path)
             for d in app_group_root.start().create(u'reads').opendir('/').read():
                 if d.is_dir and not d.basename[0] in ('.', '_') and not d.basename in self._system.ignore_names and '.' not in d.basename:
                     name = d.path.strip('/')
@@ -107,7 +107,7 @@ class ApplicationGroup(object):
         return self._system.cout
 
     def find_app(self, name):
-        app_group_root = self._make_super_root(self.name)
+        app_group_root = self._make_super_root(self.path)
         for d in app_group_root.start().create(u'reads').opendir('/').read():
             if d.is_dir and not d.basename[0] in ('.', '_') and not d.basename in self._system.ignore_names and '.' not in name:
                 if name == d.path.strip('/'):
@@ -141,4 +141,9 @@ class ApplicationGroup(object):
         if target:
             self._apps.remove(target)
 
-
+    @property
+    def path(self):
+        if self._name:
+            return self._name + '.group'
+        else:
+            return self._name

@@ -61,7 +61,7 @@ class Application(object):
         """
         self._initialized = False
         self._no_ambient = no_ambient
-        self._physical_path = join(group.name, name)
+        self._physical_path = join(group.path, name)
         self.importer = AppSpecLibraryImporter(os.path.abspath(self._physical_path))
         sys.meta_path.append(self.importer) # {$apDir}/libの読み込みに使う
         self._loaded = False
@@ -280,7 +280,7 @@ class Application(object):
         self._lock_wait_limit = cfg.get('lockWaitLimit', 60)
 
     def _read_config(self):
-        app_dir = self._group._make_super_root(join(self._group.name, self.name)).start()
+        app_dir = self._group._make_super_root(join(self._group.path, self.name)).start()
         f = app_dir.create(u'reads').open('/_manifest.xjson')
         if f.exists:
             try:
@@ -384,7 +384,7 @@ class Application(object):
         return merge_dict(obj, self.default_conf(), 'pre')
 
     def _init_appdirs(self):
-        app_mafs = self._group._make_super_root(join(self._group.name, self._path)).start()
+        app_mafs = self._group._make_super_root(join(self._group.path, self._path)).start()
         app_dir = app_mafs.create(u'uses')
         generated = []
         for k in self._assgin.values():
@@ -423,7 +423,7 @@ class Application(object):
                 self._mime_types[a] = t
 
     def _init_mafs(self):
-        root = join(self._group.name, self._path)
+        root = join(self._group.path, self._path)
         assign = self._assgin
         mafs_init = lambda type, path: self._global_config.mafs_initializer(self, self._system, type)(root, path, self._mime_types, self._encoding)
         self._pub = mafs_init('pub', assign['pub'])
@@ -918,7 +918,7 @@ class GlobalApplication(Application):
             os.mkdir('global')
         self._initialized = False
         self._no_ambient = False  # 常にFalse
-        self._physical_path = join(group.name, name)
+        self._physical_path = join(group.path, name)
         self.importer = AppSpecLibraryImporter(os.path.abspath(self._physical_path))
         sys.meta_path.append(self.importer) # {$apDir}/libの読み込みに使う
         self._initialize(name, group, system)
