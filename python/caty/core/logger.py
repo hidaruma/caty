@@ -10,7 +10,7 @@ import os, time
 def init(app, type):
     log = logging.getLogger('Caty.%s.%s' % (str(app.name), type))
     log.setLevel(logging.DEBUG)
-    log_file = join(str(app._group.name), str(app.name), '%s.log' % type)
+    log_file = join(str(app._group.path), str(app.name), '%s.log' % type)
     handler = TimedRotatingFileHandlerWithLock(
           log_file, interval=1, when='D', backupCount=5, encoding=app._system.sysencoding)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")

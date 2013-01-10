@@ -16,7 +16,7 @@ class ExecScript(Builtin):
         script = self.scripts.open('/' + self.__path)
         if not script.exists:
             throw_caty_exception(u'ScriptNotFound', u'Script does not exists: $path', path=self.__path)
-        cwd = os.path.join(self.env.get('CATY_HOME'), self.current_app._group.name, self.current_app.name)
+        cwd = os.path.join(self.env.get('CATY_HOME'), self.current_app._group.path, self.current_app.name)
         if sys.platform == 'win32':
             p = Popen(list2cmdline([script.real_path] + self.__args), cwd=cwd)
         else:
