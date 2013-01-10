@@ -941,6 +941,9 @@ class Help(Builtin):
         elif opts['resource']:
             self.__resource_name = line
             self.__mode = u'resource'
+        elif opts['special-command']:
+            self.__mode = u'special'
+            self.__line = line
         else:
             self.__line = u''
 
@@ -949,6 +952,8 @@ class Help(Builtin):
             return self._type_help()
         elif self.__mode == u'resource':
             return self._resources_help()
+        elif self.__mode == u'special':
+            return self._special_command_help()
         else:
             return self._command_help()
 
@@ -1111,10 +1116,6 @@ class Help(Builtin):
         if line == '':
             self.__line = u'help'
             line = u'help'
-        if line in ('change', 'reload', 'l', 'quit', 'ch', 'cd', 'server', 'fl', 'force-load'):
-            from caty.front.console import CatyShell
-            h = getattr(CatyShell, 'do_%s' % line)
-            return h.__doc__.strip()
         module = ''
         mode = 'usage' # usage or list or module_usage oe list_modules
         command = ''
@@ -1183,6 +1184,29 @@ class Help(Builtin):
         else:
             return u''
 
+    def _special_command_help(self):
+        line = self.__line.strip()
+        if line == u'':
+            return self._command_help()
+
+        from caty.front.console import CatyShell
+        props = dir(CatyShell)
+        cmd = 'do_%s' % line
+        if line == '*':
+            r = []
+            for p in props:
+                if p.startswith('do_'):
+                    h = getattr(CatyShell, p)
+                    doc =  h.__doc__ or u'undocumented'
+                    r.append(u'%s: %s' % (p.split('_', 1)[1], doc.strip().split('\n')[0]))
+            return u'\n'.join(r)
+        for p in props:
+            if cmd == p:
+                h = getattr(CatyShell, cmd)
+                doc =  h.__doc__ or u'undocumented'
+                return doc.strip()
+        else:
+            return u'Unknown special command: %s' % line
 
 class MakeException(Builtin):
     def setup(self, name, msg):

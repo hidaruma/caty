@@ -258,8 +258,8 @@ Web サーバの起動・停止を行う
     @catch
     def do_hcon(self, line):
         u"""
-Usage: server start|stop
-Web サーバの起動・停止を行う
+Usage: hcon start|stop
+Web hconサーバの起動・停止を行う
         """
         def usage():
             self._echo(u'使い方: hcon start port または hcon stop(デフォルトポートは9090)')
@@ -537,7 +537,7 @@ commands, schemata などの再読み込みを行う。
     @catch
     def do_fl(self, line):
         u"""
-Usage: force-load module_name
+Usage: force-load-mod module_name
 Alias: fl
 
 on demand宣言されたモジュールを読み込む。

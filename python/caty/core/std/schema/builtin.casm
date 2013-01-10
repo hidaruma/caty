@@ -1423,25 +1423,20 @@ type HelpInfo = deferred @* object;
 * --exceptionオプションは型一覧を出力する際、
 * 出力する型を例外型に限定するために用いる。
 *
-* == コンソールでのみ有効な特殊コマンド
-* 
-* change APP_NAME  : アプリケーションをAPP_NAMEに変更する。短縮コマンドはch, cd
-* quit             : Catyシェルを終了する。
-* reload           : グローバル設定とアプリケーションの再読み込み。短縮コマンドはl
-* server start PORT: PORTでCatyサーバを稼働させる。
-*        stop      : Catyサーバを停止する。
 */
 command help
 {
-  @[default(false), without(["type", "resource"])]
+  @[default(false), without(["type", "resource", "special-command"])]
   "command" : boolean?,
 
-  @[default(false), without(["command", "resource"])]
+  @[default(false), without(["command", "resource", "special-command"])]
   "type" : boolean?,
 
-  @[default(false), without(["command", "type"])]
+  @[default(false), without(["command", "type", "special-command"])]
   "resource" : boolean?,
 
+  @[default(false), without(["command", "type", "resource"])]
+  "special-command" : boolean?,
   // 以下は、既存のhelp, typeのオプション
   
   @[default(false), not-implemented]
@@ -1463,7 +1458,7 @@ command hc {
   "filter": boolean?,
 
 } [string? pattern] :: void -> void {
-  help --command %--filter %1 | cout
+  help --command %--filter %1? | cout
 };
 
 command ht {
@@ -1472,12 +1467,17 @@ command ht {
   "exception": boolean?,
 
 } [string? pattern] :: void -> void {
-  help --type %--exception %1 | cout
+  help --type %--exception %1? | cout
 };
 
 command hr {
 } [string? pattern] :: void -> void {
-  help --resource %1 | cout
+  help --resource %1? | cout
+};
+
+command special-command {
+} [string? pattern] :: void -> void {
+  help --special-command %1? | cout
 };
 
 command h :: void -> void {
