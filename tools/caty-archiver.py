@@ -55,7 +55,7 @@ def main(argv):
     else:
         caar.outfile = None
     caar.read_fset_file()
-    caar.archive()
+    return caar.archive()
 
 class CatyArchiver(object):
     def read_fset_file(self):
@@ -68,7 +68,8 @@ class CatyArchiver(object):
                 self.whitelist.default = False
 
     def archive(self):
-        self.setup_origin_dir()
+        if self.setup_origin_dir() != 0:
+            return 1
         if self.outfile:
             outfile = ZipFile(self.outfile, u'w', ZIP_DEFLATED)
         for file in self.whitelist.files:
@@ -124,6 +125,7 @@ class CatyArchiver(object):
                         if self.outfile:
                             outfile.close()
                             os.unlink(self.outfile)
+                        return 1
         if self.meta_inf:
             if not os.path.exists(self.meta_inf):
                 if not self.quiet:
@@ -141,6 +143,7 @@ class CatyArchiver(object):
                 if self.outfile:
                     outfile.close()
                     os.unlink(self.outfile)
+                return 1
             if self.list:
                 print >>cout, 'META-INF/package.json'
             if self.outfile:
@@ -150,10 +153,11 @@ class CatyArchiver(object):
         if self.outfile:
             outfile.writestr('META-INF/timezone.txt', tz_to_str(time.timezone))
             outfile.close()
+        return 0
 
     def setup_origin_dir(self):
         if not self.project:
-            return
+            return 0
         else:
             for ag in os.listdir(self.project):
                 if ag.strip(universal_path_sep) in GROUP_NAMES:
@@ -167,14 +171,15 @@ class CatyArchiver(object):
                     self.origin = os.path.join(self.project.rstrip(universal_path_sep), self.origin)
                 elif self.origin == 'caty':
                     print >>cout, u'[Error]', 'Application name `caty` is defined'
-                    sys.exit(1)
+                    return 1
                 elif self.origin == 'project':
                     self.origin = self.project
                 else:
                     print >>cout, u'[Error]', 'Application name `%s` does not exist' % self.origin
-                    sys.exit(1)
+                    return 1
+        return 0
 
-GROUP_NAMES = ['examples', 'main', 'develop', 'extra', 'common']
+GROUP_NAMES = ['examples.group', 'main.group', 'develop.group', 'extra.group', 'common.group']
 
 class WhiteListItem(object):
     def __init__(self, pattern, directives=()):
@@ -408,4 +413,4 @@ class DefaultWhiteListItemContainer(WhiteListItemContainer):
             yield self
 
 if __name__ == '__main__':
-    main(sys.argv)
+    sys.exit(main(sys.argv))

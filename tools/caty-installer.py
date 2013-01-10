@@ -72,7 +72,7 @@ class CatyInstaller(object):
         elif self.dest == 'global':
             base_dir = os.path.join(self.project.rstrip(os.path.sep), self.dest)
         else:
-            for p in ['main', 'extra', 'examples', 'common', 'develop']:
+            for p in ['main.group', 'extra.group', 'examples.group', 'common.group', 'develop.group']:
                 base_dir = os.path.join(self.project.rstrip(os.path.sep), p, self.dest)
                 if os.path.exists(base_dir):
                     break

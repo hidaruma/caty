@@ -64,9 +64,9 @@ def test02_app():
     if os.path.exists(arcfile):
         os.remove(arcfile)
     fset = os.path.join('..', 'products', 'std-app.fset')
-    rmtree(os.path.join('tmp-project', 'extra'))
-    os.mkdir(os.path.join('tmp-project', 'extra'))
-    os.mkdir(os.path.join('tmp-project', 'extra', 'wiki'))
+    rmtree(os.path.join('tmp-project', 'extra.group'))
+    os.mkdir(os.path.join('tmp-project', 'extra.group'))
+    os.mkdir(os.path.join('tmp-project', 'extra.group', 'wiki'))
     ret = os.system('python %s --project=.. --origin=wiki --fset=%s %s' % (ARCHIVER, fset, arcfile))
     if not ret == 0:
         sys.exit(ret)
@@ -79,7 +79,7 @@ def test02_app():
     if not ret == 0:
         sys.exit(ret)
     
-    if not os.path.exists(os.path.join('tmp-project', 'extra', 'wiki', 'app-manifest.xjson')):
+    if not os.path.exists(os.path.join('tmp-project', 'extra.group', 'wiki', 'app-manifest.xjson')):
         print 'installer error'
         sys.exit(1)
 
@@ -89,7 +89,7 @@ def test02_app():
     if not ret == 0:
         sys.exit(ret)
 
-    if os.path.exists(os.path.join('tmp-project', 'extra', 'wiki', 'app-manifest.xjson')):
+    if os.path.exists(os.path.join('tmp-project', 'extra.group', 'wiki', 'app-manifest.xjson')):
         print 'uninstaller error'
         sys.exit(1)
 
@@ -98,9 +98,9 @@ def test03_modify():
     if os.path.exists(arcfile):
         os.remove(arcfile)
     fset = os.path.join('..', 'products', 'std-app.fset')
-    rmtree(os.path.join('tmp-project', 'extra'))
-    os.mkdir(os.path.join('tmp-project', 'extra'))
-    os.mkdir(os.path.join('tmp-project', 'extra', 'wiki'))
+    rmtree(os.path.join('tmp-project', 'extra.group'))
+    os.mkdir(os.path.join('tmp-project', 'extra.group'))
+    os.mkdir(os.path.join('tmp-project', 'extra.group', 'wiki'))
     ret = os.system('python %s --project=.. --origin=wiki --fset=%s %s' % (ARCHIVER, fset, arcfile))
     if not ret == 0:
         sys.exit(ret)
@@ -113,20 +113,20 @@ def test03_modify():
     if not ret == 0:
         sys.exit(ret)
     
-    if not os.path.exists(os.path.join('tmp-project', 'extra', 'wiki', 'app-manifest.xjson')):
+    if not os.path.exists(os.path.join('tmp-project', 'extra.group', 'wiki', 'app-manifest.xjson')):
         print 'installer error'
         sys.exit(1)
 
 
-    os.unlink(os.path.join('tmp-project', 'extra', 'wiki', 'app-manifest.xjson'))
-    open(os.path.join('tmp-project', 'extra', 'wiki', 'actions', 'wiki.cara'), 'wb').write('a')
+    os.unlink(os.path.join('tmp-project', 'extra.group', 'wiki', 'app-manifest.xjson'))
+    open(os.path.join('tmp-project', 'extra.group', 'wiki', 'actions', 'wiki.cara'), 'wb').write('a')
 
     log = glob(os.path.join('tmp-project', 'features', 'wiki_*.install.log'))[-1]
     os.system('python %s %s --project=tmp-project' % (UNINSTALLER, log))
     if not ret == 0:
         sys.exit(ret)
 
-    if os.path.exists(os.path.join('tmp-project', 'extra', 'wiki', 'app-manifest.xjson')):
+    if os.path.exists(os.path.join('tmp-project', 'extra.group', 'wiki', 'app-manifest.xjson')):
         print 'uninstaller error'
         sys.exit(1)
 
