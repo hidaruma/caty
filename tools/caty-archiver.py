@@ -165,7 +165,7 @@ class CatyArchiver(object):
                     for a in os.listdir(pd):
                         if a == self.origin:
                             self.origin = os.path.join(pd, a)
-                            return
+                            return 0
             else:
                 if self.origin == 'global':
                     self.origin = os.path.join(self.project.rstrip(universal_path_sep), self.origin)
@@ -413,4 +413,5 @@ class DefaultWhiteListItemContainer(WhiteListItemContainer):
             yield self
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    ret = main(sys.argv)
+    sys.exit(ret)

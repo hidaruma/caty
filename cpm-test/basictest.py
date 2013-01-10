@@ -15,7 +15,7 @@ def rmtree(top):
 
 def call(line):
     print '[exec]', line
-    return os.system(line)
+    return os.system(line) % 256
 
 ARCHIVER = os.path.join('..', 'tools', 'caty-archiver.py')
 INSTALLER = os.path.join('..', 'tools', 'caty-installer.py')
@@ -45,7 +45,7 @@ def test01_caty_core():
         sys.exit(1)
     log_dir = os.path.join('tmp-project', 'features')
     bk_dir = os.path.join('tmp-project', 'backup')
-    call('python %s --project=tmp-project --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
+    ret = call('python %s --project=tmp-project --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
     if not ret == 0:
         sys.exit(ret)
     
@@ -54,7 +54,7 @@ def test01_caty_core():
         sys.exit(1)
 
     log = glob(os.path.join('tmp-project', 'features', 'minimum-caty_*.install.log'))[-1]
-    call('python %s %s --project=tmp-project' % (UNINSTALLER, log))
+    ret = call('python %s %s --project=tmp-project' % (UNINSTALLER, log))
 
     if not ret == 0:
         sys.exit(ret)
@@ -79,7 +79,7 @@ def test02_app():
         sys.exit(1)
     log_dir = os.path.join('tmp-project', 'features')
     bk_dir = os.path.join('tmp-project', 'backup')
-    call('python %s --project=tmp-project --dest=wiki --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
+    ret = call('python %s --project=tmp-project --dest=wiki --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
     if not ret == 0:
         sys.exit(ret)
     
@@ -88,7 +88,7 @@ def test02_app():
         sys.exit(1)
 
     log = glob(os.path.join('tmp-project', 'features', 'wiki_*.install.log'))[-1]
-    call('python %s %s --project=tmp-project' % (UNINSTALLER, log))
+    ret = call('python %s %s --project=tmp-project' % (UNINSTALLER, log))
 
     if not ret == 0:
         sys.exit(ret)
@@ -113,7 +113,7 @@ def test03_modify():
         sys.exit(1)
     log_dir = os.path.join('tmp-project', 'features')
     bk_dir = os.path.join('tmp-project', 'backup')
-    call('python %s --project=tmp-project --dest=wiki --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
+    ret = call('python %s --project=tmp-project --dest=wiki --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
     if not ret == 0:
         sys.exit(ret)
     
@@ -126,7 +126,7 @@ def test03_modify():
     open(os.path.join('tmp-project', 'extra.group', 'wiki', 'actions', 'wiki.cara'), 'wb').write('a')
 
     log = glob(os.path.join('tmp-project', 'features', 'wiki_*.install.log'))[-1]
-    call('python %s %s --project=tmp-project' % (UNINSTALLER, log))
+    ret = call('python %s %s --project=tmp-project' % (UNINSTALLER, log))
     if not ret == 0:
         sys.exit(ret)
 
