@@ -13,6 +13,10 @@ def rmtree(top):
     if os.path.exists(top):
         os.rmdir(top)
 
+def call(line):
+    print '[exec]', line
+    return os.system(line)
+
 ARCHIVER = os.path.join('..', 'tools', 'caty-archiver.py')
 INSTALLER = os.path.join('..', 'tools', 'caty-installer.py')
 UNINSTALLER = os.path.join('..', 'tools', 'caty-uninstaller.py')
@@ -33,7 +37,7 @@ def test01_caty_core():
     os.mkdir('tmp-project')
     os.mkdir('tmp-project/backup')
     os.mkdir('tmp-project/features')
-    ret = os.system('python %s --origin=.. --fset=%s %s' % (ARCHIVER, fset, arcfile))
+    ret = call('python %s --origin=.. --fset=%s %s' % (ARCHIVER, fset, arcfile))
     if not ret == 0:
         sys.exit(ret)
     if not os.path.exists(arcfile):
@@ -41,7 +45,7 @@ def test01_caty_core():
         sys.exit(1)
     log_dir = os.path.join('tmp-project', 'features')
     bk_dir = os.path.join('tmp-project', 'backup')
-    os.system('python %s --project=tmp-project --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
+    call('python %s --project=tmp-project --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
     if not ret == 0:
         sys.exit(ret)
     
@@ -50,7 +54,7 @@ def test01_caty_core():
         sys.exit(1)
 
     log = glob(os.path.join('tmp-project', 'features', 'minimum-caty_*.install.log'))[-1]
-    os.system('python %s %s --project=tmp-project' % (UNINSTALLER, log))
+    call('python %s %s --project=tmp-project' % (UNINSTALLER, log))
 
     if not ret == 0:
         sys.exit(ret)
@@ -67,7 +71,7 @@ def test02_app():
     rmtree(os.path.join('tmp-project', 'extra.group'))
     os.mkdir(os.path.join('tmp-project', 'extra.group'))
     os.mkdir(os.path.join('tmp-project', 'extra.group', 'wiki'))
-    ret = os.system('python %s --project=.. --origin=wiki --fset=%s %s' % (ARCHIVER, fset, arcfile))
+    ret = call('python %s --project=.. --origin=wiki --fset=%s %s' % (ARCHIVER, fset, arcfile))
     if not ret == 0:
         sys.exit(ret)
     if not os.path.exists(arcfile):
@@ -75,7 +79,7 @@ def test02_app():
         sys.exit(1)
     log_dir = os.path.join('tmp-project', 'features')
     bk_dir = os.path.join('tmp-project', 'backup')
-    os.system('python %s --project=tmp-project --dest=wiki --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
+    call('python %s --project=tmp-project --dest=wiki --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
     if not ret == 0:
         sys.exit(ret)
     
@@ -84,7 +88,7 @@ def test02_app():
         sys.exit(1)
 
     log = glob(os.path.join('tmp-project', 'features', 'wiki_*.install.log'))[-1]
-    os.system('python %s %s --project=tmp-project' % (UNINSTALLER, log))
+    call('python %s %s --project=tmp-project' % (UNINSTALLER, log))
 
     if not ret == 0:
         sys.exit(ret)
@@ -101,7 +105,7 @@ def test03_modify():
     rmtree(os.path.join('tmp-project', 'extra.group'))
     os.mkdir(os.path.join('tmp-project', 'extra.group'))
     os.mkdir(os.path.join('tmp-project', 'extra.group', 'wiki'))
-    ret = os.system('python %s --project=.. --origin=wiki --fset=%s %s' % (ARCHIVER, fset, arcfile))
+    ret = call('python %s --project=.. --origin=wiki --fset=%s %s' % (ARCHIVER, fset, arcfile))
     if not ret == 0:
         sys.exit(ret)
     if not os.path.exists(arcfile):
@@ -109,7 +113,7 @@ def test03_modify():
         sys.exit(1)
     log_dir = os.path.join('tmp-project', 'features')
     bk_dir = os.path.join('tmp-project', 'backup')
-    os.system('python %s --project=tmp-project --dest=wiki --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
+    call('python %s --project=tmp-project --dest=wiki --log-dir=%s --backup-dir=%s %s' % (INSTALLER, log_dir, bk_dir, arcfile))
     if not ret == 0:
         sys.exit(ret)
     
@@ -122,7 +126,7 @@ def test03_modify():
     open(os.path.join('tmp-project', 'extra.group', 'wiki', 'actions', 'wiki.cara'), 'wb').write('a')
 
     log = glob(os.path.join('tmp-project', 'features', 'wiki_*.install.log'))[-1]
-    os.system('python %s %s --project=tmp-project' % (UNINSTALLER, log))
+    call('python %s %s --project=tmp-project' % (UNINSTALLER, log))
     if not ret == 0:
         sys.exit(ret)
 
