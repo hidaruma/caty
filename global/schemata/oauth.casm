@@ -1,0 +1,89 @@
+module oauth in casm;
+
+class OAuthProvider {
+
+    command register-application :: AppRegistrationInfo -> OAuthInfo;
+
+    command make-request-token :: ConsumerInfoForRequestToken -> RequestResponse;
+
+    command authorize<AuthInfo default object> :: AuthInfo -> AuthResponse;
+
+    command make-access-token :: ConsumerInfoForAccessToken -> AccessResponse;
+};
+
+type OAuthDataStore = foreign;
+
+facility OAuthProvider(OAuthOnfig)
+    conforms OAuthProvider;
+
+type OAuthConfig = object;
+
+type OAuthInfo = {
+    "consumer_key": string,
+    "consumer_secret": string,
+    "request_token_url": string,
+    "access_token_url": string,
+    "authorize_url": string
+};
+
+type RequestResponse = {
+    "oauth_token": string,
+    "oauth_token_secret": string,
+};
+
+type AccessResponse = RequestResponse;
+
+type AuthResponse = {
+    "verifier": string,
+    "callback_url": string?,
+};
+
+type ConsumerInfoForRequestToken = {
+    /** アプリケーション固有のキー */
+    "oauth_consumer_key": string,
+
+    /** リクエスト毎に一意な文字列 */
+    "oauth_nonce" : string, 
+
+    /** 署名 */
+    "oauth_signature" : string, 
+
+    /** 署名の方式 */
+    "oauth_signature_method" : string, 
+
+    /** タイムスタンプ(UTC) */
+    "oauth_timestamp" : string, 
+
+    /** バージョン */
+    "oauth_version" : string, 
+
+};
+
+type ConsumerInfoForAccessToken = {
+    /** アプリケーション固有のキー */
+    "oauth_consumer_key": string,
+
+    /** リクエスト毎に一意な文字列 */
+    "oauth_nonce" : string, 
+
+    /** 署名 */
+    "oauth_signature" : string, 
+
+    /** 署名の方式 */
+    "oauth_signature_method" : string, 
+
+    /** タイムスタンプ(UTC) */
+    "oauth_timestamp" : string, 
+
+    /** バージョン */
+    "oauth_version" : string, 
+    
+    /** 既に発行されたトークン */
+    "oauth_token": string,
+
+    /** 認証コード */
+    "oauth_verifier": string,
+};
+
+type AppRegistrationInfo = object;
+
