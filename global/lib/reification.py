@@ -2,10 +2,11 @@
 from caty.command import *
 from caty.core.language import split_colon_dot_path
 from caty.core.language.util import make_structured_doc
-from caty.jsontools import tagged, split_tag
+from caty.jsontools import tagged, split_tag, pp
 from caty.util.collection import conditional_dict
 from caty.core.typeinterface import *
 from caty.core.casm.cursor.dump import TreeDumper
+from caty.core.casm.language.schemaparser import RESERVED
 
 _modemap = {
     u'reads': u'read',
@@ -284,6 +285,7 @@ class FullReifier(ShallowReifier):
     def reify_type(self, t):
         sr = ShallowReifier.reify_type(self, t)
         sr['body'] = TypeBodyReifier(sr['location']).visit(t.body)
+        print pp(sr)
         return tagged(u'type', sr)
 
 from caty.core.spectypes import UNDEFINED
@@ -341,7 +343,7 @@ class TypeBodyReifier(TreeCursor):
             return node.body.accept(self)
 
     def _visit_scalar(self, node):
-        if isinstance(node, Ref):
+        if node.name not in RESERVED:
             return self.__reify_ref(node)
         else:
             return self.__reify_builtin(node)
@@ -356,8 +358,8 @@ class TypeBodyReifier(TreeCursor):
     def __reify_ref(self, node):
         r = self._extract_common_data(node)
         r['ref'] = node.name
-        if node.body.kind:
-            r['kind'] = self.__reify_kind(node.body.kind)
+        #if node.body.kind:
+        #    r['kind'] = self.__reify_kind(node.body.kind)
         return r
 
     @format_result(u'optional')
@@ -401,14 +403,14 @@ class TypeBodyReifier(TreeCursor):
 
     @format_result(u'intersection')
     def _visit_intersection(self, node):
-        return {'operand': [node.left.accept(self), node.right.accept(self)]}
+        return {'operands': [node.left.accept(self), node.right.accept(self)]}
 
     def _visit_union(self, node):
         raise NotImplementedError(u'{0}._visit_union'.format(self.__class__.__name__))
 
     @format_result(u'merge')
     def _visit_updator(self, node):
-        return {'operand': [node.left.accept(self), node.right.accept(self)]}
+        return {'operands': [node.left.accept(self), node.right.accept(self)]}
 
     @format_result(u'tagged')
     def _visit_tag(self, node):
@@ -422,6 +424,12 @@ class TypeBodyReifier(TreeCursor):
 
     def _visit_kind(self, node):
         raise NotImplementedError(u'{0}._visit_kind'.format(self.__class__.__name__))
+
+    def _visit_unary_op(self, node):
+        res = node.body.accept(self)
+        if node.operator == 'extract':
+            return json.tagged(u'extract', {u'operands': {u'path':node.path.to_str() , u'expr':res}})
+        return json.tagged(node.operator, {u'operand': res})
 
 class SafeReifier(Command):
     def setup(self, opts, cdpath):

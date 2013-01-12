@@ -364,6 +364,9 @@ type TypeExpr = (
 | OptionalType // '?'演算
 | IntersectionType// '&'演算
 | MergedType // '++'演算
+| OpenType // 'open'演算
+| CloseType // 'close'演算
+| ExtractType // 'extract'演算
 
 // 特殊な構成法で作られる型、PER（or settoid）として解釈する
 | BagType
@@ -538,6 +541,15 @@ type BagType = @bag (TypeQualifierMixin & {
 
    *: any? // open
 });
+
+/** open演算 */
+type OpenType = @open {"operand": TypeExpr};
+
+/** close演算 */
+type CloseType = @close {"operand": TypeExpr};
+
+/** extract演算 */
+type ExtractType = @extract {"operands": {"path": string, "expr": TypeExpr}};
 
 
 //@ 以下は塩漬け
