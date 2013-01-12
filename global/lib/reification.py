@@ -285,7 +285,6 @@ class FullReifier(ShallowReifier):
     def reify_type(self, t):
         sr = ShallowReifier.reify_type(self, t)
         sr['body'] = TypeBodyReifier(sr['location']).visit(t.body)
-        print pp(sr)
         return tagged(u'type', sr)
 
 from caty.core.spectypes import UNDEFINED
