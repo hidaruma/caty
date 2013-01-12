@@ -142,7 +142,7 @@ class PipelineAdaptor(object):
         self.__result = None
         self.__succeed = False
         self.__interpreter = interpreter
-        self.__schema = interpreter.facilities['schema']
+        self.__schema = interpreter.facilities['schema'] if interpreter else None
         self.i18n = I18nMessageWrapper(handler._app.i18n, handler._env)
         self.env = handler._env
         self.app = handler._app
@@ -269,11 +269,11 @@ class PipelineAdaptor(object):
             }
         elif e.tag == 'VerbUnmatched':
             return {
-                'status': 403,
+                'status': 400,
                 "header": {
                     'content-type': u'text/plain; charset=utf-8'
                 },
-                'body': CatyException(u'UnableToAccess', u'Can not access to $path', path=e.error_obj['path']).get_message(self.i18n)
+                'body': e.get_message(self.i18n)
             }
         else:
             if e.tag.startswith('HTTP_'):
