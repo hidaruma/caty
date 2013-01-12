@@ -112,6 +112,7 @@ class WSGISessionWrapper(object):
         m['path'] = '/'
         return m.OutputString()
 
+    start = __call__
 
 def convert_conf(cfg):
     return cfg
