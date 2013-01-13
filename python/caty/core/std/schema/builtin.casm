@@ -1576,6 +1576,14 @@ command reject-non-json
   }
 };
 
+/** 
+ * Caty例外の文字列化
+ * * messageのプレースホルダーに値を埋める。
+ * * 国際化メッセージをロケールに合わせて選択する。
+ */
+command error-to-string :: Exception -> string
+    refers python:builtin.ErrorToString;
+
 /* アノテーション宣言 */
 /** アノテーションのターゲットタイプ 
  */

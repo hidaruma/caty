@@ -1338,4 +1338,7 @@ class Fill(Builtin):
     def execute(self, data):
         return self.in_schema.fill_default(data)
         
+class ErrorToString(Builtin):
+    def execute(self, e):
+        return self.i18n.get(e.value.get('message', u''), e.value)
 
