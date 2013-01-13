@@ -195,12 +195,12 @@ command process-env
   refers python:wsgilib.ProcessEnv
 ;
 
-command lookup :: Environ -> exec:Executable
+command lookup :: Environ -> univ 
   throws [ApplicationNotFound, FileNotFound, ActionNotFound]
   refers python:wsgilib.Lookup
 ;
 
-command lookup-and-exec :: Environ -> any
+command lookup-and-exec :: Environ -> univ
   throws [ApplicationNotFound, FileNotFound, ActionNotFound]
   {lookup|exec}
 ;
