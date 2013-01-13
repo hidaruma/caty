@@ -26,7 +26,7 @@ type Executable = @* {
    * callableがコマンド名であり、それが総称コマンドの場合、
    * 型具体化に使う型引数を指定する。
    */
-  "typeArgs" : [reif:TypeSpec*]?,
+  "typeArgs" : [string*]?,//[reif:TypeSpec*]?,
 
 /* ---- 環境変数の制御 ---- */
 

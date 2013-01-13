@@ -214,20 +214,6 @@ class ResponseHandler(object):
             u'body': ''.join(data)
         }
 
-from caty.front.web.app import CatyApp, HTTP_STATUS
-
-class InternalCatyApp(CatyApp):
-    def _end_proc(self, json, headers, start_response):
-        status = 200
-        status = HTTP_STATUS[json.get('status', 200)]
-        start_response(status, headers)
-        if 'body' in json:
-            b = json['body']
-            return [b]
-        else:
-            return []
-
-
 class ProcessEnv(Builtin):
 
     def execute(self, environ):
@@ -237,7 +223,7 @@ class ProcessEnv(Builtin):
         handler = server_module.get_handler_class()(None)
         return handler.process_env(environ)
 
-class LookupAndExec(Builtin):
+class Perform(Builtin):
     def execute(self, environ):
         environ['REMOTE_ADDR'] = u'127.0.0.1'
         environ['SERVER_PORT'] = str(environ['SERVER_PORT'])
@@ -253,4 +239,67 @@ class LookupAndExec(Builtin):
         environ['caty.session'] = system._global_config.session.storage.create_session(environ)
         wsgi_app = wsgi_app_cls(app, system.debug, system)
         return wsgi_app.main(environ)
+
+class Lookup(Builtin):
+    def execute(self, environ):
+        system = self.current_app._system
+        environ['REMOTE_ADDR'] = u'127.0.0.1'
+        environ['SERVER_PORT'] = str(environ['SERVER_PORT'])
+        app_name = environ['SCRIPT_NAME'] or u'root'
+        del environ['SCRIPT_NAME']
+        app = system.get_app(app_name)
+        oldpath = environ['PATH_INFO']
+        if app_name != u'root':
+            path = u'/%s%s' % (app_name, oldpath) if oldpath else u'/%s/' % app_name
+        else:
+            path = oldpath
+        environ['PATH_INFO'] = path
+        environ['caty.session'] = system._global_config.session.storage.create_session(environ)
+        wsgi_app = InternalCatyApp(app, system.debug, system)
+        entry, input = wsgi_app.get_action_and_input(environ)
+        environ['PATH_INFO'] = oldpath
+        return {
+            u'app': app_name,
+            u'setEnv': environ,
+            u'clearEnv': True,
+            u'callable': entry.canonical_name,
+            u'arg0': oldpath,
+            u'input': input
+        }
+
+from caty.front.web.app import CatyApp, HTTP_STATUS
+
+class InternalCatyApp(CatyApp):
+    def _end_proc(self, json, headers, start_response):
+        status = 200
+        status = HTTP_STATUS[json.get('status', 200)]
+        start_response(status, headers)
+        if 'body' in json:
+            b = json['body']
+            return [b]
+        else:
+            return []
+
+    def get_action_and_input(self, environ):
+        from caty.core.handler import RequestHandler
+        path = environ['PATH_INFO']
+        query = self._get_query(environ)
+        raw_input = environ['wsgi.input'].read(int(environ['CONTENT_LENGTH'] or 0))
+        input, options, method, environ = self._process_env(raw_input, query, environ)
+        
+        if method not in (u'POST', u'PUT'):
+            input = None
+        facilities = self._app.create_facilities(lambda : environ['caty.session'])
+        del environ['PATH_INFO'] # init_envで生PATH_INFOを使わせない
+        if self._system.wildcat:
+            self._app.init_env(facilities, self.is_debug, [u'web', u'test'], self._system, environ)
+        else:
+            self._app.init_env(facilities, self.is_debug, [u'web'], self._system, environ)
+        handler = RequestHandler(facilities['interpreter'], 
+                                 facilities['env'],
+                                 self._app)
+        path, _ = handler._create_path_and_vpath(path)
+        entry = handler._verb_dispatcher.get(handler._file, path, options.pop('_verb', u''), environ['REQUEST_METHOD'], False)
+        return entry, input
+
 

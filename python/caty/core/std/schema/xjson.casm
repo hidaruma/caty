@@ -113,3 +113,13 @@ command flatten
 command normalize :: univ -> univ
     refers python:xjsonlib.Normalize;
 
+/**
+ * 二つの object をマージする。
+ * --mode オプションではプロパティ名が衝突した場合の解消方法を指定する。
+ *
+ * * "fst": 第一要素のものを用いる
+ * * "snd": 第二要素のものを用いる
+ * * "error": エラーとして扱い、 null を返す
+ */
+command merge {@[default("fst")]"mode": string?} :: [object*] -> object | null
+    refers python:xjsonlib.Merge;

@@ -6,6 +6,7 @@ class Exec(Internal):
         from caty.core.command.param import Option, Argument
         from caty.core.script.interpreter.executor import CommandExecutor
         from caty.core.script.builder import CommandBuilder
+        from caty.core.facility import TransactionPendingAdaptor
         app = self.current_app.get_app(executable['app'])
         callable = executable['callable']
         if is_mafs_path(callable):
@@ -25,29 +26,35 @@ class Exec(Internal):
         for v in args_base:
             args.append(Argument(v))
         oldenv = self._facilities['env']
-        self._replace_env_and_facilities(executable)
-        builder = CommandBuilder(self._facilities, {})
+        new_facilities = self._replace_env_and_facilities(executable, app)
+        for k, v in new_facilities.items():
+            v.merge_transaction(self._facilities[k])
+        builder = CommandBuilder(new_facilities, {})
         cmd_instance = builder.make_cmd(cmd_class, type_args, opts, args, (0, 0), app._schema_module)
-        cmd_instance.set_facility(self._facilities)
+        cmd_instance.set_facility(new_facilities)
         var_storage = VarStorage(None, None)
         cmd_instance.set_var_storage(var_storage)
         try:
-            executor = CommandExecutor(cmd_instance, app, self._facilities)
-            return executor(input)
+            executor = TransactionPendingAdaptor(CommandExecutor(cmd_instance, app, new_facilities), new_facilities)
+            r = executor(input)
+            for k, v in self._facilities.items():
+                v.merge_transaction(new_facilities[k])
+            return r
         finally:
             self._facilities._facilities['env'] = oldenv
 
-    def _replace_env_and_facilities(self, executable):
+    def _replace_env_and_facilities(self, executable, app):
         from caty.env import Env
         oldenv = self._facilities['env']
+        f = app.create_facilities(lambda: self._facilities['session'])
         newenv = {}
         if not executable['clearEnv']:
             if executable['defaultEnv'] == 'frame':
                 newenv.update(oldenv._dict)
-                self._facilities['env'] = Env(newenv)
+                f['env'] = Env(newenv)
             else:
-                self._facilities['env'] = Env(newenv)
-                app.init_env(self._facilities)
+                f['env'] = Env(newenv)
+                app.init_env(f)
         additional_names = set()
         for k, v in executable['setEnv'].items():
             newenv[k] = v
@@ -60,6 +67,7 @@ class Exec(Internal):
         conflict = additional_names.intersection(set(unset))
         if conflict:
             throw_caty_exception(u'SetEnvConflict', u'$names', names=u', '.join(conflict))
+        return f
 
     def _compile_type(self, expr, app):
         from caty.core.casm.language.schemaparser import typedef

@@ -139,3 +139,24 @@ class Normalize(Builtin):
     def execute(self, data):
         return json.normalize(data)
 
+from caty.util.collection import merge_dict
+class Merge(Builtin):
+    def setup(self, opts):
+        if not opts['mode']:
+            self.merge_mode = 'pre'
+        else:
+            if opts['mode'] == 'fst':
+                self.merge_mode = 'pre'
+            elif opts['mode'] == 'snd':
+                self.merge_mode = 'post'
+            else:
+                self.merge_mode = 'error'
+
+    def execute(self, input):
+        if input == []:
+            return {}
+        f = lambda a, b: merge_dict(a, b, self.merge_mode)
+        try:
+            return reduce(f, input)
+        except:
+            return None
