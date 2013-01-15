@@ -404,8 +404,19 @@ class TypeBodyReifier(TreeCursor):
     def _visit_intersection(self, node):
         return {'operands': [node.left.accept(self), node.right.accept(self)]}
 
+    @format_result(u'union')
     def _visit_union(self, node):
-        raise NotImplementedError(u'{0}._visit_union'.format(self.__class__.__name__))
+        spec = list(self.__flatten_union(node))
+        return {'specified': spec, 'additional': tagged(u'builtin', {'typeName': u'undefined'})}
+
+    def __flatten_union(self, node):
+        if isinstance(node, Union):
+            for l in self.__flatten_union(node.left):
+                yield l
+            for r in self.__flatten_union(node.right):
+                yield r
+        else:
+            yield node.accept(self)
 
     @format_result(u'merge')
     def _visit_updator(self, node):
