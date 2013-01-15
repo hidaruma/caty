@@ -209,3 +209,11 @@ command perform :: Environ -> any
   throws [ApplicationNotFound, FileNotFound, ActionNotFound]
   refers python:wsgilib.Perform
 ;
+
+command map-exception :: Exception -> WebOutput
+  refers python:wsgilib.MapException
+;
+command map-signal :: Exception -> WebOutput
+  refers python:wsgilib.MapSignal
+;
+

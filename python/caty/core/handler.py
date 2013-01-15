@@ -147,6 +147,7 @@ class PipelineAdaptor(object):
         self.env = handler._env
         self.app = handler._app
         self.error_logger = error_logger
+        self.error_dispatcher = ErrorDispacher(self.i18n)
         self.__transaction = transaction
         import hashlib
         import os, tempfile
@@ -188,24 +189,24 @@ class PipelineAdaptor(object):
             transaction = False
         except CatySignal as e:
             transaction = False
-            if self.schema.has_command_type('map-signal') and not self.scheam._is_runaway_signal(e):
+            if self.schema.has_command_type('map-signal') and not self.scheam.is_runaway_signal(e):
                 cmd = self.__interpreter.build(u'map-signal', 
                                               None, 
                                               None, 
                                               transaction=self.__transaction)
                 result = cmd(e.raw_data)
             else:
-                result = self._dispatch_signal(e)
+                result = self.error_dispatcher.dispatch_signal(e)
         except CatyException, e:
             transaction = False
-            if self.schema.has_command_type('map-exception') and not self.schema._is_runaway_exception(e):
+            if self.schema.has_command_type('map-exception') and not self.schema.is_runaway_exception(e):
                 cmd = self.__interpreter.build(u'map-exception', 
                                               None, 
                                               None, 
                                               transaction=self.__transaction)
                 result = cmd(e.raw_data)
             else:
-                result = self._dispatch_error(e)
+                result = self.error_dispatcher.dispatch_error(e)
         except Exception, e:
             tb = traceback.format_exc()
             transaction = False
@@ -242,7 +243,76 @@ class PipelineAdaptor(object):
             if self.lock_file:
                 self.__unlock(self.lock_file)
 
-    def _dispatch_error(self, e):
+    def __lock(self, lock_dir, recur=5):
+        import os, random, time
+        while os.path.exists(lock_dir):
+            time.sleep(random.randrange(3) / 20.0 + recur / 10.0)
+        try:
+            os.mkdir(lock_dir)
+        except:
+            if recur:
+                self.__lock(lock_dir, recur-1)
+            else:
+                raise
+
+    def __unlock(self, lock_dir):
+        import os
+        if os.path.exists(lock_dir):
+            os.rmdir(lock_dir)
+
+class ExceptionAdaptor(PipelineAdaptor):
+    def __init__(self, error_obj, tb, handler, error_logger):
+        self.__error_obj = error_obj
+        self.__tb = tb
+        PipelineAdaptor.__init__(self, None, None, handler, error_logger)
+        self.error_logger = error_logger
+
+    def _handle_pipeline(self, input, debug=False):
+        e = self.__error_obj
+        if debug:
+            print self.__tb
+        if isinstance(e, CatyException):
+            result = self.error_dispatcher.dispatch_error(e)
+        else:
+            self.error_logger.write(self.__tb)
+            result = {
+                'status': 500,
+                'body': unicode(self.__tb, 'utf-8') if debug else u'Internal Server Error',
+                'header': {
+                    'content-type': u'text/plain; charset=utf-8',
+                }
+            }
+        #print self.__tb
+        return result, False
+
+class ErrorLogHandler(object):
+    def __init__(self, app, path, verb, method):
+        self._error_logger = app._system.error_logger
+        self._path = path
+        self._method = method
+        self._verb = verb
+
+    def write(self, msg):
+        self._error_logger.error('%s %s%s /%s: %s' % (self.format_date_time(), self._path, self._verb, self._method, self._format(msg)))
+
+    def _format(self, msg):
+        return msg.replace('\n', '\\n').replace('\r', '\\r')
+
+    def format_date_time(self):
+        now = time.time()
+        year, month, day, hh, mm, ss, x, y, z = time.localtime(now)
+        s = "%02d/%3s/%04d %02d:%02d:%02d" % (
+                day, self.monthname[month], year, hh, mm, ss)
+        return s
+    monthname = [None,
+                 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+class ErrorDispacher(object):
+    def __init__(self, i18n):
+        self.i18n = i18n
+
+    def dispatch_error(self, e):
         if e.tag == 'ConversionError' or e.tag == 'InputTypeError':
             return {
                 'status': 400,
@@ -289,7 +359,7 @@ class PipelineAdaptor(object):
             }
         return result
 
-    def _dispatch_signal(self, e):
+    def dispatch_signal(self, e):
         return {
             'status': 500,
             'body': self.i18n.get(u'Uncaught signal: $data', data=e),
@@ -297,71 +367,6 @@ class PipelineAdaptor(object):
                 'content-type': u'text/plain; charset=utf-8',
             }
         }
-
-    def __lock(self, lock_dir, recur=5):
-        import os, random, time
-        while os.path.exists(lock_dir):
-            time.sleep(random.randrange(3) / 20.0 + recur / 10.0)
-        try:
-            os.mkdir(lock_dir)
-        except:
-            if recur:
-                self.__lock(lock_dir, recur-1)
-            else:
-                raise
-
-    def __unlock(self, lock_dir):
-        import os
-        if os.path.exists(lock_dir):
-            os.rmdir(lock_dir)
-
-class ExceptionAdaptor(PipelineAdaptor):
-    def __init__(self, error_obj, tb, handler, error_logger):
-        self.__error_obj = error_obj
-        self.__tb = tb
-        PipelineAdaptor.__init__(self, None, None, handler, error_logger)
-        self.error_logger = error_logger
-
-    def _handle_pipeline(self, input, debug=False):
-        e = self.__error_obj
-        if debug:
-            print self.__tb
-        if isinstance(e, CatyException):
-            result = self._dispatch_error(e)
-        else:
-            self.error_logger.write(self.__tb)
-            result = {
-                'status': 500,
-                'body': unicode(self.__tb, 'utf-8') if debug else u'Internal Server Error',
-                'header': {
-                    'content-type': u'text/plain; charset=utf-8',
-                }
-            }
-        #print self.__tb
-        return result, False
-
-class ErrorLogHandler(object):
-    def __init__(self, app, path, verb, method):
-        self._error_logger = app._system.error_logger
-        self._path = path
-        self._method = method
-        self._verb = verb
-
-    def write(self, msg):
-        self._error_logger.error('%s %s%s /%s: %s' % (self.format_date_time(), self._path, self._verb, self._method, self._format(msg)))
-
-    def _format(self, msg):
-        return msg.replace('\n', '\\n').replace('\r', '\\r')
-
-    def format_date_time(self):
-        now = time.time()
-        year, month, day, hh, mm, ss, x, y, z = time.localtime(now)
-        s = "%02d/%3s/%04d %02d:%02d:%02d" % (
-                day, self.monthname[month], year, hh, mm, ss)
-        return s
-    monthname = [None,
-                 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 class WebInputParser(object):
     def __init__(self, environ, encoding, input=None):
