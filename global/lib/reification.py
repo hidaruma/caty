@@ -306,7 +306,8 @@ class TypeBodyReifier(TreeCursor):
     def _extract_common_data(self, node):
         r = {}
         for k, v in node.options.items():
-            r[k] = v
+            if k != 'pseudoTag':
+                r[k] = v
         if isinstance(node, Root):
             r['location'] = node.canonical_name
         elif isinstance(node, Ref):
@@ -461,3 +462,35 @@ class SafeReifierWithDefaultApp(SafeReifier):
         self._cdpath = cdpath
         self._safe = opts.get('safe', False)
         self._rec = opts.get('rec', False)
+
+
+
+
+class FormReifier(ShallowReifier):
+
+    def reify_type(self, t):
+        sr = ShallowReifier.reify_type(self, t)
+        sr['body'] = ObjectDumper(sr['location']).visit(t.body)
+        return tagged(u'type', sr)
+
+class ObjectDumper(TypeBodyReifier):
+    def __init__(self, location):
+        self.default_loc = location
+        self._history = {}
+
+    def _visit_root(self, node):
+        return node.body.accept(self)
+
+    def _visit_scalar(self, node):
+        from caty.core.schema import TypeReference
+        if isinstance(node, (TypeReference)):
+            if node.canonical_name in self._history:
+                raise
+            self._history[node.canonical_name] = True
+            return node.accept(self)
+        else:
+            return TypeBodyReifier._visit_scalar(self, node)
+
+
+
+

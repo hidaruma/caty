@@ -590,3 +590,129 @@ class Url(Builtin):
         else:
             return r
 
+class ObjectDumper(TreeCursor):
+
+    def _visit_root(self, node):
+        return node.body.accept(self)
+
+    def _visit_scalar(self, node):
+        if isinstance(node, (TypeReference)):
+            if node.canonical_name in self._history:
+                raise
+            self._history[node.canonical_name] = True
+            return node.accept(self)
+        else:
+            r = {u'attributes': {}}
+            r['attributes'].update(node.options)
+            r['typeName'] = node.name
+            return r
+
+    def _visit_option(self, node):
+        r = node.body.accept(self)
+        r['optional'] = True
+        return r
+
+    def _visit_enum(self, node):
+        e = map(self._to_str, node.enum)
+        return {'attributes': {}, 'typeName': u'enum', 'values': e}
+
+    def _to_str(self, e):
+        if isinstance(e, unicode):
+            return '"%s"' % e
+        elif isinstance(e, bool):
+            return str(e).lower()
+        else:
+            return str(e)
+
+    def _visit_object(self, node):
+        r = {u'attributes': {}, u'typeName': u'object', u'items': {}}
+        for k, v in node.items():
+            r['items'][k] = v.accept(self)
+        r['items']['*'] = node.wildcard.accept(self)
+        r['attributes'].update(node.options)
+        return r
+
+    def _visit_array(self, node):
+        r = {u'attributes': {}, u'typeName': u'array', u'items': []}
+        for v in node:
+            r
+        r['attributes'].update(node.options)
+        return 
+
+    def __vist_iter(self, node, r):
+
+        return r
+
+    def _visit_bag(self, node):
+        buff = ['{[']
+        self.__vist_iter(node, buff)
+        buff.append(']}')
+        self._process_option(node, buff)
+        return ''.join(buff)
+
+    def _visit_intersection(self, node):
+        l = node.left.accept(self)
+        r = node.right.accept(self)
+        buff = [l + ' & ' + r]
+        buff.insert(0, u'(')
+        buff.insert(2, u')')
+        self._process_option(node, buff)
+        return u''.join(buff)
+
+    def _visit_union(self, node):
+        ls = self.__flatten_union(node)
+        buff = [u'(']
+        for n in ls:
+            buff.append(n.accept(self))
+            buff.append(u' | ')
+        buff.pop(-1)
+        buff.append(u')')
+        self._process_option(node, buff)
+        return u''.join(buff)
+
+    def __flatten_union(self, node):
+        res = []
+        if not isinstance(node, Union):
+            return [node]
+        l = dereference(node.left)
+        if isinstance(l, Union):
+            res.extend(self.__flatten_union(l))
+        else:
+            res.append(node.left)
+        r = dereference(node.right)
+        if isinstance(r, Union):
+            res.extend(self.__flatten_union(r))
+        else:
+            res.append(node.right)
+        return res
+
+
+    def _visit_updator(self, node):
+        l = node.left.accept(self)
+        r = node.right.accept(self)
+        buff = [l + ' ++ ' + r]
+        buff.insert(0, u'(')
+        buff.insert(2, u')')
+        self._process_option(node, buff)
+        return u''.join(buff)
+
+    def _visit_tag(self, node):
+        t = node.tag
+        s = node.body.accept(self)
+        buff = ['@' + t + ' ' + s]
+        self._process_option(node, buff)
+        return u''.join(buff)
+
+    def _visit_pseudo_tag(self, node):
+        s = node.body.accept(self)
+        buff = [ '@?("%s": %s) %s' % (node._name, 
+                                    json.pp(node._value),
+                                    s)]
+        self._process_option(node, buff)
+        return u''.join(buff)
+
+    def _visit_kind(self, node):
+        return u'$kind$'
+
+
+

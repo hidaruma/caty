@@ -1250,6 +1250,9 @@ command reify-type
     /** 文字列表現としてレイフィケーションイメージを返すか */
     @[default(false)]
     "to-string": boolean?,
+    /** フォーム自動生成用のレイフィケーションイメージを返すか(暫定) */
+    @[default(false)]
+    "expand": boolean?,
   }
   [cdpath typ]
 :: void -> Type?

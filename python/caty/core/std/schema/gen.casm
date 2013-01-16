@@ -13,7 +13,8 @@ command sample {
     @[default(50)] "max-nodes": integer(minimum=1)?,
     @[default(5)] "max-branches": integer(minimum=2)?,
     "mod": string?,
-  } [string typename] :: void -> univ
+  } [string typerepr] :: void -> univ
+  throws BadArg
   reads schema
   refers python:gen.Sample;
 
@@ -26,3 +27,4 @@ command url [PathPattern pathPattern] :: void -> string
     refers python:gen.Url;
 
 type PathPattern = string;
+
