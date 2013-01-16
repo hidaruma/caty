@@ -87,7 +87,7 @@ command isarray :: univ -> boolean
  * 入力値を文字列化する。
  */
 @[filter]
-command json :: univ -> string {json:pretty};
+command json :: univ -> string {xjson:pretty};
 
 /** JSONデータをエスケープせずにシリアライズする。
  * このフィルターの出力は、そのままJavaScriptコード内で利用できる。
@@ -96,5 +96,5 @@ command json :: univ -> string {json:pretty};
  * エスケープを行うjsonフィルターを使用すべきである。
  */
 @[filter]
-command javascript :: univ -> univ {json:pretty|noescape};
+command javascript :: univ -> univ {xjson:pretty|noescape};
 
