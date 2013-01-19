@@ -638,12 +638,12 @@ def main(args):
     code = 0
     try:
         import readline
+        orgdelims = readline.get_completer_delims()
+        newdelims = orgdelims.replace('/', '')
+        readline.set_completer_delims(newdelims)
     except:
         readline = None
         print '[WARNING] readline module is not installed.'
-    orgdelims = readline.get_completer_delims()
-    newdelims = orgdelims.replace('/', '')
-    readline.set_completer_delims(newdelims)
     try:
         sh, args, script= setup_shell(args)
     except HelpFound:
