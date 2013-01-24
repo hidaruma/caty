@@ -363,13 +363,16 @@ from caty.core.casm.language import schemaparser
 from caty.core.language import util
 import operator
 class TypeCalculator(object):
-    def set_schema(self, s):
+    def set_schema(self, s, close=None):
+        from caty.core.casm.language.ast import UnaryOpNode
         tn = self.schema.make_type_normalizer()
         scm = self.parse(s)
         if self.type_params and self.type_params[0]._schema:
             self.converter = tn.visit(self.type_params[0]._schema & scm)
         else:
             self.converter = scm
+        if close:
+            self.converter = tn.visit(UnaryOpNode(u'close', self.converter))
 
     def parse(self, s):
         return as_parser(self.parse_type).run(s, auto_remove_ws=True)
@@ -422,7 +425,7 @@ class Validate(Builtin, TypeCalculator):
         self.pred = opts.get('boolean', caty.UNDEFINED)
         self.mod = opts.get('mod')
         self.schema_name = schema_name
-        self.set_schema(schema_name)
+        self.set_schema(schema_name, opts.get('close'))
 
     def execute(self, input):
         try:

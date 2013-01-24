@@ -1026,7 +1026,7 @@ command request {
 /**
  * 引数で指定された型で入力値を検証する。
  */
-command validate<T default univ> {"mod": string?, "boolean": boolean?} [string?] :: univ -> @OK univ | @NG MiniErrorInfo | boolean
+command validate<T default univ> {"mod": string?, "boolean": boolean?, "close": boolean?} [string?] :: univ -> @OK univ | @NG MiniErrorInfo | boolean
     reads schema
     refers python:builtin.Validate;
 
