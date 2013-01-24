@@ -6,14 +6,10 @@ from zipfile import ZipFile
 from optparse import OptionParser
 
 example = """pkg-list-file example(plain text):
-
-requests==0.12.0
-pygraphviz==1.1
-PIL==1.1.7
-
-or (json)
-
 {
+  "engines": {
+    "python2": ">=2.6"
+  },
   "dependencies": {
     "python2": {
        "requests": "0.12.0",
@@ -42,7 +38,9 @@ def main():
     elif f.endswith('.zip'):
         extractor = extract_from_zip
     else:
-        extractor = extract_from_text
+        print '[Error] package list must be json'
+        o.print_help()
+        sys.exit(1)
     ok = True
     e = extractor(f)
     pkgmap = init_pkg_map()

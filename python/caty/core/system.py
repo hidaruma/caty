@@ -89,12 +89,12 @@ class System(object):
         # アプリケーショングループの順序は rc.caty の実行順序に関わる
         # common, main, extra, examples という順序は固定
         self._app_groups = []
-        for g in glob('*.group'):
+        gdirs = glob('*.group')
+        if not 'main.group' in gdirs:
+            throw_caty_exception('ApplicationGroupNotFound', u'$grpName', grpName='main')
+        for g in gdirs:
             name = g.split('.')[0]
-            if name in ('common', 'extra', 'examples', 'develop', 'main'):
-                self._app_groups.append(ApplicationGroup(name, self._global_config, no_ambient, no_app, app_names, self))
-            else:
-                raise Exception(self.i18n.get('Unauthorized Group: $name', name=name))
+            self._app_groups.append(ApplicationGroup(name, self._global_config, no_ambient, no_app, app_names, self))
         if is_debug:
             caty.DEBUG = True
         self.__debug = is_debug
