@@ -169,8 +169,8 @@ def _extract_from_json(c):
     j = json.loads(c)
     e = j.get('engines', {}).get(VERSION, '')
     d = j.get('dependencies', {})
-    p = d.pop(VERSION, {}).items()
-    f = d.pop('features', {}).items()
+    p = d.get(VERSION, {}).items()
+    f = d.get('features', {}).items()
     return Requierement(e, p, f)
 
 def extract_from_zip(f):
@@ -189,7 +189,11 @@ class Requierement(object):
                 v = [v]
             self.packages.append((k, v))
         self.engines = [engine] if isinstance(engine, basestring) else engine
-        self.features = features
+        self.features = []
+        for n, v in features:
+            if isinstance(v, basestring):
+                v = [v]
+            self.features.append((n, v))
 
 if __name__ == '__main__':
     if main():
