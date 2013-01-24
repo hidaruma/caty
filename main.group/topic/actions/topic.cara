@@ -1,0 +1,89 @@
+// -*- coding: utf-8 -*-
+module topic in cara;
+
+/*== AddNewTopic */
+
+@[abstract]
+state start :: any links {
+ 一覧閲覧 --> トピック一覧画面.生成;
+};
+
+resource トピック一覧画面("/list.html") {
+  action 生成("GET")
+  :: _ -> _ produces トピック一覧画面
+  ;
+};
+
+
+/*
+step 1 {
+ input: トピック一覧画面{追加:button}
+ event: 「追加」ボタンをクリックする
+
+ //action: void
+ action: トピック登録画面生成
+ output: トピック登録画面
+}
+*/
+
+state トピック一覧画面 :: any links {
+  追加 ! /*「追加」ボタンをクリックする*/ --> トピック登録画面.生成;
+};
+
+resource トピック登録画面("/register.html") {
+ action 生成("GET")
+ :: _ -> _ produces  トピック登録画面
+ ;
+
+};
+
+/*
+step 2 {
+ input: トピック登録画面{トピック名:text}
+ event: 項目を入力する
+
+ // action: void
+ output: トピック登録画面
+}
+
+step 3 {
+ input: トピック一覧画面{登録:button}
+ event: 「登録」ボタンをクリックする
+
+ action: トピック登録処理
+ output: トピック一覧画面{ @{トピック名:text} }
+}
+*/
+
+type トピック登録データ = {
+ "トピック名": string
+};
+
+state トピック登録画面 :: [string*] links {
+  登録 ! /*「登録」ボタンをクリックする */ --> トピック登録.処理;
+};
+
+resource トピック登録("/register.act") {
+  action 処理("POST")
+  ::
+    @[in, out] #1 トピック登録データ -> any produces トピック一覧画面
+  ;
+
+};
+
+/*
+
+// ここは継続してない
+
+step 4 {
+ input: トピック一覧画面{キャンセル:button}
+ event: 「キャンセル」ボタンをクリックする
+
+ //action: void
+ action: キャンセル処理
+ output: トピック一覧画面{ @{トピック名:text} }
+}
+
+*/
+
+// End of Module
