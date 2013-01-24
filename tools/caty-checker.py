@@ -8,7 +8,7 @@ if sys.version.startswith('2'):
     VERSION = 'python2'
 else:
     VERSION = 'python3'
-example = """pkg-list-file example(plain text):
+example = """pkg-list-file example(json):
 {
   "engines": {
     "python2": ">=2.6"
