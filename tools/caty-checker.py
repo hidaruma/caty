@@ -4,7 +4,10 @@ import json
 import os
 from zipfile import ZipFile
 from optparse import OptionParser
-
+if sys.version.startswith('2'):
+    VERSION = 'python2'
+else:
+    VERSION = 'python3'
 example = """pkg-list-file example(plain text):
 {
   "engines": {
@@ -45,7 +48,15 @@ def main():
     e = extractor(f)
     pkgmap = init_pkg_map()
     featuremap = init_feature_map(options.project)
-    for pkg, versions in e.python2:
+    py_ver = sys.version.split(' ')[0].strip()
+    for engine in e.engines:
+        if compatible(engine, py_ver):
+            if options.verbose:
+                print '[OK]', sys.version
+            else:
+                print '[NG]', 'python', e.engine, 'required'
+                return False
+    for pkg, versions in e.packages:
         found = False
         if pkg in pkgmap:
             for ver in versions:
@@ -57,6 +68,7 @@ def main():
         if not found:
             ok = False
             print '[NG]', pkg, ', '.join(versions), 'is not installed.'
+
     for feature, versions in e.features:
         found = False
         if feature in featuremap:
@@ -155,14 +167,11 @@ def extract_from_json(f):
 
 def _extract_from_json(c):
     j = json.loads(c)
+    e = j.get('engines', {}).get(VERSION, '')
     d = j.get('dependencies', {})
-    p2 = d.pop('python2', {}).items()
-    f = []
-    for name, val in d.items():
-        if isinstance(val, basestring):
-            val = [val]
-        f.append((name, val))
-    return Requierement(p2, f)
+    p = d.pop(VERSION, {}).items()
+    f = d.pop('features', {}).items()
+    return Requierement(e, p, f)
 
 def extract_from_zip(f):
     zp = ZipFile(open(f, 'rb'))
@@ -173,13 +182,14 @@ def extract_from_zip(f):
     sys.exit(1)
 
 class Requierement(object):
-    def __init__(self, python2, anythingelse=()):
-        self.python2 = []
-        for k, v in python2:
+    def __init__(self, engine, dependencies, features):
+        self.packages = []
+        for k, v in dependencies:
             if isinstance(v, basestring):
                 v = [v]
-            self.python2.append((k, v))
-        self.features = anythingelse
+            self.packages.append((k, v))
+        self.engines = [engine] if isinstance(engine, basestring) else engine
+        self.features = features
 
 if __name__ == '__main__':
     if main():
