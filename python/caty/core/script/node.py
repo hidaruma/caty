@@ -13,7 +13,11 @@ import types
 schema = u''
 
 class ScalarBuilder(Syntax):
-    command_decl = u"""command __scalar-builder<T default any> :: void -> T
+    command_decl = u"""
+    /**
+     * 
+     */
+    command __scalar-builder<T default any> :: void -> T
                         reads schema
                         refers python:caty.core.script.node.ScalarBuilder;
     """
@@ -26,7 +30,11 @@ class ScalarBuilder(Syntax):
         return visitor.visit_scalar(self)
 
 class ListBuilder(Syntax):
-    command_decl = u"""command __list-builder<T default any> :: T -> array
+    command_decl = u"""
+    /**
+     * 
+     */
+    command __list-builder<T default any> :: T -> array
                         refers python:caty.core.script.node.ListBuilder;
     """
     def __init__(self, *args, **kwds):
@@ -58,7 +66,11 @@ class ListBuilder(Syntax):
         return visitor.visit_list(self)
 
 class ObjectBuilder(Syntax):
-    command_decl = u"""command __object-builder<T default any> :: T -> object
+    command_decl = u"""
+    /**
+     * 
+     */
+    command __object-builder<T default any> :: T -> object
                         refers python:caty.core.script.node.ObjectBuilder;
     """
     def __init__(self, *args, **kwds):
@@ -91,7 +103,11 @@ class ObjectBuilder(Syntax):
         return self.__nodes.items()
 
 class VarStore(Syntax):
-    command_decl = u"""command __var-store<T default any> :: T -> T
+    command_decl = u"""
+    /**
+     * 変数定義: '>' VarName
+     */
+    command __var-store<T default any> :: T -> T
                         refers python:caty.core.script.node.VarStore;
     """
     def __init__(self, *args, **kwds):
@@ -106,7 +122,11 @@ class VarStore(Syntax):
         return visitor.visit_varstore(self)
 
 class VarRef(Syntax):
-    command_decl = u"""command __var-ref<T default any> :: void -> T
+    command_decl = u"""
+    /**
+     * 変数参照: '%' VarName ['?' ['=' ScalarLiteral]]
+     */
+    command __var-ref<T default any> :: void -> T
                         refers python:caty.core.script.node.VarRef;
     """
     def __init__(self, name, optional, default):
@@ -131,7 +151,11 @@ class VarRef(Syntax):
         return self.__default
 
 class ArgRef(Syntax):
-    command_decl = u"""command __arg-ref<T default any> :: void -> T
+    command_decl = u"""
+    /**
+     * 引数参照: '%' ("0"|"1"|...|"9")+
+     */
+    command __arg-ref<T default any> :: void -> T
                         refers python:caty.core.script.node.ArgRef;
     """
     def __init__(self, num, optional):
@@ -195,7 +219,11 @@ _scalar_tag_map = {
     caty.ForeignObject: ['foreign'],
 }
 class Dispatch(Syntax):
-    command_decl = u"""command __dispatch {"seq": boolean?, "multi": boolean?} :: any -> any
+    command_decl = u"""
+    /**
+     * タイプタグ分岐: 'when" ['--seq'] | ['--multi'] '{' Script '}'
+     */
+    command __dispatch {"seq": boolean?, "multi": boolean?} :: any -> any
                         refers python:caty.core.script.node.Dispatch;
     """
 
@@ -513,7 +541,7 @@ class Catch(Syntax):
 
 class Time(Syntax):
     command_decl = u"""
-    command time-functor<T default any> {"verbose": boolean?} :: T -> T
+    command __time-functor<T default any> {"verbose": boolean?} :: T -> T
         refers python:caty.core.script.node.Time;
     """
     def __init__(self, cmd, opts):
@@ -574,7 +602,7 @@ class Take(Syntax):
 
 class Start(Syntax):
     command_decl = u"""
-    command start-functor<T default any> :: T -> never
+    command __start-functor<T default any> :: T -> never
         refers python:caty.core.script.node.Start;
     """
     def __init__(self, cmd, ignore):

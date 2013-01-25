@@ -947,6 +947,8 @@ class Help(Builtin):
         elif opts['special-command']:
             self.__mode = u'special'
             self.__line = line
+        elif opts['syntax']:
+            self.__mode = u'syntax'
         else:
             self.__line = u''
 
@@ -957,6 +959,8 @@ class Help(Builtin):
             return self._resources_help()
         elif self.__mode == u'special':
             return self._special_command_help()
+        elif self.__mode == u'syntax':
+            return self._syntax_help()
         else:
             return self._command_help()
 
@@ -1161,7 +1165,7 @@ class Help(Builtin):
             for module in modules:
                 commands = [(s.name, make_structured_doc(s.docstring).get('description', u'undocumented')) 
                          for s in self.schema.get_module(module).command_ns.values()
-                         if (not query) or (query in s.annotations)
+                         if (not query) or (query in s.annotations) and not s.name.startswith('__')
                         ]
                 commands.sort(cmp=lambda x, y:cmp(x[0], y[0]))
                 if commands:
@@ -1198,7 +1202,7 @@ class Help(Builtin):
         if line == '*':
             r = []
             for p in props:
-                if p.startswith('do_'):
+                if p.startswith('do_') and p != u'do_help':
                     h = getattr(CatyShell, p)
                     doc =  h.__doc__ or u'undocumented'
                     r.append(u'%s: %s' % (p.split('_', 1)[1], doc.strip().split('\n')[0]))
@@ -1210,6 +1214,17 @@ class Help(Builtin):
                 return doc.strip()
         else:
             return u'Unknown special command: %s' % line
+
+    def _syntax_help(self):
+        from caty.core.language.util import make_structured_doc
+        syntax_list = [make_structured_doc(s.docstring).get('description', u'')
+                 for s in self.schema.get_module(u'builtin').command_ns.values()
+                 if s.name.startswith(u'__')]
+        r = []
+        for s in syntax_list:
+            if s not in (u'', u'undocumented'):
+                r.append(s)
+        return u'\n'.join(r)
 
 class MakeException(Builtin):
     def setup(self, name, msg):

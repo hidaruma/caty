@@ -38,7 +38,7 @@ class ResourceModuleContainer(object):
         for s in self._selectors:
             matched = s.get(fs, path, verb, method, no_check)
             if matched:
-                return matched.resource_class_entry
+                return matched
         throw_caty_exception(
             u'VerbUnmatched',
             u'Not matched to verb dispatch: path=$path, verb=$verb, method=$method',
