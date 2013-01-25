@@ -139,18 +139,18 @@ class VerbMatcher(object):
         self.name = resource_class.name
         self.annotations += resource_class.annotations
         for k, v in resource_class.entries.items():
-            verb, method, parent = verb_parser.run(k, auto_remove_ws=True)
+            verb, method, checker = verb_parser.run(k, auto_remove_ws=True)
             if not verb in self._verbs:
                 self._verbs[verb] = {
                     method: {
                         'command': v,
-                        'parent': parent
+                        'checker': checker
                     }
                 }
             else:
                 self._verbs[verb][method] = {
                     'command': v,
-                    'parent': parent
+                    'checker': checker
                 }
 
     def get(self, fs, path, verb, method, no_check=False):
@@ -175,18 +175,18 @@ class VerbMatcher(object):
                 return PATH_MATCHED, None, None
         f = fs.opendir(path) if self._matcher.is_dir else fs.open(path)
         if not f.exists:
-            if e['parent'] == PARENT and not no_check:
+            if e['checker']['parent'] == PARENT and not no_check:
                 p = dirname(path) + '/' if dirname(path) not in ('/', '') else '/'
                 if p == path: # ディレクトリが渡された場合
                     p = p.rstrip('/').rsplit('/', 1)[0]
                 pdir = fs.opendir(p)
                 if pdir.exists:
-                    return MATCHED, self._matcher, e['command']
-            elif e['parent'] == NO_CARE or no_check:
-                return MATCHED, self._matcher, e['command']
+                    return MATCHED, self._matcher, e
+            elif e['checker']['parent'] == NO_CARE or no_check:
+                return MATCHED, self._matcher, e
             return NOT_MATCHED, self._matcher, ResourceActionEntry(None, u'webio:not-found %0', u'not-found')
         else:
-            return MATCHED, self._matcher, e['command']
+            return MATCHED, self._matcher, e
 
     def __repr__(self):
         return repr(self._verbs)
@@ -197,12 +197,13 @@ class Error(object):
 
 class Action(object):
     def __init__(self, ra, matcher, rae):
-        self.name = rae.name if rae else u'_'
+        self.name = rae['command'].name if rae else u'_'
         self.resource_name = ra.name
         self.module_name = ra.module
         self.matcher = matcher
-        self.resource_class_entry = rae
-        self.annotations = rae.annotations if rae else Annotations([])
+        self.resource_class_entry = rae['command'] if rae else None
+        self.condition = rae['checker'] if rae else {'parent': NO_CARE, 'secure': False}
+        self.annotations = rae['command'].annotations if rae else Annotations([])
         self.resource_class = ra
 
     def __nonzero__(self):
@@ -218,17 +219,17 @@ def verb_parser(seq):
         S('/')(seq)
         m = method(seq)
     else:
-        if v[0].isupper():
+        if v and v[0].isupper():
             m = v
             v = u''
             if m not in ('GET', 'POST', 'PUT', 'DELETE'):
                 raise ParseError(seq, u', '.join(('GET', 'POST', 'PUT', 'DELETE')))
         else:
             m = u'GET'
-    e = seq.parse(option(parent, NO_CARE))
+    c = seq.parse(option(checker, {'parent':NO_CARE, 'secure': False}))
     if not seq.eof:
         raise CatyException(u'CARA_PARSE_ERROR', u'Unknown checker: $checker', checker=seq.rest)
-    return v, m, e
+    return v, m, c
 
 def verb(seq):
     return seq.parse(Regex(u'[a-z][a-zA-Z0-9_-]*'))
@@ -236,14 +237,25 @@ def verb(seq):
 def method(seq):
     return seq.parse([u'GET', u'POST', u'PUT', u'DELETE'])
 
+def checker(seq):
+    return dict(unordered(try_(parent), try_(secure))(seq))
+
+def secure(seq):
+    if seq.eof:
+        return u'secure', False
+    return u'secure', seq.parse(u'#secure')
+
 def parent(seq):
+    if seq.eof:
+        return u'parent', NO_CARE
     x = seq.parse(['#exists-parent', '#dont-care', '#exists'])
     if x == '#exists-parent':
-        return PARENT
+        r = PARENT
     elif x == '#exists':
-        return 0
+        r = 0
     else:
-        return NO_CARE
+        r = NO_CARE
+    return u'parent', r
 
 import re
 class PathMatchingAutomaton(object):
