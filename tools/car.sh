@@ -1,5 +1,6 @@
 #!/bin/sh
 # -*- coding: utf-8 -*-
+# car -- Caty Archiver
 
 DEFAULT_CATY_HOME=../caty
 function find_caty_home { # () => caty_home
