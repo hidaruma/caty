@@ -1426,17 +1426,21 @@ type HelpInfo = deferred @* object;
 */
 command help
 {
-  @[default(false), without(["type", "resource", "special-command"])]
+  @[default(false), without(["type", "resource", "special-command", "syntax"])]
   "command" : boolean?,
 
-  @[default(false), without(["command", "resource", "special-command"])]
+  @[default(false), without(["command", "resource", "special-command", "syntax"])]
   "type" : boolean?,
 
-  @[default(false), without(["command", "type", "special-command"])]
+  @[default(false), without(["command", "type", "special-command", "syntax"])]
   "resource" : boolean?,
 
-  @[default(false), without(["command", "type", "resource"])]
+  @[default(false), without(["command", "type", "resource", "syntax"])]
   "special-command" : boolean?,
+
+  @[default(false), without(["command", "type", "resource", "special-command"])]
+  "syntax" : boolean?,
+
   // 以下は、既存のhelp, typeのオプション
   
   @[default(false), not-implemented]
