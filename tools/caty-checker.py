@@ -101,7 +101,7 @@ def init_pkg_map():
     p = subp.communicate()
     pkgmap = {}
     for l in p[0].split('\n'):
-        if l:
+        if l and '==' in l:
             a, b = l.split('==')
             pkgmap[a] = b
     return pkgmap
