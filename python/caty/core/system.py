@@ -65,7 +65,7 @@ class System(object):
                 "secretKey": u''.join([random.choice(string.ascii_letters+string.digits) for c in range(29)]),
                 "enableHTTPMethodTunneling": True,
                 "session": {
-                    "module": "caty.session.memory",
+                    "module": u"caty.session.memory",
                     "conf": {
                         "expire": 3600,
                     }
