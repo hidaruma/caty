@@ -404,9 +404,15 @@ type CatyEnviron = {
  "SYS_ENCODING": string,
  /** アプリケーションの文字符号化方式 */
  "APP_ENCODING": string,
+ /** HttpConsole (hcon) のURL */
+ "HCON_URL": string?,
 
  *: any?
 };
+
+/** システムが前もって定義している環境変数 */
+@[system]
+type StdCatyEnviron = close CatyEnviron;
 
 @[system]
 type Assoc = {

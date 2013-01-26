@@ -1,0 +1,12 @@
+{
+ "engines": {
+    "python2": ">=2.6"
+  },
+ "dependencies": {
+    "python2": {
+      "PIL": "1.1.7",
+      "requests": ["~0.11", "~0.12", "1.1.0"],
+      "pygraphviz": "1.1"
+    }
+  }
+}
