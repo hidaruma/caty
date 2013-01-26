@@ -15,6 +15,23 @@
 # install_target_short -- prj, glb, app のどれか
 
 
+function debug { # (mesg) => STDOUT
+ if [ -z "$DEBUG" -o -z "$1" ]; then
+     : # dot nothing
+ else
+     echo "DEBUG:" $1 >&2
+ fi
+}
+
+function debug_exit {
+ if [ -z "$DEBUG" ]; then
+     : # dot nothing
+ else
+     echo "DEBUG: exit" >&2
+     exit 0
+ fi
+}
+
 
 ## プロジェクト内でアプリケーションを探す
 # プロジェクトディレクトリを基点としたアプリケーションディレクトリパスを返す。
@@ -26,10 +43,10 @@ function find_app { # (prj_dir, app) => *STDOUT*
 
     local app_dir=""
     local groups=$(echo $prj_dir/*.group)
-#    echo "DEBUG: app='$app'"
-#    echo "DEBUG: groups='$groups'"
+    debug "app='$app'"
+    debug "groups='$groups'"
     for grp in $groups; do
-#	echo "DEBUG: group=$grp/$app"
+	debug "group=$grp/$app"
 	if [ -d $grp/$app ]; then
 	    app_dir=$grp/$app
 	    echo $app_dir
@@ -59,29 +76,25 @@ function confirm_version { # (proddef_dir) => *STDOUT*
     local semver=$(cat $proddef_dir/SemVer.txt)
 
     if [ ! -f $proddef_dir/Version.txt -o -n "$semver" ]; then
-	echo "DEBUG:confirm_version: making Version.txt"
+	debug "confirm_version: making Version.txt"
 	make_version $semver > $proddef_dir/Version.txt
     fi
     local version=$(cat $proddef_dir/Version.txt)
-    echo "DEBUG:confirm_version: version=$version"
+    debug "confirm_version: version=$version"
     echo "$version"
 }
 
 function expand_template { # (proddef_dir) => *STDOUT*
     local proddef_dir=$1
 
-#    if [ ! -f $proddef_dir/Version.txt ]; then
-#	make_version > $proddef_dir/Version.txt
-#    fi
     local version=$(cat $proddef_dir/Version.txt)
-    echo "DEBUG: version=$version"
+    debug "expand_templae: version=$version"
 
     cat $proddef_dir/package.template.json | sed -e 's/\$\$/\$/g' -e "s/\\\$version/$version/g" > $proddef_dir/package.json
 }
 
 function make_version { # ($proddef_dir) => *STDOUT*
     local semver=$(get_semver $proddef_dir)
-
     local Suffix=r$(hg parent $File | grep ^changeset | cut -d: -f2,3 | sed -e 's/ //g' -e 's/:/./' ).$(date +%Y%m%d)
     
     echo $semver+$Suffix
@@ -96,11 +109,11 @@ function make_archive_name { # (proddef_dir, install_target_suffix) => *STDOUT*
 	echo 0.0.0> $proddef_dir/SemVer.txt
     fi
     local semver=$(cat $proddef_dir/SemVer.txt)
-#    echo "DEBUG:make_archive_name: semver=$semver"
+   debug "make_archive_name: semver=$semver"
 
     prod=$(echo $proddef_dir | sed -e 's@/$@@' -e 's@^.*/@@')
-#    echo "DEBUG:make_archive_name: proddef_dir=$proddef_dir"
-#    echo "DEBUG:make_archive_name: prod=$prod"
+    debug "make_archive_name: proddef_dir=$proddef_dir"
+    debug "make_archive_name: prod=$prod"
 
     echo ${prod}_$semver.$install_target_suffix.zip
 }
@@ -146,12 +159,12 @@ function list_prods { # (prj_dir, origin) => *STDOUT*
 	  origin_dir=$(find_app $prj_dir $origin)
 	  ;;
   esac
-#  echo "DEBUG: origin_dir=$origin_dir"
+  debug "origin_dir=$origin_dir"
 
   local prods_dir=$origin_dir/products
-#  echo "DEBUG: prods_dir=$prods_dir"
+  debug "prods_dir=$prods_dir"
   local list=$(/bin/ls -F $prods_dir 2>/dev/null | grep '^[^.]*/$' | sed -e 's@/@@')
-#  echo "DEBUG: list=$list"
+  debug "list=$list"
   for f in $list; do
       echo $f
   done
@@ -159,13 +172,13 @@ function list_prods { # (prj_dir, origin) => *STDOUT*
 
 function list_all_prods {
   local prj_dir=$1
-
   local origins=$(list_origins $prj_dir)
-#  echo "DEBUG: origins=$origins"
+  debug "origins=$origins"
   local prods
+
   for ori in $origins; do
       prods=$(list_prods $prj_dir $ori)
-#      echo "DEBUG: prods=$prods @ $ori"
+      debug "prods=$prods @ $ori"
       for prod in $prods; do
 	  echo ::$ori:$prod
       done
@@ -174,13 +187,13 @@ function list_all_prods {
 
 function list_all_proddef_dirs {
   local prj_dir=$1
-
   local origins=$(list_origins $prj_dir)
-#  echo "DEBUG: origins=$origins"
+  debug "origins=$origins"
   local prods
+
   for ori in $origins; do
       prods=$(list_prods $prj_dir $ori)
-#      echo "DEBUG: prods=$prods @ $ori"
+      debug "prods=$prods @ $ori"
       for prod in $prods; do
 	  echo $prj_dir/$ori/prods/$prod
       done

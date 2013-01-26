@@ -19,6 +19,12 @@ source $caty_home/tools/functions.sh
 
 # ==== main ====
 
+function usage {
+    echo "** Usage: $0 [option ...] origin prod"
+    echo "** option:"
+    echo "--project PROJECT_DIR"
+    echo "--semver SEMANTIC_VERSION x.y.z"
+}
 
 prj_dir=.
 semver=
@@ -46,44 +52,44 @@ while [ -n "$1" ]; do
     esac
 done
 
-echo "DEBUG: prj_dir=$prj_dir"
-echo "DEBUG: semver=$semver"
+debug "prj_dir=$prj_dir"
+debug "semver=$semver"
 
 if [ -z "$1" ]; then
-    echo **Origins**:
+    usage
+    echo "** origin:"
     list_origins $prj_dir
-    echo ""
-    echo **Usage**: $0 OPTIONS origin prod
+    
     exit 1
 fi
 origin=$1
 
 if [ -z "$2" ]; then
-    echo **Products**:
+    usage
+    echo "** product:"
     list_prods $prj_dir $origin
-    echo ""
-    echo **Usage**: $0 OPTIONS origin prod
+
     exit 1
 fi
 prod=$2
 
-echo "DEBUG: origin=$origin"
-echo "DEBUG: prod=$prod"
+debug "origin=$origin"
+debug "prod=$prod"
 
 case $origin in
     project)
 	SUBEXT=caty-prj
-	prod_dir=$prj_dir/prods/$prod ;;
+	prod_dir=$prj_dir/products/$prod ;;
     global)
 	SUBEXT=caty-glb
-	prod_dir=$prj_dir/global/prods/$prod ;;
+	prod_dir=$prj_dir/global/products/$prod ;;
     *)
 	SUBEXT=caty-app
 	app_dir=$(find_app $prj_dir $origin)
-	prod_dir=$app_dir/prods/$prod ;;
+	prod_dir=$app_dir/products/$prod ;;
 esac
 
-echo "DEBUG: prod_dir=$prod_dir"
+debug "prod_dir=$prod_dir"
 
 if [ ! -d $prod_dir ]; then
     echo "$prod_dir does not exist"; exit 1
@@ -107,7 +113,7 @@ expand_template $prod_dir
 
 
 package_json=$prod_dir/package.json
-echo "DEBUG: package_json=$package_json"
+debug "package_json=$package_json"
 
 if [ ! -f "$package_json" ]; then
     echo "Cannot find package.json file: $package_json"
@@ -116,13 +122,14 @@ fi
 
 archive_name=$(make_archive_name $prod_dir $SUBEXT)
 
-echo "DEBUG: archive_name=$archive_name"
+debug "archive_name=$archive_name"
 
+debug_exit
 
 python $caty_home/tools/caty-archiver.py \
  --project=$prj_dir \
  --origin=$origin \
  --fset=$fset \
- --meta-inf=$prod_dir \
+ --package-json=$prod_dir/package.json \
  $caty_home/dists/$archive_name
 
