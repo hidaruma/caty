@@ -127,15 +127,45 @@ def init_feature_map(base_dir):
                 map[name].discard(version)
     return map
 
-def compatible(required, installed):
-    if required.startswith('~'):
-        return newer(fix(required[1:]), fix(installed)) < 1
-    elif required.startswith('='):
-        return fix(required[1:]) == fix(installed)
-    elif required == '*':
-        return True
-    else:
-        return newer(fix(required), fix(installed)) < 1
+def compatible(requireds, installed):
+    installed = fix(installed)
+    r = []
+    for required in transform(requireds.split(' ')):
+        if required.startswith('='):
+            r.append(required[1:] == installed)
+        elif required.startswith('>='):
+            r.append((newer(required[2:], installed) < 1 
+                 or required[2:] == installed))
+        elif required.startswith('>'):
+            r.append(newer(required[1:], installed) < 1)
+        elif required.startswith('<'):
+            r.append(not (newer(required[1:], installed) < 1 
+                 or required[1:] == installed))
+        elif required.startswith('<='):
+            r.append(not (newer(required[1:], installed) < 1))
+        elif required == '*':
+            r.append(True)
+        else:
+            print '[Error] invalid version', required
+            sys.exit(1)
+    return all(r)
+
+def transform(chunks):
+    for c in chunks:
+        c = c.strip()
+        if not c:
+            continue
+        if c.startswith('~'):
+            c = fix(c[1:])
+            yield '>=' + c
+            toks = c.split('.')
+            if len(toks) < 2:
+                next = 1
+            else:
+                next = int(toks[1]) + 1
+            yield '<' + '.'.join([toks[0], str(next), '0'])
+        else:
+            yield fix(c)
 
 def newer(v1, v2):
     for a, b in zip(v1.split('.'), v2.split('.')):
@@ -149,7 +179,7 @@ def newer(v1, v2):
 def fix(s):
     chunk = s.split('.')
     if len(chunk) >= 3:
-        return s.strip()
+        return '.'.join(chunk[0:3])
     else:
         for i in range(3-len(chunk)):
             chunk.append('0')
@@ -189,13 +219,22 @@ class Requierement(object):
         for k, v in dependencies:
             if isinstance(v, basestring):
                 v = [v]
-            self.packages.append((k, v))
-        self.engines = [engine] if isinstance(engine, basestring) else engine
+            self.packages.append((k, concat_map(self.split_or, v)))
+        self.engines = concat_map(self.split_or, [engine] if isinstance(engine, basestring) else engine)
         self.features = []
         for n, v in features:
             if isinstance(v, basestring):
                 v = [v]
-            self.features.append((n, v))
+            self.features.append((n, concat_map(self.split_or, v)))
+
+    def split_or(self, val):
+        r = []
+        for c in val.split('||'):
+            r.append(c.strip())
+        return r
+
+def concat_map(f, l):
+    return reduce(lambda a, b: a+b, map(f, l))
 
 if __name__ == '__main__':
     if main():

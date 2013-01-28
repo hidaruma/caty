@@ -25,7 +25,7 @@
        } 
    ],
   "dependencies": {
-       "caty": { "minimum-caty": "0.0.0" }
+       "caty": { "minimum-caty": "~0.0.0 || =0.7.0" }
    },
    "os": ["linux", "macos", "win"],
    "cpu": ["x86", "ppc", "x86_64"],
