@@ -43,7 +43,7 @@ class ApplicationGroup(object):
             d = self._make_super_root(self.path).start()
             r = d.create(u'uses').opendir('/root')
             if not r.exists:
-                self.i18n.write("Root application not exists, auto-generating")
+                self.i18n.write("Root application does not exists, auto-generating")
                 r.create()
                 d.commit()
         if self._exists:
