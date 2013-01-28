@@ -204,7 +204,7 @@ class Module(Facility):
         scope = scope_func(self)
         app_name, mod_name, name = split_colon_dot_path(rname, u'ignore')
         if app_name:
-            if app_name in ('this', 'global', 'caty', self._app.name):
+            if app_name in ('this', 'caty', self._app.name):
                 pass
             else:
                 return self._another_app_callback(rname, tracked, scope_func, type)
