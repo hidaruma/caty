@@ -313,7 +313,7 @@ class SelectScript(RequestTool):
                                  app)
         try:
             path, _ = handler._create_path_and_vpath(path)
-            entry = handler._verb_dispatcher.get(handler._file, path, self._verb, self._method, self._no_check)
+            entry = handler._verb_dispatcher.get(handler._file, path, self._verb, self._method, self._no_check).resource_class_entry
         except Exception, e:
             if self._exception: raise
             entry = None
@@ -338,7 +338,7 @@ class SelectAction(RequestTool):
                                  app)
         try:
             path, _ = handler._create_path_and_vpath(path)
-            entry = handler._verb_dispatcher.get(handler._file, path, self._verb, self._method, self._no_check)
+            entry = handler._verb_dispatcher.get(handler._file, path, self._verb, self._method, self._no_check).resource_class_entry
         except Exception, e:
             if self._exception: raise
             entry = None
@@ -649,7 +649,7 @@ class DirIndex(Internal):
                 break
         else:
             raise UnableToAccess(path=self.__path)
-        proxy = self._app.verb_dispatcher.get(pub, path, u'', self.__method)
+        proxy = self._app.verb_dispatcher.get(pub, path, u'', self.__method).resource_class_entry
         if proxy.compiled:
             cmd = _interpreter._instantiate(proxy.instance, opts, [path, path])
         else:

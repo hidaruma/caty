@@ -87,7 +87,6 @@ class System(object):
         self._global_app = gag._apps[0]
         self._global_app.finish_setup()
         # アプリケーショングループの順序は rc.caty の実行順序に関わる
-        # common, main, extra, examples という順序は固定
         self._app_groups = []
         gdirs = glob('*.group')
         if not 'main.group' in gdirs:
