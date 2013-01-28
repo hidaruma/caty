@@ -90,7 +90,8 @@ class System(object):
         self._app_groups = []
         gdirs = glob('*.group')
         if not 'main.group' in gdirs:
-            throw_caty_exception('ApplicationGroupNotFound', u'$grpName', grpName='main')
+            gdirs.append('main.group')
+            # throw_caty_exception('ApplicationGroupNotFound', u'$grpName', grpName='main')
         for g in gdirs:
             name = g.split('.')[0]
             self._app_groups.append(ApplicationGroup(name, self._global_config, no_ambient, no_app, app_names, self))
