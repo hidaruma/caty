@@ -145,7 +145,7 @@ class Response(Builtin):
        self.ext = opts.get('ext', caty.UNDEFINED)
        self.content_type = opts.get('content-type', caty.UNDEFINED)
        self.encoding = opts.get('encoding', caty.UNDEFINED)
-       self.status = opts.get('status', caty.UNDEFINED) if opts.get('status', caty.UNDEFINED) else 200
+       self.status = opts.get('status', caty.UNDEFINED) 
 
     def execute(self, input):
         if not self.encoding:
@@ -162,19 +162,36 @@ class Response(Builtin):
                 tp += '; charset=%s' % encoding
         else:
             tp = 'application/octet-stream'
+        st = self.status if self.status else 200
+        if isinstance(input, dict):
+            r = {}
+            r.update(input)
+            if self.status:
+                r['status'] = self.status
+            if 'status' not in r:
+                r['status'] = st
+            if 'encoding' not in r:
+                r['encoding'] = encoding
+            if 'header' not in r:
+                r['header'] = {}
+            if self.content_type or self.ext:
+                r['header']['content_type'] = tp
+            input = u''
+        else:
+            r = {
+            'status': st,
+            'encoding': encoding,
+            'body': '',
+            'header': {
+                'content-type': unicode(tp),
+                'content-length': ''
+            }
+        }
         if isinstance(input, unicode):
             length = len(input.encode(encoding))
         else:
             length = len(input)
-        return {
-            'status': self.status,
-            'encoding': encoding,
-            'body': input,
-            'header': {
-                'content-type': unicode(tp),
-                'content-length': length
-            }
-        }
+        return r
 
 
 class Print(Expand):

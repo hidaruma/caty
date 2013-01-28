@@ -300,7 +300,7 @@ class InternalCatyApp(CatyApp):
                                  self._app)
         path, _ = handler._create_path_and_vpath(path)
         entry = handler._verb_dispatcher.get(handler._file, path, options.pop('_verb', u''), environ['REQUEST_METHOD'], False)
-        return entry, input
+        return entry.resource_class_entry, input
 
 
 

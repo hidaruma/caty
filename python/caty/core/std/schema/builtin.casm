@@ -92,6 +92,17 @@ type CommonResponsePart = {
     "responseOriginalEncoding" : string?,
 };
 
+type PartialResponse = {
+    "status": integer(minimum=100, maximum=599)?,
+    "body": (string | binary)?,
+    "encoding": string?,
+    "header": {
+        "content-length": (string | integer)?,
+        "content-type": string?,
+        *: string?
+    }?,
+};
+
 @[unquiet]
 type Response = CommonResponsePart ++ {
     "status": integer(minimum=200, maximum=299),
@@ -985,7 +996,7 @@ command expand_2 {"raw": boolean?, "no-script": boolean?, "resolve": boolean?, "
 command response {"ext":string?, 
                   "status": integer?, 
                   "content-type": string?, 
-                  "encoding": string?} :: string | binary -> Response
+                  "encoding": string?} :: string | binary | PartialResponse -> Response
     reads [env, pub]
     refers python:builtin.Response;
 
