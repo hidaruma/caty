@@ -153,6 +153,8 @@ class CommandExecutor(BaseInterpreter):
                 for n in node.facility_names:
                     getattr(node, n).commit()
             return r
+        except SystemResourceNotFound as e:
+            raise
         except ContinuationSignal as e:
             #node.signal_schema.validate(e.data)
             raise

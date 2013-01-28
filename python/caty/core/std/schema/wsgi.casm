@@ -202,7 +202,7 @@ command lookup :: Environ -> univ
 
 command lookup-and-exec :: Environ -> univ
   throws [ApplicationNotFound, FileNotFound, ActionNotFound]
-  {lookup|exec}
+  {lookup|global::exec:exec}
 ;
 
 command perform :: Environ -> any
