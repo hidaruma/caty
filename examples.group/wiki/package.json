@@ -25,11 +25,11 @@
        } 
    ],
   "dependencies": {
-       "minimum-caty": "0.0.0"
+       "caty": { "minimum-caty": "0.0.0" }
    },
    "os": ["linux", "macos", "win"],
    "cpu": ["x86", "ppc", "x86_64"],
-   "engines": ["python2.5", "python2.6"],
+   "engines": {"python2": ">=2.6.0"},
    "scripts": {
        "install": "./install.py"
    }

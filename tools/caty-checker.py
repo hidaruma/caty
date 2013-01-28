@@ -25,6 +25,7 @@ example = """pkg-list-file example(json):
 }
 """
 
+py_ver = sys.version.split(' ')[0].strip()
 def main():
     argv = sys.argv
     o = OptionParser(usage='usage: python %s [OPTIONS] pkg-list-file\n%s' % (argv[0], example))
@@ -48,14 +49,13 @@ def main():
     e = extractor(f)
     pkgmap = init_pkg_map()
     featuremap = init_feature_map(options.project)
-    py_ver = sys.version.split(' ')[0].strip()
     for engine in e.engines:
         if compatible(engine, py_ver):
             if options.verbose:
                 print '[OK]', sys.version
-            else:
-                print '[NG]', 'python', e.engine, 'required'
-                return False
+        else:
+            print '[NG]', 'python', engine, 'required'
+            return False
     for pkg, versions in e.packages:
         found = False
         if pkg in pkgmap:
@@ -87,6 +87,7 @@ def main():
     return ok
 
 def init_pkg_map():
+    import re
     try:
         subp = subprocess.Popen(['pip', 'freeze'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except OSError:
@@ -100,8 +101,9 @@ def init_pkg_map():
         sys.exit(r)
     p = subp.communicate()
     pkgmap = {}
+    ptn = re.compile('[a-zA-Z0-9]+ *== *.+')
     for l in p[0].split('\n'):
-        if l and '==' in l:
+        if l and ptn.match(l):
             a, b = l.split('==')
             pkgmap[a] = b
     return pkgmap
@@ -167,7 +169,7 @@ def extract_from_json(f):
 
 def _extract_from_json(c):
     j = json.loads(c)
-    e = j.get('engines', {}).get(VERSION, '')
+    e = j.get('engines', {}).get(VERSION, py_ver)
     d = j.get('dependencies', {})
     p = d.get(VERSION, {}).items()
     f = d.get('caty', {}).items()
