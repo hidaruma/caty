@@ -170,7 +170,7 @@ def _extract_from_json(c):
     e = j.get('engines', {}).get(VERSION, '')
     d = j.get('dependencies', {})
     p = d.get(VERSION, {}).items()
-    f = d.get('features', {}).items()
+    f = d.get('caty', {}).items()
     return Requierement(e, p, f)
 
 def extract_from_zip(f):
