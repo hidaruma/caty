@@ -94,18 +94,20 @@ type CommonResponsePart = {
 
 type PartialResponse = {
     "status": integer(minimum=100, maximum=599)?,
-    "body": (string | binary)?,
+    "body": string | binary,
     "encoding": string?,
     "header": {
         "content-length": (string | integer)?,
         "content-type": string?,
         *: string?
     }?,
+    *: any?
 };
+
 
 @[unquiet]
 type Response = CommonResponsePart ++ {
-    "status": integer(minimum=200, maximum=299),
+    "status": integer(minimum=100, maximum=299),
 };
 
 @[unquiet]

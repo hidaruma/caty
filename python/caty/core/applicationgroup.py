@@ -34,7 +34,7 @@ class ApplicationGroup(object):
         self.i18n = system.i18n
         if not self.exists:
             if self._name in (USER):
-                self.i18n.write("Application gourp '$name' not exists, auto-generating", name=self._name)
+                self.i18n.write("Application gourp '$name' does not exists, auto-generating", name=self._name)
                 d = self._make_super_root('').start()
                 d.create(u'uses').opendir('/'+self.path).create()
                 d.commit()
