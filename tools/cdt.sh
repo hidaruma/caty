@@ -3,7 +3,7 @@
 # cdt -- Caty Deploy Tool
 
 DEFAULT_CATY_HOME=../caty
-function find_caty_home { # () => caty_home
+function find_caty_home { # () => $caty_home
     if [ -n "$CATY_HOME" ]; then
 	caty_home=$CATY_HOME
     elif [ -d $DEFAULT_CATY_HOME ]; then
@@ -15,17 +15,17 @@ function find_caty_home { # () => caty_home
 find_caty_home
 source $caty_home/tools/functions.sh
 
-# You can use functions in $caty_home/tools/functions.sh
+# You can use the functions in $caty_home/tools/functions.sh
 
-# ==== main ====
-
+# ==== script body ====
 
 # アプリケーションフィーチャのインストールが出来ない??
 
 
-
-function do_list {
-    case "$1" in
+## 配布パッケージ種別ごとに、すべての配布パッケージをリスとする
+function list_dists { # (dest_type) => *STDOUT*
+    local dest_type=$1
+    case "$dest_type" in
      project|prj)
        SUBEXT=caty-prj
        ;;
@@ -43,12 +43,11 @@ function do_list {
 
     list=`/bin/ls $caty_home/dists/*.$SUBEXT.zip 2>/dev/null`
     for f in $list; do
-#	basename $f .$SUBEXT.zip
 	echo $f
     done
 }
 
-function check_dist {
+function exists_dist_file { # (dist_file) => *STATUS*
     dist_file=$1
 
     if [ -f $dist_file ]; then
@@ -58,8 +57,7 @@ function check_dist {
     fi
 }
     
-
-function do_install { # dist_file, project_dir => 
+function do_install { # (target, dist_file, project_dir, dest) => 
     if [ -z "$2" ]; then
 	echo Usage: $0 install dist_file project_dir [target]
 	exit 1
@@ -70,7 +68,7 @@ function do_install { # dist_file, project_dir =>
     project_dir=$3
     dest=$4
 
-    echo "DEBUG: target=$target, dist_file=$dist_file, project_dir=$project_dir, dest=$dest"
+    debug "target=$target, dist_file=$dist_file, project_dir=$project_dir, dest=$dest"
 
 
     if [ -z "$target" ]; then
@@ -129,6 +127,7 @@ function do_install { # dist_file, project_dir =>
     echo	"--dest=$dest "
     echo	"$archive"
 
+    debug_exit
 
     python $caty_home/tools/caty-installer.py --compare=digest \
 	--project=$project_dir \
@@ -143,6 +142,12 @@ function cmd_error {
     exit 1
 }
 
+function usage {
+    echo "** Usage: $0 targetType distPackageFile destinationProjectDir [destinationAppName]"
+}
+
+echo "!!! MAIN !!!"
+
 # ==== main ====
 
 if [ ! -f $caty_home/tools/caty-installer.py ]; then
@@ -151,7 +156,7 @@ if [ ! -f $caty_home/tools/caty-installer.py ]; then
 fi
 
 if [ -z "$1" ]; then
-    echo "** Usage: $0 targetType distPackageFile projectDir destination"
+    usage
     echo ""
     echo "** targetType:"
     echo "project | prj"
@@ -163,10 +168,10 @@ fi
 target=$1
 
 if [ -z "$2" ]; then
-    echo "** Usage: $0 targetType distPackageFile projectDir destination"
+    usage
     echo ""
     echo "** distPackageFile:"
-    do_list $target
+    list_dists $target
 
     exit 1
 fi
@@ -174,9 +179,9 @@ dist_file=$2
 
 
 if [ -z "$3" ]; then
-    check_dist $dist_file
+    exists_dist_file $dist_file
     if [ $? == 0 ]; then
-	echo "** Usage: $0 targetType distPackageFile projectDir destination"
+	usage
     else
 	echo "distPackageFile '$dist_file' NOT found"
     fi
@@ -185,7 +190,7 @@ fi
 project_dir=$3
 
 if [ -z "$4" ]; then
-    echo "** Usage: $0 targetType distPackageFile projectDir destination"
+    usage
     exit 1
 else
     dest=$4

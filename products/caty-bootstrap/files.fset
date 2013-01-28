@@ -9,8 +9,9 @@
 /tools/caty-installer.py
 /tools/caty-uninstaller.py
 /tools/car.sh
-/tools/cdm.sh
+/tools/cdt.sh
 
+/dependencies.json
 
 /dists/README.txt
 /features/README.txt
