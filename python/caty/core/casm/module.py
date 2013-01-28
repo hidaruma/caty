@@ -724,7 +724,7 @@ class Module(Facility):
 
     def is_runaway_signal(self, e):
         import caty.jsontools as json
-        return isinstance(e.raw_data, json.TaggedValue) and e.raw_data.tag == u'runaway'
+        return e.is_runaway
 
 class _FaciltyLoader(object):
     def __init__(self, clsref, facility_name, module):

@@ -47,7 +47,12 @@ class CatyException(Exception):
 
 class CatySignal(Exception):
     def __init__(self, data):
-        self.raw_data = data
+        if isinstance(data, json.TaggedValue) and data.tag == 'runaway':
+            self.raw_data = data.value
+            self.is_runaway = True
+        else:
+            self.raw_data = data
+            self.is_runaway = False
         Exception.__init__(self, u'Caty Signal')
 
 def throw_caty_exception(tag, message, error_class=None, error_id=None, stack_trace=None, **kwds):
