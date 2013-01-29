@@ -325,6 +325,12 @@ type PrjManifest = {
      */
     "addrsDenied": [string*]?,
 
+    "storage": {
+        "module": string,
+        "conf": {
+            *: any?
+        },
+    },
 
 };
 

@@ -29,7 +29,7 @@ class GlobalConfig(object):
         self._orig_hosturl = obj['hostUrl']
         self._configure_server()
         self._server_module_name = obj['serverModule']
-        self._storage_conf = obj.get('storage', {'type': 'sqlite', 'path': './storage.db'})
+        self._storage_conf = obj.get('storage', {'module': 'caty.storage.sqlite', 'conf': {'path': './storage.db'}})
         self._sysencoding = unicode(encoding or locale.getpreferredencoding())
         self._mime_types = {}
         self._project_name = obj.get('projectName', unicode(os.path.basename(os.getcwd()), self._encoding))
