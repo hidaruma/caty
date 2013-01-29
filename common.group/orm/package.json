@@ -1,0 +1,39 @@
+{
+   "name": "caty-orm-lib",
+   "version": "0.0.0",
+   "uuid" : "80fce8db-b3c4-479a-8f52-e327dad8ac14",
+   "maintainers": [
+       {
+           "name": "Kuwata, Chikara",
+           "email": "chikara.kuwata@gmail.com",
+           "web": "http://return0.info" 
+       }
+   ],
+   "bugs": {
+       "web": "https://bitbucket.org/project_caty/dev/issues"
+   },
+   "licenses": [
+       {
+           "type": "MIT",
+           "url": "http://www.opensource.org/licenses/mit-license.php" 
+       } 
+   ],
+   "repositories": [
+       {
+           "type": "hg",
+           "url": "https://bitbucket.org/project_caty/dev/" 
+       } 
+   ],
+  "dependencies": {
+       "caty": { "minimum-caty": ">=0.0.0" },
+       "python2": {
+            "SQLAlchemy": ">=0.6.0"
+        }
+   },
+   "os": ["linux", "macos", "win"],
+   "cpu": ["x86", "ppc", "x86_64"],
+   "engines": {"python2": ">=2.6.0"},
+   "scripts": {
+       "install": "./install.py"
+   }
+}

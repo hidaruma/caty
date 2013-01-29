@@ -1,0 +1,16 @@
+module sqlalchemy in casm;
+
+class SQLAlchemy {
+};
+
+type SQLAlchemyConfig = {
+    "url": string,
+    *: string | number | boolean,
+};
+
+facility SQLAlchemy(null) along SQLAlchemyConfig
+    conforms SQLAlchemy
+    refers python:sqla.SQLAlchemyWrapper;
+
+entity sqlalchemy = SQLAlchemy(null);
+
