@@ -106,6 +106,8 @@ def init_pkg_map():
         if l and ptn.match(l):
             a, b = l.split('==')
             pkgmap[a] = b
+        elif l:
+            print '[Warning] Unexpected output from pip:', l
     return pkgmap
 
 def init_feature_map(base_dir):
