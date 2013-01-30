@@ -1,6 +1,6 @@
 #coding: utf-8
 from caty.core.async import AsyncQueue
-from caty.core.facility import Facility, AccessManager, FakeFacility, ReadOnlyFacility, EntityProxy
+from caty.core.facility import Facility, AccessManager, FakeFacility, ReadOnlyFacility, EntityProxy, AbstractEntityProxy
 from caty.util import cout, error_to_ustr, brutal_error_printer
 from caty.util.path import join
 from caty import mafs, storage, session
@@ -596,7 +596,7 @@ class Application(object):
             try:
                 if v[0] is None: continue
                 if len(v) == 2:
-                    facilities[k] = EntityProxy(v[0].instance(self, v[1]), None)
+                    facilities[k] = AbstractEntityProxy(v[0].instance(self, v[1]), None)
                 else:
                     facilities[k] = EntityProxy(v[0].instance(self, v[1]), v[2])
             except:

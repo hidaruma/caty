@@ -100,9 +100,20 @@ class EntityProxy(Facility):
     def create(self, mode):
         return self.base.create(mode, self.user_param)
 
+
+    def clone(self):
+        return self.base.clone()
+
     @property
     def is_entity(self):
         return True
+
+class AbstractEntityProxy(EntityProxy):
+    def commit(self):
+        self.base.commit()
+
+    def cancel(self):
+        self.base.cancel()
 
 class ReadOnlyFacility(Facility):
     _mode = READ
