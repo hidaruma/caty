@@ -50,11 +50,14 @@ class ResourceModuleContainer(object):
         if not path.endswith('/') and fs.open(path + '/').exists:
             if self._app.web_config['missingSlash'] == 'dont-care':
                 if fs.application.name != 'root':
-                    return ResourceActionEntry(None, u'webio:not-found /%s%s' % (fs.application.name, path), u'not-found')
-                return ResourceActionEntry(None, u'webio:not-found %s' % (path), u'not-found')
-            if fs.application.name != 'root':
-                return ResourceActionEntry(None, u'webio:found /%s%s/' % (fs.application.name, path), u'not-found')
-            return ResourceActionEntry(None, u'webio:found %s/' % (path), u'not-found')
+                    r = ResourceActionEntry(None, u'webio:not-found /%s%s' % (fs.application.name, path), u'not-found')
+                else:
+                    r = ResourceActionEntry(None, u'webio:not-found %s' % (path), u'not-found')
+            elif fs.application.name != 'root':
+                r = ResourceActionEntry(None, u'webio:found /%s%s/' % (fs.application.name, path), u'found')
+            else:
+                r = ResourceActionEntry(None, u'webio:found %s/' % (path), u'found')
+            return Action(DummyResource(self._app), PathMatchingAutomaton(path), {'command': r})
         return None
 
     def _get_trace(self, fs, path, verb, method, no_check=False):

@@ -68,7 +68,7 @@ def _CatySession(Session):
         __setitem__ = put
 
         def merge_transaction(self, another):
-            x.update(y)
+            self.update(another)
 
         def commit(self):
             self.save()

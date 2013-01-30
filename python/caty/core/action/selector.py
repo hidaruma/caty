@@ -163,12 +163,12 @@ class VerbMatcher(object):
         m = self._verbs.get(verb, None)
         if m is None:
             if 'finishing' in self.annotations:
-                return NOT_MATCHED, self._matcher, ResourceActionEntry(None, u'webio:bad-request %%0 %s/%s' % (verb, method), u'not-matched')
+                return NOT_MATCHED, self._matcher, {'command': ResourceActionEntry(None, u'webio:bad-request %%0 %s/%s' % (verb, method), u'not-matched')}
             return PATH_MATCHED, None, None
         e = m.get(method.upper(), None)
         if e is None:
             if 'finishing' in self.annotations:
-                return NOT_MATCHED, self._matcher, ResourceActionEntry(None, u'webio:bad-request %%0 %s/%s' % (verb, method), u'not-matched')
+                return NOT_MATCHED, self._matcher, {'command': ResourceActionEntry(None, u'webio:bad-request %%0 %s/%s' % (verb, method), u'not-matched')}
             elif '__default__' in m:
                 e = m['__default__']
             else:
@@ -184,7 +184,7 @@ class VerbMatcher(object):
                     return MATCHED, self._matcher, e
             elif e['checker']['parent'] == NO_CARE or no_check:
                 return MATCHED, self._matcher, e
-            return NOT_MATCHED, self._matcher, ResourceActionEntry(None, u'webio:not-found %0', u'not-found')
+            return NOT_MATCHED, self._matcher, {'command': ResourceActionEntry(None, u'webio:not-found %0', u'not-found')}
         else:
             return MATCHED, self._matcher, e
 
@@ -202,7 +202,7 @@ class Action(object):
         self.module_name = ra.module
         self.matcher = matcher
         self.resource_class_entry = rae['command'] if rae else None
-        self.condition = rae['checker'] if rae else {'parent': NO_CARE, 'secure': False}
+        self.condition = rae.get('checker', {'parent': NO_CARE, 'secure': False}) if rae else {'parent': NO_CARE, 'secure': False}
         self.annotations = rae['command'].annotations if rae else Annotations([])
         self.resource_class = ra
 

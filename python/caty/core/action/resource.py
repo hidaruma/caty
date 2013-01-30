@@ -93,6 +93,10 @@ class DefaultResource(ResourceClass):
             v.implemented = u'catyscript'
         self.type = DEFAULT
 
+class DummyResource(ResourceClass):
+    def __init__(self, app):
+        ResourceClass.__init__(self, app, u'', {}, {}, [], u'system', u'redirect', u'')
+
 def split_url_pattern(seq):
     r = []
     buf_list = [[]]
