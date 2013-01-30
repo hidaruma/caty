@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+# library archive
+# コマンド、ファシリティといった要素のみのアーカイブ
+# 別のアプリケーションに混ぜ込む形で使用する
+
+- *.ctpl
+- *.icaty
+- *.log
+
+# アーカイブ対象となるディレクトリ
+# --origin をルートとみなした 絶対パス形式相対パス
+
+/commands/
+/data/
+/include/
+/lib/
+/messages/
+/schemata/
+/scripts/
+
+

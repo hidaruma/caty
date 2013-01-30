@@ -40,7 +40,7 @@ else:
         def __init__(self, *ignore):
             conn = self.engine.connect()
             self.conn = conn
-            SessionClass = session_maker(bind==conn, autoflush=True)
+            SessionClass = sessionmaker(bind=conn, autoflush=True)
             SessionClass.configure(bind=conn)
             self.session = SessionClass()
 
