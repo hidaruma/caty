@@ -608,14 +608,24 @@ class Module(Facility):
                     emsgs.append(self.application.i18n.get(u'Facility class not specified: $name', name=k))
 
                     facility_class = None
+                    config = {}
                 else:
                     try:
                         facility_class = self._load_facility_class(k, v.clsname)
+                        try:
+                            config = self._load_facility_config(v)
+                        except:
+                            import traceback
+                            traceback.print_exc()
+                            emsgs.append(self.application.i18n.get(u'Failed to load facility config: $name', name=v.clsname))
+                            config = {}
                     except:
                         import traceback
                         traceback.print_exc()
                         emsgs.append(self.application.i18n.get(u'Failed to load facility class: $name', name=v.clsname))
                         facility_class = None
+                if facility_class:
+                    facility_class.__system_config__ = config
                 self.facility_classes[v.name] = facility_class
         for m in self.sub_modules.values() + self.sub_packages.values():
             m._register_facility()
@@ -642,6 +652,14 @@ class Module(Facility):
         uri = uri.replace('python:', '')
         loader = _FaciltyLoader(uri, name, self)
         return loader.load()
+
+    def _load_facility_config(self, fclnode):
+        path = u'/%s.%s.json' % (fclnode.module.name, fclnode.clsname.split('.')[-1])
+        with self.fs.open(path) as f:
+            if f.exists:
+                c = f.read()
+                return xjson.loads(c)
+            return {}
 
     def get_facility_or_entity(self, name):
         if self.has_facility(name):

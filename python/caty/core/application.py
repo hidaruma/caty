@@ -498,7 +498,7 @@ class Application(object):
                 continue
             if v[0] in initialized:
                 continue
-            v[0].initialize(self, None)
+            v[0].initialize(self, v[0].__system_config__)
             initialized.add(v[0])
 
     def get_logger(self, type):
