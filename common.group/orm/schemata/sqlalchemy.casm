@@ -15,13 +15,23 @@ facility SQLAlchemy(null) along SQLAlchemyConfig
 entity sqlalchemy = SQLAlchemy(null);
 
 /** 
- * 型情報を元にテーブルと対応するマッピングオブジェクトを生成する。
+ * 型名を元にテーブルと対応するマッピングオブジェクトを生成する。
  * 将来的にはレイフィケーションイメージを使った方がいいかもしれない。
  * 制限としてはフラットなオブジェクト型でないと動作しない。
  */
-command create-table-from-type<T> {"debug": boolean?} :: void -> void
+command create-class-from-type {"debug": boolean?}  [string] :: void -> void
     throws InvalidInput
-    reads env
+    reads [env, schema]
     uses sqlalchemy
-    refers python:sqlalchemycmd.CreatetableFromType;
+    refers python:sqlalchemycmd.CreateClassFromType;
+
+
+/** 
+ * 型名を引数とし、それらと対応したPythonクラスがある場合、それに対するテーブルを作成する。
+ */
+command map-table [string] :: void -> void
+    reads schema
+    uses sqlalchemy
+    refers python:sqlalchemycmd.MapAllTables;
+
 

@@ -1,3 +1,4 @@
+#coding: utf-8
 from caty.core.facility import Facility, READ
 from caty.core.typeinterface import dereference
 try:
@@ -60,13 +61,37 @@ else:
         def generate_py_class(self, name, object_type):
             buff = []
             _ = buff.append
+            _(u'from sqlalchemy.ext.declarative import declarative_base')
+            _(u'from sqlalchemy import *')
+            _(u'from sqlalchemy.orm import *')
             _(u'from string import Template')
             _(u'from caty.util.collection import conditional_dict')
-            _(u'class %s(object):' % name)
+            _(u'Base = declarative_base()')
+            _(u'class %s(Base):' % name)
+            _(u'    __tablename__ = "%s"' % name)
+            # optionalなプロパティの初期値はNoneになるが、これは型エラーを引き起こす。
+            # DBにおいてnullableなプロパティを記録しておき、JSON変換時に適宜undefinedにする。
             _(u'    __nullable__ = set()')
             for k, v in object_type.items():
                 if v.optional:
                     _(u'    __nullable__.add("%s")' % k)
+            for k, v in object_type.items():
+                nullable = 'False'
+                primary_key = 'False'
+                if v.optional:
+                    v = dereference(v, reduce_option=True)
+                    nullable = 'True'
+                if 'primary-key' in v.annotations:
+                    primary_key = 'True'
+                if v.type == 'string':
+                    t = 'String'
+                elif v.type == 'integer':
+                    t = 'Integer'
+                elif v.type == 'number':
+                    t = 'Numeric'
+                else:
+                    throw_caty_exception(u'NotImplemented', v.type)
+                _("    %s = Column('%s', %s, primary_key=%s, nullable=%s)" % (k, k, t, primary_key, nullable))
             init = []
             __ = init.append
             __(u'    def __init__(self')
@@ -116,31 +141,7 @@ else:
             _(u'        })')
             return u'\n'.join(buff)
 
-        def generate_table(self, name, modname, object_type):
-            gdict = {'__file__': __file__}
-            exec 'from %s import %s as target_cls' % (modname, name) in gdict
-            cls = gdict['target_cls']
-            metadata = MetaData()
-            cols = []
-            for k, v in object_type.items():
-                nullable = False
-                primary_key = False
-                if v.optional:
-                    v = dereference(v, reduce_option=True)
-                    nullable = True
-                if 'primary-key' in v.annotations:
-                    primary_key = True
-                if v.type == 'string':
-                    t = String
-                elif v.type == 'integer':
-                    t = Integer
-                elif v.type == 'number':
-                    t = Numeric
-                else:
-                    throw_caty_exception(u'NotImplemented', v.type)
-                cols.append(Column(k, t, primary_key=primary_key, nullable=nullable))
-            tbl = Table(name, metadata, *cols)
-            metadata.create_all(self.engine)
-            mapper(cls, tbl)
-
+        def create_table(self, cls):
+            cls.metadata.create_all(self.engine)
+        
 
