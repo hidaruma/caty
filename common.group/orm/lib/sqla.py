@@ -61,7 +61,12 @@ else:
             buff = []
             _ = buff.append
             _(u'from string import Template')
+            _(u'from caty.util.collection import conditional_dict')
             _(u'class %s(object):' % name)
+            _(u'    __nullable__ = set()')
+            for k, v in object_type.items():
+                if v.optional:
+                    _(u'    __nullable__.add("%s")' % k)
             init = []
             __ = init.append
             __(u'    def __init__(self')
@@ -83,6 +88,7 @@ else:
             _(u''.join(init))
             for k, v in object_type.items():
                 _('        self.%s = %s' % (k, k))
+            _(u'')
             rep = []
             __ = rep.append
             _(u'    def __repr__(self):')
@@ -102,6 +108,12 @@ else:
             rep.pop(-1)
             __(u'))')
             _(u''.join(rep))
+            _(u'')
+            _(u'    def to_json(self):')
+            _(u'        return conditional_dict(lambda k, v: not(v is None and k in self.__nullable__), {')
+            for k, v in object_type.items():
+                _('            "%s": self.%s,' % (k, k))
+            _(u'        })')
             return u'\n'.join(buff)
 
         def generate_table(self, name, modname, object_type):
