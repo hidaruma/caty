@@ -16,7 +16,7 @@ class FileStorageConnection(object):
         self.data_dir = data_dir
         self._data_map = {'apps': {}, 'global': {}}
 
-    def _load(self, app_name, collection_name, schema_name):
+    def _load(self, app_name, collection_name):
         if app_name:
             if not app_name in self._data_map['apps']:
                 self._data_map['apps'][app_name] = {}
@@ -29,7 +29,7 @@ class FileStorageConnection(object):
                 self._data_map['global'][collection_name] = stdjson.loads(open(path).read())
 
     def create_collection(self, app_name, collection_name, schema_name):
-        self._load(app_name, collection_name, schema_name)
+        self._load(app_name, collection_name)
         if app_name:
             if collection_name in self._data_map['apps'][app_name]:
                 return
@@ -38,6 +38,19 @@ class FileStorageConnection(object):
             if collection_name in self._data_map['global']:
                 return
             self._data_map['global'][collection_name] = {'app': app_name, 'schema': schema_name, 'collection_name': collection_name, 'data': []}
+
+    def load_collection(self, app_name, collection_name):
+        self._load(app_name, collection_name)
+        return self.get_collection(app_name, collection_name)
+
+    def get_collection(self, app_name, collection_name):
+        if app_name:
+            return self._data_map['apps'][app_name][collection_name]
+        else:
+            return self._data_map['global'][collection_name]
+
+    def insert(self, app_name, collection_name, obj):
+        self.get_collection(app_name, collection_name)['data'].append(obj)
 
     def commit(self):
         for tbl_name, tbl_data in self._data_map['global'].items():
@@ -69,7 +82,38 @@ class CollectionFactory(object):
 
 
 class CollectionManipulator(object):
-    pass
+    def __init__(self, conn, finder, collection_name, app_name='', current_app=None):
+        self._conn = conn
+        self._finder = finder
+        self._app = current_app
+        self._collection_name = collection_name
+        self._current_app_name = current_app.name if current_app else u''
+        self._app_name = app_name if app_name else self._current_app_name
+        self._schema = self._load_schema()
+        assert self._schema, (repr(self._schema), collection_name)
+
+    def _load_schema(self):
+        r = self._conn.load_collection(self._app_name, self._collection_name)
+        try:
+            sn = r['schema']
+            ap = r['app']
+            if not ap:
+                return self._finder.get_type(sn)
+            else:
+                return self._finder.get_type(ap + '::' + sn)
+        except:
+            return None
+
+    @property
+    def schema(self):
+        return self._schema
+
+    def insert(self, obj):
+        self._conn.insert(self._app_name, self._collection_name, obj)
+
+    def select(self, obj, limit=-1, offset=0, reverse=False):
+        for v in self._select(obj, limit, offset, reverse):
+            yield self._convert(v)
 
 def collections(conn):
     for r, d, f in os.walk(conn):
