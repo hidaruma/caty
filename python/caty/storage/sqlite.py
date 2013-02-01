@@ -46,7 +46,6 @@ def initialize(config):
     u"""コレクションとトリガーの作成を行う。
     サイト初期化時に一度呼べば良く、また既にDBが作成されている場合は処理を行わないものとする。
     """
-    import caty.storage.sqlite
     path = config['path']
     conn = sqlite3.connect(path)
     conn.execute("""create table if not exists collection_schema_matching (
@@ -59,112 +58,6 @@ def initialize(config):
     conn.commit()
     return StorageModuleWrapper(caty.storage.sqlite, config)
     
-
-from caty.core.facility import Facility, AccessManager, READ
-class StorageModuleWrapper(Facility):
-    def __init__(self, mod, conf, mode=READ):
-        self._mod = mod
-        self._storage_class = mod.JsonStorage
-        self._conf = conf
-        self._conn = None
-        self._storage = None
-        self._schema_module = None
-        self._collection_name = None
-        self.application = None
-        Facility.__init__(self, mode)
-
-    def set_finder(self, finder):
-        self._schema_module = finder
-        return self
-
-    def start(self):
-        n = self.clone()
-        n._connect()
-        return n
-
-    def clone(self):
-        new = StorageModuleWrapper(self._mod, self._conf, self.mode)
-        new._conn = self._conn
-        new._schema_module = self._schema_module
-        new.application = self.application
-        return new
-
-    def _connect(self):
-        self._conn = self._mod.connect(self._conf)
-
-    def commit(self):
-        self._conn.commit()
-
-    def cancel(self):
-        self._conn.rollback()
-
-    def __call__(self, collection_name, app_name=''):
-        current_app_name = self.application.name
-        smw = self.clone()
-        smw._storage = smw._storage_class(self._conn, self._schema_module, collection_name, app_name, current_app_name)
-        smw._collection_name = collection_name
-        return smw
-
-    am = AccessManager()
-
-    @am.update
-    def create_collection(self, schema_name, global_collection=False):
-        return self._storage.factory.create(schema_name, global_collection)
-
-    @am.update
-    def drop(self):
-        return self._storage.manipulator.drop()
-
-    @am.update
-    def insert(self, obj):
-        return self._storage.manipulator.insert(obj)
-
-    @am.read
-    def select(self, obj=TagOnly('_ANY'), limit=-1, start=0, reverse=False):
-        return self._storage.manipulator.select(obj, limit, start, reverse)
-
-    @am.read
-    def select1(self, obj):
-        return self._storage.manipulator.select1(obj)
-
-    @am.update
-    def delete(self, obj):
-        return self._storage.manipulator.delete(obj)
-
-    @am.update
-    def update(self, oldobj, newobj):
-        return self._storage.manipulator.update(oldobj, newobj)
-
-    @am.read
-    def dump(self):
-        return self._storage.manipulator.dump()
-
-    @am.update
-    def restore(self, objects):
-        return self._storage.manipulator.restore(objects)
-
-    @property
-    def schema(self):
-        return self._storage.manipulator.schema
-
-    @property
-    def collections(self):
-        return list(self._storage_class.collections(self._conn))
-
-class NullStorage(object):
-    def create(self, mode, user_param):
-        raise InternalException(u'JSON storage is not configured')
-
-    def connect(self):
-        return self
-
-    def commit(self):
-        pass
-
-    def cancel(self):
-        pass
-
-
 import string
 num = frozenset(list(string.digits))
 def path_matches(path, pattern):
@@ -499,12 +392,12 @@ class CollectionManipulator(object):
     u"""JSON ストレージ操作のフロントエンド。
     他のモジュールからはこのオブジェクトだけを通じて JSON ストレージの操作を行う。
     """
-    def __init__(self, conn, finder, collection_name, app_name='', current_app_name=''):
+    def __init__(self, conn, finder, collection_name, app_name='', current_app=None):
         self._conn = conn
         self._finder = finder
         self._collection_name = collection_name
-        self._app_name = app_name if app_name else current_app_name
-        self._current_app_name = current_app_name
+        self._current_app_name = current_app.name if current_app else u''
+        self._app_name = app_name if app_name else self._current_app_name
         self._schema = self._load_schema(app_name)
         self._app_collection_pair = self._load_collection_name()
         assert self._schema, (repr(self._schema), collection_name)
@@ -713,12 +606,12 @@ class CollectionManipulator(object):
 
 
 class CollectionFactory(object):
-    def __init__(self, conn, finder, collection_name, app_name='', current_app_name=''):
+    def __init__(self, conn, finder, collection_name, app_name='', current_app=None):
         self._conn = conn
         self._finder = finder
         self._collection_name = collection_name
-        self._app_name = app_name if app_name else current_app_name
-        self._current_app_name = current_app_name
+        self._current_app_name = current_app.name if current_app else u''
+        self._app_name = app_name if app_name else self._current_app_name
 
     def create(self, schema_name, global_collection=False):
         u"""コレクション名とスキーマ名の対応表に新たな値を作り、
@@ -737,26 +630,7 @@ class CollectionFactory(object):
         query = qb.create_collection()
         c.execute(query)
 
-class JsonStorage(CollectionFactory, CollectionManipulator):
-    def __init__(self, *args, **kwds):
-        self.__args = args
-        self.__kwds = kwds
-        self.__initialized = False
 
-    @property
-    def manipulator(self):
-        if not self.__initialized:
-            CollectionManipulator.__init__(self, *self.__args, **self.__kwds)
-        return self
-
-    @property
-    def factory(self):
-        CollectionFactory.__init__(self, *self.__args, **self.__kwds)
-        return self
-
-    @classmethod
-    def collections(cls, conn):
-        return collections(conn)
 
 
 def construct_object(values):

@@ -32,6 +32,6 @@ command create-class-from-type {"debug": boolean?}  [string] :: void -> void
 command map-table [string] :: void -> void
     reads schema
     uses sqlalchemy
-    refers python:sqlalchemycmd.MapAllTables;
+    refers python:sqlalchemycmd.MapTable;
 
 
