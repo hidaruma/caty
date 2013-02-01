@@ -630,9 +630,6 @@ class CollectionFactory(object):
         query = qb.create_collection()
         c.execute(query)
 
-
-
-
 def construct_object(values):
     d = {}
     ids = []
@@ -648,5 +645,5 @@ def collections(conn):
     c = conn.cursor()
     c.execute('select * from collection_schema_matching')
     for r in c.fetchall():
-        yield {'collection_name': r['logical_name'], 'schema': r['schema'], 'app': r['app']}
+        yield {'collectionName': r['logical_name'], 'schema': r['schema'], 'appName': r['app']}
 

@@ -52,14 +52,7 @@ def _cmp_dict(a, b, f):
 class List(Builtin):
 
     def execute(self):
-        r = []
-        for x in self.storage.collections:
-            r.append({
-                'collectionName': x['collection_name'],
-                'schema': x['schema'],
-                'appName': x['app'],
-                })
-        return r
+        return self.storage.collections
 
 class Select(Builtin, StorageAccessor):
 
@@ -151,9 +144,9 @@ class Dump(Builtin, StorageAccessor):
 
     def execute(self):
         for t in self.storage.collections:
-            if t['collection_name'] == self._collection_name:
-                storage = self.storage(t['collection_name'])
-                return {'collectionName': unicode(t['collection_name']),
+            if t['collectionName'] == self._collection_name:
+                storage = self.storage(t['collectionName'])
+                return {'collectionName': unicode(t['collectionName']),
                         'schema': unicode(t['schema']),
                         'data':list(storage.dump())}
 

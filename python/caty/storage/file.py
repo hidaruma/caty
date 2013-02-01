@@ -135,6 +135,8 @@ class CollectionManipulator(object):
                     break
                 else:
                     r.append(d)
+        if reverse:
+            r.reverse()
         return iter(r)
 
     def _match(self, obj, queries):
@@ -202,7 +204,7 @@ class CollectionManipulator(object):
         data[pos] = newobj
 
     def dump(self):
-        return self._conn.get_collection(self._app_name, self._collection_name)
+        return self._conn.get_collection(self._app_name, self._collection_name)['data']
 
     def restore(self, objects):
         col = self._conn.get_collection(self._app_name, self._collection_name)
@@ -213,10 +215,10 @@ class CollectionManipulator(object):
         return self._schema
 
 def collections(conn):
-    for r, d, f in os.walk(conn):
+    for r, d, f in os.walk(conn.data_dir):
         for e in f:
             if e.endswith('.json'):
-                o = stdjson.read(open(r + e).read())
+                o = stdjson.loads(open(os.path.join(r, e)).read())
                 yield {
                     'collectionName': o['collectionName'],
                     'schema': o['schema'],
