@@ -1,6 +1,6 @@
 # coding: utf-8
 import os
-from caty.jsontools import prettyprint
+from caty.jsontools import prettyprint, TaggedValue, TagOnly
 import caty.jsontools.stdjson as stdjson
 
 def initialize(conf):
@@ -33,11 +33,14 @@ class FileStorageConnection(object):
         if app_name:
             if collection_name in self._data_map['apps'][app_name]:
                 return
-            self._data_map['apps'][app_name][collection_name] = {'app': app_name, 'schema': schema_name, 'collection_name': collection_name, 'data': []}
+            self._data_map['apps'][app_name][collection_name] = {'appName': app_name, 'schema': schema_name, 'collectionName': collection_name, 'data': []}
         else:
             if collection_name in self._data_map['global']:
                 return
-            self._data_map['global'][collection_name] = {'app': app_name, 'schema': schema_name, 'collection_name': collection_name, 'data': []}
+            self._data_map['global'][collection_name] = {'appName': app_name, 'schema': schema_name, 'collectionName': collection_name, 'data': []}
+
+    def drop(self, app_name, collection_name):
+        self.get_collection(app_name, collection_name)['delete'] = True
 
     def load_collection(self, app_name, collection_name):
         self._load(app_name, collection_name)
@@ -54,13 +57,20 @@ class FileStorageConnection(object):
 
     def commit(self):
         for tbl_name, tbl_data in self._data_map['global'].items():
-            open(self.data_dir + '/' + tbl_name + '.json', 'wb').write(prettyprint(tbl_data))
+            path = self.data_dir + '/' + tbl_name + '.json'
+            if tbl_data.get('delete') and os.path.exists(path):
+                os.unlink(path)
+            else:
+                open(path, 'wb').write(prettyprint(tbl_data))
 
         for app_name, tbl_map in self._data_map['apps'].items():
             for tbl_name, tbl_data in tbl_map.items():
-                if not os.path.exists(self.data_dir + '/' + app_name + '/'):
-                    os.mkdir(self.data_dir + '/' + app_name + '/')
-                open(self.data_dir + '/' + app_name + '/' + tbl_name + '.json', 'wb').write(prettyprint(tbl_data))
+                path = self.data_dir + '/' + app_name + '/' + tbl_name + '.json'
+                if tbl_data.get('delete') and os.path.exists(path):
+                    os.unlink(path)
+                    if not os.path.exists(self.data_dir + '/' + app_name + '/'):
+                        os.mkdir(self.data_dir + '/' + app_name + '/')
+                    open(path, 'wb').write(prettyprint(tbl_data))
 
     def rollback(self):
         self._data_map = {'apps': {}, 'global': {}}
@@ -96,7 +106,7 @@ class CollectionManipulator(object):
         r = self._conn.load_collection(self._app_name, self._collection_name)
         try:
             sn = r['schema']
-            ap = r['app']
+            ap = r['appName']
             if not ap:
                 return self._finder.get_type(sn)
             else:
@@ -108,12 +118,99 @@ class CollectionManipulator(object):
     def schema(self):
         return self._schema
 
+    def drop(self):
+        sefl._conn.drop(self._app_name, self._collection_name)
+
     def insert(self, obj):
         self._conn.insert(self._app_name, self._collection_name, obj)
 
     def select(self, obj, limit=-1, offset=0, reverse=False):
-        for v in self._select(obj, limit, offset, reverse):
-            yield self._convert(v)
+        data = self._conn.get_collection(self._app_name, self._collection_name)['data']
+        r = []
+        for d in data:
+            if self._match(d, obj):
+                if offset:
+                    offset-=1
+                elif limit != -1 and len(r) >= limit:
+                    break
+                else:
+                    r.append(d)
+        return iter(r)
+
+    def _match(self, obj, queries):
+        if not queries:
+            queries = {}
+        if not isinstance(queries, dict):
+            return self._process_query(obj, queries)
+        for k, q in queries.items():
+            if k not in obj:
+                return False
+            v = obj[k]
+            if not self._process_query(v, q):
+                return False
+        return True
+
+    def _process_query(self, val, query):
+        if isinstance(query, (TagOnly, TaggedValue)):
+            if query.tag == '_NOT_NULL':
+                return val is not None
+            elif query.tag == '_ANY':
+                return True
+            elif query.tag == '_LT':
+                return val < query.value
+            elif query.tag == '_LE':
+                return val <= query.value
+            elif query.tag == '_GT':
+                return val > query.value
+            elif query.tag == '_GE':
+                return val >= query.value
+            elif query.tag == '_CONTAINS':
+                return any(map(lambda v: self._process_query(v, query.value), val))
+            elif query.tag == '_EACH':
+                return all(map(lambda v: self._process_query(v, query.value), val))
+            elif query.tag == '_OR':
+                return any(map(lambda v: self._process_query(val, v), query.value))
+            elif query.tag == '_AND':
+                return all(map(lambda v: self._process_query(val, v), query.value))
+            elif query.tag == '_LIKE':
+                import re
+                ptn = re.compile(query.value
+                                .replace('.', '\\.')
+                                .replace('*', '.*')
+                                .replace('%', '.*')
+                                .replace('?', '.')
+                                .replace('_', '.')
+                                .replace('#', '[0-9]')
+                                .replace('[!', '[^'))
+                return ptn.match(val)
+            elif query.tag == '_BETWEEN':
+                return query.value[0] <= val < query.value[1]
+        else:
+            return val == query
+
+    def select1(self, obj):
+        v = list(self.select(obj))
+        assert len(v) == 1
+        return v[0]
+
+    def delete(self, obj):
+        self._conn.get_collection(self._app_name, self._collection_name)['data'].remove(obj)
+
+    def update(self, oldobj, newobj):
+        data = self._conn.get_collection(self._app_name, self._collection_name)['data']
+        pos = data.index(oldobj)
+        data[pos] = newobj
+
+    def dump(self):
+        return self._conn.get_collection(self._app_name, self._collection_name)
+
+    def restore(self, objects):
+        col = self._conn.get_collection(self._app_name, self._collection_name)
+        col.update(objects)
+
+    @property
+    def schema(self):
+        return self._schema
 
 def collections(conn):
     for r, d, f in os.walk(conn):
@@ -121,8 +218,8 @@ def collections(conn):
             if e.endswith('.json'):
                 o = stdjson.read(open(r + e).read())
                 yield {
-                    'collection_name': e.rsplit('.', 1)[0].replace('/', ':'),
+                    'collectionName': o['collectionName'],
                     'schema': o['schema'],
-                    'app': o['app']
+                    'appName': o['appName']
                 }
 
