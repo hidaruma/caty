@@ -56,7 +56,6 @@ def initialize(config):
     )
     """)
     conn.commit()
-    return StorageModuleWrapper(caty.storage.sqlite, config)
     
 import string
 num = frozenset(list(string.digits))

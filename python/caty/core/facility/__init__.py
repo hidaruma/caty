@@ -289,6 +289,8 @@ class TransactionAdaptor(Command):
             self.commit()
             raise
         except:
+            import traceback
+            traceback.print_exc()
             self.cancel()
             raise
         finally:

@@ -68,9 +68,9 @@ class FileStorageConnection(object):
                 path = self.data_dir + '/' + app_name + '/' + tbl_name + '.json'
                 if tbl_data.get('delete') and os.path.exists(path):
                     os.unlink(path)
-                    if not os.path.exists(self.data_dir + '/' + app_name + '/'):
-                        os.mkdir(self.data_dir + '/' + app_name + '/')
-                    open(path, 'wb').write(prettyprint(tbl_data))
+                if not os.path.exists(self.data_dir + '/' + app_name + '/'):
+                    os.mkdir(self.data_dir + '/' + app_name + '/')
+                open(path, 'wb').write(prettyprint(tbl_data))
 
     def rollback(self):
         self._data_map = {'apps': {}, 'global': {}}
