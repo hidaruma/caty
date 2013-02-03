@@ -21,3 +21,88 @@ null, true, falseという名前はデータリテラルとして使えるが、
 ==  拡張子登録がしてないとバイナリファイルとみなされる
 
 テンプレートとの組み合わせでハマルぞ。
+
+== アプリケーションが初期化されてないと不可解なエラーとなることがある。
+
+{{{
+caty:root> strg:dump person
+Traceback (most recent call last):
+  File "./python\caty\core\facility\__init__.py", line 285, in __call__
+    r = self._command(input)
+  File "./python\caty\core\script\interpreter\executor.py", line 37, in __call__
+
+    return self.cmd.accept(self)
+  File "./python\caty\core\command\__init__.py", line 321, in accept
+    return visitor.visit_command(self)
+  File "./python\caty\core\script\interpreter\executor.py", line 53, in visit_co
+mmand
+    return self._exec_command(node, self._do_command)
+  File "./python\caty\core\script\interpreter\executor.py", line 133, in _exec_c
+ommand
+    r = exec_func(node)
+  File "./python\caty\core\script\interpreter\executor.py", line 60, in _do_comm
+and
+    return args[0].execute()
+  File "./python\caty\core\std\command\strg.py", line 151, in execute
+    'data':list(storage.dump())}
+  File "./python\caty\core\facility\__init__.py", line 157, in <lambda>
+    property.__init__(self, lambda name: lambda obj, *args, **kwds: self.execute
+(obj, name, *args, **kwds))
+  File "./python\caty\core\facility\__init__.py", line 180, in execute
+    return fun(obj, *args, **kwds)
+  File "./python\caty\storage\__init__.py", line 113, in dump
+    return self._storage.manipulator.dump()
+  File "./python\caty\storage\__init__.py", line 24, in manipulator
+    self.__manipulator = mod.CollectionManipulator(*self.__args, **self.__kwds)
+  File "./python\caty\storage\file.py", line 102, in __init__
+    self._schema = self._load_schema()
+  File "./python\caty\storage\file.py", line 106, in _load_schema
+    r = self._conn.load_collection(self._app_name, self._collection_name)
+  File "./python\caty\storage\file.py", line 47, in load_collection
+    return self.get_collection(app_name, collection_name)
+  File "./python\caty\storage\file.py", line 51, in get_collection
+    return self._data_map['apps'][app_name][collection_name]
+KeyError: u'person'
+Traceback (most recent call last):
+  File "./python\caty\front\console.py", line 322, in default
+    r = c(None)
+  File "./python\caty\core\facility\__init__.py", line 285, in __call__
+    r = self._command(input)
+  File "./python\caty\core\script\interpreter\executor.py", line 37, in __call__
+
+    return self.cmd.accept(self)
+  File "./python\caty\core\command\__init__.py", line 321, in accept
+    return visitor.visit_command(self)
+  File "./python\caty\core\script\interpreter\executor.py", line 53, in visit_co
+mmand
+    return self._exec_command(node, self._do_command)
+  File "./python\caty\core\script\interpreter\executor.py", line 133, in _exec_c
+ommand
+    r = exec_func(node)
+  File "./python\caty\core\script\interpreter\executor.py", line 60, in _do_comm
+and
+    return args[0].execute()
+  File "./python\caty\core\std\command\strg.py", line 151, in execute
+    'data':list(storage.dump())}
+  File "./python\caty\core\facility\__init__.py", line 157, in <lambda>
+    property.__init__(self, lambda name: lambda obj, *args, **kwds: self.execute
+(obj, name, *args, **kwds))
+  File "./python\caty\core\facility\__init__.py", line 180, in execute
+    return fun(obj, *args, **kwds)
+  File "./python\caty\storage\__init__.py", line 113, in dump
+    return self._storage.manipulator.dump()
+  File "./python\caty\storage\__init__.py", line 24, in manipulator
+    self.__manipulator = mod.CollectionManipulator(*self.__args, **self.__kwds)
+  File "./python\caty\storage\file.py", line 102, in __init__
+    self._schema = self._load_schema()
+  File "./python\caty\storage\file.py", line 106, in _load_schema
+    r = self._conn.load_collection(self._app_name, self._collection_name)
+  File "./python\caty\storage\file.py", line 47, in load_collection
+    return self.get_collection(app_name, collection_name)
+  File "./python\caty\storage\file.py", line 51, in get_collection
+    return self._data_map['apps'][app_name][collection_name]
+KeyError: u'person'
+
+u'person'
+caty:root>
+}}}

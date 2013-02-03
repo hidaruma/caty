@@ -5,14 +5,15 @@
 
    "description": "Caty Core",
 
-   "dependencies": {
-     "python2": {
-        "requests": "=0.12.0",
-        "pygraphviz":"1.1",
-        "PIL": "1.1.7"
-     },
-     "caty-bootstrap": "*"
-   },
+ "dependencies": {
+    "python2": {
+      "PIL": "1.1.7",
+      "requests": ["~0.11", "~0.12", "1.1.0"],
+      "pygraphviz": "1.1"
+    },
+    "caty": {
+      "caty-bootstrap": "*"
+    },
 
    "maintainers": [
        {
