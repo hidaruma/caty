@@ -119,7 +119,7 @@ class CollectionManipulator(object):
         return self._schema
 
     def drop(self):
-        sefl._conn.drop(self._app_name, self._collection_name)
+        self._conn.drop(self._app_name, self._collection_name)
 
     def insert(self, obj):
         self._conn.insert(self._app_name, self._collection_name, obj)
