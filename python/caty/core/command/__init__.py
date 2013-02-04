@@ -64,9 +64,10 @@ class Command(object):
         self.__module = module
         self.applied = False
 
-    def _prepare(self):
+    def _prepare(self, force_arg0=UNDEFINED):
         self._prepare_opts()
         self._set_profile()
+        self._set_arg0(force_arg0)
         self._finish_opts()
         opts = self._opts
         args = self._args
@@ -149,6 +150,11 @@ class Command(object):
             self._in_schema = self.profile.in_schema
             self._out_schema = self.profile.out_schema
             self.__arg0_schema = self.profile.arg0_schema
+
+
+    def _set_arg0(self, force_arg0=UNDEFINED):
+        if force_arg0 is not UNDEFINED and not self.__arg0_ref:
+            self.__arg0 = force_arg0
 
     def apply_type_params(self, type_params):
         if not type_params:
@@ -391,7 +397,7 @@ class Syntax(Builtin):
     def __init__(self, opts_ref=None, args_ref=None, pos=(None, None), module=None):
         Builtin.__init__(self, opts_ref or [], args_ref or [], [], pos, module)
 
-    def _prepare(self):
+    def _prepare(self, ignore=UNDEFINED):
         self._set_profile()
 
 class Dummy(Command):
@@ -424,12 +430,13 @@ def scriptwrapper(profile, scriptfactory):
         def accept(self, visitor):
             return visitor.visit_script(self)
 
-        def _prepare(self):
+        def _prepare(self, force_arg0=UNDEFINED):
             self.script = self.scriptfactory() # 実体化は遅延して置かないと再帰コマンドの実体化ができない
             self.script.set_facility(self.facilities)
             self.script.set_var_storage(self.var_storage)
             self._prepare_opts()
             self._set_profile()
+            self._set_arg0(force_arg0)
             self._finish_opts()
 
         def set_var_storage(self, storage):

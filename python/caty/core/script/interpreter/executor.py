@@ -32,6 +32,7 @@ class CommandExecutor(BaseInterpreter):
 
     def __call__(self, input):
         self.input = input
+        self.arg0_stack = []
         while True:
             try:
                 return self.cmd.accept(self)
@@ -70,6 +71,7 @@ class CommandExecutor(BaseInterpreter):
             for k, v in opts.items():
                 o[k] = v
         node.var_storage.new_masked_scope(opts or {}, args or [])
+        print node.arg0, self.arg0_stack
         if opts:
             for k, v in opts.items():
                 node.var_storage.opts[k] = v
@@ -127,7 +129,10 @@ class CommandExecutor(BaseInterpreter):
                     )
         try:
             node.var_storage.new_scope()
-            node._prepare()
+            if self.arg0_stack:
+                node._prepare(self.arg0_stack[-1])
+            else:
+                node._prepare()
             if node.profile.in_schema.type == 'void':
                 self.input = None
                 r = exec_func(node)
@@ -245,6 +250,8 @@ class CommandExecutor(BaseInterpreter):
         r = caty.UNDEFINED
         if node.var_name in node.var_storage.opts:
             r = node.var_storage.opts[node.var_name]
+        elif node.var_name == '0' and self.arg0_stack: #メソッドチェイン内部0への参照
+            r = self.arg0_stack[-1]
         else:
             if self.facility_set['env'].exists(node.var_name):
                 r = self.facility_set['env'].get(node.var_name)
@@ -588,6 +595,14 @@ class CommandExecutor(BaseInterpreter):
 
     def visit_empty(self, node):
         node._prepare()
+        return self.input
+
+    def visit_method_chain(self, node):
+        node._prepare()
+        self.arg0_stack.append(self.input)
+        self.input = None
+        self.input = node.pipeline.accept(self)
+        self.arg0_stack.pop(0)
         return self.input
 
     @property

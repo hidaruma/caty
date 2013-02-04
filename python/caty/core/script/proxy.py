@@ -603,6 +603,16 @@ class EmptyProxy(Proxy):
     def set_module(self, module):
         pass
 
+class MethodChainProxy(Proxy):
+    def __init__(self, pipeline):
+        self.pipeline = pipeline
+
+    def instantiate(self, builder):
+        return MethodChain(self.pipeline.instantiate(builder))
+
+    def set_module(self, module):
+        self.pipeline.set_module(module)
+
 def combine_proxy(args):
     return reduce(CombinatorProxy, args)
 

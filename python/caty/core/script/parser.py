@@ -35,6 +35,7 @@ from caty.core.script.proxy import UncloseProxy as Unclose
 from caty.core.script.proxy import ChoiceBranchProxy as ChoiceBranch
 from caty.core.script.proxy import ChoiceBranchItemProxy as ChoiceBranchItem
 from caty.core.script.proxy import EmptyProxy as Empty
+from caty.core.script.proxy import MethodChainProxy as MethodChain
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
@@ -44,7 +45,12 @@ from caty.core.language.util import fragment_name, identifier_token_a, name_toke
 from caty.jsontools.selector.parser import JSONPathSelectorParser
 import caty
 
-_OPERATORS = ['>@', '>:', '>', ';', '||', '|&', '|>', '|=', '|', ';;']
+def method_chain(seq):
+    S('.')(seq)
+    S('{')(seq)
+    return '.{'
+
+_OPERATORS = ['>@', '>:', '>', ';', '||', '|&', '|>', '|=', '|', ';;', method_chain]
 
 class NothingTodo(Exception):
     u"""コメントのみの入力など、何もしないときのシグナル
@@ -238,6 +244,10 @@ class ScriptParser(Parser):
             elif a == '>':
                 n = seq.parse(self.name)
                 r.append(VarStore(n))
+            elif a == '.{':
+                pipe = self.make_pipeline(seq)
+                S('}')(seq)
+                r.append(MethodChain(pipe))
             else:
                 raise ParseFailed(seq, '`%s` is reserved token' % a)
         return combine_proxy(r)

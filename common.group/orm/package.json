@@ -27,7 +27,7 @@
   "dependencies": {
        "caty": { "minimum-caty": ">=0.0.0" },
        "python2": {
-            "SQLAlchemy": ">=0.6.0"
+            "SQLAlchemy": ">=0.8.0"
         }
    },
    "os": ["linux", "macos", "win"],

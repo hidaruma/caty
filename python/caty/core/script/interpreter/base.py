@@ -79,3 +79,6 @@ class BaseInterpreter(object):
 
     def visit_empty(self, node):
         raise NotImplementedError(u'{0}#visit_empty'.format(self.__class__.__name__))
+
+    def visit_method_chain(self, node):
+        raise NotImplementedError(u'{0}#visit_method_chain'.format(self.__class__.__name__))

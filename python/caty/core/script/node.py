@@ -749,3 +749,26 @@ class Empty(Syntax):
 
     def accept(self, visitor):
         return visitor.visit_empty(self)
+
+
+class MethodChain(Syntax):
+    command_decl = u"""command __method_chain<T default univ> :: Moniker -> T
+                        refers python:caty.core.script.node.MethodChain;"""
+
+    def __init__(self, pipeline):
+        Syntax.__init__(self)
+        self.pipeline = pipeline
+
+    def set_facility(self, facilities, ignore=None):
+        self.pipeline.set_facility(facilities)
+
+    def _prepare(self):
+        Command._prepare(self)
+
+    def accept(self, visitor):
+        return visitor.visit_method_chain(self)
+
+    @property
+    def out_schema(self):
+        return self.pipeline.out_schema
+

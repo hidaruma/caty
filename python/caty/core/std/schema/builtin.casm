@@ -628,6 +628,10 @@ type UncloseInputArr = [
 
 ];
 
+type Moniker = {
+    "className": string,
+    "state": univ,
+};
 
 /**********************
  ******** 例外 ********
