@@ -8,11 +8,12 @@ type SQLAlchemyConfig = {
     *: string | number | boolean,
 };
 
-facility SQLAlchemy(null) along SQLAlchemyConfig
+facility SQLAlchemy(null) configured SQLAlchemyConfig
     conforms SQLAlchemy
     refers python:sqla.SQLAlchemyWrapper;
 
-entity sqlalchemy = SQLAlchemy(null);
+@[master]
+entity sqlalchemy = SQLAlchemy(null) conforms SQLAlchemy;
 
 /** 
  * 型名を元にテーブルと対応するマッピングオブジェクトを生成する。

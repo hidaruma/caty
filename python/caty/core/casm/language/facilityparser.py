@@ -31,7 +31,7 @@ def _facility(seq):
         return FacilityNode(n, clsname, sys_param_type, config_type, indices_type, doc, a)
 
 def parse_config_type(seq):
-    keyword(u'along')(seq)
+    keyword(u'configured')(seq)
     return typedef(seq)
 
 def parse_indices_type(seq):
@@ -74,5 +74,6 @@ def _entity(seq):
     S(u'(')(seq)
     value = choice(_undefined, xjson.parse)(seq) # undefinedとxjsonだけの出現を確認する
     S(u')')(seq)
+    _ = option(parse_indices_type)(seq)
     _ = seq.parse(';')
     return EntityNode(n, ename, value, doc, a)
