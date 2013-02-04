@@ -15,21 +15,36 @@
 # install_target_short -- prj, glb, app のどれか
 
 
-function debug { # (mesg) => STDOUT
- if [ -z "$DEBUG" -o -z "$1" ]; then
-     : # dot nothing
- else
-     echo "DEBUG:" $1 >&2
- fi
+function debug { # (msg) => STDERR
+    local msg=$1
+
+    if [ -z "$DEBUG" -o -z "$msg" ]; then
+	: # dot nothing
+    else
+	echo "DEBUG:" $msg >&2
+    fi
 }
 
-function debug_exit {
+function debug_exit { # () => NEVER
  if [ -z "$DEBUG" ]; then
      : # dot nothing
  else
      echo "DEBUG: exit" >&2
      exit 0
  fi
+}
+
+function error_exit { # (msg) => VOID
+    local msg=$1
+
+    echo "ERROR:" $msg >&2
+    exit 1
+}
+
+function warn { # (msg) => VOID
+    local msg=$1
+
+    echo "WARNING:" $msg >&2
 }
 
 
@@ -108,14 +123,14 @@ function make_archive_name { # (proddef_dir, install_target_suffix) => *STDOUT*
     if [ ! -f $proddef_dir/SemVer.txt ]; then
 	echo 0.0.0> $proddef_dir/SemVer.txt
     fi
-    local semver=$(cat $proddef_dir/SemVer.txt)
-   debug "make_archive_name: semver=$semver"
+    local version=$(make_version $proddef_dir)
+    debug "make_archive_name: version=$version"
 
     prod=$(echo $proddef_dir | sed -e 's@/$@@' -e 's@^.*/@@')
     debug "make_archive_name: proddef_dir=$proddef_dir"
     debug "make_archive_name: prod=$prod"
 
-    echo ${prod}_$semver.$install_target_suffix.zip
+    echo ${prod}_$version.$install_target_suffix.zip
 }
 
 

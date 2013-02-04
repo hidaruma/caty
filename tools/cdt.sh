@@ -19,7 +19,7 @@ source $caty_home/tools/functions.sh
 
 # ==== script body ====
 
-# アプリケーションフィーチャのインストールが出来ない??
+# ?? アプリケーションフィーチャのインストールが出来ない??
 
 
 ## 配布パッケージ種別ごとに、すべての配布パッケージをリスとする
@@ -36,8 +36,7 @@ function list_dists { # (dest_type) => *STDOUT*
        SUBEXT=caty-app
        ;;
      *)
-       echo "list requires (project|prj|global|glb|application|app)"
-       exit 1
+       error_exit "this function requires (project|prj|global|glb|application|app)"
        ;;
     esac
 
@@ -57,57 +56,23 @@ function exists_dist_file { # (dist_file) => *STATUS*
     fi
 }
     
-function do_install { # (target, dist_file, project_dir, dest) => 
-    if [ -z "$2" ]; then
-	echo Usage: $0 install dist_file project_dir [target]
-	exit 1
-    fi
+function do_install { # (dest_type, dist_file, project_dir, dest) => 
+    local dest_type=$1
+    local dist_file=$2
+    local project_dir=$3
+    local dest=$4
 
-    target=$1
-    dist_file=$2
-    project_dir=$3
-    dest=$4
+    debug "dest_type=$dest_type, dist_file=$dist_file, project_dir=$project_dir, dest=$dest"
 
-    debug "target=$target, dist_file=$dist_file, project_dir=$project_dir, dest=$dest"
-
-
-    if [ -z "$target" ]; then
-	target=project
-    fi
-
-    case "$target" in
-     project|prj)
-       SUBEXT=caty-prj
-       dest=project
-       ;;
-     global|glb)
-       SUBEXT=caty-glb
-       dest=global
-       ;;
-     *)
-       SUBEXT=caty-app
-       dest=$dest
-       ;;
-     *)
-       echo "*** ERROR ***"
-       exit 1
-       ;;
-    esac
-
-#    archive=$caty_home/dists/$dist_file.$SUBEXT.zip
-    archive=$dist_file
-    if [ ! -f $archive ]; then
-	echo "Cannot find archive: $archive"
-	exit 1
+    if [ ! -f $dist_file ]; then
+	error_exit "Cannot find archive: $dist_file"
     fi
 
     if [ ! -d $project_dir ]; then
-	echo "Cannot find projct: $project_dir"
-	echo "creat it"
+	warn "Cannot find projct: $project_dir" $'\ncreat it'
 	mkdir $project_dir
 	if [ ! -d $project_dir ]; then
-	    echo "Failed to create $new_projct"
-	    exit 1
+	    error_exit "Failed to create $new_projct"
 	fi
     fi
 
@@ -125,7 +90,7 @@ function do_install { # (target, dist_file, project_dir, dest) =>
     echo	"--project=$project_dir "
     echo        "--log-dir=$project_dir/features/ --backup-dir=$project_dir/backup/ "
     echo	"--dest=$dest "
-    echo	"$archive"
+    echo	"$dist_file"
 
     debug_exit
 
@@ -133,7 +98,7 @@ function do_install { # (target, dist_file, project_dir, dest) =>
 	--project=$project_dir \
         --log-dir=$project_dir/features/ --backup-dir=$project_dir/backup/ \
 	--dest=$dest \
-	$archive
+	$dist_file
 }
 
 function cmd_error {
@@ -143,35 +108,49 @@ function cmd_error {
 }
 
 function usage {
-    echo "** Usage: $0 targetType distPackageFile destinationProjectDir [destinationAppName]"
+    echo "** Usage: $0 destinationType distPackageFile destinationProjectDir [destinationAppName]"
 }
-
-echo "!!! MAIN !!!"
 
 # ==== main ====
 
 if [ ! -f $caty_home/tools/caty-installer.py ]; then
-    echo "cannot find installer"
-    exit 1
+    error_exit "cannot find installer"
 fi
 
 if [ -z "$1" ]; then
     usage
     echo ""
-    echo "** targetType:"
+    echo "** destinationType:"
     echo "project | prj"
     echo "global | glb"
     echo "application | app"
 
     exit 1
 fi
-target=$1
+
+case "$1" in
+    project|prj)
+	SUBEXT=caty-prj
+	dest_type=prj
+       ;;
+    global|glb)
+	SUBEXT=caty-glb
+	dest_type=glb
+	;;
+    *)
+	SUBEXT=caty-app
+	dest_type=app
+	;;
+    *)
+	error_exit "Illegal destinationType"
+	;;
+esac
 
 if [ -z "$2" ]; then
     usage
     echo ""
     echo "** distPackageFile:"
-    list_dists $target
+    list_dists $dest_type
 
     exit 1
 fi
@@ -189,13 +168,22 @@ if [ -z "$3" ]; then
 fi
 project_dir=$3
 
-if [ -z "$4" ]; then
+debug "dest_type=$dest_type"
+if [ "$dest_type" = "app" -a -z "$4" ]; then
     usage
     exit 1
-else
-    dest=$4
 fi
+case $dest_type in
+    prj)
+	dest=project
+	;;
+    glb)
+	dest=global
+	;;
+    *)
+	dest=$4
+	;;
+esac
 
-do_install $target $dist_file $project_dir $dest
-
+do_install $dest_type $dist_file $project_dir $dest
 

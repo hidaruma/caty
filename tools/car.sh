@@ -3,7 +3,7 @@
 # car -- Caty Archiver
 
 DEFAULT_CATY_HOME=../caty
-function find_caty_home { # () => caty_home
+function find_caty_home { # () => $caty_home
     if [ -n "$CATY_HOME" ]; then
 	caty_home=$CATY_HOME
     elif [ -d $DEFAULT_CATY_HOME ]; then
@@ -15,9 +15,10 @@ function find_caty_home { # () => caty_home
 find_caty_home
 source $caty_home/tools/functions.sh
 
-# You can use functions in $caty_home/tools/functions.sh
+# You can use the functions in $caty_home/tools/functions.sh
 
-# ==== main ====
+# ==== script body ====
+
 
 function usage {
     echo "** Usage: $0 [option ...] origin prod"
