@@ -20,11 +20,15 @@ class FileStorageConnection(object):
         if app_name:
             if not app_name in self._data_map['apps']:
                 self._data_map['apps'][app_name] = {}
+            if collection_name in self._data_map['apps'][app_name]:
+                return
             path = self.data_dir + '/' + app_name + '/' + collection_name + '.json'
             if os.path.exists(path):
                 self._data_map['apps'][app_name][collection_name] = stdjson.loads(open(path).read())
         else:
             path = self.data_dir + '/' + collection_name + '.json'
+            if collection_name in self._data_map['global']:
+                return
             if os.path.exists(path):
                 self._data_map['global'][collection_name] = stdjson.loads(open(path).read())
 
@@ -68,9 +72,10 @@ class FileStorageConnection(object):
                 path = self.data_dir + '/' + app_name + '/' + tbl_name + '.json'
                 if tbl_data.get('delete') and os.path.exists(path):
                     os.unlink(path)
-                if not os.path.exists(self.data_dir + '/' + app_name + '/'):
-                    os.mkdir(self.data_dir + '/' + app_name + '/')
-                open(path, 'wb').write(prettyprint(tbl_data))
+                else:
+                    if not os.path.exists(self.data_dir + '/' + app_name + '/'):
+                        os.mkdir(self.data_dir + '/' + app_name + '/')
+                    open(path, 'wb').write(prettyprint(tbl_data))
 
     def rollback(self):
         self._data_map = {'apps': {}, 'global': {}}
@@ -119,7 +124,7 @@ class CollectionManipulator(object):
         return self._schema
 
     def drop(self):
-        sefl._conn.drop(self._app_name, self._collection_name)
+        self._conn.drop(self._app_name, self._collection_name)
 
     def insert(self, obj):
         self._conn.insert(self._app_name, self._collection_name, obj)

@@ -149,6 +149,7 @@ class Dump(Builtin, StorageAccessor):
                 return {'collectionName': unicode(t['collectionName']),
                         'schema': unicode(t['schema']),
                         'data':list(storage.dump())}
+        throw_caty_exception('CollectionNotFound', self._collection_name)
 
 class Restore(Builtin):
 
