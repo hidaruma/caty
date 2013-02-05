@@ -2,7 +2,7 @@ import sys
 import json
 import os
 
-BASE_DIR = os.path.join('common', 'fit-view', 'pub/')
+BASE_DIR = os.path.join('common.group', 'fit-view', 'pub/')
 apps = {}
 for r, d, fs in os.walk(BASE_DIR):
     for f in fs:

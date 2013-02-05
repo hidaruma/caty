@@ -184,7 +184,7 @@ class Parse(Command):
             return tagged('void', raw_data)
             
         if self.__content_type is UNDEFINED or self.env.exists('CONTENT_TYPE'):
-            self.__content_type = self.env.get('CONTENT_TYPE')
+            self.__content_type = self.env.get('CONTENT_TYPE', UNDEFINED)
         type = self.__content_type
         if type is UNDEFINED:
             if isinstance(raw_data, str):

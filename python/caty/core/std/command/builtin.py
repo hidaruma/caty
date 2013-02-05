@@ -181,10 +181,10 @@ class Response(Builtin):
             r = {
             'status': st,
             'encoding': encoding,
-            'body': '',
+            'body': input,
             'header': {
                 'content-type': unicode(tp),
-                'content-length': ''
+                'content-length': u''
             }
         }
         if isinstance(input, unicode):
