@@ -250,8 +250,6 @@ class CommandExecutor(BaseInterpreter):
         r = caty.UNDEFINED
         if node.var_name in node.var_storage.opts:
             r = node.var_storage.opts[node.var_name]
-        elif node.var_name == '0' and self.arg0_stack: #メソッドチェイン内部0への参照
-            r = self.arg0_stack[-1]
         else:
             if self.facility_set['env'].exists(node.var_name):
                 r = self.facility_set['env'].get(node.var_name)
@@ -265,6 +263,8 @@ class CommandExecutor(BaseInterpreter):
         node._prepare()
         argv = node.var_storage.opts['_ARGV']
         try:
+            if node.arg_num == 0 and self.arg0_stack: #メソッドチェイン内部0への参照
+                return self.arg0_stack[-1]
             return argv[node.arg_num]
         except:
             if node.optional:

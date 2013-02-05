@@ -150,6 +150,7 @@ class VarRef(Syntax):
     def default(self):
         return self.__default
 
+from caty.core.spectypes import UNDEFINED
 class ArgRef(Syntax):
     command_decl = u"""
     /**
@@ -162,7 +163,6 @@ class ArgRef(Syntax):
         Syntax.__init__(self)
         self.__arg_num = int(num)
         self.__optional = optional
-
 
     def accept(self, visitor):
         return visitor.visit_argref(self)
