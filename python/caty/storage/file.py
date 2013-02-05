@@ -42,6 +42,7 @@ class FileStorageConnection(object):
             if collection_name in self._data_map['global']:
                 return
             self._data_map['global'][collection_name] = {'appName': app_name, 'schema': schema_name, 'collectionName': collection_name, 'data': []}
+        self.commit()
 
     def drop(self, app_name, collection_name):
         self.get_collection(app_name, collection_name)['delete'] = True
@@ -70,8 +71,9 @@ class FileStorageConnection(object):
         for app_name, tbl_map in self._data_map['apps'].items():
             for tbl_name, tbl_data in tbl_map.items():
                 path = self.data_dir + '/' + app_name + '/' + tbl_name + '.json'
-                if tbl_data.get('delete') and os.path.exists(path):
-                    os.unlink(path)
+                if tbl_data.get('delete'):
+                    if os.path.exists(path):
+                        os.unlink(path)
                 else:
                     if not os.path.exists(self.data_dir + '/' + app_name + '/'):
                         os.mkdir(self.data_dir + '/' + app_name + '/')
@@ -79,6 +81,7 @@ class FileStorageConnection(object):
 
     def rollback(self):
         self._data_map = {'apps': {}, 'global': {}}
+        self.commit()
 
 class CollectionFactory(object):
     def __init__(self, conn, finder, collection_name, app_name='', current_app=None):
@@ -201,12 +204,15 @@ class CollectionManipulator(object):
         return v[0]
 
     def delete(self, obj):
-        self._conn.get_collection(self._app_name, self._collection_name)['data'].remove(obj)
+        data = self._conn.get_collection(self._app_name, self._collection_name)['data']
+        for s in self.select(obj):
+            data.remove(s)
 
     def update(self, oldobj, newobj):
         data = self._conn.get_collection(self._app_name, self._collection_name)['data']
-        pos = data.index(oldobj)
-        data[pos] = newobj
+        for s in self.select(oldobj):
+            pos = data.index(s)
+            data[pos].update(newobj)
 
     def dump(self):
         return self._conn.get_collection(self._app_name, self._collection_name)['data']
