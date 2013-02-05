@@ -25,12 +25,16 @@ class FileStorageConnection(object):
             path = self.data_dir + '/' + app_name + '/' + collection_name + '.json'
             if os.path.exists(path):
                 self._data_map['apps'][app_name][collection_name] = stdjson.loads(open(path).read())
+            else:
+                self._load('', collection_name)
         else:
             path = self.data_dir + '/' + collection_name + '.json'
             if collection_name in self._data_map['global']:
                 return
             if os.path.exists(path):
-                self._data_map['global'][collection_name] = stdjson.loads(open(path).read())
+                c = open(path).read()
+                if c:
+                    self._data_map['global'][collection_name] = stdjson.loads(c)
 
     def create_collection(self, app_name, collection_name, schema_name):
         self._load(app_name, collection_name)
@@ -53,9 +57,14 @@ class FileStorageConnection(object):
 
     def get_collection(self, app_name, collection_name):
         if app_name:
-            return self._data_map['apps'][app_name][collection_name]
-        else:
+            if collection_name in self._data_map['apps'][app_name]:
+                return self._data_map['apps'][app_name][collection_name]
+            else:
+                return self.get_collection('', collection_name)
+        elif collection_name in self._data_map['global']:
             return self._data_map['global'][collection_name]
+        else:
+            throw_caty_exception(u'CollectionNotFound', u'Collection does not found: collection name=$colname, defined at $denined, called by $callee', colname=collection_name, defined=app_name, callee=app_name)
 
     def insert(self, app_name, collection_name, obj):
         self.get_collection(app_name, collection_name)['data'].append(obj)
@@ -66,7 +75,7 @@ class FileStorageConnection(object):
             if tbl_data.get('delete') and os.path.exists(path):
                 os.unlink(path)
             else:
-                open(path, 'wb').write(prettyprint(tbl_data))
+                open(path, 'wb').write(stdjson.dumps(tbl_data, indent=4))
 
         for app_name, tbl_map in self._data_map['apps'].items():
             for tbl_name, tbl_data in tbl_map.items():
@@ -84,7 +93,7 @@ class FileStorageConnection(object):
         self.commit()
 
 class CollectionFactory(object):
-    def __init__(self, conn, finder, collection_name, app_name='', current_app=None):
+    def __init__(self, conn, finder, collection_name, app_name=u'', current_app=None):
         self._conn = conn
         self._finder = finder
         self._collection_name = collection_name
@@ -95,12 +104,12 @@ class CollectionFactory(object):
         u"""コレクション名とスキーマ名の対応表に新たな値を作り、
         新規のコレクションを作成する。
         """
-        app_name = self._current_app_name if not global_collection else ''
+        app_name = self._current_app_name if not global_collection else u''
         self._conn.create_collection(app_name, self._collection_name, schema_name)
 
 
 class CollectionManipulator(object):
-    def __init__(self, conn, finder, collection_name, app_name='', current_app=None):
+    def __init__(self, conn, finder, collection_name, app_name=u'', current_app=None):
         self._conn = conn
         self._finder = finder
         self._app = current_app
@@ -120,6 +129,8 @@ class CollectionManipulator(object):
             else:
                 return self._finder.get_type(ap + '::' + sn)
         except:
+            import traceback
+            traceback.print_exc()
             return None
 
     @property
