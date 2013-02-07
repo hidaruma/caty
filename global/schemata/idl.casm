@@ -1,7 +1,11 @@
 module idl in casm;
 
-command gen-skeleton {"debug": boolean?} :: sreif:ClassSummary -> void
+command generate-py-class {"debug": boolean?} :: sreif:ClassSummary -> void
     throws [InvalidInput]
-    refers python:idl.GenSkeleton;
+    refers python:idl.GeneratePyClass;
+
+command generate-command {"debug": boolean?} :: sreif:ClassSummary -> void
+    throws [InvalidInput]
+    ;
 
 

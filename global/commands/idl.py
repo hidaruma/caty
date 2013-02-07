@@ -1,7 +1,7 @@
 from reification import *
 import os
 
-class GenSkeleton(Command):
+class GeneratePyClass(Command):
     def setup(self, opts):
         self.__debug = opts['debug']
 
