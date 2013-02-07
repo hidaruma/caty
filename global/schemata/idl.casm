@@ -1,0 +1,7 @@
+module idl in casm;
+
+command gen-skeleton {"debug": boolean?} :: sreif:ClassSummary -> void
+    throws [InvalidInput]
+    refers python:idl.GenSkeleton;
+
+

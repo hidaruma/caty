@@ -1,13 +1,15 @@
 #coding: utf-8
-from caty.core.facility import Facility, READ
 from caty.core.typeinterface import dereference
 try:
     from sqlalchemy import *
     from sqlalchemy.orm import *
+    from interfaces.sqlalchemy.SQLAlchemy import SQLAlchemyBase
 except:
-    print '[Warning] sqlalchemy is required'
+    import traceback
+    traceback.print_exc()
+    print '[Warning] sqlalchemy is not installed or sqlalchemy IDL is not compiled'
 else:
-    class SQLAlchemyWrapper(Facility):
+    class SQLAlchemyWrapper(SQLAlchemyBase):
         config = None
 
         @classmethod
@@ -58,7 +60,7 @@ else:
             finally:
                 self.conn.close()
 
-        def generate_py_class(self, name, object_type):
+        def _generate_py_class(self, name, object_type):
             buff = []
             _ = buff.append
             _(u'from sqlalchemy.ext.declarative import declarative_base')
@@ -141,7 +143,7 @@ else:
             _(u'        })')
             return u'\n'.join(buff)
 
-        def create_table(self, cls):
+        def _create_table(self, cls):
             cls.metadata.create_all(self.engine)
         
 
