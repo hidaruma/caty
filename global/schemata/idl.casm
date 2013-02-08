@@ -1,6 +1,6 @@
 module idl in casm;
 
-command generate-py-class {"debug": boolean?} :: sreif:ClassSummary -> void
+command generate-py-class {"debug": boolean?, "stdout": boolean?} :: sreif:ClassSummary -> void
     throws [InvalidInput]
     refers python:idl.GeneratePyClass;
 

@@ -4,6 +4,7 @@ import os
 class GeneratePyClass(Command):
     def setup(self, opts):
         self.__debug = opts['debug']
+        self.__stdout = opts['stdout']
 
     def execute(self, cls_data):
         if not cls_data.get('anno', {}).get('signature', False):
@@ -21,8 +22,10 @@ class GeneratePyClass(Command):
         for c in cls.command_ns.values():
             r.append(reifier.reify_command(c))
         src = u'\n'.join(list(self._generate(name, r)))
-        if self.__debug:
+        if self.__debug or self.__stdout:
             print src
+        if self.__stdout:
+            return
         pkg_dir = None
         ls = self.get_lib_dir(app, module_name)
         for d in ls:
