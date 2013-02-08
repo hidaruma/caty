@@ -76,7 +76,7 @@ class GeneratePyClass(Command):
                 yield u''
             else:
                 yield u'    def %s(%s):' % (name, u', '.join(a1))
-                yield u'        raise NotImplementedError(u"%s._%s")' % (cls_name, name)
+                yield u'        raise NotImplementedError(u"%s.%s")' % (cls_name, name)
                 yield u''
 
 
@@ -92,6 +92,8 @@ class WritePyClass(Command):
             dir = self.sysfiles.lib.opendir(path)
             if not dir.exists:
                 dir.create()
+                with self.sysfiles.lib.open(dir.path + '/__init__.py', 'wb') as f:
+                    f.write(u'')
         p.append(chunk[-1])
         path = u'/'.join(p) + '.py'
         with self.sysfiles.lib.open(path, 'wb') as f:
