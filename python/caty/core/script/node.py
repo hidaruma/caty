@@ -755,12 +755,17 @@ class MethodChain(Syntax):
     command_decl = u"""command __method_chain<T default univ> :: Moniker -> T
                         refers python:caty.core.script.node.MethodChain;"""
 
-    def __init__(self, pipeline):
+    def __init__(self, proxy, builder):
         Syntax.__init__(self)
-        self.pipeline = pipeline
+        self.proxy = proxy
+        self.builder = builder
 
     def set_facility(self, facilities, ignore=None):
-        self.pipeline.set_facility(facilities)
+        self.facilities = facilities
+
+    def set_pipeline(self, pipeline):
+        self.pipeline = pipeline
+        self.pipeline.set_facility(self.facilities)
 
     def _prepare(self):
         Command._prepare(self)

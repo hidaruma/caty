@@ -71,7 +71,6 @@ class CommandExecutor(BaseInterpreter):
             for k, v in opts.items():
                 o[k] = v
         node.var_storage.new_masked_scope(opts or {}, args or [])
-        print node.arg0, self.arg0_stack
         if opts:
             for k, v in opts.items():
                 node.var_storage.opts[k] = v
@@ -599,9 +598,13 @@ class CommandExecutor(BaseInterpreter):
 
     def visit_method_chain(self, node):
         node._prepare()
-        self.arg0_stack.append(self.input)
+        pipeline = node.proxy.instantiate(
+            MethodChainCommandBuilder(node.builder.facilities, 
+                                      node.builder.namespace.get_class(self.input['className'])))
+        node.set_pipeline(pipeline)
+        self.arg0_stack.append(self.input['state'])
         self.input = None
-        self.input = node.pipeline.accept(self)
+        self.input = pipeline.accept(self)
         self.arg0_stack.pop(0)
         return self.input
 
@@ -623,6 +626,29 @@ class CommandExecutor(BaseInterpreter):
 
     def set_var_storage(self, v):
         self.cmd.set_var_storage(v)
+
+
+from caty.core.command import Builtin, Command, scriptwrapper
+from caty.core.exception import CatyException
+from caty.core.script.builder import CommandBuilder, NullCommand
+class MethodChainCommandBuilder(CommandBuilder):
+
+    def build(self, proxy, type_args, opts_ref, args_ref, pos, module):
+        u"""コマンド文字のチャンクをコマンド名と引数のリストに分割し、呼び出し可能なコマンドオブジェクトを返す。
+        """
+        try:
+            try:
+                profile = self.namespace.get_command(proxy.name)
+            except Exception as e:
+                if proxy.module:
+                    profile = proxy.module.schema_finder.get_command(proxy.name)
+                else:
+                    raise e
+            return self.make_cmd(profile, type_args, opts_ref, args_ref, pos, module)
+        except CatyException as e:
+            if e.tag == 'CommandNotFound':
+                return NullCommand(e)
+            raise
 
 from caty.command import MafsMixin
 from caty.core.script.builder import CommandBuilder

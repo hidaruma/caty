@@ -608,7 +608,7 @@ class MethodChainProxy(Proxy):
         self.pipeline = pipeline
 
     def instantiate(self, builder):
-        return MethodChain(self.pipeline.instantiate(builder))
+        return MethodChain(self.pipeline, builder)
 
     def set_module(self, module):
         self.pipeline.set_module(module)

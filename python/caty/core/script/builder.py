@@ -7,6 +7,9 @@ class CommandBuilder(object):
         self.namespace = namespace
         self.trace = {}
 
+    def change_class(self, clsname):
+        return MethodChainCommandBuilder(self.facilities, self.namespace.get_class(clsname))
+
     def build(self, proxy, type_args, opts_ref, args_ref, pos, module):
         u"""コマンド文字のチャンクをコマンド名と引数のリストに分割し、呼び出し可能なコマンドオブジェクトを返す。
         """
