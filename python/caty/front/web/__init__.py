@@ -104,7 +104,7 @@ def setup(args):
     _help = False
     if os.path.exists(ro.PID_FILE):
         os.unlink(ro.PID_FILE)
-    system = System(options.system_encoding, options.debug, options.quiet, options.no_ambient, options.no_app, options.apps or ['root'], options.force_app, options.unleash_wildcats)
+    system = System(options)
     if options.goodbye:
         print
         print options.goodbye

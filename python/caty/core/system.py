@@ -15,15 +15,16 @@ class System(object):
     """
 
     @brutal_error_printer
-    def __init__(self, 
-                 encoding=None, 
-                 is_debug=True, 
-                 quiet=False, 
-                 no_ambient=False, 
-                 no_app=False, 
-                 app_names=(u'root',),
-                 force_app=None,
-                 wildcat=False):
+    def __init__(self, options):
+        encoding = options.system_encoding
+        is_debug = options.debug
+        quiet = options.quiet
+        no_ambient = options.no_ambient
+        no_app = options.no_app
+        app_names = options.apps or [u'root']
+        force_app = options.force_app
+        wildcat = options.unleash_wildcats
+        prj_manifest = options.prj_manifest
         make_custom_import()
         caty.core.runtimeobject.i18n = I18nMessage({}, writer=cout, lang='en') # フォールバック
         self.force_app = force_app
@@ -44,7 +45,13 @@ class System(object):
             encoding = locale.getpreferredencoding()
         self._init_temp()
         self._init_logger()
-        global_file = ['_global.xjson', 'prj-manifest.xjson']
+        if prj_manifest:
+            if '/' in prj_manifest or '\\' in prj_manifest:
+                raise Exception(u'Invalid prj-manifest: %s' % prj_manifest)
+            prjfile = os.path.join('prj-manifest', prj_manifest+'.xjson')
+        else:
+            prjfile = 'prj-manifest.xjson'
+        global_file = [prjfile, '_global.xjson']
         gcfg = None
         for f in global_file:
             if os.path.exists(f):
