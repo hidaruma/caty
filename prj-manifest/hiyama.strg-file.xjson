@@ -1,0 +1,31 @@
+{
+    "projectName": "org.chimaira.caty.dev:strg-file",
+    "mafsModule": "caty.mafs.stdfs",
+    "serverModule": "caty.front.web.simple",
+
+    "session": {
+      "module": "caty.session.memory",
+      "conf": {
+        "expire": 3600
+      }
+    },
+    "storage": {
+      "module": "caty.storage.file",
+      "conf": {"data_dir": "./file_storage"},
+    },
+
+    "secretKey": "dfgbvhq3475yr2389fryerf23904u",
+    "encoding": "utf-8",
+    "hostUrl": "http://localhost:8000",
+    "language": "ja",
+    /**********************************
+     * 以下の項目は実験的な機能の設定 *
+     **********************************/
+    "enableScriptCache": false, // true にすると Caty スクリプトのコンパイル結果をキャッシュ
+    "enableHTTPMethodTunneling": true, // true にすると HTTP メソッドトンネリングが有効になる
+    "useMultiprocessing": false, //マルチスレッドの代わりにマルチプロセスを使うかどうか
+                             //マルチプロセス使用不可の環境では、マルチスレッドにフォールバックされる。
+    // "ignoreNames": [], //Caty アプリケーションとして扱わないディレクトリ名のリスト。デフォルトは["CVS"]
+
+}
+
