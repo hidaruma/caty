@@ -34,17 +34,29 @@ class GeneratePyClass(Command):
         for c in commands:
             name = c['name'].replace('-', '_')
             input_type = c['profile']['input']
-            if not input_type.endswith(']'):
+            if not input_type.endswith(']') and not input_type.startswith('void'):
                 throw_caty_exception(u'InvalidInput', u'Input type must be array type')
+            if input_type.startswith('void'):
+                input_type = u''
             input_types = input_type.strip('[]').split(',')
             anno = c.get('anno', {})
+            transactional = True
             if anno.get('reader'):
                 yield u'    @am.read'
             elif anno.get('updater'):
                 yield u'    @am.update'
-            a1 = []
-            a2 = []
+            else:
+                transactional = False
+            if anno.get('static'):
+                yield u'    @classmethod'
+                a1 = ['cls']
+                a2 = []
+            else:
+                a1 = ['self']
+                a2 = []
             for i in input_types:
+                if not i:
+                    continue
                 n = i.split(' ')
                 if n[0].endswith('?'):
                     a1.append('%s=UNDEFINED' % n[-1].strip(' '))
@@ -55,13 +67,17 @@ class GeneratePyClass(Command):
                 else:
                     a1.append(n[-1].strip())
                     a2.append(n[-1].strip())
-            yield u'    def %s(self, %s):' % (name, u', '.join(a1))
-            yield u'        return _%s(%s)' % (name, u', '.join(a2))
-            yield u''
-            yield u'    def _%s(self, %s):' % (name, u', '.join(a1))
-            yield u'        raise NotImplementedError(u"%s._%s")' % (cls_name, name)
-            yield u''
-
+            if transactional:
+                yield u'    def %s(%s):' % (name, u', '.join(a1))
+                yield u'        return self._%s(%s)' % (name, u', '.join(a2))
+                yield u''
+                yield u'    def _%s(%s):' % (name, u', '.join(a1))
+                yield u'        raise NotImplementedError(u"%s._%s")' % (cls_name, name)
+                yield u''
+            else:
+                yield u'    def %s(%s):' % (name, u', '.join(a1))
+                yield u'        raise NotImplementedError(u"%s._%s")' % (cls_name, name)
+                yield u''
 
 
 

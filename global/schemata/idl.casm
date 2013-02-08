@@ -2,7 +2,7 @@ module idl in casm;
 
 type PySource = {"moduleName": string, "source": string};
 
-command generate-py-class {"debug": boolean?, "stdout": boolean?} :: sreif:ClassSummary -> PySource
+command generate-py-class :: sreif:ClassSummary -> PySource
     throws [InvalidInput]
     refers python:idl.GeneratePyClass;
 
