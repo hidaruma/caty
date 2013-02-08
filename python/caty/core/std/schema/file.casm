@@ -30,21 +30,21 @@ command read [string] :: void -> string | binary
  * 引数で指定したファイルに入力値を書き込む。
  */
 command write {@[default(false)]"mkdir": boolean?} [string] :: (string|binary) -> void
-    updates [data, include, pub]
+    updates [data, include, pub, sysfiles]
     refers python:file.WriteFile;
 
 /**
  * 引数で指定したファイルまたはディレクトリを削除する。
  */
 command delete [string] :: void -> null
-    updates [data, include, pub]
+    updates [data, include, pub, sysfiles]
     refers python:file.DeleteFile;
 
 /**
  * 引数で指定したファイルの最終更新時刻を取得する。
  */
 command lastmodified [string] :: void -> string
-    reads [data, include, pub, behaviors, scripts]
+    reads [data, include, pub, behaviors, scripts, sysfiles]
     refers python:file.LastModified;
 
 /**
@@ -52,14 +52,14 @@ command lastmodified [string] :: void -> string
  * mafs のバックエンドが実際のファイルシステムでない場合、引数がそのまま返される。
  */
 command realpath [string] :: void -> string
-    reads [data, include, pub, behaviors, scripts]
+    reads [data, include, pub, behaviors, scripts, sysfiles]
     refers python:file.RealPath;
 
 /**
  * ディレクトリを作成する。
  */
 command mkdir {@[default(false)]"mkdir": boolean?} [string] :: void -> void
-    updates [pub, include, data, behaviors, scripts]
+    updates [pub, include, data, behaviors, scripts, sysfiles]
     refers python:file.MakeDir;
 
 /**

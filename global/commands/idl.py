@@ -2,10 +2,6 @@ from reification import *
 import os
 
 class GeneratePyClass(Command):
-    def setup(self, opts):
-        self.__debug = opts['debug']
-        self.__stdout = opts['stdout']
-
     def execute(self, cls_data):
         if not cls_data.get('anno', {}).get('signature', False):
             throw_caty_exception(u'InvalidInput', u'$$.anno.signature=$val', val=cls_data.get('anno', {}).get('signature', u'undefined'))
@@ -22,17 +18,11 @@ class GeneratePyClass(Command):
         for c in cls.command_ns.values():
             r.append(reifier.reify_command(c))
         src = u'\n'.join(list(self._generate(name, r)))
-        if self.__debug or self.__stdout:
-            print src
-        if self.__stdout:
-            return
-        pkg_dir = None
-        ls = self.get_lib_dir(app, module_name)
-        for d in ls:
-            if not os.path.exists(d):
-                os.mkdir(d)
-            pkg_dir = d
-        open(os.path.join(pkg_dir, name) + '.py', 'wb').write(src)
+        return {
+            u'source': src,
+            u'moduleName': u'interfaces.%s.%s' % (module_name, name)
+        }
+
 
 
     def _generate(self, cls_name, commands):
@@ -69,17 +59,25 @@ class GeneratePyClass(Command):
             yield u'        return _%s(%s)' % (name, u', '.join(a2))
             yield u''
             yield u'    def _%s(self, %s):' % (name, u', '.join(a1))
-            yield u'        raise NotImplementedError(u"_%s.%s")' % (cls_name, name)
+            yield u'        raise NotImplementedError(u"%s._%s")' % (cls_name, name)
             yield u''
 
 
-    def get_lib_dir(self, app, module_name):
-        chunk = [app._group.name + '.group', app.name, 'lib']
-        yield os.path.join(*chunk)
-        chunk.append('interfaces')
-        yield os.path.join(*chunk)
-        for p in module_name.split('.'):
-            chunk.append(p)
-            yield os.path.join(*chunk)
 
+
+class WritePyClass(Command):
+    def execute(self, data):
+        pkg_dir = None
+        chunk = data['moduleName'].split('.')
+        p = [u'']
+        for c in chunk[:-1]:
+            p.append(c)
+            path = u'/'.join(p)
+            dir = self.sysfiles.lib.opendir(path)
+            if not dir.exists:
+                dir.create()
+        p.append(chunk[-1])
+        path = u'/'.join(p) + '.py'
+        with self.sysfiles.lib.open(path, 'wb') as f:
+            f.write(data['source'])
 

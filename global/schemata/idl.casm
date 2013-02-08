@@ -1,11 +1,17 @@
 module idl in casm;
 
-command generate-py-class {"debug": boolean?, "stdout": boolean?} :: sreif:ClassSummary -> void
+type PySource = {"moduleName": string, "source": string};
+
+command generate-py-class {"debug": boolean?, "stdout": boolean?} :: sreif:ClassSummary -> PySource
     throws [InvalidInput]
     refers python:idl.GeneratePyClass;
 
-command generate-command {"debug": boolean?} :: sreif:ClassSummary -> void
+command generate-command {"debug": boolean?} :: sreif:ClassSummary -> {"moduleName": string, "source": string}
     throws [InvalidInput]
     ;
+
+command write-py-class :: PySource -> void
+    uses sysfiles
+    refers python:idl.WritePyClass;
 
 

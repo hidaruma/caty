@@ -44,7 +44,7 @@ class MafsMixin(object):
         if path.startswith('this:'):
             path = path.replace('this:', '')
 
-        if place in ('schemata', 'actions'):
+        if place in ('schemata', 'actions', 'commands', 'lib'):
             sysfiles = self.sysfiles
             return path, getattr(sysfiles, place)
         else:

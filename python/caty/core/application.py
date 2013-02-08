@@ -387,7 +387,7 @@ class Application(object):
         app_mafs = self._group._make_super_root(join(self._group.path, self._path)).start()
         app_dir = app_mafs.create(u'uses')
         generated = []
-        for k in self._assgin.values():
+        for k in self._assgin.values() + ['lib']:
             d = app_dir.opendir('/' + k)
             if not d.exists:
                 self.i18n.write("$location does not exists in $app, auto-generating", location=k, app=self.name)
@@ -433,6 +433,7 @@ class Application(object):
         self._behaviors = mafs_init('behaviors', assign['behaviors'])
         self._command_fs = mafs_init('commands', assign['commands']).start().create(u'reads')
         self._schema_fs = mafs_init('schemata', assign['schemata']).start().create('reads')
+        self._lib_fs = mafs_init('lib', 'lib').start().create('reads')
         self._messages_fs = mafs_init('messages', assign['messages']).start().create(u'reads')
 
   # スクリプトファイル
@@ -648,6 +649,8 @@ class Application(object):
         return SysFiles(
             actions=self._actions.start().create(u'reads'),
             schemata=self._schema_fs.start().create(u'reads'),
+            commands=self._command_fs.start().create(u'reads'),
+            lib=self._lib_fs.start().create(u'reads'),
         )
 
     def init_env(self, facilities, is_debug, modes, system, environ={}):
@@ -900,12 +903,30 @@ class AppConfig(dict, FakeFacility):
         return n
 
 
-class SysFiles(ReadOnlyFacility):
+class SysFiles(Facility):
     def __init__(self, **kwds):
         self.__names = []
         for k, v in kwds.items():
             setattr(self, k, v)
             self.__names.append(k)
+
+    def clone(self):
+        return SysFiles(
+            **dict([(n, getattr(self, n).clone()) for n in self.__names])
+        )
+
+    def create(self, mode, user_param=None):
+        return SysFiles(
+            **dict([(n, getattr(self, n).create(mode, user_param)) for n in self.__names])
+        )
+
+    def commit(self):
+        for n in self.__names:
+            getattr(self, n).commit()
+
+    def cancel(self):
+        for n in self.__names:
+            getattr(self, n).cancel()
 
     def cleanup(self):
         for n in self.__names:
