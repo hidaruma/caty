@@ -3,7 +3,7 @@ module sqlalchemy in casm;
 @[signature]
 class SQLAlchemy(foreign) {
     @[updater]
-    command generate-py-class :: [string name, foreign type_object] -> string;
+    command generate-py-class [string name] :: foreign -> string;
     @[updater]
     command create-table :: [foreign table_class] -> void;
 };

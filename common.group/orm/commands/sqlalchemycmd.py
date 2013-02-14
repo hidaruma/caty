@@ -14,7 +14,7 @@ class CreateClassFromType(Command):
             throw_caty_exception(u'InvalidInput', t.type)
         fname = type.name + '.py'
         clsname = type.name
-        py_class = self.sqlalchemy.generate_py_class(clsname, t)
+        py_class = self.sqlalchemy.generate_py_class(t, clsname)
         if self.__debug:
             print py_class
         app_info = self.env['APPLICATION']

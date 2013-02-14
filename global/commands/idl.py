@@ -34,11 +34,10 @@ class GeneratePyClass(Command):
         for c in commands:
             name = c['name'].replace('-', '_')
             input_type = c['profile']['input']
-            if not input_type.endswith(']') and not input_type.startswith('void'):
-                throw_caty_exception(u'InvalidInput', u'Input type must be array type')
+            arg_type = c['profile']['args']
             if input_type.startswith('void'):
                 input_type = u''
-            input_types = input_type.strip('[]').split(',')
+            arg_types = arg_type.strip('[]').split(',')
             anno = c.get('anno', {})
             transactional = True
             if anno.get('reader'):
@@ -54,7 +53,10 @@ class GeneratePyClass(Command):
             else:
                 a1 = ['self']
                 a2 = []
-            for i in input_types:
+            if input_type:
+                a1.append('input')
+                a2.append('input')
+            for i in arg_types:
                 if not i:
                     continue
                 n = i.split(' ')
@@ -68,8 +70,13 @@ class GeneratePyClass(Command):
                     a1.append(n[-1].strip())
                     a2.append(n[-1].strip())
             if transactional:
-                yield u'    def %s(%s):' % (name, u', '.join(a1))
-                yield u'        return self._%s(%s)' % (name, u', '.join(a2))
+                if anno.get('static'):
+                    yield u'    @classmethod'
+                    yield u'    def %s(%s):' % (name, u', '.join(a1))
+                    yield u'        return cls._%s(%s)' % (name, u', '.join(a2))
+                else:
+                    yield u'    def %s(%s):' % (name, u', '.join(a1))
+                    yield u'        return self._%s(%s)' % (name, u', '.join(a2))
                 yield u''
                 yield u'    def _%s(%s):' % (name, u', '.join(a1))
                 yield u'        raise NotImplementedError(u"%s._%s")' % (cls_name, name)

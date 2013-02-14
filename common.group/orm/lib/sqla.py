@@ -60,7 +60,7 @@ else:
             finally:
                 self.conn.close()
 
-        def _generate_py_class(self, name, object_type):
+        def _generate_py_class(self, object_type, name):
             buff = []
             _ = buff.append
             _(u'from sqlalchemy.ext.declarative import declarative_base')
