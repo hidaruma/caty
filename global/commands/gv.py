@@ -25,6 +25,7 @@ class Draw(Builtin):
                 self._format = u'svg'
         self._if_modified = opts['if-modified']
         self._engine = opts['engine']
+        self._cluster_num = 0
 
     def execute(self, graph):
         if (self._time_file or self._time_file) and self._out_file and self._if_modified:
@@ -76,7 +77,13 @@ class Draw(Builtin):
     def _make_graph(self, graph, cluster):
         type, graph = json.split_tag(graph)
         if cluster:
-            name = 'cluster_' + graph['id']
+            if graph['id']:
+                name = u'cluster_' + graph['id']
+            else:
+                i = unicode(str(self._cluster_num))
+                name = u'cluster_' + i
+                graph['id'] = i
+                self._cluster_num += 1
         else:
             name = graph['id']
         if type == 'digraph':
