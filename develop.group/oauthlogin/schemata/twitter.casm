@@ -1,0 +1,34 @@
+module twitter in casm;
+
+
+command init-api :: OAuthInfo -> void
+    uses memory
+    refers python:twitter.InitAPI;
+
+/**
+ * twitter側へのリダイレクトURLを出力する
+ */
+command redirect [string appName] :: void -> string
+    reads memory
+    uses session
+    refers python:twitter.Redirect;
+
+/**
+ * twitterからのリダイレクトを受け取る
+ * tiwtterでのログインが成功した後はセッション情報にログインしている旨が記録される。
+ */
+command login-callback {"oauth_token": string, "oauth_verifier": string} [string appName] :: void -> void
+    reads memory
+    uses session
+    refers python:twitter.LoginCallBack;
+
+@[register-public]
+type OAuthInfo = {
+    "appName": string,
+    "consumerKey": string,
+    "consumerSecret": string,
+    "accessToken": string,
+    "accessTokenSecret": string,
+    "callback": string
+};
+
