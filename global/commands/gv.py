@@ -90,7 +90,7 @@ class Draw(Builtin):
             d = True
         else:
             d = False
-        s = True
+        s = graph.get('strict', False)
         G = AGraph(name=name, directed=d, strict=s)
         if self._font:
             G.graph_attr.update(fontname=self._font)
