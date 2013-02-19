@@ -254,10 +254,8 @@ command draw
 
   /** 出力ファイルがデータ最終変更の日時より古いときだけ描画する */
   @[with(@_OR ["time", "timefile"]), default(false)]
-  "if-modified" : boolean?,
+  "if-modified" : boolean?
   
-  @[default(false)]
-  "strict": boolean?,
  }
 :: Digraph -> (void | binary | string) 
  uses pub
