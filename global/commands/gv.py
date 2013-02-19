@@ -86,12 +86,19 @@ class Draw(Builtin):
                 self._cluster_num += 1
         else:
             name = graph['id']
+    
+        buff = []
+        s = graph['graph'].pop('strict', False)
+        if s:
+            buff.append('strict')
         if type == 'digraph':
-            d = True
+            buff.append('digraph')
         else:
-            d = False
-        s = graph.get('strict', False)
-        G = AGraph(name=name, directed=d, strict=s)
+            buff.append('graph')
+        buff.append(name)
+        buff.append('{\n}')
+        G = AGraph(' '.join(buff))
+
         if self._font:
             G.graph_attr.update(fontname=self._font)
             G.node_attr.update(fontname=self._font)
