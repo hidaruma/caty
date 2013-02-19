@@ -55,6 +55,7 @@ class Redirect(Command):
         }
         return unicode(url)
 
+from caty.core.std.command.authutil import CATY_USER_INFO_KEY
 class LoginCallBack(Command):
     def setup(self, opts, app_name):
         self.oauth_token = opts['oauth_token']
@@ -66,4 +67,4 @@ class LoginCallBack(Command):
         session = self.session.get(self.app_name, {})
         account = tc.get_auth_info(session, self.oauth_token, self.oauth_verifier)
         print account
-        session['$user_info'] = account
+        session[CATY_USER_INFO_KEY] = account

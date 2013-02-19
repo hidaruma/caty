@@ -8,44 +8,6 @@ from caty.core.std.command.authutil import CATY_USER_INFO_KEY
 
 name = 'user'
 
-class User(Facility):
-    def __init__(self, info=None):
-        self._info = {} if not info else info
-        self._loggedin = False if self._info == {} else True
-
-    am = AccessManager()
-    
-    @am.update
-    def set_user_info(self, info):
-        self._info.update(info)
-        self._loggedin = True
-
-    @am.read
-    def __getattr__(self, k):
-        return self._info[k]
-
-    @am.update
-    def clear(self):
-        self._info = {}
-
-    @am.read
-    def to_dict(self):
-        if self._info != {}:
-            return self._info
-        else:
-            return {
-                'userid': u'',
-            }
-
-    @property
-    @am.read
-    def loggedin(self):
-        return self._loggedin
-
-    def clone(self):
-        return self
-    
-
 class ExistsUser(Builtin):
 
     def execute(self, input):
@@ -95,13 +57,14 @@ class ChangePassword(Builtin):
 class GetUserInfo(Builtin):
 
     def execute(self):
-        return self.user.to_dict()
+        user = self.session.get(CATY_USER_INFO_KEY)
+        return user
 
 class UpdateInfo(Builtin):
 
     def execute(self):
-        info = self.storage('user').select1({'userid':self.user.userid})
-        self.user.set_user_info(info)
+        user = self.session.get(CATY_USER_INFO_KEY)
+        info = self.storage('user').select1({'userid':user['userid']})
         
 
 
@@ -138,7 +101,6 @@ class Login(Builtin):
             session = self.session.storage.create().create(u'uses')
             self.session = session
             del user['password']
-            self.user.set_user_info(user)
             session.put(CATY_USER_INFO_KEY, user)
             redirect_path = u'/' if not 'succ' in input else input['succ']
             redirect = {
@@ -157,9 +119,10 @@ class Loggedin(Builtin):
         self.opts = opts
 
     def execute(self, input):
-        if self.user.loggedin:
+        user = self.session.get(CATY_USER_INFO_KEY)
+        if user:
             if self.opts['userid']:
-                if self.opts['userid'] == self.user.userid:
+                if self.opts['userid'] == user['userid']:
                     return tagged(u'OK', input)
             else:
                 return tagged(u'OK', input)
@@ -170,9 +133,9 @@ class Logout(Builtin):
 
     def execute(self, input):
         key = self.session.id
-        if self.user.loggedin:
+        user = self.session.get(CATY_USER_INFO_KEY)
+        if user:
             self.session.clear()
-            self.user.clear()
         return {
             'header': {
                 'Location': unicode(join(self.env.get('HOST_URL'), input)),

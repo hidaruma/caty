@@ -744,20 +744,20 @@ class SelectionFixer(object):
                     throw_caty_exception(u'BadSelection', 
                                          u'Invalid selection: $cause, $obj', 
                                          cause=c.tag + ':' + c.get_message(ro.i18n), 
-                                         obj=json.pp(input))
+                                         obj=pp(input))
                 except IndexError, e:
                     c = CatyException(u'IndexOutOfRange', error_to_ustr(e))
                     throw_caty_exception(u'BadSelection', 
                                          u'Invalid selection: $cause, $obj', 
                                          cause=c.tag + ':' + c.get_message(ro.i18n), 
-                                         obj=json.pp(input))
+                                         obj=pp(input))
                 except CatyException, e:
                     raise
                 except Exception, e:
                     throw_caty_exception(u'BadSelection', 
                                          u'Invalid selection: $cause, $obj', 
                                          cause=error_to_ustr(e), 
-                                         obj=json.pp(input))
+                                         obj=pp(input))
             else:
                 o = {}
                 for k, v in input.items():

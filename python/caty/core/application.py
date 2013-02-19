@@ -17,7 +17,6 @@ from caty.core.std.command.authutil import (RequestToken,
                                             CATY_USER_INFO_KEY)
 
 from caty.core.customimporter import AppSpecLibraryImporter
-from caty.core.std.command.user import User
 from caty.core.exception import throw_caty_exception
 from caty.util.collection import ImmutableDict
 from caty.util import cout, error_to_ustr, brutal_error_printer
@@ -608,10 +607,6 @@ class Application(object):
         vcs = self._vcs(self, facilities['pub'], facilities['data'])
         facilities['vcs'] = vcs
         facilities['token'] = RequestToken(facilities['session'])
-        if facilities['session'].exists(CATY_USER_INFO_KEY):
-            facilities['user'] = User(facilities['session'].get(CATY_USER_INFO_KEY))
-        else:
-            facilities['user'] = User({})
         fset = FacilitySet(facilities, self)
         facilities['interpreter'] = self._interpreter.file_mode(fset)
         return fset
@@ -635,7 +630,6 @@ class Application(object):
             'memory',
             'logger',
             'sysfiles',
-            'user',
             'interpreter',
             'token',
             'vcs',

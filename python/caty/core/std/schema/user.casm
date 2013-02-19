@@ -47,15 +47,14 @@ command password :: RegistryInfo -> boolean
  * ユーザ情報の取得を行う。
  **/
 command info :: void -> UserInfo
-    reads user
+    reads session
     refers python:user.GetUserInfo;
     
 /**
  * ユーザ情報を最新の情報に更新する。
  */
 command update-info :: void -> void
-    reads storage
-    uses user
+    uses storage
     refers python:user.UpdateInfo;
 
 
@@ -75,7 +74,7 @@ type LoginForm = {
  */
 command login :: LoginForm -> @OK Redirect | @NG string
                 reads [storage, env]
-                uses [user, session]
+                uses [session]
                 refers python:user.Login;
 
 /**
@@ -86,7 +85,7 @@ command login :: LoginForm -> @OK Redirect | @NG string
  *
  */
 command loggedin<T default any> {@[default("")]"userid":string?} :: T -> @OK T | @NG T
-                                reads user
+                                reads session
                                 refers python:user.Loggedin;
 
 
@@ -97,7 +96,7 @@ command loggedin<T default any> {@[default("")]"userid":string?} :: T -> @OK T |
  */
 command logout :: string -> Redirect
     reads env
-    uses [user, session]
+    uses [session]
     refers python:user.Logout;
 
 
