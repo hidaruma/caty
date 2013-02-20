@@ -100,7 +100,7 @@ class RequestHandler(object):
             if not self._env.get('SECURE') and act.resource_class_entry and act.condition['secure']:
                 throw_caty_exception(u'SecurityError', join(self._env['HOST_URL'], self._app_path, path) + '/')
             if not self._env.get('LOGGED') and act.resource_class_entry and act.condition['logged']:
-                throw_caty_exception(u'SecurityError', join(self._env['HOST_URL'], self._app_path, path) + '/')
+                throw_caty_exception(u'NotLoggedIn', join(self._env['HOST_URL'], self._app_path, path) + '/')
             proxy = act.resource_class_entry
             if proxy is None:
                 _f = self._file.opendir(path + '/')
@@ -326,7 +326,7 @@ class ErrorDispacher(object):
                 },
                 'body': e.get_message(self.i18n)
             }
-        elif e.tag == 'SecurityError':
+        elif e.tag == 'SecurityError' or e.tag == 'NotLoggedIn':
             return {
                 'status': 403,
                 'header': {

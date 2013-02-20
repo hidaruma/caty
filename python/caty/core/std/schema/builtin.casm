@@ -868,6 +868,10 @@ exception IllegalAccess = object;
 /** 例外：その他セキュリティエラー。 */
 exception SecurityError = object;
 
+/** 例外：未ログインでのアクセス */
+exception NotLoggedIn = object;
+
+
 /*
  * --- その他 ---
  */

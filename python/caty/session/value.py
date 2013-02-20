@@ -124,7 +124,7 @@ class SessionInfoWrapper(Facility):
         """
         return self.__session.exists(name)
 
-    __in__ = exists
+    __contains__ = exists
 
     @am.read
     def get(self, name, default=None):
