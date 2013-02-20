@@ -202,7 +202,7 @@ class Action(object):
         self.module_name = ra.module
         self.matcher = matcher
         self.resource_class_entry = rae['command'] if rae else None
-        self.condition = rae.get('checker', {'parent': NO_CARE, 'secure': False}) if rae else {'parent': NO_CARE, 'secure': False}
+        self.condition = rae.get('checker', {'parent': NO_CARE, 'secure': False, 'logged': False}) if rae else {'parent': NO_CARE, 'secure': False, 'logged': False}
         self.annotations = rae['command'].annotations if rae else Annotations([])
         self.resource_class = ra
 
@@ -238,12 +238,17 @@ def method(seq):
     return seq.parse([u'GET', u'POST', u'PUT', u'DELETE'])
 
 def checker(seq):
-    return dict(unordered(try_(parent), try_(secure))(seq))
+    return dict(unordered(try_(parent), try_(secure), try_(logged))(seq))
 
 def secure(seq):
     if seq.eof:
         return u'secure', False
     return u'secure', seq.parse(u'#secure')
+
+def logged(seq):
+    if seq.eof:
+        return u'logged', False
+    return u'logged', seq.parse(u'#logged')
 
 def parent(seq):
     if seq.eof:

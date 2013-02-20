@@ -134,7 +134,7 @@ class SessionInfoWrapper(Facility):
 
     @am.read
     def __getitem__(self, name):
-        return sefl.__session[name]
+        return self.__session[name]
 
     @am.read
     def find(self, name, sjpath):

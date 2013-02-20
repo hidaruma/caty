@@ -14,6 +14,7 @@ from caty.core.facility import (Facility,
                                 AccessManager)
 from caty.core.memory import AppMemory
 from caty.core.std.command.authutil import (RequestToken,
+                                            CATY_USER_INFO_KEY,
                                             CATY_USER_INFO_KEY)
 
 from caty.core.customimporter import AppSpecLibraryImporter
@@ -678,6 +679,7 @@ class Application(object):
         env.put(u'REQUEST_METHOD', unicode(environ.get('REQUEST_METHOD', 'POST')))
         env.put(u'CONTENT_LENGTH', unicode(environ.get('CONTENT_LENGTH', '-1')))
         env.put(u'HCON_URL', self._system.get_hcon_url())
+        env.put(u'LOGGED', CATY_USER_INFO_KEY in facilities['session'])
 
     @property
     def cout(self):

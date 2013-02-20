@@ -99,6 +99,8 @@ class RequestHandler(object):
             act = self._verb_dispatcher.get(self._file, path, verb, method)
             if not self._env.get('SECURE') and act.resource_class_entry and act.condition['secure']:
                 throw_caty_exception(u'SecurityError', join(self._env['HOST_URL'], self._app_path, path) + '/')
+            if not self._env.get('LOGGED') and act.resource_class_entry and act.condition['logged']:
+                throw_caty_exception(u'SecurityError', join(self._env['HOST_URL'], self._app_path, path) + '/')
             proxy = act.resource_class_entry
             if proxy is None:
                 _f = self._file.opendir(path + '/')
