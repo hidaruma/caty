@@ -98,9 +98,9 @@ class RequestHandler(object):
             self._verify_access(path, method)
             act = self._verb_dispatcher.get(self._file, path, verb, method)
             if not self._env.get('SECURE') and act.resource_class_entry and act.condition['secure']:
-                throw_caty_exception(u'SecurityError', join(self._env['HOST_URL'], self._app_path, path) + '/')
+                throw_caty_exception(u'SecurityError', u'$url', url=join(self._env['HOST_URL'], self._app_path, path), path=join(self._app_path, path))
             if not self._env.get('LOGGED') and act.resource_class_entry and act.condition['logged']:
-                throw_caty_exception(u'NotLoggedIn', join(self._env['HOST_URL'], self._app_path, path) + '/')
+                throw_caty_exception(u'NotLoggedIn', u'$url', url=join(self._env['HOST_URL'], self._app_path, path))
             proxy = act.resource_class_entry
             if proxy is None:
                 _f = self._file.opendir(path + '/')
@@ -125,7 +125,7 @@ class RequestHandler(object):
                 else:
                     cmd = self._interpreter.build(proxy.source, opts, [path, path], transaction=transaction)
         except Exception, e:
-            return ExceptionAdaptor(e, traceback.format_exc(), self, error_logger)
+            return ExceptionAdaptor(e, self._interpreter, traceback.format_exc(), self, error_logger)
         return PipelineAdaptor(cmd, self._interpreter, self, error_logger, lock_file, transaction)
     
     def _verify_access(self, path, method):
@@ -183,7 +183,7 @@ class PipelineAdaptor(object):
 
     def _handle_pipeline(self, input, debug=False):
         try:
-            result = self.__execute(input, debug)
+            result = self._execute(input, debug)
             self.schema.get_type('WebOutput').validate(result)
             transaction = True
         except PipelineInterruption, e:
@@ -226,7 +226,7 @@ class PipelineAdaptor(object):
 
         return result, transaction
 
-    def __execute(self, input, debug):
+    def _execute(self, input, debug):
         try:
             return self.__command(input)
         except Exception, e:
@@ -266,29 +266,17 @@ class PipelineAdaptor(object):
             os.rmdir(lock_dir)
 
 class ExceptionAdaptor(PipelineAdaptor):
-    def __init__(self, error_obj, tb, handler, error_logger):
+    def __init__(self, error_obj, interpreter, tb, handler, error_logger):
         self.__error_obj = error_obj
         self.__tb = tb
-        PipelineAdaptor.__init__(self, None, None, handler, error_logger)
+        PipelineAdaptor.__init__(self, None, interpreter, handler, error_logger)
         self.error_logger = error_logger
 
-    def _handle_pipeline(self, input, debug=False):
+    def _execute(self, input, debug=False):
         e = self.__error_obj
         if debug:
             print self.__tb
-        if isinstance(e, CatyException):
-            result = self.error_dispatcher.dispatch_error(e)
-        else:
-            self.error_logger.write(self.__tb)
-            result = {
-                'status': 500,
-                'body': unicode(self.__tb, 'utf-8') if debug else u'Internal Server Error',
-                'header': {
-                    'content-type': u'text/plain; charset=utf-8',
-                }
-            }
-        #print self.__tb
-        return result, False
+        raise e
 
 class ErrorLogHandler(object):
     def __init__(self, app, path, verb, method):

@@ -656,6 +656,7 @@ class Application(object):
         env.put(u'APPLICATION', {'group': self._group.name, 'description':self.description, 'name':self.name, 'path': unicode(self.web_path)})
         env.put(u'DEBUG', system.debug)
         env.put(u'HOST_URL', unicode(self.host_url))
+        env.put(u'HOST_NAME', unicode(self.host_name))
         env.put(u'CATY_VERSION', unicode(caty.__version__))
         env.put(u'RUN_MODE', modes)
         env.put(u'PROJECT', {'name': self._system.project_name, 'location': unicode(os.getcwd(), self._system.sysencoding)})
@@ -708,6 +709,10 @@ class Application(object):
     @property
     def host_url(self):
         return self._global_config.host_url
+
+    @property
+    def host_name(self):
+        return self._global_config.host_name
 
     @property
     def associations(self):

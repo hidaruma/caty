@@ -86,6 +86,10 @@ class GlobalConfig(object):
             return self.server_name + ':' + str(self.server_port)
 
     @property
+    def host_name(self):
+        return self.server_name.split('/')[-1]
+
+    @property
     def encoding(self):
         return self._encoding
 
