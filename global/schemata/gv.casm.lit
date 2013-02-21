@@ -393,15 +393,12 @@ command graph
   when {
    undefined => "graph",
    * ==> pass
-  } > label;
-  %label | case {
-   "graph" | "node" | "edge" | "strict" | "digraph" | "subgraph" => ["_", pass] | text:concat,
-   * => pass
   } > id;
+
   @digraph {
    "id": %id,
 
-   "graph" : [%_OPTS, {"label" : %label}] | json:merge --mode=fst,
+   "graph" : [%_OPTS, {"label" : %id}] | json:merge --mode=fst,
    "elements" : %elements | when {array=>xjson:flatten, *=> pass} // これは、のdrawコマンドで対処して欲しい。
   }
 

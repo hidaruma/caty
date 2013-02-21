@@ -95,7 +95,7 @@ class Draw(Builtin):
             buff.append('digraph')
         else:
             buff.append('graph')
-        buff.append(name)
+        buff.append('"%s"' % name)
         buff.append('{\n}')
         G = AGraph(' '.join(buff))
 
