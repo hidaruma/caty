@@ -158,6 +158,7 @@ class Draw(Builtin):
             else:
                 a = {}
             a.update(**c.node_attr)
+            a.pop('label', None) #何故か\Nがラベルに設定されている
             a.update(n.attr)
             sg.add_node(n.name, **a)
 
