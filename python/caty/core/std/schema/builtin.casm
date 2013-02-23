@@ -871,6 +871,24 @@ exception SecurityError = object;
 /** 例外：未ログインでのアクセス */
 exception NotLoggedIn = object;
 
+/*
+ * -- 一般的例外
+ */
+
+/** 例外：象物物が存在しない */
+exception NotExist = object;
+
+/** 例外：対象物が既に存在する */
+exception AlreadyExists = object;
+
+/** 例外：要求された対象物が見つからなかった */
+exception NotFound = object;
+
+/** 例外：容量や値の範囲制限を超えた */
+exception Bounded = object;
+
+/** 例外：集合的なデータが空である */
+exception Empty  = object;
 
 /*
  * --- その他 ---
@@ -922,6 +940,8 @@ exception ArgsTypeError = TypeErrorInfo;
 
 @[runaway]
 exception Arg0TypeError = TypeErrorInfo;
+
+/*
 
 
 /** 
