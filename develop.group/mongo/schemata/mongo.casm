@@ -1,0 +1,45 @@
+/** 
+ * mongodb操作用モジュール
+ * JSONストレージバックエンドとは別個に作ってある。
+ */
+module mongo in casm;
+
+@[signature]
+class MongoHandler(foreign) {
+};
+
+type MongoConfig = {
+    "host": string,
+    "port": integer,
+};
+
+facility MongoHandler(null) configured MongoConfig
+    conforms MongoHandler
+    refers python:mongolib.MongoHandler;
+
+entity mongo = MongoHandler(null);
+
+@[signature]
+class MongoDB(Database) {
+    command list-collections :: void -> [string*]
+        refers python:mongo.ListCollections;
+    command drop-collection [string] :: void -> void
+        refers python:mongo.DropCollection;
+    command create-collection [string] :: void -> Collection
+        refers python:mongo.CreateCollection;
+    command clear-collection [string] :: void -> void
+        refers python:mongo.ClearCollection;
+};
+
+command list-databases :: void -> [string*]
+    uses mongo
+    refers python:mongo.ListDatabases
+    ;
+
+command create-database [string] :: void -> Database
+    uses mongo
+    refers python:mongo.CreateDatabase
+    ;
+
+type Database = foreign;
+type Collection = foreign;

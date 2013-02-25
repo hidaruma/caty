@@ -1,0 +1,40 @@
+{
+   "name": "caty-mongo-lib",
+   "version": "0.0.0",
+   "uuid" : "a26f7f36-1825-47d2-99d7-61092bc99454",
+   "maintainers": [
+       {
+           "name": "Kuwata, Chikara",
+           "email": "chikara.kuwata@gmail.com",
+           "web": "http://return0.info" 
+       }
+   ],
+   "bugs": {
+       "web": "https://bitbucket.org/project_caty/dev/issues"
+   },
+   "licenses": [
+       {
+           "type": "MIT",
+           "url": "http://www.opensource.org/licenses/mit-license.php" 
+       } 
+   ],
+   "repositories": [
+       {
+           "type": "hg",
+           "url": "https://bitbucket.org/project_caty/dev/" 
+       } 
+   ],
+  "dependencies": {
+       "caty": { "minimum-caty": ">=0.0.0" },
+       "python2": {
+            "pymongo": ">=2.4.0"
+        }
+   },
+   "os": ["linux", "macos", "win"],
+   "cpu": ["x86", "ppc", "x86_64"],
+   "engines": {"python2": ">=2.6.0"},
+   "scripts": {
+       "install": "./install.py"
+   }
+}
+
