@@ -1,4 +1,7 @@
 from caty.command import *
+import caty.jsontools as json
+from bson import ObjectId
+from decimal import Decimal
 
 class ListDatabases(Command):
     def execute(self):
@@ -10,6 +13,9 @@ class CreateDatabase(Command):
 
     def execute(self):
         return self.mongo.create_database(self.db_name)
+
+
+class ActivateDatabase(CreateDatabase): pass
 
 class ListCollections(Command):
     def execute(self):
@@ -29,10 +35,88 @@ class CreateCollection(Command):
     def execute(self):
         return self.arg0[self.col_name]
 
-
 class ClearCollection(Command):
     def setup(self, col_name):
         self.col_name = col_name
 
     def execute(self):
         self.arg0[self.col_name].remove(None)
+
+class Get(Command):
+    def setup(self, id):
+        self._id = id
+
+    def execute(self):
+        return xjson_from_bson(self.arg0.find_one(ObjectId(self._id)))
+
+class Set(Command):
+    def setup(self, id=None):
+        self._id = id
+
+    def execute(self, input):
+        if self._id:
+            self.arg0.update({'_id': ObjectId(self._id)}, bson_from_xjson(input))
+        else:
+            self.arg0.insert(bson_from_xjson(input))
+
+class Select(Command):
+    def execute(self, input):
+        if input:
+            return map(xjson_from_bson, self.arg0.find(bson_from_xjson(input)))
+        else:
+            return map(xjson_from_bson, self.arg0.find())
+
+class Delete(Command):
+    def setup(self, id=None):
+        self._id = id
+
+    def execute(self, input):
+        if self._id:
+            self.arg0.remove(ObjectId(self._id))
+        else:
+            self.arg0.remove(bson_from_xjson(input))
+
+def xjson_from_bson(o):
+    if isinstance(o, ObjectId):
+        return json.tagged(u'ObjectId', unicode(str(o)))
+    elif isinstance(o, list):
+        return  map(xjson_from_bson, o)
+    elif isinstance(o, dict):
+        keys = set(o.keys())
+        if keys == set(['__int__', '__float__']):
+            return Decimal(o['__int__'] + '.' + o['__float__'])
+        elif keys == set(['__int__']):
+            return Decimal(o['__int__'])
+        r = {}
+        for k, v in o.items():
+            r[k] = xjson_from_bson(v)
+        return r
+    else:
+        return o
+
+def bson_from_xjson(o):
+    if isinstance(o, json.TaggedValue):
+        if o.tag == 'ObjectId':
+            return ObjectId(o.value)
+        else:
+            throw_caty_exception(u'BadInput', json.pp(o))
+    elif isinstance(o, list):
+        return [bson_from_xjson(i) for i in o if o is not None]
+    elif isinstance(o, dict):
+        r = {}
+        for k, v in o.items():
+            r[k] = bson_from_xjson(v)
+            if r[k] is None:
+                del r[k]
+        return r
+    elif isinstance(o, (unicode, int, long, str, bool)):
+        return o
+    elif isinstance(o, Decimal):
+        s = str(o)
+        if '.' in s:
+            a, b = s.split('.')
+            return {'__int__': a, '__float__': b}
+        else:
+            return {'__int__': s}
+    else:
+        return None

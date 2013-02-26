@@ -1,5 +1,6 @@
 from interfaces.mongo.MongoHandler import MongoHandlerBase
 from caty.core.facility import Facility
+from caty.core.exception import *
 
 from pymongo import Connection
 from pymongo.errors import ConnectionFailure
@@ -27,7 +28,10 @@ class MongoHandler(MongoHandlerBase):
         return self
 
     def __init__(self, *ignore):
-        self.conn = Connection(host=self.config.get('host', 'localhost'), port=self.config.get('port', 27017))
+        try:
+            self.conn = Connection(host=self.config.get('host', 'localhost'), port=self.config.get('port', 27017))
+        except ConnectionFailure as e:
+            throw_caty_exception(u'DatabaseAccessError', u'error=$e', e=str(e))
 
     def list_databases(self):
         return self.conn.database_names()

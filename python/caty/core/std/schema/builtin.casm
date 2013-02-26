@@ -628,7 +628,7 @@ type UncloseInputArr = [
 
 ];
 
-type Moniker = {
+type Classified = {
     "className": string,
     "state": univ,
 };
@@ -716,6 +716,9 @@ exception FileNotFound = object;
 /** 例外：データベースのコレクションが見つからない。*/
 exception CollectionNotFound = object;
 
+/** 例外：データベースのレコードが見つからない。*/
+exception RecordNotFound = object;
+
 /** 例外：そういう例外型は存在しない
  * 例外型（Excetpion）のデータではあるが、タグが登録されてない。
  */
@@ -794,6 +797,10 @@ exception IncompatibleAnnotation = object;
 
 /** 例外：ファイルのIOに関連してエラーが生じた。 */
 exception FileIOError = object;
+
+/** 例外：データベースへのアクセスに失敗。*/
+@[runaway]
+exception DatabaseAccessError = object;
 
 /** 例外：コレクションへのアクセスに失敗。*/
 exception CollectionAccessError = object;

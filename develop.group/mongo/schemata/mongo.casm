@@ -19,8 +19,23 @@ facility MongoHandler(null) configured MongoConfig
 
 entity mongo = MongoHandler(null);
 
+command list-databases :: void -> [string*]
+    uses mongo
+    refers python:mongo.ListDatabases
+;
+
+command create-database [string] :: void -> Database
+    uses mongo
+    refers python:mongo.CreateDatabase
+;
+
+command activate-database [string] :: void -> Database
+    uses mongo
+    refers python:mongo.ActivateDatabase
+;
+
 @[signature]
-class MongoDB(Database) {
+class Database(Database) {
     command list-collections :: void -> [string*]
         refers python:mongo.ListCollections;
     command drop-collection [string] :: void -> void
@@ -31,15 +46,44 @@ class MongoDB(Database) {
         refers python:mongo.ClearCollection;
 };
 
-command list-databases :: void -> [string*]
-    uses mongo
-    refers python:mongo.ListDatabases
-    ;
+@[signature]
+class Collection(Collection) {
+    command get [string id] :: void -> Record | null
+        refers python:mongo.Get;
+    
+    command set [string? id] :: Record -> void
+        refers python:mongo.Set;
+    
+    command select :: QueryExpr -> [Record*]
+        refers python:mongo.Select;
+    
+    command delete [string? id] :: QueryExpr -> void
+        refers python:mongo.Delete;
+    
+    command exists [string id] :: void -> boolean {
+        get %1 | when {
+            None => false,
+            * => true
+        }
+    };
+    
+    command clone [string id] :: void -> void {
+        [get %1, undefined] | xjson:put $._id | set
+    };
 
-command create-database [string] :: void -> Database
-    uses mongo
-    refers python:mongo.CreateDatabase
-    ;
+    command list-ids :: QueryExpr -> [string*] {
+        select | each {
+            $._id
+        }
+    };
+
+};
+
 
 type Database = foreign;
 type Collection = foreign;
+type Record = {
+    *:(string|number|boolean|array|object|ObjectId)?
+};
+type QueryExpr = Record | null;
+type ObjectId = @ObjectId string;
