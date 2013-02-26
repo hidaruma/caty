@@ -76,6 +76,10 @@ class Delete(Command):
         else:
             self.arg0.remove(bson_from_xjson(input))
 
+class ToBSON(Command):
+    def execute(self, input):
+        return bson_from_xjson(input)
+
 def xjson_from_bson(o):
     if isinstance(o, ObjectId):
         return json.tagged(u'ObjectId', unicode(str(o)))
@@ -94,17 +98,21 @@ def xjson_from_bson(o):
     else:
         return o
 
+import re
+bson_key_pattern = re.compile("[_a-zA-Z0-9!'#&%@,=~^][_a-zA-Z0-9!'#&%@,=~^$]{0,255}")
 def bson_from_xjson(o):
     if isinstance(o, json.TaggedValue):
         if o.tag == 'ObjectId':
             return ObjectId(o.value)
         else:
-            throw_caty_exception(u'BadInput', json.pp(o))
+            throw_caty_exception(u'BadInput', u'Not BSON serializable data: $data', data=json.pp(o))
     elif isinstance(o, list):
         return [bson_from_xjson(i) for i in o if o is not None]
     elif isinstance(o, dict):
         r = {}
         for k, v in o.items():
+            if not bson_key_pattern.match(k):
+                throw_caty_exception(u'BadInput', u'In valid key: $key', key=k)
             r[k] = bson_from_xjson(v)
             if r[k] is None:
                 del r[k]

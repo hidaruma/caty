@@ -4,6 +4,18 @@
  */
 module mongo in casm;
 
+/** 
+ * mongodbに格納される形の値に変換する。
+ */
+command to-bson :: object -> BSON
+    refers python:mongo.ToBSON;
+
+type BSON = {
+    *: (string | number | boolean | ObjectId | BSON | binary),
+};
+
+type ObjectId = foreign;
+
 @[signature]
 class MongoHandler(foreign) {
 };
@@ -83,7 +95,10 @@ class Collection(Collection) {
 type Database = foreign;
 type Collection = foreign;
 type Record = {
-    *:(string|number|boolean|array|object|ObjectId)?
+    *:(BScalar | Record | BArray)?
 };
+type BScalar = string | number | boolean | EncodedObjectId;
+type BArray = [(BScalar|BArray|Record)*];
 type QueryExpr = Record | null;
-type ObjectId = @ObjectId string;
+type EncodedObjectId = @ObjectId string;
+
