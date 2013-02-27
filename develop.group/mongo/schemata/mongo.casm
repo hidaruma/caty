@@ -30,6 +30,16 @@ facility MongoHandler(null) configured MongoConfig
     refers python:mongolib.MongoHandler;
 
 entity mongo = MongoHandler(null);
+type Status = {
+  "status": ("stopped" | "running" | "unknown"),
+  "host": string(remark="ホストアドレス"),
+  "port": integer(remark="ポート番号"),
+};
+
+command status :: void -> Status
+    reads mongo
+    refers python:mongo.Status
+;
 
 command list-databases :: void -> [string*]
     uses mongo

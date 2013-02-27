@@ -14,7 +14,7 @@ class MongoHandler(MongoHandlerBase):
 
     @classmethod
     def instance(cls, app, system_param):
-        return MongoHandler(system_param)
+        return MongoHandler(app, system_param)
 
     @classmethod
     def finalize(cls, app):
@@ -27,11 +27,14 @@ class MongoHandler(MongoHandlerBase):
     def clone(self):
         return self
 
-    def __init__(self, *ignore):
+    def __init__(self, app, system_param):
+        self.app = app
+        self.system_param = system_param
         try:
-            self.conn = Connection(host=self.config.get('host', 'localhost'), port=self.config.get('port', 27017))
+            self.conn = Connection(host=self.config.get('host', u'localhost'), port=self.config.get('port', 27017))
         except ConnectionFailure as e:
-            throw_caty_exception(u'DatabaseAccessError', u'error=$e', e=str(e))
+            self.app.i18n.write(u'DatabaseAccessError: error=$e', e=str(e))
+            self.conn = None
 
     def list_databases(self):
         return self.conn.database_names()

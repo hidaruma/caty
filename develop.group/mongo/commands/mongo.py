@@ -2,6 +2,14 @@ from caty.command import *
 import caty.jsontools as json
 from bson import ObjectId
 from decimal import Decimal
+from caty.core.spectypes import UNDEFINED
+
+class Status(Command):
+    def execute(self):
+        return {
+            'host': self.mongo.config.get('host', u'localhost'),           'port': self.mongo.config.get('port', 27017),
+            'status': u'running' if self.mongo.conn else u'stopped'
+        }
 
 class ListDatabases(Command):
     def execute(self):
@@ -95,6 +103,8 @@ def xjson_from_bson(o):
         for k, v in o.items():
             r[k] = xjson_from_bson(v)
         return r
+    elif o is None:
+        return UNDEFINED
     else:
         return o
 
@@ -126,5 +136,7 @@ def bson_from_xjson(o):
             return {'__int__': a, '__float__': b}
         else:
             return {'__int__': s}
+    elif o is UNDEFINED:
+        return None
     else:
         return None
