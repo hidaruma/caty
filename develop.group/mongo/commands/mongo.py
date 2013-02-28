@@ -109,7 +109,7 @@ def xjson_from_bson(o):
         return o
 
 import re
-bson_key_pattern = re.compile("[_a-zA-Z0-9!'#&%@,=~^][_a-zA-Z0-9!'#&%@,=~^$]{0,255}")
+bson_key_pattern = re.compile("[_a-zA-Z!'#&%@,=~^][_a-zA-Z0-9!'#&%@,=~^$]{0,255}")
 def bson_from_xjson(o):
     if isinstance(o, json.TaggedValue):
         if o.tag == 'ObjectId':
@@ -122,7 +122,7 @@ def bson_from_xjson(o):
         r = {}
         for k, v in o.items():
             if not bson_key_pattern.match(k):
-                throw_caty_exception(u'BadInput', u'In valid key: $key', key=k)
+                throw_caty_exception(u'BadInput', u'Invalid key: $key', key=k)
             r[k] = bson_from_xjson(v)
             if r[k] is None:
                 del r[k]
