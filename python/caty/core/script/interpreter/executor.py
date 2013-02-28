@@ -220,7 +220,6 @@ class CommandExecutor(BaseInterpreter):
     def visit_parlist(self, node):
         node._prepare()
         r = []
-        print node.in_schema.schema_list
         node.in_schema.validate(self.input)
         for val, cmd in zip(self.input, iter(node)):
             self.input = val
