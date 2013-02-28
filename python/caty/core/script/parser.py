@@ -6,6 +6,7 @@ from caty.core.command import *
 from caty.core.script.proxy import CommandProxy
 from caty.core.script.proxy import ScalarProxy as ScalarBuilder
 from caty.core.script.proxy import ListProxy as ListBuilder
+from caty.core.script.proxy import ParallelListProxy as ParallelListBuilder
 from caty.core.script.proxy import ObjectProxy as ObjectBuilder
 from caty.core.script.proxy import ConstNodeProxy as ConstNode
 from caty.core.script.proxy import CommandNodeProxy as CommandNode
@@ -289,6 +290,7 @@ class ScriptParser(Parser):
                     self.repeat,
                     self.command,
                     self.list, 
+                    self.par_list, 
                     self.var_ref,
                     self.arg_ref,
                     self.named_block,
@@ -499,6 +501,15 @@ class ScriptParser(Parser):
         values = seq.parse(split(self.listitem, self.comma, True))
         seq.parse(']')
         l = ListBuilder()
+        l.set_values(anything(values))
+        return l
+
+    def par_list(self, seq):
+        from itertools import dropwhile
+        seq.parse('=[')
+        values = seq.parse(split(self.listitem, self.comma, True))
+        seq.parse(']')
+        l = ParallelListBuilder()
         l.set_values(anything(values))
         return l
 

@@ -17,6 +17,9 @@ class BaseInterpreter(object):
     def visit_list(self, node):
         raise NotImplementedError(u'{0}#visit_list'.format(self.__class__.__name__))
 
+    def visit_parlist(self, node):
+        raise NotImplementedError(u'{0}#visit_parlist'.format(self.__class__.__name__))
+    
     def visit_object(self, node):
         raise NotImplementedError(u'{0}#visit_object'.format(self.__class__.__name__))
 

@@ -96,6 +96,13 @@ class ListProxy(Proxy):
     def _reify(self):
         return [v.reify() for v in self.values]
 
+class ParallelListProxy(ListProxy):
+
+    def instantiate(self, builder):
+        l = ParallelListBuilder()
+        l.set_values([v.instantiate(builder) for v in self.values])
+        return l
+
 class ObjectProxy(Proxy):
     reification_type = u'_object'
     def __init__(self):

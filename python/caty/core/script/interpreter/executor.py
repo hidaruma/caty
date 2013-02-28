@@ -204,7 +204,6 @@ class CommandExecutor(BaseInterpreter):
         self.input = None
         return node.af.accept(self)
 
-
     def visit_scalar(self, node):
         node._prepare()
         return node.value
@@ -216,6 +215,16 @@ class CommandExecutor(BaseInterpreter):
             prev_input = self.input
             r.append(v.accept(self))
             self.input = prev_input
+        return r
+
+    def visit_parlist(self, node):
+        node._prepare()
+        r = []
+        print node.in_schema.schema_list
+        node.in_schema.validate(self.input)
+        for val, cmd in zip(self.input, iter(node)):
+            self.input = val
+            r.append(cmd.accept(self))
         return r
 
     def visit_object(self, node):

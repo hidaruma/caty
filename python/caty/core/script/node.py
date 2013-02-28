@@ -65,6 +65,23 @@ class ListBuilder(Syntax):
     def accept(self, visitor):
         return visitor.visit_list(self)
 
+class ParallelListBuilder(ListBuilder):
+    command_decl = u"""
+    /**
+     * 
+     */
+    command __parellel-list-builder :: array -> array
+                        refers python:caty.core.script.node.ListBuilder;
+    """
+    @property
+    def in_schema(self):
+        from caty.core.schema.base import UnivSchema
+        from caty.core.schema.array import ArraySchema
+        return ArraySchema([UnivSchema()], options={'repeat': True, 'minItems': len(self.values)})
+
+    def accept(self, visitor):
+        return visitor.visit_parlist(self)
+
 class ObjectBuilder(Syntax):
     command_decl = u"""
     /**
