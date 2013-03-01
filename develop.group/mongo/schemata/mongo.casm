@@ -112,3 +112,10 @@ type BArray = [(BScalar|BArray|Record)*];
 type QueryExpr = Record | null;
 type EncodedObjectId = @ObjectId string;
 
+command f {*:any?} [string*] :: void -> void {
+%_OPTS|dump --force;%_ARGV|dump --force
+};
+
+command g {*:any?} [string*] :: void -> void {
+f %--* %#
+};

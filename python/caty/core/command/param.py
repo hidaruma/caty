@@ -45,6 +45,7 @@ class ArgVarLoader(Param):
 
 class GlobOption(Param):
     type = 'glob'
+    key = '*'
     def reify(self):
         return tagged(u'_glob', {})
 

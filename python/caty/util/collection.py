@@ -110,8 +110,11 @@ class MultiMap(object):
 
     def update(self, o):
         for k, v in o.items():
-            for i in v:
-                self[k] = i#copy.deepcopy(i)
+            if isinstance(o, MultiMap):
+                for i in v:
+                    self[k] = i#copy.deepcopy(i)
+            else:
+                self[k] = v
 
     def get(self, k, default):
         return self.__dict.get(k, default)
