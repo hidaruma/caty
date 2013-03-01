@@ -2,6 +2,12 @@ module idl in casm;
 
 type PySource = {"moduleName": string, "source": string};
 
+/** ファシリティ用のPythonコード生成 */
+command generate-facility-class :: sreif:ClassSummary -> PySource
+    throws [InvalidInput]
+    refers python:idl.GenerateFacilityClass;
+
+/** 非ファシリティ用のPythonコード生成 */
 command generate-py-class :: sreif:ClassSummary -> PySource
     throws [InvalidInput]
     refers python:idl.GeneratePyClass;
