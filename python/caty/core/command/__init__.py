@@ -38,11 +38,11 @@ class Command(object):
         self.__arg0_ref = None
         if opts_ref:
             for o in opts_ref:
-                if o.key == '0':
+                if o.key == '0' or o.type == 'glob':
                     self.__arg0_ref = o
                 else:
                     self._opt_names.append(o.key)
-        if self.__arg0_ref:
+        if self.__arg0_ref and self.__arg0_ref.type != 'glob':
             opts_ref.remove(self.__arg0_ref)
         self.__opts_ref = opts_ref
         self.__args_ref = args_ref
@@ -539,7 +539,9 @@ class VarLoader(object):
                     return opt.default
 
         elif opt.type == 'glob':
-            return opts['_OPTS']
+            a = opts.get('_ARGV')
+            if a:
+                return a[0]
         else:
             if opt.key in opts:
                 return opts[opt.key]

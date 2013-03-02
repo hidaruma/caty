@@ -117,5 +117,5 @@ command f {*:any?} [string*] :: void -> void {
 };
 
 command g {*:any?} [string*] :: void -> void {
-f %--* %#
+f %--* --c=2 %# c
 };
