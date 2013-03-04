@@ -115,6 +115,12 @@ def bson_from_xjson(o):
         if o.tag == 'ObjectId':
             return ObjectId(o.value)
         else:
+            if isinstance(o.value, dict):
+                r = bson_from_xjson(o.value)
+                if '_tag' in r:
+                    throw_caty_exception(u'BadInput', u'Not BSON serializable data: $data', data=json.pp(o))
+                r['_tag'] = o.tag
+                return r
             throw_caty_exception(u'BadInput', u'Not BSON serializable data: $data', data=json.pp(o))
     elif isinstance(o, list):
         return [bson_from_xjson(i) for i in o if o is not None]

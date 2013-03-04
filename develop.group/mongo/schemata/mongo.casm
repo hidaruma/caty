@@ -4,17 +4,43 @@
  */
 module mongo in casm;
 
+/** _tagプロパティを使用禁止にしたオブジェクト */
+type BsonizableUntaggedObject = {
+ /** _tagは特別な目的に予約する */
+ "_tag": undefined,
+ * : BsonizableData?
+}(propNameFormat="bson-key");
+
+
+/** オブジェクトにタグを許す */
+type BsonizableObject = @* BsonizableUntaggedObject;
+
 /** 
  * mongodbに格納される形の値に変換する。
  */
-command to-bson :: object -> BSON
+command to-bson :: BsonizableObject -> BsonizedData
     refers python:mongo.ToBSON;
 
-type BSON = {
-    *: (string | number | boolean | ObjectId | BSON | binary),
-};
+type BsonizableData =(string | number | boolean | EncodedObjectId | BsonizableObject | binary);
 
 type ObjectId = foreign;
+
+
+type BsonizedObject = {
+ "_tag": string?,
+ * : BsonizedData?
+}(propNameFormat="bson-key");
+
+type BsonizedData = (BScalar | BsonizedObject | ObjectId);
+
+type Record = {
+    *:(BScalar | Record | BArray)?
+};
+type BScalar = string | number | boolean | EncodedObjectId;
+type BArray = [(BScalar|BArray|Record)*];
+type QueryExpr = Record | null;
+type EncodedObjectId = @ObjectId string;
+
 
 @[signature]
 class MongoHandler(foreign) {
@@ -104,18 +130,4 @@ class Collection(Collection) {
 
 type Database = foreign;
 type Collection = foreign;
-type Record = {
-    *:(BScalar | Record | BArray)?
-};
-type BScalar = string | number | boolean | EncodedObjectId;
-type BArray = [(BScalar|BArray|Record)*];
-type QueryExpr = Record | null;
-type EncodedObjectId = @ObjectId string;
 
-command f {*:any?} [string*] :: void -> void {
-%_OPTS|dump --force;%_ARGV|dump --force
-};
-
-command g {*:any?} [string*] :: void -> void {
-f %--* --c=2 %# c
-};
