@@ -56,6 +56,7 @@ facility MongoHandler(null) configured MongoConfig
     refers python:mongolib.MongoHandler;
 
 entity mongo = MongoHandler(null);
+
 type Status = {
   "status": ("stopped" | "running" | "unknown"),
   "host": string(remark="ホストアドレス"),
@@ -84,30 +85,46 @@ command activate-database [string] :: void -> Database
 
 @[signature]
 class Database(Database) {
+    @[reader]
     command list-collections :: void -> [string*]
         refers python:mongo.ListCollections;
+
+    @[updater]
     command drop-collection [string] :: void -> void
         refers python:mongo.DropCollection;
+    
+    @[updater]
     command create-collection [string] :: void -> Collection
         refers python:mongo.CreateCollection;
+    
+    @[reader]
+    command get-collection [string] :: void -> Collection
+        refers python:mongo.GetCollection;
+    
+    @[updater]
     command clear-collection [string] :: void -> void
         refers python:mongo.ClearCollection;
 };
 
 @[signature]
 class Collection(Collection) {
+    @[reader]
     command get [string id] :: void -> Record | null
         refers python:mongo.Get;
     
+    @[updater]
     command set [string? id] :: Record -> void
         refers python:mongo.Set;
     
+    @[reader]
     command select :: QueryExpr -> [Record*]
         refers python:mongo.Select;
     
+    @[updater]
     command delete [string? id] :: QueryExpr -> void
         refers python:mongo.Delete;
     
+    @[reader]
     command exists [string id] :: void -> boolean {
         get %1 | when {
             None => false,
@@ -115,17 +132,18 @@ class Collection(Collection) {
         }
     };
     
+    @[reader]
     command clone [string id] :: void -> void {
         [get %1, undefined] | xjson:put $._id | set
     };
 
+    @[reader]
     command list-ids :: QueryExpr -> [string*] {
         select | each {
             $._id
         }
     };
-
-};
+} refers python:mongolib.Collection;
 
 
 type Database = foreign;

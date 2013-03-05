@@ -50,40 +50,6 @@ class ClearCollection(Command):
     def execute(self):
         self.arg0[self.col_name].remove(None)
 
-class Get(Command):
-    def setup(self, id):
-        self._id = id
-
-    def execute(self):
-        return xjson_from_bson(self.arg0.find_one(ObjectId(self._id)))
-
-class Set(Command):
-    def setup(self, id=None):
-        self._id = id
-
-    def execute(self, input):
-        if self._id:
-            self.arg0.update({'_id': ObjectId(self._id)}, bson_from_xjson(input))
-        else:
-            self.arg0.insert(bson_from_xjson(input))
-
-class Select(Command):
-    def execute(self, input):
-        if input:
-            return map(xjson_from_bson, self.arg0.find(bson_from_xjson(input)))
-        else:
-            return map(xjson_from_bson, self.arg0.find())
-
-class Delete(Command):
-    def setup(self, id=None):
-        self._id = id
-
-    def execute(self, input):
-        if self._id:
-            self.arg0.remove(ObjectId(self._id))
-        else:
-            self.arg0.remove(bson_from_xjson(input))
-
 class ToBSON(Command):
     def execute(self, input):
         return bson_from_xjson(input)
