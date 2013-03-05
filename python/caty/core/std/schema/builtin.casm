@@ -628,7 +628,7 @@ type UncloseInputArr = [
 
 ];
 
-type Classified = {
+type Classed = {
     "className": string,
     "state": univ,
 };

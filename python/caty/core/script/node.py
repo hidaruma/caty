@@ -769,7 +769,7 @@ class Empty(Syntax):
 
 
 class MethodChain(Syntax):
-    command_decl = u"""command __method_chain<T default univ> :: Classified -> T
+    command_decl = u"""command __method_chain<T default univ> :: Classed -> T
                         refers python:caty.core.script.node.MethodChain;"""
 
     def __init__(self, proxy, builder):

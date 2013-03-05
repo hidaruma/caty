@@ -138,4 +138,29 @@ command compat :: [string ver1, string ver2] -> triboolean throws SyntaxError
 // refers python:
 ;
 
+/** 構造体（オブジェクト）からバージョン文字列を組み立てる
+ */
+command unparse :: ParsedVersion -> string {
+  [
+    $.major-ver | to-string, ".",
+    $.minor-ver | to-string, ".",
+    $.minor-ver | to-string,
+    $.prerelease-ver? | when {undefined=> "", *=> ["-", pass] |text:concat, },
+    $.build-ver? | when {undefined=> "", *=> ["+", pass] |text:concat, },
+  ] | text:concat
+}
+;
+
+type VersionRange = string(remark="バージョン範囲パターン") | [string(remark="バージョン範囲パターン")*];
+
+/** ver が range に含まれる（パターンにマッチする）かどうかを判定する
+ * 判定不能なときは indef を返す。
+ *
+ * rangeはpackage.jsonのdependenciesで使われる形式。
+ */
+@[should-be-implemented]
+command matches :: [string ver, VersionRange range] -> triboolean throws SyntaxError
+ // refers python:semver.Matches
+;
+
 // End of Module
