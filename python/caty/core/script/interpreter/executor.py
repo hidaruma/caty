@@ -354,6 +354,8 @@ class CommandExecutor(BaseInterpreter):
                 node.var_storage.opts['_key'] = n
                 node.var_storage.opts['_value'] = i[n]
                 r.append(node.cmd.accept(self))
+            except BreakSignal:
+                break
             finally:
                 node.var_storage.del_scope()
             n+=1
@@ -381,6 +383,8 @@ class CommandExecutor(BaseInterpreter):
                 node.var_storage.opts['_key'] = k
                 node.var_storage.opts['_value'] = v
                 r.append(node.cmd.accept(self))
+            except BreakSignal:
+                break
             finally:
                 node.var_storage.del_scope()
         return r
@@ -635,6 +639,11 @@ class CommandExecutor(BaseInterpreter):
     def set_var_storage(self, v):
         self.cmd.set_var_storage(v)
 
+    def visit_break(self, node):
+        raise BreakSignal()
+
+class BreakSignal(Exception):
+    pass
 
 from caty.core.command import Builtin, Command, scriptwrapper
 from caty.core.exception import CatyException

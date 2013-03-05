@@ -767,6 +767,15 @@ class Empty(Syntax):
     def accept(self, visitor):
         return visitor.visit_empty(self)
 
+class Break(Syntax):
+    command_decl = u"""command __break :: univ -> never
+                        refers python:caty.core.script.node.Break;
+    """
+    def __init__(self, *args, **kwds):
+        Syntax.__init__(self)
+
+    def accept(self, visitor):
+        return visitor.visit_break(self)
 
 class MethodChain(Syntax):
     command_decl = u"""command __method_chain<T default univ> :: Classed -> T
