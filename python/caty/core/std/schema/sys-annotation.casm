@@ -1,0 +1,74 @@
+// -*- coding: utf-8 -*-
+/** システムが認識し使用するアノテーション */
+@[register-public]
+module sys-annotation;
+
+/** 公開モジュールへの登録
+ */
+@[target(["TYPE_DECL", "COMMAND_DECL", "MODULE_DECL"]), affect-management]
+annotation register-public :: boolean?;
+
+/** 非推奨／廃止予定の対象をマークする
+ */
+@[target(["TYPE_DECL", "COMMAND_DECL", "PROPERTY"]), affect-management]
+annotation deprecated :: boolean?;
+
+/** デフォルト値
+ * オブジェクトのプロパティが省略されたときのデフォルト値を指定する。
+ * 省略可能なプロパティにしか意味を持たない。
+ */
+@[target("PROPERTY")]
+annotation default ::  any;
+
+/** 同時出現性
+ * 指定した名前のプロパティがないときは、ターゲットのプロパティは出現できない。
+ * 複数のプロパティに依存関係があるときに使用する。
+ */
+@[target("PROPERTY"), affect-validation]
+annotation with :: (string | [string, string*]);
+
+/** 排他出現性
+ * 指定した名前のプロパティがあるときは、ターゲットのプロパティは出現できない。
+ * 複数のプロパティに依存関係があるときに使用する。
+ */
+@[target("PROPERTY"), affect-validation]
+annotation without :: (string | [string, string*]);
+
+/** 単一インスタンス実行
+ * このアノテーション付きで宣言されたコマンドは、
+ * 一つのプロセスあたり高々一つのインスタンスだけが実行される。
+ */
+@[target("COMMAND_DECL")]
+annotation sequential :: boolean?;
+
+/** インターフェイスを定義するクラスである */
+@[target("CLASS_DECL")]
+annotation signature :: boolean?;
+
+
+/*== cara で使用するアノテーション ==*/
+
+/** 動的なポートである
+ * dynamicから変更
+ */
+@[target(["PORT_DECL"]) ]
+annotation indirect :: boolean?;
+
+/** 抽象状態である
+ */
+@[target(["STATE_DECL"]) ]
+annotation abstract :: boolean?;
+
+
+/** アクション核の入力境界となるフラグメントである
+ */
+@[target(["FRAGMENT_PROFILE_DECL"]) ]
+annotation in :: boolean?;
+
+/** アクション核の出力境界となるフラグメントである
+ */
+@[target(["FRAGMENT_PROFILE_DECL"]) ]
+annotation out :: boolean?;
+
+
+// End of Module

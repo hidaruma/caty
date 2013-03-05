@@ -2,22 +2,12 @@
 /** 標準のアノテーション */
 module annotation.std;
 
-/** 公開モジュールへの登録
- */
-@[target(["TYPE_DECL", "COMMAND_DECL", "MODULE_DECL"]), affect-management]
-annotation register-public :: boolean?;
-
 /** 型の隠蔽
  * このアノテーション付きで宣言・定義された型はモジュールからexportされない。
  * 定義された型名は不可視。
  */
 @[target("TYPE_DECL"), affect-management]
 annotation hidden :: boolean?;
-
-/** 非推奨／廃止予定の対象をマークする
- */
-@[target(["TYPE_DECL", "COMMAND_DECL", "PROPERTY"]), affect-management]
-annotation deprecated :: boolean?;
 
 /** 将来の懸念となる対象をマークする
  * 代替となる機能が実装された段階でunquietをdeprecatedに変更する。
@@ -31,35 +21,11 @@ annotation unquiet :: boolean?;
 @[target(["TYPE_DECL", "COMMAND_DECL"]), affect-management]
 annotation system :: boolean?;
 
-
-/*{{{
-
-/** open制約
- * この型の制約はopenと解釈される。再帰的に適用される。
- */
-@[target(["OBJECT", "ARRAY"]), affect-parsing]
-annotation open :: boolean?;
-
-/** closed制約
- * この型の制約はclosedと解釈される。再帰的に適用される。
- */
-@[target(["OBJECT", "ARRAY"]), affect-parsing]
-annotation closed :: boolean?;
-
-}}}*/
-
 /** 副作用のないコマンドをマークする
  */
 @[target(["COMMAND_DECL"]), affect-management]
 annotation no-effect :: boolean?;
 
-
-/** デフォルト値
- * オブジェクトのプロパティが省略されたときのデフォルト値を指定する。
- * 省略可能なプロパティにしか意味を持たない。
- */
-@[target("PROPERTY")]
-annotation default ::  any;
 
 /** 推奨値
  * オブジェクトのプロパティの推奨値を指定する。
@@ -74,20 +40,6 @@ annotation recomended :: any;
  */
 @[target("PROPERTY")]
 annotation no-default :: boolean?;
-
-/** 同時出現性
- * 指定した名前のプロパティがないときは、ターゲットのプロパティは出現できない。
- * 複数のプロパティに依存関係があるときに使用する。
- */
-@[target("PROPERTY"), affect-validation]
-annotation with :: (string | [string, string*]);
-
-/** 排他出現性
- * 指定した名前のプロパティがあるときは、ターゲットのプロパティは出現できない。
- * 複数のプロパティに依存関係があるときに使用する。
- */
-@[target("PROPERTY"), affect-validation]
-annotation without :: (string | [string, string*]);
 
 /** 依存性
  * このプロパティの値は指定した名前のプロパティ値に依存する。
@@ -126,13 +78,6 @@ annotation sample :: boolean?;
  */
 @[target("COMMAND_DECL")]
 annotation filter :: boolean?;
-
-/** 単一インスタンス実行
- * このアノテーション付きで宣言されたコマンドは、
- * 一つのプロセスあたり高々一つのインスタンスだけが実行される。
- */
-@[target("COMMAND_DECL")]
-annotation sequential :: boolean?;
 
 /* ---- */
 /*== クライアント／サーバー型のシステムで利用するアノテーション  */
