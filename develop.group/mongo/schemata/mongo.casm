@@ -38,7 +38,10 @@ type Record = {
 };
 type BScalar = string | number | boolean | EncodedObjectId;
 type BArray = [(BScalar|BArray|Record)*];
-type QueryExpr = Record | null;
+type QueryExpr = QueryObject | null | QueryTag<TaggedQueryObject>;
+type QueryObject = {*: BScalar | QueryTag<BScalar | TaggedQueryObject> | QueryObject};
+type TaggedQueryObject = @*! QueryObject;
+type QueryTag<T> = @any T | @eq T | @neq T | @lt T | @gt T | @lte T | @gte T | @and T | @or T;
 type EncodedObjectId = @ObjectId string;
 
 
@@ -97,10 +100,6 @@ class Database(Database) {
     command create-collection [string] :: void -> Collection
         refers python:mongo.CreateCollection;
     
-    @[reader]
-    command get-collection [string] :: void -> Collection
-        refers python:mongo.GetCollection;
-    
     @[updater]
     command clear-collection [string] :: void -> void
         refers python:mongo.ClearCollection;
@@ -143,7 +142,7 @@ class Collection(Collection) {
             $._id
         }
     };
-} refers python:mongolib.Collection;
+};
 
 
 type Database = foreign;
