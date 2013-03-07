@@ -1,0 +1,155 @@
+<<ignore  -*- coding: utf-8 -*- >>
+
+= ストレージ問い合わせ言語
+
+<<{
+/**
+ * ストレージ問い合わせ言語
+ */
+module query; 
+
+}>>
+
+== 補助的なデータ型
+
+<<{
+/** typeIs のパラメータに指定するBSON型の名前 */
+type bsonTypeName = (
+  "int"
+| "long"
+| "double"
+| "string"
+| "object"
+| "array"
+| "binary"
+| "objectId"
+| "boolean"
+| "dateTime"
+| "undefined"
+);
+
+}>>
+
+== スカラーリテラル
+
+<<{
+
+type scalr = (
+  /** 未定義：MongoDBではnull */
+  undefined
+|
+  boolean
+|
+  number | @int integer | @long integer | @double number
+|
+  string
+|
+  binary
+);
+
+type comparable = (
+  number | @int integer | @long integer | @double number
+|
+  string
+);
+
+type regex = string(remark="正規表現");
+
+}>>
+
+== 問い合わせ式 
+
+<<{
+/** 問い合わせ式 */
+type Expr = (
+  /** スカラーリテラル */
+  scalar   
+|
+  /** 述語論理式 */
+  Pred
+|
+  /** 複合セレクター */
+  Compound
+);
+
+}>>
+
+== 述語論理式
+
+<<{
+
+type Pred = (
+ @any |
+
+/* 等値比較 */
+ @eq scalr |
+ @notEq scalar | @ne scalar |
+
+/* 大小比較 */
+ @lt comparable |
+ @gt comparable |
+ @lte comparable |
+ @gtg comparable |
+
+/* 定義／未定義 */
+ @isDefined   | @defined |
+ @isNotDefined | @ndefined |
+
+/* 要素と集合 */
+ @isIn [scalar*]  | @in [scalar*] |
+ @isNotIn [scalar*] | @nin [scalar*] |
+ @has scalar |
+ @hasNot scalar | @hasnt scalr |
+
+/* 集合の包含関係 */
+ @includes [scalar*] |
+ @notInclude [scalar*] |
+ @isIncluded [scalar*] |
+ @isNotIncluded [scalar*] |
+
+/* パターンマッチ */
+ @like regex |
+ @regex regex |
+
+/* その他 */
+ @mod [integer, integer] |
+ @typeIs bsonTypeName | @type bsonTypeName |
+ @length integer | @size integer |
+
+/* 論理結合子 */
+ @and [Expr*]  |
+ @or  [Expr*]  |
+ @not Expr     |
+ @nor [Expr*]   |
+
+/* 限量子 */
+ @every Expr |
+ @some  Expr |
+);
+
+
+}>>
+
+
+== 複合セレクタ
+
+<<{
+
+type ObjSelector = {
+ *: Expr?
+};
+
+type ArrSelector = [Expr*];
+
+/* 複合セレクタ */
+type Compound = (
+ ObjSelector |
+ ArrSelector |
+ @open ObjSelector |
+ @open ArrSelector |
+ @close ObjSelector |
+ @close ArrSelector |
+);
+
+
+}>>
