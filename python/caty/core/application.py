@@ -266,6 +266,18 @@ class Application(object):
         self._assgin = cfg['assign']
         self._indexfiles = cfg.get('indexFiles', ['index.html', 'index.htm', 'index.cgi', 'index.act'])
         self._filetypes = cfg.get('filetypes', {})
+        self._storage_confs = cfg.get('storage', {}).get('configs', 
+                {
+                    'sqlite':  {'module': u'caty.storage.sqlite', 'conf': {'path': u'./storage.db'}},
+                    'file': {'module': u'caty.storage.file', 'conf': {'data_dir': u'./file_storage'}},
+                })
+        for k, v in self._storage_confs.items():
+            if self._global_config.storage_conf.get(k, {}).get('module') != v.get('module'):
+                self.cout.writeln('[Warning] Unknown storage backend: %s' % k)
+        self._default_storage = cfg.get('storage', {}).get('defaultBackend', 'file')
+        self._storage_conf = self._storage_confs.get(self._default_storage)
+        if not self._storage_conf:
+            self.cout.writeln('[Warning] Unknown storage backend: %s' % self._default_storage)
         self._encoding = cfg.get('encoding', 'utf-8')
         self._mime_types = self._global_config.mime_types
         self._raw_associations = self._global_config.associations
@@ -462,7 +474,7 @@ class Application(object):
         self._session_storage = self._global_config.session.storage
 
     def _init_storage(self):
-        self._storage = storage.initialize(self._global_config.storage_conf)
+        self._storage = storage.initialize(self._storage_conf)
 
     def _init_vcs(self):
         if self._global_config.vcs_module:

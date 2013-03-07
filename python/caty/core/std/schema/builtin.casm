@@ -202,7 +202,15 @@ type AppManifest = {
     /** ディレクトリに対するインデックスファイルの名前 */
     "indexFiles": [string(remark="ファイル名")*]?,
 
-    "deprecated": boolean?
+    "deprecated": boolean?,
+    "storage": {
+        @[default({"file": {"module": "caty.storage.file", "conf": {"data_dir": "./file_storage"}}})]
+        "configs": {
+            *: object,
+        }?,
+        @[default("file")]
+        "defaultBackend": string?
+    }?,
 //    *:any
 };
 
@@ -330,6 +338,9 @@ type PrjManifest = {
         "conf": {
             *: any?
         },
+    },
+    "storageBackends": {
+        "*": {"module": string, },
     },
 
 };
@@ -628,7 +639,7 @@ type UncloseInputArr = [
 
 ];
 
-type Classified = {
+type Classed = {
     "className": string,
     "state": univ,
 };

@@ -70,7 +70,8 @@ class Set(Command):
 class Select(Command):
     def execute(self, input):
         if input:
-            return map(xjson_from_bson, self.arg0.find(bson_from_xjson(input)))
+            q = compile_query(input)
+            return map(xjson_from_bson, self.arg0.find(bson_from_xjson(q, True)))
         else:
             return map(xjson_from_bson, self.arg0.find())
 
@@ -110,26 +111,27 @@ def xjson_from_bson(o):
 
 import re
 bson_key_pattern = re.compile("[_a-zA-Z!'#&%@,=~^][_a-zA-Z0-9!'#&%@,=~^$]{0,255}")
-def bson_from_xjson(o):
+def bson_from_xjson(o, is_query=False):
     if isinstance(o, json.TaggedValue):
         if o.tag == 'ObjectId':
             return ObjectId(o.value)
         else:
             if isinstance(o.value, dict):
-                r = bson_from_xjson(o.value)
+                r = bson_from_xjson(o.value, is_query)
                 if '_tag' in r:
                     throw_caty_exception(u'BadInput', u'Not BSON serializable data: $data', data=json.pp(o))
                 r['_tag'] = o.tag
                 return r
             throw_caty_exception(u'BadInput', u'Not BSON serializable data: $data', data=json.pp(o))
     elif isinstance(o, list):
-        return [bson_from_xjson(i) for i in o if o is not None]
+        return [bson_from_xjson(i, is_query) for i in o if o is not None]
     elif isinstance(o, dict):
         r = {}
         for k, v in o.items():
             if not bson_key_pattern.match(k):
-                throw_caty_exception(u'BadInput', u'Invalid key: $key', key=k)
-            r[k] = bson_from_xjson(v)
+                if not (is_query and k.startswith('$')):
+                    throw_caty_exception(u'BadInput', u'Invalid key: $key', key=k)
+            r[k] = bson_from_xjson(v, is_query)
             if r[k] is None:
                 del r[k]
         return r
@@ -146,3 +148,29 @@ def bson_from_xjson(o):
         return None
     else:
         return None
+
+def compile_query(query):
+    if isinstance(query, json.TaggedValue):
+        tag, val = json.split_tag(query)
+        if tag == 'any':
+            return None
+        elif tag == 'eq':
+            return compile_query(val)
+        elif tag == 'neq':
+            op = '$ne'
+        elif tag == 'lte':
+            op = '$le'
+        elif tag == 'gte':
+            op = '$ge'
+        else:
+            op = '$' + tag
+        return {op: compile_query(val)}
+    elif isinstance(query, dict):
+        r = {}
+        for k, v in query.items():
+            r[k] = compile_query(v)
+        return r
+    elif isinstance(query, list):
+        return map(compile_query, query)
+    else:
+        return query

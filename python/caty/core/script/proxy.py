@@ -610,6 +610,17 @@ class EmptyProxy(Proxy):
     def set_module(self, module):
         pass
 
+class BreakProxy(Proxy):
+    reification_type = u'_empty'
+    def __init__(self):
+        pass
+
+    def instantiate(self, builder):
+        return Break()
+
+    def set_module(self, module):
+        pass
+
 class MethodChainProxy(Proxy):
     def __init__(self, pipeline):
         self.pipeline = pipeline

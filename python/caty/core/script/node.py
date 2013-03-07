@@ -400,8 +400,10 @@ class Branch(object):
 
 
 class Each(Syntax):
-    command_decl = u"""command __each-functor-applied<T default any> {"seq":boolean?} :: object|[T*] -> [T*]|object
-                                                       {"seq":boolean?, "obj": boolean} :: object -> object
+    command_decl = u"""command __each-functor-applied<S default univ, T default univ> 
+           {"seq":boolean?} :: [S*] | object | foreign(remark="iterator") -> [T*]|object
+           {"iter":boolean} :: [S*] | foreign -> foreign(remark="iterator")
+           {"seq":boolean?, "obj": boolean} :: object -> object
                         refers python:caty.core.script.node.Each;"""
     def __init__(self, cmd, opts_ref):
         Syntax.__init__(self, opts_ref)
@@ -419,10 +421,15 @@ class Each(Syntax):
 
     def setup(self, opts, *ignore):
         self.__prop = opts['obj'] if 'obj' in opts else None
+        self.__iter = opts['iter'] if 'iter' in opts else None
 
     @property
     def prop(self):
         return self.__prop
+
+    @property
+    def iter(self):
+        return self.__iter
 
     def set_facility(self, facilities, app=None):
         self.cmd.set_facility(facilities, app)
@@ -767,9 +774,18 @@ class Empty(Syntax):
     def accept(self, visitor):
         return visitor.visit_empty(self)
 
+class Break(Syntax):
+    command_decl = u"""command __break :: univ -> never
+                        refers python:caty.core.script.node.Break;
+    """
+    def __init__(self, *args, **kwds):
+        Syntax.__init__(self)
+
+    def accept(self, visitor):
+        return visitor.visit_break(self)
 
 class MethodChain(Syntax):
-    command_decl = u"""command __method_chain<T default univ> :: Classified -> T
+    command_decl = u"""command __method_chain<T default univ> :: Classed -> T
                         refers python:caty.core.script.node.MethodChain;"""
 
     def __init__(self, proxy, builder):

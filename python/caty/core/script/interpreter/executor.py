@@ -337,6 +337,9 @@ class CommandExecutor(BaseInterpreter):
         node._prepare()
         if node.prop:
             return self.__iter_obj_as_array(node)
+        elif node.iter:
+            node.context = self.input
+            return self.__iter_stream(node)
         else:
             if isinstance(self.input, dict):
                 return self.__iter_obj(node)
@@ -352,12 +355,31 @@ class CommandExecutor(BaseInterpreter):
             try:
                 node.var_storage.new_scope()
                 node.var_storage.opts['_key'] = n
-                node.var_storage.opts['_value'] = i[n]
+                node.var_storage.opts['_value'] = i[n] if isinstance(i, dict) else v
                 r.append(node.cmd.accept(self))
+            except BreakSignal:
+                break
             finally:
                 node.var_storage.del_scope()
             n+=1
         return r
+
+
+    def __iter_stream(self, node):
+        n = 0
+        for v in node.context:
+            self.input = v
+            try:
+                node.var_storage.new_scope()
+                node.var_storage.opts['_key'] = n
+                node.var_storage.opts['_value'] = v
+                r = node.cmd.accept(self)
+            except BreakSignal:
+                break
+            finally:
+                node.var_storage.del_scope()
+            yield r
+            n+=1
 
     def __iter_obj_as_array(self, node):
         r = []
@@ -381,6 +403,8 @@ class CommandExecutor(BaseInterpreter):
                 node.var_storage.opts['_key'] = k
                 node.var_storage.opts['_value'] = v
                 r.append(node.cmd.accept(self))
+            except BreakSignal:
+                break
             finally:
                 node.var_storage.del_scope()
         return r
@@ -635,6 +659,11 @@ class CommandExecutor(BaseInterpreter):
     def set_var_storage(self, v):
         self.cmd.set_var_storage(v)
 
+    def visit_break(self, node):
+        raise BreakSignal()
+
+class BreakSignal(Exception):
+    pass
 
 from caty.core.command import Builtin, Command, scriptwrapper
 from caty.core.exception import CatyException

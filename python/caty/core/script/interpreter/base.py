@@ -85,3 +85,6 @@ class BaseInterpreter(object):
 
     def visit_method_chain(self, node):
         raise NotImplementedError(u'{0}#visit_method_chain'.format(self.__class__.__name__))
+
+    def visit_break(self, node):
+        raise NotImplementedError(u'{0}#visit_break'.format(self.__class__.__name__))

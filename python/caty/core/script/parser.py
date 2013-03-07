@@ -35,6 +35,7 @@ from caty.core.script.proxy import CatchProxy as Catch
 from caty.core.script.proxy import UncloseProxy as Unclose
 from caty.core.script.proxy import ChoiceBranchProxy as ChoiceBranch
 from caty.core.script.proxy import ChoiceBranchItemProxy as ChoiceBranchItem
+from caty.core.script.proxy import BreakProxy as Break
 from caty.core.script.proxy import EmptyProxy as Empty
 from caty.core.script.proxy import MethodChainProxy as MethodChain
 from caty.core.script.proxy import combine_proxy
@@ -65,6 +66,7 @@ class HashNotationFound(Exception):
 class ScriptParser(Parser):
     DEFAULT = 0
     BEGIN_REPEAT = 1
+    EACH = 2
 
     def __init__(self, facilities=None):
         self._context = [self.DEFAULT]
@@ -146,6 +148,8 @@ class ScriptParser(Parser):
                 raise EndOfBuffer(seq, self.functor)
             if func == 'begin':
                 self._context.append(self.BEGIN_REPEAT)
+            elif func == 'each':
+                self._context.append(self.EACH)
             else:
                 self._context.append(self._context[-1])
             try:
@@ -288,6 +292,7 @@ class ScriptParser(Parser):
                     self.value, 
                     self.call_forward,
                     self.repeat,
+                    self.break_,
                     self.command,
                     self.list, 
                     self.par_list, 
@@ -706,9 +711,15 @@ class ScriptParser(Parser):
 
     def repeat(self, seq):
         S(u'repeat')(seq)
-        if self._context[-1] != self.BEGIN_REPEAT:
+        if self.BEGIN_REPEAT not in self._context:
             raise ParseError(seq, u'repeat')
         return Repeat()
+
+    def break_(self, seq):
+        S(u'break')(seq)
+        if self.EACH not in self._context:
+            raise ParseError(seq, u'break')
+        return Break()
 
     def empty(self, seq):
         if seq.eof:
