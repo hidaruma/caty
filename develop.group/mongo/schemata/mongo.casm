@@ -38,10 +38,7 @@ type Record = {
 };
 type BScalar = string | number | boolean | EncodedObjectId;
 type BArray = [(BScalar|BArray|Record)*];
-type QueryExpr = QueryObject | null | QueryTag<TaggedQueryObject>;
-type QueryObject = {*: BScalar | QueryTag<BScalar | TaggedQueryObject> | QueryObject};
-type TaggedQueryObject = @*! QueryObject;
-type QueryTag<T> = @any T | @eq T | @neq T | @lt T | @gt T | @lte T | @gte T | @and T | @or T;
+type QueryExpr = query:Pred | query:ObjSelector;
 type EncodedObjectId = @ObjectId string;
 
 

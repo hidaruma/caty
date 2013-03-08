@@ -34,7 +34,7 @@ type bsonTypeName = (
 
 <<{
 
-type scalr = (
+type scalar = (
   /** 未定義：MongoDBではnull */
   undefined
 |
@@ -82,14 +82,14 @@ type Pred = (
  @any |
 
 /* 等値比較 */
- @eq scalr |
+ @eq scalar |
  @notEq scalar | @ne scalar |
 
 /* 大小比較 */
  @lt comparable |
  @gt comparable |
  @lte comparable |
- @gtg comparable |
+ @gte comparable |
 
 /* 定義／未定義 */
  @isDefined   | @defined |
@@ -99,7 +99,7 @@ type Pred = (
  @isIn [scalar*]  | @in [scalar*] |
  @isNotIn [scalar*] | @nin [scalar*] |
  @has scalar |
- @hasNot scalar | @hasnt scalr |
+ @hasNot scalar | @hasnt scalar |
 
 /* 集合の包含関係 */
  @includes [scalar*] |

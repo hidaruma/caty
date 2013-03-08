@@ -149,22 +149,49 @@ def bson_from_xjson(o, is_query=False):
     else:
         return None
 
+_qmap = {
+    'notEq': u'ne',
+    'lte': u'le',
+    'gte': u'ge',
+    'isIn': u'in',
+    'isNotIn': u'nin',
+    'includes': u'all',
+    'typeIs': u'type',
+    'length': u'size'
+}
+_qset = [u'ne', u'lt', u'gt', u'in', u'nin', u'regex', u'mod', u'type', u'size', u'and', u'or', u'not', u'nor']
+for q in _qset:
+    _qmap[q] = q
 def compile_query(query):
-    if isinstance(query, json.TaggedValue):
+    if isinstance(query, (json.TaggedValue, json.TagOnly)):
         tag, val = json.split_tag(query)
         if tag == 'any':
             return None
         elif tag == 'eq':
             return compile_query(val)
-        elif tag == 'neq':
-            op = '$ne'
-        elif tag == 'lte':
-            op = '$le'
-        elif tag == 'gte':
-            op = '$ge'
+        elif tag == 'isDefined' or tag == 'defined':
+            return {'$ne': UNDEFINED}
+        elif tag == 'isDefined' or tag == 'defined':
+            return {'$exists': True}
+        elif tag == 'isNotDefined' or tag == 'ndefined':
+            return {'$exists': False}
+        elif tag == 'has':
+            return {'$all': [val]}
+        elif tag == 'hasNot' or tag == 'hasnt':
+            return {'$not': {'$all': [val]}}
+        elif tag == 'notInclude':
+            return {'$not': {'$all': val}}
+        elif tag == 'open':
+            return compile_query(val)
+        elif tag == 'close':
+            return compile_query(val)
+        elif tag == 'like':
+            return {'$regex': val.replace('*', '.*').replace('%', '.*').replace('#', '[0-9]').replace('[!', '[^').replace('?', '.').replace('_', '.')}
+        elif tag in _qmap:
+            op = '$'+_qmap.get(tag, tag)
+            return {op: compile_query(val)}
         else:
-            op = '$' + tag
-        return {op: compile_query(val)}
+            return json.tagged(tag, compile_query(val))
     elif isinstance(query, dict):
         r = {}
         for k, v in query.items():
