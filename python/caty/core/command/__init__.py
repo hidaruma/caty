@@ -409,6 +409,23 @@ def new_dummy():
         pass
     return _Dummy
 
+def bound_command(target_class):
+    class BoundCommand(Command):
+        bound_class = None
+        def setup(self, *args):
+            self.method_args = args
+
+        def execute(self, input=UNDEFINED):
+            args = [self.arg0]
+            if input:
+                args.append(input)
+            if self.method_args:
+                args.extend(self.method_args)
+            method = self.name.replace('-', '_')
+            return getattr(self.bound_class, method)(*args)
+    BoundCommand.bound_class = target_class
+    return BoundCommand
+
 def scriptwrapper(profile, scriptfactory):
     class Wrapper(Command):
         def __init__(self, opts_ref, args_ref, type_args=[], pos=(None, None), module=None):

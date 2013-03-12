@@ -25,31 +25,6 @@ class CreateDatabase(Command):
 
 class ActivateDatabase(CreateDatabase): pass
 
-class ListCollections(Command):
-    def execute(self):
-        return self.arg0.collection_names()
-
-class DropCollection(Command):
-    def setup(self, col_name):
-        self.col_name = col_name
-
-    def execute(self):
-        self.arg0[self.col_name].drop_collection(self.col_name)
-
-class CreateCollection(Command):
-    def setup(self, col_name):
-        self.col_name = col_name
-
-    def execute(self):
-        return self.arg0[self.col_name]
-
-class ClearCollection(Command):
-    def setup(self, col_name):
-        self.col_name = col_name
-
-    def execute(self):
-        self.arg0[self.col_name].remove(None)
-
 class Get(Command):
     def setup(self, id):
         self._id = id

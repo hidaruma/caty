@@ -614,10 +614,11 @@ class Jump(object):
         self.nothing = nothing
         self.only = only
 
-class CommandURI(object):
+class CommandURI(dict):
     def __init__(self, types):
         for tp, val in types:
             setattr(self, tp, val)
+            self[tp] = val
 
 class KindReference(object):
     def __init__(self, name, annotations, docstring=u''):

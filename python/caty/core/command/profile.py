@@ -6,8 +6,10 @@ from caty.util.optionparser import OptionParser, OptionParseFailed
 import caty.core.runtimeobject as ro
 from caty.core.exception import throw_caty_exception
 from caty.core.command.param import Option
-from caty.core.command import new_dummy, Syntax
+from caty.core.command import new_dummy, Syntax, bound_command
 from caty.core.schema.base import UnivSchema
+from caty.util.path import join
+
 import types
 from itertools import *
 from functools import *
@@ -96,7 +98,42 @@ class ProfileContainer(object):
         for p in self.profiles:
             p.resolve()
 
+class BoundProfileContainer(ProfileContainer):
+    def __init__(self, name, class_uri, annotations, doc, app, module):
+        self.profiles = []
+        self.name = name
+        self.module = module
+        if not class_uri:
+            self.command_class = new_dummy()
+            self.implemented = u'none'
+        else:
+            path = (class_uri.split(':')[-1])
+            try:
+                bound_cls = self._load_bound_class(*path.rsplit('.', 1))
+            except:
+                import traceback
+                traceback.print_exc()
+                self.command_class = new_dummy()
+                self.implemented = u'none'
+            else:
+                self.command_class = bound_command(bound_cls)
+                self.implemented = u'python'
+        self._annotations = annotations or {}
+        self.doc = doc if doc else u''
+        self.defined_application = app
+        self.uri = class_uri
+        self.type_params = []
 
+    def _load_bound_class(self, modname, clsname):
+        code = 'from %s import %s as bound_cls' % (modname, clsname)
+        relpath = self.module.canonical_name.replace('.', '/')+'.py'
+        g_dict = {}
+        abspath = join(self.module._app._physical_path, 'lib', relpath)
+        obj = compile(code, relpath, 'exec')
+        g_dict['__file__'] = abspath
+        exec obj in g_dict
+        return g_dict['bound_cls']
+        
 
 class CommandProfile(object):
     u"""コマンドの引数や型の宣言を定義するクラス。

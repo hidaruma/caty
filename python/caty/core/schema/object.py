@@ -140,7 +140,7 @@ class ObjectSchema(SchemaBase, Object):
         elif self.optional and value is None:
             return
         if not isinstance(value, dict):
-            raise JsonSchemaError(dict(msg='value should be $type', type='object'))
+            raise JsonSchemaError(dict(msg='value should be $type: $data', type='object', data=value))
         if self.minProperties > -1 and self.minProperties > len(value):
             raise JsonSchemaError(dict(msg=u"Number of property should be greater than $min", min=self.minProperties), {})
         if self.maxProperties > -1 and self.maxProperties < len(value):

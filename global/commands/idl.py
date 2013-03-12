@@ -79,11 +79,11 @@ class GenerateFacilityClass(Command):
                     yield u'        return self._%s(%s)' % (name, u', '.join(a2))
                 yield u''
                 yield u'    def _%s(%s):' % (name, u', '.join(a1))
-                yield u'        raise NotImplementedError(u"%s._%s")' % (cls_name, name)
+                yield u'        raise NotImplementedError(u"%s._%s")' % ('self.__class__.__name__', name)
                 yield u''
             else:
                 yield u'    def %s(%s):' % (name, u', '.join(a1))
-                yield u'        raise NotImplementedError(u"%s.%s")' % (cls_name, name)
+                yield u'        raise NotImplementedError(u"%s.%s")' % ('self.__class__.__name__', name)
                 yield u''
 
 

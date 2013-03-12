@@ -782,6 +782,10 @@ class ClassModule(Module):
         self.count = 0
 
     @property
+    def uri(self):
+        return self._clsobj.uri
+
+    @property
     def module(self):
         return self.parent
 

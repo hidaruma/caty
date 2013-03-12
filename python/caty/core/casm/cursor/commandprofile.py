@@ -4,7 +4,7 @@ from caty.core.casm.cursor.resolver import ReferenceResolver
 from caty.core.casm.cursor.typevar import TypeVarApplier
 from caty.core.casm.cursor.normalizer import TypeNormalizer
 from caty.core.exception import CatyException
-from caty.core.command.profile import CommandProfile, ProfileContainer, ScriptProfileContainer
+from caty.core.command.profile import CommandProfile, ProfileContainer, ScriptProfileContainer, BoundProfileContainer
 from caty.core.schema import *
 
 class ProfileBuilder(SchemaBuilder):
@@ -14,7 +14,14 @@ class ProfileBuilder(SchemaBuilder):
         self._root_name = node.name
         if node.profile_container: # register-public時に処理が二重に走らないように
             return node.profile_container
-        if node.uri:
+        if u'bind' in node.annotations and self.module.is_class: # メソッドの自動バインド
+            pc = BoundProfileContainer(node.name, 
+                                  self.module.uri.get('python', ''), 
+                                  node.annotation, 
+                                  node.doc, 
+                                  node.application, 
+                                  self.module)
+        elif node.uri:
             pc = ProfileContainer(node.name, 
                                   node.uri, 
                                   self.module.command_loader, 
