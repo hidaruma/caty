@@ -43,14 +43,13 @@ class ProfileBuilder(SchemaBuilder):
             rr = ReferenceResolver(self.module)
             params = []
             # 型パラメータのデフォルト値を設定
-            for p in node.type_params:
+            for p in node.type_params + self.module.type_params:
                 schema = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
                 params.append(schema.accept(rr))
-
             self._type_params = params
             pc.type_params = params
             pat.build([self, rr])
-            e = pat.verify_type_var(node.type_var_names)
+            e = pat.verify_type_var(node.type_var_names + [t.var_name for t in self.module.type_params])
             if e:
                 raise CatyException(u'SCHEMA_COMPILE_ERROR', 
                                     u'Undeclared type variable at $this: $name',

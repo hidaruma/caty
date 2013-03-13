@@ -124,6 +124,7 @@ class Module(Facility):
         self.get_annotation = partial(self._get_resource, scope_func=lambda x:x.annotation_ns, type=u'Annotation')
         self.has_annotation = partial(self._has_resource, scope_func=lambda x:x.annotation_ns, type=u'Annotation')
 
+        self.type_params = []
         self.__related = Module.Relation()
 
     @property
@@ -780,6 +781,7 @@ class ClassModule(Module):
         for m in clsobj.member:
             m.declare(self)
         self.count = 0
+        self.type_params = clsobj.type_args
 
     @property
     def uri(self):

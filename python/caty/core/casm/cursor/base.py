@@ -59,7 +59,7 @@ class SchemaBuilder(TreeCursor):
                 type_args.append(arg.accept(self))
             return TypeReference(node.name, type_args, self.module)
         else:
-            for t in self._type_params:
+            for t in self._type_params + self.module.type_params:
                 if t.var_name == node.name:
                     schema = TypeVariable(node.name, node.type_args, t.kind, t.default, node.options, self.module)
                     return schema 
