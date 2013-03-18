@@ -413,16 +413,31 @@ def bound_command(target_class):
     class BoundCommand(Command):
         bound_class = None
         def setup(self, *args):
-            self.method_args = args
+            if self.profile.opts_schema.type != 'never':
+                if len(args) > 1:
+                    self.opt_args = args[0]
+                    self.method_args = args[1:]
+                elif args:
+                    self.opt_args = args[0]
+                    self.method_args = []
+                else:
+                    self.opt_args = {}
+                    self.method_args = []
+            else:
+                self.opt_args = {}
+                self.method_args = args
 
         def execute(self, input=UNDEFINED):
-            args = [self.arg0]
+            if 'static' in self._annotations:
+                args = []
+            else:
+                args = [self.arg0]
             if input:
                 args.append(input)
             if self.method_args:
                 args.extend(self.method_args)
             method = self.name.replace('-', '_')
-            return getattr(self.bound_class, method)(*args)
+            return getattr(self.bound_class, method)(*args, **self.opt_args)
     BoundCommand.bound_class = target_class
     return BoundCommand
 
