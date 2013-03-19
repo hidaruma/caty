@@ -437,7 +437,10 @@ def bound_command(target_class):
             if self.method_args:
                 args.extend(self.method_args)
             method = self.name.replace('-', '_')
-            return getattr(self.bound_class, method)(*args, **self.opt_args)
+            if '__property__' in self._annotations:
+                return getattr(self.bound_class, method).fget(self.arg0)
+            else:
+                return getattr(self.bound_class, method)(*args, **self.opt_args)
     BoundCommand.bound_class = target_class
     return BoundCommand
 
