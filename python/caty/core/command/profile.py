@@ -113,11 +113,14 @@ class BoundProfileContainer(ProfileContainer):
             except:
                 import traceback
                 traceback.print_exc()
-                self.command_class = new_dummy()
-                self.implemented = u'none'
+                bound_cls = None
             else:
-                self.command_class = bound_command(bound_cls)
-                self.implemented = u'python'
+                if not bound_cls:
+                    self.command_class = new_dummy()
+                    self.implemented = u'none'
+                else:
+                    self.command_class = bound_command(bound_cls)
+                    self.implemented = u'python'
         self._annotations = annotations or {}
         self.doc = doc if doc else u''
         self.defined_application = app
@@ -125,6 +128,8 @@ class BoundProfileContainer(ProfileContainer):
         self.type_params = []
 
     def _load_bound_class(self, modname, clsname):
+        if modname == 'caty.core.command' and clsname == 'DummyClass':
+            return None
         code = 'from %s import %s as bound_cls' % (modname, clsname)
         relpath = self.module.canonical_name.replace('.', '/')+'.py'
         g_dict = {}

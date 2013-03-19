@@ -26,7 +26,35 @@ def catyclass(seq):
 
 def restriction(seq):
     S('(')(seq)
-    r = typedef(seq)
+    r = option(typedef, ScalarNode(u'univ'))(seq)
+    if option(S(u'->'))(seq):
+       typedef(seq)
+    S(')')(seq)
+    return r
+
+def property(seq):
+    doc = option(docstring)(seq)
+    annotations = seq.parse(annotation)
+    keyword(u'property')(seq)
+    with strict():
+        pname = name_token(seq)
+        S('::')(seq)
+        tp = typedef(seq)
+        if option(S('='))(seq):
+            val = seq.parse(xjson.parsers)
+            annotations.add(Annotation(u'__init__', val))
+        S(u';')(seq)
+        annotations.add(Annotation(u'__property__'))
+        annotations.add(Annotation(u'bind'))
+        return CommandNode(pname, [CallPattern(None, None, CommandDecl((ScalarNode(u'void'), tp), [], []))], CommandURI([(u'python', 'caty.core.command.Dummy')]), doc, annotations, [])
+
+
+def refers(seq):
+    try:
+        return CommandURI(many1(refer)(seq))
+    except:
+        return CommandURI([(u'python', 'caty.core.command.DummyClass')])
+
     S(')')(seq)
     return r
 
