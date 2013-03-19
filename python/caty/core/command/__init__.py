@@ -402,6 +402,8 @@ class Syntax(Builtin):
 
 class Dummy(Command):
     def execute(self, *args, **kwds):
+        if '__property__' in self._annotations and '__init__' in self._annotations:
+            return self._annotations['__init__'].value
         throw_caty_exception('NotImplemented', self.name)
 
 def new_dummy():
@@ -438,6 +440,8 @@ def bound_command(target_class):
                 args.extend(self.method_args)
             method = self.name.replace('-', '_')
             if not hasattr(self.bound_class, method):
+                if '__property__' in self._annotations and '__init__' in self._annotations:
+                    return self._annotations['__init__'].value
                 throw_caty_exception(
                     'NotImplemented',
                     self.name
