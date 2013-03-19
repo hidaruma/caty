@@ -437,6 +437,11 @@ def bound_command(target_class):
             if self.method_args:
                 args.extend(self.method_args)
             method = self.name.replace('-', '_')
+            if not hasattr(self.bound_class, method):
+                throw_caty_exception(
+                    'NotImplemented',
+                    self.name
+                )
             if '__property__' in self._annotations:
                 return getattr(self.bound_class, method).fget(self.arg0)
             else:

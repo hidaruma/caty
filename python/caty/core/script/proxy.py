@@ -14,7 +14,7 @@ class Proxy(object):
     ソースコード上で見えるメソッド・プロパティが一致している。
     """
     def instantiate(self, builder):
-        raise NotImplemtentedError
+        raise NotImplementedError
 
     def set_module(self, module):
         pass
@@ -23,7 +23,7 @@ class Proxy(object):
         return json.tagged(self.reification_type, self._reify())
 
     def _reify(self):
-        raise NotImplemtentedError(u'{0}.reify'.format(self.__class__.__name__))
+        raise NotImplementedError(u'{0}.reify'.format(self.__class__.__name__))
 
 class CommandProxy(Proxy):
     u"""コマンド呼び出しに遭遇したときに構築されるプロキシクラス。
