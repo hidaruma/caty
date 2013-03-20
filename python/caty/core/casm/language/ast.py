@@ -46,7 +46,7 @@ class ASTRoot(Root):
     def __init__(self, name, type_params, ast, annotation, docstring, kind=None):
         self._name = name
         self._reference_schema = None
-        self._type_params = type_params if type_params else ()
+        self._type_params = type_params if type_params else []
         self.body = ast
         self.options = None
         self.__annotation = annotation
