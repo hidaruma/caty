@@ -110,7 +110,7 @@ class ResourceModuleContainer(object):
 
 class ResourceNode(ClassNode):
     def __init__(self, name, member, rest, ref, doc, ann):
-        ClassNode.__init__(self, name, member, rest, ref, doc, ann, [])
+        ClassNode.__init__(self, name, member, rest, None, ref, doc, ann, [])
 
     def declare(self, module):
         self.module = module

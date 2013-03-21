@@ -15,22 +15,23 @@ def catyclass(seq):
     keyword(u'class')(seq)
     classname = name_token(seq)
     type_args = seq.parse(option(type_arg, []))
-    rest = option(restriction, ScalarNode(u'univ'))(seq)
+    dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
     with strict():
         S(u'{')(seq)
         member = many([command, property])(seq)
         S(u'}')(seq)
         ref = refers(seq)
         S(u';')(seq)
-        return ClassNode(classname, member, rest, ref, doc, annotations, type_args)
+        return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args)
 
 def restriction(seq):
     S('(')(seq)
-    r = option(typedef, ScalarNode(u'univ'))(seq)
+    dom = option(typedef, ScalarNode(u'univ'))(seq)
+    codom = None
     if option(S(u'->'))(seq):
-       typedef(seq)
+       codom = option(typedef, ScalarNode(u'univ'))(seq)
     S(')')(seq)
-    return r
+    return dom, codom
 
 def property(seq):
     doc = option(docstring)(seq)

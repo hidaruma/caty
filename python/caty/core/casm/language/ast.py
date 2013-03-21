@@ -104,12 +104,13 @@ class ASTRoot(Root):
         return self.module.app
 
 class ClassNode(object):
-    def __init__(self, name, member, restriction, uri, doc, annotations, type_args):
+    def __init__(self, name, member, domain, codomain, uri, doc, annotations, type_args):
         self.name = name
         self.member = member
         self.docstring = doc
         self.annotations = annotations
-        self.restriction = restriction
+        self.restriction = domain
+        self.codomain = codomain
         self.uri = uri
         self.type_args = type_args
 
@@ -560,6 +561,8 @@ class CommandDecl(object):
         if self.__initialized:
             return
         i, o = self.profile_ast
+        if isinstance(o, ScalarNode) and o.name == '_' and cursors[0].module.is_class and cursors[0].module._clsobj.codomain:
+            o = cursors[0].module._clsobj.codomain
         for cursor in cursors:
             i = i.accept(cursor)
             o = o.accept(cursor)
