@@ -115,7 +115,7 @@ def term(seq):
         return s
 
 def singleton(seq):
-    p = seq.parse(['undefined', 'null', 'true', 'false'])
+    p = seq.parse([u'undefined', u'null', u'true', u'false'])
     if p == 'undefined':
         return UNDEFINED
     elif p == 'null':

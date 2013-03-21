@@ -261,7 +261,7 @@ class TaggedNode(Node, Tag):
     def __init__(self, tag, node):
         Node.__init__(self)
         self._tag = tag
-        self.body = node if node else ScalarNode('undefined')
+        self.body = node if node else ScalarNode(u'undefined')
 
     @property
     def tag(self):

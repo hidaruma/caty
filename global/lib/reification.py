@@ -350,6 +350,7 @@ class TypeBodyReifier(TreeCursor):
 
     @format_result(u'builtin')
     def __reify_builtin(self, node):
+        print node
         r = self._extract_common_data(node)
         r['typeName'] = node.name
         return r
