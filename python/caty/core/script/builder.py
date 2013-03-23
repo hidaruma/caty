@@ -38,7 +38,7 @@ class CommandBuilder(object):
         """
         c.set_facility(self.facilities)
 
-class NullCommand(object):
+class NullCommand(Command):
     def __init__(self, e):
         self.orig = e
 
