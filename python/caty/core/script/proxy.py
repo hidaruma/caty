@@ -98,9 +98,13 @@ class ListProxy(Proxy):
 
 class ParallelListProxy(ListProxy):
 
+    def set_wildcard(self, wildcard):
+        self.wildcard = wildcard
+
     def instantiate(self, builder):
         l = ParallelListBuilder()
         l.set_values([v.instantiate(builder) for v in self.values])
+        l.wildcard = self.wildcard
         return l
 
 class ObjectProxy(Proxy):

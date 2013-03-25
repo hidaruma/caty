@@ -79,6 +79,9 @@ class ParallelListBuilder(ListBuilder):
         from caty.core.schema.array import ArraySchema
         return ArraySchema([UnivSchema()], options={'repeat': True})
 
+    def set_wildcard(self, wildcard):
+        self.wildcard = wildcard
+
     def accept(self, visitor):
         return visitor.visit_parlist(self)
 

@@ -512,11 +512,26 @@ class ScriptParser(Parser):
     def par_list(self, seq):
         from itertools import dropwhile
         seq.parse('=[')
-        values = seq.parse(split(self.listitem, self.comma, True))
+        items = seq.parse(split(choice(lambda s: (False, self.listitem(s)), self.wildcard_item), self.comma, True))
         seq.parse(']')
+        wild = len([i for i in items if i[0]])
+        if wild > 1:
+            raise ParseError(seq, self.par_list)
+        elif wild:
+            w = True
+        else:
+            w = False
         l = ParallelListBuilder()
-        l.set_values(anything(values))
+        l.set_values(anything([i[1] for i in items]))
+        l.set_wildcard(w)
         return l
+
+    def wildcard_item(self, seq):
+        S('*')(seq)
+        try:
+            return True, seq.parse(self.make_pipeline)
+        except NothingTodo:
+            raise ParseFailed(seq, self.listitem)
 
     def listitem(self, seq):
         if seq.current == ']': 

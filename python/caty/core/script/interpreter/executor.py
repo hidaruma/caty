@@ -224,7 +224,13 @@ class CommandExecutor(BaseInterpreter):
         node.in_schema.validate(self.input)
         for val, cmd in filled_zip(self.input, node.values, UNDEFINED):
             self.input = val
-            r.append(cmd.accept(self))
+            if cmd is UNDEFINED:
+                if node.wildcard:
+                    r.append(node.values[-1].accept(self))
+                else:
+                    r.append(UNDEFINED)
+            else:
+                r.append(cmd.accept(self))
         return r
 
     def visit_object(self, node):
