@@ -194,8 +194,8 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 | nth 2     |[1, ,3,4] |         | Undefined |
 | nth 3     |[1, ,3,4] |3        ||
 | nth 4     |[1, ,3,4] |4        ||
-| nth 5     |[1, ,3,4] |         | IndexOutOfRange |
-| nth 6     |[1, ,3,4] |         | IndexOutOfRange |
+| nth 5     |[1, ,3,4] |         | Undefined |
+| nth 6     |[1, ,3,4] |         | Undefined |
 
 |= !command |= !input   |= !output|= !exception |
 | nth -2    |[1, ,3,4,] |         | Exception |
@@ -205,8 +205,8 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 | nth 2     |[1, ,3,4,] |         | Undefined|
 | nth 3     |[1, ,3,4,] |3        ||
 | nth 4     |[1, ,3,4,] |4        ||
-| nth 5     |[1, ,3,4,] |         | IndexOutOfRange |
-| nth 6     |[1, ,3,4,] |         | IndexOutOfRange |
+| nth 5     |[1, ,3,4,] |         | Undefined |
+| nth 6     |[1, ,3,4,] |         | Undefined |
 
 --safeを付ければ型エラーを除き例外は起きない。
 
