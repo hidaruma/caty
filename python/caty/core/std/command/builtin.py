@@ -506,7 +506,7 @@ class Nth(Builtin):
         # d は配列
         if n < 1 or n > len(d):
             if not self.safe:
-                throw_caty_exception(u'IndexOutOfRange', unicode(str(n)))
+                throw_caty_exception(u'Undefined', unicode(str(n)))
             else:
                 x = caty.UNDEFINED
         else:
@@ -528,7 +528,7 @@ class Item(Builtin):
             x = json.untagged(input)[self.num] # 0 はじまり
         except:
             if not self.safe:
-                throw_caty_exception(u'IndexOutOfRange', unicode(str(n)))
+                throw_caty_exception(u'Undefined', unicode(str(n)))
             else:
                 x = caty.UNDEFINED
         if x is caty.UNDEFINED and not self.safe:

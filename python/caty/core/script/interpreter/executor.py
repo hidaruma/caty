@@ -8,6 +8,7 @@ from caty.command import MafsMixin
 from copy import deepcopy
 from caty.core.facility import PEND
 import caty.util as util
+from caty.util.collection import filled_zip
 from caty import UNDEFINED
 from caty.jsontools.path import build_query
 from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettyprint, split_tag, normalize_number
@@ -221,7 +222,7 @@ class CommandExecutor(BaseInterpreter):
         node._prepare()
         r = []
         node.in_schema.validate(self.input)
-        for val, cmd in zip(self.input, iter(node)):
+        for val, cmd in filled_zip(self.input, node.values, UNDEFINED):
             self.input = val
             r.append(cmd.accept(self))
         return r

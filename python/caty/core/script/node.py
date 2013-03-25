@@ -77,7 +77,7 @@ class ParallelListBuilder(ListBuilder):
     def in_schema(self):
         from caty.core.schema.base import UnivSchema
         from caty.core.schema.array import ArraySchema
-        return ArraySchema([UnivSchema()], options={'repeat': True, 'minItems': len(self.values)})
+        return ArraySchema([UnivSchema()], options={'repeat': True})
 
     def accept(self, visitor):
         return visitor.visit_parlist(self)
