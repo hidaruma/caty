@@ -73,11 +73,6 @@ class ParallelListBuilder(ListBuilder):
     command __parellel-list-builder :: array -> array
                         refers python:caty.core.script.node.ListBuilder;
     """
-    @property
-    def in_schema(self):
-        from caty.core.schema.base import UnivSchema
-        from caty.core.schema.array import ArraySchema
-        return ArraySchema([UnivSchema()], options={'repeat': True})
 
     def set_wildcard(self, wildcard):
         self.wildcard = wildcard
@@ -115,6 +110,52 @@ class ObjectBuilder(Syntax):
 
     def accept(self, visitor):
         return visitor.visit_object(self)
+
+    def iteritems(self):
+        return self.__nodes.iteritems()
+
+    def items(self):
+        return self.__nodes.items()
+
+class ParallelObjectBuilder(Syntax):
+    command_decl = u"""
+    /**
+     * 
+     */
+    command __parallel-object-builder :: object -> object
+                        refers python:caty.core.script.node.ParallelObjectBuilder;
+    """
+    def __init__(self, *args, **kwds):
+        Syntax.__init__(self, *args, **kwds)
+        self.__nodes = {}
+        self.wildcard = None
+
+    def add_node(self, node):
+        if node.name == u'*':
+            if self.wildcard:
+                raise KeyError(node.name)
+            else:
+                self.wildcard = node
+            return
+        if node.name in self.__nodes:
+            raise KeyError(node.name)
+        self.__nodes[node.name] = node
+    
+    def set_facility(self, facilities, app=None):
+        for n in self.__nodes.values():
+            n.set_facility(facilities, app)
+        if self.wildcard:
+            self.wildcard.set_facility(facilities, app)
+   
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        for v in self.__nodes.values():
+            v.set_var_storage(storage)
+        if self.wildcard:
+            self.wildcard.set_var_storage(storage)
+
+    def accept(self, visitor):
+        return visitor.visit_parobject(self)
 
     def iteritems(self):
         return self.__nodes.iteritems()

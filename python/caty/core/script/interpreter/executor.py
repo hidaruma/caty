@@ -251,6 +251,30 @@ class CommandExecutor(BaseInterpreter):
         else:
             return obj
 
+    def visit_parobject(self, node):
+        node._prepare()
+        node.in_schema.validate(self.input)
+        obj = {}
+        prev_input = {}
+        prev_input.update(self.input)
+        for name, cmd in node.iteritems():
+            self.input = prev_input.pop(cmd.name, UNDEFINED)
+            obj[name] = cmd.accept(self)
+        for k , v in prev_input.items():
+            if node.wildcard:
+                self.input = v
+                obj[k] = node.wildcard.accept(self)
+        if '$$tag' in obj:
+            if '$$val' in obj:
+                o = tagged(obj['$$tag'], obj['$$val'])
+            else:
+                t = obj['$$tag']
+                del obj['$$tag']
+                o = tagged(t, obj)
+            return o
+        else:
+            return obj
+
     def visit_varstore(self, node):
         node._prepare()
         if node.var_name not in node.var_storage.opts:

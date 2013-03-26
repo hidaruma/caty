@@ -8,6 +8,7 @@ from caty.core.script.proxy import ScalarProxy as ScalarBuilder
 from caty.core.script.proxy import ListProxy as ListBuilder
 from caty.core.script.proxy import ParallelListProxy as ParallelListBuilder
 from caty.core.script.proxy import ObjectProxy as ObjectBuilder
+from caty.core.script.proxy import ParallelObjectProxy as ParallelObjectBuilder
 from caty.core.script.proxy import ConstNodeProxy as ConstNode
 from caty.core.script.proxy import CommandNodeProxy as CommandNode
 from caty.core.script.proxy import DispatchProxy as Dispatch
@@ -296,6 +297,7 @@ class ScriptParser(Parser):
                     self.command,
                     self.list, 
                     self.par_list, 
+                    self.par_obj, 
                     self.var_ref,
                     self.arg_ref,
                     self.named_block,
@@ -546,6 +548,29 @@ class ScriptParser(Parser):
         if not seq.peek(self.comma):
             raise ParseFailed(seq, self.listitem)
         return CommandProxy(u'undefined', [], {}, [], (seq.col, seq.line))
+
+    def par_obj(self, seq):
+        seq.parse('={')
+        items = seq.parse(split(self.par_item, self.comma, True))
+        seq.parse('}')
+        o = ParallelObjectBuilder()
+        for i in anything(items):
+            o.add_node(i)
+        return o
+
+    def par_item(self, seq):
+        if seq.current == '}': return
+        n = choice(xjson.string, S(u'*'))(seq)
+        if not seq.parse(option(':')):
+            if seq.eof:
+                raise EndOfBuffer(seq, self.item)
+            else:
+                raise ParseError(seq, self.item)
+        try:
+            v = self.make_pipeline(seq)
+        except NothingTodo:
+            raise ParseFailed(seq, self.item)
+        return CommandNode(n, v)
 
     def object(self, seq):
         seq.parse('{')

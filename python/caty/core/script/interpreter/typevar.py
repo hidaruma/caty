@@ -23,6 +23,16 @@ class TypeVarApplier(BaseInterpreter):
         for n in node:
             n.accept(self)
 
+    def visit_parlist(self, node):
+        for n in node:
+            n.accept(self)
+
+    def visit_parobject(self, node):
+        for k, v in node.items():
+            v.accept(self)
+        if node.wildcard:
+            node.wildcard.accept(self)
+
     def visit_object(self, node):
         for k, v in node.items():
             v.accept(self)

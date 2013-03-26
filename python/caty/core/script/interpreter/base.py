@@ -23,6 +23,9 @@ class BaseInterpreter(object):
     def visit_object(self, node):
         raise NotImplementedError(u'{0}#visit_object'.format(self.__class__.__name__))
 
+    def visit_parobject(self, node):
+        raise NotImplementedError(u'{0}#visit_parobject'.format(self.__class__.__name__))
+
     def visit_varstore(self, node):
         raise NotImplementedError(u'{0}#visit_varstore'.format(self.__class__.__name__))
 

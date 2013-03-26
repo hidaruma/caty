@@ -131,6 +131,30 @@ class ObjectProxy(Proxy):
             o[n.name] = n.reify()
         return o
 
+class ParallelObjectProxy(Proxy):
+    reification_type = u'_object'
+    def __init__(self):
+        self.nodes = []
+
+    def add_node(self, node):
+        self.nodes.append(node)
+
+    def instantiate(self, builder):
+        o = ParallelObjectBuilder()
+        for n in self.nodes:
+            o.add_node(n.instantiate(builder))
+        return o
+
+    def set_module(self, module):
+        for n in self.nodes:
+            n.set_module(module)
+
+    def _reify(self):
+        o = {}
+        for n in self.nodes:
+            o[n.name] = n.reify()
+        return o
+
 class ConstNodeProxy(Proxy):
     def __init__(self, n, v):
         self.name = n
