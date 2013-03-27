@@ -406,3 +406,11 @@ def conditional_dict(func, base=None, **kwds):
             r[unicode(k)] = v
     return r
 
+def flatten(seq):
+    for e in seq:
+        if isinstance(e, (list, tuple)):
+            for s in flatten(e):
+                yield s
+        else:
+            yield e
+

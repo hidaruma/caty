@@ -399,7 +399,7 @@ command graph
    "id": %id,
 
    "graph" : [%_OPTS, {"label" : %id}] | json:merge --mode=fst,
-   "elements" : %elements | when {array=>xjson:flatten, *=> pass} // これは、のdrawコマンドで対処して欲しい。
+   "elements" : %elements
   }
 
 };

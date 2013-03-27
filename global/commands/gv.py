@@ -2,6 +2,7 @@
 from caty.core.command import Builtin
 from caty.core.exception import *
 import caty.jsontools as json
+from caty.util.collection import flatten
 try:
     from pygraphviz import AGraph
 except:
@@ -109,7 +110,7 @@ class Draw(Builtin):
         return G, graph
 
     def _add_nodes(self, G, src):
-        for e in src['elements']:
+        for e in flatten(src['elements']):
             type, elem = json.split_tag(e)
             if type == 'node':
                 self._add_node(G, elem)
@@ -122,7 +123,7 @@ class Draw(Builtin):
             graph.add_node(i, **node)
 
     def _add_edges(self, G, src, parent=None):
-        for e in src['elements']:
+        for e in flatten(src['elements']):
             type, elem = json.split_tag(e)
             if type == 'edge':
                 self._add_edge(G, elem, parent=parent)
@@ -142,7 +143,7 @@ class Draw(Builtin):
             self._add_edge(graph, e, edge, parent=parent)
 
     def _add_cluster_nodes(self, G, src):
-        for e in src['elements']:
+        for e in flatten(src['elements']):
             type, elem = json.split_tag(e)
             if type == 'cluster':
                 self._add_cluster_node(G, elem)
@@ -163,7 +164,7 @@ class Draw(Builtin):
             sg.add_node(n.name, **a)
 
     def _add_cluster_edges(self, G, src):
-        for e in src['elements']:
+        for e in flatten(src['elements']):
             type, elem = json.split_tag(e)
             if type == 'cluster':
                 self._add_cluster_edge(G, elem)
