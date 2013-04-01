@@ -69,15 +69,6 @@ resource Wikiファイル("*.wiki") {
     };
 };
 
-/** 読者と筆者が閲覧するHTMLページ */
-state 記事ページ for [読者, 筆者] :: WikiPage links {
-    + 編集 --> Wikiファイル.編集;
-    + ソース --> Wikiファイル.原稿;
-    + 新規 --> 新規ファイル.雛形;
-    + 一覧 --> AllPages.get;
-    + root --> Root.get;
-};
-
 resource Root("/") {
     action get("GET") :: @[in, out] #io void -> never redirects Wikiファイル.読み出し {
         "/wiki/FrontPage.wiki" | redirect
@@ -110,16 +101,25 @@ resource AllPages("/all.html") {
     };
 };
 
+/** 読者と筆者が閲覧するHTMLページ */
+state 記事ページ for [読者, 筆者] :: WikiPage links {
+    + 編集 --> 編集 by Wikiファイル.編集;
+    + ソース --> 原稿 by Wikiファイル.原稿;
+    + 新規 --> 編集 by 新規ファイル.雛形;
+    + 一覧 --> 索引 by AllPages.get;
+    + root --> ルート by Root.get;
+};
+
 /** Wiki記事の一覧 */
 state 索引 for 読者 :: WikiIndex links {
-    + new --> 新規ファイル.雛形;
-    + link --> Wikiファイル.読み出し;
+    + new --> 編集 by 新規ファイル.雛形;
+    + link --> 記事ページ by Wikiファイル.読み出し;
 };
 
 /** 編集UIとなる画面 */
 state 編集 for 不明なユーザー :: WikiSkele links {
-    submit --> Wikiファイル.書き込み;
-    + cancel --> Wikiファイル.読み出し;
+    submit --> 記事ページ by Wikiファイル.書き込み;
+    + cancel --> 記事ページ by Wikiファイル.読み出し;
 };
 
 state 原稿 for 読者 :: any;
@@ -127,7 +127,7 @@ state 原稿 for 読者 :: any;
 /** 便宜上の開始画面 */
 @[abstract]
 state start for 読者 :: any links {
-  visit --> AllPages.get;
+  visit --> 記事ページ by AllPages.get;
 };
  
 

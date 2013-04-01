@@ -397,10 +397,10 @@ class StateBlock(Parser):
             seq.parse('-->')
             if peek(option(S('[')))(seq):
                 S('[')(seq)
-                dest = split(self.action_ref, ',')(seq)
+                dest = split(self.state_ref, ',')(seq)
                 S(']')(seq)
             else:
-                dest = [self.action_ref(seq)]
+                dest = [self.state_ref(seq)]
             S(';')(seq)
             return Link(trigger, dest, isembed, occ, path, ds, ann)
 
@@ -425,6 +425,21 @@ class StateBlock(Parser):
 
     def embed_trigger(self, seq):
         return self._script_parser.command(seq, no_opt=True)
+
+    def state_ref(self, seq):
+        stname = identifier_token_m(seq)
+        orelse = []
+        if option(keyword(u'orelse'))(seq):
+            if option(S(u'[')):
+                orelse = split(identifier_token_m, ',')(seq)
+                S(']')(seq)
+            else:
+                orelse = [identifier_token_m(seq)]
+        if option(keyword(u'by'))(seq):
+            cmd = identifier_token(seq)
+        else:
+            cmd = None
+        return LinkDest(stname, orelse, cmd)
 
     def action_ref(self, seq):
         actname = identifier_token_m(seq)
@@ -478,6 +493,12 @@ class StateBlock(Parser):
     @property
     def app(self):
         return self.parent.app
+
+class LinkDest(object):
+    def __init__(self, stname, orelse, cmd):
+        self.main_transition = stname
+        self.sub_transtion = orelse
+        self.command = cmd
 
 class UserRole(Parser):
     def __init__(self, ds, ann):
