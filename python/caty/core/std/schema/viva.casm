@@ -120,29 +120,4 @@ command draw-nt {
     updates pub
     refers python:viva.nt.DrawNT;
 
-/**
- * まだ出来てないよ
- */
-command draw-scenarios {
-  @[default(10)]
-  "max-legth": integer?,
-  /** 出力ファイル
-   * 指定がないときは標準出力
-   */
-  "out" : string(remark="Catyのファイルパス")?, 
-
-  /** 出力フォーマット */
-  @[default("gif")]
-  "format" : ("gif" | "png" | "jpeg" | "dot" | "svg" | "svge")?,
- 
-  /** ファイル出力時に.caraの変更がされていない場合は再出力しない */
-  @[with("out"), default(false)]
-  "if-modified": boolean?,
-
-  /** 描画に使われるフォント。日本語を使う場合は指定するのを推奨 */
-  "font": string?
-  } [string startAction, string userrole] :: void -> void | binary | string
-     throws [ModuleNotFound, ResourceNotFound, ActionNotFound]
-     uses pub
-    refers python:viva.cara.Scenarios;
 

@@ -2,6 +2,7 @@
 from caty.core.command import Builtin
 from caty.core.exception import *
 from caty.util import utime_from_timestr, timestamp_from_utime
+from caty.util.collection import flatten
 try:
     import pygraphviz as gv
 except:
@@ -36,15 +37,6 @@ class DrawingMixin(object):
             if c.nodeType == dom.Element.ELEMENT_NODE:
                 return c.toxml().replace('<?xml version="1.0" encoding="utf-8"?>', '')
 
-    def format_graph(self, graph):
-        self._fill_subgraph(graph)
-        return graph
-
-    def _fill_subgraph(self, graph):
-        for sg in graph['subgraphs']:
-            if not sg['nodes']:
-                sg['nodes'].append({'name': 'x', 'type': 'middle-point', 'label': ''})
-
 class DrawModule(Builtin, DrawingMixin):
     _graph_config = {
         # 全体のバックグラウンドのグラフ
@@ -62,6 +54,12 @@ class DrawModule(Builtin, DrawingMixin):
         #  ステートをまとめるサブグラフ
         'state_subgraph': {
             'fillcolor': '#ffff99',
+            'color': 'black',
+            'style': 'rounded,filled',
+            'fontsize': 14.0,
+        },
+        'command-subgraph': {
+            'fillcolor': 'transparent',
             'color': 'black',
             'style': 'rounded,filled',
             'fontsize': 14.0,
@@ -208,6 +206,13 @@ class DrawModule(Builtin, DrawingMixin):
             'width': '0.0',
             'label': ''
         },
+        # コマンドノード
+        'command': {
+            'shape': 'none',
+            'height': '0.0',
+            'width': '0.0',
+            'label': ''
+        },
         # ファシリティ/エンティティ
         'facility': {
             'shape': u'Mcircle',
@@ -216,6 +221,7 @@ class DrawModule(Builtin, DrawingMixin):
             'fillcolor': u'darkorange3'
         },
     }
+
     def setup(self, opts, module_name):
         self._module_name = module_name
         self._out_file = opts.get('out', '')
@@ -293,11 +299,70 @@ class DrawModule(Builtin, DrawingMixin):
         rmc = app.resource_module_container
         rm = rmc.get_module(self._module_name)
         if self._node == 'userrole':
-            return rm.make_userrole_graph()
+            r = self.make_userrole_graph(rm)
         elif self._node == 'facility':
-            return rm.make_facility_graph()
+            r = self.make_facility_graph(rm)
         else:
-            return rm.make_graph()
+            r = self.make_state_graph(rm)
+        return r
+
+    def make_state_graph(self, module):
+        graph = {
+            'name': module.name,
+            'nodes': [],
+            'edges': [],
+            'subgraphs': {},
+        }
+        nodes = graph['nodes']
+        edges = graph['edges']
+        state_command_map = graph['subgraphs']
+        for s in module.states:
+            nodes.append({u'name': s.name, u'label': s.name, u'type': u'state'})
+            for link in flatten([l.destinations for l in s.links]):
+                cmd = link.command or u'undefined'
+                if link.command:
+                     if link.command not in state_command_map:
+                        state_command_map[link.command] = {
+                            'name': link.command,
+                            'nodes': [],
+                            'edges': [],
+                            'subgraphs': {},
+                            'type': u'command-subgraph',
+                        }
+                     cursubgraph = state_command_map[link.command]
+                else:
+                     if u'undefined' not in state_command_map:
+                        state_command_map[u'undefined'] = {
+                            'name': u'undefined',
+                            'nodes': [],
+                            'edges': [],
+                            'subgraphs': {},
+                            'type': u'missing-command-subgraph',
+                        }
+                     cursubgraph = state_command_map[u'undefined']
+                target = module.get_state(link.main_transition, True)
+                dest = u'%s-%s-%s' % (s.name, cmd, link.main_transition)
+                if target:
+                    edges.append({u'from': s.name, u'to': dest, u'type': u'link'})
+                else:
+                    for n in nodes:
+                        if n['name'] == dest:
+                            break
+                    else:
+                        nodes.append({u'name': link.main_transition, u'label': link.main_transition, u'type': u'missing-state'})
+                    edges.append({u'from': s.name, u'to': dest, u'type': u'link'})
+                for n in cursubgraph['nodes']:
+                    if n['name'] == dest:
+                        break
+                else:
+                    cursubgraph['nodes'].append({'name': dest, 'label': dest, 'type': u'command'})
+            for rs in module.states:
+                for rev_link in flatten([l.destinations for l in rs.links]):
+                    if rev_link.main_transition == s.name:
+                        revcmd = rev_link.command or u'undefined'
+                        edges.append({u'to': s.name, u'from':u'%s-%s-%s' % (rs.name, revcmd, s.name), u'type': u'link'})
+        graph['subgraphs'] = [v for v in graph['subgraphs'].values()]
+        return graph
 
     def transform(self, graph_struct, root=True):
         cfg = {
@@ -341,7 +406,7 @@ class DrawModule(Builtin, DrawingMixin):
             N = RG.get_node(name)
             attr = {}
             attr.update(self._graph_config[node['type']])
-            if node['type'] == 'middle-point':
+            if node['type'] == 'middle-point' or node['type'] == 'command':
                 pass
             elif (self._node == 'state' and node['type'] not in ('state', 'abstract-state')):
                 if node['type'] == 'missing-state':
@@ -385,6 +450,14 @@ class DrawModule(Builtin, DrawingMixin):
                             **conf)
         return RG
 
+    def format_graph(self, graph):
+        self._fill_subgraph(graph)
+        return graph
+
+    def _fill_subgraph(self, graph):
+        for sg in graph['subgraphs']:
+            if not sg['nodes']:
+                sg['nodes'].append({'name': 'x', 'type': 'middle-point', 'label': ''})
 
 class DrawAction(Builtin, DrawingMixin):
     _graph_config = {
@@ -623,81 +696,4 @@ class DrawAction(Builtin, DrawingMixin):
                             edge['to'], 
                             **self._graph_config['edge'][edge['type']])
         return RG
-
-class Scenarios(DrawModule, DrawAction):
-    def setup(self, opts, state_name, userrole, mod):
-        self._max_length = opts['max-length']
-        self._userrole = userrole
-        self._state = state
-        DrawModule.setup(self, opts, state)
-        self._node = u'any'
-
-
-    def make_graph(self):
-        app = self.current_app
-        rmc = app.resource_module_container
-        rm = rmc.get_module(self._module_name)
-        user_node, state_node = self._get_target_node(rm)
-        graph_struct = self._compress_action(rm.make_graph())
-        graph_struct['nodes'].append(user_node, state_node)
-        graph_struct['edges'].append({'from': user_node['name'], 'to': self._state, 'type': 'scenario'})
-
-    def _get_user_node(self, rm):
-        userrole_struct = rm.make_userrole_graph()
-        self.__check_start(userrole_struct)
-        for n in userrole_struct['nodes']:
-            if n['type'] in ('userrole', 'missing-userrole') and n['name'] == self._userrole:
-                user_node = n
-            elif n['type'] == state and n['name'] == self._state:
-                state_node = n
-        return user_node, state_node
-
-    def _compress_action(self, graph_struct, start_state):
-        new_graph = {
-            'name': graph_struct['name'],
-            'nodes': [],
-            'edges': [],
-        }
-        for s in self._find_next_state(graph_struct, start_state['name']):
-            pass
-
-
-    def _find_next_state(self, graph_struct, name, length=0):
-        for e in graph_struct['edges']:
-            if e['from'] == name:
-                pass
-
-    def __check_start(self):
-        for n in graph_struct['edges']:
-            if n['from'] == self._userrole and n['to'] == self._target_action:
-                break
-        else:
-            for n in userrole_struct['nodes']:
-                if n['type'] in ('userrole', 'missing-userrole') and n['name'] == self._userrole:
-                    break
-            else:
-                raise throw_caty_exception(
-                    'UserroleNotFound',
-                    u'Userrole `$userrole` is not defined at $moduleName',
-                    userrole = self._userrole,
-                    moduleName = self._module_name
-                )
-            for n in userrole_struct['nodes']:
-                if n['type'] == 'state' and n['name'] == self._target_action:
-                    break
-            else:
-                raise throw_caty_exception(
-                    'StateNotFound',
-                    u'State `$stateName` is not defined at $moduleName',
-                    stateName = self._state,
-                    moduleName = self._module_name,
-                )
-
-    def transform(self, graph_struct, root=True):
-        self._node = 'any'
-        self._graph_config = {}
-        self._graph_config.update(DrawModule._graph_config)
-        self._graph_config['userrole'] = DrawAction._graph_config['userrole']
-        self._graph_config['edge']['usecase'] = DrawAction._graph_config['edge']['usecase']
-        return DrawModule.transform(graph_struct)
 

@@ -259,11 +259,10 @@ class ResourceModule(Module):
             o['ports'][p.name] = p.reify()
         return json.tagged(u'cara', o)
 
-    def get_state(self, name):
-        if name not in self._states:
+    def get_state(self, name, safe=False):
+        if name not in self._states and not safe:
             raise SystemResourceNotFound('StateNotFound', '$name', name)
-        return self._states[name]
-
+        return self._states.get(name)
     
     @property
     def states(self):
@@ -287,9 +286,9 @@ class ResourceModule(Module):
         appered_dest = set([])
         for s in self.states:
             for f in self._find_links_to(s.name):
-                edges.append({u'from': f, u'to': s.name, u'type': u'action'})
+                edges.append({u'from': f, u'to': s.name, u'type': u'link'})
             for i, link in enumerate(s.links):
-                if len(link.link_to_list) > 1:
+                if len(link.destinations) > 1:
                     from_name = u'__middle_point_{0}_{1}'.format(link.trigger, s.name)
                     nodes.append({'name': from_name, 'type': 'middle-point', 'label': ''})
                     edges.append({u'from': s.name, 
@@ -305,8 +304,7 @@ class ResourceModule(Module):
                         edges[-1][u'trigger'] = ' '.join(['-', edges[-1][u'trigger']])
                 else:
                     from_name = s.name
-                for link_to in link.link_to_list:
-                    act, fragment = link_to
+                for dest in link.destinations:
                     to_node_name = self._find_linked_action(act)
                     if not to_node_name:
                         if not '.' in act:
@@ -319,7 +317,7 @@ class ResourceModule(Module):
                             to_node_name = 'port#'+to_node_name
                         appered_dest.add(to_node_name)
                         e = {u'from': from_name, u'to': to_node_name, u'type': u'link'}
-                    if len(link.link_to_list) == 1:
+                    if len(link.destinations) == 1:
                         if link.trigger:
                             e[u'trigger'] = link.trigger
                         else:
@@ -395,10 +393,10 @@ class ResourceModule(Module):
         return r
 
     def _find_links_to(self, state_name):
-        for r in self.resources:
-            for act in r.entries.values():
-                if state_name in act.profiles.next_states:
-                    yield act.resource_name+'.'+act.name
+        for s in self.states:
+            for dest in s.destinations:
+                if state_name == dest.main_transition or state_name in s.orelse:
+                    yield s.name
 
     def _find_linked_action(self, action_id):
         if ':' in action_id:

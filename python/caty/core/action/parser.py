@@ -523,7 +523,7 @@ class Link(object):
     def __init__(self, trigger, dest, type, appearance, path, docstring=u'', annotations=Annotations([])):
         self.docstring = docstring
         self.annotations = annotations
-        self.link_to_list = dest
+        self.destinations = dest
         self.trigger = trigger
         self.path = path
         self.appearance = appearance
