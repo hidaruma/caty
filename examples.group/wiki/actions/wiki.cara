@@ -148,3 +148,11 @@ type WikiFile = {
 type WikiPage = object;
 
 type WikiIndex = deferred array;
+
+
+
+state Foo::any links {
+ bar --> Bar;
+};
+
+state Bar::any;

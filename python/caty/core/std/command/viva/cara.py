@@ -64,6 +64,12 @@ class DrawModule(Builtin, DrawingMixin):
             'style': 'rounded,filled',
             'fontsize': 14.0,
         },
+        'missing-command-subgraph': {
+            'fillcolor': 'transparent',
+            'color': 'black',
+            'style': 'rounded,filled',
+            'fontsize': 14.0,
+        },
         # エッジの属性
         'edge': {
             # アクションからステートへのエッジ
