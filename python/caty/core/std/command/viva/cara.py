@@ -331,49 +331,53 @@ class DrawModule(Builtin, DrawingMixin):
         state_command_map = graph['subgraphs']
         for s in module.states:
             nodes.append({u'name': s.name, u'label': s.name, u'type': u'state'})
-            for link in flatten([l.destinations for l in s.links]):
-                cmd = link.command or u'undefined'
-                if link.command:
-                     if link.command not in state_command_map:
-                        state_command_map[link.command] = {
-                            'name': link.command,
-                            'nodes': [],
-                            'edges': [],
-                            'subgraphs': {},
-                            'type': u'command-subgraph',
-                        }
-                     cursubgraph = state_command_map[link.command]
-                else:
-                     if u'undefined' not in state_command_map:
-                        state_command_map[u'undefined'] = {
-                            'name': u'undefined',
-                            'nodes': [],
-                            'edges': [],
-                            'subgraphs': {},
-                            'type': u'missing-command-subgraph',
-                        }
-                     cursubgraph = state_command_map[u'undefined']
-                target = module.get_state(link.main_transition, True)
-                dest = u'%s-%s-%s' % (s.name, cmd, link.main_transition)
-                if target:
-                    edges.append({u'from': s.name, u'to': dest, u'type': u'link-outcoming'})
-                else:
-                    for n in nodes:
+            for linkitem in s.links:
+                for link in linkitem.destinations:
+                    trigger = linkitem.trigger
+                    if link.command:
+                        cmd = link.command
+                        if link.command not in state_command_map:
+                           state_command_map[link.command] = {
+                               'name': link.command,
+                               'nodes': [],
+                               'edges': [],
+                               'subgraphs': {},
+                               'type': u'command-subgraph',
+                           }
+                        cursubgraph = state_command_map[link.command]
+                    else:
+                        cmd = trigger
+                        if cmd not in state_command_map:
+                           state_command_map[cmd] = {
+                               'name': cmd,
+                               'nodes': [],
+                               'edges': [],
+                               'subgraphs': {},
+                               'type': u'missing-command-subgraph',
+                           }
+                        cursubgraph = state_command_map[cmd]
+                    target = module.get_state(link.main_transition, True)
+                    dest = u'%s-%s-%s' % (s.name, cmd, link.main_transition)
+                    if target:
+                        edges.append({u'from': s.name, u'to': dest, u'type': u'link-outcoming'})
+                    else:
+                        for n in nodes:
+                            if n['name'] == dest:
+                                break
+                        else:
+                            nodes.append({u'name': link.main_transition, u'label': link.main_transition, u'type': u'missing-state'})
+                        edges.append({u'from': s.name, u'to': dest, u'type': u'link-outcoming'})
+                    for n in cursubgraph['nodes']:
                         if n['name'] == dest:
                             break
                     else:
-                        nodes.append({u'name': link.main_transition, u'label': link.main_transition, u'type': u'missing-state'})
-                    edges.append({u'from': s.name, u'to': dest, u'type': u'link-outcoming'})
-                for n in cursubgraph['nodes']:
-                    if n['name'] == dest:
-                        break
-                else:
-                    cursubgraph['nodes'].append({'name': dest, 'label': dest, 'type': u'command'})
-            for rs in module.states:
-                for rev_link in flatten([l.destinations for l in rs.links]):
-                    if rev_link.main_transition == s.name:
-                        revcmd = rev_link.command or u'undefined'
-                        edges.append({u'to': s.name, u'from':u'%s-%s-%s' % (rs.name, revcmd, s.name), u'type': u'link-incoming'})
+                        cursubgraph['nodes'].append({'name': dest, 'label': dest, 'type': u'command'})
+                for rs in module.states:
+                    for l in rs.links:
+                        for rev_link in l.destinations:
+                            if rev_link.main_transition == s.name:
+                                revcmd = rev_link.command or l.trigger
+                                edges.append({u'to': s.name, u'from':u'%s-%s-%s' % (rs.name, revcmd, s.name), u'type': u'link-incoming'})
         graph['subgraphs'] = [v for v in graph['subgraphs'].values()]
         return graph
 
