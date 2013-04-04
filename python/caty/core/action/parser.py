@@ -394,6 +394,8 @@ class StateBlock(Parser):
         ann = seq.parse(option(annotation, Annotations([])))
         isembed, trigger, occ, path = self.trigger(seq)
         with strict():
+            if option('::')(seq):
+                typedef(seq)
             seq.parse('-->')
             if peek(option(S('[')))(seq):
                 S('[')(seq)
@@ -693,6 +695,8 @@ def _link_item_head(seq):
         n = name(seq)
         seq.parse(skip_ws)
         o = option(choice([u'+', u'*', u'!', u'?']), u'!')(seq)
+    if option('::')(seq):
+        typedef(seq)
     seq.parse(skip_ws)
     return S(u'-->')(seq)
 
