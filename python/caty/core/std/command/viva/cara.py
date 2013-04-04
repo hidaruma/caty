@@ -60,14 +60,14 @@ class DrawModule(Builtin, DrawingMixin):
         },
         'command-subgraph': {
             'fillcolor': 'transparent',
-            'color': 'transparent',
+            'color': '#c4c4c4',
             'fontcolor': 'black',
             'style': 'rounded,filled',
             'fontsize': 14.0,
         },
         'missing-command-subgraph': {
             'fillcolor': 'transparent',
-            'color': 'transparent',
+            'color': '#c4c4c4',
             'fontcolor': 'black',
             'style': 'rounded,filled',
             'fontsize': 14.0,
