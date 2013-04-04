@@ -60,13 +60,15 @@ class DrawModule(Builtin, DrawingMixin):
         },
         'command-subgraph': {
             'fillcolor': 'transparent',
-            'color': 'black',
+            'color': 'transparent',
+            'fontcolor': 'black',
             'style': 'rounded,filled',
             'fontsize': 14.0,
         },
         'missing-command-subgraph': {
             'fillcolor': 'transparent',
-            'color': 'black',
+            'color': 'transparent',
+            'fontcolor': 'black',
             'style': 'rounded,filled',
             'fontsize': 14.0,
         },
@@ -78,9 +80,14 @@ class DrawModule(Builtin, DrawingMixin):
                 'color': 'crimson'
             },
             # ステートからアクションへのエッジ
-            'link': {
+            'link-incoming': {
                 'fontsize': 14.0,
                 'color': 'darkorchid3',
+            },
+            'link-outcoming': {
+                'fontsize': 14.0,
+                'color': 'darkorchid3',
+                'arrowhead': 'none',
             },
             # リダイレクトのエッジ
             'redirect': {
@@ -349,14 +356,14 @@ class DrawModule(Builtin, DrawingMixin):
                 target = module.get_state(link.main_transition, True)
                 dest = u'%s-%s-%s' % (s.name, cmd, link.main_transition)
                 if target:
-                    edges.append({u'from': s.name, u'to': dest, u'type': u'link'})
+                    edges.append({u'from': s.name, u'to': dest, u'type': u'link-outcoming'})
                 else:
                     for n in nodes:
                         if n['name'] == dest:
                             break
                     else:
                         nodes.append({u'name': link.main_transition, u'label': link.main_transition, u'type': u'missing-state'})
-                    edges.append({u'from': s.name, u'to': dest, u'type': u'link'})
+                    edges.append({u'from': s.name, u'to': dest, u'type': u'link-outcoming'})
                 for n in cursubgraph['nodes']:
                     if n['name'] == dest:
                         break
@@ -366,7 +373,7 @@ class DrawModule(Builtin, DrawingMixin):
                 for rev_link in flatten([l.destinations for l in rs.links]):
                     if rev_link.main_transition == s.name:
                         revcmd = rev_link.command or u'undefined'
-                        edges.append({u'to': s.name, u'from':u'%s-%s-%s' % (rs.name, revcmd, s.name), u'type': u'link'})
+                        edges.append({u'to': s.name, u'from':u'%s-%s-%s' % (rs.name, revcmd, s.name), u'type': u'link-incoming'})
         graph['subgraphs'] = [v for v in graph['subgraphs'].values()]
         return graph
 
