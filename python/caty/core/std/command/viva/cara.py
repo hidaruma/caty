@@ -372,12 +372,12 @@ class DrawModule(Builtin, DrawingMixin):
                             break
                     else:
                         cursubgraph['nodes'].append({'name': dest, 'label': dest, 'type': u'command'})
-                for rs in module.states:
-                    for l in rs.links:
-                        for rev_link in l.destinations:
-                            if rev_link.main_transition == s.name:
-                                revcmd = rev_link.command or l.trigger
-                                edges.append({u'to': s.name, u'from':u'%s-%s-%s' % (rs.name, revcmd, s.name), u'type': u'link-incoming'})
+            for rs in module.states:
+                for l in rs.links:
+                    for rev_link in l.destinations:
+                        if rev_link.main_transition == s.name:
+                            revcmd = rev_link.command or l.trigger
+                            edges.append({u'to': s.name, u'from':u'%s-%s-%s' % (rs.name, revcmd, s.name), u'type': u'link-incoming'})
         graph['subgraphs'] = [v for v in graph['subgraphs'].values()]
         return graph
 
