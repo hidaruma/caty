@@ -164,6 +164,10 @@ def null(seq, convert=False):
 def comma(seq):
     return seq.parse(',')
 
+@try_
+def bare_property(seq):
+    return Regex(u'[^"\s:,.|{}\\[\\]<>*/;=\\`~!@#$%^&()]+')(seq)
+
 def obj(seq):
     seq.parse('{')
     items = seq.parse(option(split(item, comma, True), {}))
@@ -177,7 +181,7 @@ def obj(seq):
     return o
 
 def item(seq):
-    k = seq.parse(string)
+    k = seq.parse([bare_property, string])
     seq.parse(':')
     v = seq.parse(parsers)
     return k, v

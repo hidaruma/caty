@@ -583,7 +583,7 @@ class ScriptParser(Parser):
 
     def item(self, seq):
         if seq.current == '}': return
-        n = xjson.string(seq)
+        n = choice(xjson.string, xjson.bare_property)(seq)
         if not seq.parse(option(':')):
             if seq.eof:
                 raise EndOfBuffer(seq, self.item)
@@ -612,7 +612,7 @@ class ScriptParser(Parser):
         except NothingTodo:
             raise ParseFailed(seq, self.item)
         seq.parse('>:')
-        n = xjson.string(seq)
+        n = choice(xjson.bare_property, xjson.string)(seq)
         return CommandNode(n, v)
 
     def choice_branch(self, seq):
