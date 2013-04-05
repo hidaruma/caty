@@ -105,7 +105,7 @@ def term(seq):
         return ScalarNode(u'never', {}, [])
 
     doc = option(docstring)(seq)
-    s = seq.parse(map(try_, [_pseudo_tag, _type_name_tag, _tag, _never, _unary]) + [enum, _term, bag, object_, array, scalar])
+    s = seq.parse(map(try_, [_pseudo_tag, _type_name_tag, _tag, _never, _unary]) + [enum, _term, bag, object_, array, exponent, scalar])
     o = seq.parse(option('?'))
     if doc:
         s.docstring = doc
@@ -372,3 +372,15 @@ class CasmJSONPathSelectorParser(JSONPathSelectorParser):
     def length(self, seq):
         t = seq.parse('length()')
         raise ParseError(seq, t)
+
+@try_
+def exponent(seq):
+    keyword(u'command')(seq)
+    with strict():
+        opts = option(object_)(seq)
+        args = option(array)(seq)
+        S(u'::')(seq)
+        intype = term(seq)
+        S(u'->')(seq)
+        outtype = term(seq)
+        return ExponentNode(intype, outtype, args, opts)

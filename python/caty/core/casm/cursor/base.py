@@ -140,5 +140,8 @@ class SchemaBuilder(TreeCursor):
     def _visit_kind(self, node):
         return node
 
+    def _visit_exponent(self, node):
+        print u'[Warning] Not implmented yet'
+        return UndefinedSchema()
 
 

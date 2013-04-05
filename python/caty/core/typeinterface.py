@@ -111,6 +111,22 @@ class PseudoTag(AbstractNode):
     def tag(self):
         raise NotImplementedError(str(self.__class__) + '#tag')
 
+class Exponent(object):
+    def get_intype(self):
+        return self._intype
+
+    def get_outtype(self):
+        return self._outtype
+
+    def get_argstype(self):
+        return self._argstype
+
+    def get_optstype(self):
+        return self._optstype
+
+    def accept(self, cursor):
+        return cursor._visit_exponent(self)
+
 class TreeCursor(object):
     def visit(self, node):
         return node.accept(self)
@@ -156,6 +172,9 @@ class TreeCursor(object):
 
     def _visit_kind(self, node):
         raise NotImplementedError(u'{0}._visit_kind'.format(self.__class__.__name__))
+
+    def _visit_exponent(self, node):
+        raise NotImplementedError(u'{0}._visit_exponent'.format(self.__class__.__name__))
 
     @property
     def result(self):

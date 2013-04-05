@@ -65,6 +65,7 @@ from caty.core.schema.array import ArraySchema
 from caty.core.schema.object import ObjectSchema, PseudoTag
 from caty.core.schema.enum import EnumSchema
 from caty.core.schema.bag import BagSchema
+from caty.core.schema.exponent import ExponentSchema
 __all__ = [
     "SchemaBase",
     "OperatorSchema",
@@ -100,6 +101,7 @@ __all__ = [
     "BagSchema",
     "UnaryOpSchema",
     "ExtractorSchema",
+    "ExponentSchema",
     "types",
     "schemata",
 ]
