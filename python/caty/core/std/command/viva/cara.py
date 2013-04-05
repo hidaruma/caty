@@ -330,7 +330,7 @@ class DrawModule(Builtin, DrawingMixin):
         edges = graph['edges']
         state_command_map = graph['subgraphs']
         for s in module.states:
-            nodes.append({u'name': s.name, u'label': s.name, u'type': u'state'})
+            nodes.append({u'name': s.name, u'label': s.name, u'type': u'state' if 'abstract' not in s.annotations else u'abstract-state'})
             for linkitem in s.links:
                 for link in linkitem.destinations:
                     trigger = linkitem.trigger
