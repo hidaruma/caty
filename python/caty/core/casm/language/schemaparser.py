@@ -7,7 +7,6 @@ from caty.core.casm.language.ast import *
 from caty.core.language.util import *
 from caty.core.schema import schemata
 from caty.jsontools.selector.parser import JSONPathSelectorParser
-from caty.jsontools.xjson import bare_property
 
 RESERVED = frozenset(schemata.keys() + ['type'])
 
@@ -275,7 +274,7 @@ def object_(seq):
 def item(seq):
     doc = seq.parse(option(docstring))
     d = seq.parse(option(annotation, Annotations([])))
-    k = seq.parse([bare_property, string, '*'])
+    k = seq.parse([string, '*'])
     _ = seq.parse(':')
     s = typedef(seq)
     s.annotations = d

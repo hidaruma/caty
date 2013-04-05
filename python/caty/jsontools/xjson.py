@@ -181,7 +181,7 @@ def obj(seq):
     return o
 
 def item(seq):
-    k = seq.parse([bare_property, string])
+    k = seq.parse(string)
     seq.parse(':')
     v = seq.parse(parsers)
     return k, v
