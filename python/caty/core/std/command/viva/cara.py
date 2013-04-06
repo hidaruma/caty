@@ -378,6 +378,14 @@ class DrawModule(Builtin, DrawingMixin):
                         if rev_link.main_transition == s.name:
                             revcmd = rev_link.command or l.trigger
                             edges.append({u'to': s.name, u'from':u'%s-%s-%s' % (rs.name, revcmd, s.name), u'type': u'link-incoming'})
+            for port in module.ports:
+                nodes.append({u'name': port.name, u'label': port.name, u'type': u'port'})
+                for rs in module.states:
+                    for l in rs.links:
+                        for rev_link in l.destinations:
+                            if rev_link.main_transition == port.name:
+                                revcmd = rev_link.command or l.trigger
+                                edges.append({u'to': port.name, u'from':u'%s-%s-%s' % (rs.name, revcmd, port.name), u'type': u'link-incoming'})
         graph['subgraphs'] = [v for v in graph['subgraphs'].values()]
         return graph
 
