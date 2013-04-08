@@ -510,6 +510,10 @@ class UserRole(Parser):
     def __call__(self, seq):
         keyword('userrole')(seq)
         self.name = name(seq)
+        if option(u'=')(seq):
+            self.typedef = typedef(seq)
+        else:
+            self.typedef = None
         S(';')(seq)
         return self
 
