@@ -85,6 +85,8 @@ class ASTRoot(Root):
 
     def declare(self, module):
         self.module = module
+        if not self.body:
+            return
         module.add_ast(self)
 
     def reify(self):

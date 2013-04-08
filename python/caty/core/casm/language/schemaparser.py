@@ -17,6 +17,8 @@ def schema(seq):
     name_of_type = seq.parse(name_token)
     if name_of_type in RESERVED:
         raise ParseFailed(seq, schema, '%s is reserved.' % n)
+    if option(u';')(seq):
+        return ASTRoot(name_of_type, [], None, annotations, doc, None)
     type_args = seq.parse(option(type_arg))
     k_of = option(kind_of)(seq)
     e = seq.parse('=')
