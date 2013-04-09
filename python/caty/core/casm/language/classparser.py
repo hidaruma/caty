@@ -18,7 +18,7 @@ def catyclass(seq):
     dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
     with strict():
         S(u'{')(seq)
-        member = many([command, property])(seq)
+        member = many([command, property, schema, const])(seq)
         S(u'}')(seq)
         ref = refers(seq)
         S(u';')(seq)
