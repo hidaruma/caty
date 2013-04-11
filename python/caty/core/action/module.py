@@ -2,8 +2,9 @@
 from caty.core.action.selector import *
 from caty.core.action.resource import *
 from caty.core.exception import *
-from caty.core.casm.language.ast import CommandNode, ClassNode, ScalarNode, CommandURI
+from caty.core.casm.language.ast import CommandNode, ClassNode, ScalarNode, CommandURI, ASTRoot
 from caty.core.casm.language.commandparser import call_pattern
+from caty.core.schema.base import Annotations, Annotation
 from caty.core.casm.module import Module, ClassModule
 from topdown import CharSeq, many1
 from functools import partial
@@ -187,8 +188,6 @@ class ResourceModule(Module):
                     raise
 
     def _compile_type(self, name, type, check_never=True):
-        from caty.core.casm.language.ast import ASTRoot
-        from caty.core.schema.base import Annotations
         if not type or type == '_':
             return
         ast = ASTRoot(self.name+'.'+name, [], type, Annotations([]), u'')
@@ -214,12 +213,10 @@ class ResourceModule(Module):
         st.parent = self
 
     def add_userrole(self, ur):
-        if ur.name in self._userroles:
-            throw_caty_exception(
-                u'CARA_COMPILE_ERROR',
-                u'Duplicated userrole name: $name module: $module', 
-                name=ur.name, module=self._name)
-        self._userroles[ur.name] = ur
+        annotations = ur.annotations
+        ur.annotations.add(Annotation(u'__userrole__', True))
+        userroletype = ASTRoot(ur.name, [], ur.typedef, annotations, ur.docstring)
+        userroletype.declare(self)
 
     def add_port(self, port):
         if port.name in self._ports:
