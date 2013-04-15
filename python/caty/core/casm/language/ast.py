@@ -746,4 +746,54 @@ class AnnotationDecl(object):
     def accept(self, visitor):
         return self.type.accept(visitor)
 
+class CollectionDeclNode(object):
+    def __init__(self, name, coltype, keypath, keytype, doc, ann):
+        from caty.core.script.parser import ScriptParser
+        self.name = name
+        self.docstring = doc
+        self.annotations = ann
+        a = Annotations([])
+        for c in ann._annotations:
+            a.add(c)
+        a.add(Annotation(u'__collection'))
+        a.add(Annotation(u'key-getter', keypath))
+        if keytype:
+            a.add(Annotation(u'key-type', keytype))
+        self.type = ASTRoot(name, None, coltype, ann, doc)
+        sp = ScriptParser()
+        script = sp.parse('void')
+        self.command1 = CommandNode('_' + name, 
+                                     [CallPattern(None, 
+                                                 None, 
+                                                 CommandDecl(
+                                                    (ScalarNode(u'void'), ScalarNode(u'Classed')),
+                                                    [], 
+                                                    []
+                                                 ), 
+                                     )],
+                                     CommandURI([(u'python', 'caty.core.command.Dummy')]),
+                                     doc, 
+                                     Annotations([Annotation(u'__collection')]),
+                                     [])
+        self.command2 = CommandNode(name, 
+                                     [CallPattern(None, 
+                                                 None, 
+                                                 CommandDecl(
+                                                    (ScalarNode(u'void'), ScalarNode(u'sequence', None, [coltype])),
+                                                    [], 
+                                                    []
+                                                 ), 
+                                     )],
+                                     CommandURI([(u'python', 'caty.core.command.Dummy')]),
+                                     doc, 
+                                     Annotations([Annotation(u'__collection')]),
+                                     [])
+        self.catyclass = ClassNode(name, [], ScalarNode(u'univ'), ScalarNode(u'univ'), CommandURI([(u'python', 'caty.core.command.DummyClass')]), None, Annotations([]), [])
+        self.entity = FacilityNode(u'_'+name, None, u'null', ScalarNode(u'null'), {}, None, Annotations([]))
 
+    def declare(self, module):
+        self.type.declare(module)
+        self.command1.declare(module)
+        self.command2.declare(module)
+        self.catyclass.declare(module)
+        self.entity.declare(module)
