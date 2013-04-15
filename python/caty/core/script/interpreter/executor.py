@@ -369,6 +369,8 @@ class CommandExecutor(BaseInterpreter):
         if node.prop:
             return self.__iter_obj_as_array(node)
         elif node.iter:
+            if not hasattr(self.input, '__iter__'):
+                throw_caty_exception(u'InputTypeError', u'Input data must be an iterator')
             node.context = self.input
             return self.__iter_stream(node)
         else:

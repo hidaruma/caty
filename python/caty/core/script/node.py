@@ -445,8 +445,8 @@ class Branch(object):
 
 class Each(Syntax):
     command_decl = u"""command __each-functor-applied<S default univ, T default univ> 
-           {"seq":boolean?} :: [S*] | object | foreign(remark="iterator") -> [T*]|object
-           {"iter":boolean} :: [S*] | foreign -> foreign(remark="iterator")
+           {"seq":boolean?} :: sequence<S> | object  -> [T*]|object
+           {"iter":boolean} :: sequence<S> -> foreign(remark="iterator")
            {"seq":boolean?, "obj": boolean} :: object -> object
                         refers python:caty.core.script.node.Each;"""
     def __init__(self, cmd, opts_ref):

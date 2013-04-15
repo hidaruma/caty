@@ -60,6 +60,8 @@ type ErrorInfo = {
     "errorMap": ErrorMap
 };
 
+type sequence<T> = [T*] | foreign(remark="iterator");
+
 type MiniErrorInfo = MiniErrorObj | MiniError;
 
 type MiniErrorObj = {
