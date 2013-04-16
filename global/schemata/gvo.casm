@@ -17,8 +17,8 @@ command olog [string name, string? text] :: (null | gv:Node | gv:Edge | gv:Clust
   %in | gv:graph --label=%label %name
 };
 
-/** ologのノード（圏の対象） */
-command node [string id, string? text] :: void -> gv:Node 
+/** ologのタイプを表すボックスノード（圏の対象） */
+command t-box [string id, string? text] :: void -> gv:Node 
 {
   [
     %1 > id,
@@ -28,8 +28,8 @@ command node [string id, string? text] :: void -> gv:Node
   gv:node --shape=box --label=%label %id
 };
 
-/** ologのアロー（圏の射） */
-command arrow [string name, string from, string to, string? text] :: void -> gv:Edge
+/** ologのアスペクトを表すアロー（圏の射） */
+command a-arrow [string name, string from, string to, string? text] :: void -> gv:Edge
 {
   [
     %1 > name,
@@ -48,7 +48,7 @@ command constr :: (null | gv:Node | gv:Edge | gv:Cluster| array) -> gv:Cluster
 };
 
 /** ologのパス同値等式 */
-command peq [string id, string left, string right] :: void -> gv:Node
+command p-eq [string id, string left, string right] :: void -> gv:Node
 {
   [
     %1 > id,
