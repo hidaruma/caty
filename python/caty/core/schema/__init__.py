@@ -102,6 +102,7 @@ __all__ = [
     "UnaryOpSchema",
     "ExtractorSchema",
     "ExponentSchema",
+    "EmptySchema",
     "types",
     "schemata",
 ]

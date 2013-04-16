@@ -123,6 +123,10 @@ class TypeCalcurator(_SubNormalizer):
             r = r.body
         lt = l.type
         rt = r.type
+        if u'__empty__' in (lt, rt):
+            # 宣言のみされたスキーマは計算不能
+            # 仕方がないのでまとめて宣言のみのスキーマに潰す。
+            res = EmptySchema()
         # 型変数の場合はデフォルトもしくはカインドを元に計算する。
         # XXX:現状デフォルトのみ実装
         if lt == '__variable__':

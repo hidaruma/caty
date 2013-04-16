@@ -97,7 +97,7 @@ class Module(Facility):
         self.get_proto_type = partial(self._get_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
         self.has_proto_type = partial(self._has_resource, scope_func=lambda x:x.proto_ns, type=u'Command')
         
-        self.add_ast = partial(self._add_resource, scope_func=lambda x:x.ast_ns, type=u'Type', see_register_public=True)
+        self.add_ast = partial(self._add_resource, scope_func=lambda x:x.ast_ns, type=u'Type', see_register_public=True, ignore_undefined=True)
         self.get_ast = partial(self._get_resource, scope_func=lambda x:x.ast_ns, type=u'Type')
         self.has_ast = partial(self._has_resource, scope_func=lambda x:x.ast_ns, type=u'Type')
         
@@ -159,13 +159,14 @@ class Module(Facility):
         m = t.module.canonical_name + '.' + t.module.type
         return m, a
 
-    def _add_resource(self, target, scope_func=None, type=u'', see_register_public=False, see_filter=False, callback=None, force=False):
+    def _add_resource(self, target, scope_func=None, type=u'', see_register_public=False, see_filter=False, callback=None, force=False, ignore_undefined=False):
         scope = scope_func(self)
         name = target.name
         if name in scope and not force:
             t = scope[name]
-            m, a = self._get_mod_and_app(t)
-            raise Exception(self.application.i18n.get(u'%s $name of $this is already defined in $module of $app' % type, 
+            if t.body is not None:
+                m, a = self._get_mod_and_app(t)
+                raise Exception(self.application.i18n.get(u'%s $name of $this is already defined in $module of $app' % type, 
                                                        name=name, 
                                                        this=self._get_full_name(),
                                                        module=m,

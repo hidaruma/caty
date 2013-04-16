@@ -912,6 +912,38 @@ class UndefinedSchema(SchemaBase, Scalar):
     def tag(self):
         return self.type
 
+class EmptySchema(SchemaBase, Scalar):
+    u"""宣言のみされたスキーマ。
+    """
+    def __init__(self, name):
+        self.__name = name
+        SchemaBase.__init__(self)
+
+    def validate(self, value):
+        raise JsonSchemaError(dict(msg='$name is declared but not defined', name=self.__name))
+
+    def intersect(self, another):
+        return NeverSchema()
+
+    def _convert(self, value):
+        raise JsonSchemaError(dict(msg='$name is declared but not defined', name=self.__name))
+
+    def dump(self, depth, node=[]):
+        return u'__empty__'
+
+    def clone(self, checked=None, *args, **kwds):
+        s = EmptySchema(self.__name)
+        s.annotations = self.annotations
+        return s
+
+    @property
+    def type(self):
+        return u'__empty__'
+
+    @property
+    def tag(self):
+        return self.type
+
 class TypeVariable(SchemaBase, Scalar):
     def __init__(self, var_name, type_arguments, kind, default, options, module):
         self.var_name = var_name

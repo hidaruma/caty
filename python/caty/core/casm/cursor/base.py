@@ -33,7 +33,10 @@ class SchemaBuilder(TreeCursor):
             self._root_name = node.name
             _ = True
         self._type_params = node._type_params
-        body = node.body.accept(self)
+        if not node.body:
+            body = EmptySchema(node.name)
+        else:
+            body = node.body.accept(self)
         s = NamedSchema(node.name, node._type_params, body, self.module)
         if _:
             self._type_params = None
