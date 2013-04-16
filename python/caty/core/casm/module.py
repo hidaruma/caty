@@ -635,10 +635,14 @@ class Module(Facility):
             self.application.cout.writeln('OK')
 
         for k, v in self.entity_ns.items():
+            if not v.facility_name:
+                continue
             if self.has_facility(v.facility_name): # entiry name = FacilityName;形式。 ここでは抽象エンティティ
                 self._app.register_facility(v.canonical_name if not self.is_root else v.name, self.facility_classes[v.facility_name], v.user_param)
 
         for k, v in self.entity_ns.items():
+            if not v.facility_name:
+                continue
             if not self.has_facility(v.facility_name): # 具体エンティティ
                 fname = self.get_entity(v.facility_name).canonical_name # ファシリティ名は抽象エンティティより取得
                 self._app.register_entity(v.canonical_name if not self.is_root else v.name, fname, v.user_param)
