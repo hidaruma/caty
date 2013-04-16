@@ -67,6 +67,8 @@ def _entity(seq):
     a = seq.parse(annotation)
     _ = seq.parse(keyword(u'entity'))
     n = seq.parse(name_token)
+    if option(S(u';'))(seq):
+        return EntityNode(n, None, None, doc, a)
     if n in RESERVED:
         raise ParseFailed(seq, command, '%s is reserved.' % n)
     seq.parse('=')
