@@ -1,0 +1,63 @@
+// -*- coding: utf-8 -*-
+/** Graphviz interface for Olog */
+module gvo;
+
+/** 背景色 */
+const BGCOLOR :: string = "white";
+
+/** olog */
+command olog [string name, string? text] :: (null | gv:Node | gv:Edge | gv:Cluster| array) -> gv:Digraph
+{
+  pass > in;
+  [
+    %1 > name,
+    %2?="" > text,
+  ];
+  ["(", %name, ") ", %text] | text:concat > label;
+  %in | gv:graph --label=%label %name
+};
+
+/** ologのノード（圏の対象） */
+command node [string id, string? text] :: void -> gv:Node 
+{
+  [
+    %1 > id,
+    %2?="" > text,
+  ];
+  ["(", %id, ") ", %text] | text:concat > label;
+  gv:node --shape=box --label=%label %id
+};
+
+/** ologのアロー（圏の射） */
+command arrow [string name, string from, string to, string? text] :: void -> gv:Edge
+{
+  [
+    %1 > name,
+    %2 > from,
+    %3 > to,
+    %4?="" > text,
+  ];
+  ["(", %name, ") ", %text] | text:concat > label;
+  gv:edge --label=%label %from %to
+};
+
+/** ologの制約 */
+command constr :: (null | gv:Node | gv:Edge | gv:Cluster| array) -> gv:Cluster 
+{
+  gv:cluster --color=gray --style=rounded
+};
+
+/** ologのパス同値等式 */
+command peq [string id, string left, string right] :: void -> gv:Node
+{
+  [
+    %1 > id,
+    %2 > left,
+    %3 > right,
+  ];
+  BGCOLOR > bgcolor;
+  ["(", %id, ") ", %left, " = ", %right] | text:concat > label;
+  gv:node --shape=box --label=%label --color=%bgcolor %id
+};
+
+// End of Module
