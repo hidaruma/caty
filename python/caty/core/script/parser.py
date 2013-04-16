@@ -338,7 +338,18 @@ class ScriptParser(Parser):
         seq.parse('%')
         n = seq.parse(Regex(ur'[0-9]+'))
         o = seq.parse(option('?'))
-        return ArgRef(n, bool(o))
+        if o and option('=')(seq):
+            d = seq.parse([xjson.string, 
+                      xjson.binary,
+                      xjson.multiline_string,
+                      bind2nd(xjson.null, True), 
+                      bind2nd(xjson.number, True), 
+                      bind2nd(xjson.integer, True), 
+                      bind2nd(xjson.boolean, True),
+                      ])
+        else:
+            d = caty.UNDEFINED
+        return ArgRef(n, bool(o), d)
     
     def tag_name(self, seq):
         return seq.parse([u'*!', u'*', xjson.string, self.name, Regex(ur'[-0-9a-zA-Z_]+')])

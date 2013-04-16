@@ -220,10 +220,11 @@ class ArgRef(Syntax):
     command __arg-ref<T default any> :: void -> T
                         refers python:caty.core.script.node.ArgRef;
     """
-    def __init__(self, num, optional):
+    def __init__(self, num, optional, default):
         Syntax.__init__(self)
         self.__arg_num = int(num)
         self.__optional = optional
+        self.__default = default
 
     def accept(self, visitor):
         return visitor.visit_argref(self)
@@ -235,6 +236,10 @@ class ArgRef(Syntax):
     @property
     def optional(self):
         return self.__optional
+
+    @property
+    def default(self):
+        return self.__default
 
 class ConstNode(object):
     def __init__(self, name, value):

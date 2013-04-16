@@ -306,7 +306,7 @@ class CommandExecutor(BaseInterpreter):
             return argv[node.arg_num]
         except:
             if node.optional:
-                return caty.UNDEFINED
+                return node.default
             else:
                 raise Exception(u'Variable %%%d is not defined' % node.arg_num)
 

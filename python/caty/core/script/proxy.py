@@ -1,9 +1,11 @@
 #coding:utf-8
+from caty.core.spectypes import UNDEFINED
 from caty.core.command import *
 from caty.core.script.node import *
 from caty.core.script.builder import CommandCombinator, DiscardCombinator
 from caty.core.exception import InternalException, throw_caty_exception
 import caty.jsontools as json
+
 
 class Proxy(object):
     u"""パイプライン構築のためのプロキシ。
@@ -485,12 +487,13 @@ class VarRefProxy(CommandProxy):
 
 class ArgRefProxy(CommandProxy):
     reification_type = u'_argref'
-    def __init__(self, name, optional):
+    def __init__(self, name, optional, default=UNDEFINED):
         self.name = name
         self.optional = optional
+        self.default = default
 
     def instantiate(self, builder):
-        return ArgRef(self.name, self.optional)
+        return ArgRef(self.name, self.optional, self.default)
 
     def set_module(self, module):
         pass
