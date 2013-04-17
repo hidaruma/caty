@@ -10,20 +10,26 @@ module query;
 
 }>>
 
+== 方針
+
+* MongoDBのオペレーターは、そのままの綴りで採用する。
+* 否定を含む述語は not を入れる。
+* 上記の二つは整合しないので、別名を許す。
+
 == 補助的なデータ型
 
 <<{
 /** typeIs のパラメータに指定するBSON型の名前 */
 type bsonTypeName = (
-  "int"
+  "boolean"
+| "int"
 | "long"
 | "double"
 | "string"
+| "binary"
 | "object"
 | "array"
-| "binary"
 | "objectId"
-| "boolean"
 | "dateTime"
 | "undefined"
 );
@@ -54,6 +60,8 @@ type comparable = (
 );
 
 type regex = string(remark="正規表現");
+
+type likePattern = string(remark="LIKEのパターン");
 
 }>>
 
@@ -108,7 +116,7 @@ type Pred = (
  @isNotIncluded [scalar*] |
 
 /* パターンマッチ */
- @like regex |
+ @like likePattern |
  @regex regex |
 
 /* その他 */
