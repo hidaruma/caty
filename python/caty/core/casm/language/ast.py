@@ -758,8 +758,6 @@ class CollectionDeclNode(object):
         if keytype:
             a.add(Annotation(u'key-type', keytype))
         self.type = ASTRoot(name, None, coltype, ann, doc)
-        sp = ScriptParser()
-        script = sp.parse('void')
         self.command1 = CommandNode('_' + name, 
                                      [CallPattern(None, 
                                                  None, 
@@ -787,7 +785,7 @@ class CollectionDeclNode(object):
                                      Annotations([Annotation(u'__collection')]),
                                      [])
         self.catyclass = ClassNode(name, [], ScalarNode(u'univ'), ScalarNode(u'univ'), CommandURI([(u'python', 'caty.core.command.DummyClass')]), None, Annotations([]), [])
-        self.entity = FacilityNode(u'_'+name, None, u'null', ScalarNode(u'null'), {}, None, Annotations([]))
+        self.entity = FacilityNode(name, None, u'null', ScalarNode(u'null'), {}, None, Annotations([]))
 
     def declare(self, module):
         self.type.declare(module)

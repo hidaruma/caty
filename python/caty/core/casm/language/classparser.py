@@ -4,6 +4,7 @@ from topdown import *
 from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, CommandNode
 from caty.core.casm.language.schemaparser import schema, typedef, type_arg
 from caty.core.casm.language.syntaxparser import syntax
+from caty.core.casm.language.facilityparser import _entity
 from caty.core.casm.language.commandparser import command, refer, xjson, CallPattern, CommandDecl, CommandURI
 from caty.core.casm.language.constparser import const
 from caty.core.casm.language.kindparser import kind
@@ -18,7 +19,7 @@ def catyclass(seq):
     dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
     with strict():
         S(u'{')(seq)
-        member = many([command, property, schema, const])(seq)
+        member = many([command, property, schema, const, _entity])(seq)
         S(u'}')(seq)
         ref = refers(seq)
         S(u';')(seq)
