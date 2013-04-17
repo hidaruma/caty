@@ -46,7 +46,7 @@ class NullCommand(Command):
         pass
 
     def set_var_storage(self, *args):
-        pass
+        Command.set_var_storage(self, *args)
 
     def accept(self, visitor):
         raise self.orig
