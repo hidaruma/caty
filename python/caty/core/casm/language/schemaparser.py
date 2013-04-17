@@ -15,6 +15,9 @@ def schema(seq):
     annotations = seq.parse(annotation)
     t = seq.parse([keyword('type'), keyword('exception')])
     name_of_type = seq.parse(name_token)
+    kind = option(kind_of)(seq)
+    if kind:
+        default = option(default_type)(seq)
     if name_of_type in RESERVED:
         raise ParseFailed(seq, schema, '%s is reserved.' % n)
     if option(u';')(seq):
