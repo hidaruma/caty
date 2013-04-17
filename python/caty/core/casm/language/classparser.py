@@ -11,6 +11,9 @@ from caty.core.casm.language.kindparser import kind
 from caty.core.language.util import *
 
 def catyclass(seq):
+    return choice(classdef, signature)(seq)
+
+def classdef(seq):
     doc = option(docstring)(seq)
     annotations = seq.parse(annotation)
     keyword(u'class')(seq)
@@ -24,6 +27,34 @@ def catyclass(seq):
         ref = refers(seq)
         S(u';')(seq)
         return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args)
+
+def signature(seq):
+    doc = option(docstring)(seq)
+    annotations = seq.parse(annotation)
+    keyword(u'signature')(seq)
+    annotations.add(Annotation(u'__signature'))
+    classname = name_token(seq)
+    type_args = seq.parse(option(type_arg, []))
+    dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
+    with strict():
+        S(u'{')(seq)
+        member = many([abs_command, abs_type, _entity])(seq)
+        S(u'}')(seq)
+        ref = refers(seq)
+        S(u';')(seq)
+        return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args)
+
+def abs_type(seq):
+    type = schema(seq)
+    if type.body:
+        raise ParseError(u'Type can not defined in signature class')
+    return type
+
+def abs_command(seq):
+    cmd = command(seq)
+    if cmd.script_proxy or cmd.reference_to_implementation.defined:
+        raise ParseError(u'Command can not defined in signature class')
+    return cmd
 
 def restriction(seq):
     S('(')(seq)
@@ -48,7 +79,7 @@ def property(seq):
         S(u';')(seq)
         annotations.add(Annotation(u'__property__'))
         annotations.add(Annotation(u'bind'))
-        return CommandNode(pname, [CallPattern(None, None, CommandDecl((ScalarNode(u'void'), tp), [], []))], CommandURI([(u'python', 'caty.core.command.Dummy')]), doc, annotations, [])
+        return CommandNode(pname, [CallPattern(None, None, CommandDecl((ScalarNode(u'void'), tp), [], []))], CommandURI([(u'python', 'caty.core.command.Dummy')], False), doc, annotations, [])
 
 
 def refers(seq):

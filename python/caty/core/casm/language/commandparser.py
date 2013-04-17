@@ -168,8 +168,7 @@ def refers(seq):
     try:
         return CommandURI(many1(refer)(seq))
     except:
-
-        return CommandURI([(u'python', 'caty.core.command.Dummy')])
+        return CommandURI([(u'python', 'caty.core.command.Dummy')], False)
 
 def refer(seq):
     _ = seq.parse(keyword(u'refers'))

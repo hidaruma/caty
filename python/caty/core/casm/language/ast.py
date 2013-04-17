@@ -410,8 +410,10 @@ class CommandNode(Function):
         self.patterns = patterns
         self.uri = None
         self.script_proxy = None
+        self.reference_to_implementation = None
         if isinstance(uri_or_script, CommandURI):
             self.uri = uri_or_script.python
+            self.reference_to_implementation = uri_or_script
         else:
             self.script_proxy = uri_or_script
         self.doc = doc
@@ -543,7 +545,7 @@ class CommandDecl(object):
     コマンドURI参照 refers
     """
     def __init__(self, profile, jump, resource):
-        self.uri = '' # 後で挿入される
+        self.uri = None # 後で挿入される
         self.profile_ast = profile
         self.profile = None
         self.jump_decl = jump
@@ -625,10 +627,11 @@ class Jump(object):
         self.only = only
 
 class CommandURI(dict):
-    def __init__(self, types):
+    def __init__(self, types, defined=True):
         for tp, val in types:
             setattr(self, tp, val)
             self[tp] = val
+        self.defined = defined
 
 class KindReference(object):
     def __init__(self, name, annotations, docstring=u''):
@@ -767,7 +770,7 @@ class CollectionDeclNode(object):
                                                     []
                                                  ), 
                                      )],
-                                     CommandURI([(u'python', 'caty.core.command.Dummy')]),
+                                     CommandURI([(u'python', 'caty.core.command.Dummy')], False),
                                      doc, 
                                      Annotations([Annotation(u'__collection')]),
                                      [])
@@ -780,11 +783,11 @@ class CollectionDeclNode(object):
                                                     []
                                                  ), 
                                      )],
-                                     CommandURI([(u'python', 'caty.core.command.Dummy')]),
+                                     CommandURI([(u'python', 'caty.core.command.Dummy')], False),
                                      doc, 
                                      Annotations([Annotation(u'__collection')]),
                                      [])
-        self.catyclass = ClassNode(name, [], ScalarNode(u'univ'), ScalarNode(u'univ'), CommandURI([(u'python', 'caty.core.command.DummyClass')]), None, Annotations([]), [])
+        self.catyclass = ClassNode(name, [], ScalarNode(u'univ'), ScalarNode(u'univ'), CommandURI([(u'python', 'caty.core.command.DummyClass')], False), None, Annotations([]), [])
         self.entity = FacilityNode(name, None, u'null', ScalarNode(u'null'), {}, None, Annotations([]))
 
     def declare(self, module):
