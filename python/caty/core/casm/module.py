@@ -164,7 +164,7 @@ class Module(Facility):
         name = target.name
         if name in scope and not force:
             t = scope[name]
-            if t.body is not None:
+            if t.defined:
                 m, a = self._get_mod_and_app(t)
                 raise Exception(self.application.i18n.get(u'%s $name of $this is already defined in $module of $app' % type, 
                                                        name=name, 

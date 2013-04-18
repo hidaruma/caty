@@ -52,6 +52,7 @@ class ASTRoot(Root):
         self.__annotation = annotation
         self.__docstring = docstring if docstring else u''
         self.kind = None
+        self.defined = ast is not None
 
     #def clone(self):
     #    return TypeLambda(self._name, self._type_params, self.__definition, self.__annotation, self.__docstring)
@@ -113,6 +114,7 @@ class ClassNode(object):
         self.codomain = codomain
         self.uri = uri
         self.type_args = type_args
+        self.defined = True
 
     def declare(self, module):
         self.module = module
@@ -133,6 +135,7 @@ class FacilityNode(object):
         self.indices_param_type = indices_param_type
         self.docstring = doc
         self.annotations = annotations
+        self.defined = True
 
     def declare(self, module):
         self.module = module
@@ -149,6 +152,7 @@ class EntityNode(object):
         self.user_param = value
         self.docstring = doc
         self.annotations = annotations
+        self.defined = fname is not None
 
     def declare(self, module):
         self.module = module
@@ -423,6 +427,7 @@ class CommandNode(Function):
         self.type_params = type_params
         self.type_params_ast = type_params
         self.command_type = command_type
+        self.defined = self.reference_to_implementation is not None and self.reference_to_implementation.defined
 
     @property
     def annotations(self):
