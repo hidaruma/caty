@@ -13,7 +13,7 @@ command olog [string name, string? text] :: (null | gv:Node | gv:Edge | gv:Clust
     %1 > name,
     %2?="" > text,
   ];
-  ["(", %name, ") ", %text] | text:concat > label;
+  [%text, " (", %name, ")"] | text:concat > label;
   %in | gv:graph --label=%label %name
 };
 
@@ -24,21 +24,50 @@ command t-box [string id, string? text] :: void -> gv:Node
     %1 > id,
     %2?="" > text,
   ];
-  ["(", %id, ") ", %text] | text:concat > label;
+  [%text, " (", %id, ")"] | text:concat > label;
   gv:node --shape=box --label=%label %id
 };
 
 /** ologのアスペクトを表すアロー（圏の射） */
-command a-arrow [string name, string from, string to, string? text] :: void -> gv:Edge
+command a-arrow 
 {
+   @[default(false)]
+   "total": boolean?,
+
+   @[default(false)]
+   "inj": boolean?,
+
+   @[default(false)]
+   "surj": boolean?,
+
+   @[default(false)]
+   "multi": boolean?,
+
+   @[default(false)]
+   "induced": boolean?,
+
+ }
+ [string name, string from, string to, string? text] :: void -> gv:Edge
+{
+  %total | case {true=>"tee",  false=>""} > tail1;
+  %inj   | case {true=>"inv",  false=>""} > tail2;
+  %surj  | case {true=>"tee",  false=>""} > head1;
+  %multi | case {true=>"crow", false=>"normal"} > head2;
+  [%tail1, %tail2] | text:concat | cond{""=>"none", *=>pass} > tail;
+  [%head1, %head2] | text:concat > head;
+
   [
     %1 > name,
     %2 > from,
     %3 > to,
     %4?="" > text,
   ];
-  ["(", %name, ") ", %text] | text:concat > label;
-  gv:edge --label=%label %from %to
+
+  %induced | case {true=>"dashed", false=>undefined} > style;
+
+  [%text, " (", %name, ")"] | text:concat > label;
+
+  gv:edge --style=%style? --dir=both --arrowtail=%tail --arrowhead=%head --label=%label %from %to
 };
 
 /** ologの制約 */
@@ -56,7 +85,7 @@ command p-eq [string id, string left, string right] :: void -> gv:Node
     %3 > right,
   ];
   BGCOLOR > bgcolor;
-  ["(", %id, ") ", %left, " = ", %right] | text:concat > label;
+  [%left, " = ", %right, " (", %id, ")"] | text:concat > label;
   gv:node --shape=box --label=%label --color=%bgcolor %id
 };
 
