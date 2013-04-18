@@ -143,7 +143,10 @@ class FacilityNode(object):
 
     @property
     def canonical_name(self):
-        return self.module.canonical_name + ':' + self.name
+        if self.module.is_class:
+            return self.module.canonical_name + '.' + self.name
+        else:
+            return self.module.canonical_name + ':' + self.name
 
 class EntityNode(object):
     def __init__(self, name, fname, value, doc, annotations):
@@ -160,7 +163,10 @@ class EntityNode(object):
 
     @property
     def canonical_name(self):
-        return self.module.canonical_name + ':' + self.name
+        if self.module.is_class:
+            return self.module.canonical_name + '.' + self.name
+        else:
+            return self.module.canonical_name + ':' + self.name
 
 class Node(object):
     def __init__(self, options=None):

@@ -111,6 +111,7 @@ class Module(Facility):
         self.add_facility = partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility', see_register_public=True)
         self.get_facility = partial(self._get_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.has_facility = partial(self._has_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
+        self.get_facility_classes = partial(self._get_resource, scope_func=lambda x:x.facility_classes, type=u'Facility')
 
         self.add_entity = partial(self._add_resource, scope_func=lambda x:x.entity_ns, type=u'Entity', see_register_public=True)
         self.get_entity = partial(self._get_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
@@ -629,7 +630,7 @@ class Module(Facility):
                 if facility_class:
                     facility_class.__system_config__ = config
                 self.facility_classes[v.name] = facility_class
-        for m in self.sub_modules.values() + self.sub_packages.values():
+        for m in self.sub_modules.values() + self.sub_packages.values() + self.class_ns.values():
             m._register_facility()
         if self.is_root and not self.compiled:
             self.application.cout.writeln('OK')
@@ -638,7 +639,7 @@ class Module(Facility):
             if not v.facility_name:
                 continue
             if self.has_facility(v.facility_name): # entiry name = FacilityName;形式。 ここでは抽象エンティティ
-                self._app.register_facility(v.canonical_name if not self.is_root else v.name, self.facility_classes[v.facility_name], v.user_param)
+                self._app.register_facility(v.canonical_name if not self.is_root else v.name, self.get_facility_classes(v.facility_name), v.user_param)
 
         for k, v in self.entity_ns.items():
             if not v.facility_name:
