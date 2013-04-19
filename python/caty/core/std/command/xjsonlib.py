@@ -160,3 +160,15 @@ class Merge(Builtin):
             return reduce(f, input)
         except:
             return None
+
+class ReadDir(Builtin):
+    def setup(self, path):
+        self.path = path
+
+    def execute(self):
+        r = {}
+        for dirent in self.pub.opendir(self.path).read():
+            if dirent.path.endswith('.xjson') and not dirent.is_dir:
+                r[dirent.basename.split('.')[0]] = xjson.loads(dirent.read())
+        return r
+

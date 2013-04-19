@@ -123,3 +123,9 @@ command normalize :: univ -> univ
  */
 command merge {@[default("fst")]"mode": string?} :: [object*] -> object | null
     refers python:xjsonlib.Merge;
+
+
+command read-dir [string path] :: void -> {*: object}
+    reads pub
+    refers python:xjsonlib.ReadDir;
+
