@@ -31,17 +31,20 @@ command t-box [string id, string? text] :: void -> gv:Node
 /** ologのアスペクトを表すアロー（圏の射） */
 command a-arrow 
 {
-   @[default(false)]
+   @[default(false), without("incl")]
    "total": boolean?,
 
-   @[default(false)]
+   @[default(false), without("incl")]
    "inj": boolean?,
 
    @[default(false)]
    "surj": boolean?,
 
-   @[default(false)]
+   @[default(false), without("incl")]
    "multi": boolean?,
+
+   @[default(false), without("multi"), without("inj"), without("total")]
+   "incl": boolean?,
 
    @[default(false)]
    "induced": boolean?,
@@ -49,11 +52,12 @@ command a-arrow
  }
  [string name, string from, string to, string? text] :: void -> gv:Edge
 {
+  %incl  | case {true=>"obox",  false=>""} > tail0;
   %total | case {true=>"tee",  false=>""} > tail1;
   %inj   | case {true=>"inv",  false=>""} > tail2;
   %surj  | case {true=>"tee",  false=>""} > head1;
   %multi | case {true=>"crow", false=>"normal"} > head2;
-  [%tail1, %tail2] | text:concat | cond{""=>"none", *=>pass} > tail;
+  [%tail0, %tail1, %tail2] | text:concat | cond{""=>"none", *=>pass} > tail;
   [%head1, %head2] | text:concat > head;
 
   [
