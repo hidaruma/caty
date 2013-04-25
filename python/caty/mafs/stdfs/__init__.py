@@ -4,7 +4,7 @@ from caty.mafs.authorization import simple_checker, CREATE, READ, UPDATE, DELETE
 from caty.core.exception import *
 from caty.util import timestamp_from_utime
 import tempfile
-
+encoding = 'utf-8'
 def createFile(path):
     if path.endswith('/'):
         raise InternalException(u'$path is not file (is directory)', path=path)

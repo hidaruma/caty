@@ -2,6 +2,8 @@
 import caty
 from caty.core.application import *
 from caty.core.applicationgroup import *
+from caty.jsontools.util import DirectoryWalker, FileOpener
+from caty.jsontools import xjson, prettyprint
 from caty.util.path import join
 from caty.core.script import node
 from customimporter import make_custom_import
@@ -46,19 +48,17 @@ class System(object):
         self._init_temp()
         self._init_logger()
         if prj_manifest:
-            if '/' in prj_manifest or '\\' in prj_manifest:
-                raise Exception(u'Invalid prj-manifest: %s' % prj_manifest)
-            prjfile = os.path.join('prj-manifest', prj_manifest+'.xjson')
+            prjfile = ('prj-manifest.' + prj_manifest+'.xjson')
         else:
             prjfile = 'prj-manifest.xjson'
         global_file = [prjfile, '_global.xjson']
         gcfg = None
         for f in global_file:
             if os.path.exists(f):
-                gcfg = xjson.load(open(f))
+                gcfg = DirectoryWalker(FileOpener(os.getcwd()), True, '/' + prjfile).read('/prj-manifest')
                 if f == '_global.xjson':
                     self._deprecate_logger.warning(u'_global.xjson is deprecated.')
-        if not gcfg:
+        if not gcfg and 'prj-manifest.xjson' not in gcfg:
             import random
             import string
             gcfg = {
@@ -80,6 +80,8 @@ class System(object):
                 "mafsModule": u"caty.mafs.stdfs"
             }
             open('prj-manifest.xjson', 'wb').write(xjson.dumps(gcfg))
+        if not gcfg:
+            raise Exception(prjfile + ' not exists')
         self._global_config = GlobalConfig(gcfg, 
                                            self._validate_encoding(encoding))
         self._global_app = None

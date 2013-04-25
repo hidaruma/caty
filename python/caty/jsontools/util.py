@@ -24,3 +24,19 @@ class DirectoryWalker(object):
                     o.update(r[key])
                 r[key] = o
         return r
+
+import os
+from caty.mafs.fileobject import FileObject, DirectoryObject
+from caty.mafs import stdfs
+from caty.util.path import join
+class FileOpener(object):
+    def __init__(self, cwd):
+        self.cwd = cwd
+
+    def opendir(self, path):
+        return DirectoryObject(join(self.cwd, path).replace('\\', '/'), stdfs)
+
+    def open(self, path):
+        return FileObject(join(self.cwd, path).replace('\\', '/'), 'rb', stdfs)
+
+            
