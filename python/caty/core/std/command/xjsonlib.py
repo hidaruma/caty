@@ -161,14 +161,13 @@ class Merge(Builtin):
         except:
             return None
 
+from caty.jsontools.util import DirectoryWalker
 class ReadDir(Builtin):
-    def setup(self, path):
+    def setup(self, opts, path):
         self.path = path
+        self.rec = opts['rec']
+        self.file = opts['also-file']
 
     def execute(self):
-        r = {}
-        for dirent in self.pub.opendir(self.path).read():
-            if dirent.path.endswith('.xjson') and not dirent.is_dir:
-                r[dirent.basename.split('.')[0]] = xjson.loads(dirent.read())
-        return r
-
+        d = DirectoryWalker(self.pub, self.rec, self.file)
+        return d.read(self.path)
