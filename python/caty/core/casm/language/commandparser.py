@@ -29,7 +29,9 @@ def command(seq):
             j = seq.parse(jump)
             r = seq.parse(many(resource))
             rf = seq.parse(option([script, refers]))
-            _ = seq.parse(u';')
+            nohook(S(u';'))(seq)
+            doc2 = postfix_docstring(seq)
+            doc = concat_docstring(doc, doc2)
             return CommandNode(n, map(lambda p:p(j, r), patterns), rf, doc, a, t)
     finally:
         seq.parser_hook = h

@@ -788,6 +788,7 @@ class ClassModule(Module):
             m.declare(self)
         self.count = 0
         self.type_params = clsobj.type_args
+        self.docstring = clsobj.docstring
 
     @property
     def uri(self):

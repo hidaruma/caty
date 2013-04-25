@@ -23,3 +23,34 @@ def make_structured_doc(s):
 def path_string(seq):
     return Regex(u'/[^/ \t\r\n;]*/?')(seq)
 
+@nohook
+@option
+def postfix_docstring(seq):
+    if seq.eof:
+        return
+    skip_ws(seq)
+    if not option(S(u'//*'))(seq):
+        if seq.parser_hook:
+            seq.parser_hook.hook(seq)
+        return
+    doc = []
+    doc.append(until('\n')(seq).strip())
+    option(S('\n'))(seq)
+    while not seq.eof and option(S('//'))(seq):
+        doc.append(until('\n')(seq).lstrip('*'))
+        option(S('\n'))(seq)
+        many(u' ')(seq)
+    if seq.parser_hook:
+        seq.parser_hook.hook(seq)
+    return '\n'.join(filter(lambda x: x.strip(), doc))
+
+def concat_docstring(a, b):
+    if a:
+        if b:
+            return a + '\n' + b
+        else:
+            return a
+    if b:
+        return b
+    return None
+

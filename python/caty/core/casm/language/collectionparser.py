@@ -20,5 +20,7 @@ def collection_decl(seq):
         else:
             keypath = u'$._id'
             keytype = None
-        S(u';')(seq)
+        nohook(S(u';'))(seq)
+        doc2 = postfix_docstring(seq)
+        doc = concat_docstring(doc, doc2)
     return CollectionDeclNode(name, coltype, keypath, keytype, doc, annotations)

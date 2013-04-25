@@ -644,4 +644,16 @@ alpha = Regex(r'[a-zA-Z_]+')
 number = Regex(r'[0-9]+')
 alphanum = Regex(r'[a-zA-Z_0-9]+')
 
+class nohook(Parser):
+    def __init__(self, parser):
+        self.parser = parser
+
+    def __call__(self, seq):
+        h = seq.ignore_hook
+        seq.ignore_hook = True
+        try:
+            return self.parser(seq)
+        finally:
+            seq.ignore_hook = h
+
 

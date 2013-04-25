@@ -25,7 +25,9 @@ def classdef(seq):
         member = many([command, property, schema, const, _entity])(seq)
         S(u'}')(seq)
         ref = refers(seq)
-        S(u';')(seq)
+        nohook(S(u';'))(seq)
+        doc2 = postfix_docstring(seq)
+        doc = concat_docstring(doc, doc2)
         return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args)
 
 def signature(seq):
@@ -41,7 +43,9 @@ def signature(seq):
         member = many([abs_command, abs_type, _entity])(seq)
         S(u'}')(seq)
         ref = refers(seq)
-        S(u';')(seq)
+        nohook(S(u';'))(seq)
+        doc2 = postfix_docstring(seq)
+        doc = concat_docstring(doc, doc2)
         return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args)
 
 def abs_type(seq):

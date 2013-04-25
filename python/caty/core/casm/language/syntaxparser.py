@@ -19,6 +19,8 @@ def syntax(seq):
         if seq.parse([':=', '=', ';']) == ';':
             a.add(Annotation(u'__deferred'))
             d = ScalarNode(u'any')
+            doc2 = postfix_docstring(seq)
+            doc = concat_docstring(doc, doc2)
             return ASTRoot(n, v, d, a, doc)
     ann = seq.parse(option(choice(keyword('deferred'), keyword('lexical'))))
     if ann == u'deferred':
@@ -40,6 +42,8 @@ def syntax(seq):
         a.add(Annotation('register-public'))
     d.apply_type_name(n)
     c = seq.parse(';')
+    doc2 = postfix_docstring(seq)
+    doc = concat_docstring(doc, doc2)
     return ASTRoot(n, v, d, a, doc)
 
 def bnf_def(seq):

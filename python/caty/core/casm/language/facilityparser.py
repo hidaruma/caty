@@ -27,7 +27,9 @@ def _facility(seq):
         clsname = None
         if ref:
             clsname = ':'.join(ref)
-        _ = seq.parse(';')
+        nohook(S(u';'))(seq)
+        doc2 = postfix_docstring(seq)
+        doc = concat_docstring(doc, doc2)
         return FacilityNode(n, clsname, sys_param_type, config_type, indices_type, doc, a)
 
 def parse_config_type(seq):
@@ -67,7 +69,9 @@ def _entity(seq):
     a = seq.parse(annotation)
     _ = seq.parse(keyword(u'entity'))
     n = seq.parse(name_token)
-    if option(S(u';'))(seq):
+    if option(nohook(S(u';')))(seq):
+        doc2 = postfix_docstring(seq)
+        doc = concat_docstring(doc, doc2)
         return EntityNode(n, None, None, doc, a)
     if n in RESERVED:
         raise ParseFailed(seq, command, '%s is reserved.' % n)
@@ -77,5 +81,7 @@ def _entity(seq):
     value = choice(_undefined, xjson.parse)(seq) # undefinedとxjsonだけの出現を確認する
     S(u')')(seq)
     _ = option(parse_indices_type)(seq)
-    _ = seq.parse(';')
+    nohook(S(u';'))(seq)
+    doc2 = postfix_docstring(seq)
+    doc = concat_docstring(doc, doc2)
     return EntityNode(n, ename, value, doc, a)

@@ -106,7 +106,9 @@ def module_decl(seq, type='casm'):
     else:
         timing = u'boot'
     rel = seq.parse(option(relation, []))
-    seq.parse(';')
+    nohook(S(';'))(seq)
+    doc2 = postfix_docstring(seq)
+    doc = concat_docstring(doc, doc2)
     return ModuleName(n, a, rel, doc, timing)
 
 def relation(seq):

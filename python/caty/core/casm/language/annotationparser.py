@@ -8,5 +8,7 @@ def annotation_decl(seq):
     name = name_token(seq)
     S(u'::')(seq)
     type = typedef(seq)
-    S(u';')(seq)
+    nohook(S(u';'))(seq)
+    doc2 = postfix_docstring(seq)
+    doc = concat_docstring(doc, doc2)
     return AnnotationDecl(name, type, doc, annotations)

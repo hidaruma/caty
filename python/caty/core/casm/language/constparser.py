@@ -18,7 +18,9 @@ def const(seq):
         value = peek(choice(_undefined, xjson.parse))(seq) # undefinedとxjsonだけの出現を確認する
         schema = peek(typedef)(seq)
         script = _script(seq)
-        _ = seq.parse(';')
+        nohook(S(u';'))(seq)
+        doc2 = postfix_docstring(seq)
+        doc = concat_docstring(doc, doc2)
         return ConstDecl(n, type, schema, script, doc, a, value)
 
 def _undefined(seq):

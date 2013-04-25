@@ -20,7 +20,9 @@ def schema(seq):
         default = option(default_type)(seq)
     if name_of_type in RESERVED:
         raise ParseFailed(seq, schema, '%s is reserved.' % n)
-    if option(u';')(seq):
+    if option(nohook(S(u';')))(seq):
+        doc2 = postfix_docstring(seq)
+        doc = concat_docstring(doc, doc2)
         return ASTRoot(name_of_type, [], None, annotations, doc, None)
     type_args = seq.parse(option(type_arg))
     k_of = option(kind_of)(seq)
@@ -40,7 +42,9 @@ def schema(seq):
     else:
         if isinstance(definition, NamedTaggedNode):
             definition._tag = name_of_type
-    c = seq.parse(';')
+    nohook(S(u';'))(seq)
+    doc2 = postfix_docstring(seq)
+    doc = concat_docstring(doc, doc2)
     return ASTRoot(name_of_type, type_args, definition, annotations, doc, k_of)
 
 def typedef(seq):

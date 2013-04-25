@@ -9,7 +9,9 @@ def kind(seq):
     name_of_kind = seq.parse(name_token)
     seq.parse('=')
     seq.parse(expr)
-    seq.parse(';')
+    nohook(S(u';'))(seq)
+    doc2 = postfix_docstring(seq)
+    doc = concat_docstring(doc, doc2)
     return KindReference(name_of_kind, annotations, doc)
 
 def expr(seq):
