@@ -156,7 +156,6 @@ class ShallowReifier(object):
         }
 
     def reify_class(self, c):
-        print c.docstring
         return {
             u'document': make_structured_doc(c.docstring),
             u'anno': self.reify_annotations(c.annotations),

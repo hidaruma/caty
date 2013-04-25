@@ -42,7 +42,7 @@ def postfix_docstring(seq):
         many(u' ')(seq)
     if seq.parser_hook:
         seq.parser_hook.hook(seq)
-    return '\n'.join(filter(lambda x: x.strip(), doc))
+    return '\n'.join(filter(lambda x: x, map(lambda x: x.strip(), doc)))
 
 def concat_docstring(a, b):
     if a:
