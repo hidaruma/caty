@@ -19,9 +19,9 @@ class GlobalConfig(object):
         self._raw_data = obj
         fs = obj['mafsModule']
         self._mafs_module = fs
-        session_conf = obj.get('session', {'module': 'caty.session.memory', 'conf': {'expire': 3600}})
+        self.session_conf = obj.get('session', {'module': 'caty.session.memory', 'conf': {'expire': 3600}})
         secret_key = obj['secretKey']
-        self.session = session.initialize(session_conf)
+        self.session = session.initialize(self.session_conf)
         self._filetypes = mafs.metadata.default_types
         self._encoding = obj.get('encoding', u'utf-8')
         self.server_port = 80

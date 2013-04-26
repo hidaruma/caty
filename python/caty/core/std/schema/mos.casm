@@ -41,3 +41,19 @@ command get-canonical-name :: @* {"name": string, "location": {*:string}, *:any?
     %path | text:concat
 };
 
+
+/** ファシリティのバックエンドに関する情報 */
+type BackendInfo = {
+  /** バックエンドの名前 */
+  "name": string,
+  /** そのバックエンドがサポーするファシリティ名 */
+  "facility": string,
+  /** バックエンドの実装モジュール */
+  "module": string,
+  /** 短い説明 */
+  "description": string?,
+};
+
+/** モジュールごとに、ファシリティのバックエンド情報を出力する */
+command list-backends [string module-cdpath] :: void -> [BackendInfo*]
+    refers python:mos.ListBackends;
