@@ -30,8 +30,8 @@ class GlobalConfig(object):
         self._configure_server()
         self._server_module_name = obj['serverModule']
         self._storage_conf = obj.get('storageBackends', {
-              'file': {'module': 'caty.storage.file'},
-              'sqlite': {'module': 'caty.storage.sqlite'}})
+              u'file': {'module': u'caty.storage.file'},
+              u'sqlite': {'module': u'caty.storage.sqlite'}})
         self._sysencoding = unicode(encoding or locale.getpreferredencoding())
         self._mime_types = {}
         self._project_name = obj.get('projectName', unicode(os.path.basename(os.getcwd()), self._encoding))
