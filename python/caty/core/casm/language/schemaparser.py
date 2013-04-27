@@ -20,7 +20,7 @@ def schema(seq):
         default = option(default_type)(seq)
     if name_of_type in RESERVED:
         raise ParseFailed(seq, schema, '%s is reserved.' % n)
-    if option(nohook(S(u';')))(seq):
+    if nohook(option(S(u';')))(seq):
         doc2 = postfix_docstring(seq)
         doc = concat_docstring(doc, doc2)
         return ASTRoot(name_of_type, [], None, annotations, doc, None)
