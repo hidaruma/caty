@@ -1693,7 +1693,8 @@ command follow
     "safe": boolean?
   }
   [string path]
-  :: Reference -> any? throws Undefined;
+  :: Reference -> any? throws Undefined
+  refers python:builtin.Follow;
 
 /* アノテーション宣言 */
 /** アノテーションのターゲットタイプ 

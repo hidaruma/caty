@@ -1416,3 +1416,76 @@ class Dereference(Internal):
         r = executor(None)
         return r
     
+from caty.jsontools.selector.parser import JSONPathSelectorParser
+from caty.jsontools.selector.stm import Selector
+class Follow(Dereference):
+    def setup(self, opts, path):
+        self.__path = path
+        self.auto = opts['auto']
+        self.safe = opts['safe']
+
+    def execute(self, ref):
+        val = self.deref(ref)
+        stm = DerefJSONPathSelectorParser(self).run(self.__path)
+        return stm.select(val).next()
+
+    def deref(self, ref):
+        val =Dereference.execute(self, ref)
+        if val.tag == 'Total':
+            val = json.untagged(val)
+        else:
+            val = json.untagged(val)[1]
+        return val
+
+class DerefJSONPathSelectorParser(JSONPathSelectorParser):
+    def __init__(self, follow):
+        JSONPathSelectorParser.__init__(self, empty_when_error = follow.safe)
+        self.follow = follow
+
+    def dot(self, seq):
+        sep = choice(u'.', u'!')(seq)
+        def _(a, b):
+            if sep == u'!' or self.follow.auto:
+                return DerefWrapper(a, self.follow).chain(b)
+            else:
+                return a.chain(b)
+        return _
+
+    def namewildcard(self, seq):
+        t = seq.parse('*')
+        raise ParseError(seq, t)
+
+    def itemwildcard(self, seq):
+        t = seq.parse('#')
+        raise ParseError(seq, t)
+
+    def oldtag(self, seq):
+        t = seq.parse('^')
+        raise ParseError(seq, t)
+
+    def tag(self, seq):
+        t = seq.parse('tag()')
+        raise ParseError(seq, t)
+
+    def exp_tag(self, seq):
+        t = seq.parse('exp-tag()')
+        raise ParseError(seq, t)
+ 
+    def length(self, seq):
+        t = seq.parse('length()')
+        raise ParseError(seq, t)
+
+class DerefWrapper(Selector):
+    def __init__(self, selector, follow):
+        Selector.__init__(self)
+        self.selector = selector
+        self.follow = follow
+
+    def run(self, obj):
+        for r in self.selector.run(obj):
+            if json.tag(r) == u'__reference':
+                yield self.follow.deref(r)
+            else:
+                yield r
+
+
