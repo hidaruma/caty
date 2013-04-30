@@ -1377,3 +1377,42 @@ class ErrorToString(Builtin):
     def execute(self, e):
         return self.i18n.get(e.value.get('message', u''), e.value)
 
+import caty.jsontools.selector as selector
+class Dereference(Internal):
+    def execute(self, ref):
+        ref = json.untagged(ref)
+        act = ref[u'type'] + 'Action.get'
+        if u'arg' in ref:
+            args = [ref[u'arg']]
+        else:
+            args = [None]
+        val = self.exec_cmd(act, args)
+        if u'ext' in ref:
+            stm = selector.compile(ref['ext'])
+            rel = stm.select(val).next()
+            return json.tagged(u'Relative', [val, rel])
+        else:
+            return json.tagged(u'Total', val)
+
+    def exec_cmd(self, name, raw_args):
+        from caty.util.path import is_mafs_path
+        from caty.core.command import VarStorage
+        from caty.core.command.param import Option, Argument
+        from caty.core.script.interpreter.executor import CommandExecutor
+        from caty.core.script.builder import CommandBuilder
+        from caty.core.facility import TransactionPendingAdaptor
+        app = self.current_app
+        cmd_class = app._schema_module.get_command(name)
+        opts = [Option('0', None)]
+        args = []
+        for v in raw_args:
+            args.append(Argument(v))
+        builder = CommandBuilder(self._facilities, {})
+        cmd_instance = builder.make_cmd(cmd_class, [], opts, args, (0, 0), app._schema_module)
+        cmd_instance.set_facility(self._facilities)
+        var_storage = VarStorage(None, None)
+        cmd_instance.set_var_storage(var_storage)
+        executor = TransactionPendingAdaptor(CommandExecutor(cmd_instance, app, self._facilities), self._facilities)
+        r = executor(None)
+        return r
+    
