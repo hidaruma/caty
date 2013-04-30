@@ -340,11 +340,11 @@ type PrjManifest = {
         "conf": {
             *: any?
         },
-    },
-    "storageBackends": {
-        "*": {"module": string, },
-    },
-
+    }?,
+    /**
+     * 配布パッケージからマージされる項目
+     */
+    *: object,
 };
 
 /**
