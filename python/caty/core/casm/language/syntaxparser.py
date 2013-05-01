@@ -47,7 +47,12 @@ def syntax(seq):
     return ASTRoot(n, v, d, a, doc)
 
 def bnf_def(seq):
-    seq.parse(many(['??', '(:', ':)', name_token, integer, string, sq_string, '|', '@&', '?', '*', '{', '}', '(', ')', ':', '<', '>', ',', '@']))
+    seq.parse(many(['??', '(:', ':)', syn_name_token, integer, string, sq_string, '|', '@&', '?', '*', '{', '}', '(', ')', ':', '<', '>', ',', '@']))
+
+def syn_name_token(seq):
+    n = name_token(seq)
+    if n == 'syntax':
+        raise ParseError(seq, n)
 
 @try_
 def sq_string(seq):
