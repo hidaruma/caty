@@ -340,11 +340,11 @@ type PrjManifest = {
         "conf": {
             *: any?
         },
-    },
-    "storageBackends": {
-        "*": {"module": string, },
-    },
-
+    }?,
+    /**
+     * 配布パッケージからマージされる項目
+     */
+    *: object,
 };
 
 /**
@@ -1660,6 +1660,41 @@ command reject-non-json
  */
 command error-to-string :: Exception -> string
     refers python:builtin.ErrorToString;
+
+
+type DataAddr = @* {
+ "type": string(remark="型の完全修飾名"),
+ "arg": (null|number|string|boolean)?,
+ "ext": string(remark="XJSONパス")?,
+ * : any?
+};
+
+type Reference = @__reference {
+ "type": string(remark="型の完全修飾名"),
+ "arg": (null|number|string|boolean)?,
+ "ext": string(remark="XJSONパス")?,
+};
+
+/** 参照を解決する */
+command deref :: Reference -> @Total any | @Relative [any total, any portion]
+    refers python:builtin.Dereference;
+
+/** 型Tがアドレス可能か調べる */
+command is-addressable<T> :: void -> boolean;
+
+/** 混合XJSONパスの値を取得する */
+command follow 
+  {
+    /** 自動的に参照解決するか */
+    @[default(false)]
+    "auto": boolean?,
+    /** 値が存在しないときにundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?
+  }
+  [string path]
+  :: Reference -> any? throws Undefined
+  refers python:builtin.Follow;
 
 /* アノテーション宣言 */
 /** アノテーションのターゲットタイプ 

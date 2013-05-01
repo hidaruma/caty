@@ -1377,3 +1377,115 @@ class ErrorToString(Builtin):
     def execute(self, e):
         return self.i18n.get(e.value.get('message', u''), e.value)
 
+import caty.jsontools.selector as selector
+class Dereference(Internal):
+    def execute(self, ref):
+        ref = json.untagged(ref)
+        act = ref[u'type'] + 'Action.get'
+        if u'arg' in ref:
+            args = [ref[u'arg']]
+        else:
+            args = [None]
+        val = self.exec_cmd(act, args)
+        if u'ext' in ref:
+            stm = selector.compile(ref['ext'])
+            rel = stm.select(val).next()
+            return json.tagged(u'Relative', [val, rel])
+        else:
+            return json.tagged(u'Total', val)
+
+    def exec_cmd(self, name, raw_args):
+        from caty.util.path import is_mafs_path
+        from caty.core.command import VarStorage
+        from caty.core.command.param import Option, Argument
+        from caty.core.script.interpreter.executor import CommandExecutor
+        from caty.core.script.builder import CommandBuilder
+        from caty.core.facility import TransactionPendingAdaptor
+        app = self.current_app
+        cmd_class = app._schema_module.get_command(name)
+        opts = [Option('0', None)]
+        args = []
+        for v in raw_args:
+            args.append(Argument(v))
+        builder = CommandBuilder(self._facilities, {})
+        cmd_instance = builder.make_cmd(cmd_class, [], opts, args, (0, 0), app._schema_module)
+        cmd_instance.set_facility(self._facilities)
+        var_storage = VarStorage(None, None)
+        cmd_instance.set_var_storage(var_storage)
+        executor = TransactionPendingAdaptor(CommandExecutor(cmd_instance, app, self._facilities), self._facilities)
+        r = executor(None)
+        return r
+    
+from caty.jsontools.selector.parser import JSONPathSelectorParser
+from caty.jsontools.selector.stm import Selector
+class Follow(Dereference):
+    def setup(self, opts, path):
+        self.__path = path
+        self.auto = opts['auto']
+        self.safe = opts['safe']
+
+    def execute(self, ref):
+        val = self.deref(ref)
+        stm = DerefJSONPathSelectorParser(self).run(self.__path)
+        return stm.select(val).next()
+
+    def deref(self, ref):
+        val =Dereference.execute(self, ref)
+        if val.tag == 'Total':
+            val = json.untagged(val)
+        else:
+            val = json.untagged(val)[1]
+        return val
+
+class DerefJSONPathSelectorParser(JSONPathSelectorParser):
+    def __init__(self, follow):
+        JSONPathSelectorParser.__init__(self, empty_when_error = follow.safe)
+        self.follow = follow
+
+    def dot(self, seq):
+        sep = choice(u'.', u'!')(seq)
+        def _(a, b):
+            if sep == u'!' or self.follow.auto:
+                return DerefWrapper(a, self.follow).chain(b)
+            else:
+                return a.chain(b)
+        return _
+
+    def namewildcard(self, seq):
+        t = seq.parse('*')
+        raise ParseError(seq, t)
+
+    def itemwildcard(self, seq):
+        t = seq.parse('#')
+        raise ParseError(seq, t)
+
+    def oldtag(self, seq):
+        t = seq.parse('^')
+        raise ParseError(seq, t)
+
+    def tag(self, seq):
+        t = seq.parse('tag()')
+        raise ParseError(seq, t)
+
+    def exp_tag(self, seq):
+        t = seq.parse('exp-tag()')
+        raise ParseError(seq, t)
+ 
+    def length(self, seq):
+        t = seq.parse('length()')
+        raise ParseError(seq, t)
+
+class DerefWrapper(Selector):
+    def __init__(self, selector, follow):
+        Selector.__init__(self)
+        self.selector = selector
+        self.follow = follow
+
+    def run(self, obj):
+        for r in self.selector.run(obj):
+            if json.tag(r) == u'__reference':
+                yield self.follow.deref(r)
+            else:
+                yield r
+
+
