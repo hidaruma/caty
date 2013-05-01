@@ -535,6 +535,106 @@ command attr
 
 }>>
 
+== データの可視化
+
+<<{
+/** XJSONデータをGraphviz形式に描画する */
+command draw-data [string? name] :: any? -> gv:Digraph {
+  pass > in;  
+  %1?="data" > name;
+  %in? | data-to-graph | gv:graph --label=%name
+};
+
+/** XJSONデータをグラフに変換する */
+command data-to-graph [string? path] :: any? -> (gv:Node | gv:ElementList) {
+  pass   > in;
+  %1?="$" > path;
+  %in? |
+  case {
+   undefined =>
+   // 未定義
+     ["#'undefined", "\n", %path] | text:concat > label;
+     gv:node --shape=box --style=dotted --label=%label %path
+     ,
+   // スカラー
+   (null|boolean|number|string|binary) =>
+     [xjson:pretty, "\n", %path] | text:concat > label;
+     gv:node --shape=box --label=%label %path
+     ,
+   // オブジェクト
+   object => 
+     [
+      // オブジェクトノード
+      ["{}", "\n", %path] | text:concat > label;
+      gv:node --label=%label %path,
+
+      // プロパティ群
+      each {
+        pass > pv;
+        [%path, ".", %_key] | text:concat > new-path;
+        [
+          gv:edge --label=%_key %path %new-path,
+          // 各プロパティに対して再起
+          %pv | data-to-graph %new-path
+        ]
+      }
+     ]
+     ,
+   // 配列
+   array =>
+     [
+      // 配列ノード
+      ["[]", "\n", %path]|text:concat  > label;
+      gv:node --label=%label %path,
+
+      // length() 仮想プロパティ
+      list:length | json:pretty > len;
+      [%path, ".", "length()"] | text:concat > len-path;
+      [%len, "\n", %len-path] | text:concat  > len-label;
+      gv:node --shape=box --label=%len-label %len-path,
+      gv:edge --label="length()" %path %len-path,
+
+      // 項目群
+      each {
+        pass > item;
+        %_key | to-string > k;
+        [%path, ".", %k] | text:concat > new-path;
+        [
+          gv:edge --label=%k %path %new-path,
+          // 各項目に対して再起
+          %item? | data-to-graph %new-path
+        ]
+      }
+     ]
+     ,
+   // 明示的タグ付き
+   @*! any? =>
+     [tag > tag, untagged > con];
+
+     [
+       // タグノード
+       ["@", "\n", %path]|text:concat > label;
+       gv:node --label=%label %path,
+
+       // tag() 仮想プロパティ
+       [%path, ".", "tag()"] | text:concat > tag-path;
+       [%tag | json:pretty, "\n", %tag-path] | text:concat > tag-label;
+       gv:node --shape=box --label=%tag-label %tag-path,
+       gv:edge --label="tag()" %path %tag-path,
+
+       // content() 仮想プロパティ
+       [%path, ".", "content()"] | text:concat > con-path;
+       gv:edge --label="content()" %path %con-path,
+
+       // コンテントに対して再起
+       %con? | data-to-graph %con-path,
+     ]
+     ,
+  }
+};
+
+}>>
+
 == サンプル
 
 * 参考：[[http://www.graphviz.org/Documentation/dotguide.pdf|dot Manual]]
