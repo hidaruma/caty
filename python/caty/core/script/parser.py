@@ -139,7 +139,7 @@ class ScriptParser(Parser):
 
     def fetch(self, seq):
         keyword(u'fetch')(seq)
-        return Fetch(self.obj_query(seq))
+        return Fetch(self.query_value(seq))
 
     def query_item(self, seq, label_list=frozenset()):
         n = choice(S(u'*'), xjson.string)(seq)
@@ -153,16 +153,16 @@ class ScriptParser(Parser):
     def query_value(self, seq, label_list=frozenset()):
         if option(S(u'@+'))(seq):
             label = name_token(seq)
+            if label in label_list:
+                raise ParseError(seq, u'Label is already defined: %s' % label)
         else:
             label = None
-        if label in label_list:
-            raise ParseError(seq, u'Label is already defined: %s' % v)
         if not label_list:
             label_list = set([label])
         else:
             label_list.add(label)
         v = option(name_token)(seq)
-        if v != u'any' and v not in label_list:
+        if v and v != u'any' and v not in label_list:
             raise ParseError(seq, u'Undefined label: %s' % v)
         if not v:
             r = choice(#xjson.string, 

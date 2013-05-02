@@ -709,6 +709,12 @@ class CommandExecutor(BaseInterpreter):
                     return UNDEFINED
                 else:
                     throw_caty_exception(u'Undefined', '.'.join(context) or u'undefined')
+            try:
+                node.in_schema.validate(data)
+            except:
+                pass
+            else:
+                data = fetcher.fetch_addr(data, self.app, self.facility_set, True)
             if qo.label:
                 labels[qo.label] = qo
             if qo.type == u'type':
