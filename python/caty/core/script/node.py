@@ -859,3 +859,17 @@ class MethodChain(Syntax):
     def out_schema(self):
         return self.pipeline.out_schema
 
+class Fetch(Syntax):
+    command_decl = u"""command __fetch<T default univ> :: DataAddr -> T
+                        refers python:caty.core.script.node.Fetch;"""
+
+    def __init__(self, queries):
+        Syntax.__init__(self)
+        self.queries = queries
+
+    def _prepare(self):
+        Command._prepare(self)
+
+    def accept(self, visitor):
+        return visitor.visit_fetch(self)
+

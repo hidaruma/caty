@@ -662,6 +662,16 @@ class MethodChainProxy(Proxy):
     def set_module(self, module):
         self.pipeline.set_module(module)
 
+class FetchProxy(Proxy):
+    def __init__(self, queries):
+        self.queries = queries
+
+    def instantiate(self, builder):
+        return Fetch(self.queries)
+
+    def set_module(self, module):
+        pass
+
 def combine_proxy(args):
     return reduce(CombinatorProxy, args)
 

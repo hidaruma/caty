@@ -15,6 +15,7 @@ from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettypr
 from caty.jsontools import jstypes
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Internal, scriptwrapper
 from caty.core.script.node import *
+from caty.core.script.query import Fetcher
 from caty.core.exception import *
 import caty
 import caty.core.schema as schema
@@ -694,6 +695,60 @@ class CommandExecutor(BaseInterpreter):
 
     def visit_break(self, node):
         raise BreakSignal()
+
+    def visit_fetch(self, node):
+        node._prepare()
+        node.in_schema.validate(self.input)
+        fetcher = Fetcher()
+        val = fetcher.fetch_addr(self.input, self.app, self.facility_set, True)
+        labels = {}
+        context = []
+        def filter(data, qo):
+            if data is UNDEFINED:
+                if qo.optional:
+                    return UNDEFINED
+                else:
+                    throw_caty_exception(u'Undefined', '.'.join(context) or u'undefined')
+            if qo.label:
+                labels[qo.label] = qo
+            if qo.type == u'type':
+                if qo.value == u'any':
+                    return data
+                else:
+                    return filter(data, labels[qo.value])
+            elif qo.type == u'tag':
+                if json.tag(data) == qo.tag:
+                    return filter(data, qo.value)
+            elif qo.type == u'object':
+                r = {}
+                if not isinstance(data, dict):
+                    throw_caty_exception(u'BadInput', json.pp(data))
+                obj = {}
+                obj.update(data)
+                for k, q in qo.queries.items():
+                    context.append(k)
+                    r[k] = filter(obj.pop(k, UNDEFINED), q)
+                    context.pop(-1)
+                if qo.wildcard:
+                    for k, v in obj.items():
+                        context.append(k)
+                        r[k] = filter(v, q.wildcard)
+                        context.pop(-1)
+                return r
+            elif qo.type == u'array':
+                if not isinstance(data, list):
+                    throw_caty_exception(u'BadInput', json.pp(data))
+                r = []
+                ls = data[0:len(qo.queries)]
+                for q, v in zip(qo.queries, ls):
+                    r.append(filter(v, q))
+                if qo.repeat:
+                    for v in data[len(qo.queries):]:
+                        r.append(filter(v, qo.repeat))
+                return r
+            assert False, qo.type
+
+        return filter(val, node.queries)
 
 class BreakSignal(Exception):
     pass

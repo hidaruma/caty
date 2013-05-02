@@ -91,3 +91,6 @@ class BaseInterpreter(object):
 
     def visit_break(self, node):
         raise NotImplementedError(u'{0}#visit_break'.format(self.__class__.__name__))
+
+    def visit_fetch(self, node):
+        raise NotImplementedError(u'{0}#visit_fetch'.format(self.__class__.__name__))

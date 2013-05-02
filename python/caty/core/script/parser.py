@@ -39,6 +39,8 @@ from caty.core.script.proxy import ChoiceBranchItemProxy as ChoiceBranchItem
 from caty.core.script.proxy import BreakProxy as Break
 from caty.core.script.proxy import EmptyProxy as Empty
 from caty.core.script.proxy import MethodChainProxy as MethodChain
+from caty.core.script.proxy import FetchProxy as Fetch
+from caty.core.script.query import *
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
@@ -134,6 +136,68 @@ class ScriptParser(Parser):
         S(u'=>')(seq)
         cmd = self.make_pipeline(seq)
         return t, cmd
+
+    def fetch(self, seq):
+        keyword(u'fetch')(seq)
+        return Fetch(self.obj_query(seq))
+
+    def query_item(self, seq, label_list=frozenset()):
+        n = choice(S(u'*'), xjson.string)(seq)
+        if not seq.parse(option(':')):
+            if seq.eof:
+                raise EndOfBuffer(seq, self.query)
+            else:
+                raise ParseError(seq, self.query)
+        return (n, self.query_value(seq, label_list))
+
+    def query_value(self, seq, label_list=frozenset()):
+        if option(S(u'@+'))(seq):
+            label = name_token(seq)
+        else:
+            label = None
+        if label in label_list:
+            raise ParseError(seq, u'Label is already defined: %s' % v)
+        if not label_list:
+            label_list = set([label])
+        else:
+            label_list.add(label)
+        v = option(name_token)(seq)
+        if v != u'any' and v not in label_list:
+            raise ParseError(seq, u'Undefined label: %s' % v)
+        if not v:
+            r = choice(#xjson.string, 
+                          #xjson.binary,
+                          #xjson.multiline_string,
+                          #bind2nd(xjson.null, True), 
+                          #bind2nd(xjson.number, True), 
+                          #bind2nd(xjson.integer, True), 
+                          #bind2nd(xjson.boolean, True),
+                          try_(bind2nd(self.obj_query, label_list)),
+                          try_(bind2nd(self.array_query, label_list)),
+                          try_(bind2nd(self.tag_query, label_list)),
+                          )(seq)
+            r.label = label
+        else:
+            r = TypeQuery(label, v)
+        r.optional = option(S(u'?'))(seq)
+        return r
+
+    def obj_query(self, seq, label_list=frozenset()):
+        S(u'{')(seq)
+        queries = dict(seq.parse(split(bind2nd(self.query_item, label_list), self.comma, True)))
+        S(u'}')(seq)
+        return ObjectQuery(queries, None)
+
+    def array_query(self, seq, label_list=frozenset()):
+        S(u'[')(seq)
+        queries = seq.parse(split(bind2nd(self.query_value, label_list), self.comma, True))
+        S(u']')(seq)
+        return ArrayQuery(queries, None)
+
+    def tag_query(self, seq, label_list=frozenset()):
+        _ = seq.parse('@')
+        n = self.tag_name(seq)
+        return TagQuery(n, self.query_value(seq, label_list))
 
     def functor(self, seq):
         import string as str_mod
@@ -282,6 +346,7 @@ class ScriptParser(Parser):
                     self.empty,
                     self.exception_handle,
                     self.catch,
+                    self.fetch,
                     self.functor,
                     self.tag,
                     self.choice_branch,
