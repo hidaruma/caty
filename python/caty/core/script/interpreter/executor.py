@@ -703,7 +703,7 @@ class CommandExecutor(BaseInterpreter):
         val = fetcher.fetch_addr(self.input, self.app, self.facility_set, True)
         labels = {}
         context = []
-        def filter(data, qo):
+        def filter(data, qo, orig=None):
             if data is UNDEFINED:
                 if qo.optional:
                     return UNDEFINED
@@ -711,20 +711,20 @@ class CommandExecutor(BaseInterpreter):
                     throw_caty_exception(u'Undefined', '.'.join(context) or u'undefined')
             try:
                 node.in_schema.validate(data)
+                orig = data
+                data = fetcher.fetch_addr(data, self.app, self.facility_set, True)
             except:
                 pass
-            else:
-                data = fetcher.fetch_addr(data, self.app, self.facility_set, True)
             if qo.label:
                 labels[qo.label] = qo
             if qo.type == u'type':
                 if qo.value == u'any':
                     return data
                 else:
-                    return filter(data, labels[qo.value])
+                    return filter(data, labels[qo.value], orig)
             elif qo.type == u'tag':
                 if json.tag(data) == qo.tag:
-                    return filter(data, qo.value)
+                    return filter(data, qo.value, orig)
             elif qo.type == u'object':
                 r = {}
                 if not isinstance(data, dict):
@@ -740,6 +740,10 @@ class CommandExecutor(BaseInterpreter):
                         context.append(k)
                         r[k] = filter(v, q.wildcard)
                         context.pop(-1)
+                
+                if not node.noself:
+                    if orig and '_self' not in r:
+                        r['_self'] = orig
                 return r
             elif qo.type == u'array':
                 if not isinstance(data, list):
@@ -754,7 +758,7 @@ class CommandExecutor(BaseInterpreter):
                 return r
             assert False, qo.type
 
-        return filter(val, node.queries)
+        return filter(val, node.queries, self.input)
 
 class BreakSignal(Exception):
     pass

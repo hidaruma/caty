@@ -139,7 +139,8 @@ class ScriptParser(Parser):
 
     def fetch(self, seq):
         keyword(u'fetch')(seq)
-        return Fetch(self.query_value(seq))
+        opts = self.options(seq)
+        return Fetch(self.query_value(seq), opts)
 
     def query_item(self, seq, label_list=frozenset()):
         n = choice(S(u'*'), xjson.string)(seq)
