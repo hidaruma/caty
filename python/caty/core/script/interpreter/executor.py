@@ -468,9 +468,13 @@ class CommandExecutor(BaseInterpreter):
             r = []
             i = self.input
             if isinstance(i, dict):
-                i = i.values()
-            for v in i:
+                i = i.items()
+            else:
+                i = enumerate(i)
+            for k, v in i:
                 node.var_storage.new_scope()
+                node.var_storage.opts['_key'] = k
+                node.var_storage.opts['_value'] = v
                 try:
                     self.input = v
                     x = node.cmd.accept(self)
