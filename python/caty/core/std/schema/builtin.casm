@@ -1621,7 +1621,12 @@ command fill<T default univ> :: T -> T
     refers python:builtin.Fill;
 
 command keys :: array | object | @*! (array|object) -> [(string|integer)*] {
-    untagged | xjson:normalize | each {%_key}
+    untagged | xjson:normalize | each {
+        when {
+            undefined => undefined,
+            * => %_key
+        }
+    } | list:tighten
 };
 
 /** 入力が純粋JSONに変換不可能なときは例外またはundefined値とする
