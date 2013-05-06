@@ -961,8 +961,13 @@ exception ArgsTypeError = TypeErrorInfo;
 @[runaway]
 exception Arg0TypeError = TypeErrorInfo;
 
-/*
 
+/** タグを除いた内容を出力する 
+ * untagged の別名だが、untaggedよりこちらを推奨
+ */
+command content [string? tagName] :: univ -> univ {
+ untagged %1?
+};
 
 /** 
  * 入力値を例外として送出する。
@@ -1623,6 +1628,15 @@ command fill<T default univ> :: T -> T
 command keys :: array | object | @*! (array|object) -> [(string|integer)*] {
     untagged | xjson:normalize | each {%_key}
 };
+
+/** 複合データのサイズ 
+ * 複合データとは、配列またはオブジェクトにタグを許したデータである。
+ * そのサイズは、有効な（undefinedでない）項目数またはプロパティ数である。
+ */
+command size :: (@* object | @* array) -> integer {
+ content | keys | list:length
+};
+
 
 /** 入力が純粋JSONに変換不可能なときは例外またはundefined値とする
  * 変換不可能な値とは：

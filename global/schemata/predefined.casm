@@ -25,9 +25,14 @@ command neq
   eq %--boolean | filter:not
 };
 
+/*
+// builtinに移動
+
 command content [string? tagName] :: univ -> univ {
  untagged %1?
 };
+
+*/
 
 /*
 command lookup-action 
