@@ -60,6 +60,14 @@ def op(seq):
         return UnionNode
 
 def term(seq):
+    def _tag_exp(s):
+        _ = s.parse(u'@')
+        _ = s.parse(u'(')
+        tl = split(string, u'|', allow_last_delim=True)(seq)
+        _ = s.parse(u')')
+        v = s.parse(option(try_(term)))
+        return reduce(lambda a, b: UnionNode(a, b), map(lambda t:TaggedNode(t, v), tl))
+
     def _tag(s):
         _ = s.parse('@')
         t = s.parse([tagname, string, u'*!', u'*'])
@@ -114,7 +122,7 @@ def term(seq):
         return ScalarNode(u'never', {}, [])
 
     doc = option(docstring)(seq)
-    s = seq.parse(map(try_, [_pseudo_tag, _type_name_tag, _tag, _never, _unary]) + [enum, _term, bag, object_, array, exponent, scalar])
+    s = seq.parse(map(try_, [_tag_exp, _pseudo_tag, _type_name_tag, _tag, _never, _unary]) + [enum, _term, bag, object_, array, exponent, scalar])
     o = seq.parse(option('?'))
     if doc:
         s.docstring = doc
