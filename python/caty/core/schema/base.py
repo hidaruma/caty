@@ -648,6 +648,10 @@ class TagSchema(SchemaBase, Tag):
         #return '@%s %s' % (self.__tag, self.__schema.type)
 
     @property
+    def is_extra_tag(self):
+        return not isinstance(self.__tag, basestring)
+
+    @property
     def canonical_type(self):
         return u'@%s %s' % (self.__tag, self.__schema.canonical_type)
 

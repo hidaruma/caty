@@ -11,7 +11,7 @@ class StringSchema(ScalarSchema):
     format = attribute('format', None)
     profile = attribute('profile')
     pattern = attribute('pattern', None)
-    excludes = attribute('excludes', None)
+    excludes = attribute('excludes', [])
 
     __options__ = SchemaBase.__options__ | set(['maxLength', 'minLength', 'format', 'profile', 'pattern', 'excludes'])
     
@@ -55,13 +55,19 @@ class StringSchema(ScalarSchema):
             raise JsonSchemaError(dict(msg=u'Different profile: $profile1, $profile2', profile1=self.profile, profile2=another.profile))
         if self.pattern is not None and another.pattern is not None and self.pattern != another.pattern:
             raise JsonSchemaError(dict(msg=u'Different pattern: $pattern1, $pattern2', pattern1=self.pattern, pattern2=another.pattern))
-        
+        excludes = []
+        if self.excludes:
+            if another.excludes:
+                excludes = list(set(self.excludes).union(set(another.excludes)))
+            else:
+                excludes = self.excludes
         opts = {
             'minLength': minLength,
             'maxLength': maxLength,
             'format': self.format or another.format,
             'profile': self.profile or another.profile,
             'pattern': self.pattern or another.pattern,
+            'excludes': self.excludes,
         }
         return self.clone(opts)
         
@@ -79,5 +85,6 @@ class StringSchema(ScalarSchema):
     @property
     def type(self):
         return u'string'
+
 
 

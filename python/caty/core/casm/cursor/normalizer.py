@@ -204,7 +204,21 @@ class TypeCalcurator(_SubNormalizer):
             else:
                 res = comb[0] | comb[1]
         elif lt.startswith('@'): # タグ型の場合はタグ名一致時は中身を計算
-            if rt.startswith('@'): # 右辺がタグ型
+            l = self._dereference(l, False)
+            r = self._dereference(r, False)
+            if l.is_extra_tag:
+                if r.is_extra_tag:
+                    t = (l.tag & r.tag).accept(self)
+                else:
+                    if rt.startswith('@'):
+                        rt = rt[1:]
+                    t = rt if rt not in l.tag.excludes else None
+                if t is None or isinstance(t, NeverSchema):
+                    res = NeverSchema()
+                else:
+                    n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
+                    res = TagSchema(t, n)
+            elif rt.startswith('@'): # 右辺がタグ型
                 if lt != rt:
                     if lt == '@*!' or lt == '@*': 
                         # ワイルドカードタグ & 通常タグ
@@ -233,7 +247,21 @@ class TypeCalcurator(_SubNormalizer):
                     else:
                         res = NeverSchema()
         elif rt.startswith('@'):
-            if rt == u'@*':
+            l = self._dereference(l, False)
+            r = self._dereference(r, False)
+            if r.is_extra_tag:
+                if l.is_extra_tag:
+                    t = (l.tag & r.tag).accept(self)
+                else:
+                    if lt.startswith('@'):
+                        lt = lt[1:]
+                    t = lt if lt not in r.tag.excludes else None
+                if t is None or isinstance(t, NeverSchema):
+                    res = NeverSchema()
+                else:
+                    n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
+                    res = TagSchema(t, n)
+            elif rt == u'@*':
                 n = (l & self._dereference(r, True)).accept(self)
                 res = n
             else:

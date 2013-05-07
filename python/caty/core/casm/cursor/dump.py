@@ -243,6 +243,8 @@ class TreeDumper(TreeCursor):
 
     def _visit_tag(self, node):
         t = node.tag
+        if not isinstance(t, unicode):
+            t = t.accept(self)
         s = node.body.accept(self)
         buff = ['@' + t + ' ' + s]
         self._process_option(node, buff)
