@@ -709,7 +709,7 @@ class CommandExecutor(BaseInterpreter):
         val = fetcher.fetch_addr(self.input, self.app, self.facility_set, True)
         labels = {}
         context = []
-        def filter(data, qo, orig=None, depth=0):
+        def filter(data, qo, orig=None, depth=1):
             if data is UNDEFINED:
                 if qo.optional:
                     return UNDEFINED
