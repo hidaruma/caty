@@ -15,7 +15,7 @@ from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettypr
 from caty.jsontools import jstypes
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Internal, scriptwrapper
 from caty.core.script.node import *
-from caty.core.script.query import Fetcher
+from caty.core.script.query import *
 from caty.core.exception import *
 import caty
 import caty.core.schema as schema
@@ -729,10 +729,17 @@ class CommandExecutor(BaseInterpreter):
                 labels[qo.label] = qo
             if qo.type == u'type':
                 if qo.value == u'any':
-                    return data
+                    if isinstance(data, dict):
+                        qo = ObjectQuery({}, TypeQuery(None, u'any'))
+                    elif isinstance(data, list):
+                        qo = ArrayQuery([], TypeQuery(None, u'any'))
+                    elif isinstance(data, TaggedValue):
+                        qo = TagQuery(data.tag, TypeQuery(None, u'any'))
+                    else:
+                        return data
                 else:
                     return filter(data, labels[qo.value], orig, depth)
-            elif qo.type == u'tag':
+            if qo.type == u'tag':
                 if json.tag(data) == qo.tag:
                     return filter(data, qo.value, orig, depth)
             elif qo.type == u'object':
@@ -748,7 +755,7 @@ class CommandExecutor(BaseInterpreter):
                 if qo.wildcard:
                     for k, v in obj.items():
                         context.append(k)
-                        r[k] = filter(v, q.wildcard, depth=depth)
+                        r[k] = filter(v, qo.wildcard, depth=depth)
                         context.pop(-1)
                 
                 if not node.noself:
@@ -761,7 +768,7 @@ class CommandExecutor(BaseInterpreter):
                 r = []
                 ls = data[0:len(qo.queries)]
                 for q, v in zip(qo.queries, ls):
-                    r.append(filter(v, q, depth=depth+1))
+                    r.append(filter(v, q, depth=depth))
                 if qo.repeat:
                     for v in data[len(qo.queries):]:
                         r.append(filter(v, qo.repeat, depth=depth))
