@@ -63,7 +63,7 @@ def term(seq):
     def _tag_exp(s):
         _ = s.parse(u'@')
         _ = s.parse(u'(')
-        tl = split(string, u'|', allow_last_delim=True)(seq)
+        tl = split(typedef, u'|', allow_last_delim=True)(seq)
         _ = s.parse(u')')
         v = s.parse(option(try_(term)))
         return reduce(lambda a, b: UnionNode(a, b), map(lambda t:TaggedNode(t, v), tl))
