@@ -754,9 +754,12 @@ class CommandExecutor(BaseInterpreter):
                     context.pop(-1)
                 if qo.wildcard:
                     for k, v in obj.items():
-                        context.append(k)
-                        r[k] = filter(v, qo.wildcard, depth=depth)
-                        context.pop(-1)
+                        if k == '_self':
+                            r[k] = v
+                        else:
+                            context.append(k)
+                            r[k] = filter(v, qo.wildcard, depth=depth)
+                            context.pop(-1)
                 
                 if not node.noself:
                     if orig and '_self' not in r:
