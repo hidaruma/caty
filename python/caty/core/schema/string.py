@@ -11,13 +11,17 @@ class StringSchema(ScalarSchema):
     format = attribute('format', None)
     profile = attribute('profile')
     pattern = attribute('pattern', None)
+    excludes = attribute('excludes', None)
 
-    __options__ = SchemaBase.__options__ | set(['maxLength', 'minLength', 'format', 'profile', 'pattern'])
+    __options__ = SchemaBase.__options__ | set(['maxLength', 'minLength', 'format', 'profile', 'pattern', 'excludes'])
     
     def __init__(self, *args, **kwds):
         ScalarSchema.__init__(self, *args, **kwds)
         if (self.minLength > self.maxLength) and (self.maxLength is not None):
             raise JsonSchemaError(dict(msg='minLength($min) is longer than maxLength($max)', min=self.minLength, max=self.maxLength))
+        if self.excludes:
+            if not isinstance(self.excludes, list) or not all(map(lambda a: isinstance(a, unicode), self.excludes)):
+                raise JsonSchemaError(dict(msg='excludes attribute must be list'))
 
     def _validate(self, value):
         if not self.optional and value == None:
@@ -35,6 +39,10 @@ class StringSchema(ScalarSchema):
             c = re.compile('^(' + self.pattern + ')$')
             if not c.match(value):
                 raise JsonSchemaError(dict(msg=u'value does not matched to $pattern', pattern=self.pattern))
+        if self.excludes:
+            if value in self.excludes:
+                raise JsonSchemaError(dict(msg=u'value matched to exclusion pattern: $pattern', pattern='|'.join(self.excludes)))
+                
 
     def intersect(self, another):
         if another.type != self.type:

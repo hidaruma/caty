@@ -589,7 +589,9 @@ class TagSchema(SchemaBase, Tag):
         if self.optional and (value is caty.UNDEFINED):
             return
         t = tag(value)
-        if t != self.tag:
+        if isinstance(self.tag, SchemaBase):
+            self.tag.validate(t)
+        elif t != self.tag:
             if self.tag == '*!' and t in _builtin_tags:
                 raise JsonSchemaError(dict(msg='Wildcard tag is not able to used to builtin types: $type', type=t))
             if self.tag not in ('*', '*!'):
@@ -625,7 +627,7 @@ class TagSchema(SchemaBase, Tag):
     def fill_default(self, value):
         import caty.jsontools as json
         if self.__tag not in ('*', '*!'):
-            return tagged(self.__tag, self.__schema.fill_default(json.untagged(value)))
+            return tagged(value.tag, self.__schema.fill_default(json.untagged(value)))
         else:
             try:
                 t = json.tag(value, explicit=True)
@@ -639,7 +641,10 @@ class TagSchema(SchemaBase, Tag):
     @property
     def type(self):
         #XXX: 再帰的な型定義の問題があるので、タグ付きの型のインスペクションに制限をかけた
-        return u'@' + self.__tag
+        if isinstance(self.__tag, basestring):
+            return u'@' + self.__tag
+        else:
+            return u'@' + self.__tag.type
         #return '@%s %s' % (self.__tag, self.__schema.type)
 
     @property

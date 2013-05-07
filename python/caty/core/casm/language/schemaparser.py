@@ -7,6 +7,8 @@ from caty.core.casm.language.ast import *
 from caty.core.language.util import *
 from caty.core.schema import schemata
 from caty.jsontools.selector.parser import JSONPathSelectorParser
+from caty.core.typeinterface import flatten_union_node
+import caty.jsontools.xjson as xjson
 
 RESERVED = frozenset(schemata.keys() + ['type'])
 
@@ -63,10 +65,10 @@ def term(seq):
     def _tag_exp(s):
         _ = s.parse(u'@')
         _ = s.parse(u'(')
-        tl = split(typedef, u'|', allow_last_delim=True)(seq)
+        tl = typedef(s)
         _ = s.parse(u')')
         v = s.parse(option(try_(term)))
-        return reduce(lambda a, b: UnionNode(a, b), map(lambda t:TaggedNode(t, v), tl))
+        return reduce(lambda a, b: UnionNode(a, b), map(lambda t:TaggedNode(t, v), flatten_union_node(tl)))
 
     def _tag(s):
         _ = s.parse('@')
@@ -194,7 +196,7 @@ def options(seq):
 def optval(seq):
     k = seq.parse(name)
     _ = seq.parse('=')
-    v = seq.parse(value)
+    v = xjson.parse(seq)
     return [k, v]
 
 def bag(seq):

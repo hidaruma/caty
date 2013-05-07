@@ -26,5 +26,22 @@ class ReferenceResolver(SchemaBuilder):
     def _visit_kind(self, node):
         return node
 
-
-
+    @apply_annotation
+    def _visit_tag(self, node):
+        t = node.tag
+        s = node.body.accept(self)
+        if isinstance(t, unicode):
+            pass
+        elif isinstance(t, SchemaBase):
+            t = t.accept(self)
+            if isinstance(t, EnumSchema):
+                t = t.enum[0]
+                if not isinstance(t, unicode):
+                    throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'%s' % str(t))
+            elif not isinstance(t, StringSchema):
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'%s' % t.type)
+        else:
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'%s' % str(t))
+        r = TagSchema(t, s)
+        r._options = node.options
+        return r

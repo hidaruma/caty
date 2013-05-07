@@ -6,7 +6,7 @@ from caty.core.casm.language.ast import *
 from caty.core.schema import *
 from caty.util.collection import OverlayedDict
 import caty.jsontools as json
-from caty.core.exception import CatyException
+from caty.core.exception import CatyException, throw_caty_exception
 
 def apply_annotation(f):
     def _apply(cursor, node):
@@ -130,6 +130,10 @@ class SchemaBuilder(TreeCursor):
     def _visit_tag(self, node):
         t = node.tag
         s = node.body.accept(self)
+        if isinstance(t, unicode):
+            pass
+        elif isinstance(t, Node):
+            t = t.accept(self)
         r = TagSchema(t, s)
         r._options = node.options
         return r

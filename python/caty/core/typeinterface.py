@@ -208,17 +208,30 @@ def flatten_union(node, cache=None, debug=False):
         if node.canonical_name in cache:
             return []
         cache.add(node.canonical_name)
-    if node.type != '__union__':
+    if isinstance(node, Union):
         return [node]
     node = dereference(node)
-    if node.left.type == '__union__':
+    if isinstance(node.left, Union):
         r.extend(flatten_union(node.left, cache, debug=debug))
     else:
         cache.add(node.left.canonical_name)
         r.append(node.left)
-    if node.right.type == '__union__':
+    if isinstance(node.right, Union):
         r.extend(flatten_union(node.right, cache, debug=debug))
     else:
         cache.add(node.right.canonical_name)
         r.append(node.right)
+    return r
+
+def flatten_union_node(node):
+    r = []
+    if isinstance(node, Union):
+        if isinstance(node.left, Union):
+            r.extend(flatten_union_node(node.left))
+        else:
+            r.append(node.left)
+        if isinstance(node.right, Union):
+            r.extend(flatten_union_node(node.right))
+        else:
+            r.append(node.right)
     return r
