@@ -1404,7 +1404,7 @@ class Follow(Dereference):
         return stm.select(val).next()
 
     def deref(self, ref):
-        val =Dereference.execute(self, ref)
+        val = Dereference.execute(self, ref)
         if val.tag == 'Total':
             val = json.untagged(val)
         else:
@@ -1420,9 +1420,11 @@ class DerefJSONPathSelectorParser(JSONPathSelectorParser):
         sep = choice(u'.', u'!')(seq)
         def _(a, b):
             if sep == u'!' or self.follow.auto:
-                return DerefWrapper(a, self.follow).chain(b)
-            else:
-                return a.chain(b)
+                if not isinstance(a, DerefWrapper):
+                    a = DerefWrapper(a, self.follow)
+                if not isinstance(b, DerefWrapper):
+                    b = DerefWrapper(b, self.follow)
+            return a.chain(b)
         return _
 
     def namewildcard(self, seq):
@@ -1462,4 +1464,6 @@ class DerefWrapper(Selector):
             else:
                 yield r
 
+    def _to_str(self):
+        return u'deref(%s)' % self.selector._to_str()
 
