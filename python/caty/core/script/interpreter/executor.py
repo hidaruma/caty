@@ -704,10 +704,12 @@ class CommandExecutor(BaseInterpreter):
         node._prepare()
         node.in_schema.validate(self.input)
         fetcher = Fetcher()
+        if node.deref_depth == 0:
+            return self.input
         val = fetcher.fetch_addr(self.input, self.app, self.facility_set, True)
         labels = {}
         context = []
-        def filter(data, qo, orig=None):
+        def filter(data, qo, orig=None, depth=0):
             if data is UNDEFINED:
                 if qo.optional:
                     return UNDEFINED
@@ -716,7 +718,11 @@ class CommandExecutor(BaseInterpreter):
             try:
                 node.in_schema.validate(data)
                 orig = data
-                data = fetcher.fetch_addr(data, self.app, self.facility_set, True)
+                if node.deref_depth > depth:
+                    data = fetcher.fetch_addr(data, self.app, self.facility_set, True)
+                    depth += 1
+                else:
+                    return data
             except:
                 pass
             if qo.label:
@@ -725,10 +731,10 @@ class CommandExecutor(BaseInterpreter):
                 if qo.value == u'any':
                     return data
                 else:
-                    return filter(data, labels[qo.value], orig)
+                    return filter(data, labels[qo.value], orig, depth)
             elif qo.type == u'tag':
                 if json.tag(data) == qo.tag:
-                    return filter(data, qo.value, orig)
+                    return filter(data, qo.value, orig, depth)
             elif qo.type == u'object':
                 r = {}
                 if not isinstance(data, dict):
@@ -737,12 +743,12 @@ class CommandExecutor(BaseInterpreter):
                 obj.update(data)
                 for k, q in qo.queries.items():
                     context.append(k)
-                    r[k] = filter(obj.pop(k, UNDEFINED), q)
+                    r[k] = filter(obj.pop(k, UNDEFINED), q, depth=depth)
                     context.pop(-1)
                 if qo.wildcard:
                     for k, v in obj.items():
                         context.append(k)
-                        r[k] = filter(v, q.wildcard)
+                        r[k] = filter(v, q.wildcard, depth=depth)
                         context.pop(-1)
                 
                 if not node.noself:
@@ -755,10 +761,10 @@ class CommandExecutor(BaseInterpreter):
                 r = []
                 ls = data[0:len(qo.queries)]
                 for q, v in zip(qo.queries, ls):
-                    r.append(filter(v, q))
+                    r.append(filter(v, q, depth=depth+1))
                 if qo.repeat:
                     for v in data[len(qo.queries):]:
-                        r.append(filter(v, qo.repeat))
+                        r.append(filter(v, qo.repeat, depth=depth))
                 return r
             assert False, qo.type
 

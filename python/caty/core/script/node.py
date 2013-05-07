@@ -860,7 +860,7 @@ class MethodChain(Syntax):
         return self.pipeline.out_schema
 
 class Fetch(Syntax):
-    command_decl = u"""command __fetch<T default univ> {@[default(false)]"no-self": boolean?} :: DataAddr -> T
+    command_decl = u"""command __fetch<T default univ> {@[default(false)]"no-self": boolean?, @[default(10)]"deref-depth": integer(minimum=0)?} :: DataAddr -> T
                         refers python:caty.core.script.node.Fetch;"""
 
     def __init__(self, queries, opts):
@@ -872,6 +872,7 @@ class Fetch(Syntax):
 
     def setup(self, opts):
         self.noself = opts['no-self']
+        self.deref_depth = opts['deref-depth']
 
     def accept(self, visitor):
         return visitor.visit_fetch(self)
