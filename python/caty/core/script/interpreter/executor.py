@@ -728,7 +728,7 @@ class CommandExecutor(BaseInterpreter):
             if qo.label:
                 labels[qo.label] = qo
             if qo.type == u'type':
-                if qo.value == u'any':
+                if qo.value in (u'any', u'_'):
                     if isinstance(data, dict):
                         qo = ObjectQuery({}, TypeQuery(None, u'any'))
                     elif isinstance(data, list):
