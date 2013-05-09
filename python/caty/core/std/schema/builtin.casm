@@ -965,9 +965,8 @@ exception Arg0TypeError = TypeErrorInfo;
 /** タグを除いた内容を出力する 
  * untagged の別名だが、untaggedよりこちらを推奨
  */
-command content [string? tagName] :: univ -> univ {
- untagged %1?
-};
+command content<S default any, T default univ> [string?] :: S -> T
+    refers python:builtin.Untagged;
 
 /** 
  * 入力値を例外として送出する。
@@ -1260,8 +1259,10 @@ command tagged<S default univ, T default any> :: [string, S?] -> T
  * 入力値のタグを除去して返す。組み込み型が与えられた場合、その値がそのまま返る。
  * 引数が与えられた場合、タグ名と引数を比較し、異なっていた場合は例外を創出する。
  */
-command untagged<S default any, T default univ> [string?] :: S -> T
-    refers python:builtin.Untagged;
+command untagged<s default any, t default univ> [string?] :: s -> t
+{
+    content %1?
+};
 
 /**
  * コンソールに入力値を書き出す。
@@ -1626,7 +1627,7 @@ command fill<T default univ> :: T -> T
     refers python:builtin.Fill;
 
 command keys :: array | object | @*! (array|object) -> [(string|integer)*] {
-    untagged | xjson:normalize | each {
+    content | xjson:normalize | each {
         when {
             undefined => undefined,
             * => %_key

@@ -44,6 +44,7 @@ command unzip3<S default any, T default any, U default any> :: [[S, T, U]*] -> [
 /**
  * 入力値の長さを返す。
  */
+@[register-public]
 command length<S default any> :: [S*] -> integer
     refers python:listlib.Length;
 
