@@ -29,7 +29,7 @@ class Fetcher(object):
         r = executor(None)
         if u'ext' in ref and auto_extract:
             stm = selector.compile(ref['ext'])
-            r = stm.select(val).next()
+            r = stm.select(r).next()
         return r
 
 class TypeQuery(object):
