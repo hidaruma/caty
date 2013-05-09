@@ -234,4 +234,6 @@ def flatten_union_node(node):
             r.extend(flatten_union_node(node.right))
         else:
             r.append(node.right)
+    else:
+        r.append(node)
     return r

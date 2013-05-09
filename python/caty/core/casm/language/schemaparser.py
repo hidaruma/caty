@@ -68,7 +68,8 @@ def term(seq):
         tl = typedef(s)
         _ = s.parse(u')')
         v = s.parse(option(try_(term)))
-        return reduce(lambda a, b: UnionNode(a, b), map(lambda t:TaggedNode(t, v), flatten_union_node(tl)))
+        l = map(lambda t:TaggedNode(t, v), flatten_union_node(tl))
+        return reduce(lambda a, b: UnionNode(a, b), l)
 
     def _tag(s):
         _ = s.parse('@')
