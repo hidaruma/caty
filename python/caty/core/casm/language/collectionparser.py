@@ -18,7 +18,7 @@ def collection_decl(seq):
             keypath = CasmJSONPathSelectorParser()(seq)
             keytype = option(typedef)(seq)
         else:
-            keypath = u'$._id'
+            keypath = u'$.id'
             keytype = None
         nohook(S(u';'))(seq)
         doc2 = postfix_docstring(seq)
