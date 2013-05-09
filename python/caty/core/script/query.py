@@ -65,7 +65,6 @@ class ArrayQuery(object):
         self.repeat = repeat
         self.label = None
         self.optional = False
-        self.repeat = False
 
 class AddressQuery(object):
     type = u'address'

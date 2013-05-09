@@ -210,7 +210,7 @@ class ScriptParser(Parser):
 
     def array_query(self, seq, label_list=frozenset()):
         S(u'[')(seq)
-        queries = seq.parse(split(choice(bind2nd(self.query_value, label_list), bind2nd(self.repeat_item, label_list)), self.comma, True))
+        queries = seq.parse(split(bind2nd(self.repeat_item, label_list), self.comma, True))
         S(u']')(seq)
         q = []
         r = None

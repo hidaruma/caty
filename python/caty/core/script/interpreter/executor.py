@@ -722,6 +722,22 @@ class CommandExecutor(BaseInterpreter):
                 else:
                     throw_caty_exception(u'Undefined', '.'.join(context) or u'undefined')
             through = False
+            resolved = False
+            if qo.type == u'any' and qo.value in labels:
+                qo = labels[qo.value]
+            try:
+                node.in_schema.validate(data)
+                orig = data
+                if qo.type == u'address':
+                    return data
+                if (node.deref_depth > depth):
+                    data = fetcher.fetch_addr(data, self.app, self.facility_set, True)
+                    depth += 1
+                    resolved = True
+                else:
+                    return data
+            except:
+                pass
             if qo.type == u'type':
                 if qo.value in (u'any', u'_'):
                     if isinstance(data, dict):
@@ -732,20 +748,6 @@ class CommandExecutor(BaseInterpreter):
                         qo = TagQuery(data.tag, TypeQuery(None, u'any'))
                     else:
                         through = True
-                else:
-                    qo = labels[qo.value]
-            try:
-                node.in_schema.validate(data)
-                orig = data
-                if qo.type == u'address':
-                    return data
-                if (node.deref_depth > depth):
-                    data = fetcher.fetch_addr(data, self.app, self.facility_set, True)
-                    depth += 1
-                else:
-                    return data
-            except:
-                pass
             if qo.label:
                 labels[qo.label] = qo
             if through:
@@ -753,6 +755,8 @@ class CommandExecutor(BaseInterpreter):
             if qo.type == u'tag':
                 if json.tag(data) == qo.tag:
                     return filter(data, qo.value, orig, depth)
+                else:
+                    throw_caty_exception(u'BadInput', json.pp(data))
             elif qo.type == u'object':
                 r = {}
                 if not isinstance(data, dict):
@@ -773,7 +777,7 @@ class CommandExecutor(BaseInterpreter):
                             context.pop(-1)
                 
                 if not node.noself:
-                    if orig and '_self' not in r:
+                    if resolved and '_self' not in r:
                         r['_self'] = orig
                 return r
             elif qo.type == u'array':
@@ -786,10 +790,12 @@ class CommandExecutor(BaseInterpreter):
                     context.append(str(num))
                     r.append(filter(v, q, orig, depth=depth))
                     context.pop(-1)
+                    num += 1
                 if qo.repeat:
                     for v in data[len(qo.queries):]:
                         context.append(str(num))
                         r.append(filter(v, qo.repeat, orig, depth=depth))
+                        num += 1
                         context.pop(-1)
                 return r
             elif qo.type == u'address':
