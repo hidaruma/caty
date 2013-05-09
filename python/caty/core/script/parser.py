@@ -162,8 +162,8 @@ class ScriptParser(Parser):
             label_list = set([label])
         else:
             label_list.add(label)
-        v = option(name_token)(seq)
-        if v and v not in (u'any', u'_') and v not in label_list:
+        v = option(choice(u'&', name_token))(seq)
+        if v and v not in (u'any', u'_', u'&') and v not in label_list:
             raise ParseError(seq, u'Undefined label: %s' % v)
         if not v:
             r = choice(#xjson.string, 
@@ -178,22 +178,54 @@ class ScriptParser(Parser):
                           try_(bind2nd(self.tag_query, label_list)),
                           )(seq)
             r.label = label
+        elif v == u'&':
+            r = AddressQuery()
         else:
             r = TypeQuery(label, v)
         r.optional = option(S(u'?'))(seq)
         return r
 
+    def repeat_item(self, seq, label_list):
+        r = self.query_value(seq, label_list)
+        r.repeat = option(S(u'*'))(seq)
+        if r.optional:
+            raise ParseError(seq, u'*')
+        return r
+
     def obj_query(self, seq, label_list=frozenset()):
         S(u'{')(seq)
-        queries = dict(seq.parse(split(bind2nd(self.query_item, label_list), self.comma, True)))
+        queries = seq.parse(split(bind2nd(self.query_item, label_list), self.comma, True))
         S(u'}')(seq)
-        return ObjectQuery(queries, None)
+        q = {}
+        w = None
+        for k, v in queries:
+            if k == '*':
+                if not w:
+                    w = v
+                else:
+                    raise ParseError(seq, u'Duplicated wildcard')
+            else:
+                q[k] = v
+        return ObjectQuery(q, w)
 
     def array_query(self, seq, label_list=frozenset()):
         S(u'[')(seq)
-        queries = seq.parse(split(bind2nd(self.query_value, label_list), self.comma, True))
+        queries = seq.parse(split(choice(bind2nd(self.query_value, label_list), bind2nd(self.repeat_item, label_list)), self.comma, True))
         S(u']')(seq)
-        return ArrayQuery(queries, None)
+        q = []
+        r = None
+        for v in queries:
+            if v.repeat:
+                if not r:
+                    r = v
+                else:
+                    raise ParseError(seq, u'*')
+            else:
+                if r:
+                    raise ParseError(seq, u'*')
+                else:
+                    q.append(v)
+        return ArrayQuery(q, r)
 
     def tag_query(self, seq, label_list=frozenset()):
         _ = seq.parse('@')

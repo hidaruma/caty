@@ -715,24 +715,13 @@ class CommandExecutor(BaseInterpreter):
         val = fetcher.fetch_addr(self.input, self.app, self.facility_set, True)
         labels = {}
         context = []
-        def filter(data, qo, orig=None, depth=1):
+        def filter(data, qo, orig, depth=1):
             if data is UNDEFINED:
                 if qo.optional:
                     return UNDEFINED
                 else:
                     throw_caty_exception(u'Undefined', '.'.join(context) or u'undefined')
-            try:
-                node.in_schema.validate(data)
-                orig = data
-                if node.deref_depth > depth:
-                    data = fetcher.fetch_addr(data, self.app, self.facility_set, True)
-                    depth += 1
-                else:
-                    return data
-            except:
-                pass
-            if qo.label:
-                labels[qo.label] = qo
+            through = False
             if qo.type == u'type':
                 if qo.value in (u'any', u'_'):
                     if isinstance(data, dict):
@@ -742,9 +731,25 @@ class CommandExecutor(BaseInterpreter):
                     elif isinstance(data, TaggedValue):
                         qo = TagQuery(data.tag, TypeQuery(None, u'any'))
                     else:
-                        return data
+                        through = True
                 else:
-                    return filter(data, labels[qo.value], orig, depth)
+                    qo = labels[qo.value]
+            try:
+                node.in_schema.validate(data)
+                orig = data
+                if qo.type == u'address':
+                    return data
+                if (node.deref_depth > depth):
+                    data = fetcher.fetch_addr(data, self.app, self.facility_set, True)
+                    depth += 1
+                else:
+                    return data
+            except:
+                pass
+            if qo.label:
+                labels[qo.label] = qo
+            if through:
+                return data
             if qo.type == u'tag':
                 if json.tag(data) == qo.tag:
                     return filter(data, qo.value, orig, depth)
@@ -756,7 +761,7 @@ class CommandExecutor(BaseInterpreter):
                 obj.update(data)
                 for k, q in qo.queries.items():
                     context.append(k)
-                    r[k] = filter(obj.pop(k, UNDEFINED), q, depth=depth)
+                    r[k] = filter(obj.pop(k, UNDEFINED), q, orig, depth=depth)
                     context.pop(-1)
                 if qo.wildcard:
                     for k, v in obj.items():
@@ -764,7 +769,7 @@ class CommandExecutor(BaseInterpreter):
                             r[k] = v
                         else:
                             context.append(k)
-                            r[k] = filter(v, qo.wildcard, depth=depth)
+                            r[k] = filter(v, qo.wildcard, orig, depth=depth)
                             context.pop(-1)
                 
                 if not node.noself:
@@ -776,12 +781,20 @@ class CommandExecutor(BaseInterpreter):
                     throw_caty_exception(u'BadInput', json.pp(data))
                 r = []
                 ls = data[0:len(qo.queries)]
+                num = 0
                 for q, v in zip(qo.queries, ls):
-                    r.append(filter(v, q, depth=depth))
+                    context.append(str(num))
+                    r.append(filter(v, q, orig, depth=depth))
+                    context.pop(-1)
                 if qo.repeat:
                     for v in data[len(qo.queries):]:
-                        r.append(filter(v, qo.repeat, depth=depth))
+                        context.append(str(num))
+                        r.append(filter(v, qo.repeat, orig, depth=depth))
+                        context.pop(-1)
                 return r
+            elif qo.type == u'address':
+                p = json.untagged(orig)
+                return json.tagged(u'__reference', {u'type': p['type'], u'arg': p['arg'], u'ext': u'.'.join(['$'] +context)})
             assert False, qo.type
 
         return filter(val, node.queries, self.input)

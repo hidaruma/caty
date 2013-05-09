@@ -38,6 +38,7 @@ class TypeQuery(object):
         self.label = label
         self.value = value
         self.optional = False
+        self.repeat = False
 
 class TagQuery(object):
     type = u'tag'
@@ -46,6 +47,7 @@ class TagQuery(object):
         self.value = value
         self.label = None
         self.optional = False
+        self.repeat = False
 
 class ObjectQuery(object):
     type = u'object'
@@ -54,6 +56,7 @@ class ObjectQuery(object):
         self.wildcard = wildcard
         self.label = None
         self.optional = False
+        self.repeat = False
 
 class ArrayQuery(object):
     type = u'array'
@@ -62,3 +65,12 @@ class ArrayQuery(object):
         self.repeat = repeat
         self.label = None
         self.optional = False
+        self.repeat = False
+
+class AddressQuery(object):
+    type = u'address'
+    def __init__(self):
+        self.value = None
+        self.label = None
+        self.optional = False
+        self.repeat = False
