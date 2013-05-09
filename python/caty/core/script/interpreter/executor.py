@@ -390,7 +390,8 @@ class CommandExecutor(BaseInterpreter):
                 node.var_storage.new_scope()
                 node.var_storage.opts['_key'] = n
                 node.var_storage.opts['_value'] = i[n] if isinstance(i, dict) else v
-                r.append(node.cmd.accept(self))
+                if not v is UNDEFINED:
+                    r.append(node.cmd.accept(self))
             except BreakSignal:
                 break
             finally:
@@ -407,7 +408,8 @@ class CommandExecutor(BaseInterpreter):
                 node.var_storage.new_scope()
                 node.var_storage.opts['_key'] = n
                 node.var_storage.opts['_value'] = v
-                r = node.cmd.accept(self)
+                if not v is UNDEFINED:
+                    r = node.cmd.accept(self)
             except BreakSignal:
                 break
             finally:
@@ -423,7 +425,8 @@ class CommandExecutor(BaseInterpreter):
                 node.var_storage.new_scope()
                 node.var_storage.opts['_key'] = k
                 node.var_storage.opts['_value'] = v
-                r.append([k, node.cmd.accept(self)])
+                if not v is UNDEFINED:
+                    r.append([k, node.cmd.accept(self)])
             finally:
                 node.var_storage.del_scope()
         return dict(r)
@@ -436,7 +439,8 @@ class CommandExecutor(BaseInterpreter):
                 node.var_storage.new_scope()
                 node.var_storage.opts['_key'] = k
                 node.var_storage.opts['_value'] = v
-                r.append(node.cmd.accept(self))
+                if not v is UNDEFINED:
+                    r.append(node.cmd.accept(self))
             except BreakSignal:
                 break
             finally:
@@ -477,7 +481,8 @@ class CommandExecutor(BaseInterpreter):
                 node.var_storage.opts['_value'] = v
                 try:
                     self.input = v
-                    x = node.cmd.accept(self)
+                    if not v is UNDEFINED:
+                        x = node.cmd.accept(self)
                     if self.__truth(x, node):
                         r.append(v)
                 finally:
@@ -489,9 +494,10 @@ class CommandExecutor(BaseInterpreter):
                 node.var_storage.new_scope()
                 try:
                     self.input = v
-                    x = node.cmd.accept(self)
-                    if self.__truth(x, node):
-                        r[k] = v
+                    if not v is UNDEFINED:
+                        x = node.cmd.accept(self)
+                        if self.__truth(x, node):
+                            r[k] = v
                 finally:
                     node.var_storage.del_scope()
         return r
