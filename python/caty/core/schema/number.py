@@ -37,7 +37,7 @@ class NumberSchema(ScalarSchema):
             raise JsonSchemaError(dict(msg=u'value should be smaller than $val', val=self.maximum), value, '')
         if self.excludes:
             if value in self.excludes:
-                raise JsonSchemaError(dict(msg=u'value matched to exclusion pattern: $pattern', pattern='|'.join(self.excludes)))
+                raise JsonSchemaError(dict(msg=u'value matched to exclusion pattern: $pattern', pattern='|'.join(map(str, self.excludes))))
 
 
     def intersect(self, another):
