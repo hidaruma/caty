@@ -860,7 +860,7 @@ class MethodChain(Syntax):
         return self.pipeline.out_schema
 
 class Fetch(Syntax):
-    command_decl = u"""command __fetch<T default univ> {@[default(false)]"no-self": boolean?, @[default(10)]"deref-depth": integer(minimum=0)?} :: DataAddr -> T
+    command_decl = u"""command __fetch<T default univ> {@[default(false)]"no-self": boolean?, @[default(10)]"deref-depth": integer(minimum=0)?} :: Reference | {"_self": Reference, *:any?} -> T
                         refers python:caty.core.script.node.Fetch;"""
 
     def __init__(self, queries, opts):

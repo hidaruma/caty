@@ -39,7 +39,6 @@ class NumberSchema(ScalarSchema):
             if value in self.excludes:
                 raise JsonSchemaError(dict(msg=u'value matched to exclusion pattern: $pattern', pattern='|'.join(map(str, self.excludes))))
 
-
     def intersect(self, another):
         minimum = max(self.minimum, another.minimum)
         if None in (self.maximum, another.maximum):

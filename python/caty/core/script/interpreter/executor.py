@@ -710,12 +710,9 @@ class CommandExecutor(BaseInterpreter):
         node._prepare()
         node.in_schema.validate(self.input)
         fetcher = Fetcher()
-        if node.deref_depth == 0:
-            return self.input
-        val = fetcher.fetch_addr(self.input, self.app, self.facility_set, True)
         labels = {}
         context = []
-        def filter(data, qo, orig, depth=1):
+        def filter(data, qo, orig, depth=0):
             if data is UNDEFINED:
                 if qo.optional:
                     return UNDEFINED
@@ -731,8 +728,12 @@ class CommandExecutor(BaseInterpreter):
                 if qo.type == u'address':
                     return data
                 if (node.deref_depth > depth):
-                    data = fetcher.fetch_addr(data, self.app, self.facility_set, True)
-                    depth += 1
+                    if json.tag(data) != u'__reference':
+                        #参照型ではなく_selfに参照がある場合、あらかじめderefが済んでいるものとする。
+                        data = data
+                    else:
+                        data = fetcher.fetch_addr(data, self.app, self.facility_set, True)
+                        depth += 1
                     resolved = True
                 else:
                     return data
@@ -799,11 +800,14 @@ class CommandExecutor(BaseInterpreter):
                         context.pop(-1)
                 return r
             elif qo.type == u'address':
-                p = json.untagged(orig)
+                if json.tag(orig) == '__reference':
+                    p = json.untagged(orig)
+                else:
+                    p = json.untagged(orig['_self'])
                 return json.tagged(u'__reference', {u'type': p['type'], u'arg': p['arg'], u'ext': u'.'.join(['$'] +context)})
             assert False, qo.type
 
-        return filter(val, node.queries, self.input)
+        return filter(self.input, node.queries, self.input)
 
 class BreakSignal(Exception):
     pass
