@@ -21,7 +21,7 @@ class StringSchema(ScalarSchema):
             raise JsonSchemaError(dict(msg='minLength($min) is longer than maxLength($max)', min=self.minLength, max=self.maxLength))
         if self.excludes:
             if not isinstance(self.excludes, list) or not all(map(lambda a: isinstance(a, unicode), self.excludes)):
-                raise JsonSchemaError(dict(msg='excludes attribute must be list'))
+                raise JsonSchemaError(dict(msg='excludes attribute must be list of string'))
 
     def _validate(self, value):
         if not self.optional and value == None:

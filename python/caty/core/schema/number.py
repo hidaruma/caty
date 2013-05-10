@@ -7,13 +7,17 @@ import random
 class NumberSchema(ScalarSchema):
     minimum = attribute('minimum')
     maximum = attribute('maximum')
-    __options__ = SchemaBase.__options__ | set(['minimum', 'maximum'])
+    excludes = attribute('excludes', [])
+    __options__ = SchemaBase.__options__ | set(['minimum', 'maximum', 'excludes'])
 
     def __init__(self, *args, **kwds):
         ScalarSchema.__init__(self, *args, **kwds)
         if self.minimum > self.maximum and self.maximum is not None:
             raise JsonSchemaError(dict(msg='minmum($min) is bigger than maximum($max)', min=self.minimum, max=self.maximum))
         self.is_integer = False
+        if self.excludes:
+            if not isinstance(self.excludes, list) or not all(map(lambda a: isinstance(a, (int, Decimal)), self.excludes)):
+                raise JsonSchemaError(dict(msg='excludes attribute must be list of number'))
 
     def _validate(self, value):
         if not self.optional and value == None:
@@ -31,6 +35,10 @@ class NumberSchema(ScalarSchema):
             raise JsonSchemaError(dict(msg=u'value should be greater than $val', val=self.minimum), value, '')
         if self.maximum != None and self.maximum < value:
             raise JsonSchemaError(dict(msg=u'value should be smaller than $val', val=self.maximum), value, '')
+        if self.excludes:
+            if value in self.excludes:
+                raise JsonSchemaError(dict(msg=u'value matched to exclusion pattern: $pattern', pattern='|'.join(self.excludes)))
+
 
     def intersect(self, another):
         minimum = max(self.minimum, another.minimum)
@@ -41,9 +49,16 @@ class NumberSchema(ScalarSchema):
         if minimum > maximum and maximum is not None:
             return NeverSchema()
         is_integer = self.is_integer or another.is_integer
+        excludes = []
+        if self.excludes:
+            if another.excludes:
+                excludes = list(set(self.excludes).union(set(another.excludes)))
+            else:
+                excludes = self.excludes
         opts = {
             'minimum': minimum,
             'maximum': maximum,
+            'excludes': excludes,
         }
         r = self.clone(opts)
         r.is_integer = is_integer
