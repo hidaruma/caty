@@ -962,6 +962,7 @@ class TypeVariable(SchemaBase, Scalar):
         self._kind = kind
         self._default = default
         self._default_schema = None
+        self._constraint = None
         SchemaBase.__init__(self, options)
 
     def __repr__(self):
@@ -1095,7 +1096,8 @@ class TypeVariable(SchemaBase, Scalar):
     def intersect(self, another):
         return IntersectionSchema(self, another)
     
-
+    def set_tag_constraint(self, extag):
+        self._constraint = extag
 
 class OptionalSchema(SchemaBase, Optional):
     def __init__(self, schema):

@@ -96,6 +96,9 @@ class TypeVarApplier(SchemaBuilder):
                 if isinstance(r, TypeParam):
                     return node
                 else:
+                    if node._constraint:
+                        if r.tag in node._constraint.excludes:
+                            return NeverSchema()
                     return r
             else:
                 return node

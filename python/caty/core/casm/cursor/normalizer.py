@@ -207,19 +207,21 @@ class TypeCalcurator(_SubNormalizer):
             l = self._dereference(l, False)
             r = self._dereference(r, False)
             if l.is_extra_tag:
-                if r.is_extra_tag:
-                    t = (l.tag & r.tag).accept(self)
-                elif r.type == u'__variable__':
-                    t = l.tag
+                if r.type == u'__variable__':
+                    res = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
+                    res.set_tag_constraint(l.tag)
                 else:
-                    if rt.startswith('@'):
-                        rt = rt[1:]
-                    t = rt if rt not in l.tag.excludes else None
-                if t is None or isinstance(t, NeverSchema):
-                    res = NeverSchema()
-                else:
-                    n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
-                    res = TagSchema(t, n)
+                    if r.is_extra_tag:
+                        t = (l.tag & r.tag).accept(self)
+                    else:
+                        if rt.startswith('@'):
+                            rt = rt[1:]
+                        t = rt if rt not in l.tag.excludes else None
+                    if t is None or isinstance(t, NeverSchema):
+                        res = NeverSchema()
+                    else:
+                        n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
+                        res = TagSchema(t, n)
             elif rt.startswith('@'): # 右辺がタグ型
                 if lt != rt:
                     if r.is_extra_tag:
@@ -262,19 +264,21 @@ class TypeCalcurator(_SubNormalizer):
             l = self._dereference(l, False)
             r = self._dereference(r, False)
             if r.is_extra_tag:
-                if l.is_extra_tag:
-                    t = (l.tag & r.tag).accept(self)
-                elif l.type == u'__variable__':
-                    t = r.tag
+                if l.type == u'__variable__':
+                    res = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
+                    res.set_tag_constraint(r.tag)
                 else:
-                    if lt.startswith('@'):
-                        lt = lt[1:]
-                    t = lt if lt not in r.tag.excludes else None
-                if t is None or isinstance(t, NeverSchema):
-                    res = NeverSchema()
-                else:
-                    n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
-                    res = TagSchema(t, n)
+                    if l.is_extra_tag:
+                        t = (l.tag & r.tag).accept(self)
+                    else:
+                        if lt.startswith('@'):
+                            lt = lt[1:]
+                        t = lt if lt not in r.tag.excludes else None
+                    if t is None or isinstance(t, NeverSchema):
+                        res = NeverSchema()
+                    else:
+                        n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
+                        res = TagSchema(t, n)
             elif rt == u'@*':
                 n = (l & self._dereference(r, True)).accept(self)
                 res = n
