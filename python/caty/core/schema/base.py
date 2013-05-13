@@ -999,6 +999,10 @@ class TypeVariable(SchemaBase, Scalar):
     def type_vars(self):
         return self._schema.type_vars if self._schema else []
 
+    @property
+    def is_extra_tag(self):
+        return self._schema.is_extra_tag if self._schema else False
+
     def set_default(self, schema):
         self._default_schema = schema
 

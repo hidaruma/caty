@@ -209,6 +209,8 @@ class TypeCalcurator(_SubNormalizer):
             if l.is_extra_tag:
                 if r.is_extra_tag:
                     t = (l.tag & r.tag).accept(self)
+                elif r.type == u'__variable__':
+                    t = l.tag
                 else:
                     if rt.startswith('@'):
                         rt = rt[1:]
@@ -220,7 +222,17 @@ class TypeCalcurator(_SubNormalizer):
                     res = TagSchema(t, n)
             elif rt.startswith('@'): # 右辺がタグ型
                 if lt != rt:
-                    if lt == '@*!' or lt == '@*': 
+                    if r.is_extra_tag:
+                        if lt.startswith('@'):
+                            lt = lt[1:]
+                        t = lt if lt not in r.tag.excludes else None
+                        if t is None or isinstance(t, NeverSchema):
+                            res = NeverSchema()
+                        else:
+                            n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
+                            res = TagSchema(t, n)
+
+                    elif lt == '@*!' or lt == '@*': 
                         # ワイルドカードタグ & 通常タグ
                         n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
                         res = TagSchema(r.tag, n)
@@ -252,6 +264,8 @@ class TypeCalcurator(_SubNormalizer):
             if r.is_extra_tag:
                 if l.is_extra_tag:
                     t = (l.tag & r.tag).accept(self)
+                elif l.type == u'__variable__':
+                    t = r.tag
                 else:
                     if lt.startswith('@'):
                         lt = lt[1:]

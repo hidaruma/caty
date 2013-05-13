@@ -445,6 +445,8 @@ class Validate(Builtin, TypeCalculator):
         self.set_schema(schema_name, opts.get('close'))
 
     def execute(self, input):
+        from caty.core.casm.cursor import TreeDumper
+        print TreeDumper().visit(self.converter)
         try:
             scm = self.converter
             scm.validate(input)
