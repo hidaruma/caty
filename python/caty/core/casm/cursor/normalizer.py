@@ -2,6 +2,8 @@
 from caty.core.casm.cursor.base import *
 from caty.core.casm.cursor.dump import TreeDumper
 from caty.core.exception import throw_caty_exception
+from caty.core.schema import schemata
+_builtin_types = schemata.keys()
 
 class TypeNormalizer(TreeCursor):
     def __init__(self, module):
@@ -96,7 +98,7 @@ class TypeCalcurator(_SubNormalizer):
             self.history.add(node)
             try:
                 node.body = node.body.accept(self)
-            except:
+            except Exception as e:
                 print '[DEBUG]', node.name
         return node
 
@@ -221,7 +223,10 @@ class TypeCalcurator(_SubNormalizer):
                         res = NeverSchema()
                     else:
                         n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
-                        res = TagSchema(t, n)
+                        if t in _builtin_types:
+                            res = n
+                        else:
+                            res = TagSchema(t, n)
             elif rt.startswith('@'): # 右辺がタグ型
                 if lt != rt:
                     if r.is_extra_tag:
@@ -278,7 +283,10 @@ class TypeCalcurator(_SubNormalizer):
                         res = NeverSchema()
                     else:
                         n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
-                        res = TagSchema(t, n)
+                        if t in _builtin_types:
+                            res = n
+                        else:
+                            res = TagSchema(t, n)
             elif rt == u'@*':
                 n = (l & self._dereference(r, True)).accept(self)
                 res = n

@@ -98,6 +98,10 @@ class SchemaBase(Resource):
     def app(self):
         return None
 
+    @property
+    def is_extra_tag(self):
+        return False
+
     def remarks():
         def _get(self):
             return self._options.get('remark', False)
