@@ -341,9 +341,14 @@ class TagProxy(Proxy):
         self.cmdproxy = c
 
     def instantiate(self, builder):
-        return TagBuilder(self.tag, self.cmdproxy.instantiate(builder))
+        if isinstance(self.tag, unicode):
+            return TagBuilder(self.tag, self.cmdproxy.instantiate(builder))
+        else:
+            return ExtendedTagBuilder(self.tag.instantiate(builder), self.cmdproxy.instantiate(builder))
 
     def set_module(self, module):
+        if not isinstance(self.tag, unicode):
+            self.tag.set_module(module)
         self.cmdproxy.set_module(module)
 
     def _reify(self):
@@ -358,10 +363,14 @@ class UnaryTagProxy(Proxy):
         self.tag = t
 
     def instantiate(self, builder):
-        return UnaryTagBuilder(self.tag)
+        if isinstance(self.tag, unicode):
+            return UnaryTagBuilder(self.tag)
+        else:
+            return ExtendedUnaryTagBuilder(self.tag)
 
     def set_module(self, module):
-        pass
+        if not isinstance(self.tag, unicode):
+            self.tag.set_module(module)
 
     def _reify(self):
         return {

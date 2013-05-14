@@ -4,7 +4,7 @@ Caty では switch, dispatch, object 生成などはすべてコマンドとし�
 """
 
 from caty.jsontools.path import build_query
-from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly
+from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettyprint
 from caty.jsontools import jstypes
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Syntax, VarStorage
 import caty
@@ -340,7 +340,7 @@ class Dispatch(Syntax):
 
 
 class TagBuilder(Syntax):
-    command_decl = u"""command __add-tag :: any -> any
+    command_decl = u"""command __tag :: any -> any
                         refers python:caty.core.script.node.TagBuilder;
     """
     def __init__(self, tag, cmd):
@@ -370,6 +370,56 @@ class UnaryTagBuilder(Syntax):
         pass
 
     def accept(self, visitor):
+        return visitor.visit_unarytag(self)
+
+class ExtendedTag(object):
+    def _do_tag_pipeline(self, visitor):
+        prev = visitor.input
+        visitor.input = None
+        self.tag = self.tagcmd.accept(visitor)
+        if not isinstance(self.tag, unicode):
+            throw_caty_exception(u'OutputTypeError', u'Not a string: %s' % prettyprint(self.tag))
+        visitor.input = prev
+
+class ExtendedTagBuilder(Syntax, ExtendedTag):
+    command_decl = u"""command __ex_tag :: any -> any
+                        refers python:caty.core.script.node.ExtendedTagBuilder;
+    """
+    def __init__(self, tag, cmd):
+        Syntax.__init__(self)
+        self.command = cmd
+        self.tagcmd = tag
+        self.tag = None
+
+    def set_facility(self, facilities, app=None):
+        self.tagcmd.set_facility(facilities, app)
+        self.command.set_facility(facilities, app)
+
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        self.command.set_var_storage(storage)
+
+    def accept(self, visitor):
+        self._do_tag_pipeline(visitor)
+        return visitor.visit_binarytag(self)
+
+class ExtendedUnaryTagBuilder(Syntax, ExtendedTag):
+    command_decl = u"""command __ex-unary-tag :: any -> any
+                        refers python:caty.core.script.node.ExtendedUnaryTagBuilder;
+    """
+    def __init__(self, tag):
+        Syntax.__init__(self)
+        self.tagcmd = tag
+        self.tag = None
+
+    def set_facility(self, facilities, app=None):
+        self.tagcmd.set_facility(facilities, app)
+
+    def set_var_storage(self, storage):
+        self.tagcmd.set_facility(facilities, app)
+
+    def accept(self, visitor):
+        self._do_tag_pipeline(visitor)
         return visitor.visit_unarytag(self)
 
 class Case(object):

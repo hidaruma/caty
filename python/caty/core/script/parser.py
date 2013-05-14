@@ -338,7 +338,11 @@ class ScriptParser(Parser):
             if a == '|':
                 r.append(seq.parse([self.term, self.group]))
             elif a == '>@':
-                t = self.tag_name(seq)
+                if option(S(u'('))(seq):
+                    t = self.pipeline(seq)
+                    S(u')')(seq)
+                else:
+                    t = self.tag_name(seq)
                 exp = r.pop(-1)
                 r.append(TagBuilder(t, exp))
             elif a == ';':
@@ -405,12 +409,16 @@ class ScriptParser(Parser):
 
     def tag(self, seq):
         _ = seq.parse('@')
-        n = self.tag_name(seq)
+        if option(S(u'('))(seq):
+            t = self.pipeline(seq)
+            S(u')')(seq)
+        else:
+            t = self.tag_name(seq)
         delim = True if seq.eof else seq.peek(option([',', ']', '}', ';', '|'], False))
         if delim:
-            return UnaryTagBuilder(n)
-        r = seq.parse([self.term, self.group])
-        return TagBuilder(n, r)
+            return UnaryTagBuilder(t)
+        p = seq.parse([self.term, self.group])
+        return TagBuilder(t, p)
     
     def var_ref(self, seq):
         seq.parse('%')
