@@ -366,7 +366,7 @@ class UnaryTagProxy(Proxy):
         if isinstance(self.tag, unicode):
             return UnaryTagBuilder(self.tag)
         else:
-            return ExtendedUnaryTagBuilder(self.tag)
+            return ExtendedUnaryTagBuilder(self.tag.instantiate(self))
 
     def set_module(self, module):
         if not isinstance(self.tag, unicode):

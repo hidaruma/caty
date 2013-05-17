@@ -399,6 +399,7 @@ class ExtendedTagBuilder(Syntax, ExtendedTag):
     def set_var_storage(self, storage):
         Syntax.set_var_storage(self, storage)
         self.command.set_var_storage(storage)
+        self.tagcmd.set_var_storage(storage)
 
     def accept(self, visitor):
         self._do_tag_pipeline(visitor)
@@ -417,7 +418,7 @@ class ExtendedUnaryTagBuilder(Syntax, ExtendedTag):
         self.tagcmd.set_facility(facilities, app)
 
     def set_var_storage(self, storage):
-        self.tagcmd.set_facility(facilities, app)
+        self.tagcmd.set_var_storage(storage)
 
     def accept(self, visitor):
         self._do_tag_pipeline(visitor)
