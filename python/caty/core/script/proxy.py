@@ -377,6 +377,26 @@ class UnaryTagProxy(Proxy):
             'tag': self.tag
         }
 
+class ParTagProxy(Proxy):
+    reification_type = u'_tag'
+    def __init__(self, t, c):
+        self.tagcmd = t
+        self.cmdproxy = c
+
+    def instantiate(self, builder):
+        return ParTagBuilder(self.tagcmd.instantiate(builder), self.cmdproxy.instantiate(builder))
+
+    def set_module(self, module):
+        self.tagcmd.set_module(module)
+        self.cmdproxy.set_module(module)
+
+    def _reify(self):
+        return {
+            'tag': self.tag,
+            'value': self.cmdproxy.reify()
+        }
+
+
 class CaseProxy(TagProxy):
     def instantiate(self, builder):
         return Case(self.tag, self.cmdproxy.instantiate(builder))

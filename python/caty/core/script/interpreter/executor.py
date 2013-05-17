@@ -706,6 +706,14 @@ class CommandExecutor(BaseInterpreter):
     def visit_break(self, node):
         raise BreakSignal()
 
+    def visit_partag(self, node):
+        node._prepare()
+        t, o = split_tag(self.input)
+        self.input = t
+        t = node.tagcmd.accept(self)
+        self.input = o
+        return tagged(t, node.command.accept(self))
+
     def visit_fetch(self, node):
         node._prepare()
         node.in_schema.validate(self.input)

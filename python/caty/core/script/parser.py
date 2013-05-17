@@ -13,6 +13,7 @@ from caty.core.script.proxy import ConstNodeProxy as ConstNode
 from caty.core.script.proxy import CommandNodeProxy as CommandNode
 from caty.core.script.proxy import DispatchProxy as Dispatch
 from caty.core.script.proxy import TagProxy as TagBuilder
+from caty.core.script.proxy import ParTagProxy as ParTagBuilder
 from caty.core.script.proxy import UnaryTagProxy as UnaryTagBuilder
 from caty.core.script.proxy import CaseProxy as Case
 from caty.core.script.proxy import UntagCaseProxy as UntagCase
@@ -400,6 +401,7 @@ class ScriptParser(Parser):
                     self.list, 
                     self.par_list, 
                     self.par_obj, 
+                    self.par_tag, 
                     self.var_ref,
                     self.arg_ref,
                     self.named_block,
@@ -419,7 +421,15 @@ class ScriptParser(Parser):
             return UnaryTagBuilder(t)
         p = seq.parse([self.term, self.group])
         return TagBuilder(t, p)
-    
+
+    def par_tag(self, seq):
+        _ = seq.parse('=@')
+        S(u'(')(seq)
+        t = self.pipeline(seq)
+        S(u')')(seq)
+        p = seq.parse([self.term, self.group])
+        return ParTagBuilder(t, p)
+
     def var_ref(self, seq):
         seq.parse('%')
         n = name_token(seq)
@@ -556,7 +566,6 @@ class ScriptParser(Parser):
             optional = True
         return OptionLoader(name, optional)
     
-
     def named_arg(self, seq):
         from caty.core.language import _name_token_ptn
         if option(S(u'%#'))(seq):

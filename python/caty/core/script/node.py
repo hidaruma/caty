@@ -424,6 +424,28 @@ class ExtendedUnaryTagBuilder(Syntax, ExtendedTag):
         self._do_tag_pipeline(visitor)
         return visitor.visit_unarytag(self)
 
+class ParTagBuilder(Syntax):
+    command_decl = u"""command __par_tag :: univ -> univ
+                        refers python:caty.core.script.node.ParTagBuilder;
+    """
+    def __init__(self, tag, cmd):
+        Syntax.__init__(self)
+        self.command = cmd
+        self.tagcmd = tag
+        self.tag = None
+
+    def set_facility(self, facilities, app=None):
+        self.tagcmd.set_facility(facilities, app)
+        self.command.set_facility(facilities, app)
+
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        self.command.set_var_storage(storage)
+        self.tagcmd.set_var_storage(storage)
+
+    def accept(self, visitor):
+        return visitor.visit_partag(self)
+
 class Case(object):
     def __init__(self, tag, cmd):
         self.tag= tag
