@@ -6,6 +6,7 @@ Caty では switch, dispatch, object 生成などはすべてコマンドとし�
 from caty.jsontools.path import build_query
 from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettyprint
 from caty.jsontools import jstypes
+from caty.core.exception import *
 from caty.core.command import ScriptError, PipelineInterruption, PipelineErrorExit, Command, Syntax, VarStorage
 import caty
 import types
