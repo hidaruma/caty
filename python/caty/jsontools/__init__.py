@@ -31,6 +31,7 @@ __all__ = ['load',
            'tagged',
            'untagged',
            'split_tag',
+           'split_exp_tag',
            'CatyEncoder',
            'raw_json']
 
@@ -609,6 +610,12 @@ def untagged(val, explicit=False):
 
 def split_tag(val):
     return tag(val), untagged(val)
+
+def split_exp_tag(val):
+    if isinstance(val, TaggedValue):
+        return tag(val), untagged(val)
+    else:
+        return None, val
 
 def obj2path(obj):
     u"""辞書形式の JSON オブジェクトをパス形式に変換する。
