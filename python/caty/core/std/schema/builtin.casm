@@ -866,10 +866,13 @@ exception UnhandledSignal = {
  *: any?
 };
 
-/** 例外：環境変数の設定でsetとunsetの競合が起きた。 */
-@[runaway]
+/** 例外：環境変数やオブジェクト変更の設定でsetとunsetの競合が起きた。 */
+@[runaway, deprecated]
 exception SetEnvConflict = object;
 
+/** 例外：環境変数やオブジェクト変更の設定でsetとunsetの競合が起きた。 */
+@[runaway]
+exception SetUnsetConflict = object;
 
 /*
  * --- セキュリティ
