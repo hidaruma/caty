@@ -5,6 +5,19 @@ module xjson in casm;
 
 type AnyObject = {*:any};
 
+type ObjectModifier = @* {
+ @[defaut(false)]
+ "clear": boolean?,
+
+ @[default({})]
+ "set": object?,
+
+ @[default([])]
+ "unset": [string*]?,
+
+ *: univ
+};
+
 /**
  * 引数で指定されたファイルを JSON データとして読み込み、値を返す。
  * JSON でないデータの書き込まれたファイルに対しての動作は保証しない（通常はエラー）。
@@ -129,3 +142,6 @@ command read-dir {@[default(false)]"rec": boolean?, "also-file": string(remark="
     reads pub
     refers python:xjsonlib.ReadDir;
 
+command modify :: [@* object input, ObjectModifier modifier] -> @* object
+    throws SetUnsetConflict
+    refers python:xjsonlib.Modify;

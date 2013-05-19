@@ -171,3 +171,31 @@ class ReadDir(Builtin):
     def execute(self):
         d = DirectoryWalker(self.pub, self.rec, self.file)
         return d.read(self.path)
+
+from copy import deepcopy
+class Modify(Builtin):
+    def execute(self, data):
+        i, m = data
+        t, d = json.split_exp_tag(i)
+        if t:
+            return json.tagged(t, self.modify(d, m))
+        else:
+            return self.modify(d, m)
+
+    def modify(self, obj, modifier):
+        obj = deepcopy(obj)
+        if modifier.get('clear', False):
+            obj = {}
+        s = modifier.get('set', {})
+        u = modifier.get('unset', [])
+        set_names = set(s.keys())
+        unset_names = set(u)
+        conflict = set_names.intersection(unset_names)
+        if conflict:
+            throw_caty_exception(u'SetUnsetConflict', u'$names', names=u', '.join(conflict))
+        for k, v in s.items():
+            obj[k] = v
+        for k in u:
+            if k in obj:
+                del obj[k]
+        return obj
