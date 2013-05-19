@@ -70,6 +70,6 @@ list:length
 | %%obj     | pv   d      | 3        | |
 | %%arr     | item 4      |          | Exception |
 | %%obj     | pv   e      |          | Exception |
-| %%arr     | each {pass} | %%arr     | |
+| %%arr     | each {pass} | [1,3]     | |
 | %%obj     | each --obj {pass} | %%obj| |
 
