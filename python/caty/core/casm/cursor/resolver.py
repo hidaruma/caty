@@ -45,3 +45,12 @@ class ReferenceResolver(SchemaBuilder):
         r = TagSchema(t, s)
         r._options = node.options
         return r
+
+    def _visit_type_function(self, node):
+        schema = node.module.get_type(node.typename)
+        if node.funcname == u'typeName':
+            return EnumSchema([node.typename])
+        elif node.funcname == u'recordType':
+            if u'__collection' not in schema.annotations:
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % node.typename)
+            return schema.accept(self).body

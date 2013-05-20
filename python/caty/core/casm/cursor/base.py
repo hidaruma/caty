@@ -151,4 +151,9 @@ class SchemaBuilder(TreeCursor):
         print u'[Warning] Not implmented yet'
         return UndefinedSchema()
 
+    def _visit_type_function(self, node):
+        node._module = self.module
+        return node
+
+
 

@@ -10,7 +10,7 @@ from caty.jsontools.selector.parser import JSONPathSelectorParser
 from caty.core.typeinterface import flatten_union_node
 import caty.jsontools.xjson as xjson
 
-RESERVED = frozenset(schemata.keys() + ['type'])
+RESERVED = frozenset(schemata.keys() + ['type'] + ['typeName'] + ['recordType'])
 
 def schema(seq):
     doc = option(docstring)(seq)
@@ -21,7 +21,7 @@ def schema(seq):
     if kind:
         default = option(default_type)(seq)
     if name_of_type in RESERVED:
-        raise ParseFailed(seq, schema, '%s is reserved.' % n)
+        raise ParseFailed(seq, schema, '%s is reserved.' % name_of_type)
     if nohook(option(S(u';')))(seq):
         doc2 = postfix_docstring(seq)
         doc = concat_docstring(doc, doc2)
@@ -125,7 +125,7 @@ def term(seq):
         return ScalarNode(u'never', {}, [])
 
     doc = option(docstring)(seq)
-    s = seq.parse(map(try_, [_tag_exp, _pseudo_tag, _type_name_tag, _tag, _never, _unary]) + [enum, _term, bag, object_, array, exponent, scalar])
+    s = seq.parse(map(try_, [_tag_exp, _pseudo_tag, _type_name_tag, _tag, _never, _unary]) + [enum, _term, bag, object_, array, exponent, type_function, scalar])
     o = seq.parse(option('?'))
     if doc:
         s.docstring = doc
@@ -405,3 +405,12 @@ def exponent(seq):
         S(u'->')(seq)
         outtype = term(seq)
         return ExponentNode(intype, outtype, args, opts)
+
+def type_function(seq):
+    t = choice(keyword(u'typeName'), keyword(u'recordType'))(seq)
+    S(u'<')(seq)
+    n = seq.parse(typename)
+    S(u'>')(seq)
+    node = TypeFunctionNode(t, n)
+    return node
+

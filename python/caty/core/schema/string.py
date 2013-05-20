@@ -67,7 +67,7 @@ class StringSchema(ScalarSchema):
             'format': self.format or another.format,
             'profile': self.profile or another.profile,
             'pattern': self.pattern or another.pattern,
-            'excludes': self.excludes,
+            'excludes': excludes,
         }
         return self.clone(opts)
         

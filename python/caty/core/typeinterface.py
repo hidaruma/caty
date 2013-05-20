@@ -59,6 +59,10 @@ class Function(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_function(self)
 
+class TypeFunction(AbstractNode):
+    def accept(self, cursor):
+        return cursor._visit_type_function(self)
+
 class Operator(AbstractNode):
     @property
     def left(self):

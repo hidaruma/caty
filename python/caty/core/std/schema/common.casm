@@ -31,9 +31,5 @@ type Message = {
  * : string?
 }(minProperties = 1);
 
-/** 型の名前を表す文字列 */
-type typeName = string(remark = "type name");
-
-
 
 // End of Module

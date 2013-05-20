@@ -519,7 +519,7 @@ type BuiltinTypeName = (
  | "foreign" // フォーリンデータ
 );
 
-type typeName = string(remark="type-name");
+type dataTypeName = string(remark="type-name");
 type uri = string(remark="uri");
 type mediaType = string(remark="media-type");
 type httpMethod = ("GET" | "PUT" | "POST" | "DELETE" | "HEAD");
@@ -548,8 +548,8 @@ type Trigger = {
  @[default("")]
  "verb" : string?,
  @[default("void")]
- "inputDatatype": typeName?,
- "paramsDatatype" : typeName?,
+ "inputDatatype": dataTypeName?,
+ "paramsDatatype" : dataTypeName?,
 
  // その他いろいろ
   * : any?

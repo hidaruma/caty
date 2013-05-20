@@ -771,7 +771,7 @@ class CollectionDeclNode(object):
         a.add(Annotation(u'key-getter', keypath))
         if keytype:
             a.add(Annotation(u'key-type', keytype))
-        self.type = ASTRoot(name, None, coltype, ann, doc)
+        self.type = ASTRoot(name, None, coltype, a, doc)
         self.command1 = CommandNode('_' + name, 
                                      [CallPattern(None, 
                                                  None, 
@@ -807,3 +807,15 @@ class CollectionDeclNode(object):
         self.command2.declare(module)
         self.catyclass.declare(module)
         self.entity.declare(module)
+
+class TypeFunctionNode(TypeFunction, SchemaBase):
+    def __init__(self, funcname, typename):
+        self.funcname = funcname
+        self.typename = typename
+        SchemaBase.__init__(self)
+        self._module = None
+
+    @property
+    def module(self):
+        return self._module
+

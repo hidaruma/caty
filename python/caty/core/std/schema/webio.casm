@@ -110,7 +110,7 @@ type GenericFormatName = (
 command unconstrue
  {
    /** Caty型システムの型名 */
-   "type" : typeName?,
+   "type" : dataTypeName?,
   
    /** フォーマット名（タグ名）
     * 有限個の候補から選ぶ。
@@ -176,7 +176,7 @@ command parse
 command construe
  {
    /** Caty型システムの型名 */
-   "type" : typeName?,
+   "type" : dataTypeName?,
  }
 :: Generic -> any throws [webio_InsufficientMetainfo, ConversionError]
     refers python:webio.Construe;
@@ -207,7 +207,7 @@ command untranslate  {
    "format" : GenericFormatName?,
 
    /** Caty型システムの型名 */
-   "type" : typeName?,
+   "type" : dataTypeName?,
  } :: any -> Raw throws [webio_InsufficientMetainfo, ConversionError] {
     unconstrue --format=%format? --type=%type? | unparse --content-type=%content-type?
 };
@@ -315,7 +315,7 @@ command encode-to-form-and-request
  */
 @[sample]
 command decode-from-form-and-back
- [typeName myType]
+ [dataTypeName myType]
 :: string -> object
 {
   %1 > myType;

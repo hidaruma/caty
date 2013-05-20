@@ -334,16 +334,16 @@ type AppliedType = @apply {
 /** 型の名前、これだけは特別扱い 
  * 型の名前（文字列）を特別扱いしているが、これはたぶん避けられない
  */
-type typeName = string(remark="型の名前");
+type catyTypeName = string(remark="型の名前");
 
 /** 型のテキスト表現
  * 暫定的に使う
  */
-type typeText = string(remark="型のテキスト表現");
+type catyTypeText = string(remark="型のテキスト表現");
 
 /** 型の仕様（テキストを許す）
  */
-type TypeSpec = typeText|TypeExpr;
+type TypeSpec = catyTypeText|TypeExpr;
 
 
 /** 型表現 - 各種型表現のユニオン
