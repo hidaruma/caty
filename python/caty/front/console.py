@@ -152,8 +152,11 @@ class CatyShell(cmd.Cmd):
             self.dribble_file.flush()
         return cmd.Cmd.onecmd(self, line)
 
-    def _echo(self, s):
-        cout.writeln(s)
+    def _echo(self, s, nonl=False):
+        if nonl:
+            cout.write(s)
+        else:
+            cout.writeln(s)
  
     @catch
     def do_quit(self, line):
@@ -207,6 +210,32 @@ Usage: debug [on|off]
         for l in lines:
             d.append(l.replace(' '*space, '', 1))
         return '\n'.join(d)
+
+    @catch
+    def do_service(self, line):
+        u"""
+Usage: service [SERVICE_NAME] [ARGUMENTS]
+server, hconなどの起動・停止を行う。
+無引数で呼び出されたときはサービス一覧と状態を出力する。
+        """
+        arg = line.strip()
+        if not arg:
+            self._echo(u'server: ', True)
+            self.do_server('status')
+            self._echo(u'hcon: ', True)
+            self.do_hcon('status')
+            return
+        if not ' ' in arg:
+            srv = arg
+            args = u''
+        else:
+            srv, args = arg.split(' ', 1)
+        if srv == 'server':
+            self.do_server(args)
+        elif srv == 'hcon':
+            self.do_hcon(args)
+        else:
+            self._echo(u'Unknown service: %s' % srv)
 
     @catch
     def do_server(self, line):
