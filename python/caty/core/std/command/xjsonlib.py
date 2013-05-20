@@ -177,6 +177,7 @@ class Modify(Builtin):
     def execute(self, data):
         i, m = data
         t, d = json.split_exp_tag(i)
+        m = json.normalize(m)
         if t:
             return json.tagged(t, self.modify(d, m))
         else:
