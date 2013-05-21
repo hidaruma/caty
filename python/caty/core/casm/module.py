@@ -616,7 +616,7 @@ class Module(Facility):
                     try:
                         facility_class = self._load_facility_class(k, v.clsname)
                         try:
-                            config = self._load_facility_config(v)
+                            config = self._load_facility_config(k)
                         except:
                             import traceback
                             traceback.print_exc()
@@ -660,13 +660,8 @@ class Module(Facility):
         loader = _FaciltyLoader(uri, name, self)
         return loader.load()
 
-    def _load_facility_config(self, fclnode):
-        path = u'/%s.%s.json' % (fclnode.module.name, fclnode.clsname.split('.')[-1])
-        with self.fs.open(path) as f:
-            if f.exists:
-                c = f.read()
-                return xjson.loads(c)
-            return {}
+    def _load_facility_config(self, fclname):
+        return self.system._global_config.facilities.get(fclname, {})
 
     def get_facility_or_entity(self, name):
         if self.has_facility(name):

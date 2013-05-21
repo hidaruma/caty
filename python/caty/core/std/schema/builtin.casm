@@ -341,10 +341,39 @@ type PrjManifest = {
             *: any?
         },
     }?,
+    "facilities": FacilitiesConfig,
     /**
      * 配布パッケージからマージされる項目
      */
     *: object,
+};
+
+/** マニフェストの "facilities" 項目の値の型 
+ * オブジェクトのプロパティ名（キー）はファシリティ名となる
+ */
+type FacilitiesConfig = {
+  /* プロパティ名（キー）はファシリティ名*/
+  *: (BackendSpec | BackendGroupSpec)?
+};
+
+type BackendSpec = {
+  /** バックエンド名 */ 
+  "backend": string,
+  /** 設定データ */
+  "config": object?,
+};
+
+/* 複数のバックエンドの設定をまとめてするためのデータ
+ * バックエンド選択がスキーマや実行時に行われるときに使う。
+ */
+type BackendGroupSpec = @group {
+   /** 各バックエンドごとの設定パラメータ */
+   "configs": {
+      /* プロパティ名にバックエンド名、プロパティ値に設定データを指定する */
+      *: object?
+    },
+    /** このプロジェクトまたはアプリケーションで使うデフォルトバックエンド */
+    "defaultBackend": string?
 };
 
 /**

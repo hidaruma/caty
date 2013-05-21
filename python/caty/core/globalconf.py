@@ -63,6 +63,7 @@ class GlobalConfig(object):
         self._enableScriptCache = obj.get('enableScriptCache', False)
         self._enableHTTPMethodTunneling = obj.get('enableHTTPMethodTunneling', False)
         self._useMultiprocessing = obj.get('useMultiprocessing', True)
+        self._facilities = obj.get('facilities', {})
 
     def mafs_initializer(self, app, system, type):
         initializer = MafsInitializer(self._mafs_module, app, system, type)
@@ -151,6 +152,11 @@ class GlobalConfig(object):
     def project_name(self):
         return self._project_name
 
+    @property
+    def facilities(self):
+        return self._facilities
+
+
 class MafsInitializer(object):
     u"""mafs 初期化オブジェクト。
     mafs は数あるファシリティの中でももっとも込み入った初期化手順となっている。
@@ -207,5 +213,4 @@ class MafsInitializer(object):
     @property
     def global_config(self):
         return self._global_config
-
 

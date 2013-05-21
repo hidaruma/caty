@@ -34,6 +34,8 @@ class FileOpener(object):
         self.cwd = cwd
 
     def opendir(self, path):
+        if path.startswith(self.cwd):
+            path = path[len(self.cwd):]
         return DirectoryObject(join(self.cwd, path).replace('\\', '/'), stdfs)
 
     def open(self, path):

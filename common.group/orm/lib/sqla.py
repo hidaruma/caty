@@ -13,9 +13,11 @@ else:
         config = None
 
         @classmethod
-        def initialize(cls, app_instance, config):
-            if not config:
+        def initialize(cls, app_instance, setting):
+            if not setting:
                 config = {}
+            else:
+                config = setting.get('config', {})
             cls.config = config
             cfg = {'encoding': 'utf-8'}
             url = 'sqlite:///:memory:'
