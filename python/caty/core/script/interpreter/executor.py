@@ -835,7 +835,7 @@ class CommandExecutor(BaseInterpreter):
         try:
             if u'value' in req:
                 self.input = req[u'value']
-            env._dict[node.envname] = json.modify(val, req[u'update'])
+            env._dict[node.envname] = json.modify(val, req.get(u'update', {}))
             oldmut = env.get(u'_MUTATING')
             env._dict[u'_MUTATING'] = node.envname
             r = node.pipeline.accept(self)
@@ -846,7 +846,7 @@ class CommandExecutor(BaseInterpreter):
             else:
                 res = {"update": {"set":{}, "unset":[], "clear":False}}
                 outval = r
-            updater = json.compose_update(req[u'update'], res[u'update'])
+            updater = json.compose_update(req.get(u'update', {}), res.get(u'update', {}))
             return json.tagged(u'__mutate', {u'value': outval, u'update': updater})
         finally:
             if oldval != UNDEFINED:
