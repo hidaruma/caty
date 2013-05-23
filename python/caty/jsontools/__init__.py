@@ -822,7 +822,7 @@ def compose_update(a, b):
         u'unset': [],
         u'clear': a.get(u'clear', False)
     }
-    r[u'set'].update(a.get(u'update', {}))
+    r[u'set'].update(a.get(u'set', {}))
     r[u'unset'] = a.get(u'unset', [])[:]
     for k, v in b.get(u'set').items():
         if k in r[u'unset']:
