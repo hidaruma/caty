@@ -41,6 +41,7 @@ from caty.core.script.proxy import BreakProxy as Break
 from caty.core.script.proxy import EmptyProxy as Empty
 from caty.core.script.proxy import MethodChainProxy as MethodChain
 from caty.core.script.proxy import FetchProxy as Fetch
+from caty.core.script.proxy import MutatingProxy as Mutating
 from caty.core.script.query import *
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
@@ -233,6 +234,15 @@ class ScriptParser(Parser):
         n = self.tag_name(seq)
         return TagQuery(n, self.query_value(seq, label_list))
 
+    def mutating(self, seq):
+        keyword(u'mutating')(seq)
+        opts = self.options(seq)
+        name = self.name(seq)
+        S(u'{')(seq)
+        p = self.pipeline(seq)
+        S(u'}')(seq)
+        return Mutating(p, name, opts)
+
     def functor(self, seq):
         import string as str_mod
         k = lambda s: keyword(s, str_mod.ascii_letters + '_.')
@@ -385,6 +395,7 @@ class ScriptParser(Parser):
                     self.exception_handle,
                     self.catch,
                     self.fetch,
+                    self.mutating,
                     self.functor,
                     self.tag,
                     self.choice_branch,

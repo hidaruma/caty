@@ -794,4 +794,39 @@ class SelectionFixer(object):
         else:
             return obj
 
+from copy import deepcopy
+def modify(obj, modifier):
+    from caty.core.exception import CatyException, throw_caty_exception
+    obj = deepcopy(obj)
+    if modifier.get('clear', False):
+        obj = {}
+    s = modifier.get('set', {})
+    u = modifier.get('unset', [])
+    set_names = set(s.keys())
+    unset_names = set(u)
+    conflict = set_names.intersection(unset_names)
+    if conflict:
+        throw_caty_exception(u'SetUnsetConflict', u'$names', names=u', '.join(conflict))
+    for k, v in s.items():
+        obj[k] = v
+    for k in u:
+        if k in obj:
+            del obj[k]
+    return obj
 
+def compose_update(a, b):
+    if b.get('clear'):
+        return b
+    r = {
+        u'set': {},
+        u'unset': [],
+        u'clear': a.get(u'clear', False)
+    }
+    r[u'set'].update(a.get(u'update', {}))
+    r[u'unset'] = a.get(u'unset', [])[:]
+    for k, v in b.get(u'set').items():
+        if k in r[u'unset']:
+            r[u'unset'].remove(k)
+        r[u'set'][k] = v
+    r[u'unset'].extend(b.get(u'unset', []))
+    return r

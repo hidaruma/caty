@@ -951,3 +951,25 @@ class Fetch(Syntax):
     def accept(self, visitor):
         return visitor.visit_fetch(self)
 
+class Mutating(Syntax):
+    command_decl = u"""command __mutating<S default univ, T default univ> {@[default(false)]"commit": boolean?} :: Mut<S> -> Mut<T>
+                        refers python:caty.core.script.node.Mutating;"""
+
+    def __init__(self, pipeline, envname, opts):
+        Syntax.__init__(self, opts)
+        self.pipeline = pipeline
+        self.envname = envname
+
+    def set_facility(self, facilities, ignore=None):
+        self.pipeline.set_facility(facilities)
+
+    def set_var_storage(self, storage):
+        self.pipeline.set_var_storage(storage)
+
+
+    def _prepare(self):
+        Command._prepare(self)
+
+    def accept(self, visitor):
+        return visitor.visit_mutating(self)
+

@@ -44,6 +44,8 @@ class Env(Facility):
     def exists(self, name):
         return name in self._dict
 
+    __contains__ = exists
+
     def commit(self):
         pass
 

@@ -817,6 +817,43 @@ class CommandExecutor(BaseInterpreter):
 
         return filter(self.input, node.queries, self.input)
 
+    def visit_mutating(self, node):
+        node._prepare()
+        node.in_schema.validate(self.input)
+        if json.tag(self.input) == u'__mutate':
+            req = json.untagged(self.input)
+        else:
+            req = {"update": {"set":{}, "unset":[], "clear":False}}
+        env = self.facility_set._facilities['env']
+        if node.envname in env:
+            oldval = env[node.envname]
+            assert isinstance(oldval, dict)
+            val = deepcopy(oldval)
+        else:
+            oldval = UNDEFINED
+            val = {}
+        try:
+            if u'value' in req:
+                self.input = req[u'value']
+            env._dict[node.envname] = json.modify(val, req[u'update'])
+            oldmut = env.get(u'_MUTATING')
+            env._dict[u'_MUTATING'] = node.envname
+            r = node.pipeline.accept(self)
+            node.out_schema.validate(r)
+            if json.tag(r) == u'__mutate':
+                res = json.untagged(r)
+                outval = res.pop(u'value')
+            else:
+                res = {"update": {"set":{}, "unset":[], "clear":False}}
+                outval = r
+            updater = json.compose_update(req[u'update'], res[u'update'])
+            return json.tagged(u'__mutate', {u'value': outval, u'update': updater})
+        finally:
+            if oldval != UNDEFINED:
+                env._dict[node.envname] = oldval
+            if oldmut:
+                env._dict[u'_MUTATING'] = oldmut
+
 class BreakSignal(Exception):
     pass
 
@@ -894,7 +931,6 @@ class _CallCommand(MafsMixin, CommandBuilder, Internal):
         return CommandExecutor(c, app, self._facilities)
 
     def __script(self):
-        from copy import deepcopy
         self.var_loader.opts = self.__opts_ref
         self.var_loader.args = self.__args_ref
         opts = self.var_loader._load_opts(self.var_storage.opts, self.var_storage.args)

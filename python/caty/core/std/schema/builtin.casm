@@ -536,6 +536,26 @@ type CatyAppProperty = {
     *: any
 };
 
+
+type MutationRequest<T default univ> = @__mutate {
+ "value": T, // undefined値の可能性もあり
+ "update": ObjectUpdate?
+};
+
+type ObjectUpdate = {
+ @[default({})]
+ "set": object?,
+ @[default([])]
+ "unset": [string(remark="名前")*]?,
+ @[default(false)]
+ "clear": boolean?
+};
+
+type Mut<T default univ> = (
+   (T & @(string(excludes=["__mutate"])) univ) 
+ | MutationRequest<T>
+);
+
 /**
  * 組み込み型の名前
  */

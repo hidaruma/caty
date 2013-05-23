@@ -702,6 +702,20 @@ class FetchProxy(Proxy):
     def set_module(self, module):
         pass
 
+class MutatingProxy(Proxy):
+    def __init__(self, pipeline, envname, opts):
+        self.pipeline = pipeline
+        self.envname = envname
+        self.opts = opts
+
+    def instantiate(self, builder):
+        return Mutating(self.pipeline.instantiate(builder), self.envname, self.opts)
+
+    def set_module(self, module):
+        self.pipeline.set_module(module)
+
+
+
 def combine_proxy(args):
     return reduce(CombinatorProxy, args)
 

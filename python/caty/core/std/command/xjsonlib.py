@@ -179,24 +179,8 @@ class Modify(Builtin):
         t, d = json.split_exp_tag(i)
         m = json.normalize(m)
         if t:
-            return json.tagged(t, self.modify(d, m))
+            return json.tagged(t, json.modify(d, m))
         else:
-            return self.modify(d, m)
+            return json.modify(d, m)
 
-    def modify(self, obj, modifier):
-        obj = deepcopy(obj)
-        if modifier.get('clear', False):
-            obj = {}
-        s = modifier.get('set', {})
-        u = modifier.get('unset', [])
-        set_names = set(s.keys())
-        unset_names = set(u)
-        conflict = set_names.intersection(unset_names)
-        if conflict:
-            throw_caty_exception(u'SetUnsetConflict', u'$names', names=u', '.join(conflict))
-        for k, v in s.items():
-            obj[k] = v
-        for k in u:
-            if k in obj:
-                del obj[k]
-        return obj
+
