@@ -34,8 +34,7 @@ class Env(Facility):
 
     def clone(self):
         e = Env()
-        for k, v in self._dict.items():
-            e._dict[k] = v
+        e._dict = self._dict
         return e
 
     def __repr__(self):

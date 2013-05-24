@@ -847,9 +847,13 @@ class CommandExecutor(BaseInterpreter):
                 res = {"update": {"set":{}, "unset":[], "clear":False}}
                 outval = r
             updater = json.compose_update(req.get(u'update', {}), res.get(u'update', {}))
-            return json.tagged(u'__mutate', {u'value': outval, u'update': updater})
+            if node.commit:
+                env._dict[node.envname] = json.modify(env._dict[node.envname], res.get(u'update', {}))
+                return outval
+            else:
+                return json.tagged(u'__mutate', {u'value': outval, u'update': updater})
         finally:
-            if oldval != UNDEFINED:
+            if oldval != UNDEFINED and not node.commit:
                 env._dict[node.envname] = oldval
             if oldmut:
                 env._dict[u'_MUTATING'] = oldmut

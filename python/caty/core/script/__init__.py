@@ -128,8 +128,6 @@ class AbstractCommandCompiler(FakeFacility):
         builder = CommandBuilder(self.facilities, self.module.finder)
         var_storage = VarStorage(opts, args)
         env = self._facilities['env']
-        for k, v in env.items():
-            var_storage.opts[k] = v
         try:
             c = proxy.instantiate(builder)
         except CommandUsageError as e:

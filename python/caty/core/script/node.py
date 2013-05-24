@@ -966,6 +966,8 @@ class Mutating(Syntax):
     def set_var_storage(self, storage):
         self.pipeline.set_var_storage(storage)
 
+    def setup(self, opts, *ignore):
+        self.commit = opts[u'commit']
 
     def _prepare(self):
         Command._prepare(self)
