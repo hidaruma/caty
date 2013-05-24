@@ -172,8 +172,7 @@ class ReadDir(Builtin):
         d = DirectoryWalker(self.pub, self.rec, self.file)
         return d.read(self.path)
 
-from copy import deepcopy
-class Modify(Builtin):
+class ApplyUpdate(Builtin):
     def execute(self, data):
         i, m = data
         t, d = json.split_exp_tag(i)
@@ -183,4 +182,7 @@ class Modify(Builtin):
         else:
             return json.modify(d, m)
 
+class ComposeUpdate(Builtin):
+    def execute(self, data):
+        return reduce(json.compose_update, data, {})
 

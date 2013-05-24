@@ -142,6 +142,19 @@ command read-dir {@[default(false)]"rec": boolean?, "also-file": string(remark="
     reads pub
     refers python:xjsonlib.ReadDir;
 
-command modify :: [@* object input, ObjectModifier modifier] -> @* object
+command apply-update :: [@* object input, ObjectModifier modifier] -> @* object
     throws SetUnsetConflict
-    refers python:xjsonlib.Modify;
+    refers python:xjsonlib.ApplyUpdate;
+
+command compose-updates :: [ObjectUpdate*] -> ObjectUpdate
+    refers python:xjsonlib.ComposeUpdate;
+
+@[register-public]
+command app-u :: [@* object input, ObjectModifier modifier] -> @* object {
+    apply-update
+};
+@[register-public]
+command cmp-us :: [ObjectUpdate*] -> ObjectUpdate {
+    compose-updates
+};
+

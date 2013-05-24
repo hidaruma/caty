@@ -818,13 +818,11 @@ def compose_update(a, b):
     if b.get('clear'):
         return b
     r = {
-        u'set': {},
-        u'unset': [],
+        u'set': a.get(u'set', {}),
+        u'unset': a.get(u'unset', [])[:],
         u'clear': a.get(u'clear', False)
     }
-    r[u'set'].update(a.get(u'set', {}))
-    r[u'unset'] = a.get(u'unset', [])[:]
-    for k, v in b.get(u'set').items():
+    for k, v in b.get(u'set', {}).items():
         if k in r[u'unset']:
             r[u'unset'].remove(k)
         r[u'set'][k] = v
