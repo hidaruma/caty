@@ -236,12 +236,11 @@ class ScriptParser(Parser):
 
     def mutating(self, seq):
         keyword(u'mutating')(seq)
-        opts = self.options(seq)
         name = self.name(seq)
         S(u'{')(seq)
         p = self.pipeline(seq)
         S(u'}')(seq)
-        return Mutating(p, name, opts)
+        return Mutating(p, name)
 
     def functor(self, seq):
         import string as str_mod

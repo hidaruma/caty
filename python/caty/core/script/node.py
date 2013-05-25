@@ -955,8 +955,8 @@ class Mutating(Syntax):
     command_decl = u"""command __mutating<S default univ, T default univ> {@[default(false)]"commit": boolean?} :: Mut<S> -> Mut<T>
                         refers python:caty.core.script.node.Mutating;"""
 
-    def __init__(self, pipeline, envname, opts):
-        Syntax.__init__(self, opts)
+    def __init__(self, pipeline, envname):
+        Syntax.__init__(self)
         self.pipeline = pipeline
         self.envname = envname
 
@@ -965,9 +965,6 @@ class Mutating(Syntax):
 
     def set_var_storage(self, storage):
         self.pipeline.set_var_storage(storage)
-
-    def setup(self, opts, *ignore):
-        self.commit = opts[u'commit']
 
     def _prepare(self):
         Command._prepare(self)

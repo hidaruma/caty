@@ -703,13 +703,12 @@ class FetchProxy(Proxy):
         pass
 
 class MutatingProxy(Proxy):
-    def __init__(self, pipeline, envname, opts):
+    def __init__(self, pipeline, envname):
         self.pipeline = pipeline
         self.envname = envname
-        self.opts = opts
 
     def instantiate(self, builder):
-        return Mutating(self.pipeline.instantiate(builder), self.envname, self.opts)
+        return Mutating(self.pipeline.instantiate(builder), self.envname)
 
     def set_module(self, module):
         self.pipeline.set_module(module)
