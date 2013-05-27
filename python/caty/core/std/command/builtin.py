@@ -1467,3 +1467,16 @@ class DerefWrapper(Selector):
     def _to_str(self):
         return u'deref(%s)' % self.selector._to_str()
 
+class Dissoc(Builtin):
+    def execute(self, data):
+        t = json.tag(data)
+        if t in set([u'except', u'signal', u'normal']):
+            return data
+        else:
+            body = json.untagged(data)
+            t = json.tag(body['value'])
+            if t in set([u'except', u'signal']):
+                return body[u'value']
+            else:
+                body[u'value'] = json.untagged(body[u'value'])
+                return json.tagged(u'normal', json.tagged(u'__mutate', body))

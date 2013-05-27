@@ -1768,6 +1768,10 @@ command follow
   :: Reference -> any? throws Undefined
   refers python:builtin.Follow;
 
+command dissoc<B default univ, E default Exception, S default any>
+  :: Mut<@normal B | @except E | @signal S> -> (@normal Mut<B> | @except E | @signal S)
+  refers python:builtin.Dissoc;
+
 /* アノテーション宣言 */
 /** アノテーションのターゲットタイプ 
  */

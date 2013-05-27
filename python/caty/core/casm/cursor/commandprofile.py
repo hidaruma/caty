@@ -63,8 +63,10 @@ class ProfileBuilder(SchemaBuilder):
             arg_schema = tn.visit(pat.arg_schema.accept(tc))
             p = pat.decl.profile
             new_prof = [None, None]
+            tc = TypeVarApplier(self.module)
             tc._init_type_params(node)
             new_prof[0] = tn.visit(p[0].accept(tc)) 
+            tc = TypeVarApplier(self.module)
             tc._init_type_params(node)
             new_prof[1] = tn.visit(p[1].accept(tc))
             pat.decl.profile = tuple(new_prof)
