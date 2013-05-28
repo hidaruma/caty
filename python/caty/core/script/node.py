@@ -972,3 +972,19 @@ class Mutating(Syntax):
     def accept(self, visitor):
         return visitor.visit_mutating(self)
 
+class CommitM(Syntax):
+    command_decl = u"""command __commitm<S default univ> [string?] :: Mut<S> -> Mut<S>
+                        refers python:caty.core.script.node.CommitM;"""
+
+    def __init__(self, args_ref):
+        Syntax.__init__(self, [], args_ref)
+
+    def setup(self, name=None):
+        self.envname = name
+
+    def _prepare(self):
+        Command._prepare(self)
+
+    def accept(self, visitor):
+        return visitor.visit_commitm(self)
+

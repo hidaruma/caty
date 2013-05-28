@@ -42,6 +42,7 @@ from caty.core.script.proxy import EmptyProxy as Empty
 from caty.core.script.proxy import MethodChainProxy as MethodChain
 from caty.core.script.proxy import FetchProxy as Fetch
 from caty.core.script.proxy import MutatingProxy as Mutating
+from caty.core.script.proxy import CommitMProxy as CommitM
 from caty.core.script.query import *
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
@@ -285,6 +286,8 @@ class ScriptParser(Parser):
         if option(peek('$'))(seq):
             return self.xjson_path(seq)
         name = self.name(seq)
+        if name == u'commitm':
+            return CommitM(self.arguments(seq))
         #if name.endswith('.caty') and name[0] != '/':
         #    return self.__make_exec_script(name, seq)
         pos = (seq.col-len(name), seq.line)

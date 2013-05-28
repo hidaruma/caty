@@ -31,6 +31,7 @@ class CommandExecutor(BaseInterpreter):
         self.app = app
         self.facility_set = facility_set
         self.schema = facility_set['schema']
+        self._mutating_context = MutatingContext()
 
     def __call__(self, input):
         self.input = input
@@ -841,6 +842,7 @@ class CommandExecutor(BaseInterpreter):
             if u'value' in req:
                 self.input = req[u'value']
             env._dict[node.envname] = json.modify(val, req.get(u'update', {}))
+            self._mutating_context.enter(node.envname, env._dict[node.envname], {})
             oldmut = env.get(u'_MUTATING')
             env._dict[u'_MUTATING'] = node.envname
             r = node.pipeline.accept(self)
@@ -854,10 +856,48 @@ class CommandExecutor(BaseInterpreter):
             updater = json.compose_update(req.get(u'update', {}), res.get(u'update', {}))
             return json.tagged(u'__mutate', {u'value': outval, u'update': updater})
         finally:
+            self._mutating_context.exit()
             if oldval != UNDEFINED:
                 env._dict[node.envname] = oldval
             if oldmut:
                 env._dict[u'_MUTATING'] = oldmut
+
+    def visit_commitm(self, node):
+        node._prepare()
+        if json.tag(self.input) == u'__mutate':
+            req = json.untagged(self.input)
+        else:
+            req = {"update": {"set":{}, "unset":[], "clear":False}, 'value': self.input}
+        if self._mutating_context.level == 0:
+            if not node.envname:
+                throw_caty_exception(u'SyntaxError', u'commitm <NAME>')
+            env = self.facility_set._facilities['env']
+            val = env._dict.get(node.envname, {})
+            env._dict[node.envname] = json.modify(val, req.get(u'update', {}))
+            req['update'] = {}
+            self.input = req['value']
+        else:
+            self.input = self._mutating_context.apply(req)
+        return self.input
+
+class MutatingContext(object):
+    def __init__(self):
+        self._context = []
+        self.level = 0
+
+    def enter(self, name, value, operator):
+        self.level += 1
+        self._context.append([name, value, operator])
+
+    def exit(self):
+        self.level -= 1
+        self._context.pop(-1)
+
+    def apply(self, req):
+        self._context[-1][1] = json.modify(self._context[-1][1], req.get('update', {}))
+        self._context[-1][2] = json.compose_update(self._context[-1][1], req.get('update', {}))
+        req['update'] = {}
+        return json.tagged(u'__mutate', req)
 
 class BreakSignal(Exception):
     pass

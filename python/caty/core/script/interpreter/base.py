@@ -101,5 +101,7 @@ class BaseInterpreter(object):
     def visit_mutating(self, node):
         raise NotImplementedError(u'{0}#visit_mutating'.format(self.__class__.__name__))
 
+    def visit_commitm(self, node):
+        raise NotImplementedError(u'{0}#visit_commitm'.format(self.__class__.__name__))
 
 

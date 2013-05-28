@@ -713,7 +713,12 @@ class MutatingProxy(Proxy):
     def set_module(self, module):
         self.pipeline.set_module(module)
 
+class CommitMProxy(Proxy):
+    def __init__(self, args):
+        self.args = args
 
+    def instantiate(self, builder):
+        return CommitM(self.args)
 
 def combine_proxy(args):
     return reduce(CombinatorProxy, args)
