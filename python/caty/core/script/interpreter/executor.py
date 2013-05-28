@@ -579,6 +579,11 @@ class CommandExecutor(BaseInterpreter):
 
     def visit_try(self, node):
         node._prepare()
+        t = json.tag(self.input)
+        if t == u'normal':
+            self.input = json.untagged(self.input)
+        elif t in (u'signal', u'except'):
+            return self.input
         try:
             self.input = tagged(u'normal', node.pipeline.accept(self))
         except CatySignal as e:
