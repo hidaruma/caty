@@ -3,6 +3,7 @@ from getopt import getopt
 from caty.core.system import System, StdStream, StreamWrapper
 from caty.core.script.builder import CommandCombinator
 from caty.core.script.parser import NothingTodo
+from caty.core.facility import FakeFacility
 from caty.jsontools import pp
 from caty.core.schema import VoidSchema, ArraySchema
 from caty.core.exception import CatyException
@@ -31,7 +32,7 @@ def catch(f):
     _.__doc__ = f.__doc__
     return _
 
-class CatyShell(cmd.Cmd):
+class CatyShell(cmd.Cmd, FakeFacility):
     def __init__(self, site, wildcat, debug, system, dribble, cmdline):
         cmd.Cmd.__init__(self)
         self.debug = debug
@@ -82,6 +83,7 @@ class CatyShell(cmd.Cmd):
             if k in e._dict:
                 del e._dict[k]
         facilities._facilities['env'] = e.create(u'reads')
+        facilities._facilities['__console__'] = self
         return facilities
 
     def change_app(self, line):

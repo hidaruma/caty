@@ -874,6 +874,9 @@ class CommandExecutor(BaseInterpreter):
             env = self.facility_set._facilities['env']
             val = env._dict.get(node.envname, {})
             env._dict[node.envname] = json.modify(val, req.get(u'update', {}))
+            mode = env.get('RUN_MODE', [])
+            if 'console' in mode:
+                self.facility_set['__console__'].env[node.envname] = env._dict[node.envname]
             req['update'] = {}
             self.input = req['value']
         else:
