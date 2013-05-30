@@ -78,6 +78,9 @@ def xjson_from_bson(o):
         r = {}
         for k, v in o.items():
             r[k] = xjson_from_bson(v)
+            if '__tag' in r:
+                t = r.pop('__tag')
+                r = json.tagged(t, r)
         return r
     elif o is None:
         return UNDEFINED
@@ -93,9 +96,9 @@ def bson_from_xjson(o, is_query=False):
         else:
             if isinstance(o.value, dict):
                 r = bson_from_xjson(o.value, is_query)
-                if '_tag' in r:
+                if '__tag' in r:
                     throw_caty_exception(u'BadInput', u'Not BSON serializable data: $data', data=json.pp(o))
-                r['_tag'] = o.tag
+                r['__tag'] = o.tag
                 return r
             throw_caty_exception(u'BadInput', u'Not BSON serializable data: $data', data=json.pp(o))
     elif isinstance(o, list):
