@@ -21,6 +21,7 @@ def classdef(seq):
     type_args = seq.parse(option(type_arg, []))
     dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
     with strict():
+        option(S(u'='))(seq)
         S(u'{')(seq)
         member = many([command, property, schema, const, _entity])(seq)
         S(u'}')(seq)

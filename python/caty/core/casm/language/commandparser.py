@@ -178,6 +178,7 @@ def refer(seq):
     return l.strip(u':'), seq.parse(Regex(r'([a-zA-Z][a-zA-Z0-9]*(\.[a-zA-Z][a-zA-Z0-9]*)*)'))
 
 def script(seq):
+    option(S(u'='))(seq)
     seq.parse(u'{')
     p = CommandScriptParser()(seq)
     seq.parse(u'}')
