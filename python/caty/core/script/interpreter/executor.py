@@ -581,26 +581,26 @@ class CommandExecutor(BaseInterpreter):
     def visit_try(self, node):
         node._prepare()
         t = json.tag(self.input)
-        if t == u'normal':
+        if t == u'__normal':
             self.input = json.untagged(self.input)
-        elif t in (u'signal', u'except'):
+        elif t in (u'__signal', u'__except'):
             return self.input
         try:
-            self.input = tagged(u'normal', node.pipeline.accept(self))
+            self.input = tagged(u'__normal', node.pipeline.accept(self))
         except CatySignal as e:
             if self.schema.is_runaway_signal(e) and node.wall < node.HARD:
                 raise
-            self.input = tagged(u'signal', e.raw_data)
+            self.input = tagged(u'__signal', e.raw_data)
         except CatyException as e:
             if self.schema.is_runaway_exception(e) and node.wall < node.HARD:
                 raise
-            self.input = tagged(u'except', e.to_json())
+            self.input = tagged(u'__except', e.to_json())
         except Exception as e:
             if node.wall == node.SUPERHARD:
                 import traceback
                 from caty.util import error_to_ustr, brutal_encode
                 tb = brutal_encode(traceback.format_exc(), u'unicode-escape')
-                self.input = tagged(u'except', CatyException(u'RuntimeError', error_to_ustr(e), stack_trace=tb).to_json())
+                self.input = tagged(u'__except', CatyException(u'RuntimeError', error_to_ustr(e), stack_trace=tb).to_json())
             else:
                 raise
         return self.input
@@ -609,6 +609,7 @@ class CommandExecutor(BaseInterpreter):
         node._prepare()
         if node.handler is not None:
             t, self.input = split_tag(self.input)
+            t = t.lstrip('_')
             if t in node.handler:
                 self.input = node.handler[t].accept(self)
         return self.input
