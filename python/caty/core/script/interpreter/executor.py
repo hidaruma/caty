@@ -612,6 +612,8 @@ class CommandExecutor(BaseInterpreter):
             t = t.lstrip('_')
             if t in node.handler:
                 self.input = node.handler[t].accept(self)
+            elif node.handler.get('*'):
+                self.input = node.handler['*'].accept(self)
         return self.input
 
     def visit_unclose(self, node):

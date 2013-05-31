@@ -133,7 +133,7 @@ class ScriptParser(Parser):
         return Catch(r)
 
     def _handler(self, seq):
-        t = option(choice(u'normal', u'except', u'signal'))(seq)
+        t = option(choice(u'normal', u'except', u'signal', u'*'))(seq)
         if not t:
             return None, None
         S(u'=>')(seq)
