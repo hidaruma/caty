@@ -105,9 +105,31 @@ class ASTRoot(Root):
         return self.module.app
 
 class ClassNode(object):
+
     def __init__(self, name, member, domain, codomain, uri, doc, annotations, type_args):
+        self.is_ref = False
         self.name = name
         self.member = member
+        self.ref = None
+        self.docstring = doc
+        self.annotations = annotations
+        self.restriction = domain
+        self.codomain = codomain
+        self.uri = uri
+        self.type_args = type_args
+        self.defined = True
+
+    def declare(self, module):
+        self.module = module
+        module.add_class(self)
+
+class ClassRefNode(object):
+
+    def __init__(self, name, ref, domain, codomain, uri, doc, annotations, type_args):
+        self.is_ref = True
+        self.name = name
+        self.ref = ref
+        self.member = []
         self.docstring = doc
         self.annotations = annotations
         self.restriction = domain

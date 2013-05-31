@@ -806,6 +806,11 @@ class ClassModule(Module):
         return m, a
 
     def _build_schema_tree(self):
+        if self._clsobj.is_ref:
+            ref = self.parent.get_class(self._clsobj.ref)
+            self._clsobj.member = ref._clsobj.member
+            self._clsobj.is_ref = False
+            ClassModule.__init__(self, self.app, self.parent, self._clsobj)
         Module._build_schema_tree(self)
         b = self.make_schema_builder()
         b._type_params = []

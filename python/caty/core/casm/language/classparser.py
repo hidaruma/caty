@@ -1,7 +1,7 @@
 #coding: utf-8
 from topdown import *
 
-from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, CommandNode
+from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, CommandNode, ClassRefNode
 from caty.core.casm.language.schemaparser import schema, typedef, type_arg
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.facilityparser import _entity
@@ -22,14 +22,20 @@ def classdef(seq):
     dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
     with strict():
         option(S(u'='))(seq)
-        S(u'{')(seq)
-        member = many([command, property, schema, const, _entity])(seq)
-        S(u'}')(seq)
-        ref = refers(seq)
-        nohook(S(u';'))(seq)
-        doc2 = postfix_docstring(seq)
-        doc = concat_docstring(doc, doc2)
-        return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args)
+        if option(S(u'{'))(seq):
+            member = many([command, property, schema, const, _entity])(seq)
+            S(u'}')(seq)
+            ref = refers(seq)
+            nohook(S(u';'))(seq)
+            doc2 = postfix_docstring(seq)
+            doc = concat_docstring(doc, doc2)
+            return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args)
+        else:
+            name = identifier_token_a(seq)
+            nohook(S(u';'))(seq)
+            doc2 = postfix_docstring(seq)
+            doc = concat_docstring(doc, doc2)
+            return ClassRefNode(classname, name, dom, codom, CommandURI([(u'python', 'caty.core.command.DummyClass')]), doc, annotations, type_args)
 
 def signature(seq):
     doc = option(docstring)(seq)
