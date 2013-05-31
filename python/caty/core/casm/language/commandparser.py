@@ -28,7 +28,7 @@ def command(seq):
             patterns = many1(call_pattern)(seq)
             j = seq.parse(jump)
             r = seq.parse(many(resource))
-            rf = seq.parse(option([script, refers]))
+            rf = seq.parse(option([refers, script]))
             nohook(S(u';'))(seq)
             doc2 = postfix_docstring(seq)
             doc = concat_docstring(doc, doc2)
@@ -167,6 +167,8 @@ def alias(seq):
     return seq.parse(name)
 
 def refers(seq):
+    if option(peek(choice('{', '=')))(seq):
+        raise ParseFailed(seq, refers)
     try:
         return CommandURI(many1(refer)(seq))
     except:
@@ -177,14 +179,20 @@ def refer(seq):
     l = seq.parse(Regex(r'[a-zA-Z]+:'))
     return l.strip(u':'), seq.parse(Regex(r'([a-zA-Z][a-zA-Z0-9]*(\.[a-zA-Z][a-zA-Z0-9]*)*)'))
 
+
+from caty.core.script.parser import ScriptParser, CommandProxy, GlobArg, GlobOption
 def script(seq):
     option(S(u'='))(seq)
-    seq.parse(u'{')
-    p = CommandScriptParser()(seq)
-    seq.parse(u'}')
-    return p
+    parser = CommandScriptParser()
+    if option(u'{')(seq):
+        p = parser(seq)
+        seq.parse(u'}')
+        return p
+    else:
+        name = parser.name(seq) 
+        ta = option(parser.type_args, [])(seq)
+        return CommandProxy(name, ta, [GlobOption()], [GlobArg()], (0, 0))
 
-from caty.core.script.parser import ScriptParser
 class CommandScriptParser(ScriptParser):
     def __call__(self, seq):
         self.continue_to_parse = True
