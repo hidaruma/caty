@@ -46,14 +46,21 @@ def signature(seq):
     type_args = seq.parse(option(type_arg, []))
     dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
     with strict():
-        S(u'{')(seq)
-        member = many([abs_command, abs_type, _entity])(seq)
-        S(u'}')(seq)
-        ref = refers(seq)
-        nohook(S(u';'))(seq)
-        doc2 = postfix_docstring(seq)
-        doc = concat_docstring(doc, doc2)
-        return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args)
+        option(S(u'='))(seq)
+        if option(S(u'{'))(seq):
+            member = many([abs_command, abs_type, _entity])(seq)
+            S(u'}')(seq)
+            ref = refers(seq)
+            nohook(S(u';'))(seq)
+            doc2 = postfix_docstring(seq)
+            doc = concat_docstring(doc, doc2)
+            return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args)
+        else:
+            name = identifier_token_a(seq)
+            nohook(S(u';'))(seq)
+            doc2 = postfix_docstring(seq)
+            doc = concat_docstring(doc, doc2)
+            return ClassRefNode(classname, name, dom, codom, CommandURI([(u'python', 'caty.core.command.DummyClass')]), doc, annotations, type_args)
 
 def abs_type(seq):
     type = schema(seq)
