@@ -1,0 +1,10 @@
+module neos in casm;
+
+command lookup-action [string type-name, @[default("get")] string? verb] :: void -> string | null = {
+    [%1, "Action", ".", %2?="get"] | text:concat > act;
+    sreif:show-command --safe %act | when {
+        undefined => null,
+        * => %act
+    }
+};
+
