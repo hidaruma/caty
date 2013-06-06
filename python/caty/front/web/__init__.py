@@ -95,6 +95,7 @@ def make_server_opt_parser():
     parser.add_option('--pid', help=u'サーバーのプロセスIDファイル')
     parser.add_option('--hcon-port', dest='hcon', type='string', action='callback', callback=check_hcon, help=u'hconの動作するポート(uwsgi動作時には無効, hcon-nameと排他)')
     parser.add_option('--hcon-name', dest='hcon', type='string', action='callback', callback=check_hcon, help=u'hconアプリケーション名(uwsgi動作時のみ有効, hcon-portと排他)')
+    parser.add_option('--public-commands', choices=['action', 'all'])
     return parser
 
 def setup(args):

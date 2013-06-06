@@ -43,16 +43,17 @@ class ModuleName(object):
             return u'stop'
 
 class ASTRoot(Root):
-    def __init__(self, name, type_params, ast, annotation, docstring, kind=None):
+    def __init__(self, name, type_params, ast, annotation, docstring, kind=None, defined=True, redifinable=False):
         self._name = name
         self._reference_schema = None
         self._type_params = type_params if type_params else []
-        self.body = ast
+        self.body = ast if ast else ScalarNode(u'univ')
         self.options = None
         self.__annotation = annotation
         self.__docstring = docstring if docstring else u''
         self.kind = None
-        self.defined = ast is not None
+        self.defined = defined
+        self.redifinable = redifinable
 
     #def clone(self):
     #    return TypeLambda(self._name, self._type_params, self.__definition, self.__annotation, self.__docstring)
@@ -118,6 +119,7 @@ class ClassNode(object):
         self.uri = uri
         self.type_args = type_args
         self.defined = True
+        self.redifinable = False
 
     def declare(self, module):
         self.module = module
@@ -137,6 +139,7 @@ class ClassRefNode(object):
         self.uri = uri
         self.type_args = type_args
         self.defined = True
+        self.redifinable = False
 
     def declare(self, module):
         self.module = module
@@ -158,6 +161,7 @@ class FacilityNode(object):
         self.docstring = doc
         self.annotations = annotations
         self.defined = True
+        self.redifinable = False
 
     def declare(self, module):
         self.module = module
@@ -178,6 +182,7 @@ class EntityNode(object):
         self.docstring = doc
         self.annotations = annotations
         self.defined = fname is not None
+        self.redifinable = False
 
     def declare(self, module):
         self.module = module
@@ -456,6 +461,7 @@ class CommandNode(Function):
         self.type_params_ast = type_params
         self.command_type = command_type
         self.defined = self.reference_to_implementation is not None and self.reference_to_implementation.defined
+        self.redifinable = False
 
     @property
     def annotations(self):

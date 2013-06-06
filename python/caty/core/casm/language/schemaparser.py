@@ -18,6 +18,8 @@ def schema(seq):
     t = seq.parse([keyword('type'), keyword('exception')])
     name_of_type = seq.parse(name_token)
     kind = option(kind_of)(seq)
+    redifinable = False
+    defined = True
     if kind:
         default = option(default_type)(seq)
     if name_of_type in RESERVED:
@@ -25,10 +27,14 @@ def schema(seq):
     if nohook(option(S(u';')))(seq):
         doc2 = postfix_docstring(seq)
         doc = concat_docstring(doc, doc2)
-        return ASTRoot(name_of_type, [], None, annotations, doc, None)
+        return ASTRoot(name_of_type, [], None, annotations, doc, None, False, False)
     type_args = seq.parse(option(type_arg))
     k_of = option(kind_of)(seq)
-    e = seq.parse('=')
+    e = choice(S(u'='), S(u'?='), S(u'&='))(seq)
+    if e == '?=':
+        defined = False
+    elif e == u'&=':
+        redifinable = True
     deferred = seq.parse(option(keyword(u'deferred')))
     if deferred:
         annotations.add(Annotation(u'__deferred'))
@@ -47,7 +53,7 @@ def schema(seq):
     nohook(S(u';'))(seq)
     doc2 = postfix_docstring(seq)
     doc = concat_docstring(doc, doc2)
-    return ASTRoot(name_of_type, type_args, definition, annotations, doc, k_of)
+    return ASTRoot(name_of_type, type_args, definition, annotations, doc, k_of, defined, redifinable)
 
 def typedef(seq):
     return chainl(term, op, allow_trailing_operator=True)(seq)

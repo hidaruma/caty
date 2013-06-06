@@ -15,6 +15,7 @@ from caty.core.casm.cursor import (SchemaBuilder,
                                    TypeNormalizer, 
                                    TreeDumper,
                                    DependencyAnalizer)
+from caty.core.casm.language.ast import IntersectionNode
 from caty.core.casm.plugin import PluginMap
 from caty.jsontools.path.validator import to_decl_style
 from caty.core.exception import throw_caty_exception, CatyException, SystemResourceNotFound
@@ -165,13 +166,16 @@ class Module(Facility):
         name = target.name
         if name in scope and not force:
             t = scope[name]
-            if t.defined:
+            if not (t.defined or not t.redifinable):
                 m, a = self._get_mod_and_app(t)
                 raise Exception(self.application.i18n.get(u'%s $name of $this is already defined in $module of $app' % type, 
-                                                       name=name, 
-                                                       this=self._get_full_name(),
-                                                       module=m,
-                                                       app=a))
+                                                   name=name, 
+                                                   this=self._get_full_name(),
+                                                   module=m,
+                                                   app=a))
+            else:
+                if type == u'Type':
+                    target.body = IntersectionNode(scope[name], target.body)
         if see_register_public and ('register-public' in target.annotations or 'register-public' in self.annotations):
             if not self.is_root:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)

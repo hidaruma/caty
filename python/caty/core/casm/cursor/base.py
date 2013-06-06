@@ -30,13 +30,12 @@ class SchemaBuilder(TreeCursor):
     def _visit_root(self, node):
         _ = False
         if self._root_name is None:
+            if self.__is_irregular_refinement(node):
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'$name in $module can not refinemented', name=node.name, module=self.module.canonical_name)
             self._root_name = node.name
             _ = True
         self._type_params = node._type_params
-        if not node.body:
-            body = EmptySchema(node.name)
-        else:
-            body = node.body.accept(self)
+        body = node.body.accept(self)
         s = NamedSchema(node.name, node._type_params, body, self.module)
         if _:
             self._type_params = None
@@ -155,5 +154,26 @@ class SchemaBuilder(TreeCursor):
         node._module = self.module
         return node
 
+    def __is_irregular_refinement(self, node):
+        if not node.redifinable:
+            return False
+        if not isinstance(node.body, Intersection):
+            return True
+        nodes = self.__flatten_intersection(node)
+        count = 0
+        for n in nodes:
+            if isinstance(n, Root) and not n.defined:
+                count += 1
+                if count > 1:
+                    return True
+        return count == 0
 
+    def __flatten_intersection(self, node):
+        if isinstance(node, Root) and isinstance(node.body, Intersection):
+            for n in self.__flatten_intersection(node.body.left):
+                yield n
+            for n in self.__flatten_intersection(node.body.right):
+                yield n
+        else:
+            yield node
 

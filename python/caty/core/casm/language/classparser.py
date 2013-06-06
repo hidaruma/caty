@@ -64,8 +64,8 @@ def signature(seq):
 
 def abs_type(seq):
     type = schema(seq)
-    if type.body:
-        raise ParseError(u'Type can not defined in signature class')
+    if type.defined:
+        raise ParseError(seq, u'Type can not defined in signature class')
     return type
 
 def abs_command(seq):
