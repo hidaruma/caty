@@ -20,8 +20,10 @@ def classdef(seq):
     classname = name_token(seq)
     type_args = seq.parse(option(type_arg, []))
     dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
+    defined = True
+    redifinable = False
     with strict():
-        option(S(u'='))(seq)
+        e = option(choice(S(u'='), S(u'?='), S(u'&=')), u'=')(seq)
         if option(S(u'{'))(seq):
             member = many([command, property, schema, const, _entity])(seq)
             S(u'}')(seq)
@@ -29,7 +31,7 @@ def classdef(seq):
             nohook(S(u';'))(seq)
             doc2 = postfix_docstring(seq)
             doc = concat_docstring(doc, doc2)
-            return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args)
+            return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args, e)
         else:
             name = identifier_token_a(seq)
             nohook(S(u';'))(seq)

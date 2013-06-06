@@ -69,6 +69,7 @@ class Module(Facility):
         self._plugin = PluginMap()
         self._type = u'casm'
         self._literate = False
+        self._fragment = False
         self.ast_ns = {}
         self.proto_ns = {}
         self.saved_st = {}
@@ -77,6 +78,7 @@ class Module(Facility):
         self.docstring = u''
         self.last_modified = 0
         self.timing = u'boot'
+        self.attaches = None
         self.loaded = True
         self.annotations = Annotations([])
         self.package_root_path = u'/'
@@ -176,6 +178,10 @@ class Module(Facility):
             else:
                 if type == u'Type':
                     target.body = IntersectionNode(scope[name], target.body)
+                elif type == u'Class':
+                    for m in target.member:
+                        m.declare(t)
+                    return
         if see_register_public and ('register-public' in target.annotations or 'register-public' in self.annotations):
             if not self.is_root:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)
@@ -471,13 +477,38 @@ class Module(Facility):
     def make_profile_builder(self):
         return ProfileBuilder(self)
 
+
     def _attache_module(self):
+        if self.attaches:
+            target = self.get_module(self.attaches)
+            for c in self.class_ns.values():
+                c._clsobj.declare(target)
+            self.class_ns = {}
+            for t in self.ast_ns.values():
+                t.declare(target)
+            self.ast_ns = {}
+            for p in self.proto_ns.values():
+                p.declare(target)
+            self.proto_ns = {}
+            for f in self.facility_ns.values():
+                p.declare(target)
+            self.facility_ns = {}
+            for e in self.entity_ns.values():
+                p.declare(target)
+            self.entity_ns = {}
+            for a in self.annotation_proto_ns.values():
+                a.declare(target)
+            self.annotation_proto_ns = {}
+            r = True
+        else:
+            r = False
+
         for m in self.sub_modules.values():
             if m._attache_module():
                 del self.sub_modules[m.name]
         for v in self.sub_packages.values():
             m._attache_module()
-        return False
+        return r
 
     def _build_schema_tree(self):
         self.saved_st.update(self.ast_ns)
@@ -939,11 +970,17 @@ class AppModule(Module):
             self.application.i18n.write(u'[WARNING] public.casm is obsolete')
             self.application._system.deprecate_logger.warning(u'public.casm is obsolete: %s' % self.application.name)
             # self._compile(e.path)
-        elif e.path.endswith(u'.casm') or e.path.endswith(u'.pcasm') or e.path.endswith(u'.casm.lit'):
+        elif (e.path.endswith(u'.casm') 
+                or e.path.endswith(u'.pcasm') 
+                or e.path.endswith(u'.casm.lit')
+                or e.path.endswith(u'.casm.frag')
+                or e.path.endswith(u'.casm.frag.lit')):
             mod = self._get_module_class()(self._app, self)
             mod.filepath = e.path
-            if e.path.endswith(u'.casm.lit'):
+            if e.path.endswith(u'.casm.lit') or e.path.endswith(u'.casm.frag.lit'):
                 mod._literate = True
+            if u'.casm.frag' in e.path:
+                mod._fragment = True
             mod._name = unicode(self._path_to_module(e.basename))
             mod._compile(e.path)
 
@@ -990,9 +1027,7 @@ class AppModule(Module):
 
     def _compile(self, path, force=False):
         o = self.fs.open(path)
-        if path.endswith('.casm'):
-            res = self.parse_casm(o)
-        elif path.endswith('.pcasm'):
+        if path.endswith('.pcasm'):
             d = to_decl_style(o)
             if self.pcasm_cache:
                 io = self.pcasm_cache
@@ -1004,24 +1039,26 @@ class AppModule(Module):
         elif path.endswith('.xcasm'):
             res = self.parse_casm(o, 'xcasm')
         else:
-            res = self.parse_casm(o, 'lit')
-
+            if not self._literate:
+                res = self.parse_casm(o, 'casm', self._fragment)
+            else:
+                res = self.parse_casm(o, 'lit', self._fragment)
         for t in res:
             if t.declare(self) == u'stop' and not force:
                 break
 
-    def parse_casm(self, fo, type='casm'):
+    def parse_casm(self, fo, type='casm', fragment=False):
         try:
             if type == 'casm':
                 self._show_msg(fo)
                 self._app.cout.write(u'...')
-                r = parse(fo.read())
+                r = parse(fo.read(), fragment)
             elif type == 'xcasm':
                 r = xcasm.parse(fo.read())
             elif type == 'lit':
                 self._show_msg(fo)
                 self._app.cout.write(u'...')
-                r = parse_literate(fo.read())
+                r = parse_literate(fo.read(), fragment)
         except:
             self._app.cout.writeln(u'NG')
             raise

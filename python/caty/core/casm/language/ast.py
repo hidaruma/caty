@@ -19,12 +19,13 @@ class Provide(object):
         module.exports= self.exports
 
 class ModuleName(object):
-    def __init__(self, name, annotations, rel, docstring=u'', timing=u'boot'):
+    def __init__(self, name, annotations, rel, docstring=u'', timing=u'boot', attaches=None):
         self.name = name
         self.docstring = docstring
         self.annotations = annotations
         self.related = rel
         self.timing = timing
+        self.attaches = attaches
 
     def declare(self, module):
         if self.name == 'builtin': #ビルトインのみは特別扱い
@@ -33,9 +34,12 @@ class ModuleName(object):
         else:
             if self.name != module.canonical_name:
                 raise InternalException("Module name $name and path name $path are not matched", name=self.name, path=module.filepath)
+        if not module._fragment and self.attaches:
+                raise InternalException("Module $name could not be fragment module", name=self.name, path=module.filepath)
         module.docstring = self.docstring
         module.annotations = self.annotations
         module.timing = self.timing
+        module.attaches = self.attaches
         for r in self.related:
             module.related.add(r)
         if self.timing == u'demand':
@@ -107,7 +111,7 @@ class ASTRoot(Root):
 
 class ClassNode(object):
 
-    def __init__(self, name, member, domain, codomain, uri, doc, annotations, type_args):
+    def __init__(self, name, member, domain, codomain, uri, doc, annotations, type_args, type=u'='):
         self.is_ref = False
         self.name = name
         self.member = member
@@ -118,8 +122,8 @@ class ClassNode(object):
         self.codomain = codomain
         self.uri = uri
         self.type_args = type_args
-        self.defined = True
-        self.redifinable = False
+        self.defined = type != u'?='
+        self.redifinable = type == u'&='
 
     def declare(self, module):
         self.module = module

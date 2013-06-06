@@ -21,16 +21,16 @@ def read_cara_files(rmc, action_fs, facility, target, app, current_package=None)
         if not f.is_dir and (f.path.endswith('.cara') 
                             or f.path.endswith('.cara.lit') 
                             or f.path.endswith('.cara.frag')
-                            or f.path.endswith('.cara..frag.lit')):
+                            or f.path.endswith('.cara.frag.lit')):
             try:
                 msg = app.i18n.get('Action: $path', path=f.path.strip('/'))
                 app.cout.write(u'  * ' + msg)
                 app.cout.write('...')
                 source = f.read()
                 if f.path.endswith('.lit'):
-                    parser = LiterateRADParser(f.path, facility)
+                    parser = LiterateRADParser(f.path, facility, '.cara.frag' in f.path)
                 else:
-                    parser = ResourceActionDescriptorParser(f.path, facility)
+                    parser = ResourceActionDescriptorParser(f.path, facility, '.cara.frag' in f.path)
                 resource_module = parser.run(source, hook=lambda seq:remove_comment(seq, is_doc_str), auto_remove_ws=True)
                 if current_package:
                     resource_module.parent = current_package

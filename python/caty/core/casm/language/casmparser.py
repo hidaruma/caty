@@ -14,25 +14,25 @@ from caty.core.casm.language.kindparser import kind
 from caty.core.casm.language.facilityparser import facility
 import sys
 
-def parse(t):
+def parse(t, fragment=False):
     try:
-        return as_parser(casm).run(t, hook=remove_comment, auto_remove_ws=True)
+        return as_parser(bind2nd(casm, fragment)).run(t, hook=remove_comment, auto_remove_ws=True)
     except ParseError as e:
         raise SchemaSyntaxError(e), None, sys.exc_info()[2]
 
-def parse_literate(t):
+def parse_literate(t, fragment=False):
     try:
-        return as_parser(literate_casm).run(t, hook=remove_comment, auto_remove_ws=True)
+        return as_parser(bind2nd(literate_casm, fragment)).run(t, hook=remove_comment, auto_remove_ws=True)
     except ParseFailed, e:
         raise SchemaSyntaxError(e)
 
 _top_level = [try_(schema), try_(command), try_(syntax), try_(kind), try_(const), try_(catyclass), try_(facility), try_(annotation_decl), try_(collection_decl)]
 
-def casm(seq):
+def casm(seq, fragment):
     s = []
     #p = option(provides)(seq)
     remove_comment(seq)
-    m = module_decl(seq)
+    m = module_decl(seq, u'casm', fragment)
     s.append(m)
     #if p:
     #    s.append(p)
@@ -43,7 +43,7 @@ def casm(seq):
     remove_comment(seq)
     return s
 
-def literate_casm(seq):
+def literate_casm(seq, fragment):
     s = []
     h = seq.ignore_hook
     seq.ignore_hook = True
@@ -55,7 +55,7 @@ def literate_casm(seq):
         break
     seq.ignore_hook = h
     remove_comment(seq)
-    m = module_decl(seq)
+    m = module_decl(seq, u'casm', fragment)
     s.append(m)
     while not seq.eof:
         n = seq.parse(_top_level + [peek(S(u'}>>'))])
@@ -90,7 +90,7 @@ def literate_casm(seq):
     return s
 
 
-def module_decl(seq, type='casm'):
+def module_decl(seq, type='casm', fragment=False):
     doc = seq.parse(option(docstring))
     a = seq.parse(annotation)
     _ = seq.parse(keyword('module'))
@@ -109,7 +109,12 @@ def module_decl(seq, type='casm'):
     nohook(S(';'))(seq)
     doc2 = postfix_docstring(seq)
     doc = concat_docstring(doc, doc2)
-    return ModuleName(n, a, rel, doc, timing)
+    attaches = None
+    if fragment:
+        if option(keyword(u'attaches'))(seq):
+            attaches = identifier_token_m(seq)
+            S(u';')(seq)
+    return ModuleName(n, a, rel, doc, timing, attaches)
 
 def relation(seq):
     seq.parse(keyword('related'))
