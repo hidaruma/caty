@@ -18,13 +18,16 @@ def read_cara_files(rmc, action_fs, facility, target, app, current_package=None)
     from caty.core.language.util import remove_comment
     import caty.jsontools.xjson as xjson
     for f in action_fs.opendir(target).read():
-        if not f.is_dir and (f.path.endswith('.cara') or f.path.endswith('.cara.lit')):
+        if not f.is_dir and (f.path.endswith('.cara') 
+                            or f.path.endswith('.cara.lit') 
+                            or f.path.endswith('.cara.frag')
+                            or f.path.endswith('.cara..frag.lit')):
             try:
                 msg = app.i18n.get('Action: $path', path=f.path.strip('/'))
                 app.cout.write(u'  * ' + msg)
                 app.cout.write('...')
                 source = f.read()
-                if f.path.endswith('.cara.lit'):
+                if f.path.endswith('.lit'):
                     parser = LiterateRADParser(f.path, facility)
                 else:
                     parser = ResourceActionDescriptorParser(f.path, facility)

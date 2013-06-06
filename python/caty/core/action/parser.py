@@ -25,12 +25,19 @@ class ResourceActionDescriptorParser(Parser):
 
     def __call__(self, seq):
         mn = module_decl(seq, 'cara')
+        if self._path.endswith('.frag'):
+            keyword(u'attaches')(seq)
+            attaches = identifier_token_m(seq)
+            S(u';')(seq)
+        else:
+            attaches = None
         name = mn.name
         self._module_name = name
         ds = mn.docstring or u''
         if self._path.strip(u'/').split(u'.')[0].replace(u'/', u'.') != name:
             raise InternalException("Module name $name and path name $path are not matched", name=name, path=self._path)
         rm = ResourceModule(name.split('.')[-1], ds, self._app)
+        rm.attaches = attaches
         classes = seq.parse(many(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, constparser.const, self.userrole, self.port])))
         if not seq.eof:
             raise ParseError(seq, self)

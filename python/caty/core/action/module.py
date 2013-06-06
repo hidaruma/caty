@@ -129,10 +129,34 @@ class ResourceModule(Module):
         self.is_root = False
         self._ports = {}
         self._type = u'cara'
+        self.attaches = None
 
         self.add_rclass = partial(self._add_resource, scope_func=lambda x:x.class_ns, type=u'Resource', see_register_public=False, callback=lambda target: ClassModule(self._app, self, target))
         self.get_rclass = partial(self._get_resource, scope_func=lambda x:x.class_ns, type=u'Resource')
         self.has_rclass = partial(self._has_resource, scope_func=lambda x:x.class_ns, type=u'Resource')
+
+    def _attache_module(self):
+        if self.attaches is None:
+            return
+        target = self.get_module(self.attaches)
+        for c in self.class_ns.values():
+            c._clsobj.declare(target)
+        self.class_ns = {}
+        for t in self.ast_ns.values():
+            t.declare(target)
+        self.ast_ns = {}
+        for p in self.proto_ns.values():
+            p.declare(target)
+        self.proto_ns = {}
+        for f in self.facility_ns.values():
+            p.declare(target)
+        self.facility_ns = {}
+        for e in self.entity_ns.values():
+            p.declare(target)
+        self.entity_ns = {}
+        for a in self.annotation_proto_ns.values():
+            a.declare(target)
+        self.annotation_proto_ns = {}
 
     @property
     def resources(self):

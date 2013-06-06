@@ -434,6 +434,7 @@ class Module(Facility):
     def resolve(self):
         u"""型参照の解決
         """
+        self._attache_module()
         self._build_schema_tree()
         self._resolve_reference()
         self._check_dependency()
@@ -469,6 +470,14 @@ class Module(Facility):
 
     def make_profile_builder(self):
         return ProfileBuilder(self)
+
+    def _attache_module(self):
+        for m in self.sub_modules.values():
+            if m._attache_module():
+                del self.sub_modules[m.name]
+        for v in self.sub_packages.values():
+            m._attache_module()
+        return False
 
     def _build_schema_tree(self):
         self.saved_st.update(self.ast_ns)
@@ -809,6 +818,9 @@ class ClassModule(Module):
         a = t.module.application.name
         m = self.parent.name + '.' + t.module.name
         return m, a
+
+    def _attache_module(self):
+        return False
 
     def _build_schema_tree(self):
         if self._clsobj.is_ref:
