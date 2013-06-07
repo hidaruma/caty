@@ -32,6 +32,7 @@ class ResourceActionDescriptorParser(Parser):
         if self._path.strip(u'/').split(u'.')[0].replace(u'/', u'.') != name:
             raise InternalException("Module name $name and path name $path are not matched", name=name, path=self._path)
         rm = ResourceModule(name.split('.')[-1], ds, self._app)
+        rm.attaches = mn.attaches
         classes = seq.parse(many(map(try_, [self.resourceclass, self.state, schemaparser.schema, commandparser.command, constparser.const, self.userrole, self.port])))
         if not seq.eof:
             raise ParseError(seq, self)

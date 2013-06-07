@@ -477,7 +477,6 @@ class Module(Facility):
     def make_profile_builder(self):
         return ProfileBuilder(self)
 
-
     def _attache_module(self):
         if self.attaches:
             target = self.get_module(self.attaches)
