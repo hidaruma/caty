@@ -106,14 +106,13 @@ def module_decl(seq, type='casm', fragment=False):
     else:
         timing = u'boot'
     rel = seq.parse(option(relation, []))
-    nohook(S(';'))(seq)
-    doc2 = postfix_docstring(seq)
-    doc = concat_docstring(doc, doc2)
     attaches = None
     if fragment:
         if option(keyword(u'attaches'))(seq):
             attaches = identifier_token_m(seq)
-            S(u';')(seq)
+    nohook(S(';'))(seq)
+    doc2 = postfix_docstring(seq)
+    doc = concat_docstring(doc, doc2)
     return ModuleName(n, a, rel, doc, timing, attaches)
 
 def relation(seq):
