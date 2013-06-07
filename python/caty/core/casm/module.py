@@ -480,6 +480,10 @@ class Module(Facility):
     def _attache_module(self):
         if self.attaches:
             target = self.get_module(self.attaches)
+            if target._type != self._type:
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', 
+                                     u'Module type missmatched: $name=$type, $name2=$type2',
+                                     name=self.name, type=self._type, name2=self.attaches, type2=target.type)
             for c in self.class_ns.values():
                 c._clsobj.declare(target)
             self.class_ns = {}
