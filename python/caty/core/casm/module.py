@@ -168,7 +168,7 @@ class Module(Facility):
         name = target.name
         if name in scope and not force:
             t = scope[name]
-            if not (t.defined or not t.redifinable):
+            if not (t.defined or not t.redifinable) or (type == u'Type' and target.defined == t.defined and t.redifinable == target.redifinable):
                 m, a = self._get_mod_and_app(t)
                 raise Exception(self.application.i18n.get(u'%s $name of $this is already defined in $module of $app' % type, 
                                                    name=name, 
@@ -177,7 +177,9 @@ class Module(Facility):
                                                    app=a))
             else:
                 if type == u'Type':
-                    target.body = IntersectionNode(scope[name], target.body)
+                    target.body = IntersectionNode(scope[name].body, target.body)
+                    target.defined = False
+                    target.redifinable = False
                 elif type == u'Class':
                     for m in target.member:
                         m.declare(t)
@@ -832,6 +834,7 @@ class ClassModule(Module):
         self.type_params = clsobj.type_args
         self.docstring = clsobj.docstring
         self.defined = True
+        self.redifinable = False
 
     @property
     def uri(self):

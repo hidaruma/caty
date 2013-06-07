@@ -49,6 +49,8 @@ class StringSchema(ScalarSchema):
             return NeverSchema()
         minLength = max(self.minLength, another.minLength)
         maxLength = min(self.maxLength, another.maxLength)
+        if maxLength is None:
+            maxLength = max(self.maxLength, another.maxLength)
         if self.format is not None and another.format is not None and self.format != another.format:
             raise JsonSchemaError(dict(msg=u'Different format: $format1, $format2', format1=self.format, format2=another.format))
         if self.profile is not None and another.profile is not None and self.profile != another.profile:
@@ -69,7 +71,7 @@ class StringSchema(ScalarSchema):
             'pattern': self.pattern or another.pattern,
             'excludes': excludes,
         }
-        return self.clone(opts)
+        return self.clone(None, opts)
         
     def _convert(self, value):
         if value == None or isinstance(value, unicode):

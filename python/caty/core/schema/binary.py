@@ -40,7 +40,7 @@ class BinarySchema(ScalarSchema):
             'format': self.format or another.format,
             'profile': self.profile or another.profile,
         }
-        return self.clone(opts)
+        return self.clone(None, opts)
  
     def _convert(self, value):
         if isinstance(value, str):

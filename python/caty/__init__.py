@@ -1,7 +1,7 @@
 # coding: utf-8
 
 __version__ = u'pp-2.0.0'
-DEBUG = True
+DEBUG = False
 
 
 from caty.core.spectypes import * #XXX:互換性のため。後で直す。
