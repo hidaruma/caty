@@ -17,6 +17,10 @@ def schema(seq):
     annotations = seq.parse(annotation)
     t = seq.parse([keyword('type'), keyword('exception')])
     name_of_type = seq.parse(name_token)
+    if t == 'type' and option(u':=')(seq):
+        ref = identifier_token_m(seq)
+        S(u';')(seq)
+        return AliasNode(name_of_type, ref, u'type')
     kind = option(kind_of)(seq)
     redifinable = False
     defined = True

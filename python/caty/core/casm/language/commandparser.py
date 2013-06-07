@@ -24,6 +24,10 @@ def command(seq):
             n = seq.parse(cmdname)
             if n in RESERVED:
                 raise ParseFailed(seq, command, '%s is reserved.' % n)
+            if option(u':=')(seq):
+                ref = identifier_token_m(seq)
+                S(u';')(seq)
+                return AliasNode(n, ref, u'command')
             t = seq.parse(option(type_arg, []))
             patterns = many1(call_pattern)(seq)
             j = seq.parse(jump)

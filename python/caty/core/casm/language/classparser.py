@@ -18,6 +18,10 @@ def classdef(seq):
     annotations = seq.parse(annotation)
     keyword(u'class')(seq)
     classname = name_token(seq)
+    if option(u':=')(seq):
+        ref = identifier_token_m(seq)
+        S(u';')(seq)
+        return AliasNode(classname, ref, u'class')
     type_args = seq.parse(option(type_arg, []))
     dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
     defined = True
@@ -45,6 +49,10 @@ def signature(seq):
     keyword(u'signature')(seq)
     annotations.add(Annotation(u'__signature'))
     classname = name_token(seq)
+    if option(u':=')(seq):
+        ref = identifier_token_m(seq)
+        S(u';')(seq)
+        return AliasNode(classname, ref, u'class')
     type_args = seq.parse(option(type_arg, []))
     dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
     with strict():

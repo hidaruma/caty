@@ -443,6 +443,7 @@ class Module(Facility):
         u"""型参照の解決
         """
         self._attache_module()
+        #self._resolve_alias()
         self._build_schema_tree()
         self._resolve_reference()
         self._check_dependency()
@@ -514,6 +515,25 @@ class Module(Facility):
         for v in self.sub_packages.values():
             m._attache_module()
         return r
+
+    def _resolve_alias(self):
+        for k, c in self.class_ns.items():
+            if c.is_alias:
+                o = self.get_class(c.reference).clone()
+                o._name = c.name
+                self.class_ns[k] = o
+        for k, c in self.ast_ns.items():
+            if c.is_alias:
+                o = self.get_ast(c.reference).clone()
+                o._name = c.name
+                self.ast_ns[k] = o
+        for k, c in self.proto_ns.items():
+            if c.is_alias:
+                o = self.get_proto_type(c.reference)
+                o.name = c.name
+                self.proto_ns[k] = o
+        for m in self.sub_modules.values() + self.class_ns.values() + self.sub_packages.values():
+            m._resolve_alias()
 
     def _build_schema_tree(self):
         self.saved_st.update(self.ast_ns)
@@ -811,7 +831,6 @@ class _FaciltyLoader(object):
         g_dict['__file__'] = self.abspath
         exec obj in g_dict
         return g_dict[self.clsname]
-        
 
 class ClassModule(Module):
     u"""
@@ -819,6 +838,7 @@ class ClassModule(Module):
     そのため、実装はモジュールとほぼ同等とする。
     """
     is_class = True
+    is_alias = False
     def __init__(self, app, parent, clsobj):
         Module.__init__(self, app, parent)
         self._type = u'class'
@@ -835,6 +855,9 @@ class ClassModule(Module):
         self.docstring = clsobj.docstring
         self.defined = True
         self.redifinable = False
+
+    def clone(self):
+        return ClassModule(self.app, self.parent, self.clsobj)
 
     @property
     def uri(self):

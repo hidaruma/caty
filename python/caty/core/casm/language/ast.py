@@ -47,6 +47,7 @@ class ModuleName(object):
             return u'stop'
 
 class ASTRoot(Root):
+    is_alias = False
     def __init__(self, name, type_params, ast, annotation, docstring, kind=None, defined=True, redifinable=False):
         self._name = name
         self._reference_schema = None
@@ -59,8 +60,8 @@ class ASTRoot(Root):
         self.defined = defined
         self.redifinable = redifinable
 
-    #def clone(self):
-    #    return TypeLambda(self._name, self._type_params, self.__definition, self.__annotation, self.__docstring)
+    def clone(self):
+        return ASTRoot(self._name, self._type_params, self.body, self.__annotation, self.__docstring, self.kind, self.defined, self.redifinable)
 
     @property
     def type_params(self):
@@ -111,6 +112,7 @@ class ASTRoot(Root):
 
 class ClassNode(object):
 
+    is_alias = False
     def __init__(self, name, member, domain, codomain, uri, doc, annotations, type_args, type=u'='):
         self.is_ref = False
         self.name = name
@@ -130,6 +132,7 @@ class ClassNode(object):
         module.add_class(self)
 
 class ClassRefNode(object):
+    is_alias = False
 
     def __init__(self, name, ref, domain, codomain, uri, doc, annotations, type_args):
         self.is_ref = True
@@ -150,6 +153,7 @@ class ClassRefNode(object):
         module.add_class(self)
 
 class FacilityNode(object):
+    is_alias = False
     def __init__(self, 
                  name, 
                  clsname, # ファシリティ実装クラス(Python)
@@ -179,6 +183,7 @@ class FacilityNode(object):
             return self.module.canonical_name + ':' + self.name
 
 class EntityNode(object):
+    is_alias = False
     def __init__(self, name, fname, value, doc, annotations):
         self.name= name
         self.facility_name= fname
@@ -199,7 +204,27 @@ class EntityNode(object):
         else:
             return self.module.canonical_name + ':' + self.name
 
+class AliasNode(object):
+    is_alias = True
+    def __init__(self, name, ref, type):
+        self.name = name
+        self.reference = ref
+        self.type = type
+        self.annotations = Annotations([])
+        self.docstring = u''
+        self.module = None
+
+    def declare(self, module):
+        self.module = module
+        #if self.type == u'type':
+        #    module.add_ast(self)
+        #elif self.type == u'command':
+        #    module.add_proto_type(self)
+        #elif self.type == u'class':
+        #    module.add_class(self)
+
 class Node(object):
+    is_alias = False
     def __init__(self, options=None):
         self.options = {} if options is None else options
         self.annotations = Annotations([])
@@ -446,6 +471,7 @@ class OptionNode(Node, Optional):
     annotations = property(*annotations())
 
 class CommandNode(Function):
+    is_alias = False
     def __init__(self, name, patterns, uri_or_script, doc, annotation, type_params, command_type=u'command'):
         self.name = name
         self.patterns = patterns
@@ -466,6 +492,9 @@ class CommandNode(Function):
         self.command_type = command_type
         self.defined = self.reference_to_implementation is not None and self.reference_to_implementation.defined
         self.redifinable = False
+
+    def clone(self):
+        return CommandNode(self.name, self.patterns, self.reference_to_implementation, self.doc, self.annotation, self.type_params, self.command_type)
 
     @property
     def annotations(self):
@@ -677,6 +706,7 @@ class CommandURI(dict):
         self.defined = defined
 
 class KindReference(object):
+    is_alias = False
     def __init__(self, name, annotations, docstring=u''):
         self.name = name
         self.annotations = annotations
@@ -756,6 +786,7 @@ class ConstDecl(object):
         return o
 
 class AnnotationDecl(object):
+    is_class = False
     def __init__(self, name, type, doc, ann):
         from caty.core.script.parser import ScriptParser
         self.name = name
