@@ -309,7 +309,7 @@ class TypeCalcurator(_SubNormalizer):
                 if lt == rt == 'object':
                     if self.__exclusive_pseudotag(l, r):
                         return NeverSchema()
-                res = self._dereference(l).intersect(self._dereference(r)).accept(self)
+                res = l.intersect(r).accept(self)
             elif lt == 'enum' and isinstance(r, Scalar):
                 res = self._intersect_enum_and_scalar(self._dereference(l), r)
             elif rt == 'enum' and isinstance(l, Scalar):
