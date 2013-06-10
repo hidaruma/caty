@@ -123,7 +123,7 @@ class CatyApp(object):
             self._app.init_env(facilities, self.is_debug, [u'web', u'test'], self._system, environ)
         else:
             self._app.init_env(facilities, self.is_debug, [u'web'], self._system, environ)
-        handler = RequestHandler(facilities['interpreter'], 
+        handler = self.get_request_handler_class()(facilities['interpreter'], 
                                  facilities['env'],
                                  self._app)
                                  #self._app.pub, 
@@ -135,6 +135,9 @@ class CatyApp(object):
         #cmd = handler.request(path, options, method)
         #r = cmd(input)
         #return r
+
+    def get_request_handler_class(self):
+        return RequestHandler
 
     def _get_query(self, environ):
         qs = environ['QUERY_STRING']
