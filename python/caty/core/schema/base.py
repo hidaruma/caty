@@ -11,7 +11,7 @@ from caty.core.spectypes import UNDEFINED, INDEF
 import copy
 import random
 from decimal import Decimal
-from caty.jsontools import TaggedValue, TagOnly
+from caty.jsontools import TaggedValue, TagOnly, prettyprint
 from types import NoneType
 
 class SchemaBase(Resource):
@@ -246,7 +246,7 @@ class SchemaBase(Resource):
     def _clone(self, checked, *args, **kwds):
         raise NotImplementedError()
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         u"""スキーマ処理のベース。
         タグ付きの値は基本的に共通でエラーとし、タグを扱う場合はこのメソッドをサブクラスでオーバーライドする。
         """
@@ -364,16 +364,27 @@ class UnionSchema(OperatorSchema, Union):
     def operate(self, l, r):
         return l | r
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         u"""union 型に対するスキーマ適用処理。
         """
+        if path is None:
+            path = set()
         if self.optional and (value is caty.UNDEFINED):
             return
         try:
-            self._left.validate(value)
+            if self._left in path and self._right in path:
+                raise JsonSchemaError(dict(msg=u'value does not matched any of union: $value', value=prettyprint(value)))
+            if self._left in path:
+                self._right.validate(value, path)
+            else:
+                path.add(self._left)
+                self._left.validate(value, path)
         except JsonSchemaError, e1:
+            if self._left in path and self._right in path:
+                raise e1
             try:
-                self._right.validate(value)
+                path.add(self._right)
+                self._right.validate(value, path)
             except JsonSchemaError, e2:
                 raise JsonSchemaUnionError(e1, e2)
             else:
@@ -590,18 +601,18 @@ class TagSchema(SchemaBase, Tag):
     def tag(self):
         return self.__tag
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         if self.optional and (value is caty.UNDEFINED):
             return
         t = tag(value)
         if isinstance(self.tag, SchemaBase):
-            self.tag.validate(t)
+            self.tag.validate(t, path)
         elif t != self.tag:
             if self.tag == '*!' and t in _builtin_tags:
                 raise JsonSchemaError(dict(msg='Wildcard tag is not able to used to builtin types: $type', type=t))
             if self.tag not in ('*', '*!'):
                 raise JsonSchemaError(dict(msg='Unmatched tag: $another, $this', this=self.tag, another=t))
-        self.__schema.validate(untagged(value))
+        self.__schema.validate(untagged(value), path)
 
     def intersect(self, another):
         if self._unmatched(another):
@@ -708,7 +719,7 @@ class UnivSchema(SchemaBase, Scalar):
     def intersect(self, another):
         return another.clone(None)
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         pass
 
     def _convert(self, value):
@@ -738,7 +749,7 @@ class ForeignSchema(SchemaBase, Scalar):
     def intersect(self, another):
         return another.clone(None)
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         if value is caty.UNDEFINED:
             raise JsonSchemaError(dict(msg='undefined value'))
         if type(value) in (dict, list, tuple, unicode, NoneType, str, int, bool, Decimal, TagOnly, TaggedValue):
@@ -771,7 +782,7 @@ class AnySchema(SchemaBase, Scalar):
     def intersect(self, another):
         return another.clone(None)
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         if value is caty.UNDEFINED:
             raise JsonSchemaError(dict(msg='undefined value'))
         if type(value) not in (dict, list, tuple, unicode, NoneType, str, int, bool, Decimal, TagOnly, TaggedValue):
@@ -800,7 +811,7 @@ class AnySchema(SchemaBase, Scalar):
 class NullSchema(SchemaBase, Scalar):
     u"""値が null 値、つまり None であれば良とするスキーマ。
     """
-    def validate(self, value):
+    def validate(self, value, path=None):
         if self.optional and (value is caty.UNDEFINED):
             return
         if value is not None:
@@ -834,7 +845,7 @@ class NullSchema(SchemaBase, Scalar):
 class IndefSchema(SchemaBase, Scalar):
     u"""値がindefであれば良とするスキーマ。
     """
-    def validate(self, value):
+    def validate(self, value, path=None):
         if self.optional and (value is UNDEFINED):
             return
         if value is not INDEF:
@@ -868,7 +879,7 @@ class IndefSchema(SchemaBase, Scalar):
 class VoidSchema(SchemaBase, Scalar):
     u"""Null と同じ unit だが、値なしを意味するところが違う。
     """
-    def validate(self, value):
+    def validate(self, value, path=None):
         if self.optional and (value is caty.UNDEFINED):
             return
         if value is not None:
@@ -901,7 +912,7 @@ class VoidSchema(SchemaBase, Scalar):
 class NeverSchema(SchemaBase, Scalar):
     u"""そもそもアクセスがあってはいけないスキーマ。
     """
-    def validate(self, value):
+    def validate(self, value, path=None):
         if self.optional and (value is caty.UNDEFINED):
             return
         raise JsonSchemaError(dict(msg='It is an extra element'))
@@ -935,7 +946,7 @@ class UndefinedSchema(SchemaBase, Scalar):
     def type(self):
         return u'undefined'
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         if not (value is caty.UNDEFINED):
             raise JsonSchemaError(dict(msg='It must undefined element'))
 
@@ -967,7 +978,7 @@ class EmptySchema(SchemaBase, Scalar):
         self.__name = name
         SchemaBase.__init__(self)
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         raise JsonSchemaError(dict(msg='$name is declared but not defined', name=self.__name))
 
     def intersect(self, another):
@@ -1046,18 +1057,18 @@ class TypeVariable(SchemaBase, Scalar):
     def set_default(self, schema):
         self._default_schema = schema
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         if self.optional and value is caty.UNDEFINED:
             return 
         if self._schema:
-            self.__validate(self._schema, value)
+            self.__validate(self._schema, value, path)
         elif self._default_schema:
-            self.__validate(self._default_schema, value)
+            self.__validate(self._default_schema, value, path)
         else:
             raise JsonSchemaError(dict(msg=u'Type variable which neither instantiated nor a default value was given: $name', name=self.name))
 
-    def __validate(self, s, value):
-        s.validate(value)
+    def __validate(self, s, value, path):
+        s.validate(value, path)
         if s.format: # フォーマットの指定がある場合
             r = self._module.get_plugin(s.format).validate(value)
             if r:
@@ -1163,9 +1174,9 @@ class OptionalSchema(SchemaBase, Optional):
     def options(self):
         return self._schema.options
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         if not (value is caty.UNDEFINED):
-            self._schema.validate(value)
+            self._schema.validate(value, path)
 
     def convert(self, value):
         if not (value is caty.UNDEFINED):
@@ -1301,10 +1312,10 @@ class NamedSchema(SchemaBase, Root):
     def type_vars(self):
         return list(self._type_vars)
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         if self.optional and value is caty.UNDEFINED:
             return 
-        self._schema.validate(value)
+        self._schema.validate(value, path)
         if self._schema.format: # フォーマットの指定がある場合
             try:
                 r = self._module.get_plugin(self._schema.format).validate(value)
@@ -1460,8 +1471,8 @@ class TypeReference(SchemaBase, Scalar, Ref):
         return get, set
     type_args = property(*type_args())
 
-    def validate(self, value):
-        self.body.validate(value)
+    def validate(self, value, path=None):
+        self.body.validate(value, path)
         if isinstance(value, dict): 
             errors = {}
             is_error = False
@@ -1537,9 +1548,9 @@ class UnaryOpSchema(SchemaBase, UnaryOperator):
     def options(self):
         return self._schema.options
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         if not (value is caty.UNDEFINED):
-            self._schema.validate(value)
+            self._schema.validate(value, path)
 
     def convert(self, value):
         if not (value is caty.UNDEFINED):
@@ -1588,9 +1599,9 @@ class ExtractorSchema(SchemaBase, UnaryOperator):
     def options(self):
         return self._schema.options
 
-    def validate(self, value):
+    def validate(self, value, path=None):
         if not (value is caty.UNDEFINED):
-            self._schema.validate(value)
+            self._schema.validate(value, path)
 
     def convert(self, value):
         if not (value is caty.UNDEFINED):

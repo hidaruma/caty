@@ -13,9 +13,9 @@ class BagItem(object):
         self.index = p[0]
         self.count = 0
 
-    def validate(self, v):
+    def validate(self, v, path=None):
         try:
-            self.schema.validate(v)
+            self.schema.validate(v, path)
             self.count += 1
             return True
         except:
