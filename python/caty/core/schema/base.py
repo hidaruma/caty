@@ -575,6 +575,7 @@ _builtin_tags = [
     u'enum',
     u'undefined',
     u'foreign',
+    u'indef',
     ]
 
 class TagSchema(SchemaBase, Tag):
@@ -861,7 +862,7 @@ class IndefSchema(SchemaBase, Scalar):
 
 
     def clone(self, checked=None, *args, **kwds):
-        s = NullSchema(*args, **kwds)
+        s = IndefSchema(*args, **kwds)
         s.annotations = self. annotations
         return s
 

@@ -473,7 +473,7 @@ def encode(obj):
         return {'$$tag': obj.tag, '$$val': encode(obj.value)}
     elif isinstance(obj, TagOnly):
         return {'$$tag': obj.tag, '$$no-value': True}
-    elif obj is UNDEFINED:
+    elif obj is INDEF:
         return {'$$tag': u'indef', '$$no-value': True}
     elif isinstance(obj, dict):
         n = {}

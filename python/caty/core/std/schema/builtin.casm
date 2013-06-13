@@ -10,7 +10,7 @@ type scalar  = null|boolean|number|string|binary;
  */
 type StandardJson =  JsonScalar | StdArray | StdObject;
 
-type JsonScalar = string | number | null | boolean;
+type JsonScalar = string | number | null | boolean | indef;
 
 type StdObject = {
   *: StandardJson,
