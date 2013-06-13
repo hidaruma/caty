@@ -30,7 +30,6 @@ command show
 };
 
 const pi = 3.14;
-const indef = @Indef;
 const nothing = undefined;
 type OK = @OK (null | nothing);
 const htmlDesc = '''
