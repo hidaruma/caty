@@ -1302,7 +1302,7 @@ command tag<T default univ> :: T -> string
 /**
  * 第一の入力値をタグ名とし、第二の入力値をタグ付きにして返す。
  */
-command tagged<S default univ, T default any> :: [string, S?] -> T
+command tagged<S default univ, T default univ> :: [string, S?] -> T
     refers python:builtin.Tagged;
 
 /**
