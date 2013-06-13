@@ -6,6 +6,7 @@ from topdown import *
 import caty.jsontools as json
 from caty.util import bind2nd, escape_html
 from caty.jsontools import stdjson, decode, encode, CatyEncoder
+from caty.core.spectypes import INDEF
 
 def toxml(o):
     doc = dom.Document()
@@ -57,6 +58,9 @@ def _toxml(o, p, doc):
         tn.setAttribute('tag', t)
         _toxml(v, tn, doc)
         p.appendChild(tn)
+    elif o is INDEF:
+        e = doc.createElement('indef')
+        p.appendChild(e)
     elif o is None:    
         e = doc.createElement('null')
         p.appendChild(e)
@@ -126,7 +130,9 @@ def multiline_string(seq):
         seq.ignore_hook = False
 
 def boolean(seq, convert=False):
-    b = seq.parse(['true', 'false'])
+    b = seq.parse(['true', 'false', 'indef'])
+    if b == 'indef':
+        return INDEF
     if convert:
         return True if b == 'true' else False
     else:

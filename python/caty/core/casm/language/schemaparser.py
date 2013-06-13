@@ -1,7 +1,7 @@
 #coding:utf-8
 u"""
 """
-from caty import UNDEFINED
+from caty.core.spectypes import UNDEFINED, INDEF
 from topdown import *
 from caty.core.casm.language.ast import *
 from caty.core.language.util import *
@@ -145,7 +145,7 @@ def term(seq):
         return s
 
 def singleton(seq):
-    p = seq.parse([u'undefined', u'null', u'true', u'false'])
+    p = seq.parse([u'undefined', u'null', u'true', u'false', u'indef'])
     if p == 'undefined':
         return UNDEFINED
     elif p == 'null':
@@ -154,6 +154,8 @@ def singleton(seq):
         return True
     elif p == 'false':
         return False
+    elif p == 'indef':
+        return INDEF
 
 def tagname(seq):
     return seq.parse(Regex(u'[a-zA-Z0-9_][a-zA-Z0-9-_]*'))

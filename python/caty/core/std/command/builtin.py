@@ -895,9 +895,11 @@ from types import *
 import decimal
 
 def _type_of(input):
-    import caty
-    if input is caty.UNDEFINED:
+    from caty.core.spectypes import UNDEFINED, INDEF
+    if input is UNDEFINED:
         return u'undefined'
+    if input is INDEF:
+        return u'indef'
     input_type = type(input)
     if input_type == NoneType:
         type_name = u'null'

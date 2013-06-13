@@ -103,6 +103,7 @@ __all__ = [
     "ExtractorSchema",
     "ExponentSchema",
     "EmptySchema",
+    "IndefSchema",
     "types",
     "schemata",
 ]
@@ -123,6 +124,7 @@ types = {
     'bag': BagSchema([]),
     'undefined': OptionalSchema(UndefinedSchema()),
     'univ': UnivSchema({}),
+    'indef': IndefSchema({}),
     'foreign': ForeignSchema({}),
 }
 

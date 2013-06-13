@@ -6,6 +6,7 @@ from caty.core.schema.errors import *
 import caty
 import caty.core.runtimeobject as ro
 from caty.core.typeinterface import *
+from caty.core.spectypes import UNDEFINED, INDEF
 
 import copy
 import random
@@ -825,6 +826,40 @@ class NullSchema(SchemaBase, Scalar):
     @property
     def type(self):
         return u'null'
+
+    @property
+    def tag(self):
+        return self.type
+
+class IndefSchema(SchemaBase, Scalar):
+    u"""値がindefであれば良とするスキーマ。
+    """
+    def validate(self, value):
+        if self.optional and (value is UNDEFINED):
+            return
+        if value is not INDEF:
+            raise JsonSchemaError(dict(msg='Not a indef'))
+
+    def intersect(self, another):
+        if type(another) != IndefSchema:
+            raise JsonSchemaError(dict(msg='Unsupported operand types for $op: $type1, $type2', op='&', type1='null', type2=another.type))
+        return IndefSchema()
+
+    def _convert(self, value):
+        return value
+
+
+    def clone(self, checked=None, *args, **kwds):
+        s = NullSchema(*args, **kwds)
+        s.annotations = self. annotations
+        return s
+
+    def dump(self, depth, node=[]):
+        return u'indef'
+
+    @property
+    def type(self):
+        return u'indef'
 
     @property
     def tag(self):

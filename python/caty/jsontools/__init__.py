@@ -12,7 +12,7 @@ except:
     except:
         raise ImportError('Python 2.6 (or later) or simplejson package is needed')
 import caty.core.runtimeobject as ro
-from caty import UNDEFINED
+from caty.core.spectypes import UNDEFINED, INDEF
 import decimal
 __all__ = ['load', 
            'loads', 
@@ -25,6 +25,7 @@ __all__ = ['load',
            'pp', 
            'TaggedValue',
            'TagOnly',
+           'INDEF',
            'tag',
            'obj2path',
            'path2obj',
@@ -78,6 +79,8 @@ class CatyEncoder(json.encoder.JSONEncoder):
         def _iterencode(self, o, markers=None):
             if isinstance(o, str):
                 yield u'b"%s"' % repr(o)[1:-1]
+            elif o is Indef:
+                yield u'indef'
             elif o is UNDEFINED:
                 pass
             else:
@@ -158,6 +161,8 @@ class CatyEncoder(json.encoder.JSONEncoder):
                     yield chunk
             elif o is UNDEFINED:
                 pass
+            elif o is INDEF:
+                yield u'indef'
             else:
                 if markers is not None:
                     markerid = id(o)
@@ -367,6 +372,8 @@ class PPEncoder(CatyEncoder):
                     yield u"#'undefined"
                 elif o is _empty:
                     yield u''
+                elif o is INDEF:
+                    yield u'indef'
                 else:
                     yield u'#<foreign %s>' % repr(o)
             else:
@@ -387,6 +394,8 @@ class PPEncoder(CatyEncoder):
                     yield u"#'undefined"
                 elif o is _empty:
                     yield u''
+                elif o is INDEF:
+                    yield u'indef'
                 else:
                     yield u'#<foreign %s>' % repr(o)
             else:
@@ -464,6 +473,8 @@ def encode(obj):
         return {'$$tag': obj.tag, '$$val': encode(obj.value)}
     elif isinstance(obj, TagOnly):
         return {'$$tag': obj.tag, '$$no-value': True}
+    elif obj is UNDEFINED:
+        return {'$$tag': u'indef', '$$no-value': True}
     elif isinstance(obj, dict):
         n = {}
         for k, v in obj.items():
@@ -483,6 +494,8 @@ def decode(obj):
             if '$$val' in obj:
                 return TaggedValue(obj['$$tag'], decode(obj['$$val']))
             elif '$$no-value' in obj:
+                if obj['$$tag'] == u'indef':
+                    return INDEF
                 return TagOnly(obj['$$tag'])
             else:
                 raise JsonError(ro.i18n.get(u'No $$val or $$no-value that matches to $$tag'))
@@ -521,7 +534,8 @@ _tag_class_dict = {
     types.NoneType: u'null',
     list: u'array',
     tuple: u'array',
-    caty.UNDEFINED.__class__: u'undefined',
+    UNDEFINED.__class__: u'undefined',
+    INDEF.__class__: u'indef',
 }
 
 _reserved = set(_tag_class_dict.values())
@@ -828,3 +842,5 @@ def compose_update(a, b):
         r[u'set'][k] = v
     r[u'unset'].extend(b.get(u'unset', []))
     return r
+
+

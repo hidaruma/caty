@@ -564,6 +564,7 @@ type BuiltinTypeName = (
    "number" | "string" | "boolean" | "null" | "binary" // スカラー型
  | "array" | "object" // 複合型
  | "tagged"  // XJSONによる拡張
+ | "indef"  
  | "undefined" // 未定義
  | "foreign" // フォーリンデータ
 );
@@ -640,9 +641,6 @@ type Exception = @*! {
 type Positive = (true  | @True univ  | @OK univ);
 /** 偽、NO、失敗などを表す型 */
 type Negative = (false | @False univ | @NG univ);
-
-/** 不明、不定、未知などを表す */
-const indef = @Indef;
 
 /** 三値の真偽値型 */
 type triboolean = (true | false | indef);

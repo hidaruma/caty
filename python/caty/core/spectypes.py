@@ -42,4 +42,7 @@ def reduce_undefined(obj):
         return r
     return obj
 
+class Indef(object): pass
+
+INDEF = Indef
 
