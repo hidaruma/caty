@@ -1015,7 +1015,7 @@ exception Arg0TypeError = TypeErrorInfo;
 /** タグを除いた内容を出力する 
  * untagged の別名だが、untaggedよりこちらを推奨
  */
-command content<S default any, T default univ> [string?] :: S -> T
+command content<S default univ, T default univ> [string?] :: S -> T
     refers python:builtin.Untagged;
 
 /** 
@@ -1208,7 +1208,7 @@ command default [any value] :: univ -> univ
  *
  * safeオプションが指定されているなら、undefined値の入力をそのままpassする。
  */
-command nth<T default any>
+command nth<T default univ>
  {
    @[default(false)]
    "safe": boolean?,
@@ -1242,7 +1242,7 @@ command item<T default any>
  * 
  * safeオプションが指定されているなら、undefined値の入力をそのままpassする。
  */
-command pv<T default any> 
+command pv<T default univ> 
  {
    @[default(false)]
    "safe": boolean?,
@@ -1256,7 +1256,7 @@ command pv<T default any>
  * 値が存在した場合 @EXISTS タグがついた値が返り、そうでなければ @NO タグのついた null が返る。
  */
 @[deprecated]
-command findpv<T default any> [string] :: object -> @EXISTS T | @NO null
+command findpv<T default univ> [string] :: object -> @EXISTS T | @NO null
         refers python:builtin.FindPV;
     
 /**
@@ -1279,7 +1279,7 @@ command eq
  * 入力値二つのうち第一要素を Caty スクリプトの式、第二要素をその入力として実行する。
  * このコマンドはテストモードでしか動作しないため、通常は使う必要はない。
  */
-@[test] command eval<T default univ> :: [any, string] | string -> T
+@[test] command eval<T default univ> :: [univ, string] | string -> T
     reads env
     uses interpreter
     refers python:builtin.Eval;
