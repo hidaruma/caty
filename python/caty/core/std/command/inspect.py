@@ -151,12 +151,19 @@ class ReifyModule(Internal):
         return mod.reify()
 
 class Whereis(Internal):
-    def setup(self, cmd_name):
+    def setup(self, opts, cmd_name):
         self._cmd_name = cmd_name
+        self.type = opts['type']
 
     def execute(self):
         from caty.core.language import split_colon_dot_path
         app, mod, cn = split_colon_dot_path(self._cmd_name, u'cmd')
-        c = self.current_app.get_app(app)._schema_module.get_module(mod).get_command(cn)
+        m = self.current_app.get_app(app)._schema_module.get_module(mod)
+        if self.type == 'command':
+            c = m.get_command(cn)
+        elif self.type == 'type':
+            c = m.get_type(cn)
+        elif self.type == 'class':
+            c = m.get_class(cn)
         return c.module.app.name + u'::' + c.module.canonical_name + u':' + c.name
 

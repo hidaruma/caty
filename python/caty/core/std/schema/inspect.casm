@@ -152,10 +152,10 @@ command reify-module [string modName] :: void -> ReifiedModule
     refers python:inspect.ReifyModule;
 
 /** 
- * コマンドの所属するモジュールの完全修飾名を出力する。
+ * 型やコマンドの所属するモジュールの完全修飾名を出力する。
  * 主にregister-publicやoverrideで登録されたコマンドの所在を確認するのに使う。
  */
-command where-is [string cmdName] :: void -> string
+command where-is {@[default("command")]"type": ("type"|"command"|"class")?} [string cmdName] :: void -> string
     refers python:inspect.Whereis;
 
 /*レイフィケーション関係*/
