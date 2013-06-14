@@ -9,7 +9,6 @@ from copy import deepcopy
 from caty.core.facility import PEND
 import caty.util as util
 from caty.util.collection import filled_zip
-from caty import UNDEFINED
 from caty.jsontools.path import build_query
 from caty.jsontools import TaggedValue, tag, tagged, untagged, TagOnly, prettyprint, split_tag, normalize_number
 from caty.jsontools import jstypes
@@ -18,6 +17,7 @@ from caty.core.script.node import *
 from caty.core.script.query import *
 from caty.core.exception import *
 import caty
+from caty.core.spectypes import UNDEFINED, INDEF
 import caty.core.schema as schema
 from caty.core.spectypes import reduce_undefined
 from caty.core.schema.errors import JsonSchemaError
@@ -506,7 +506,7 @@ class CommandExecutor(BaseInterpreter):
 
     def __truth(self, v, node):
         if node.indef:
-            return (v == True and isinstance(v, bool)) or tag(v) == 'True' or tag(v) == 'OK' or tag(v) == 'Indef'
+            return (v == True and isinstance(v, bool)) or tag(v) == 'True' or tag(v) == 'OK' or tag(v) == 'Indef' or v is INDEF
         else:
             return (v == True and isinstance(v, bool)) or tag(v) == 'True' or tag(v) == 'OK'
 
