@@ -372,18 +372,9 @@ class UnionSchema(OperatorSchema, Union):
         if self.optional and (value is caty.UNDEFINED):
             return
         try:
-            if self._left in path and self._right in path:
-                raise JsonSchemaError(dict(msg=u'value does not matched any of union: $value', value=prettyprint(value)))
-            if self._left in path:
-                self._right.validate(value, path)
-            else:
-                path.add(self._left)
-                self._left.validate(value, path)
+            self._left.validate(value, path)
         except JsonSchemaError, e1:
-            if self._left in path and self._right in path:
-                raise e1
             try:
-                path.add(self._right)
                 self._right.validate(value, path)
             except JsonSchemaError, e2:
                 raise JsonSchemaUnionError(e1, e2)
