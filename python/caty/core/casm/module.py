@@ -914,7 +914,8 @@ class ClassModule(Module):
     def _validate_signature(self):
         if '+' not in self.name:
             return
-        typename, signame = self.name.split('+')
+        typename = self._clsobj.underlyingtype
+        signame = self._clsobj.conforms
         if signame:
             sigcls = self.parent.get_class(signame)
             if '__signature' not in sigcls.annotations:

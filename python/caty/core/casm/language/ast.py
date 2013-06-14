@@ -113,7 +113,7 @@ class ASTRoot(Root):
 class ClassNode(object):
 
     is_alias = False
-    def __init__(self, name, member, domain, codomain, uri, doc, annotations, type_args, type=u'='):
+    def __init__(self, name, member, domain, codomain, conforms, uri, doc, annotations, type_args, type=u'='):
         self.is_ref = False
         self.name = name
         self.member = member
@@ -124,8 +124,12 @@ class ClassNode(object):
         self.codomain = codomain
         self.uri = uri
         self.type_args = type_args
+        self.conforms = conforms
         self.defined = type != u'?='
         self.redifinable = type == u'&='
+        self.underlyingtype = None
+        if '+' in self.name:
+            self.underlyingtype, self.conforms = self.name.split('+')
 
     def declare(self, module):
         self.module = module
@@ -861,7 +865,7 @@ class CollectionDeclNode(object):
                                      doc, 
                                      Annotations([Annotation(u'__collection')]),
                                      [])
-        self.catyclass = ClassNode(name, [], ScalarNode(u'univ'), ScalarNode(u'univ'), CommandURI([(u'python', 'caty.core.command.DummyClass')], False), None, Annotations([]), [])
+        self.catyclass = ClassNode(name, [], ScalarNode(u'univ'), ScalarNode(u'univ'), None, CommandURI([(u'python', 'caty.core.command.DummyClass')], False), None, Annotations([]), [])
         self.entity = FacilityNode(name, None, u'null', ScalarNode(u'null'), {}, None, Annotations([]))
 
     def declare(self, module):

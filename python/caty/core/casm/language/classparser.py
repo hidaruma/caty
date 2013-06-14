@@ -24,6 +24,8 @@ def classdef(seq):
         return AliasNode(classname, ref, u'class')
     type_args = seq.parse(option(type_arg, []))
     dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
+    if '+' not in classname or classname.endswith('+'):
+        conform = option(conforms)(seq)
     defined = True
     redifinable = False
     with strict():
@@ -35,7 +37,7 @@ def classdef(seq):
             nohook(S(u';'))(seq)
             doc2 = postfix_docstring(seq)
             doc = concat_docstring(doc, doc2)
-            return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args, e)
+            return ClassNode(classname, member, dom, codom, conforms, ref, doc, annotations, type_args, e)
         else:
             name = identifier_token_a(seq)
             nohook(S(u';'))(seq)
@@ -141,4 +143,9 @@ def refers(seq):
         return CommandURI(many1(refer)(seq))
     except:
         return CommandURI([(u'python', 'caty.core.command.DummyClass')])
+
+def conforms(seq):
+    keyword('conforms')(seq)
+    return identifier_token(seq)
+
 

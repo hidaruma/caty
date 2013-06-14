@@ -110,8 +110,8 @@ class ResourceModuleContainer(object):
             s.validate_url_patterns()
 
 class ResourceNode(ClassNode):
-    def __init__(self, name, member, rest, ref, doc, ann):
-        ClassNode.__init__(self, name, member, rest, None, ref, doc, ann, [])
+    def __init__(self, name, member, dom, ref, doc, ann):
+        ClassNode.__init__(self, name, member, dom, None, None, ref, doc, ann, [])
 
     def declare(self, module):
         self.module = module
