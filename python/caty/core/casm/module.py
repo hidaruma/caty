@@ -452,6 +452,7 @@ class Module(Facility):
         self._normalize()
         self._register_command()
         self._register_facility()
+        self._validate_signature()
         self.compiled = True
         for m in self.sub_modules.values() + self.class_ns.values():
             m.compiled = True
@@ -738,6 +739,10 @@ class Module(Facility):
         if self.has_entity(name):
             return self.get_entity(name)
 
+    def _validate_signature(self):
+        for m in self.class_ns.values() + self.sub_modules.values() + self.sub_packages.values():
+            m._validate_signature()
+
     def _loop_exec(self, target, cursor_factory, callback):
         try:
             for k, v in target.items():
@@ -905,6 +910,16 @@ class ClassModule(Module):
         Module._register_command(self)
         for v in self.command_ns.values():
             v.set_arg0_type(self._clsrestriction)
+
+    def _validate_signature(self):
+        if '+' not in self.name:
+            return
+        typename, signame = self.name.split('+')
+        if signame:
+            sigcls = self.parent.get_class(signame)
+            if '__signature' not in sigcls.annotations:
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', '%s is not signature class' % signame)
+        self.parent.get_type(typename)
 
     def reify(self):
         import caty.jsontools as json
