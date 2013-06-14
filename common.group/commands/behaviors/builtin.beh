@@ -148,7 +148,7 @@ printとほぼ同様のコマンドである。printとの違いは、printがHT
 |[{"a":1,}, {"a":1}] | eq --boolean| true   |オブジェクトに余分な括弧は影響ない |
 |[foreign, null] | eq --boolean  | false    |foreignとnullは別物 |
 |[undefined, foreign]|eq --boolean| false   |undefinedとforeingは別物 |
-|[foreign, foreign]|eq --boolean | true     |2つのforeingは同じ |
+|[foreign, foreign]|eq --boolean | indef     |2つのforeingは同じ |
 |[undefined, null]|eq --boolean  | false    |undefinedとnullは違う |
 |[null, undefined]|eq --boolean  | false    |等号は対称 |
 |[undefined, undefined]|eq --boolean  | true|2つのundefinedは等しい |
