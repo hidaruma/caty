@@ -213,6 +213,12 @@ _name_token_ptn = u'({0})({1})*'.format(_name_start, _name_char)
 _identifier_ptn = _name_token_ptn + u'(\\.{0})*'.format(_name_token_ptn)
 _mod_identifier_ptn = u'({0}:)?{1}'.format(_identifier_ptn, _identifier_ptn)
 _app_identifier_ptn = u'({n}::({i}|:{n}))|({i})'.format(n=_name_token_ptn, i=_mod_identifier_ptn)
+
+_class_name_char = u'|'.join([_name_start, '-', '[0-9]', '\\+', _ext_name])
+_class_name_token_ptn = u'({0})({1})*'.format(_name_start, _class_name_char)
+_class_identifier_ptn = _class_name_token_ptn + u'(\\.{0})*'.format(_class_name_token_ptn)
+_class_mod_identifier_ptn = u'({0}:)?{1}'.format(_identifier_ptn, _class_identifier_ptn)
+_class_app_identifier_ptn = u'({n}::({i}|:{n}))|({i})'.format(n=_name_token_ptn, i=_class_mod_identifier_ptn)
 import re
 def some_token(seq):
     return seq.parse(Regex(u'({0})+'.format(_name_char), re.X))
@@ -229,6 +235,18 @@ def identifier_token_m(seq):
 def identifier_token_a(seq):
     return seq.parse(Regex(_app_identifier_ptn, re.X))
 
+def class_name_token(seq):
+    return seq.parse(Regex(_class_name_token_ptn, re.X))
+
+def class_identifier_token(seq):
+    return seq.parse(Regex(_class_identifier_ptn, re.X))
+
+def class_identifier_token_m(seq):
+    return seq.parse(Regex(_class_mod_identifier_ptn, re.X))
+
+def class_identifier_token_a(seq):
+    return seq.parse(Regex(_class_app_identifier_ptn, re.X))
+
 def split_colon_dot_path(s, consider_context=u'ignore'):
     # ignoreを指定されると文脈を一切無視
     c = CDPSplitter(consider_context)
@@ -239,9 +257,9 @@ class CDPSplitter(Parser):
         self.__consider_cotext = consider_context
 
     def __call__(self, seq):
-        app_name = option(Regex(_name_token_ptn + u'::', re.X))(seq)
-        mod_name = option(Regex(_identifier_ptn + u'(:|\\.$)', re.X))(seq)
-        content_name = option(Regex(_identifier_ptn+u'\\.?', re.X))(seq)
+        app_name = option(Regex(_class_name_token_ptn + u'::', re.X))(seq)
+        mod_name = option(Regex(_class_identifier_ptn + u'(:|\\.$)', re.X))(seq)
+        content_name = option(Regex(_class_identifier_ptn+u'\\.?', re.X))(seq)
         if app_name:
             app_name = app_name.strip(u':')
         if mod_name:

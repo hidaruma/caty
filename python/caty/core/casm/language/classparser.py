@@ -17,7 +17,7 @@ def classdef(seq):
     doc = option(docstring)(seq)
     annotations = seq.parse(annotation)
     keyword(u'class')(seq)
-    classname = name_token(seq)
+    classname = class_name_token(seq)
     if option(u':=')(seq):
         ref = identifier_token_m(seq)
         S(u';')(seq)

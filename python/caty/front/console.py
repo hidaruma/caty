@@ -359,13 +359,13 @@ Web hconサーバの起動・停止を行う
             else:
                 self.prompt = '> '
         except CatyException, e:
-            #self._echo(traceback)
+            self._echo(traceback)
             m = e.get_message(self.app.i18n)
             self._echo(m)
             self.set_prompt()
             self.interpreter = None
         except Exception, e:
-            #self._echo(traceback)
+            self._echo(traceback)
             self._echo(e)
             self.set_prompt()
             self.interpreter = None

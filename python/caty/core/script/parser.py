@@ -49,7 +49,7 @@ from caty.util import bind2nd, try_parse
 import caty.jsontools.xjson as xjson
 from caty.core.exception import SubCatyException
 from caty.core.command.param import *
-from caty.core.language.util import fragment_name, identifier_token_a, name_token
+from caty.core.language.util import fragment_name, identifier_token_a, name_token, class_identifier_token_a
 from caty.jsontools.selector.parser import JSONPathSelectorParser
 import caty
 
@@ -285,7 +285,7 @@ class ScriptParser(Parser):
     def command(self, seq, no_opt=False):
         if option(peek('$'))(seq):
             return self.xjson_path(seq)
-        name = self.name(seq)
+        name = class_identifier_token_a(seq)
         if name == u'commitm':
             return CommitM(self.arguments(seq))
         #if name.endswith('.caty') and name[0] != '/':
