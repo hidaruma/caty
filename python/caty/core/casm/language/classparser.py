@@ -66,7 +66,7 @@ def signature(seq):
             nohook(S(u';'))(seq)
             doc2 = postfix_docstring(seq)
             doc = concat_docstring(doc, doc2)
-            return ClassNode(classname, member, dom, codom, ref, doc, annotations, type_args)
+            return ClassNode(classname, member, dom, codom, None, ref, doc, annotations, type_args)
         else:
             name = identifier_token_a(seq)
             nohook(S(u';'))(seq)
