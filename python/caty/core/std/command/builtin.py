@@ -18,6 +18,7 @@ from caty.command import MafsMixin
 import caty.core.runtimeobject as ro
 from caty.core.spectypes import reduce_undefined
 from caty.core.handler import WebInputParser
+from caty.core.spectypes import UNDEFINED, INDEF
 
 import os
 import sys
@@ -575,7 +576,13 @@ class Equals(Builtin):
         input = reduce_undefined(input)
         while len(input) < 2:
             input.append(caty.UNDEFINED)
-        if self.__eq(*input):
+        res = self.__eq(*input)
+        if res == INDEF:
+            if self._boolean:
+                return INDEF
+            else:
+                return tagged(u'Indef', input)
+        elif res:
             if self._boolean:
                 return True
             else:
@@ -606,7 +613,7 @@ class Equals(Builtin):
                 return False
             return all([self.__rec_eq(p[0], p[1]) for p in zip(a, b)])
         elif _type_of(a) == _type_of(b) == 'foreign':
-            return True
+            return INDEF
         else:
             if a == b:
                 if (isinstance(a, bool) and not isinstance(b, bool)) or (isinstance(b, bool) and not isinstance(a, bool)):

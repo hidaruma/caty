@@ -645,6 +645,8 @@ type Negative = (false | @False univ | @NG univ);
 /** 三値の真偽値型 */
 type triboolean = (true | false | indef);
 
+type Logical<X> = (boolean |indef | @True X | @False X | @Indef X | @OK X | @NG X);
+
 /** 単一指定はT型データ、複数指定はT型項目の配列を使う型 */
 type multiItem<T> = (T | [T, T, T*]);
 
@@ -1265,13 +1267,10 @@ command findpv<T default univ> [string] :: object -> @EXISTS T | @NO null
 command eq 
  {
    @[default(false)]
-   "boolean": boolean? 
+   "boolean": triboolean? 
  }
 :: [univ, univ] -> (
-     // --taggedオプションが指定されたとき
-     @True [univ, univ] | @False [univ, univ] |
-     // --booleanオプションが指定されたとき
-     boolean
+     Logical<[univ, univ]>
    )
     refers python:builtin.Equals;
 
