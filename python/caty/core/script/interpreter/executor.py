@@ -113,7 +113,6 @@ class CommandExecutor(BaseInterpreter):
                     msg = '{0}'.format(name)
                 self.app._system.deprecate_logger.debug(msg)
             except Exception, e:
-                import traceback
                 traceback.print_exc()
                 msg = u'%s (other infomation is lacking)' % node.name
                 self.app._system.deprecate_logger.debug(msg)
