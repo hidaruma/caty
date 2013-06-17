@@ -414,3 +414,10 @@ def flatten(seq):
         else:
             yield e
 
+def int_dict_to_list(d):
+    a = []
+    for k in sorted(d.keys()):
+        while len(a) < k:
+            a.append(UNDEFINED)
+        a.append(d[k])
+    return a

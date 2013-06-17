@@ -34,6 +34,7 @@ class System(object):
         self.wildcat = wildcat
         self.hcon_port = None
         self.hcon_name = None
+        self.public_commands = options.public_commands
         if quiet:
             class NullWriter(object):
                 def write(self, *args):

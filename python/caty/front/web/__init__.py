@@ -203,13 +203,13 @@ class CatyPerformerFacade(object):
                                  server_class, 
                                  handler_class)
         from caty.util import cout
-        cout.writeln("Serving on port %d..." % port)
+        cout.writeln("Performer serving on port %d..." % port)
 
     def main(self):
         self.httpd.serve_forever()
 
     def close(self):
-        self.httpd.server_close()
+        self.httpd.shutdown()
 
 
 class PerformerThread(threading.Thread):
@@ -219,7 +219,6 @@ class PerformerThread(threading.Thread):
 
     def run(self):
         self.server.main()
-        self.server.close()
 
     def shutdown(self):
         self.server.close()

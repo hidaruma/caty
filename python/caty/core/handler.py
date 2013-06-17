@@ -7,7 +7,7 @@ from caty.util.path import splitext, dirname, join
 from caty.core.command.exception import *
 from caty.core.exception import *
 from caty.core.schema.base import JsonSchemaError
-from caty.util import error_wrapper
+from caty.util import error_wrapper, brutal_encode
 
 import traceback
 import time
@@ -289,7 +289,7 @@ class ErrorLogHandler(object):
         self._error_logger.error('%s %s%s /%s: %s' % (self.format_date_time(), self._path, self._verb, self._method, self._format(msg)))
 
     def _format(self, msg):
-        return msg.replace('\n', '\\n').replace('\r', '\\r')
+        return brutal_encode(msg.replace('\n', '\\n').replace('\r', '\\r'), 'utf-8')
 
     def format_date_time(self):
         now = time.time()
