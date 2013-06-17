@@ -67,7 +67,9 @@ def index_list(seq):
 def _entity(seq):
     doc = option(docstring)(seq)
     a = seq.parse(annotation)
-    _ = seq.parse(keyword(u'entity'))
+    tp = choice(keyword(u'master'), keyword(u'entity'))(seq)
+    if tp == u'master':
+        a.add(Annotation(u'__master'))
     n = seq.parse(name_token)
     if option(nohook(S(u';')))(seq):
         doc2 = postfix_docstring(seq)
