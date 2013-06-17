@@ -114,6 +114,7 @@ def setup(args):
     if os.path.exists(ro.PID_FILE):
         os.unlink(ro.PID_FILE)
     system = System(options)
+    system.public_commands = options.public_commands
     if options.goodbye:
         print
         print options.goodbye
