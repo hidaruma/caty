@@ -1,6 +1,6 @@
 # coding:utf-8
 from caty.core.command import Builtin, Command, scriptwrapper
-from caty.core.exception import CatyException
+from caty.core.exception import CatyException, SystemResourceNotFound
 class CommandBuilder(object):
     def __init__(self, facilities, namespace):
         self.facilities = facilities
@@ -17,7 +17,7 @@ class CommandBuilder(object):
                 profile = self.namespace.get_command(proxy.name)
             return self.make_cmd(profile, type_args, opts_ref, args_ref, pos, module)
         except CatyException as e:
-            if e.tag == 'CommandNotFound':
+            if isinstance(e, SystemResourceNotFound):
                 return NullCommand(e)
             raise
 
