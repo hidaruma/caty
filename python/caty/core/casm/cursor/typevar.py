@@ -25,8 +25,8 @@ class TypeVarApplier(SchemaBuilder):
         if r:
             self._init_type_params(node)
         body = node.body.accept(self)
-        if self.debug:
-            print '>>>>>>', self.dump_scope(), TreeDumper(True).visit(node.body)
+        if 'debug' in node.annotations:
+            self.debug = True
         if r:
             node._schema = body
             self.current = None
@@ -71,14 +71,25 @@ class TypeVarApplier(SchemaBuilder):
         if isinstance(node, TypeReference):
             self.type_args.new_scope()
             try:
-                if self.debug:
-                    print '>>', TreeDumper(True).visit(node), node.type_args, node.type_params, self.type_args
-                ta = zip(node.type_params, node.type_args)
+                ta = zip([a for a in node.type_params if not isinstance(a, NamedTypeParam)], 
+                         [b for b in node.type_args if not isinstance(a, NamedParameterNode)])
                 args = []
                 for param, type in ta:
                     a = type.accept(self)
                     self.type_args[param.var_name] = a
                     args.append(a)
+                if self.debug:
+                    print args
+                found = False
+                for param in [a for a in node.type_params if isinstance(a, NamedTypeParam)]:
+                    for arg in [b for b in node.type_args if isinstance(a, NamedParameterNode)]:
+                        if param.arg_name == arg.name:
+                            a = arg.body.accept(self)
+                            self.type_args[param.var_name] = a
+                            args.append(a)
+                            found = True
+                if found:
+                    print args
                 key = (node.module.name+':'+TreeDumper(True).visit(node), tuple(node.options.items()), tuple(ta))
                 if key in self.history:
                     self.history[key].recursive = True

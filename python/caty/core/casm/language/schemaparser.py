@@ -162,9 +162,19 @@ def tagname(seq):
 
 def type_arg(seq):
     _ = seq.parse('<')
-    vars = chain_flat(type_paramater, comma)(seq)
+    named = option(chain_flat(named_type_paramater, comma), [])(seq)
+    positional = chain_flat(type_paramater, comma)(seq)
     _ = seq.parse('>')
-    return vars
+    return named + positional
+
+@try_
+def named_type_paramater(seq):
+    arg_name = name_token(seq)
+    S(u'=')(seq)
+    name = name_token(seq)
+    kind = option(kind_of)(seq)
+    default = option(default_type)(seq)
+    return NamedTypeParam(arg_name, name, kind, default)
 
 def type_paramater(seq):
     name = name_token(seq)
@@ -184,9 +194,17 @@ def default_type(seq):
 def type_var(seq):
     _ = seq.parse('<')
     with strict():
-        vars = chain_flat(typedef, comma)(seq)
+        named_params = option(chain_flat(named_typedef, comma), [])(seq)
+        params = chain_flat(typedef, comma)(seq)
         _ = seq.parse('>')
-        return vars
+        return named_params + params
+
+@try_
+def named_typedef(seq):
+    arg_name = name_token(seq)
+    S(u'=')(seq)
+    body = typedef(seq)
+    return NamedParameterNode(arg_name, body)
 
 def scalar(seq):
     n = seq.parse(typename)

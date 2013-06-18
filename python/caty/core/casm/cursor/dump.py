@@ -1,7 +1,7 @@
 # coding: utf-8
 from caty.core.typeinterface import *
 from caty.core.schema import *
-from caty.core.casm.language.ast import TypeParam
+from caty.core.casm.language.ast import TypeParam, NamedParameterNode
 import caty.jsontools as json
 
 class TreeDumper(TreeCursor):
@@ -62,7 +62,10 @@ class TreeDumper(TreeCursor):
             if node.type_args:
                 buff.append('<')
                 for t in node.type_args:
-                    buff.append(t.accept(self))
+                    if isinstance(t, NamedParameterNode):
+                        buff.append(t.body.accept(self))
+                    else:
+                        buff.append(t.accept(self))
                     buff.append(', ')
                 buff.pop(-1)
                 buff.append('>')

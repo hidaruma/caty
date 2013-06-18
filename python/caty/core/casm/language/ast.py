@@ -726,6 +726,7 @@ class KindReference(object):
 class TypeParam(object):
     def __init__(self, name, kind, default_type):
         self._name = name
+        self.arg_name = None
         self.var_name = name
         self.kind = kind
         self._default = default_type
@@ -749,6 +750,12 @@ class TypeParam(object):
             'kind': self.kind,
             'default': self.default
         })
+
+class NamedTypeParam(TypeParam):
+    def __init__(self, arg_name, name, kind, default_type):
+        self._name = name
+        self.arg_name = name
+        TypeParam.__init__(self, name, kind, default_type)
 
 class ConstDecl(object):
     def __init__(self, name, type, schema, script, doc, ann, value):
@@ -885,4 +892,53 @@ class TypeFunctionNode(TypeFunction, SchemaBase):
     @property
     def module(self):
         return self._module
+
+class NamedParameterNode(SchemaBase):
+    def __init__(self, name, schema):
+        SchemaBase.__init__(self)
+        self._name = name
+        self._schema = schema
+        self._annotations = Annotations([])
+        self._docstring = u''
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def body(self):
+        return self._schema
+
+    @property
+    def options(self):
+        return self._schema.options
+
+    def validate(self, value, path=None):
+        if not (value is caty.UNDEFINED):
+            self._schema.validate(value, path)
+
+    def convert(self, value):
+        if not (value is caty.UNDEFINED):
+            return self._schema.convert(value)
+
+    @property
+    def optional(self):
+        return False
+
+    def _clone(self, *args, **kwds):
+        return NamedParameterNode(self.name, self.body.clone(*args, **kwds))
+
+    def _deepcopy(self, checked):
+        return NamedParameterNode(self.name, self.body.clone(checked))
+
+    @property
+    def type(self):
+        return self.body.type
+
+    @property
+    def tag(self):
+        return self.body.tag
+
+    def accept(self, visitor):
+        return NamedParameterNode(self.name, self.body.accept(visitor))
 
