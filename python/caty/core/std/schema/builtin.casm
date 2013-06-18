@@ -853,6 +853,9 @@ exception TagNotExist = object;
 /** 例外：型のアノテーションが矛盾している。 */
 exception IncompatibleAnnotation = object;
 
+/** 例外：defaultの指定されていない型変数に型パラメータが与えられていない。 */
+exception TypeParamNotApplied = object;
+
 /* 
  * --- IOエラー
  */

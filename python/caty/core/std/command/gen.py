@@ -1,7 +1,7 @@
 #coding:utf-8
 from caty.core.command import Builtin
 from caty.core.typeinterface import *
-from caty.core.schema import TagSchema, StringSchema, NamedSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema, NeverSchema, UndefinedSchema, ArraySchema, ObjectSchema
+from caty.core.schema import TagSchema, StringSchema, NamedSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema, NeverSchema, UndefinedSchema, ArraySchema, ObjectSchema, TypeVariable
 from caty.core.schema import types as reserved
 import caty.jsontools as json
 import random
@@ -42,6 +42,7 @@ class Sample(Builtin):
         cd = mod.make_cycle_detecter()
         ta = mod.make_typevar_applier()
         tn = mod.make_type_normalizer()
+        sb._root_name = u'gen:sample'
         t = ast.accept(sb)
         t = t.accept(rr)
         t = t.accept(cd)
@@ -101,6 +102,11 @@ class ReferenceExpander(SchemaBuilder):
             else:
                 self._history[node.canonical_name] = True
                 return node.body.accept(self)
+        if isinstance(node, TypeVariable):
+            if node._schema:
+                return node._schema.accept(self)
+            if node._default_schema:
+                return node._default_schema.accept(self)
         return node
 
     @apply_annotation
@@ -310,6 +316,12 @@ class DataGenerator(TreeCursor):
             return _EMPTY
         elif isinstance(node, UndefinedSchema):
             return UNDEFINED
+        elif isinstance(node, TypeVariable):
+            if node._schema:
+                return node._schema.accept(self)
+            if node._default_schema:
+                return node._default_schema.accept(self)
+            throw_caty_exception(u'TypeParamNotApplied', node.name)
         return None
 
 
