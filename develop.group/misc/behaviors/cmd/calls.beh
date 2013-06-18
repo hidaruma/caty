@@ -69,6 +69,7 @@ class Bar {
 
 == !exec
 
+{{{
 |= !command  |= !output |=!judge|
 | t:cmd1     | |suspend|
 | t:cmd2     | |suspend|
@@ -78,5 +79,6 @@ class Bar {
 | t:Foo.cmd4 | |suspend|
 | t:Bar.cmd1 | |suspend|
 | t:Bar.cmd2 | |suspend|
+}}}
 
 ※FITの構造の問題でsetupで定義したコマンドが呼び出せないので、それが修正されるまでペンディング
