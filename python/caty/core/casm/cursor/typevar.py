@@ -24,9 +24,9 @@ class TypeVarApplier(SchemaBuilder):
         r = self.real_root
         if r:
             self._init_type_params(node)
-        body = node.body.accept(self)
-        if 'debug' in node.annotations:
+        if node.name == u'PAnchor':
             self.debug = True
+        body = node.body.accept(self)
         if r:
             node._schema = body
             self.current = None
@@ -72,24 +72,20 @@ class TypeVarApplier(SchemaBuilder):
             self.type_args.new_scope()
             try:
                 ta = zip([a for a in node.type_params if not isinstance(a, NamedTypeParam)], 
-                         [b for b in node.type_args if not isinstance(a, NamedParameterNode)])
+                         [b for b in node.type_args if not isinstance(b, NamedParameterNode)])
                 args = []
                 for param, type in ta:
                     a = type.accept(self)
                     self.type_args[param.var_name] = a
                     args.append(a)
-                if self.debug:
-                    print args
-                found = False
                 for param in [a for a in node.type_params if isinstance(a, NamedTypeParam)]:
-                    for arg in [b for b in node.type_args if isinstance(a, NamedParameterNode)]:
+                    print param
+                    for arg in [b for b in node.type_args if isinstance(b, NamedParameterNode)]:
+                        print arg.name
                         if param.arg_name == arg.name:
                             a = arg.body.accept(self)
                             self.type_args[param.var_name] = a
                             args.append(a)
-                            found = True
-                if found:
-                    print args
                 key = (node.module.name+':'+TreeDumper(True).visit(node), tuple(node.options.items()), tuple(ta))
                 if key in self.history:
                     self.history[key].recursive = True

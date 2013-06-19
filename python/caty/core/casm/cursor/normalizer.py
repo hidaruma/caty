@@ -553,8 +553,12 @@ class VariableChecker(_SubNormalizer):
                         u'Type variable which neither instantiated nor a default value was given: $name', 
                         name=node.name)
         elif isinstance(node, TypeReference):
-            var_list = zip(node.type_args, node.type_params)
-            rest_params = node.type_params[len(var_list):]
+            var_list = zip([a for a in node.type_args if not isinstance(a, NamedParameterNode)], 
+                           [b for b in node.type_params if not isinstance(b, NamedTypeParam)])
+            rest_params = [b for b in node.type_params if not isinstance(b, NamedTypeParam)][len(var_list):]
+            named_list = zip([a for a in node.type_args if isinstance(a, NamedParameterNode)], 
+                           [b for b in node.type_params if isinstance(b, NamedTypeParam)])
+            rest_params += [b for b in node.type_params if isinstance(b, NamedTypeParam)][len(named_list):]
             self.__suspcious_var.append([])
             for p in rest_params:
                 self.__suspcious_var[-1].append(p.var_name)

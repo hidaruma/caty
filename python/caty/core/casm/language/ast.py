@@ -753,9 +753,11 @@ class TypeParam(object):
 
 class NamedTypeParam(TypeParam):
     def __init__(self, arg_name, name, kind, default_type):
-        self._name = name
-        self.arg_name = name
         TypeParam.__init__(self, name, kind, default_type)
+        self.arg_name = arg_name
+
+    def __repr__(self):
+        return self.arg_name + '=' + self.var_name + ":" + str(self.kind)
 
 class ConstDecl(object):
     def __init__(self, name, type, schema, script, doc, ann, value):
