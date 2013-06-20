@@ -876,6 +876,10 @@ class ClassModule(Module):
     def canonical_name(self):
         return self.parent.canonical_name + u':' + self.name
 
+    @property
+    def conforms(self):
+        return self._clsobj.conforms
+
     def _get_full_name(self):
         return u'class ' + self.name
 
@@ -912,15 +916,7 @@ class ClassModule(Module):
             v.set_arg0_type(self._clsrestriction)
 
     def _validate_signature(self):
-        if '+' not in self.name:
-            return
-        typename = self._clsobj.underlyingtype
-        signame = self._clsobj.conforms
-        if signame:
-            sigcls = self.parent.get_class(signame)
-            if '__signature' not in sigcls.annotations:
-                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', '%s is not signature class' % signame)
-        self.parent.get_type(typename)
+        pass
 
     def reify(self):
         import caty.jsontools as json

@@ -2,7 +2,7 @@
 from topdown import *
 
 from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, CommandNode, ClassRefNode
-from caty.core.casm.language.schemaparser import schema, typedef, type_arg
+from caty.core.casm.language.schemaparser import schema, typedef, type_arg, scalar
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.facilityparser import _entity
 from caty.core.casm.language.commandparser import command, refer, xjson, CallPattern, CommandDecl, CommandURI
@@ -26,6 +26,8 @@ def classdef(seq):
     dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
     if '+' not in classname or classname.endswith('+'):
         conform = option(conforms)(seq)
+    elif '+' in classname:
+        conform = ScalarNode(classname.split('+')[-1])
     defined = True
     redifinable = False
     with strict():
@@ -146,6 +148,22 @@ def refers(seq):
 
 def conforms(seq):
     keyword('conforms')(seq)
-    return identifier_token(seq)
+    return choice(signature_spec, signature_spec_list)(seq)
+
+def signature_spec(seq):
+    return scalar(seq)
+
+@try_
+def signature_spec_list(seq):
+    S(u'[')(seq)
+    r = split(signature_spec, ',')(seq)
+    S(u']')(seq)
+    names = set()
+    for n in r:
+        if n.name in r:
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Signature name conflicted: $name', name=n.name)
+        names.add(n.name)
+    return r
+
 
 
