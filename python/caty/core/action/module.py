@@ -2,7 +2,7 @@
 from caty.core.action.selector import *
 from caty.core.action.resource import *
 from caty.core.exception import *
-from caty.core.casm.language.ast import CommandNode, ClassNode, ScalarNode, CommandURI, ASTRoot
+from caty.core.casm.language.ast import CommandNode, ClassNode, ScalarNode, CommandURI, ASTRoot, ClassBody
 from caty.core.casm.language.commandparser import call_pattern
 from caty.core.schema.base import Annotations, Annotation
 from caty.core.casm.module import Module, ClassModule
@@ -111,7 +111,7 @@ class ResourceModuleContainer(object):
 
 class ResourceNode(ClassNode):
     def __init__(self, name, member, dom, ref, doc, ann):
-        ClassNode.__init__(self, name, member, dom, None, None, ref, doc, ann, [])
+        ClassNode.__init__(self, name, ClassBody(member, CommandURI([(u'python', 'caty.core.command.Dummy')])), dom, None, None, ref, doc, ann, [])
 
     def declare(self, module):
         self.module = module

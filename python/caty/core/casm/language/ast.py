@@ -113,41 +113,130 @@ class ASTRoot(Root):
 class ClassNode(object):
 
     is_alias = False
-    def __init__(self, name, member, domain, codomain, conforms, uri, doc, annotations, type_args, type=u'='):
+    def __init__(self, name, expression, domain, codomain, conforms, doc, annotations, type_args, type=u'='):
         self.is_ref = False
         self.name = name
-        self.member = member
+        self.expression = expression
+        self.member = []
+        self.uri = None
         self.ref = None
         self.docstring = doc
         self.annotations = annotations
         self.restriction = domain
         self.codomain = codomain
-        self.uri = uri
         self.type_args = type_args
         self.conforms = conforms
         self.defined = type != u'?='
         self.redifinable = type == u'&='
         self.underlyingtype = None
-        if '+' in self.name:
-            self.underlyingtype, self.conforms = self.name.split('+')
+        self.module = None
 
     def declare(self, module):
+        if self.module is None: # 他のモジュールへのアタッチ時には不要な処理
+            try:
+                self.expression.accept(self)
+            except:
+                raise
         self.module = module
         module.add_class(self)
+
+    def visit_class_body(self, obj):
+        for m in obj.member:
+            self.member.append(m)
+        self.uri = obj.uri
+        return obj
+
+    def visit_class_intersection(self, obj):
+        l = obj.left.accept(self)
+        r = obj.left.accept(self)
+        if isinstance(l, ClassBody):
+            return l
+        else:
+            return r
+
+    def visit_class_use(self, obj):
+        return obj.cls
+
+    def visit_class_unuse(self, obj):
+        return obj.cls
+
+    def visit_class_close(self, obj):
+        return obj.cls
+
+    def visit_class_open(self, obj):
+        return obj.cls
+
+    def visit_class_ref(self, obj):
+        return None
+
+class ClassBody(object):
+    def __init__(self, member, uri):
+        self.member = member
+        self.uri = uri
+
+    def accept(self, visitor):
+        return visitor.visit_class_body(self)
+
+class ClassReference(object):
+    def __init__(self, name, type_params):
+        self.name = name
+        self.type_params = type_params
+
+    def accept(self, visitor):
+        return self.visitor.visit_class_ref(self)
+
+class ClassIntersectionOperator(object):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def accept(self, visitor):
+        return visitor.visit_class_intersection(self)
+
+class UseOperator(object):
+    def __init__(self, names, cls):
+        self.names = names
+        self.cls = cls
+
+    def accept(self, visitor):
+        return visitor.visit_use(self)
+
+class UnuseOperator(object):
+    def __init__(self, names, cls):
+        self.names = names
+        self.cls = cls
+
+    def accept(self, visitor):
+        return visitor.visit_class_unuse(self)
+
+class CloseOperator(object):
+    def __init__(self, cls):
+        self.cls = cls
+
+    def accept(self, visitor):
+        return visitor.visit_class_close(self)
+
+class OpenOperator(object):
+    def __init__(self, cls):
+        self.cls = cls
+
+    def accept(self, visitor):
+        return visitor.visit_class_open(self)
 
 class ClassRefNode(object):
     is_alias = False
 
-    def __init__(self, name, ref, domain, codomain, uri, doc, annotations, type_args):
+    def __init__(self, name, ref, domain, codomain, doc, annotations, type_args):
         self.is_ref = True
         self.name = name
         self.ref = ref
         self.member = []
+        self.uri = None
+        self.expression = None
         self.docstring = doc
         self.annotations = annotations
         self.restriction = domain
         self.codomain = codomain
-        self.uri = uri
         self.type_args = type_args
         self.defined = True
         self.redifinable = False
@@ -874,7 +963,7 @@ class CollectionDeclNode(object):
                                      doc, 
                                      Annotations([Annotation(u'__collection')]),
                                      [])
-        self.catyclass = ClassNode(name, [], ScalarNode(u'univ'), ScalarNode(u'univ'), None, CommandURI([(u'python', 'caty.core.command.DummyClass')], False), None, Annotations([]), [])
+        self.catyclass = ClassNode(name, ClassBody([], CommandURI([(u'python', 'caty.core.command.DummyClass')], False)), ScalarNode(u'univ'), ScalarNode(u'univ'), None, None, Annotations([]), [])
         self.entity = FacilityNode(name, None, u'null', ScalarNode(u'null'), {}, None, Annotations([]))
 
     def declare(self, module):
