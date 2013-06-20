@@ -8,7 +8,7 @@ from caty.core.casm.language.schemaparser import schema
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.commandparser import command
 from caty.core.casm.language.constparser import const
-from caty.core.casm.language.classparser import catyclass
+from caty.core.casm.language.classparser import catyclass, conforms
 from caty.core.casm.language.collectionparser import collection_decl
 from caty.core.casm.language.kindparser import kind
 from caty.core.casm.language.facilityparser import facility
@@ -106,6 +106,7 @@ def module_decl(seq, type='casm', fragment=False):
     else:
         timing = u'boot'
     rel = seq.parse(option(relation, []))
+    conformance = option(conforms)(seq)
     attaches = None
     if fragment:
         if option(keyword(u'attaches'))(seq):
