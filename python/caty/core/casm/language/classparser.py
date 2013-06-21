@@ -1,7 +1,7 @@
 #coding: utf-8
 from topdown import *
 
-from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, CommandNode, ClassRefNode, ClassBody, ClassIntersectionOperator, UseOperator, UnuseOperator, CloseOperator, ClassReference
+from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, CommandNode, ClassRefNode, ClassBody, ClassIntersectionOperator, UseOperator, UnuseOperator, CloseOperator, ClassReference, OpenOperator
 from caty.core.casm.language.schemaparser import schema, typedef, type_arg, scalar, type_var
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.facilityparser import _entity
@@ -55,7 +55,7 @@ def op(seq):
 
 @try_
 def class_expression(seq):
-    return chainl(choice(class_term, use, unuse, close, class_definition, class_ref), op, allow_trailing_operator=True)(seq)
+    return chainl(choice(class_term, use, unuse, open,  close, class_definition, class_ref), op, allow_trailing_operator=True)(seq)
 
 def class_definition(seq):
     S(u'{')(seq)
@@ -78,23 +78,28 @@ def class_ref(seq):
 
 def use(seq):
     def _use_item(seq):
+        option(choice(S(u'command'), S(u'type')))(seq)
         name = name_token(seq)
-        if option(keyword(u'as')):
+        if option(keyword(u'as'))(seq):
             alias = name_token(seq)
         else:
             alias = None
         return name, alias
     keyword(u'use')(seq)
     _ = seq.parse('(')
-    r = split(_use_item, u',', allow_last_delim=True)(seq)
+    r = split(_use_item, u',')(seq)
     _ = seq.parse(')')
     body = class_expression(seq)
     return UseOperator(r, body)
 
 def unuse(seq):
+    def _unuse_item(seq):
+        option(choice(S(u'command'), S(u'type')))(seq)
+        name = name_token(seq)
+        return name
     keyword(u'use')(seq)
     _ = seq.parse('(')
-    r = split(name_token, u',', allow_last_delim=True)(seq)
+    r = split(_unuse_item, u',')(seq)
     _ = seq.parse(')')
     body = class_expression(seq)
     return UnuseOperator(r, body)
