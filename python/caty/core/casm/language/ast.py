@@ -199,7 +199,7 @@ class UseOperator(object):
         self.cls = cls
 
     def accept(self, visitor):
-        return visitor.visit_use(self)
+        return visitor.visit_class_use(self)
 
 class UnuseOperator(object):
     def __init__(self, names, cls):

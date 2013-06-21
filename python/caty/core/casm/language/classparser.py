@@ -79,15 +79,15 @@ def class_ref(seq):
 def use(seq):
     def _use_item(seq):
         option(choice(S(u'command'), S(u'type')))(seq)
-        name = name_token(seq)
-        if option(keyword(u'as'))(seq):
+        name = choice(name_token, S(u'*'))(seq)
+        if name != '*' and option(keyword(u'as'))(seq):
             alias = name_token(seq)
         else:
             alias = None
         return name, alias
     keyword(u'use')(seq)
     _ = seq.parse('(')
-    r = split(_use_item, u',')(seq)
+    r = option(split(_use_item, u','), [])(seq)
     _ = seq.parse(')')
     body = class_expression(seq)
     return UseOperator(r, body)
@@ -95,11 +95,11 @@ def use(seq):
 def unuse(seq):
     def _unuse_item(seq):
         option(choice(S(u'command'), S(u'type')))(seq)
-        name = name_token(seq)
+        name = choice(name_token, S(u'*'))(seq)
         return name
     keyword(u'unuse')(seq)
     _ = seq.parse('(')
-    r = split(_unuse_item, u',')(seq)
+    r = option(split(_unuse_item, u','), [])(seq)
     _ = seq.parse(')')
     body = class_expression(seq)
     return UnuseOperator(r, body)
