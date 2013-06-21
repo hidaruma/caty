@@ -93,7 +93,10 @@ def literate_casm(seq, fragment):
 def module_decl(seq, type='casm', fragment=False):
     doc = seq.parse(option(docstring))
     a = seq.parse(annotation)
-    _ = seq.parse(keyword('module'))
+    if not fragment:
+        _ = seq.parse(keyword('module'))
+    else:
+        _ = seq.parse(keyword('fragment'))
     n = pkgname(seq)
     if type == 'casm':
         i = seq.parse(option(keyword('in')))
@@ -101,12 +104,16 @@ def module_decl(seq, type='casm', fragment=False):
         i = seq.parse(keyword('in'))
     if i:
         seq.parse(keyword(type))
-    if option(keyword('on'))(seq):
+    if not fragment and option(keyword('on'))(seq):
         timing = choice(keyword(u'boot'), keyword(u'demand'))(seq)
     else:
         timing = u'boot'
-    rel = seq.parse(option(relation, []))
-    conformance = option(conforms)(seq)
+    if not fragment:
+        rel = seq.parse(option(relation, []))
+        conformance = option(conforms)(seq)
+    else:
+        rel = []
+        conformance = None
     attaches = None
     if fragment:
         if option(keyword(u'attaches'))(seq):
