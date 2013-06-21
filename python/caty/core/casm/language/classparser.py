@@ -97,7 +97,7 @@ def unuse(seq):
         option(choice(S(u'command'), S(u'type')))(seq)
         name = name_token(seq)
         return name
-    keyword(u'use')(seq)
+    keyword(u'unuse')(seq)
     _ = seq.parse('(')
     r = split(_unuse_item, u',')(seq)
     _ = seq.parse(')')
