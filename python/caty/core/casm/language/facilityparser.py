@@ -20,6 +20,7 @@ def _facility(seq):
             raise ParseFailed(seq, command, '%s is reserved.' % n)
         seq.parse('(')
         sys_param_type = typename(seq)
+        option(name_token)(seq)
         seq.parse(')')
         config_type = option(parse_config_type, ScalarNode(u'null'))(seq)
         indices_type = option(parse_indices_type, {})(seq)
@@ -37,24 +38,32 @@ def parse_config_type(seq):
     return typedef(seq)
 
 def parse_indices_type(seq):
-    keyword(u'conforms')(seq)
     return choice(conditional_indices, indices)(seq)
 
 def conditional_indices(seq):
     r = {}
+    keyword(u'applying')(seq)
+    seq.parse('(')
+    typename(seq)
+    option(name_token)(seq)
+    seq.parse(')')
+    keyword(u'conforms')(seq)
     S('{')(seq)
     for type, cls_name in split(indices_item, u',', True)(seq):
+        if type in r:
+            raise ParseError(conditional_indices, seq)
         r[type] = cls_name
     S('}')(seq)
     return r
 
 def indices_item(seq):
-    t = typedef(seq)
+    t = choice(typedef, S(u'*'))(seq)
     S('=>')(seq)
-    i = indices(seq)
+    i = choice(index_list, typename)(seq)
     return t, i
 
 def indices(seq):
+    keyword(u'conforms')(seq)
     return choice(index_list, typename)(seq)
 
 def index_list(seq):
