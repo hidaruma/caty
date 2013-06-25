@@ -3,8 +3,8 @@ import os
 
 class GenerateFacilityClass(Command):
     def execute(self, cls_data):
-        if not cls_data.get('anno', {}).get('signature', False):
-            throw_caty_exception(u'InvalidInput', u'$$.anno.signature=$val', val=cls_data.get('anno', {}).get('signature', u'undefined'))
+        if not cls_data.get('anno', {}).get('__signature', False):
+            throw_caty_exception(u'InvalidInput', u'$$.anno.__signature=$val', val=cls_data.get('anno', {}).get('__signature', u'undefined'))
         name = cls_data['name']
         app_name = cls_data['location']['app'].strip('::')
         module_name = (cls_data['location']['pkg'] + cls_data['location']['mod']).strip(':')
@@ -90,8 +90,8 @@ class GenerateFacilityClass(Command):
 
 class GeneratePyClass(Command):
     def execute(self, cls_data):
-        if not cls_data.get('anno', {}).get('signature', False):
-            throw_caty_exception(u'InvalidInput', u'$$.anno.signature=$val', val=cls_data.get('anno', {}).get('signature', u'undefined'))
+        if not cls_data.get('anno', {}).get('__signature', False):
+            throw_caty_exception(u'InvalidInput', u'$$.anno.__signature=$val', val=cls_data.get('anno', {}).get('__signature', u'undefined'))
         name = cls_data['name']
         app_name = cls_data['location']['app'].strip('::')
         module_name = (cls_data['location']['pkg'] + cls_data['location']['mod']).strip(':')
