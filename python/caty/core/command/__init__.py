@@ -259,7 +259,10 @@ class Command(object):
                 self.async_queue = self._defined_application.async_queue
             else:
                 self.async_queue = self.__current_application.async_queue
-            setattr(self, key, facility)
+            if key != 'arg0':
+                setattr(self, key, facility)
+            else:
+                self.__arg0 = facility
             _set.add(name)
         # 互換性維持のため、schemaを追加
         if not 'schema' in _set:
