@@ -1,5 +1,6 @@
 #coding:utf-8
 from caty.core.casm.module.basemodule import *
+from caty.core.casm.language.ast import *
 
 class ClassModule(Module):
     u"""
@@ -14,8 +15,10 @@ class ClassModule(Module):
         self.command_loader = parent.command_loader
         self._name = clsobj.name
         self._clsobj = clsobj
+        self._declared = set()
         for m in clsobj.member:
             m.declare(self)
+            self._declared.add(m)
         self._clsrestriction_proto = clsobj.restriction
         self.is_root = False
         self.annotations = clsobj.annotations
@@ -83,6 +86,13 @@ class ClassModule(Module):
         Module._register_command(self)
         for v in self.command_ns.values():
             v.set_arg0_type(self._clsrestriction)
+        class_expr_interpreter = ClassExprInterpreter(self)
+        class_body = class_expr_interpreter.visit(self._clsobj.expression)
+        for m in class_body.member:
+            if m in self._declared:
+                pass
+            else:
+                self.add_command(m)
 
     def _attache_class(self, cmd):
         modname = self.uri.python.split(u':')[-1]
@@ -124,3 +134,45 @@ class ClassModule(Module):
         exec obj in g_dict
         return g_dict[u'_module']
 
+class ClassExprInterpreter(object):
+    def __init__(self, class_module):
+        self.module = class_module
+
+    def visit(self, obj):
+        return obj.accept(self)
+
+    def visit_class_body(self, obj):
+        return obj
+
+    def visit_class_intersection(self, obj):
+        l = obj.left.accept(self)
+        r = obj.right.accept(self)
+        new = ClassBody([], None)
+        if not l.opened:
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'closed class')
+        if not r.opened:
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'closed class')
+        for m in l.member:
+            new.member.append(m)
+        for m in r.member:
+            new.member.append(m)
+        return new.accept(self)
+
+    def visit_class_use(self, obj):
+        return ClassBody([], None)
+
+    def visit_class_unuse(self, obj):
+        return ClassBody([], None)
+
+    def visit_class_close(self, obj):
+        n = obj.cls.accept(self)
+        n.opened = False
+        return n
+    
+    def visit_class_open(self, obj):
+        n = obj.cls.accept(self)
+        n.opened = True
+        return n
+
+    def visit_class_ref(self, obj):
+        return ClassBody([], None)

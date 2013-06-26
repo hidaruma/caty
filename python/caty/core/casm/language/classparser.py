@@ -1,7 +1,7 @@
 #coding: utf-8
 from topdown import *
 
-from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, CommandNode, ClassRefNode, ClassBody, ClassIntersectionOperator, UseOperator, UnuseOperator, CloseOperator, ClassReference, OpenOperator
+from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, CommandNode, ClassBody, ClassIntersectionOperator, UseOperator, UnuseOperator, CloseOperator, ClassReference, OpenOperator
 from caty.core.casm.language.schemaparser import schema, typedef, type_arg, scalar, type_var
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.facilityparser import _entity
@@ -32,18 +32,11 @@ def classdef(seq):
         conform = ScalarNode(classname.split('+')[-1])
     with strict():
         e = option(choice(S(u'='), S(u'?='), S(u'&=')), u'=')(seq)
-        if option(peek(clsref))(seq):
-            name = identifier_token_a(seq)
-            nohook(S(u';'))(seq)
-            doc2 = postfix_docstring(seq)
-            doc = concat_docstring(doc, doc2)
-            return ClassRefNode(classname, name, dom, codom, doc, annotations, type_args)
-        else:
-            expression = class_expression(seq)
-            nohook(S(u';'))(seq)
-            doc2 = postfix_docstring(seq)
-            doc = concat_docstring(doc, doc2)
-            return ClassNode(classname, expression, dom, codom, conforms, doc, annotations, type_args, e)
+        expression = class_expression(seq)
+        nohook(S(u';'))(seq)
+        doc2 = postfix_docstring(seq)
+        doc = concat_docstring(doc, doc2)
+        return ClassNode(classname, expression, dom, codom, conforms, doc, annotations, type_args, e)
 
 def clsref(seq):
     identifier_token_a(seq)
@@ -72,7 +65,7 @@ def class_term(seq):
 
 @try_
 def class_ref(seq):
-    name = name_token(seq)
+    name = class_identifier_token_m(seq)
     ta = option(type_var, [])(seq)
     return ClassReference(name, ta)
 

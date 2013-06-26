@@ -134,7 +134,7 @@ class ClassNode(object):
     def declare(self, module):
         if self.module is None: # 他のモジュールへのアタッチ時には不要な処理
             try:
-                self.expression.accept(self)
+                self.expression.accept(self) # クラスの定義部のみ摘出する
             except:
                 raise
         self.module = module
@@ -144,11 +144,12 @@ class ClassNode(object):
         for m in obj.member:
             self.member.append(m)
         self.uri = obj.uri
+        obj.visited = True
         return obj
 
     def visit_class_intersection(self, obj):
         l = obj.left.accept(self)
-        r = obj.left.accept(self)
+        r = obj.right.accept(self)
         if isinstance(l, ClassBody):
             return l
         else:
@@ -173,6 +174,7 @@ class ClassBody(object):
     def __init__(self, member, uri):
         self.member = member
         self.uri = uri
+        self.opened = True
 
     def accept(self, visitor):
         return visitor.visit_class_body(self)
@@ -183,7 +185,7 @@ class ClassReference(object):
         self.type_params = type_params
 
     def accept(self, visitor):
-        return self.visitor.visit_class_ref(self)
+        return visitor.visit_class_ref(self)
 
 class ClassIntersectionOperator(object):
     def __init__(self, left, right):
@@ -223,27 +225,6 @@ class OpenOperator(object):
     def accept(self, visitor):
         return visitor.visit_class_open(self)
 
-class ClassRefNode(object):
-    is_alias = False
-
-    def __init__(self, name, ref, domain, codomain, doc, annotations, type_args):
-        self.is_ref = True
-        self.name = name
-        self.ref = ref
-        self.member = []
-        self.uri = None
-        self.expression = None
-        self.docstring = doc
-        self.annotations = annotations
-        self.restriction = domain
-        self.codomain = codomain
-        self.type_args = type_args
-        self.defined = True
-        self.redifinable = False
-
-    def declare(self, module):
-        self.module = module
-        module.add_class(self)
 
 class FacilityNode(object):
     is_alias = False
