@@ -281,17 +281,21 @@ class ScriptParser(Parser):
         except ParseFailed as e:
             raise ParseError(e.cs, self.functor)
 
-
     def command(self, seq, no_opt=False):
         if option(peek('$'))(seq):
             return self.xjson_path(seq)
-        name = class_identifier_token_a(seq)
+        name = identifier_token_a(seq)
         if name == u'commitm':
             return CommitM(self.arguments(seq))
         #if name.endswith('.caty') and name[0] != '/':
         #    return self.__make_exec_script(name, seq)
         pos = (seq.col-len(name), seq.line)
         type_args = option(self.type_args, [])(seq)
+        if option(S(u'.'))(seq):
+            mname = name_token(seq)
+            name = name + '.' + mname
+            type_args2 = option(self.type_args, [])(seq)
+            type_args += type_args2
         if not no_opt:
             opts = self.options(seq)
             args = self.arguments(seq)
