@@ -156,7 +156,7 @@ def refers(seq):
     try:
         return CommandURI(many1(refer)(seq))
     except:
-        return CommandURI([(u'python', 'caty.core.command.DummyClass')])
+        return CommandURI([(u'python', 'caty.core.command')])
     return r
 
 def property(seq):
@@ -180,7 +180,7 @@ def refers(seq):
     try:
         return CommandURI(many1(refer)(seq))
     except:
-        return CommandURI([(u'python', 'caty.core.command.DummyClass')])
+        return CommandURI([(u'python', 'caty.core.command')])
 
 def conforms(seq):
     keyword('conforms')(seq)
