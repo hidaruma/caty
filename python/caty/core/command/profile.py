@@ -240,6 +240,7 @@ def check_enum(t, name, option, opt_str, value, parser):
 
 class ScriptProfileContainer(ProfileContainer):
     def __init__(self, name, proxy, commands, annotations, doc, app, module):
+        assert proxy is not None, module.canonical_name + ':' + name
         self.profiles = []
         self.name = name
         self.command_class = proxy

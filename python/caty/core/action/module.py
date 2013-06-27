@@ -111,7 +111,7 @@ class ResourceModuleContainer(object):
 
 class ResourceNode(ClassNode):
     def __init__(self, name, member, dom, ref, doc, ann):
-        ClassNode.__init__(self, name, ClassBody(member, CommandURI([(u'python', 'caty.core.command.Dummy')])), dom, None, None, ref, doc, ann, [])
+        ClassNode.__init__(self, name, ClassBody(member, ref), dom, None, None, doc, ann, [])
 
     def declare(self, module):
         self.module = module

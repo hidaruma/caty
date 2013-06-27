@@ -67,9 +67,13 @@ class ASTRoot(Root):
     def type_params(self):
         return self._type_params
 
-    @property
-    def name(self):
-        return self._name
+    def name():
+        def get(self):
+            return self._name
+        def set(self, v):
+            self._name = v
+        return get, set
+    name = property(*name())
 
     @property
     def annotations(self):
@@ -557,6 +561,7 @@ class CommandNode(Function):
             self.reference_to_implementation = uri_or_script
         else:
             self.script_proxy = uri_or_script
+            self.reference_to_implementation = uri_or_script
         self.doc = doc
         self.annotation = annotation
         self.profile_container = None
@@ -564,11 +569,17 @@ class CommandNode(Function):
         self.type_params = type_params
         self.type_params_ast = type_params
         self.command_type = command_type
-        self.defined = self.reference_to_implementation is not None and self.reference_to_implementation.defined
+        if uri_or_script is None or (isinstance(uri_or_script, CommandURI) and not uri_or_script.defined):
+            self.defined = False
+        else:
+            self.defined = True
         self.redifinable = False
+        self.module = None
+        self.application = None
 
     def clone(self):
-        return CommandNode(self.name, self.patterns, self.reference_to_implementation, self.doc, self.annotation, self.type_params, self.command_type)
+        r = CommandNode(self.name, self.patterns, self.reference_to_implementation, self.doc, self.annotation, self.type_params, self.command_type)
+        return r
 
     @property
     def annotations(self):

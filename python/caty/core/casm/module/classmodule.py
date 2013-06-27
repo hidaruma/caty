@@ -92,7 +92,15 @@ class ClassModule(Module):
             if m in self._declared:
                 pass
             else:
-                self.add_command(m)
+                if isinstance(m, CommandNode):
+                    if m.module is None:
+                        m.module = self
+                    if m.application is None:
+                        m.application = self.application
+                    cursor = m.module.make_profile_builder()
+                    self.add_command(cursor.visit(m))
+                else:
+                    pass
 
     def _attache_class(self, cmd):
         modname = self.uri.python.split(u':')[-1]
@@ -159,10 +167,36 @@ class ClassExprInterpreter(object):
         return new.accept(self)
 
     def visit_class_use(self, obj):
-        return ClassBody([], None)
+        r = obj.cls.accept(self)
+        new_mem = set([])
+        for n, a in obj.names: # ワイルドカードの処理
+            if n == '*':
+                new_mem = set(r.member)
+                break
+        for n, a in obj.names:
+            if n == '*':
+                continue
+            for m in r.member:
+                if m.name == n:
+                    if a is not None:
+                        m = m.clone()
+                        m.name = a
+                    new_mem.add(m)
+        r.member = list(new_mem)
+        return r
 
     def visit_class_unuse(self, obj):
-        return ClassBody([], None)
+        r = obj.cls.accept(self)
+        new_mem = set(r.member)
+        for n in obj.names: # ワイルドカードの処理
+            if n == '*':
+                new_mem = []
+                break
+            for m in r.member:
+                if m.name == n:
+                    new_mem.remove(m)
+        r.member = list(new_mem)
+        return r
 
     def visit_class_close(self, obj):
         n = obj.cls.accept(self)
