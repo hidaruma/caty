@@ -44,5 +44,5 @@ def reduce_undefined(obj):
 
 class Indef(object): pass
 
-INDEF = Indef
+INDEF = Indef()
 
