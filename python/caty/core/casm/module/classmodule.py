@@ -104,12 +104,9 @@ class ClassModule(Module):
 
     def _attache_class(self, cmd):
         modname = self.uri.python.split(u':')[-1]
-        for name, obj in self.refered_module.__dict__.items():
+        for name, obj in self.refered_module.items():
             if self._is_same_name(name, cmd.name):
                 cmd.uri = modname + '.' + name
-                if modname not in self.command_loader.command_dict:
-                    self.command_loader.command_dict[modname] = {}
-                self.command_loader.command_dict[modname][name] = obj
 
     def _is_same_name(self, a, b):
         return a.lower().replace('-', '') == b.lower().replace('-', '')
@@ -131,16 +128,10 @@ class ClassModule(Module):
         if 'python' not in self.uri:
             return
         modname = self.uri.python.split(u':')[-1]
-        if modname == u'caty.core.command':
-            return 
-        code = u'import %s as _module' % (modname)
-        relpath = modname.replace(u'.', u'/')+u'.py'
-        g_dict = {}
-        abspath = join(self.module._app._physical_path, u'lib', relpath)
-        obj = compile(code, relpath, u'exec')
-        g_dict[u'__file__'] = abspath
-        exec obj in g_dict
-        return g_dict[u'_module']
+        if modname == 'caty.core.command':
+            return
+        if self.command_loader:
+            return self.command_loader.command_dict[modname]
 
 class ClassExprInterpreter(object):
     def __init__(self, class_module):
