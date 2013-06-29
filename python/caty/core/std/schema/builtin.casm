@@ -1665,7 +1665,7 @@ command sleep<T default any> [integer(minimum=0)? millisec] :: T -> T
 /** 
  * 入力データを文字列化する。
  */
-command to-string :: any -> string
+command to-string :: univ -> string
     refers python:builtin.ToString;
 
 /** 

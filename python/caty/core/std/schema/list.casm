@@ -9,7 +9,7 @@ module list in casm;
  *
  * このコマンドは unzip と対になっている。
  */
-command zip<S default any, T default any> :: [[S*], [T*]] -> [[S, T]*]
+command zip<S default univ, T default univ> :: [[S*], [T*]] -> [[S, T]*]
         refers python:listlib.Zip;
 
 /**
@@ -19,7 +19,7 @@ command zip<S default any, T default any> :: [[S*], [T*]] -> [[S, T]*]
  *
  * このコマンドは unzip3 と対になっている。
  */
-command zip3<S default any, T default any, U default any> :: [[S*],[T*],[U*]] -> [[S, T, U]*]
+command zip3<S default univ, T default univ, U default univ> :: [[S*],[T*],[U*]] -> [[S, T, U]*]
         refers python:listlib.Zip3;
 
 /**
@@ -28,7 +28,7 @@ command zip3<S default any, T default any, U default any> :: [[S*],[T*],[U*]] ->
  * 
  * このコマンドは zip コマンドと対になっている。
  */
-command unzip<S default any, T default any> :: [[S, T]*] -> [[S*], [T*]]
+command unzip<S default univ, T default univ> :: [[S, T]*] -> [[S*], [T*]]
     refers python:listlib.UnZip;
 
 /**
@@ -38,27 +38,27 @@ command unzip<S default any, T default any> :: [[S, T]*] -> [[S*], [T*]]
  * 
  * このコマンドは zip3 コマンドと対になっている。
  */
-command unzip3<S default any, T default any, U default any> :: [[S, T, U]*] -> [[S*],[T*],[U*]] 
+command unzip3<S default univ, T default univ, U default univ> :: [[S, T, U]*] -> [[S*],[T*],[U*]] 
     refers python:listlib.UnZip3;
 
 /**
  * 入力値の長さを返す。
  */
 @[register-public]
-command length<S default any> :: [S*] -> integer
+command length<S default univ> :: [S*] -> integer
     refers python:listlib.Length;
 
 /**
  * 入力値を引数の回数分だけ繰り返したリストを返す。
  */
-command cycle<T default any> [integer] :: T -> [T*]
+command cycle<T default univ> [integer] :: T -> [T*]
     refers python:listlib.Cycle;
 
 /**
  * 入力値を添字のリストと zip した値を返す。
  * 例えば ["x", "y", "z"] という入力に対しては [(0, "x"), (1, "y"), (2, "z")] という値が返る。
  */
-command enumerate<T default any> :: [T*] -> [[integer, T]*]
+command enumerate<T default univ> :: [T*] -> [[integer, T]*]
     refers python:listlib.Enumerate;
 
 /**
@@ -66,7 +66,7 @@ command enumerate<T default any> :: [T*] -> [[integer, T]*]
  * オプションの key が指定されて尚且つ入力値が object の配列の場合、
  * key にあたるプロパティがソートキーとして使われる（JSON パス式には未対応）。
  */
-command sort<T default any>  {"key":string?, @[default(false)]"reverse": boolean?} :: [T*] -> [T*]
+command sort<T default univ>  {"key":string?, @[default(false)]"reverse": boolean?} :: [T*] -> [T*]
     refers python:listlib.Sort;
 
 /**
@@ -74,13 +74,13 @@ command sort<T default any>  {"key":string?, @[default(false)]"reverse": boolean
  * 第一引数は開始インデックスで、第二引数は終了インデックスとなる。
  * 第二引数は省略可能で、その場合は配列の最終要素までのスライスが返される。
  */
-command slice<T default any> [integer, integer?] :: [T*] -> [T*]
+command slice<T default univ> [integer, integer?] :: [T*] -> [T*]
     refers python:listlib.Slice;
 
 /**
  * いくつかの配列を結合した新しい配列を返す。
  */
-command concat :: [[any*]*] -> [any*]
+command concat :: [[univ*]*] -> [univ*]
     refers python:listlib.Concat;
 
 /**
@@ -91,13 +91,13 @@ command contains
    @[default(false)]
    "boolean" : boolean?
  }
-:: [[any*], any] -> boolean | @True [[any*], any] | @False [[any*], any]
+:: [[univ*], univ] -> boolean | @True [[univ*], univ] | @False [[univ*], univ]
     refers python:listlib.Contains;
 
 /**
  * ルーズ配列(undefinedを含んだ配列)をundefinedを含まない配列にして返す。
  */
-command tighten :: [any*] -> [any*]
+command tighten :: [univ*] -> [univ*]
     refers python:listlib.Tighten;
 
 /**
@@ -115,6 +115,6 @@ command range
 /**
  * 配列の要素を逆順にする。
  */
-command reverse<T default any> :: [T*] -> [T*]
+command reverse<T default univ> :: [T*] -> [T*]
     refers python:listlib.Reverse;
 
