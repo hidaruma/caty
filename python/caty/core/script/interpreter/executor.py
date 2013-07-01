@@ -695,6 +695,7 @@ class CommandExecutor(BaseInterpreter):
 
     def visit_fold(self, node):
         node._prepare()
+        node.in_schema.validate(self.input)
         input = self.input[0]
         init = self.input[1]
         n = 0
