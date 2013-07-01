@@ -643,9 +643,12 @@ type Positive = (true  | @True univ  | @OK univ);
 type Negative = (false | @False univ | @NG univ);
 
 /** 三値の真偽値型 */
-type triboolean = (true | false | indef);
+type tboolean = (true | false | indef);
 
-type Logical<X> = (boolean |indef | @True X | @False X | @Indef X | @OK X | @NG X);
+type Logical = (LogicalTrue | LogicalFalse | LogicalIndef);
+type LogicalTrue  = (true  | @True  univ | @OK univ);
+type LogicalFalse = (false | @False univ | @NG univ);
+type LogicalIndef = (indef | @Indef univ);
 
 /** 単一指定はT型データ、複数指定はT型項目の配列を使う型 */
 type multiItem<T> = (T | [T, T, T*]);
@@ -1270,12 +1273,30 @@ command findpv<T default univ> [string] :: object -> @EXISTS T | @NO null
 command eq 
  {
    @[default(false)]
-   "boolean": triboolean? 
+   "boolean": tboolean? 
  }
-:: [univ, univ] -> (
-     Logical<[univ, univ]>
-   )
+:: [univ, univ] -> Logical
     refers python:builtin.Equals;
+
+command to-tboolean :: Logical -> tboolean {
+ case {
+  LogicalTrue  => true,
+  LogicalFalse => false,
+  LogicalIndef => indef,
+ }
+};
+
+command and :: [Logical*] -> tboolean
+    refers python:builtin.And;
+
+command or :: [Logical*] -> tboolean
+    refers python:builtin.Or;
+
+command not :: Logical -> tboolean 
+    refers python:builtin.Not;
+
+command implies :: [Logical, Logical] -> tboolean
+    refers python:builtin.Implies;
 
 /**
  * 入力値二つのうち第一要素を Caty スクリプトの式、第二要素をその入力として実行する。

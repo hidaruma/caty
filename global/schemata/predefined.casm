@@ -7,12 +7,6 @@ type list<X default any> = [X*];
 
 type record<X default any> = {*: X?};
 
-type Trilogical<X> =(triboolean | @True X | @False X | @Indef X);
-
-command not :: boolean -> boolean {
- filter:not
-};
-
 command neq
  {
     @[default(false)]

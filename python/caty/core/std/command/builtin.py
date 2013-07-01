@@ -623,6 +623,61 @@ class Equals(Builtin):
                 return True
             return False
 
+class And(Builtin):
+    def execute(self, input):
+        return reduce(self._and, input, True)
+
+    def _and(self, a, b):
+        if a == True or tag(a) == u'True':
+            if b == True or tag(b) == u'True':
+                return True
+            elif b == False or tag(b) == u'False':
+                return False
+            return INDEF
+        elif a == False or tag(a) == u'False':
+            return False
+        else:
+            if b == False or tag(b) == u'False':
+                return False
+            return INDEF
+
+class Or(Builtin):
+    def execute(self, input):
+        return reduce(self._or, input, False if len(input) > 0 else True)
+
+    def _or(self, a, b):
+        if a == True or tag(a) == u'True':
+            return True
+        elif a == False or tag(a) == u'False':
+            if b == True or tag(b) == u'True':
+                return True
+            elif b == False or tag(b) == u'False':
+                return False
+            else:
+                return INDEF
+        else:
+            if b == True or tag(b) == u'True':
+                return True
+            return INDEF
+
+class Not(Builtin):
+    def execute(self, input):
+        return _not(input)
+
+
+def _not(input):  
+    if input == True or tag(input) == u'True':
+        return False
+    elif input == False or tag(input) == u'False':
+        return True
+    else:
+        return INDEF
+
+class Implies(Or):
+    def execute(self, input):
+        a = _not(input[0])
+        return self._or(a, input[1])
+
 class Eval(Builtin):
     
     def execute(self, input):

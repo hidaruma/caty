@@ -102,7 +102,7 @@ command stable :: string -> boolean throws SyntaxError {
  * 判定不能なときは indef を返す。
  */
 @[should-be-implemented]
-command lt :: [string ver1, string ver2] -> triboolean throws SyntaxError
+command lt :: [string ver1, string ver2] -> tboolean throws SyntaxError
 // refers python:
 ;
 
@@ -110,14 +110,14 @@ command lt :: [string ver1, string ver2] -> triboolean throws SyntaxError
  * 判定不能なときは indef を返す。
  */
 @[should-be-implemented] /* スクリプト実装も容易ではあるが */
-command le :: [string ver1, string ver2] -> triboolean throws SyntaxError
+command le :: [string ver1, string ver2] -> tboolean throws SyntaxError
 // refers python:
 ;
 
 /** SemVerの順序において ver1 > ver2 かどうか判定する
  * 判定不能なときは indef を返す。
  */
-command gt :: [string ver1, string ver2] -> triboolean throws SyntaxError {
+command gt :: [string ver1, string ver2] -> tboolean throws SyntaxError {
  [$.1, $.0] | semver:lt
 }
 ;
@@ -125,7 +125,7 @@ command gt :: [string ver1, string ver2] -> triboolean throws SyntaxError {
 /** SemVerの順序において ver1 >= ver2 かどうか判定する
  * 判定不能なときは indef を返す。
  */
-command ge :: [string ver1, string ver2] -> triboolean throws SyntaxError {
+command ge :: [string ver1, string ver2] -> tboolean throws SyntaxError {
  [$.1, $.0] | semver:le
 }
 ;
@@ -134,7 +134,7 @@ command ge :: [string ver1, string ver2] -> triboolean throws SyntaxError {
  * 判定不能なときは indef を返す。
  */
 @[should-be-implemented]
-command compat :: [string ver1, string ver2] -> triboolean throws SyntaxError
+command compat :: [string ver1, string ver2] -> tboolean throws SyntaxError
 // refers python:
 ;
 
@@ -159,7 +159,7 @@ type VersionRange = string(remark="バージョン範囲パターン") | [string
  * rangeはpackage.jsonのdependenciesで使われる形式。
  */
 @[should-be-implemented]
-command matches :: [string ver, VersionRange range] -> triboolean throws SyntaxError
+command matches :: [string ver, VersionRange range] -> tboolean throws SyntaxError
  // refers python:semver.Matches
 ;
 

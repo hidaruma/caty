@@ -44,7 +44,7 @@ type TypeQualifierMixin = LocatedQualifierMixin & {
     /** 型が名前空間（束縛セット、コンテキスト）内で名前に束縛されているとき、その名前が再帰的かどうか 
      */
     @[default(@Indef)]
-    "recursive": triboolean?,
+    "recursive": tboolean?,
 
     *: any?  // open
 };
