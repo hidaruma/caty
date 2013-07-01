@@ -695,7 +695,11 @@ class CommandExecutor(BaseInterpreter):
 
     def visit_fold(self, node):
         node._prepare()
-        node.in_schema.validate(self.input)
+        try:
+            node.in_schema.validate(self.input)
+        except JsonSchemaError, e:
+            info = e.error_report(self.app.i18n)
+            throw_caty_exception(u'InputTypeError', prettyprint(info), errorInfo=info)
         input = self.input[0]
         init = self.input[1]
         n = 0
