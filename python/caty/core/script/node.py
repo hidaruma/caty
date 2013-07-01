@@ -989,7 +989,7 @@ class CommitM(Syntax):
         return visitor.visit_commitm(self)
 
 class Fold(Syntax):
-    command_decl = u"""command __fold<S default univ, T default univ> :: S -> T
+    command_decl = u"""command __fold<S default univ, T default univ, U default univ> :: [[S*], T]-> T
                         refers python:caty.core.script.node.Fold;"""
     def __init__(self, cmd, opts_ref):
         Syntax.__init__(self, opts_ref)
