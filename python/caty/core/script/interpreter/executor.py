@@ -693,6 +693,27 @@ class CommandExecutor(BaseInterpreter):
         self.arg0_stack.pop(0)
         return self.input
 
+    def visit_fold(self, node):
+        input = self.input[0]
+        init = self.input[1]
+        n = 0
+        acc = init
+        for v in input:
+            self.input = v
+            try:
+                node.var_storage.new_scope()
+                node.var_storage.opts['_key'] = n
+                node.var_storage.opts['_acc'] = acc
+                if not v is UNDEFINED:
+                    acc = node.cmd.accept(self)
+            except BreakSignal:
+                break
+            finally:
+                node.var_storage.del_scope()
+            n+=1
+        self.input = acc
+        return self.input
+
     @property
     def in_schema(self):
         return self.cmd.in_schema

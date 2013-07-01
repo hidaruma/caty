@@ -104,4 +104,7 @@ class BaseInterpreter(object):
     def visit_commitm(self, node):
         raise NotImplementedError(u'{0}#visit_commitm'.format(self.__class__.__name__))
 
+    def visit_fold(self, node):
+        raise NotImplementedError(u'{0}#visit_fold'.format(self.__class__.__name__))
+
 

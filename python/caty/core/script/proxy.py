@@ -724,5 +724,8 @@ def combine_proxy(args):
     return reduce(CombinatorProxy, args)
 
 
-
+class FoldProxy(FunctorProxy):
+    reification_type = u'_fold'
+    def _get_class(self):
+        return Fold
 

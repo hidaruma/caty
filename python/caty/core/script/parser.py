@@ -43,6 +43,7 @@ from caty.core.script.proxy import MethodChainProxy as MethodChain
 from caty.core.script.proxy import FetchProxy as Fetch
 from caty.core.script.proxy import MutatingProxy as Mutating
 from caty.core.script.proxy import CommitMProxy as CommitM
+from caty.core.script.proxy import FoldProxy as Fold
 from caty.core.script.query import *
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
@@ -246,7 +247,7 @@ class ScriptParser(Parser):
     def functor(self, seq):
         import string as str_mod
         k = lambda s: keyword(s, str_mod.ascii_letters + '_.')
-        func = seq.parse([k(u'each'), k(u'take'), k(u'time'), k(u'start'), k(u'begin'), k(u'unclose')])
+        func = seq.parse([k(u'each'), k(u'take'), k(u'time'), k(u'start'), k(u'begin'), k(u'unclose'), k(u'fold')])
         try:
             if func in ('unclose', 'each', 'take'):
                 opts = self.options(seq)
@@ -278,6 +279,8 @@ class ScriptParser(Parser):
                 return Begin(cmd, opts)
             elif func == u'unclose':
                 return Unclose(cmd, opts)
+            elif func == u'fold':
+                return Fold(cmd, opts)
         except ParseFailed as e:
             raise ParseError(e.cs, self.functor)
 

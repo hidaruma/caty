@@ -988,3 +988,22 @@ class CommitM(Syntax):
     def accept(self, visitor):
         return visitor.visit_commitm(self)
 
+class Fold(Syntax):
+    command_decl = u"""command __fold<S default univ, T default univ> :: S -> T
+                        refers python:caty.core.script.node.Fold;"""
+    def __init__(self, cmd, opts_ref):
+        Syntax.__init__(self, opts_ref)
+        self.cmd = cmd
+
+    def _prepare(self):
+        Command._prepare(self)
+
+    def set_facility(self, facilities, app=None):
+        self.cmd.set_facility(facilities, app)
+
+    def set_var_storage(self, storage):
+        Syntax.set_var_storage(self, storage)
+        self.cmd.set_var_storage(storage)
+
+    def accept(self, visitor):
+        return visitor.visit_fold(self)
