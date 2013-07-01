@@ -790,6 +790,14 @@ class CommandURI(dict):
             self[tp] = val
         self.defined = defined
 
+class ClassURI(dict):
+    def __init__(self, types, defined=True):
+        for tp, val in types:
+            setattr(self, tp, val)
+            self[tp] = val
+            assert(isinstance(val, list)), val
+        self.defined = defined
+
 class KindReference(object):
     is_alias = False
     def __init__(self, name, annotations, docstring=u''):
@@ -955,7 +963,7 @@ class CollectionDeclNode(object):
                                      doc, 
                                      Annotations([Annotation(u'__collection')]),
                                      [])
-        self.catyclass = ClassNode(name, ClassBody([], CommandURI([(u'python', 'caty.core.command')], False)), ScalarNode(u'univ'), ScalarNode(u'univ'), None, None, Annotations([]), [])
+        self.catyclass = ClassNode(name, ClassBody([], ClassURI([(u'python', ['caty.core.command'])], False)), ScalarNode(u'univ'), ScalarNode(u'univ'), None, None, Annotations([]), [])
         self.entity = FacilityNode(name, None, u'null', ScalarNode(u'null'), {}, None, Annotations([]))
 
     def declare(self, module):

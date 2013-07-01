@@ -79,10 +79,9 @@ class ClassModule(Module):
         self._clsrestriction = self.make_type_normalizer().visit(self._clsrestriction)
 
     def _register_command(self):
-        self.refered_module = self._load_refered_module()
-        if self.refered_module:
-            for cmd in self.proto_ns.values():
-                self._attache_class(cmd)
+        self.refered_modules = list(self._load_refered_modules())
+        for cmd in self.proto_ns.values():
+            self._attache_class(cmd)
         Module._register_command(self)
         for v in self.command_ns.values():
             v.set_arg0_type(self._clsrestriction)
@@ -103,10 +102,12 @@ class ClassModule(Module):
                     pass
 
     def _attache_class(self, cmd):
-        modname = self.uri.python.split(u':')[-1]
-        for name, obj in self.refered_module.items():
-            if self._is_same_name(name, cmd.name):
-                cmd.uri = modname + '.' + name
+        for modname, refered_module in self.refered_modules:
+            if refered_module is None:
+                continue
+            for name, obj in refered_module.items():
+                if self._is_same_name(name, cmd.name):
+                    cmd.uri = modname + u'.' + name
 
     def _is_same_name(self, a, b):
         return a.lower().replace('-', '') == b.lower().replace('-', '')
@@ -122,16 +123,17 @@ class ClassModule(Module):
             del v['classes']
         return json.tagged(u'_class', v)
 
-    def _load_refered_module(self):
+    def _load_refered_modules(self):
         if self.uri is None:
-            return 
+            raise StopIteration()
         if 'python' not in self.uri:
-            return
-        modname = self.uri.python.split(u':')[-1]
-        if modname == 'caty.core.command':
-            return
-        if self.command_loader:
-            return self.command_loader.command_dict[modname]
+            raise StopIteration()
+        for mod in self.uri.python:
+            modname = mod.split(u':')[-1]
+            if modname == 'caty.core.command':
+                yield None, None
+            elif self.command_loader and modname in self.command_loader.command_dict:
+                yield modname, self.command_loader.command_dict[modname]
 
 class ClassExprInterpreter(object):
     def __init__(self, class_module):

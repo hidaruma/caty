@@ -1,7 +1,7 @@
 #coding: utf-8
 from topdown import *
 
-from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, CommandNode, ClassBody, ClassIntersectionOperator, UseOperator, UnuseOperator, CloseOperator, ClassReference, OpenOperator
+from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, ClassURI, CommandNode, ClassBody, ClassIntersectionOperator, UseOperator, UnuseOperator, CloseOperator, ClassReference, OpenOperator
 from caty.core.casm.language.schemaparser import schema, typedef, type_arg, scalar, type_var
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.facilityparser import _entity
@@ -147,33 +147,19 @@ def property(seq):
 
 def refers(seq):
     try:
-        return CommandURI(many1(refer)(seq))
-    except:
-        return CommandURI([(u'python', 'caty.core.command')])
-    return r
+        keyword(u'refers')(seq)
+        if option(S(u'['))(seq):
+            content = split(_refer, S(u','))(seq)
+            S(u']')(seq)
+        else:
+            content = [_refer(seq)]
+        return ClassURI([(u'python', content)])
+    except ParseFailed:
+        return ClassURI([(u'python', ['caty.core.command'])])
 
-def property(seq):
-    doc = option(docstring)(seq)
-    annotations = seq.parse(annotation)
-    keyword(u'property')(seq)
-    with strict():
-        pname = name_token(seq)
-        S('::')(seq)
-        tp = typedef(seq)
-        if option(S('='))(seq):
-            val = seq.parse(xjson.parsers)
-            annotations.add(Annotation(u'__init__', val))
-        S(u';')(seq)
-        annotations.add(Annotation(u'__property__'))
-        annotations.add(Annotation(u'bind'))
-        return CommandNode(pname, [CallPattern(None, None, CommandDecl((ScalarNode(u'void'), tp), [], []))], CommandURI([(u'python', 'caty.core.command.Dummy')]), doc, annotations, [])
-
-
-def refers(seq):
-    try:
-        return CommandURI(many1(refer)(seq))
-    except:
-        return CommandURI([(u'python', 'caty.core.command')])
+def _refer(seq):
+    S(u'python:')(seq)
+    return Regex(r'([a-zA-Z][a-zA-Z0-9]*(\.[a-zA-Z][a-zA-Z0-9]*)*)')(seq)
 
 def conforms(seq):
     keyword('conforms')(seq)
