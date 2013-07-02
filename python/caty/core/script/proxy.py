@@ -47,7 +47,7 @@ class CommandProxy(Proxy):
         self.module = module
 
     def update_module(self, module):
-        if self.module and self.module.canonical_name == module.canonical_name:
+        if self.module and module and self.module.canonical_name == module.canonical_name:
             self.module = module
 
     def instantiate(self, builder):
