@@ -79,7 +79,7 @@ class CatyEncoder(json.encoder.JSONEncoder):
         def _iterencode(self, o, markers=None):
             if isinstance(o, str):
                 yield u'b"%s"' % repr(o)[1:-1]
-            elif o is Indef:
+            elif o is INDEF:
                 yield u'indef'
             elif o is UNDEFINED:
                 pass
