@@ -22,10 +22,8 @@ class Proxy(object):
         pass
 
     def update_module(self, module):
-        if hasattr(self, 'module'):
-            if self.module.canonical_name == module.canonical_name:
-                self.module = module
-
+        pass
+        
     def reify(self):
         return json.tagged(self.reification_type, self._reify())
 
@@ -47,6 +45,10 @@ class CommandProxy(Proxy):
 
     def set_module(self, module):
         self.module = module
+
+    def update_module(self, module):
+        if self.module and self.module.canonical_name == module.canonical_name:
+            self.module = module
 
     def instantiate(self, builder):
         return builder.build(self, self.type_args, self.opts, self.args, self.pos, self.module)
@@ -100,6 +102,10 @@ class ListProxy(Proxy):
         for v in self.values:
             v.set_module(module)
 
+    def update_module(self, module):
+        for v in self.values:
+            v.update_module(module)
+
     def _reify(self):
         return [v.reify() for v in self.values]
 
@@ -132,6 +138,10 @@ class ObjectProxy(Proxy):
         for n in self.nodes:
             n.set_module(module)
 
+    def update_module(self, module):
+        for n in self.nodes:
+            n.update_module(module)
+
     def _reify(self):
         o = {}
         for n in self.nodes:
@@ -155,6 +165,10 @@ class ParallelObjectProxy(Proxy):
     def set_module(self, module):
         for n in self.nodes:
             n.set_module(module)
+
+    def update_module(self, module):
+        for n in self.nodes:
+            n.update_module(module)
 
     def _reify(self):
         o = {}
@@ -187,6 +201,9 @@ class CommandNodeProxy(Proxy):
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
+    def update_module(self, module):
+        self.cmdproxy.update_module(module)
+
     def reify(self):
         return self.cmdproxy.reify()
 
@@ -208,6 +225,10 @@ class DispatchProxy(Proxy):
     def set_module(self, module):
         for c in self.cases:
             c.set_module(module)
+
+    def update_module(self, module):
+        for c in self.cases:
+            c.update_module(module)
 
     def _reify(self):
         return {
@@ -255,6 +276,12 @@ class TypeCaseProxy(Proxy):
                 else:
                     throw_caty_exception('CompileError', module._app.i18n.get(u'types are not exclusive: $type1, $type2', type1=module.make_dumper().visit(t1), type2=module.make_dumper().visit(t2)))
 
+    def update_module(self, module):
+        if self.via:
+            self.via.update_module(module)
+        for c in self.cases:
+            c.update_module(module)
+
     def _reify(self):
         o = {
             'cases': [c.reify() for c in self.cases]
@@ -285,6 +312,10 @@ class TypeCondProxy(Proxy):
         for c in self.cases:
             c.set_module(module)
 
+    def update_module(self, module):
+        for c in self.cases:
+            c.update_module(module)
+
     def _reify(self):
         o = {
             'cases': [c.reify() for c in self.cases]
@@ -312,6 +343,9 @@ class BranchProxy(Proxy):
         tn = module.make_type_normalizer()
         self.type = ar.accept(sb).accept(rr).accept(cd).accept(ta).accept(tn).body
 
+    def update_module(self, module):
+        self.cmdproxy.update_module(module)
+
     def instantiate(self, builder):
         return Branch(self.type, self.cmdproxy.instantiate(builder))
         
@@ -330,6 +364,9 @@ class ChoiceBranchItemProxy(Proxy):
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
+    def update_module(self, module):
+        self.cmdproxy.update_module(module)
+    
     def instantiate(self, builder):
         return Branch(self.type, self.cmdproxy.instantiate(builder))
         
@@ -356,6 +393,11 @@ class TagProxy(Proxy):
             self.tag.set_module(module)
         self.cmdproxy.set_module(module)
 
+    def update_module(self, module):
+        if not isinstance(self.tag, unicode):
+            self.tag.update_module(module)
+        self.cmdproxy.update_module(module)
+
     def _reify(self):
         return {
             'tag': self.tag,
@@ -377,6 +419,10 @@ class UnaryTagProxy(Proxy):
         if not isinstance(self.tag, unicode):
             self.tag.set_module(module)
 
+    def update_module(self, module):
+        if not isinstance(self.tag, unicode):
+            self.tag.update_module(module)
+
     def _reify(self):
         return {
             'tag': self.tag
@@ -394,6 +440,10 @@ class ParTagProxy(Proxy):
     def set_module(self, module):
         self.tagcmd.set_module(module)
         self.cmdproxy.set_module(module)
+
+    def update_module(self, module):
+        self.tagcmd.update_module(module)
+        self.cmdproxy.update_module(module)
 
     def _reify(self):
         return {
@@ -424,6 +474,9 @@ class FunctorProxy(Proxy):
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
+    def update_module(self, module):
+        self.cmdproxy.update_module(module)
+    
     def _reify(self):
         return {
             'opts': [o.reify() for o in self.opts],
@@ -481,6 +534,10 @@ class CombinatorProxy(Proxy):
         self.a.set_module(module)
         self.b.set_module(module)
 
+    def update_module(self, module):
+        self.a.update_module(module)
+        self.b.update_module(module)
+
     def _reify(self):
         return [self.a.reify(), self.b.reify()]
 
@@ -493,6 +550,9 @@ class VarStoreProxy(CommandProxy):
         return VarStore(self.name)
 
     def set_module(self, module):
+        pass
+
+    def update_module(self, module):
         pass
 
     def _reify(self):
@@ -511,6 +571,9 @@ class VarRefProxy(CommandProxy):
         return VarRef(self.name, self.optional, self.default)
 
     def set_module(self, module):
+        pass
+
+    def update_module(self, module):
         pass
 
     def _reify(self):
@@ -532,6 +595,9 @@ class ArgRefProxy(CommandProxy):
     def set_module(self, module):
         pass
 
+    def update_module(self, module):
+        pass
+
     def _reify(self):
         return {
             'name': self.name,
@@ -547,6 +613,9 @@ class DiscardProxy(Proxy):
     
     def set_module(self, module):
         self.target.set_module(module)
+
+    def update_module(self, module):
+        self.target.update_module(module)
 
     def reify(self):
         return self.target.reify()
@@ -565,6 +634,9 @@ class FragmentProxy(Proxy):
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
+    def update_module(self, module):
+        self.cmdproxy.update_module(module)
+
     def _reify(self):
         return {
             'name': self.fragment_name,
@@ -582,6 +654,9 @@ class EnvelopeProxy(Proxy):
 
     def set_module(self, module):
         self.cmdproxy.set_module(module)
+
+    def update_module(self, module):
+        self.cmdproxy.update_module(module)
 
     def reify(self):
         return None #throw_caty_exception('RuntimeError', u'Action command can not reified by inspect:reify-cmd')
@@ -616,6 +691,9 @@ class TryProxy(Proxy):
     def set_module(self, module):
         self.pipeline.set_module(module)
 
+    def update_module(self, module):
+        self.pipeline.update_module(module)
+
 class CatchProxy(Proxy):
     def __init__(self, handler):
         self.handler = handler
@@ -629,6 +707,11 @@ class CatchProxy(Proxy):
             for v in self.handler.values():
                 v.set_module(module)
 
+    def update_module(self, module):
+        if self.handler:
+            for v in self.handler.values():
+                v.update_module(module)
+
 class UncloseProxy(Proxy):
     def __init__(self, pipeline, opts):
         self.pipeline = pipeline
@@ -639,6 +722,9 @@ class UncloseProxy(Proxy):
 
     def set_module(self, module):
         self.pipeline.set_module(module)
+
+    def update_module(self, module):
+        self.pipeline.update_module(module)
 
 class ChoiceBranchProxy(Proxy):
     reification_type = u'_branch'
@@ -657,6 +743,10 @@ class ChoiceBranchProxy(Proxy):
     def set_module(self, module):
         for n in self.cases:
             n.set_module(module)
+
+    def update_module(self, module):
+        for n in self.cases:
+            n.update_module(module)
 
     def _reify(self):
         o = {}
@@ -696,6 +786,9 @@ class MethodChainProxy(Proxy):
     def set_module(self, module):
         self.pipeline.set_module(module)
 
+    def update_module(self, module):
+        self.pipeline.update_module(module)
+
 class FetchProxy(Proxy):
     def __init__(self, queries, opts):
         self.queries = queries
@@ -717,6 +810,9 @@ class MutatingProxy(Proxy):
 
     def set_module(self, module):
         self.pipeline.set_module(module)
+
+    def update_module(self, module):
+        self.pipeline.update_module(module)
 
 class CommitMProxy(Proxy):
     def __init__(self, args):

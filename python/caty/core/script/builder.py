@@ -49,7 +49,7 @@ class ClassModuleWrapper(object):
     def __init__(self, module, type_args):
         self.module = module
         self.schema_finder = module.schema_finder
-        self.type_params = []
+        self._type_params = []
         rr = module.make_reference_resolver()
         for p in module.type_params:
             schema = TypeVariable(p.var_name, [], p.kind, p.default, {}, module)
@@ -72,9 +72,9 @@ class ClassModuleWrapper(object):
                 x._schema = t
                 _ta.append(x)
         if _ta:
-            self._apply_type_params(_ta, type_args)
+            self.__apply_type_params(_ta, type_args)
 
-    def _apply_type_params(self, type_params, type_args):
+    def __apply_type_params(self, type_params, type_args):
         if not type_params:
             return
         tp = []
@@ -82,7 +82,7 @@ class ClassModuleWrapper(object):
             param.var_name = arg.var_name
             tp.append(param)
         if tp:
-            self.type_params = tp
+            self._type_params = tp
 
     def apply(self, type):
         tc = self.module.make_typevar_applier()
@@ -93,6 +93,10 @@ class ClassModuleWrapper(object):
 
     def __getattr__(self, name):
         return getattr(self.module, name)
+
+    @property
+    def type_params(self):
+        return self._type_params
 
 class NullCommand(Command):
     def __init__(self, e):

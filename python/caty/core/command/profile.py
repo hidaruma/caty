@@ -222,7 +222,7 @@ class CommandProfile(object):
 
     def apply(self, node, module):
         r = []
-        for s in [self._in_schema, self._out_schema, self.__arg0_schema]:
+        for s in [node._in_schema, node._out_schema, node.arg0_schema]:
             tc = module.make_typevar_applier()
             tc._init_type_params(node)
             tc.real_root = False

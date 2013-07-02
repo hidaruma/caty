@@ -142,6 +142,7 @@ class CommandExecutor(BaseInterpreter):
                     node.in_schema.validate(input)
                 except JsonSchemaError, e:
                     info = e.error_report(self.app.i18n)
+                    print u'[DEBUG]', node.name
                     throw_caty_exception(u'InputTypeError', prettyprint(info), errorInfo=info)
                 if u'no-auto-fill' in node.annotations:
                     r = exec_func(node, input)

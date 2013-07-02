@@ -36,7 +36,7 @@ class ProfileBuilder(SchemaBuilder):
             rr = ReferenceResolver(self.module)
             params = []
             # 型パラメータのデフォルト値を設定
-            for p in node.type_params + self.module.type_params:
+            for p in node.type_params:
                 schema = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
                 params.append(schema.accept(rr))
             self._type_params = params

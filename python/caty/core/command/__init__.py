@@ -144,16 +144,20 @@ class Command(object):
                     _ta.append(x)
         if _ta:
             self.apply_type_params(_ta)
-        if self.type_params:
-            self._in_schema, self._out_schema, self.__arg0_schema = self.profile.apply(self, self.profile_container.module)
+        if self.__module and self.__module.type_params:
+            self._in_schema = self.__module.apply(self.profile.in_schema)
+            self._out_schema = self.__module.apply(self.profile.out_schema)
+            self.__arg0_schema = self.__module.apply(self.profile.arg0_schema)
+            for t1 in self.type_params:
+                for t2 in self.__module.type_params:
+                    if t2.var_name == t1.var_name and not t1._schema:
+                        t1._schema = t2._schema
         else:
             self._in_schema = self.profile.in_schema
             self._out_schema = self.profile.out_schema
             self.__arg0_schema = self.profile.arg0_schema
-        if self.__module and self.__module.type_params:
-            self._in_schema = self.__module.apply(self._in_schema)
-            self._out_schema = self.__module.apply(self._out_schema)
-            self.__arg0_schema = self.__module.apply(self.__arg0_schema)
+        if self.type_params:
+            self._in_schema, self._out_schema, self.__arg0_schema = self.profile.apply(self, self.profile_container.module)
 
     def _set_arg0(self, force_arg0=UNDEFINED):
         if force_arg0 is not UNDEFINED and not self.__arg0_ref:
@@ -226,6 +230,10 @@ class Command(object):
     @property
     def arg0(self):
         return self.__arg0
+
+    @property
+    def arg0_schema(self):
+        return self.__arg0_schema
 
     def set_facility(self, facilities, target_app=None):
         u"""ファシリティの設定。
