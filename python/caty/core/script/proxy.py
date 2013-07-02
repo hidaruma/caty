@@ -21,6 +21,11 @@ class Proxy(object):
     def set_module(self, module):
         pass
 
+    def update_module(self, module):
+        if hasattr(self, 'module'):
+            if self.module.canonical_name == module.canonical_name:
+                self.module = module
+
     def reify(self):
         return json.tagged(self.reification_type, self._reify())
 

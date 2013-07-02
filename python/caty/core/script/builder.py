@@ -29,7 +29,7 @@ class CommandBuilder(object):
         from caty.core.command.param import Option, OptionVarLoader, Argument, NamedArg
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
-            cls.set_module(module)
+            cls.update_module(module)
             obj = scriptwrapper(profile, lambda :cls.instantiate(self))
             cmd = obj(opts_ref, args_ref, type_args, pos, module)
         else:
