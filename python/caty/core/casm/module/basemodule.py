@@ -822,6 +822,9 @@ class Module(Facility):
         import caty.jsontools as json
         return e.is_runaway
 
+    def apply(self, ignore):
+        return ignore
+
 class _FaciltyLoader(object):
     def __init__(self, clsref, facility_name, module):
         self.path = facility_name + '.py'

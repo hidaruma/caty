@@ -665,7 +665,6 @@ class Not(Builtin):
     def execute(self, input):
         return _not(normalize_tribool(input))
 
-
 def _not(input):  
     if input == True:
         return False

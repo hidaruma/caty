@@ -729,3 +729,16 @@ class FoldProxy(FunctorProxy):
     def _get_class(self):
         return Fold
 
+class ClassProxy(Proxy):
+    def __init__(self, name, type_args, command):
+        self.name = name
+        self.type_args = type_args
+        self.command = command
+
+    def set_module(self, module):
+        self.module = module
+
+    def instantiate(self, builder):
+        m = builder.get_class_module(self)
+        self.command.set_module(m)
+        return self.command.instantiate(builder)

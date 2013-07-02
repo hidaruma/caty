@@ -67,7 +67,7 @@ class SchemaBuilder(TreeCursor):
                     return schema 
             raise CatyException(u'SCHEMA_COMPILE_ERROR', 
                                 u'Undeclared type variable at $this: $name',
-                                this=self._root_name, name=node.name)
+                                this=(self._root_name or u'public'), name=node.name)
 
     @apply_annotation
     def _visit_option(self, node):

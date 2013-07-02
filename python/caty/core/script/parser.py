@@ -44,6 +44,7 @@ from caty.core.script.proxy import FetchProxy as Fetch
 from caty.core.script.proxy import MutatingProxy as Mutating
 from caty.core.script.proxy import CommitMProxy as CommitM
 from caty.core.script.proxy import FoldProxy as Fold
+from caty.core.script.proxy import ClassProxy
 from caty.core.script.query import *
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
@@ -296,15 +297,21 @@ class ScriptParser(Parser):
         type_args = option(self.type_args, [])(seq)
         if option(S(u'.'))(seq):
             mname = name_token(seq)
-            name = name + '.' + mname
             type_args2 = option(self.type_args, [])(seq)
-            type_args += type_args2
-        if not no_opt:
-            opts = self.options(seq)
-            args = self.arguments(seq)
+            if not no_opt:
+                opts = self.options(seq)
+                args = self.arguments(seq)
+            else:
+                opts = []
+                args = []
+            return ClassProxy(name, type_args, CommandProxy(mname, type_args2, opts, args, pos))
         else:
-            opts = []
-            args = []
+            if not no_opt:
+                opts = self.options(seq)
+                args = self.arguments(seq)
+            else:
+                opts = []
+                args = []
         return CommandProxy(name, type_args, opts, args, pos)
 
     def call_forward(self, seq):

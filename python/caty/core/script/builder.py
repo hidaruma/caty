@@ -1,6 +1,8 @@
 # coding:utf-8
 from caty.core.command import Builtin, Command, scriptwrapper
 from caty.core.exception import CatyException, SystemResourceNotFound
+from caty.core.schema import TypeVariable
+
 class CommandBuilder(object):
     def __init__(self, facilities, namespace):
         self.facilities = facilities
@@ -27,6 +29,7 @@ class CommandBuilder(object):
         from caty.core.command.param import Option, OptionVarLoader, Argument, NamedArg
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
+            cls.set_module(module)
             obj = scriptwrapper(profile, lambda :cls.instantiate(self))
             cmd = obj(opts_ref, args_ref, type_args, pos, module)
         else:
@@ -37,6 +40,59 @@ class CommandBuilder(object):
         u"""Syntax オブジェクトなど、通常の処理経路をたどらないオブジェクトにファシリティを追加する。
         """
         c.set_facility(self.facilities)
+
+    def get_class_module(self, cls_proxy):
+        cls = ClassModuleWrapper(cls_proxy.module.get_class(cls_proxy.name), cls_proxy.type_args)
+        return cls
+
+class ClassModuleWrapper(object):
+    def __init__(self, module, type_args):
+        self.module = module
+        self.schema_finder = module.schema_finder
+        self.type_params = []
+        rr = module.make_reference_resolver()
+        for p in module.type_params:
+            schema = TypeVariable(p.var_name, [], p.kind, p.default, {}, module)
+            self.type_params.append(schema.accept(rr))
+        schema = module.schema_finder
+        l = len(type_args)
+        _ta = []
+        for i, p in enumerate(self.type_params):
+            if i < l:
+                s = type_args[i]
+                sb = module.make_schema_builder()
+                sb._type_params = self.type_params
+                rr = module.make_reference_resolver()
+                tn = module.make_type_normalizer()
+                ta = module.make_typevar_applier()
+                ta._init_type_params(self)
+                ta.real_root = False
+                t = tn.visit(s.accept(sb).accept(rr)).accept(ta)
+                x = p.clone(set())
+                x._schema = t
+                _ta.append(x)
+        if _ta:
+            self._apply_type_params(_ta, type_args)
+
+    def _apply_type_params(self, type_params, type_args):
+        if not type_params:
+            return
+        tp = []
+        for param, _, arg in zip(type_params, type_args, self.type_params):
+            param.var_name = arg.var_name
+            tp.append(param)
+        if tp:
+            self.type_params = tp
+
+    def apply(self, type):
+        tc = self.module.make_typevar_applier()
+        tc._init_type_params(self)
+        tc.real_root = False
+        r = type.accept(tc)
+        return r 
+
+    def __getattr__(self, name):
+        return getattr(self.module, name)
 
 class NullCommand(Command):
     def __init__(self, e):
