@@ -623,60 +623,61 @@ class Equals(Builtin):
                 return True
             return False
 
+from caty.util import normalize_tribool
 class And(Builtin):
     def execute(self, input):
-        return reduce(self._and, input, True)
+        return reduce(self._and, map(normalize_tribool, input), True)
 
     def _and(self, a, b):
-        if a == True or tag(a) == u'True':
-            if b == True or tag(b) == u'True':
+        if a == True:
+            if b == True:
                 return True
-            elif b == False or tag(b) == u'False':
+            elif b == False:
                 return False
             return INDEF
-        elif a == False or tag(a) == u'False':
+        elif a == False:
             return False
         else:
-            if b == False or tag(b) == u'False':
+            if b == False:
                 return False
             return INDEF
 
 class Or(Builtin):
     def execute(self, input):
-        return reduce(self._or, input, False if len(input) > 0 else True)
+        return reduce(self._or, map(normalize_tribool, input), False if len(input) > 0 else True)
 
     def _or(self, a, b):
-        if a == True or tag(a) == u'True':
+        if a == True:
             return True
-        elif a == False or tag(a) == u'False':
-            if b == True or tag(b) == u'True':
+        elif a == False:
+            if b == True:
                 return True
-            elif b == False or tag(b) == u'False':
+            elif b == False:
                 return False
             else:
                 return INDEF
         else:
-            if b == True or tag(b) == u'True':
+            if b == True:
                 return True
             return INDEF
 
 class Not(Builtin):
     def execute(self, input):
-        return _not(input)
+        return _not(normalize_tribool(input))
 
 
 def _not(input):  
-    if input == True or tag(input) == u'True':
+    if input == True:
         return False
-    elif input == False or tag(input) == u'False':
+    elif input == False:
         return True
     else:
         return INDEF
 
 class Implies(Or):
     def execute(self, input):
-        a = _not(input[0])
-        return self._or(a, input[1])
+        a = _not(normalize_tribool(input[0]))
+        return self._or(a, normalize_tribool(input[1]))
 
 class Eval(Builtin):
     

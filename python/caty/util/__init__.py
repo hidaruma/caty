@@ -243,3 +243,11 @@ def timestamp_from_utime(sec):
     import time
     return datetime.datetime(*(time.localtime(sec)[:-3]))
 
+def normalize_tribool(a):
+    from caty.jsontools import tag
+    if a == True or tag(a) in (u'True', u'OK'):
+        return True
+    elif a == False or tag(a) in (u'False', u'NG'):
+        return False
+    else:
+        return INDEF
