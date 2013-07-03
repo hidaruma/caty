@@ -541,6 +541,7 @@ _tag_class_dict = {
 
 _reserved = set(_tag_class_dict.values())
 _reserved.add('foreign')
+_reserved.add('integer')
 
 _builtin_types = dict()
 for a, b in _tag_class_dict.items():
@@ -550,8 +551,6 @@ for a, b in _tag_class_dict.items():
         _builtin_types[b].append(a)
 _builtin_types['number'].append(int)
 _builtin_types['integer'] = [int]
-_builtin_types['number'].append(long)
-_builtin_types['integer'] = [long]
 
 class _anything_else(object):
     def __contains__(self, tp):
@@ -754,7 +753,7 @@ class SelectionFixer(object):
                 try:
                     scm.validate(input)
                     tp = input['$selection'], type(input['$current']), type(input['$values'])
-                    if tp not in ((u'object', unicode, dict), (u'array',long,  int, list)):
+                    if tp not in ((u'object', unicode, dict), (u'array', int, list)):
                         throw_caty_exception(u'BadSelection', 
                                          u'Invalid selection: $cause, $obj', 
                                          cause=u'miss matched',

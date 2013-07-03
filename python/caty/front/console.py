@@ -449,10 +449,10 @@ Web hconサーバの起動・停止を行う
         try:
             cmd.Cmd.cmdloop(self, *args, **kwds)
         except KeyboardInterrupt, e:
-            self.cleanup()
+            self.cleanup_console()
             raise
 
-    def cleanup(self):
+    def cleanup_console(self):
         if self.server is not None:
             self.server.shutdown()
             self.server.stop()
@@ -460,6 +460,9 @@ Web hconサーバの起動・停止を行う
             self.hcon.shutdown()
             self.hcon.stop()
         self.system.finalize()
+
+    def cleanup(self):
+        pass
 
     @catch
     def do_setenv(self, line):
@@ -695,7 +698,7 @@ def main(args):
             code = sh.exec_files(args)
         else:
             code = sh.exec_script(script)
-    sh.cleanup()
+    sh.cleanup_console()
     return code
 
 if __name__ == '__main__':
