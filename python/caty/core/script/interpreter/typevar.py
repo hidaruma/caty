@@ -10,10 +10,13 @@ class TypeVarApplier(BaseInterpreter):
 
     def visit_script(self, node):
         if not node.prepared:
+            ta = []
             for i, t in enumerate(node.type_args):
                 for p in self.type_params:
                     if p.var_name == t.name:
-                        node.type_args[i] = p._schema if p._schema else p._default_schema if p._default_schema else p
+                        ta.append(p._schema if p._schema else p._default_schema if p._default_schema else p)
+            if ta:
+                node.apply_type_params(ta)
             return
         node.apply_type_params(self.type_params)
         if node.script:
