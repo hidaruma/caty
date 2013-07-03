@@ -158,12 +158,12 @@ class Whereis(Internal):
     def execute(self):
         from caty.core.language import split_colon_dot_path
         app, mod, cn = split_colon_dot_path(self._cmd_name, u'cmd')
-        m = self.current_app.get_app(app)._schema_module.get_module(mod)
+        m = self.current_app.get_app(app)._schema_module
         if self.type == 'command':
-            c = m.get_command(cn)
+            c = m.get_command(mod + ':' +cn)
         elif self.type == 'type':
-            c = m.get_type(cn)
+            c = m.get_type(mod + ':' +cn)
         elif self.type == 'class':
-            c = m.get_class(cn)
+            c = m.get_class(mod + ':' +cn)
         return c.module.app.name + u'::' + c.module.canonical_name + u':' + c.name
 

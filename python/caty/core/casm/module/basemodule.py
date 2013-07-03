@@ -227,9 +227,15 @@ class Module(Facility):
                 return self._another_app_callback(rname, tracked, scope_func, type)
         if mod_name:
             if mod_name == self.name:
-                return self._get_resource(name, tracked, scope_func, type)
+                r = self._get_resource(name, tracked, scope_func, type)
+                if r.module.name == mod_name or mod_name in ('builtin', 'public'):
+                    return r
+                raise SystemResourceNotFound(u'%sNotFound' % type, u'$name', name=rname)
             mod = self.get_module(mod_name)
-            return mod._get_resource(name, tracked, scope_func, type)
+            r = mod._get_resource(name, tracked, scope_func, type)
+            if r.module.name == mod_name or mod_name in ('builtin', 'public'):
+                return r
+            raise SystemResourceNotFound(u'%sNotFound' % type, u'$name', name=rname)
         if '.' in name:
             c, n = name.split('.', 1)
             if c == self.name:

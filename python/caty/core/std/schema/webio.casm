@@ -118,7 +118,7 @@ command unconstrue
    @[default("form")]
    "format" : GenericFormatName?,
  }
-:: json:StandardJson -> Generic throws [webio_InsufficientMetainfo, ConversionError]
+:: StandardJson -> Generic throws [webio_InsufficientMetainfo, ConversionError]
     refers python:webio.UnConstrue;
 
 /** genericデータをrawデータにdownward変換する 
