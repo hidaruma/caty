@@ -388,7 +388,7 @@ class PPEncoder(CatyEncoder):
                     yield e
             elif isinstance(o, TagOnly):
                 yield u'@%s' % (o.tag)
-            elif not isinstance(o, (basestring, bool, int, decimal.Decimal, InternalDecimal, dict, list, tuple)) and o is not None:
+            elif not isinstance(o, (basestring, long, bool, int, decimal.Decimal, InternalDecimal, dict, list, tuple)) and o is not None:
                 from caty import UNDEFINED
                 if o is UNDEFINED:
                     yield u"#'undefined"
@@ -526,6 +526,7 @@ import caty
 import caty.core.spectypes
 _tag_class_dict = {
     int: u'number',
+    long: u'number',
     decimal.Decimal: u'number',
     bool: u'boolean',
     dict: u'object',
@@ -550,6 +551,8 @@ for a, b in _tag_class_dict.items():
         _builtin_types[b].append(a)
 _builtin_types['number'].append(int)
 _builtin_types['integer'] = [int]
+_builtin_types['number'].append(long)
+_builtin_types['integer'] = [long]
 
 class _anything_else(object):
     def __contains__(self, tp):
@@ -723,7 +726,7 @@ def path2obj(obj):
 
 import types
 def is_json(obj):
-    if isinstance(obj, (int, decimal.Decimal, unicode, str, bool, types.NoneType)):
+    if isinstance(obj, (long, int, decimal.Decimal, unicode, str, bool, types.NoneType)):
         return True
     elif isinstance(obj, dict):
         return all(map(is_json, obj.values()))
@@ -752,7 +755,7 @@ class SelectionFixer(object):
                 try:
                     scm.validate(input)
                     tp = input['$selection'], type(input['$current']), type(input['$values'])
-                    if tp not in ((u'object', unicode, dict), (u'array', int, list)):
+                    if tp not in ((u'object', unicode, dict), (u'array',long,  int, list)):
                         throw_caty_exception(u'BadSelection', 
                                          u'Invalid selection: $cause, $obj', 
                                          cause=u'miss matched',
