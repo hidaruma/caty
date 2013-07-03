@@ -540,7 +540,6 @@ _tag_class_dict = {
 }
 
 _reserved = set(_tag_class_dict.values())
-_reserved.add('integer')
 _reserved.add('foreign')
 
 _builtin_types = dict()

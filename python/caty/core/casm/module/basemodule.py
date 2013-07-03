@@ -228,12 +228,12 @@ class Module(Facility):
         if mod_name:
             if mod_name == self.name:
                 r = self._get_resource(name, tracked, scope_func, type)
-                if r.module.name == mod_name or mod_name in ('builtin', 'public'):
+                if is_valid_call(r, mod_name):
                     return r
                 raise SystemResourceNotFound(u'%sNotFound' % type, u'$name', name=rname)
             mod = self.get_module(mod_name)
             r = mod._get_resource(name, tracked, scope_func, type)
-            if r.module.name == mod_name or mod_name in ('builtin', 'public'):
+            if is_valid_call(r, mod_name):
                 return r
             raise SystemResourceNotFound(u'%sNotFound' % type, u'$name', name=rname)
         if '.' in name:
@@ -898,3 +898,11 @@ class LocalModule(Module):
     def clone(self):
         return self
 
+def is_valid_call(res, mod_name):
+    if res.module.name == mod_name:
+        return True
+    if mod_name in ('builtin', 'public'):
+        return True
+    if res.module.parent and res.module.parent.name == mod_name:
+        return True
+    return False
