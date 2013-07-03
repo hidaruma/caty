@@ -170,6 +170,9 @@ class CommandExecutor(BaseInterpreter):
             #node.signal_schema.validate(e.raw_data)
             raise e
         except CatyException as e:
+            if self.facility_set['env'].get('DEBUG'):
+                msg = u'[DEBUG] {0}: Col {1}, Line {2}'.format(node.name, node.col, node.line)
+                util.cout.writeln(msg)
             import sys
             info = sys.exc_info()[2]
             if e.tag in ('UnexpectedArg', 'UnexpectedOption', 'MissingArg', 'MissingOption', 'InputTypeError'):

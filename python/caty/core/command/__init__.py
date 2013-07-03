@@ -171,6 +171,8 @@ class Command(object):
             param.var_name = arg.var_name
             tp.append(param)
         if tp:
+            for p in self.type_params[len(tp):]:
+                tp.append(p)
             self.__type_params = tp
             self.__type_args = []
 
@@ -474,6 +476,7 @@ def scriptwrapper(profile, scriptfactory):
             self.scriptfactory = scriptfactory
             self.script = None
             self.type_var_applied = False
+            self.prepared = False
             Command.__init__(self, opts_ref, args_ref, type_args, pos, module)
 
         def execute(self, input=None):
@@ -496,6 +499,7 @@ def scriptwrapper(profile, scriptfactory):
             self._set_profile()
             self._set_arg0(force_arg0)
             self._finish_opts()
+            self.prepared = True
 
         def set_var_storage(self, storage):
             Command.set_var_storage(self, storage)

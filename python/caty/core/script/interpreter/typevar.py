@@ -1,5 +1,5 @@
 from caty.core.script.interpreter.base import BaseInterpreter
-
+from caty.core.schema.base import TypeVariable
 
 class TypeVarApplier(BaseInterpreter):
     def __init__(self, type_params):
@@ -7,6 +7,17 @@ class TypeVarApplier(BaseInterpreter):
 
     def visit_command(self, node):
         node.apply_type_params(self.type_params)
+
+    def visit_script(self, node):
+        if not node.prepared:
+            for i, t in enumerate(node.type_args):
+                for p in self.type_params:
+                    if p.var_name == t.name:
+                        node.type_args[i] = p._schema if p._schema else p._default_schema if p._default_schema else p
+            return
+        node.apply_type_params(self.type_params)
+        if node.script:
+            node.script.accept(self)
 
     def visit_pipe(self, node):
         node.bf.accept(self)
@@ -64,11 +75,6 @@ class TypeVarApplier(BaseInterpreter):
 
     def visit_take(self, node):
         node.cmd.accept(self)
-
-    def visit_script(self, node):
-        node.apply_type_params(self.type_params)
-        if node.script:
-            node.script.accept(self)
 
     def visit_start(self, node):
         node.cmd.accept(self)
