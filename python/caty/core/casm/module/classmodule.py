@@ -84,6 +84,10 @@ class ClassModule(Module):
             self._attache_class(cmd)
         Module._register_command(self)
         for v in self.command_ns.values():
+            for p in v.type_params:
+                for p2 in self.type_params:
+                    if p.var_name == p2.var_name:
+                        throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Conflicted type parameter: %s<%s>' % (v.canonical_name, p.var_name))
             v.set_arg0_type(self._clsrestriction)
         class_expr_interpreter = ClassExprInterpreter(self)
         class_body = class_expr_interpreter.visit(self._clsobj.expression)
