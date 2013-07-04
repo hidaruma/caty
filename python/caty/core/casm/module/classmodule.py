@@ -16,6 +16,7 @@ class ClassModule(Module):
         self._name = clsobj.name
         self._clsobj = clsobj
         self._declared = set()
+        self.type_params = clsobj.type_args
         for m in clsobj.member:
             m.declare(self)
             self._declared.add(m)
@@ -23,7 +24,6 @@ class ClassModule(Module):
         self.is_root = False
         self.annotations = clsobj.annotations
         self.count = 0
-        self.type_params = clsobj.type_args
         self.docstring = clsobj.docstring
         self.defined = True
         self.redifinable = False

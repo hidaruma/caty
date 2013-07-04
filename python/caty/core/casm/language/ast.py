@@ -629,6 +629,30 @@ class CommandNode(Function):
             t = u'_script'
         return json.tagged(u'command', json.tagged(t, r))
         
+class AssertionNode(CommandNode):
+    def __init__(self, patterns, uri_or_script, doc, annotation, type_params, command_type=u'command'):
+        CommandNode.__init__(self, u'', patterns, uri_or_script, doc, annotation, type_params, command_type)
+
+    def declare(self, module):
+        self.module = module
+        num = 1
+        for p in module.proto_ns.values():
+            if u'__assert' in p.annotation:
+                num += 1
+        self.name = u'_assert_' + str(num)
+        if module.type_params:
+            type_params = []
+            for tp in self.type_params:
+                for tp2 in module.type_params:
+                    if tp.var_name == tp2.var_name:
+                        break
+                else:
+                    type_params.append(tp)
+            self.type_var_names = [n.var_name for n in type_params]
+            self.type_params = type_params
+            self.type_params_ast = type_params
+        module.add_proto_type(self)
+        self.application = module.application
 
 class CallPattern(object):
     def __init__(self, opts, args, decl):

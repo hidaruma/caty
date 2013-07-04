@@ -3,7 +3,7 @@ import re
 from topdown import *
 from caty.core.casm.language.ast import *
 from caty.core.language.util import *
-from caty.core.casm.language.schemaparser import term, typedef, object_, array, type_arg
+from caty.core.casm.language.schemaparser import term, typedef, object_, array, type_arg, typename
 from caty.jsontools import xjson
 RESERVED = frozenset([
 'number', 'integer', 'string', 'boolean', 'array', 'object',
@@ -19,8 +19,10 @@ def command(seq):
         #seq.parser_hook = ParserHook(skip_ws, rmcmt)
         doc = option(docstring)(seq)
         a = seq.parse(annotation)
-        _ = seq.parse(keyword(u'command'))
+        _ = choice(keyword(u'command'), keyword(u'assert'))(seq)
         with strict():
+            if _ == u'assert':
+                return assertion(seq, doc, a)
             n = seq.parse(cmdname)
             if n in RESERVED:
                 raise ParseFailed(seq, command, '%s is reserved.' % n)
@@ -206,4 +208,52 @@ class CommandScriptParser(ScriptParser):
         except:
             r = Empty()
         return r
+
+def assertion(seq, doc, annotation):
+    from caty.core.script.parser import ListBuilder, VarStore, Discard, JsonPath, combine_proxy, JSONPathSelectorParser
+    bound_vars = option(bindings)(seq)
+    bound_names = []
+    in_type_items = []
+    for tn, names in bound_vars:
+        for n in names:
+            if n not in bound_names:
+                bound_names.append(n)
+            else:
+                raise ParseFailed(seq, u'Conflicted variable: %s' % n)
+            in_type_items.append(ScalarNode(tn))
+    parser = CommandScriptParser()
+    S(u'{')(seq)
+    body = parser(seq)
+    S(u'}')(seq)
+    nohook(S(u';'))(seq)
+    doc2 = postfix_docstring(seq)
+    doc = concat_docstring(doc, doc2)
+    in_type = ArrayNode(in_type_items, {})
+    setup = []
+    for i, k in enumerate(bound_names):
+        jp = JsonPath(JSONPathSelectorParser(False, True).run(u'$.' + str(i)), (0,0))
+        setup.append(combine_proxy([jp, VarStore(k)]))
+    type_args = []
+    for tn, names in bound_vars:
+        type_args.append(TypeParam(tn, None, None))
+    patterns = [lambda j, r: CallPattern(None, None, CommandDecl(((in_type), ScalarNode(u'Logical')), j, r))]
+    l = ListBuilder()
+    l.set_values(setup)
+    script = combine_proxy([l, body])
+    annotation.add(Annotation(u'__assert'))
+    return AssertionNode(map(lambda p:p([], []), patterns), script, doc, annotation, type_args)
+
+@try_
+def bindings(seq):
+    S(u'(')(seq)
+    b = split(binding, u',', allow_last_delim=True)(seq)
+    S(u')')(seq)
+    return b
+
+@try_
+def binding(seq):
+    names = split(name_token, u',', allow_last_delim=True)(seq)
+    S(u'::')(seq)
+    tn = typename(seq)
+    return tn, names
 
