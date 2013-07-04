@@ -211,7 +211,7 @@ class CommandScriptParser(ScriptParser):
 
 def assertion(seq, doc, annotation):
     from caty.core.script.parser import ListBuilder, VarStore, Discard, JsonPath, combine_proxy, JSONPathSelectorParser
-    bound_vars = option(bindings)(seq)
+    bound_vars = option(bindings, [])(seq)
     bound_names = []
     in_type_items = []
     for tn, names in bound_vars:
@@ -228,7 +228,10 @@ def assertion(seq, doc, annotation):
     nohook(S(u';'))(seq)
     doc2 = postfix_docstring(seq)
     doc = concat_docstring(doc, doc2)
-    in_type = ArrayNode(in_type_items, {})
+    if in_type_items:
+        in_type = ArrayNode(in_type_items, {})
+    else:
+        in_type = ScalarNode(u'null')
     setup = []
     for i, k in enumerate(bound_names):
         jp = JsonPath(JSONPathSelectorParser(False, True).run(u'$.' + str(i)), (0,0))
