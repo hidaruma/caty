@@ -169,6 +169,7 @@ def type_arg(seq):
 
 @try_
 def named_type_paramater(seq):
+    doc = option(docstring)(seq)
     arg_name = name_token(seq)
     S(u'=')(seq)
     name = name_token(seq)
@@ -177,6 +178,7 @@ def named_type_paramater(seq):
     return NamedTypeParam(arg_name, name, kind, default)
 
 def type_paramater(seq):
+    doc = option(docstring)(seq)
     name = name_token(seq)
     kind = option(kind_of)(seq)
     default = option(default_type)(seq)
