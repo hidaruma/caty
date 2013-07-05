@@ -10,13 +10,12 @@ class Fetcher(object):
         import caty.jsontools as json
         import caty.jsontools.selector as selector
         ref = json.untagged(ref)
-        name = ref[u'type'] + 'Action.get'
-        if u'arg' in ref:
-            raw_args = [ref[u'arg']]
-        else:
-            raw_args = [None]
+        name = ref[u'type'] + '.get'
+        raw_args = [ref[u'arg']]
+        if u'ext' in ref and auto_extract:
+            raw_args.append(ref[u'ext'])
         cmd_class = app._schema_module.get_command(name)
-        opts = [Option('0', None)]
+        opts = []
         args = []
         for v in raw_args:
             args.append(Argument(v))
@@ -27,9 +26,6 @@ class Fetcher(object):
         cmd_instance.set_var_storage(var_storage)
         executor = TransactionPendingAdaptor(CommandExecutor(cmd_instance, app, facilities), facilities)
         r = executor(None)
-        if u'ext' in ref and auto_extract:
-            stm = selector.compile(ref['ext'])
-            r = stm.select(r).next()
         return r
 
 class TypeQuery(object):

@@ -772,6 +772,9 @@ class CommandExecutor(BaseInterpreter):
                 qo = labels[qo.value]
             try:
                 node.in_schema.validate(data)
+            except:
+                return data
+            else:
                 orig = data
                 if qo.type == u'address':
                     return data
@@ -785,8 +788,6 @@ class CommandExecutor(BaseInterpreter):
                     resolved = True
                 else:
                     return data
-            except:
-                pass
             if qo.type == u'type':
                 if qo.value in (u'any', u'_'):
                     if isinstance(data, dict):
