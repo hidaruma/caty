@@ -1,0 +1,781 @@
+/* -*- coding: utf-8 -*- */
+
+/** さまざまな指標 
+ */
+module sig;
+
+/** 等値性
+ * 集合X上の等値性（同値関係）を規定する。
+ */
+signature Eq
+<
+  X
+> = 
+{
+ /** 等値性述語（二項関係）*/
+ command eq  :: [X, X] -> Logical;
+
+
+ /** 反射律
+  * ∀x∈X.(x = x)
+  */
+ assert (x :: X) {
+  [%x, %x] | eq
+ };
+
+ /** 対称律 
+  * ∀x, y∈X.(x = y ⇒ y = x)
+  */
+ assert (x, y:: X) {
+  [
+    [%x, %y] | eq,
+    [%y, %x] | eq,
+  ] | implies
+ };
+
+ /** 推移律 
+  * ∀x, y, z∈X.((x = y ∧ y = z) ⇒ x = z)
+  */
+ assert (x, y, z::X) {
+  [
+
+    [
+      [%x, %y] | eq,
+      [%y, %z] | eq,
+    ] | and
+    ,
+    [%x, %z] | eq
+    ,
+
+  ] | implies
+ };
+
+};
+
+/** （部分）順序集合
+ */
+signature Ord<T> conforms Eq<T> = {
+ /** 不等号 ＜ */
+ command lt :: [T, T] -> tboolean;
+
+ /** 不等号 ≦ */
+ command lte :: [T, T] -> tboolean {
+   [eq, lt] | or
+ };
+
+ /** 不等号 ＞ */
+ command gt :: [T, T] -> tboolean;
+
+ /** 不等号 ≧ */
+ command gte :: [T, T] -> tboolean {
+   [eq, gt] | or
+ };
+
+};
+
+/** 離散的な線形順序集合
+ */
+signature Seq<T> conforms Ord<T> = {
+  /** 後者 */
+  command succ :: T -> T throws Bounded;
+
+  /** 前者 */
+  command pred:: T -> T throws Bounded;
+
+  /* 別名 */
+
+  command next := succ;
+  command prev := pred;
+};
+
+
+/** 下に有界な順序集合
+ */
+signature LBounded<T> conforms Ord<T> = {
+  /** 最小元 */
+  command bottom :: void -> T;
+
+  /* 別名 */
+
+  command first := bottom;
+};
+
+
+/** 上に有界な順序集合
+ */
+signature UBounded<T> conforms Ord<T> = {
+  /** 最大元 */
+  command top :: void -> T;
+
+  /* 別名 */
+
+  command last := top;
+};
+
+/** meet半束（meet semilattice）
+ */
+signature MSLat<T> conforms UBounded<T> = {
+  /** 二項のmeet演算 ∧ */
+  command meet2 :: [T, T] -> T;
+
+  /* 別名 */
+  command min2 := meet2;
+
+  /** n項のmeet演算 ∧ */
+  command meet :: [T*] -> T {
+    [pass, top] | fold {[%_acc, pass] | meet2}
+  };
+
+  /* 別名 */
+  command min := meet;
+};
+
+/** join半束（join semilattice）
+ */
+signature JSLat<T> conforms LBounded<T> = {
+  /** 二項のjoin演算 ∨ */
+  command join2 :: [T, T] -> T;
+
+  /* 別名 */
+  command max2 := join2;
+
+  /** n項のjoin演算 ∨ */
+  command join :: [T*] -> T {
+    [pass, bottom] | fold {[%_acc, pass] | join2}
+  };
+
+  /* 別名 */
+  command max := join;
+
+};
+
+/** 上と下に有界な順序集合 
+ */
+signature Bounded<T> conforms [LBounded<T>, UBounded<T>] = {};
+
+/*{{{
+
+/** 付点集合（Pointed Set）
+ */
+signature Pointed<X> {
+ command base :: void -> X;
+};
+
+
+/** レトラクタブルな集合
+ * 例： 実数を整数に切り捨てる操作
+ */
+signature Retractable<X, A> {
+
+ command retract :: X -> A;
+ command incl :: A -> X;
+ command self-retract :: X -> X {
+   retract | incl;
+ };
+
+ /** レトラクト性
+  */
+ assert (a :: A) {
+  [
+    %a | incl | retract,
+    %a
+  ] | eq
+ };
+
+ /** 自己レトラクトの定義
+  */
+ assert (x :: X) {
+  [
+    %x |retract | incl,
+    %x | self-retract,
+  ] | eq
+ };
+
+ /** 自己レトラクトのベキ等性
+  */
+ assert (x :: X) {
+  [
+    %x | self-retract | self-retract,
+    %x | self-retract,
+  ] | eq
+ };
+
+};
+
+}}}*/
+
+
+/** 部分的に「主キー」を持つ集合
+ */
+signature PatiallyKeyed
+<
+  /* レコードの集合 */ X, 
+  /* キーの集合 */     K
+> = 
+{
+ /** レコードのキーを得る */
+ command key :: X -> K throws Undefined;
+
+ /** レコードがキーを持つかどうか調べる */
+ command has-key :: X -> boolean;
+
+ /** 引数に与えられたキーからレコードを得る */
+ command get [K key] :: void -> X throws NotFound;
+
+ /** 入力に与えられたキーからレコードを得る */
+ command get_ :: K -> X throws NotFound;
+
+
+ /** has-keyの値が妥当であること */
+ assert (x :: X) {
+    %x | has-key > has-key;
+    
+    try { %x | key } |
+    catch {
+       except => false,
+       normal => true,
+     } > can-key;
+
+     [
+       %has-key,
+       %can-key,
+     ] | eq
+  };
+
+  /** get と key がおおよそ逆であること */
+  assert (k :: K) {
+    try {get %k} |
+    catch {
+      except => true,
+      normal =>
+        [
+          key,
+          %k,
+        ] | eq
+    }
+  };
+
+  /** get と get_ の同値性 */
+  assert (k :: K) {
+   [
+     get %k,
+     %k | get_,
+   ] | eq
+  };
+
+};
+
+/** すべての要素（レコード）が「主キー」を持つ集合
+ */
+signature Keyed<X, K> conforms PartiallyKeyed<X, K> = 
+{
+  /** すべてのレコードがキーを持つ */
+  assert (x :: X) {
+     %x |  has-key
+  };
+};
+
+
+
+/** 群
+ * 通常はモノイドから導出して定義する。
+ */
+signature Group<G> = {
+
+ /** 単位元 */
+ command unit :: void -> G;
+
+ /** 逆元 
+  * inverse element
+  */
+ command inv :: G -> G;
+
+ /** 乗法 二項演算 */
+ command mult2 :: [G, G] -> G;
+
+ /** 乗法 n項演算 
+  * デフォルト実装：左からフォールドする。
+  */
+ command mult :: [G*] -> G {
+   [pass, unit] | fold {[%_acc, pass] | mult2}
+ };
+
+ // アサーション 
+
+ /** 左単位律 */
+ assert (x :: G) {
+   [
+     [unit, %x] | mult2,
+     %x,
+   ] | eq
+ };
+
+ /** 右単位律 */
+ assert (x :: G) {
+   [
+     [%x, unit] | mult2,
+     %x,
+   ] | eq
+ };
+
+
+ /** 結合律 */
+ assert (x, y, z :: G) {
+   [
+     [[%x, %y] | mult2, %z] | mult2,
+     [%x, [%y, %z] | mult2] | mult2,
+   ] | eq
+ };
+
+ /** 逆元の法則 */
+ assert (x :: G) {
+  [
+    [%x, (%x | inv)] | mult2,
+    unit,
+  ] | eq
+ };
+
+};
+
+
+
+/** モノイド 
+ */
+signature Monoid<M> = {
+
+ /** モノイド単位 */
+ command unit :: void -> M;
+
+ /** モノイド乗法 二項演算 */
+ command mult2 :: [M, M] -> M;
+
+ /** モノイド乗法 n項演算 
+  * デフォルト実装：左からフォールドする。
+  */
+ command mult :: [M*] -> M {
+   [pass, unit] | fold {[%_acc, pass] | mult2}
+ };
+
+ 
+ /** 左単位律 */
+ assert (x ::M) {
+   [
+     [unit, %x] | mult2,
+     %x,
+   ] | eq
+ };
+
+ /** 右単位律 */
+ assert (x ::M) {
+   [
+     [%x, unit] | mult2,
+     %x,
+   ] | eq
+ };
+
+ /** 結合律 */
+ assert (x, y, z::M) {
+   [
+     [[%x, %y] | mult2, %z] | mult2,
+     [%x, [%y, %z] | mult2] | mult2,
+   ] | eq
+ };
+
+};
+
+/** 更新モノイド 
+ */
+signature UpdateMonoid<M> 
+/* borrows(
+     unit  as no-update,
+     mult2 as compose-updates2,
+     mult  as compose-updates,
+)
+*/
+= {
+
+// コピペ＆リネーム
+
+ /** モノイド単位 */
+ command no-update :: void -> M;
+
+ /** モノイド乗法 二項演算 */
+ command compose-updates2 :: [M, M] -> M;
+
+ /** モノイド乗法 n項演算 
+  * デフォルト実装：左からフォールドする。
+  */
+ command compose-updates :: [M*] -> M {
+   [pass, no-update] | fold {[%_acc, pass] | compose-updates2}
+ };
+
+ 
+ /** 左単位律 */
+ assert (x ::M) {
+   [
+     [no-update, %x] | compose-updates2,
+     %x,
+   ] | eq
+ };
+
+ /** 右単位律 */
+ assert (x ::M) {
+   [
+     [%x, no-update] | compose-updates2,
+     %x,
+   ] | eq
+ };
+
+ /** 結合律 */
+ assert (x, y, z :: M) {
+   [
+     [[%x, %y] | compose-updates2, %z] | compose-updates2,
+     [%x, [%y, %z] | compose-updates2] | compose-updates2,
+   ] | eq
+ };
+
+};
+
+/** 可換モノイド 
+ */
+signature CMonoid<M> conforms Monoid<M> = {
+
+ /** 可換律 */
+ assert (x, y::M) {
+   [
+     [%x, %y] | mult2,
+     [%y, %x] | mult2,
+   ] | eq
+ };
+
+};
+
+/** 加法的モノイド 
+ */
+signature AdditiveMonoid<M> 
+/* borrows(
+     unit  as zero,
+     mult2 as add2,
+     mult  as add,
+)
+*/
+= {
+
+// コピペ＆リネーム
+
+ /** モノイド単位 */
+ command zero :: void -> M;
+
+ /** モノイド乗法 二項演算 */
+ command add2 :: [M, M] -> M;
+
+ /** モノイド乗法 n項演算 
+  * デフォルト実装：左からフォールドする。
+  */
+ command add :: [M*] -> M {
+   [pass, zero] | fold {[%_acc, pass] | add2}
+ };
+
+ 
+ /** 左単位律 */
+ assert (x ::M) {
+   [
+     [zero, %x] | add2,
+     %x,
+   ] | eq
+ };
+
+ /** 右単位律 */
+ assert (x ::M) {
+   =[pass> x];
+
+   [
+     [%x, zero] | add2,
+     %x,
+   ] | eq
+ };
+
+ /** 結合律 */
+ assert (x, y, z :: M) {
+   [
+     [[%x, %y] | add2, %z] | add2,
+     [%x, [%y, %z] | add2] | add2,
+   ] | eq
+ };
+
+ /** 可換律 */
+ assert (x, y::M) {
+   [
+     [%x, %y] | add2,
+     [%y, %x] | add2,
+   ] | eq
+ };
+
+};
+
+/** 半環
+ */
+signature Semiring<M> conforms [Monoid<M>, AdditiveMonoid<M>] = {
+
+ /** 左分配律 */
+ assert (x, y, z ::M) {
+   [
+     [%x, [%y, %z] | add2] | mult2,
+     [[%x, %y] | mult2, [%x, %y] | mult2] | add2,
+   ] | eq
+ };
+
+ /** 右分配律 */
+ assert (x ::M){
+   [
+     [[%x, %y] | add2, %z] | mult2,
+     [[%x, %z] | mult2, [%y, %z] | mult2] | add2,
+   ] | eq
+ };
+  
+};
+
+/* 束半環
+ * bag型、set型など
+ */
+signature LatSemiring<A> = {
+
+ /** モノイド単位 */
+ command top :: void -> A;
+
+ /** モノイド乗法 二項演算 */
+ command meet2 :: [A, A] -> A;
+
+ /** モノイド乗法 n項演算 
+  * デフォルト実装：左からフォールドする。
+  */
+ command meet :: [A*] -> A {
+   [pass, top] | fold {[%_acc, pass] | meet2}
+ };
+
+ 
+ /** 左単位律 */
+ command _assert_0 :: [A] -> Logical {
+   =[pass> x];
+
+   [
+     [top, %x] | meet2,
+     %x,
+   ] | eq
+ };
+
+ /** 右単位律 */
+ command _assert_1 :: [A] -> Logical {
+   =[pass> x];
+
+   [
+     [%x, top] | meet2,
+     %x,
+   ] | eq
+ };
+
+
+ /** 結合律 */
+ command _assert_2 :: [A, A, A] -> Logical {
+   =[pass> x, pass> y, pass> z];
+
+   [
+     [[%x, %y] | meet2, %z] | meet2,
+     [%x, [%y, %z] | meet2] | meet2,
+   ] | eq
+ };
+
+ /** モノイド単位 */
+ command bottom :: void -> A;
+
+ /** モノイド乗法 二項演算 */
+ command join2 :: [A, A] -> A;
+
+ /** モノイド乗法 n項演算 
+  * デフォルト実装：左からフォールドする。
+  */
+ command join :: [A*] -> A {
+   [pass, bottom] | fold {[%_acc, pass] | join2}
+ };
+
+ 
+ /** 左単位律 */
+ command _assert_0 :: [A] -> Logical {
+   =[pass> x];
+
+   [
+     [bottom, %x] | join2,
+     %x,
+   ] | eq
+ };
+
+ /** 右単位律 */
+ command _assert_1 :: [A] -> Logical {
+   =[pass> x];
+
+   [
+     [%x, bottom] | join2,
+     %x,
+   ] | eq
+ };
+
+
+ /** 結合律 */
+ command _assert_2 :: [A, A, A] -> Logical {
+   =[pass> x, pass> y, pass> z];
+
+   [
+     [[%x, %y] | join2, %z] | join2,
+     [%x, [%y, %z] | join2] | join2,
+   ] | eq
+ };
+
+ /** 可換律 */
+ command _assert_3 :: [A, A] -> Logical {
+   =[pass> x, pass>y];
+
+   [
+     [%x, %y] | join2,
+     [%y, %x] | join2,
+   ] | eq
+ };
+
+ /** 左分配律 */
+ command _assert_7 :: [A, A, A] -> Logical {
+   =[pass> x, pass> y, pass> z];
+
+   [
+     [%x, [%y, %z] | join2] | meet2,
+     [[%x, %y] | meet2, [%x, %y] | meet2] | join2,
+   ] | eq
+ };
+
+ /** 右分配律 */
+ command _assert_8 :: [A, A, A] -> Logical {
+   =[pass> x, pass> y, pass> z];
+
+   [
+     [[%x, %y] | join2, %z] | meet2,
+     [[%x, %z] | meet2, [%y, %z] | meet2] | join2,
+   ] | eq
+ };
+  
+};
+
+/*{{{
+
+/* 束半環
+ * bag型、set型など
+ */
+signature LatSemiring<A>
+ borrows(
+     unit  as top,
+     mult2 as meet2,
+     mult  as meet,
+
+     zero as bottom,
+     add2 as join2,
+     add  as join
+ ) Semiring<A> = {};
+
+signature Semiring<A> conforms [Monoid<A>, AdditiveMonoid<A>] = {
+ /** 左分配律 */
+ /** 右分配律 */
+};
+
+signature AdditiveMonoid<A>
+ borrows(
+     unit  as zero
+     mult2 as add2,
+     mult  as add
+ ) CMonoid<A> = {};
+
+signature CMonoid<M> conforms Monoid<M> = {
+ /** 可換律 */
+};
+
+signature UpdateMonoid<M>
+ borrows(
+     unit  as no-update
+     mult2 as compose-updates2,
+     mult  as compose-updates
+ ) Monoid<M> = {};
+ 
+
+}}}*/
+
+
+/** スタック
+ */
+signature Stack<Val> = {
+
+  command is-empty :: void -> boolean;
+  command top :: void -> Val throws Empty;
+  command push :: Val -> void;
+  command pop :: void  -> void throws Empty;
+
+
+ /** スタックが空でないなら、topはVal型データである
+  */
+ assert (x::Val)/* 束縛変数はダミー */{
+   is-empty |
+   case {
+     true  => true,
+     false =>
+       top | validate<integer>
+   }
+ };
+
+ /** スタックが空なら、topは例外を引き起こす
+  */
+ assert (x::Val)/* 束縛変数はダミー */{ 
+   is-empty |
+   case {
+     false => true,
+     true  =>
+       try {top} |
+       catch {
+         except => true,
+         * => false,
+       }
+     ,
+   }
+ };
+
+ /** スタックが空のときpushすると、空でなくなる
+  */
+ assert (x :: Val) {
+   is-empty |
+   case {
+     false => true,
+     true  =>
+       %x | push;
+       is-empty | not
+     ,
+   }
+ };
+
+ /** スタックが空でないときpushすると、やはり空ではない
+  */
+ assert (x :: Val) {
+   is-empty |
+   case {
+     true  => true,
+     false =>
+       %x | push;
+       is-empty | not
+     ,
+   }
+ };
+
+ /** pushすると、topはpushした値になる
+  */
+ assert (x :: Val) {
+   %x | push;
+   [
+     top,
+     %x
+   ] | eq
+ };
+
+};

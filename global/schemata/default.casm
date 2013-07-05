@@ -223,8 +223,12 @@ command names :: [(@* object)*] -> [string*] {
  each {$.name}
 };
 
-command which [string cmdName] :: void -> string {
+command which [string cmd-name] :: void -> string {
  inspect:where-is %1
+};
+
+command which-t [string typ-name] :: void -> string {
+ inspect:where-is --type=type %1
 };
 
 command narrow [string* args] :: object -> object
