@@ -630,16 +630,20 @@ class CommandNode(Function):
         return json.tagged(u'command', json.tagged(t, r))
         
 class AssertionNode(CommandNode):
-    def __init__(self, patterns, uri_or_script, doc, annotation, type_params, command_type=u'command'):
-        CommandNode.__init__(self, u'', patterns, uri_or_script, doc, annotation, type_params, command_type)
+    def __init__(self, name, patterns, uri_or_script, doc, annotation, type_params, command_type=u'command'):
+        CommandNode.__init__(self, name or u'', patterns, uri_or_script, doc, annotation, type_params, command_type)
 
     def declare(self, module):
+        import re
         self.module = module
-        num = 1
-        for p in module.proto_ns.values():
-            if u'__assert' in p.annotation:
-                num += 1
-        self.name = u'_assert_' + str(num)
+        max_num = 0
+        ptn = re.compile(u'_assert_[0-9]+')
+        if not self.name:
+            for p in module.proto_ns.values():
+                if u'__assert' in p.annotation:
+                    if ptn.match(p.name):
+                        max_num = max(max_num, int(p.name.rsplit('_', 1)[1]))
+            self.name = u'_assert_' + str(max_num+1)
         if module.type_params:
             type_params = []
             for tp in self.type_params:

@@ -211,6 +211,7 @@ class CommandScriptParser(ScriptParser):
 
 def assertion(seq, doc, annotation):
     from caty.core.script.parser import ListBuilder, VarStore, Discard, JsonPath, combine_proxy, JSONPathSelectorParser
+    name = option(assertion_name)(seq)
     bound_vars = option(bindings, [])(seq)
     bound_names = []
     in_type_items = []
@@ -244,7 +245,7 @@ def assertion(seq, doc, annotation):
     l.set_values(setup)
     script = combine_proxy([l, body])
     annotation.add(Annotation(u'__assert'))
-    return AssertionNode(map(lambda p:p([], []), patterns), script, doc, annotation, type_args)
+    return AssertionNode(name, map(lambda p:p([], []), patterns), script, doc, annotation, type_args)
 
 @try_
 def bindings(seq):
@@ -259,4 +260,24 @@ def binding(seq):
     S(u'::')(seq)
     tn = typename(seq)
     return tn, names
+
+def assertion_name(seq):
+    S(u'[')(seq)
+    n = until(u']')(seq)
+    S(u']')(seq)
+    return u'_assert_' + u''.join(map(_quote, n))
+
+def _quote(c):
+    import urllib
+    if c == '_':
+        return u'_5f'
+    elif c == '.':
+        return u'_2e'
+    elif c == '/':
+        return u'_2f'
+    elif c in '0123456789':
+        return u'_3' + str(c)
+    else:
+        return urllib.quote(c.encode('utf-8')).replace('%', '_')
+
 
