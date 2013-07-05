@@ -9,7 +9,7 @@ module sig;
  */
 signature Eq
 <
-  X
+  /** 台集合 */ X
 > = 
 {
  /** 等値性述語（二項関係）*/
@@ -54,7 +54,13 @@ signature Eq
 
 /** （部分）順序集合
  */
-signature Ord<T> conforms Eq<T> = {
+signature Ord
+<
+  /** 台集合 */ T
+> 
+conforms Eq<T> 
+= 
+{
  /** 不等号 ＜ */
  command lt :: [T, T] -> tboolean;
 
@@ -69,6 +75,42 @@ signature Ord<T> conforms Eq<T> = {
  /** 不等号 ≧ */
  command gte :: [T, T] -> tboolean {
    [eq, gt] | or
+ };
+
+ /** 反射律（reflexivity）
+  * x ≦ x
+  */
+ assert
+ (x::T) {
+   [%x, %x] | lte
+ };
+
+ /** 推移律（transitivity）
+  * x ≦ y ∧ y ≦ z ⇒ x ≦ z
+  */
+ assert (x, y::T) {
+  [
+   [
+     [%x, %y] | lte,
+     [%y, %z] | lte,
+   ] | and,
+
+   [%x, %z] | lte,
+  ] | implies
+ };
+
+ /** 反対称律（antisymmetry）
+  * x ≦ y ∧ y ≦ x ⇒ x ＝ y
+  */
+ assert (x, y::T) {
+  [
+   [
+    [%x, %y] | lte,
+    [%y, %x] | lte,
+   ] | eq,
+
+   [%x, %y] | eq,
+  ] | implies 
  };
 
 };
@@ -205,12 +247,29 @@ signature Retractable<X, A> {
 }}}*/
 
 
+kind KeyType = lower (string|number|binary);
+type fragmentPath = string(remark="フラグメントパス＝XJSONパス");
+
+/** 主キーとフラグメントパスによりレコードポーションが得られる集合
+ */
+signature FragmentGettable</** キーの集合 */ K in KeyType default string> = 
+{
+
+ /** 引数に与えられたキーとフラグメントパスからレコードポーションを得る */
+ command get [K key, fragmentPath frag-path] :: void -> any throws NotFound;
+
+ /** 入力に与えられたキーとフラグメントパスからレコードポーションを得る */
+ command get_ :: [K, fragmentPath?] -> any throws NotFound;
+
+};
+
+
 /** 部分的に「主キー」を持つ集合
  */
 signature PatiallyKeyed
 <
-  /* レコードの集合 */ X, 
-  /* キーの集合 */     K
+  /** レコードの集合 */ X, 
+  /** キーの集合 */     K in KeyType,
 > = 
 {
  /** レコードのキーを得る */
@@ -220,10 +279,10 @@ signature PatiallyKeyed
  command has-key :: X -> boolean;
 
  /** 引数に与えられたキーからレコードを得る */
- command get [K key] :: void -> X throws NotFound;
+ command lookup [K key] :: void -> X throws NotFound;
 
  /** 入力に与えられたキーからレコードを得る */
- command get_ :: K -> X throws NotFound;
+ command lookup_ :: K -> X throws NotFound;
 
 
  /** has-keyの値が妥当であること */
@@ -242,9 +301,9 @@ signature PatiallyKeyed
      ] | eq
   };
 
-  /** get と key がおおよそ逆であること */
+  /** lookup と key がおおよそ逆であること */
   assert (k :: K) {
-    try {get %k} |
+    try {lookup %k} |
     catch {
       except => true,
       normal =>
@@ -255,11 +314,11 @@ signature PatiallyKeyed
     }
   };
 
-  /** get と get_ の同値性 */
+  /** lookup と lookup_ の同値性 */
   assert (k :: K) {
    [
-     get %k,
-     %k | get_,
+     lookup %k,
+     %k | lookup_,
    ] | eq
   };
 
