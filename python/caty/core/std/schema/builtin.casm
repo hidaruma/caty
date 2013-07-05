@@ -1754,60 +1754,6 @@ command reject-non-json
 command error-to-string :: Exception -> string
     refers python:builtin.ErrorToString;
 
-/** car = first */
-command first 
- {
-   @[default(false)]
-   "safe":boolean?
- } :: [any*] -> any? throws Undefined
-{
-  nth %--safe 1
-};
-
-/* cadr = second */
-command second
- {
-   @[default(false)]
-   "safe":boolean?
- } :: [any*] -> any? throws Undefined
-{
-  nth %--safe 2
-};
-
-/** cdr = rest */
-command rest 
- {
-   @[default(false)]
-   "safe":boolean?
- }
- :: [any*] -> any? throws Undefined
-{
-  cond {
-   [] => undefined,
-    * => list:slice 1,
-  } > result ;
-
-  %safe |
-  case {
-   true => 
-     %result?
-     ,
-   false => 
-     %result? |
-     when {
-       undefined => make-exception Undefined "empty list" | throw,
-       * => pass
-    }
-  }
-};
-
-
-/** cons = fput = 'put an item on the first position" */
-command fput :: [any item, [any*] list] -> [any*] {
- [ [nth 1], nth 2] | list:concat
-};
-
-
 type DataAddr = @* {
  "type": string(remark="型の完全修飾名"),
  "arg": (null|number|string|boolean)?,
