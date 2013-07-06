@@ -219,13 +219,15 @@ CDパスには、名前の種別（型かコマンドか、など）の情報が
 type namespaceSort = (
   "applications"
 | "facilities"
+| "entities"
 | "packages"
 | "modules"
 | "types"
 | "commands"
 | "classes"
-| "states"
-| "userroles"
+| "annotations"
+| "states" // 廃止予定
+| "userroles" // 廃止予定
 );
 
 
@@ -541,6 +543,31 @@ type Module = @module (ModuleSummary & {
   *: any?
 });
 
+/** クラスとモジュールの仕様（conforms, borrows情報）
+ */
+type Specification = {
+ /** conformまたはborrowしている先のクラスの完全修飾ドメイン名 */
+ "class" : string(remark="完全修飾名"),
+ /** classで指定されたクラス（指標）にconformしているかどうか */
+ "conformance": boolean,
+ /* classで指定されたクラス（指標）から移入している記号の一覧
+  * キーであるオブジェクトプロパティは、当該クラスで使用している名前（usingの値）。
+  */
+ "symbols": {*: Symbol?}
+};
+
+/** 使用している記号の情報 
+ */
+type Symbol = {
+ /** 現在使用している名前 */
+ "using": string,
+ /** conform, borrow先における元来の名前 */
+ "orig": string?,
+ /** この名前が配置されている名前空間種別 */
+ "namespace": namespaceSort,
+};
+
+
 /** クラスの基本情報 */
 type ClassSummary = LocatedQualifierMixin & {
   "document": Doc?,
@@ -552,13 +579,15 @@ type ClassSummary = LocatedQualifierMixin & {
   /** arg0 */
   "arg0": TypeSpec?,
 
+  /** クラスの仕様（conforms, borrows情報）*/
+  "specifications" : [Specification*]?,
+
   /** @[deprecated]アノテーションの値をコピーする */
   @[deprecated, default(false)]
   "deprecated": boolean?,
 
  *: any?
 };
-   
 
 /** クラス
  * クラスは名前空間コンテナだが、現状では1つだけの名前空間commandsを持つ
@@ -566,7 +595,7 @@ type ClassSummary = LocatedQualifierMixin & {
  */
 @[mogra-node, full-info]
 type Class = @class (ClassSummary & {
-
+ 
   /** コマンドの名前空間 */
   @[namespace]
   "commands": NamespaceOf<Command>,
