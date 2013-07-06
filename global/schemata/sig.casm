@@ -255,10 +255,16 @@ type fragmentPath = string(remark="フラグメントパス＝XJSONパス");
 signature FragmentGettable</** キーの集合 */ K in KeyType default string> = 
 {
 
- /** 引数に与えられたキーとフラグメントパスからレコードポーションを得る */
- command get [K key, fragmentPath frag-path] :: void -> any throws NotFound;
+ /** 引数に与えられたキーとフラグメントパスからレコードポーションを得る 
+  * フラグメントパスが与えられなかった場合は、レコード全体を返す。
+  * 出力型は、フラグメントポーションの型は可変なので静的に予測はできない。
+  */
+ command get [K key, fragmentPath? frag-path] :: void -> any throws NotFound;
 
- /** 入力に与えられたキーとフラグメントパスからレコードポーションを得る */
+ /** 入力に与えられたキーとフラグメントパスからレコードポーションを得る
+  * フラグメントパスが与えられなかった場合は、レコード全体を返す。
+  * 出力型は、フラグメントポーションの型は可変なので静的に予測はできない。
+  */
  command get_ :: [K, fragmentPath?] -> any throws NotFound;
 
 };
