@@ -84,6 +84,7 @@ class Module(Facility):
         self.annotations = Annotations([])
         self.package_root_path = u'/'
         self.facility_classes = {}
+        self.assertions = []
 
         self.add_schema = partial(self._add_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
         self.get_type = partial(self._get_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
@@ -658,6 +659,28 @@ class Module(Facility):
 
     def _register_command(self):
         if not self.compiled:
+            import re
+            ptn = re.compile(u'_assert_[0-9]+$')
+            nums = []
+            for a in self.assertions:
+                if ptn.match(a.name):
+                    nums.append(int(a.name.rsplit('_', 1)[1]))
+            if nums:
+                max_num = nums[-1] + 1
+            else:
+                max_num = 1
+            usables = []
+            for i in range(1, max_num):
+                if i not in nums:
+                    usables.append(i)
+            for a in self.assertions:
+                if not a.name:
+                    if usables:
+                        a.name = u'_assert_' + str(usables.pop(0))
+                    else:
+                        a.name = u'_assert_' + str(max_num)
+                        max_num += 1
+                a.re_declare(self)
             if self.is_root:
                 self.application.cout.write(u'  * ' + self.application.i18n.get(u'Initializing commands') + '...')
             try:

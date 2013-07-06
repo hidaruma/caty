@@ -38,7 +38,9 @@ class ProfileBuilder(SchemaBuilder):
             # 型パラメータのデフォルト値を設定
             for p in node.type_params:
                 schema = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
-                params.append(schema.accept(rr))
+                v = schema.accept(rr)
+                if isinstance(v, TypeVariable):
+                    params.append(v)
             self._type_params = params
             pc.type_params = params
             pat.build([self, rr])
