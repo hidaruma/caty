@@ -262,24 +262,21 @@ def binding(seq):
     return tn, names
 
 def assertion_name(seq):
+    import re
+    from caty.core.language import _name_char
+    ptn = re.compile(_name_char, re.X)
     S(u'[')(seq)
     n = until(u']')(seq)
     S(u']')(seq)
     if n.strip('0123456789') == u'':
         return u'_assert_' + n
     else:
-        return u'_assert_' + u''.join(map(_quote, n))
+        return u'_assert_' + u''.join(map(lambda c:_quote(c, ptn), n))
 
-def _quote(c):
+def _quote(c, ptn):
     import urllib
-    if c == '_':
-        return u'_5f'
-    elif c == '.':
-        return u'_2e'
-    elif c == '/':
-        return u'_2f'
-    elif c in '0123456789':
-        return u'_3' + str(c)
+    if ptn.match(c):
+        return c
     else:
         return urllib.quote(c.encode('utf-8')).replace('%', '_')
 
