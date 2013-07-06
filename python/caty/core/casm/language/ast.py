@@ -637,12 +637,12 @@ class AssertionNode(CommandNode):
         import re
         self.module = module
         max_num = 0
-        ptn = re.compile(u'_assert_[0-9]+')
-        if not self.name:
-            for p in module.proto_ns.values():
-                if u'__assert' in p.annotation:
-                    if ptn.match(p.name):
-                        max_num = max(max_num, int(p.name.rsplit('_', 1)[1]))
+        ptn = re.compile(u'_assert_[0-9]+$')
+        for p in module.proto_ns.values():
+            if u'__assert' in p.annotation:
+                if ptn.match(p.name):
+                    max_num = max(max_num, int(p.name.rsplit('_', 1)[1]))
+        if ptn.match(self.name) or not self.name:
             self.name = u'_assert_' + str(max_num+1)
         if module.type_params:
             type_params = []

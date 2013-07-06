@@ -265,7 +265,10 @@ def assertion_name(seq):
     S(u'[')(seq)
     n = until(u']')(seq)
     S(u']')(seq)
-    return u'_assert_' + u''.join(map(_quote, n))
+    if n.strip('0123456789') == u'':
+        return u'_assert_' + n
+    else:
+        return u'_assert_' + u''.join(map(_quote, n))
 
 def _quote(c):
     import urllib
