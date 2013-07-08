@@ -96,6 +96,10 @@ class ClassModule(Module):
                 pass
             else:
                 if isinstance(m, CommandNode):
+                    if m.name in self.proto_ns and (m.defined or self.get_proto_type(m.name).defined):
+                        self.add_proto_type(m)
+                    if m.name in self.proto_ns:
+                        continue
                     if m.module is None:
                         m.module = self
                     if m.application is None:
@@ -206,4 +210,73 @@ class ClassExprInterpreter(object):
         return n
 
     def visit_class_ref(self, obj):
-        return ClassBody([], None)
+        from caty.core.casm.language.ast import ASTRoot, CommandNode
+        from caty.core.script.builder import ClassModuleWrapper
+        cls = self.module.get_class(obj.name)
+        tp = []
+        member = []
+        for p ,p2 in zip(cls.type_params, obj.type_params):
+            sb = self.module.make_schema_builder()
+            rr = self.module.make_reference_resolver()
+            tn = self.module.make_type_normalizer()
+            t = tn.visit(p2.accept(sb).accept(rr))
+            x = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
+            x._schema = t
+            tp.append(x)
+        for m in cls._clsobj.member:
+            if not tp:
+                member.append(m)
+            else:
+                if isinstance(m, ASTRoot):
+                    print m
+                elif isinstance(m, CommandNode):
+                    m = m.clone()
+                    for ptn in m.patterns:
+                        self.__build_profile(ptn, cls, tp, m.type_params)
+                    member.append(m)
+                else:
+                    member.append(m)
+        return ClassBody(member, None)
+
+    def __build_profile(self, pat, cls, tp, type_params):
+        from caty.core.casm.cursor.base import SchemaBuilder
+        from caty.core.casm.cursor.resolver import ReferenceResolver
+        from caty.core.casm.cursor.typevar import TypeVarApplier
+        from caty.core.casm.cursor.normalizer import TypeNormalizer
+        rr = ReferenceResolver(cls)
+        params = []
+        # 型パラメータのデフォルト値を設定
+        for p in type_params:
+            schema = TypeVariable(p.var_name, [], p.kind, p.default, {}, cls)
+            v = schema.accept(rr)
+            if isinstance(v, TypeVariable):
+                params.append(v)
+        sb = SchemaBuilder(cls)
+        sb._type_params = params
+        pat.build([sb, rr])
+        e = pat.verify_type_var([p.var_name for p in type_params] + [t.var_name for t in cls.type_params])
+        if e:
+            raise CatyException(u'SCHEMA_COMPILE_ERROR', 
+                                u'Undeclared type variable at $this: $name',
+                                this=node.name, name=e)
+        tc = TypeVarApplier(cls)
+        tn = TypeNormalizer(cls)
+        tc.real_root = False
+        tc._init_type_params(Dummy(tp))
+        opt_schema = tn.visit(pat.opt_schema.accept(tc))
+        tc._init_type_params(Dummy(tp))
+        arg_schema = tn.visit(pat.arg_schema.accept(tc))
+        p = pat.decl.profile
+        new_prof = [None, None]
+        tc = TypeVarApplier(cls)
+        tc._init_type_params(Dummy(tp))
+        new_prof[0] = tn.visit(p[0].accept(tc)) 
+        tc = TypeVarApplier(cls)
+        tc._init_type_params(Dummy(tp))
+        new_prof[1] = tn.visit(p[1].accept(tc))
+        pat.decl.profile = tuple(new_prof)
+
+class Dummy(object):
+    def __init__(self, params):
+        self.type_params = params
+

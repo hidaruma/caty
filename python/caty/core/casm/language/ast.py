@@ -713,7 +713,7 @@ def _verify_type_var(obj, names):
                 return x
     elif not isinstance(obj, TypeVariable):
         return 
-    elif not obj.name in names:
+    elif not obj.name in names and not obj._schema:
         return obj.name
 
 class CommandDecl(object):
@@ -734,7 +734,12 @@ class CommandDecl(object):
     def clone(self):
         new = CommandDecl(self.profile_ast, self.jump_decl, self.resource)
         new.uri = self.uri
+        new.profile = self.profile
+        new._set_initialized(self.__initialized)
         return new
+
+    def _set_initialized(self, v):
+        self.__initialized = v
 
     def get_all_resources(self):
         for res in self.resource:
