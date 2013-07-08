@@ -678,6 +678,22 @@ class Implies(Or):
         a = _not(normalize_tribool(input[0]))
         return self._or(a, normalize_tribool(input[1]))
 
+_b_map = {
+    (True, True): True,
+    (True, False): False,
+    (True, INDEF): INDEF,
+    (False, True): False,
+    (False, False): True,
+    (False, INDEF): INDEF,
+    (INDEF, True): INDEF,
+    (INDEF, False): INDEF,
+    (INDEF, INDEF): INDEF,
+}
+
+class Equiv(Builtin):
+    def execute(self, input):
+        return _b_map[(normalize_tribool(input[0]), normalize_tribool(input[1]))]
+
 class Eval(Builtin):
     
     def execute(self, input):
