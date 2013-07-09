@@ -1,0 +1,151 @@
+/* -*- coding: utf-8 -*- */
+
+/** 隠蔽指標 
+ */
+module hsig;
+
+kind KeyType = lower (string|number|binary);
+type fragmentPath = string(remark="フラグメントパス＝XJSONパス");
+
+/** 主キーとフラグメントパスによりレコードポーションが得られるエンティティ
+ */
+@[hidden]
+signature FragmentGettable</** キーの集合 */ K in KeyType default string> = 
+{
+
+ /** 引数に与えられたキーとフラグメントパスからレコードポーションを得る 
+  * フラグメントパスが与えられなかった場合は、レコード全体を返す。
+  * 出力型は、フラグメントポーションの型は可変なので静的に予測はできない。
+  */
+ @[reader]
+ command get [K key, fragmentPath? frag-path] :: void -> any throws NotFound;
+
+ /** 入力に与えられたキーとフラグメントパスからレコードポーションを得る
+  * フラグメントパスが与えられなかった場合は、レコード全体を返す。
+  * 出力型は、フラグメントポーションの型は可変なので静的に予測はできない。
+  */
+ @[reader]
+ command get_ :: [K, fragmentPath?] -> any throws NotFound;
+
+};
+
+/** 状態をダンプ可能なエンティティ
+ */
+@[hidden]
+signature Dumpable</** ダンプのデータ型*/ D> {
+  @[reader]
+  command dump :: void -> D;
+};
+
+/** 状態をアンダンプ可能なエンティティ
+ */
+@[hidden]
+signature Undumpable</** ダンプのデータ型*/ D> conforms Dumpable<D> {
+  @[updater]
+  command undump :: D -> void throws Exception;
+  
+  assert (d :: D) {
+    [
+     %d,
+     %d | undump; dump,
+    ] | eq
+  };
+};
+
+
+/** 状態をアンロード可能なエンティティ
+ * 状態は他のストレージエンティティに書き込まれる。
+ */
+@[hidden]
+signature Unloadable<A> {
+  @[reader]
+  command unload [A*] :: void -> any throws Exception;
+  command backup := unload;
+};
+
+/** 状態をロード可能なエンティティ
+ * 状態は他のストレージエンティティから読み込まれる。
+ */
+@[hidden]
+signature Loadable<B, A> conforms Unloadale <A> {
+  @[updater]
+  command load [B*] :: void -> any throws Exception;
+  command restore := load;
+};
+
+/** スタック
+ */
+@[hidden]
+signature Stack<Val> = {
+
+  command is-empty :: void -> boolean;
+  command top :: void -> Val throws Empty;
+  command push :: Val -> void;
+  command pop :: void  -> void throws Empty;
+
+
+ /** スタックが空でないなら、topはVal型データである
+  */
+ assert (x::Val)/* 束縛変数はダミー */{
+   is-empty |
+   case {
+     true  => true,
+     false =>
+       top | validate<integer>
+   }
+ };
+
+ /** スタックが空なら、topは例外を引き起こす
+  */
+ assert (x::Val)/* 束縛変数はダミー */{ 
+   is-empty |
+   case {
+     false => true,
+     true  =>
+       try {top} |
+       catch {
+         except => true,
+         * => false,
+       }
+     ,
+   }
+ };
+
+ /** スタックが空のときpushすると、空でなくなる
+  */
+ assert (x :: Val) {
+   is-empty |
+   case {
+     false => true,
+     true  =>
+       %x | push;
+       is-empty | not
+     ,
+   }
+ };
+
+ /** スタックが空でないときpushすると、やはり空ではない
+  */
+ assert (x :: Val) {
+   is-empty |
+   case {
+     true  => true,
+     false =>
+       %x | push;
+       is-empty | not
+     ,
+   }
+ };
+
+ /** pushすると、topはpushした値になる
+  */
+ assert (x :: Val) {
+   %x | push;
+   [
+     top,
+     %x
+   ] | eq
+ };
+
+};
+

@@ -7,8 +7,8 @@ module sig;
 /** 等値性
  * 集合X上の等値性（同値関係）を規定する。
  */
-signature Eq
-<
+@[pure]
+signature Eq <
   /** 台集合 */ X
 > = 
 {
@@ -54,8 +54,8 @@ signature Eq
 
 /** （部分）順序集合
  */
-signature Ord
-<
+@[pure]
+signature Ord <
   /** 台集合 */ T
 > 
 conforms Eq<T> 
@@ -99,6 +99,7 @@ conforms Eq<T>
   ] | implies
  };
 
+
  /** 反対称律（antisymmetry）
   * x ≦ y ∧ y ≦ x ⇒ x ＝ y
   */
@@ -117,6 +118,7 @@ conforms Eq<T>
 
 /** 離散的な線形順序集合
  */
+@[pure]
 signature Seq<T> conforms Ord<T> = {
   /** 後者 */
   command succ :: T -> T throws Bounded;
@@ -133,6 +135,7 @@ signature Seq<T> conforms Ord<T> = {
 
 /** 下に有界な順序集合
  */
+@[pure]
 signature LBounded<T> conforms Ord<T> = {
   /** 最小元 */
   command bottom :: void -> T;
@@ -145,6 +148,7 @@ signature LBounded<T> conforms Ord<T> = {
 
 /** 上に有界な順序集合
  */
+@[pure]
 signature UBounded<T> conforms Ord<T> = {
   /** 最大元 */
   command top :: void -> T;
@@ -156,6 +160,7 @@ signature UBounded<T> conforms Ord<T> = {
 
 /** meet半束（meet semilattice）
  */
+@[pure]
 signature MSLat<T> conforms UBounded<T> = {
   /** 二項のmeet演算 ∧ */
   command meet2 :: [T, T] -> T;
@@ -174,6 +179,7 @@ signature MSLat<T> conforms UBounded<T> = {
 
 /** join半束（join semilattice）
  */
+@[pure]
 signature JSLat<T> conforms LBounded<T> = {
   /** 二項のjoin演算 ∨ */
   command join2 :: [T, T] -> T;
@@ -193,12 +199,14 @@ signature JSLat<T> conforms LBounded<T> = {
 
 /** 上と下に有界な順序集合 
  */
+@[pure]
 signature Bounded<T> conforms [LBounded<T>, UBounded<T>] = {};
 
 /*{{{
 
 /** 付点集合（Pointed Set）
  */
+@[pure]
 signature Pointed<X> {
  command base :: void -> X;
 };
@@ -207,6 +215,7 @@ signature Pointed<X> {
 /** レトラクタブルな集合
  * 例： 実数を整数に切り捨てる操作
  */
+@[pure]
 signature Retractable<X, A> {
 
  command retract :: X -> A;
@@ -247,31 +256,9 @@ signature Retractable<X, A> {
 }}}*/
 
 
-kind KeyType = lower (string|number|binary);
-type fragmentPath = string(remark="フラグメントパス＝XJSONパス");
-
-/** 主キーとフラグメントパスによりレコードポーションが得られる集合
- */
-signature FragmentGettable</** キーの集合 */ K in KeyType default string> = 
-{
-
- /** 引数に与えられたキーとフラグメントパスからレコードポーションを得る 
-  * フラグメントパスが与えられなかった場合は、レコード全体を返す。
-  * 出力型は、フラグメントポーションの型は可変なので静的に予測はできない。
-  */
- command get [K key, fragmentPath? frag-path] :: void -> any throws NotFound;
-
- /** 入力に与えられたキーとフラグメントパスからレコードポーションを得る
-  * フラグメントパスが与えられなかった場合は、レコード全体を返す。
-  * 出力型は、フラグメントポーションの型は可変なので静的に予測はできない。
-  */
- command get_ :: [K, fragmentPath?] -> any throws NotFound;
-
-};
-
-
 /** 部分的に「主キー」を持つ集合
  */
+@[pure]
 signature PartiallyKeyed
 <
   /** レコードの集合 */ X, 
@@ -332,6 +319,7 @@ signature PartiallyKeyed
 
 /** すべての要素（レコード）が「主キー」を持つ集合
  */
+@[pure]
 signature Keyed<X, K> conforms PartiallyKeyed<X, K> = 
 {
   /** すべてのレコードがキーを持つ */
@@ -345,6 +333,7 @@ signature Keyed<X, K> conforms PartiallyKeyed<X, K> =
 /** 群
  * 通常はモノイドから導出して定義する。
  */
+@[pure]
 signature Group<G> = {
 
  /** 単位元 */
@@ -406,6 +395,7 @@ signature Group<G> = {
 
 /** モノイド 
  */
+@[pure]
 signature Monoid<M> = {
 
  /** モノイド単位 */
@@ -450,6 +440,7 @@ signature Monoid<M> = {
 
 /** 更新モノイド 
  */
+@[pure]
 signature UpdateMonoid<M> 
 /* borrows(
      unit  as no-update,
@@ -503,6 +494,7 @@ signature UpdateMonoid<M>
 
 /** 可換モノイド 
  */
+@[pure]
 signature CMonoid<M> conforms Monoid<M> = {
 
  /** 可換律 */
@@ -517,6 +509,7 @@ signature CMonoid<M> conforms Monoid<M> = {
 
 /** 加法的モノイド 
  */
+@[pure]
 signature AdditiveMonoid<M> 
 /* borrows(
      unit  as zero,
@@ -580,6 +573,7 @@ signature AdditiveMonoid<M>
 
 /** 半環
  */
+@[pure]
 signature Semiring<M> conforms [Monoid<M>, AdditiveMonoid<M>] = {
 
  /** 左分配律 */
@@ -603,6 +597,7 @@ signature Semiring<M> conforms [Monoid<M>, AdditiveMonoid<M>] = {
 /* 束半環
  * bag型、set型など
  */
+@[pure]
 signature LatSemiring<A> = {
 
  /** モノイド単位 */
@@ -732,6 +727,7 @@ signature LatSemiring<A> = {
 /* 束半環
  * bag型、set型など
  */
+@[pure]
 signature LatSemiring<A>
  borrows(
      unit  as top,
@@ -743,11 +739,13 @@ signature LatSemiring<A>
      add  as join
  ) Semiring<A> = {};
 
+@[pure]
 signature Semiring<A> conforms [Monoid<A>, AdditiveMonoid<A>] = {
  /** 左分配律 */
  /** 右分配律 */
 };
 
+@[pure]
 signature AdditiveMonoid<A>
  borrows(
      unit  as zero
@@ -755,10 +753,12 @@ signature AdditiveMonoid<A>
      mult  as add
  ) CMonoid<A> = {};
 
+@[pure]
 signature CMonoid<M> conforms Monoid<M> = {
  /** 可換律 */
 };
 
+@[pure]
 signature UpdateMonoid<M>
  borrows(
      unit  as no-update
@@ -770,77 +770,3 @@ signature UpdateMonoid<M>
 }}}*/
 
 
-/** スタック
- */
-signature Stack<Val> = {
-
-  command is-empty :: void -> boolean;
-  command top :: void -> Val throws Empty;
-  command push :: Val -> void;
-  command pop :: void  -> void throws Empty;
-
-
- /** スタックが空でないなら、topはVal型データである
-  */
- assert (x::Val)/* 束縛変数はダミー */{
-   is-empty |
-   case {
-     true  => true,
-     false =>
-       top | validate<integer>
-   }
- };
-
- /** スタックが空なら、topは例外を引き起こす
-  */
- assert (x::Val)/* 束縛変数はダミー */{ 
-   is-empty |
-   case {
-     false => true,
-     true  =>
-       try {top} |
-       catch {
-         except => true,
-         * => false,
-       }
-     ,
-   }
- };
-
- /** スタックが空のときpushすると、空でなくなる
-  */
- assert (x :: Val) {
-   is-empty |
-   case {
-     false => true,
-     true  =>
-       %x | push;
-       is-empty | not
-     ,
-   }
- };
-
- /** スタックが空でないときpushすると、やはり空ではない
-  */
- assert (x :: Val) {
-   is-empty |
-   case {
-     true  => true,
-     false =>
-       %x | push;
-       is-empty | not
-     ,
-   }
- };
-
- /** pushすると、topはpushした値になる
-  */
- assert (x :: Val) {
-   %x | push;
-   [
-     top,
-     %x
-   ] | eq
- };
-
-};
