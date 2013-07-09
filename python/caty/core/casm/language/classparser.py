@@ -29,14 +29,14 @@ def classdef(seq):
     if '+' not in classname or classname.endswith('+'):
         conform = option(conforms)(seq)
     elif '+' in classname:
-        conform = ScalarNode(classname.split('+')[-1])
+        conform = ClassReference(classname.split('+')[-1], [])
     with strict():
         e = option(choice(S(u'='), S(u'?='), S(u'&=')), u'=')(seq)
         expression = class_expression(seq)
         nohook(S(u';'))(seq)
         doc2 = postfix_docstring(seq)
         doc = concat_docstring(doc, doc2)
-        return ClassNode(classname, expression, dom, codom, conforms, doc, annotations, type_args, e)
+        return ClassNode(classname, expression, dom, codom, conform, doc, annotations, type_args, e)
 
 def clsref(seq):
     identifier_token_a(seq)
@@ -166,19 +166,21 @@ def conforms(seq):
     return choice(signature_spec, signature_spec_list)(seq)
 
 def signature_spec(seq):
-    return scalar(seq)
+    return class_ref(seq)
 
 @try_
 def signature_spec_list(seq):
     S(u'[')(seq)
-    r = split(signature_spec, ',')(seq)
+    r = split(class_ref, ',')(seq)
     S(u']')(seq)
+    if not r:
+        return None
     names = set()
     for n in r:
         if n.name in r:
             throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Signature name conflicted: $name', name=n.name)
         names.add(n.name)
-    return r
+    return reduce(lambda a, b: ClassIntersectionOperator(a, b), r)
 
 
 

@@ -130,6 +130,8 @@ class ClassNode(object):
         self.codomain = codomain
         self.type_args = type_args
         self.conforms = conforms
+        if conforms:
+            self.expression = ClassIntersectionOperator(expression, conforms)
         self.defined = type != u'?='
         self.redifinable = type == u'&='
         self.underlyingtype = None
@@ -578,7 +580,7 @@ class CommandNode(Function):
         self.application = None
 
     def clone(self):
-        r = CommandNode(self.name, self.patterns, self.reference_to_implementation, self.doc, self.annotation, self.type_params, self.command_type)
+        r = self.__class__(self.name, [p.clone() for p in self.patterns], self.reference_to_implementation, self.doc, self.annotation, self.type_params, self.command_type)
         return r
 
     @property

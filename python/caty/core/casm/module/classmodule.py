@@ -95,10 +95,15 @@ class ClassModule(Module):
             if m in self._declared:
                 pass
             else:
-                if isinstance(m, CommandNode):
+                if isinstance(m, AssertionNode):
+                    pass
+                elif isinstance(m, CommandNode):
                     if m.name in self.proto_ns and (m.defined or self.get_proto_type(m.name).defined):
                         self.add_proto_type(m)
                     if m.name in self.proto_ns:
+                        continue
+                    if m.name in self.command_ns:
+                        print self.canonical_name, m.name, m
                         continue
                     if m.module is None:
                         m.module = self
@@ -212,11 +217,16 @@ class ClassExprInterpreter(object):
     def visit_class_ref(self, obj):
         from caty.core.casm.language.ast import ASTRoot, CommandNode
         from caty.core.script.builder import ClassModuleWrapper
-        cls = self.module.get_class(obj.name)
+        try:
+            cls = self.module.get_class(obj.name)
+        except:
+            print u'[Error]', self.canonical_name
+            raise
         tp = []
         member = []
         for p ,p2 in zip(cls.type_params, obj.type_params):
             sb = self.module.make_schema_builder()
+            sb._type_params = []
             rr = self.module.make_reference_resolver()
             tn = self.module.make_type_normalizer()
             t = tn.visit(p2.accept(sb).accept(rr))

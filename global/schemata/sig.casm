@@ -272,7 +272,7 @@ signature FragmentGettable</** キーの集合 */ K in KeyType default string> =
 
 /** 部分的に「主キー」を持つ集合
  */
-signature PatiallyKeyed
+signature PartiallyKeyed
 <
   /** レコードの集合 */ X, 
   /** キーの集合 */     K in KeyType,
