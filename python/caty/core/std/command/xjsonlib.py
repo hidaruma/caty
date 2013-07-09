@@ -186,3 +186,20 @@ class ComposeUpdate(Builtin):
     def execute(self, data):
         return reduce(json.compose_update, data, {})
 
+class IsSubobject(Builtin):
+    def execute(self, input):
+        o2, o1 = input
+        return self._partial_match(o1, o2)
+
+    def _partial_match(self, o1, o2):
+        r = []
+        for k, v in o2.items():
+            if k not in o1:
+                return False
+            e = o1[k]
+            if isinstance(e, dict) and isinstance(v, dict):
+                r.append(self._partial_match(e, v))
+            else:
+                r.append(e == v)
+        return all(r)
+

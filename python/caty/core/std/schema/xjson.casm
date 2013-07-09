@@ -142,6 +142,13 @@ command read-dir {@[default(false)]"rec": boolean?, "also-file": string(remark="
     reads pub
     refers python:xjsonlib.ReadDir;
 
+/** 
+ * 入力の第一要素が第二要素に包含されるかどうかを返す。
+ */
+@[register-public]
+command is-subobject :: [object expected, object target] -> boolean
+    refers python:xjsonlib.IsSubobject;
+
 command apply-update :: [@* object input, ObjectModifier modifier] -> @* object
     throws SetUnsetConflict
     refers python:xjsonlib.ApplyUpdate;
