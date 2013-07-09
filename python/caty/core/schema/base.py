@@ -778,7 +778,6 @@ class AnySchema(SchemaBase, Scalar):
         if value is caty.UNDEFINED:
             raise JsonSchemaError(dict(msg='undefined value'))
         if type(value) not in (dict, list, tuple, unicode, NoneType, str, int, bool, Decimal, TagOnly, TaggedValue, Indef):
-            print type(value)
             raise JsonSchemaError(dict(msg='Not a json value: $value', value=repr(value)), repr(value))
 
     def _convert(self, value):

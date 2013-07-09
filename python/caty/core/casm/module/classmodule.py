@@ -2,6 +2,16 @@
 from caty.core.casm.module.basemodule import *
 from caty.core.casm.language.ast import *
 
+def error_wrapper(f):
+    def _(self, *args, **kwds):
+        try:
+            return f(self, *args, **kwds)
+        except:
+            self.application.cout.writeln('NG')
+            print '    [ERROR]', u'%s::%s (%s)' % (self._app.name, self.canonical_name, self.type)
+            raise
+    return _
+
 class ClassModule(Module):
     u"""
     クラスは名前空間を構成するというその機能においてモジュールに近い。
@@ -79,40 +89,47 @@ class ClassModule(Module):
         self._clsrestriction = self.make_type_normalizer().visit(self._clsrestriction)
 
     def _register_command(self):
-        self.refered_modules = list(self._load_refered_modules())
-        for cmd in self.proto_ns.values():
-            self._attache_class(cmd)
+        try:
+            self.refered_modules = list(self._load_refered_modules())
+            for cmd in self.proto_ns.values():
+                self._attache_class(cmd)
+        except:
+            print '    [ERROR]', u'%s::%s' % (self._app.name, self.canonical_name)
+            raise
         Module._register_command(self)
-        for v in self.command_ns.values():
-            for p in v.type_params:
-                for p2 in self.type_params:
-                    if p.var_name == p2.var_name:
-                        throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Conflicted type parameter: %s<%s>' % (v.canonical_name, p.var_name))
-            v.set_arg0_type(self._clsrestriction)
-        class_expr_interpreter = ClassExprInterpreter(self)
-        class_body = class_expr_interpreter.visit(self._clsobj.expression)
-        for m in class_body.member:
-            if m in self._declared:
-                pass
-            else:
-                if isinstance(m, AssertionNode):
-                    m.re_declare(self)
-                elif isinstance(m, CommandNode):
-                    if m.name in self.proto_ns and (m.defined or self.get_proto_type(m.name).defined):
-                        self.add_proto_type(m)
-                    if m.name in self.proto_ns:
-                        continue
-                    if m.name in self.command_ns:
-                        print self.canonical_name, m.name, m
-                        continue
-                    if m.module is None:
-                        m.module = self
-                    if m.application is None:
-                        m.application = self.application
-                    cursor = m.module.make_profile_builder()
-                    self.add_command(cursor.visit(m))
-                else:
+        try:
+            for v in self.command_ns.values():
+                for p in v.type_params:
+                    for p2 in self.type_params:
+                        if p.var_name == p2.var_name:
+                            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Conflicted type parameter: %s<%s>' % (v.canonical_name, p.var_name))
+                v.set_arg0_type(self._clsrestriction)
+            class_expr_interpreter = ClassExprInterpreter(self)
+            class_body = class_expr_interpreter.visit(self._clsobj.expression)
+            for m in class_body.member:
+                if m in self._declared:
                     pass
+                else:
+                    if isinstance(m, AssertionNode):
+                        m.re_declare(self)
+                    elif isinstance(m, CommandNode):
+                        if m.name in self.proto_ns and (m.defined or self.get_proto_type(m.name).defined):
+                            self.add_proto_type(m)
+                        if m.name in self.proto_ns:
+                            continue
+                        if m.name in self.command_ns:
+                            continue
+                        if m.module is None:
+                            m.module = self
+                        if m.application is None:
+                            m.application = self.application
+                        cursor = m.module.make_profile_builder()
+                        self.add_command(cursor.visit(m))
+                    else:
+                        pass
+        except:
+            print '    [ERROR]', u'%s::%s' % (self._app.name, self.canonical_name)
+            raise
 
     def _attache_class(self, cmd):
         for modname, refered_module in self.refered_modules:
