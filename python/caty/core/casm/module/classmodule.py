@@ -96,7 +96,7 @@ class ClassModule(Module):
                 pass
             else:
                 if isinstance(m, AssertionNode):
-                    pass
+                    m.re_declare(self)
                 elif isinstance(m, CommandNode):
                     if m.name in self.proto_ns and (m.defined or self.get_proto_type(m.name).defined):
                         self.add_proto_type(m)
@@ -233,10 +233,16 @@ class ClassExprInterpreter(object):
             x = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
             x._schema = t
             tp.append(x)
+        assertions = []
         for m in cls._clsobj.member:
             if not tp:
                 member.append(m)
             else:
+                if isinstance(m, AssertionNode):
+                    m = m.clone()
+                    if m.name in self.module.command_ns:
+                        m.name = u''
+                    assertions.append(m)
                 if isinstance(m, ASTRoot):
                     print m
                 elif isinstance(m, CommandNode):
@@ -246,6 +252,29 @@ class ClassExprInterpreter(object):
                     member.append(m)
                 else:
                     member.append(m)
+        if assertions:
+            import re
+            ptn = re.compile(u'_assert_[0-9]+$')
+            nums = []
+            for a in self.module.assertions:
+                if ptn.match(a.name):
+                    nums.append(int(a.name.rsplit('_', 1)[1]))
+            if nums:
+                max_num = nums[-1] + 1
+            else:
+                max_num = 1
+            usables = []
+            for i in range(1, max_num):
+                if i not in nums:
+                    usables.append(i)
+            
+            for a in assertions:
+                if not a.name:
+                    if usables:
+                        a.name = u'_assert_' + str(usables.pop(0))
+                    else:
+                        a.name = u'_assert_' + str(max_num)
+                        max_num += 1
         return ClassBody(member, None)
 
     def __build_profile(self, pat, cls, tp, type_params):

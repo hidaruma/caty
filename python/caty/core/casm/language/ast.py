@@ -726,17 +726,22 @@ class CommandDecl(object):
     コマンドURI参照 refers
     """
     def __init__(self, profile, jump, resource):
+        from caty.core.schema import NeverSchema
         self.uri = None # 後で挿入される
         self.profile_ast = profile
         self.profile = None
         self.jump_decl = jump
         self.resource = resource if isinstance(resource, list) else [resource]
         self.__initialized = False
+        self.throws = NeverSchema()
+        self.signals = NeverSchema()
 
     def clone(self):
         new = CommandDecl(self.profile_ast, self.jump_decl, self.resource)
         new.uri = self.uri
         new.profile = self.profile
+        new.throws = self.throws
+        new.signals = self.signals
         new._set_initialized(self.__initialized)
         return new
 
