@@ -220,7 +220,7 @@ class ClassExprInterpreter(object):
         try:
             cls = self.module.get_class(obj.name)
         except:
-            print u'[Error]', self.canonical_name
+            print u'[Error]', self.module.canonical_name
             raise
         tp = []
         member = []

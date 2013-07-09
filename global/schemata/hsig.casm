@@ -67,7 +67,7 @@ signature Unloadable<A> {
  * 状態は他のストレージエンティティから読み込まれる。
  */
 @[hidden]
-signature Loadable<B, A> conforms Unloadale <A> {
+signature Loadable<B, A> conforms Unloadable <A> {
   @[updater]
   command load [B*] :: void -> any throws Exception;
   command restore := load;
