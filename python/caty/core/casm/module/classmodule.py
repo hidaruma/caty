@@ -319,9 +319,9 @@ class ClassExprInterpreter(object):
         tn = TypeNormalizer(cls)
         tc.real_root = False
         tc._init_type_params(Dummy(tp))
-        opt_schema = tn.visit(pat.opt_schema.accept(tc))
+        pat.opt_schema = tn.visit(pat.opt_schema.accept(tc))
         tc._init_type_params(Dummy(tp))
-        arg_schema = tn.visit(pat.arg_schema.accept(tc))
+        pat.arg_schema = tn.visit(pat.arg_schema.accept(tc))
         p = pat.decl.profile
         new_prof = [None, None]
         tc = TypeVarApplier(cls)

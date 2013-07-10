@@ -659,13 +659,20 @@ class CallPattern(object):
         self.opts = opts
         self.args = args
         self.decl = decl
+        self.opt_schema = None
+        self.arg_schema = None
 
     def clone(self):
-        return CallPattern(self.opts, self.args, self.decl.clone())
+        r = CallPattern(self.opts, self.args, self.decl.clone())
+        r.opt_schema = self.opt_schema
+        r.arg_schema = self.arg_schema
+        return r
 
     def build(self, cursors):
         if self.opts:
             o = self.opts
+            if self.opt_schema:
+                o = self.opt_schema
             for cursor in cursors:
                 o = o.accept(cursor)
             self.opt_schema = o
@@ -673,6 +680,8 @@ class CallPattern(object):
             self.opt_schema = schemata['null']
         if self.args:
             a = self.args
+            if self.arg_schema:
+                a = self.arg_schema
             for cursor in cursors:
                 a = a.accept(cursor)
             self.arg_schema = a
