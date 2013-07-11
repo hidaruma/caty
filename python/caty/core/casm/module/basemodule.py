@@ -172,7 +172,6 @@ class Module(Facility):
             t = scope[name]
             if not (t.defined or not t.redifinable) or (type == u'Type' and target.defined == t.defined and t.redifinable == target.redifinable):
                 m, a = self._get_mod_and_app(t)
-                print t, target
                 raise Exception(self.application.i18n.get(u'%s $name of $this is already defined in $module of $app' % type, 
                                                    name=name, 
                                                    this=self._get_full_name(),

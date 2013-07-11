@@ -161,7 +161,7 @@ class CommandExecutor(BaseInterpreter):
                     getattr(node, n).commit()
             return r
         except SystemResourceNotFound as e:
-            traceback.print_exc()
+            #traceback.print_exc()
             raise
         except ContinuationSignal as e:
             #node.signal_schema.validate(e.data)

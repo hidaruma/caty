@@ -6,7 +6,7 @@ from caty.core.script.parser import NothingTodo
 from caty.core.facility import FakeFacility
 from caty.jsontools import pp
 from caty.core.schema import VoidSchema, ArraySchema
-from caty.core.exception import CatyException
+from caty.core.exception import CatyException, SystemResourceNotFound
 from caty.mafs.authorization import AuthoriToken
 from caty.session.value import create_variable
 from caty.util import get_message, init_writer, cout, debug, error_to_ustr
@@ -358,7 +358,7 @@ Web hconサーバの起動・停止を行う
                 self.interpreter = None
             else:
                 self.prompt = '> '
-        except CatyException, e:
+        except CatyException as e:
             #self._echo(traceback)
             m = e.get_message(self.app.i18n)
             self._echo(m)
