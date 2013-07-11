@@ -327,11 +327,14 @@ type PrjManifest = {
     /**
      * アクセス可能なIPアドレスのリスト(末尾のみワイルドカード可)。
      * 特に指定されなかった場合、全てのホストからのアクセスを受け付ける
+     * addrsDeniedと指定がかぶったときは、addrsDenied が優先される。
      */
     "addrsAllowed": [string*]?,
 
     /**
      * アクセスを拒否するIPアドレスのリスト(末尾のみワイルドカード)
+     * 特に指定されなかった場合、アクセスを拒否するIPアドレスはない。
+     * addrsAlloedと指定がかぶったときは、addrsDenied が優先される。
      */
     "addrsDenied": [string*]?,
 
@@ -341,7 +344,8 @@ type PrjManifest = {
             *: any?
         },
     }?,
-    "facilities": FacilitiesConfig,
+    /** ファシリティに関する設定 */
+    "facilities": FacilitiesConfig?,
     /**
      * 配布パッケージからマージされる項目
      */
