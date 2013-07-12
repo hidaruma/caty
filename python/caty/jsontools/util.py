@@ -1,4 +1,36 @@
 import caty.jsontools.xjson as xjson
+class ManifestReader(object):
+    def __init__(self, mafs, name, manifest_dir=u'/prj-manifest'):
+        self.mafs = mafs
+        self.base_mafenist = name
+        self.manifest_dir = manifest_dir
+
+    def read(self):
+        m = None
+        dm = {}
+        with self.mafs.open(self.base_mafenist) as f:
+            if f.exists:
+                m = xjson.loads(f.read())
+                if not isinstance(m, dict):
+                    return m
+        dir = self.mafs.opendir(self.manifest_dir)
+        if not dir.exists:
+            return m
+        else:
+            dm = self._read_dir(dir)
+        if m:
+            dm.update(m)
+        return dm
+
+    def _read_dir(self, dir):
+        res = {}
+        for e in dir.read():
+            if not e.is_dir and e.path.endswith('.xjson'):
+                res[e.basename.rsplit('.', 1)[0]] = ManifestReader(self.mafs, e.path, e.path.rsplit('.', 1)[0]).read()
+            elif e.is_dir and not self.mafs.open(e.path + '.xjson').exists:
+                res[e.basename] = self._read_dir(self.mafs.opendir(e.path))
+        return res
+
 class DirectoryWalker(object):
     def __init__(self, mafs, rec, special_file):
         self.mafs = mafs

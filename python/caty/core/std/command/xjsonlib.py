@@ -161,7 +161,7 @@ class Merge(Builtin):
         except:
             return None
 
-from caty.jsontools.util import DirectoryWalker
+from caty.jsontools.util import DirectoryWalker, ManifestReader
 class ReadDir(Builtin):
     def setup(self, opts, path):
         self.path = path
@@ -171,6 +171,16 @@ class ReadDir(Builtin):
     def execute(self):
         d = DirectoryWalker(self.pub, self.rec, self.file)
         return d.read(self.path)
+
+class ReadFileDir(Builtin):
+    def setup(self, token):
+        if not token.startswith('/'):
+            token = '/' + token
+        self.token = token
+
+    def execute(self):
+        d = ManifestReader(self.pub, self.token+'.xjson', self.token)
+        return d.read()
 
 class ApplyUpdate(Builtin):
     def execute(self, data):

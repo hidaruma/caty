@@ -142,6 +142,10 @@ command read-dir {@[default(false)]"rec": boolean?, "also-file": string(remark="
     reads pub
     refers python:xjsonlib.ReadDir;
 
+command read-file-dir [string token] :: void -> any
+    reads pub
+    refers python:xjsonlib.ReadFileDir;
+
 /** 
  * 入力の第一要素が第二要素に包含されるかどうかを返す。
  */
