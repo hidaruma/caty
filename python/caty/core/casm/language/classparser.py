@@ -1,7 +1,7 @@
 #coding: utf-8
 from topdown import *
 
-from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, ClassURI, CommandNode, ClassBody, ClassIntersectionOperator, UseOperator, UnuseOperator, CloseOperator, ClassReference, OpenOperator
+from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, ClassURI, CommandNode, ClassBody, ClassIntersectionOperator, UseOperator, UnuseOperator, CloseOperator, ClassReference, OpenOperator, AliasNode
 from caty.core.casm.language.schemaparser import schema, typedef, type_arg, scalar, type_var
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.facilityparser import _entity
