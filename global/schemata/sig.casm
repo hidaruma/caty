@@ -329,6 +329,33 @@ signature Keyed<X, K> conforms PartiallyKeyed<X, K> =
 };
 
 
+/** 相互に変換可能なデータ領域
+ * encode/decode, marshal/unmarshal, 
+ * serialize/deserialize, parse/unparse
+ * など
+ */
+@[pure]
+signature FromTo<X, Y> {
+  command from-x :: X -> Y;
+  command to-x :: Y -> X;
+
+ /* X, Y にeqが定義されている必要がある。 */
+
+ assert (x::X) {
+   [
+     %x | from-x | to-x,
+     %x,
+   ] | eq
+ };
+
+ assert (y::Y) {
+   [
+     %y | to-x | from-x,
+     %y,
+   ] | eq
+ };
+
+};
 
 /** 群
  * 通常はモノイドから導出して定義する。
