@@ -31,7 +31,7 @@ from caty.mafs import stdfs
 from caty.util.path import join
 class FileOpener(object):
     def __init__(self, cwd):
-        self.cwd = cwd
+        self.cwd = cwd.replace('\\', '/')
 
     def opendir(self, path):
         if path.startswith(self.cwd):
