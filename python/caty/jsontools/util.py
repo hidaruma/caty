@@ -26,9 +26,9 @@ class ManifestReader(object):
         res = {}
         for e in dir.read():
             if not e.is_dir and e.path.endswith('.xjson'):
-                res[e.basename.rsplit('.', 1)[0]] = ManifestReader(self.mafs, e.path, e.path.rsplit('.', 1)[0]).read()
+                res[unicode(e.basename.rsplit('.', 1)[0])] = ManifestReader(self.mafs, e.path, e.path.rsplit('.', 1)[0]).read()
             elif e.is_dir and not self.mafs.open(e.path + '.xjson').exists:
-                res[e.basename] = self._read_dir(self.mafs.opendir(e.path))
+                res[unicode(e.basename)] = self._read_dir(self.mafs.opendir(e.path))
         return res
 
 class DirectoryWalker(object):
@@ -47,7 +47,7 @@ class DirectoryWalker(object):
     def _read(self, path):
         r = {}
         for dirent in self.mafs.opendir(path).read():
-            key = dirent.basename.split('.')[0]
+            key = unicode(dirent.basename.split('.')[0])
             if dirent.path.endswith('.xjson') and not dirent.is_dir:
                 r[key] = xjson.loads(dirent.read())
             elif dirent.is_dir and self.rec:
