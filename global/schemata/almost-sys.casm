@@ -1,0 +1,58 @@
+// -*- coding: utf-8 -*-
+
+
+/** システム定義の候補 
+ * 一時的にこのモジュールに定義するが、
+ * システム側に移される予定。
+ */
+module almost-sys; 
+
+// AppManifest
+
+/** ファシリティのターゲットドメイン
+ * この型の値＝名前は、ファシリティの用途とデザインパターンの大分類を与える。
+ */
+type targetDomain = ("mafs"|"storage"|"session" | "other");
+
+/** ファシリティバックエンドに関する基本情報 
+ */
+type FacilityBackendInfo =  {
+  /** バックエンド名 */
+  "name": string,
+  /** バックエンドのモジュール＆クラスの名前 */
+  "module": string,
+  /** バックエンドの設定情報の型
+   * 型の修飾名を指定する。
+   */
+  "configType": string(remark="型の名前"),
+
+  /** このバックエンドの短い説明 */
+  "description": string?,
+  /** このバックエンドのより詳しい説明 
+   * Wiki記法が使える。
+   */
+  "moreDescription": string?,
+  /** バージョン
+   * パッケージメタ情報と重複記述になるときは書かないほうがよい。
+   */
+  "version": string?,
+
+  /** このバックエンドが実現するファシリティの用途とデザインパターン */
+  "targetDomain": targetDomain?,
+  /** ファシリティ宣言で使う標準的なファシリティ名 */
+  "stdFacilityName": string?,
+
+  *: any?
+
+};
+
+/** アプリケーションごとのファシリティバックエンドの基本情報を列挙する */
+command list-backends
+ [@[default("this")] string(remark="アプリケーション名")? app]
+ :: void -> [FacilityBackendInfo*]
+;
+
+
+
+
+
