@@ -138,7 +138,14 @@ command merge {@[default("fst")]"mode": string?} :: [object*] -> object | null
     refers python:xjsonlib.Merge;
 
 
-command read-dir {@[default(false)]"rec": boolean?, "also-file": string(remark="ファイルパス")?,} [string path] :: void -> {*: object}
+
+command read-dir 
+ {
+   @[default(false)]
+   "rec": boolean?, 
+   "also-file": string(remark="ファイルパス")?,
+  } 
+  [string path] :: void -> any
     reads pub
     refers python:xjsonlib.ReadDir;
 

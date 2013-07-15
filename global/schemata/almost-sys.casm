@@ -130,17 +130,29 @@ signature Collection
 
  /** コレクションにレコードを挿入する 
   * 引数にキーが指定されれば、そのキーを使う。
-  * 引数にキーが指定されず、レコードにもIDがないきはBadInput例外。
+  * 引数にキーが指定されず、レコードにもIDがないきは可能なら自動生成する、
+  * 不可能ならBadInput例外。
   */
  @[updater]
  command insert [Key? key] :: Record -> Record
    throws [AlreadyExists, BadInput]
  ;
 
- /** 単一レコードを置き換える */
+ /** 単一レコードを置き換える 
+  * 必ず既存レコードを置き換える。
+  */
  @[updater]
  command replace [Key key] :: Record -> Record
    throws NotExist
+ ;
+
+ /** 引数に指定されたキーのレコードを削除する 
+  * 出力は任意である。
+  * 削除に失敗した場合は例外とする。
+  */
+ @[updater]
+ command delete [Key key] :: void -> any
+   throws NotFound
  ;
 
  /* == デフォルト実装付きのコマンドプロファイル == */
@@ -182,3 +194,104 @@ signature Collection
 
 
 };
+
+
+
+
+@[hidden] signature StorageAdmin = {
+/*
+
+
+|コマンド                |入力                    | 別名   |
+|------------------------|------------------------|--------|
+| create-database 名前?  |DatabaseOptions         |        |
+| activate-database 名前?|ActivationOptions       |connect |
+| confirm-database 名前? |ConfirmOptions          |confirm |
+| list-collecions 名前?  |void                    |list    |
+| drop-database 名前?    |void                    |        |
+| create-collection 名前 |CollectionOptions       |        |
+| drop-collection 名前   |void                    |        |
+| clear-collection 名前  |void                    |truncate|
+| alter-collection 名前  |CollectionOptions       |        |
+| show-collectin 名前    |void                    |describe|
+
+*/
+
+ type DatabaseOptions;
+ type CollectionOptions;
+
+ type DatabaseInfo;
+ type CollectionInfo;
+
+ type ConfirmOptions;
+ type ActivationOptions;
+
+
+ /** データベースを作成する
+  * 1つのストレージバックエンドが1つのデータベースしかサポートしない場合は、
+  * データベース名は不要。
+  */
+ command create-database [string? database-name] 
+  :: DatabaseOptions -> any
+ ;
+
+ /** 存在するデータベースをアクティブ化する
+  * データベースサーバーへの接続処理などを行う。
+  */
+ command activate-database [string? database-name]
+  :: ActivationOptions -> any
+ ;
+ command connect := activate-database;
+
+
+ /** データベースを利用可能とする
+  * 存在しなければ作成し、アクティブでないならアクティブ化する。
+  */
+ command confirm-database [string? database-name]
+  :: ConfirmOptions -> any
+ ;
+ command confirm := confirm-database;
+
+
+ /** データベース内のすべてのコレクションを列挙する */
+ command list-collecions [string? database-name]
+  :: void -> [CollectionInfo*]
+ ;
+ command list := list-collections;
+
+ /** データベースを削除する */
+ command drop-database [string? database-name]
+  :: void -> any
+ ;
+
+
+ /** コレクションを新規作成する */
+ command create-collection [string? database-name] 
+  :: CollectionOptions -> any
+ ;
+
+ /** コレクションを削除する */
+ command drop-collection [string? database-name]
+   :: void -> any
+ ;
+
+ /** コレクションに含まれるすべてのレコードを削除して空にする */
+ command clear-collection [string? database-name]
+  :: void -> any
+ ;
+ command truncate := clear-collection;
+
+ /** コレクションに関する設定を変更する */
+ command alter-collection [string? database-name]
+  :: CollectionOptions -> any
+ ;
+
+ /** コレクションに関する情報を出力する */
+ command show-collectin [string? database-name]
+  :: void -> CollectionInfo
+ throws NotFound
+ ;
+ command describe := show-collection;
+
+};
+
