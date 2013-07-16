@@ -116,7 +116,7 @@ class DirectoryObject(fileobject.DirectoryObject, Facility, Resource):
         return self.path
 
     def _get_canonical_name(self):
-        return '%s:%s' % (self.application.name, self.name)
+        return '%s:%s' % (self.application.name or u'this', self.name)
 
     def _open(self, path, mode='rb'):
         fo = FileObject(path, mode, self.module)

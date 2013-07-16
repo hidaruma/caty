@@ -291,6 +291,7 @@ class Application(object):
         self._deprecated = cfg.get('deprecated', False)
         self._manifest = cfg
         self._lock_wait_limit = cfg.get('lockWaitLimit', 60)
+        self.backend_info = cfg.get(u'facilityBackends', {})
 
     def _read_config(self):
         app_dir = self._group._make_super_root(join(self._group.path, self.name)).start()
