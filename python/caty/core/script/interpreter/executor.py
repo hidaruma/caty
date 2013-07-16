@@ -143,6 +143,7 @@ class CommandExecutor(BaseInterpreter):
                 except JsonSchemaError, e:
                     info = e.error_report(self.app.i18n)
                     print u'[DEBUG]', node.name
+                    print prettyprint(input)
                     throw_caty_exception(u'InputTypeError', prettyprint(info), errorInfo=info)
                 if u'no-auto-fill' in node.annotations:
                     r = exec_func(node, input)
@@ -155,6 +156,7 @@ class CommandExecutor(BaseInterpreter):
                     node.out_schema.validate(r)
                 except JsonSchemaError, e:
                     info = e.error_report(self.app.i18n)
+                    print prettyprint(r)
                     throw_caty_exception(u'OutputTypeError', prettyprint(info), errorInfo=info)
             if 'commit-point' in node.profile_container.get_annotations():
                 for n in node.facility_names:

@@ -71,6 +71,8 @@ class FileOpener(object):
         return DirectoryObject(join(self.cwd, path).replace('\\', '/'), stdfs)
 
     def open(self, path):
+        if path.startswith(self.cwd):
+            path = path[len(self.cwd):]
         return FileObject(join(self.cwd, path).replace('\\', '/'), 'rb', stdfs)
 
             
