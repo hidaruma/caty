@@ -3,6 +3,7 @@ from caty.core.async import AsyncQueue
 from caty.core.facility import Facility, AccessManager, FakeFacility, ReadOnlyFacility, EntityProxy, AbstractEntityProxy
 from caty.util import cout, error_to_ustr, brutal_error_printer
 from caty.util.path import join
+from caty.jsontools.util import ManifestReader
 from caty import mafs, storage, session
 from caty.jsontools import xjson
 from caty.util.collection import merge_dict
@@ -293,24 +294,15 @@ class Application(object):
 
     def _read_config(self):
         app_dir = self._group._make_super_root(join(self._group.path, self.name)).start()
-        f = app_dir.create(u'reads').open('/_manifest.xjson')
+        f = app_dir.create(u'reads').open('/app-manifest.xjson')
         if f.exists:
             try:
-                cfg = xjson.loads(f.read())
+                cfg = ManifestReader(app_dir.create(u'reads'), u'/app-manifest.xjson', u'/app-manifest').read()
             except Exception, e:
                 self._system.i18n.write(u'Failed to parse JSON: $path\n$error', path=f.path, error=error_to_ustr(e))
                 raise
-            self._system.deprecate_logger.warning(u'%s: _manifest.xjson is deprecated.' % self.name)
         else:
-            f = app_dir.create(u'reads').open('/app-manifest.xjson')
-            if f.exists:
-                try:
-                    cfg = xjson.loads(f.read())
-                except Exception, e:
-                    self._system.i18n.write(u'Failed to parse JSON: $path\n$error', path=f.path, error=error_to_ustr(e))
-                    raise
-            else:
-                cfg = self.default_conf()
+            cfg = self.default_conf()
         manifest_type = self._system._casm._core.schema_finder.get_type('AppManifest')
         manifest_type.validate(cfg)
         cfg = manifest_type.fill_default(cfg)

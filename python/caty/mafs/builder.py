@@ -90,7 +90,7 @@ class FileObject(fileobject.FileObject, Facility, Resource):
         return self.path
 
     def _get_canonical_name(self):
-        return '%s:%s' % (self.application.name, self.name)
+        return '%s:%s' % (self.application.name or u'this', self.name)
 
     #def __del__(self):
     #    self.opener = None

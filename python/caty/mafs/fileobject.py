@@ -68,7 +68,7 @@ class FileObject(object):
         try:
             self.last_modified
             return True
-        except:
+        except Exception as e:
             return False
 
     def mode():
