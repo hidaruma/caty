@@ -1,12 +1,13 @@
 import caty.jsontools.xjson as xjson
 class ManifestReader(object):
-    def __init__(self, mafs, name, manifest_dir=u'/prj-manifest'):
+    def __init__(self, mafs, name, manifest_dir=u'/prj-manifest', default=None):
         self.mafs = mafs
         self.base_mafenist = name
         self.manifest_dir = manifest_dir
+        self.default = default or {}
 
     def read(self):
-        m = None
+        m = self.default
         dm = {}
         with self.mafs.open(self.base_mafenist) as f:
             if f.exists:

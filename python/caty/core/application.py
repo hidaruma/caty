@@ -295,15 +295,11 @@ class Application(object):
 
     def _read_config(self):
         app_dir = self._group._make_super_root(join(self._group.path, self.name)).start()
-        f = app_dir.create(u'reads').open('/app-manifest.xjson')
-        if f.exists:
-            try:
-                cfg = ManifestReader(app_dir.create(u'reads'), u'/app-manifest.xjson', u'/app-manifest').read()
-            except Exception, e:
-                self._system.i18n.write(u'Failed to parse JSON: $path\n$error', path=f.path, error=error_to_ustr(e))
-                raise
-        else:
-            cfg = self.default_conf()
+        try:
+            cfg = ManifestReader(app_dir.create(u'reads'), u'/app-manifest.xjson', u'/app-manifest', self.default_conf()).read()
+        except Exception, e:
+            self._system.i18n.write(u'Failed to parse JSON: $path\n$error', path=f.path, error=error_to_ustr(e))
+            raise
         manifest_type = self._system._casm._core.schema_finder.get_type('AppManifest')
         manifest_type.validate(cfg)
         cfg = manifest_type.fill_default(cfg)
