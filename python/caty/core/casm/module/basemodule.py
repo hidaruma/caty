@@ -461,9 +461,12 @@ class Module(Facility):
         self._register_command()
         self._register_facility()
         self._validate_signature()
+        self.set_compiled(True)
+
+    def set_compiled(self, v):
         self.compiled = True
         for m in self.sub_modules.values() + self.class_ns.values():
-            m.compiled = True
+            m.set_compiled(v)
 
     def make_schema_builder(self):
         return SchemaBuilder(self)
@@ -735,18 +738,21 @@ class Module(Facility):
         if self.is_root and not self.compiled:
             self.application.cout.writeln('OK')
 
-        for k, v in self.entity_ns.items():
-            if not v.facility_name:
-                continue
-            if self.has_facility(v.facility_name): # entiry name = FacilityName;形式。 ここでは抽象エンティティ
-                self._app.register_facility(v.canonical_name if not self.is_root else v.name, self.get_facility_classes(v.facility_name), v.user_param)
+        if not self.compiled:
+            for k, v in self.entity_ns.items():
+                if not v.facility_name:
+                    continue
+                if '__master' not in v.annotations:
+                    continue
+                self._app.register_facility(v.name, self.get_facility_classes(v.facility_name), v.user_param)
 
-        for k, v in self.entity_ns.items():
-            if not v.facility_name:
-                continue
-            if not self.has_facility(v.facility_name): # 具体エンティティ
-                fname = self.get_entity(v.facility_name).canonical_name # ファシリティ名は抽象エンティティより取得
-                self._app.register_entity(v.canonical_name if not self.is_root else v.name, fname, v.user_param)
+            for k, v in self.entity_ns.items():
+                if not v.facility_name:
+                    continue
+                if '__master' in v.annotations:
+                    continue
+                fname = self.get_entity(v.facility_name).name # ファシリティ名は抽象エンティティより取得
+                self._app.register_entity(v.name, fname, v.user_param)
         if emsgs:
             self.application.cout.writeln(u'')
         for e in emsgs:

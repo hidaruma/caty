@@ -36,3 +36,14 @@ class CoreModule(Module):
         Module.clear_namespace(self)
         self.schema_ns.update(schemata)
 
+    def _load_facility_class(self, name, uri):
+        if not uri.startswith(u'python:'):
+            raise Exception(self.application.i18n.get(u'Invalid reference: $ref, $name, $mod', ref=uri, name=name, mod=self.name))
+        uri = uri.replace('python:', '')
+        lib, cls = uri.split('.', 1)
+        code = 'from caty.core.std.command.%s import %s' % (lib, cls)
+        g_dict = {}
+        obj = compile(code, 'python/caty/core/std/command/' + lib +'.py', 'exec')
+        g_dict['__file__'] = 'python/caty/core/std/command/' + lib +'.py'
+        exec obj in g_dict
+        return g_dict[cls]

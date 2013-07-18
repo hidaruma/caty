@@ -48,12 +48,14 @@ def conditional_indices(seq):
     option(name_token)(seq)
     seq.parse(')')
     keyword(u'conforms')(seq)
-    S('{')(seq)
-    for type, cls_name in split(indices_item, u',', True)(seq):
-        if type in r:
-            raise ParseError(conditional_indices, seq)
-        r[type] = cls_name
-    S('}')(seq)
+    if option(S('{'))(seq):
+        for type, cls_name in split(indices_item, u',', True)(seq):
+            if type in r:
+                raise ParseError(conditional_indices, seq)
+            r[type] = cls_name
+        S('}')(seq)
+    else:
+        i = choice(index_list, typename)(seq)
     return r
 
 def indices_item(seq):

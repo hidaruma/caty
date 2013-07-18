@@ -494,12 +494,12 @@ class Application(object):
         self.facility_name_conflicted(name)
         res = self.get_facility_class(facility_name)
         if not res:
-            raise Exception(self.i18n.get("Unknown facility: $name", name=name, app=self.name))
-        self._facility_classes[name] = (cls, sys_param, user_param, facility_name)
+            raise Exception(self.i18n.get("Unknown facility: $name", name=facility_name, app=self.name))
+        self._facility_classes[name] = (res[0], res[1], user_param, facility_name)
 
     def get_facility_class(self, facility_name):
         if facility_name in self._facility_classes:
-            cls, sys_param = self._facility_classes[facility_name]
+            return self._facility_classes[facility_name]
         if self.parent:
             return self.parent.get_facility_class(facility_name)
         else:
