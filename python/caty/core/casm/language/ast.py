@@ -967,9 +967,10 @@ class AnnotationDecl(object):
         return self.type.accept(visitor)
 
 class CollectionDeclNode(object):
-    def __init__(self, name, coltype, keypath, keytype, doc, ann):
+    def __init__(self, name, coltype, keypath, keytype, dbname, doc, ann):
         from caty.core.script.parser import ScriptParser
         self.name = name
+        self.dbname = dbname
         self.docstring = doc
         self.annotations = ann
         a = Annotations([])
@@ -980,19 +981,6 @@ class CollectionDeclNode(object):
         if keytype:
             a.add(Annotation(u'key-type', keytype))
         self.type = ASTRoot(name, None, coltype, a, doc)
-        self.command1 = CommandNode('_' + name, 
-                                     [CallPattern(None, 
-                                                 None, 
-                                                 CommandDecl(
-                                                    (ScalarNode(u'void'), ScalarNode(u'Classed')),
-                                                    [], 
-                                                    []
-                                                 ), 
-                                     )],
-                                     CommandURI([(u'python', 'caty.core.command.Dummy')], False),
-                                     doc, 
-                                     Annotations([Annotation(u'__collection')]),
-                                     [])
         self.command2 = CommandNode(name, 
                                      [CallPattern(None, 
                                                  None, 
@@ -1007,14 +995,13 @@ class CollectionDeclNode(object):
                                      Annotations([Annotation(u'__collection')]),
                                      [])
         self.catyclass = ClassNode(name, ClassBody([], ClassURI([(u'python', ['caty.core.command'])], False)), ScalarNode(u'univ'), ScalarNode(u'univ'), None, None, Annotations([]), [])
-        self.entity = FacilityNode(name, None, u'null', ScalarNode(u'null'), {}, None, Annotations([]))
+        self.entity = EntityNode(name, dbname, name, None, Annotations([]))
 
     def declare(self, module):
         self.type.declare(module)
-        self.command1.declare(module)
-        self.command2.declare(module)
+        #self.command2.declare(module)
         self.catyclass.declare(module)
-        self.entity.declare(module)
+        #self.entity.declare(module)
 
 class TypeFunctionNode(TypeFunction, SchemaBase):
     def __init__(self, funcname, typename):
