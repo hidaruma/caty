@@ -349,6 +349,9 @@ Web hconサーバの起動・停止を行う
             except NothingTodo:
                 self.set_prompt()
                 return False
+            except:
+                traceback.print_exc()
+                return False
             if c:
                 r = c(None)
                 if self.not_void_out(c):

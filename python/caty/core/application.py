@@ -481,17 +481,29 @@ class Application(object):
                 logger.init(self, tp)
 
     def register_facility(self, name, cls, system_param):
-        if name in self._facility_classes:
-            raise Exception(self.i18n.get("Facility name conflicted: $name at $app", name=name, app=self.name))
+        self.facility_name_conflicted(name)
         self._facility_classes[name] = (cls, system_param)
 
-    def register_entity(self, name, facility_name, user_param):
+    def facility_name_conflicted(self, name):
         if name in self._facility_classes:
-            raise Exception(self.i18n.get("Entity name conflicted: $name at $app", name=name, app=self.name))
-        if facility_name not in self._facility_classes:
-            raise Exception(self.i18n.get("Unknown facility: $name at $app", name=name, app=self.name))
-        cls, sys_param = self._facility_classes[facility_name]
+            raise Exception(self.i18n.get("Facility name conflicted: $name at $app", name=name, app=self.name))
+        if self.parent:
+            self.parent.facility_name_conflicted(name)
+
+    def register_entity(self, name, facility_name, user_param):
+        self.facility_name_conflicted(name)
+        res = self.get_facility_class(facility_name)
+        if not res:
+            raise Exception(self.i18n.get("Unknown facility: $name", name=name, app=self.name))
         self._facility_classes[name] = (cls, sys_param, user_param, facility_name)
+
+    def get_facility_class(self, facility_name):
+        if facility_name in self._facility_classes:
+            cls, sys_param = self._facility_classes[facility_name]
+        if self.parent:
+            return self.parent.get_facility_class(facility_name)
+        else:
+            return None
 
     def _init_facilities(self):
         initialized = set()
@@ -594,7 +606,7 @@ class Application(object):
             'logger': logger.Logger(self).start(),
             'sysfiles': self._create_sysfiles(),
         }
-        for k, v in self._facility_classes.items():
+        for k, v in self.get_facility_items():
             try:
                 if v[0] is None: continue
                 if len(v) == 2:
@@ -612,6 +624,13 @@ class Application(object):
         fset = FacilitySet(facilities, self)
         facilities['interpreter'] = self._interpreter.file_mode(fset)
         return fset
+
+    def get_facility_items(self):
+        for k, v in self._facility_classes.items():
+            yield k, v
+        if self.parent:
+            for k, v in self.parent.get_facility_items():
+                yield k, v
 
     def has_facility(self, name):
         if name in self._facility_classes:
