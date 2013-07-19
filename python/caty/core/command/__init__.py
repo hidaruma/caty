@@ -255,6 +255,7 @@ class Command(object):
                     name = e.canonical_name
             factory = facilities.get(name)
             if not factory:
+                print facilities.keys()
                 throw_caty_exception('FacilityNotDefined', u'Facility $name is not defined', name=name)
             if factory.is_entity:
                 if param:

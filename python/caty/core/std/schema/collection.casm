@@ -5,8 +5,8 @@ facility default-storage (string database-name)
    conforms Collection
    refers python:collection.DefaultStorage;
 
-master default-database = default-storage("default");
-entity default-collection = default-database("collection");
+master default-database = default-storage("default-database");
+entity default-collection = default-database("default-collection");
 
 /** デフォルトのレコード型 
  */
@@ -251,3 +251,10 @@ signature Collection
 
 };
 
+@[__collection, __identified("id"), __id-type("string")]
+type default-collection = {
+    "id": string?,
+    *: any?
+};
+
+class default-collection conforms Collection<default-collection, string> = {};
