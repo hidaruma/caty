@@ -252,3 +252,8 @@ def normalize_tribool(a):
         return False
     else:
         return INDEF
+
+def DEBUG(a):
+    print
+    print u'[DEBUG]', a
+

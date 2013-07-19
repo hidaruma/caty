@@ -751,8 +751,7 @@ class Module(Facility):
                     continue
                 if '__master' in v.annotations:
                     continue
-                fname = self.get_entity(v.facility_name).name # ファシリティ名は抽象エンティティより取得
-                self._app.register_entity(v.name, fname, v.user_param)
+                self._app.register_entity(v.name, v.facility_name, v.user_param)
         if emsgs:
             self.application.cout.writeln(u'')
         for e in emsgs:

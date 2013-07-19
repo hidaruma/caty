@@ -7,6 +7,7 @@ from caty.core.schema import *
 from caty.util.collection import OverlayedDict
 import caty.jsontools as json
 from caty.core.exception import CatyException, throw_caty_exception
+from caty.util import DEBUG
 
 def apply_annotation(f):
     def _apply(cursor, node):
@@ -65,6 +66,9 @@ class SchemaBuilder(TreeCursor):
                 if t.var_name == node.name:
                     schema = TypeVariable(node.name, node.type_args, t.kind, t.default, node.options, self.module)
                     return schema 
+            if isinstance(node, TypeVariable):
+                if node.default:
+                    return node
             raise CatyException(u'SCHEMA_COMPILE_ERROR', 
                                 u'Undeclared type variable at $this: $name',
                                 this=(self._root_name or u'public'), name=node.name)
