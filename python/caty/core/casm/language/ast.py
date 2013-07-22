@@ -724,7 +724,7 @@ def _verify_type_var(obj, names):
                 return x
     elif not isinstance(obj, TypeVariable):
         return 
-    elif not obj.name in names and not obj._schema:
+    elif not obj.name in names and not obj._schema and not obj._default_schema:
         return obj.name
 
 class CommandDecl(object):
@@ -977,9 +977,9 @@ class CollectionDeclNode(object):
         for c in ann._annotations:
             a.add(c)
         a.add(Annotation(u'__collection'))
-        a.add(Annotation(u'key-getter', keypath))
+        a.add(Annotation(u'__identified', keypath))
         if keytype:
-            a.add(Annotation(u'key-type', keytype))
+            a.add(Annotation(u'__id-type', keytype))
         self.type = ASTRoot(name, None, coltype, a, doc)
         self.command2 = CommandNode(name, 
                                      [CallPattern(None, 
@@ -994,14 +994,21 @@ class CollectionDeclNode(object):
                                      doc, 
                                      Annotations([Annotation(u'__collection')]),
                                      [])
-        self.catyclass = ClassNode(name, ClassBody([], ClassURI([(u'python', ['caty.core.command'])], False)), ScalarNode(u'univ'), ScalarNode(u'univ'), None, None, Annotations([]), [])
+        self.catyclass = ClassNode(name, 
+                                  ClassIntersectionOperator(
+                                    ClassBody([], ClassURI([(u'python', ['caty.core.command'])], False)),
+                                    ClassReference(u'Collection', [ScalarNode(name)])),
+                                  ScalarNode(u'univ'), 
+                                  ScalarNode(u'univ'), 
+                                  None, None, 
+                                  Annotations([]), [])
         self.entity = EntityNode(name, dbname, name, None, Annotations([]))
 
     def declare(self, module):
         self.type.declare(module)
         #self.command2.declare(module)
         self.catyclass.declare(module)
-        #self.entity.declare(module)
+        self.entity.declare(module)
 
 class TypeFunctionNode(TypeFunction, SchemaBase):
     def __init__(self, funcname, typename):
