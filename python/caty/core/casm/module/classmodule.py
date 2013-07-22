@@ -162,8 +162,8 @@ class ClassModule(Module):
             modname = mod.split(u':')[-1]
             if modname == 'caty.core.command':
                 yield None, None
-            elif self.command_loader and modname in self.command_loader.command_dict:
-                yield modname, self.command_loader.command_dict[modname]
+            elif self.command_loader and self.command_loader.has_module(modname):
+                yield modname, self.command_loader.get_module(modname)
 
 class ClassExprInterpreter(object):
     def __init__(self, class_module):

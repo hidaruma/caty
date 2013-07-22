@@ -1,95 +1,62 @@
-from caty.core.facility import Facility, READ
-from caty.core.exception import *
-import caty.jsontools.selector as selector
-from caty.jsontools import pp
+#coding: utf-8
+import caty
+from caty.core.command import Builtin
 
-class DefaultStorage(Facility):
-    __db__ = {}
-    def __init__(self, mode, system_param):
-        Facility.__init__(self, mode)
-        self.dbname = system_param
-        if system_param not in DefaultStorage.__db__:
-            DefaultStorage.__db__[system_param] = {}
 
-    @classmethod
-    def initialize(cls, app_instance, config):
-        pass
+class Lookup(Builtin):
+    def setup(self, key):
+        self.key = key
 
-    @classmethod
-    def instance(cls, app_instance, system_param):
-        i = DefaultStorage(READ, system_param)
-        i.app = app_instance
-        return i
+    def execute(self):
+        return self.arg0.lookup(self.key)
 
-    @classmethod
-    def finalize(cls, app):
-        pass
+class Insert(Builtin):
+    def setup(self, key=None):
+        self.key = key
 
-    def create(self, mode, user_param=u'default-collection'):
-        obj = Facility.create(self, mode)
-        obj.collname = user_param
-        if user_param not in DefaultStorage.__db__[self.dbname]:
-            DefaultStorage.__db__[self.dbname][user_param] = {}
-        return obj
+    def execute(self, rec):
+        return self.arg0.insert(self.key, rec)
 
-    def clone(self):
-        return self
 
-    @property
-    def db(self):
-        return DefaultStorage.__db__[self.dbname][self.collname]
+class Get(Builtin):
+    def setup(self, key, path=None):
+        self.key = key
+        self.path = path
 
-    def lookup(self, k):
-        try:
-            return self.db[k]
-        except:
-            throw_caty_exception(u'NotFound', pp(k))
+    def execute(self):
+        return self.arg0.get(self.key, self.path)
 
-    def get(self, k, p=None):
-        try:
-            r = self.db[k]
-            if not p:
-                return r
-            else:
-                stm = selector.compile(p)
-                return list(stm.select(input))[0]
-        except:
-            throw_caty_exception(u'NotFound', pp(k))
-        
-    def belongs(self, record):
-        return record in self.db.values()
-    
-    def exists(self, k):
-        return k in self.db
+class Belongs(Builtin):
+    def execute(self, record):
+        return self.arg0.belongs(record)
 
-    def keys(self):
-        return list(self.db.keys())
 
-    def all(self):
-        return list(self.db.values())
+class Exists(Builtin):
+    def setup(self, key):
+        self.key = key
 
-    def insert(self, k, v):
-        if k == None:
-            k = v.get(self.keytype)
-            if not k:
-                throw_caty_exception(u'BadInput', pp(v))
-        if k in self.db:
-            throw_caty_exception(u'AlreadyExists', pp(k))
-        self.db[k] = v
-        return v
+    def execute(self):
+        return self.arg0.exists(self.key)
 
-    def replace(self, k, v):
-        if k not in self.db:
-            throw_caty_exception(u'NotFound', pp(k))
-        self.db[k] = v
-        return v
+class Keys(Builtin):
+    def execute(self):
+        return self.arg0.keys()
 
-    def delete(self, k):
-        if k not in self.db:
-            throw_caty_exception(u'NotFound', pp(k))
-        del self.db[k]
+class All(Builtin):
+    def execute(self):
+        return self.arg0.all()
 
-    def keytype(self):
-        tp = self.app._schema_module.get_type(self.collname)
-        return tp.annotations['__identified'].value
+class Replace(Builtin):
+    def setup(self, key):
+        self.key = key
+
+    def execute(self, rec):
+        return self.arg0.replace(self.key, rec)
+
+class Delete(Builtin):
+    def setup(self, key):
+        self.key = key
+
+    def execute(self):
+        return self.arg0.delete(self.key)
 

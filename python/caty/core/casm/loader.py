@@ -13,12 +13,40 @@ class CommandLoader(object):
             return self.builtin.get(pkg, cls)
         return self.command_dict[pkg][cls]
 
+    def has_module(self, name):
+        return name in self.command_dict
+
+    def get_module(self, name):
+        return self.command_dict[name]
+
 class BuiltinLoader(object):
+    def __init__(self):
+        self.__modmap = {}
+
     def get(self, pkg, cls):
         if not pkg.startswith('caty.'):
             pkg = 'caty.core.std.command.' + pkg
         mod = __import__(pkg, fromlist=[cls])
         return getattr(mod, cls)
+
+    def has_module(self, pkg):
+        if not pkg.startswith('caty.'):
+            pkg = 'caty.core.std.command.' + pkg
+        if pkg in self.__modmap:
+            return True
+        try:
+            self.__modmap[pkg] = __import__(pkg, fromlist=[str(pkg.rsplit('.', 1)[1])])
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return False
+        return True
+
+    def get_module(self, pkg):
+        if not pkg.startswith('caty.'):
+            pkg = 'caty.core.std.command.' + pkg
+        print self.__modmap[pkg]
+        return self.__modmap[pkg].__dict__
 
 def load_commands(fs):
     d = {}
