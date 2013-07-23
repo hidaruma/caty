@@ -15,7 +15,7 @@ def collection_decl(seq):
         keyword(u'of')(seq)
         coltype = typedef(seq)
         if option(keyword(u'identified'))(seq):
-            keypath = CasmJSONPathSelectorParser()(seq)
+            keypath = CasmJSONPathSelectorParser()(seq)._to_str()
             keytype = option(col_key_type)(seq)
         else:
             keypath = u'$.id'
