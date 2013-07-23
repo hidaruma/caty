@@ -980,7 +980,11 @@ class CollectionDeclNode(object):
         a.add(Annotation(u'__identified', keypath))
         if keytype:
             a.add(Annotation(u'__id-type', keytype))
-        self.type = ASTRoot(name, None, coltype, a, doc)
+        if isinstance(coltype, ScalarNode):
+            recname = name
+        else:
+            recname = name+'Record'
+        self.type = ASTRoot(recname, None, coltype, a, doc)
         self.command2 = CommandNode(name, 
                                      [CallPattern(None, 
                                                  None, 
@@ -997,7 +1001,7 @@ class CollectionDeclNode(object):
         self.catyclass = ClassNode(name, 
                                   ClassIntersectionOperator(
                                     ClassBody([], ClassURI([(u'python', ['caty.core.command'])], False)),
-                                    ClassReference(u'Collection', [ScalarNode(name)])),
+                                    ClassReference(u'Collection', [ScalarNode(recname)])),
                                   ScalarNode(u'univ'), 
                                   ScalarNode(u'univ'), 
                                   None, None, 
