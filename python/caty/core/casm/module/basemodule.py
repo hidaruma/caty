@@ -458,6 +458,7 @@ class Module(Facility):
         self._detect_cycle()
         self._apply_type_var()
         self._normalize()
+        self._post_process()
         self._register_command()
         self._register_facility()
         self._validate_signature()
@@ -791,6 +792,36 @@ class Module(Facility):
         except:
             print '[ERROR]', u'%s::%s (%s)' % (self._app.name, self.canonical_name, self.type)
             raise
+
+    def _post_process(self):
+        # 型計算の後処理
+        # 現状ではコレクション型のうちid-typeが不明の物の処理を行う
+        # identifiedで指定されたパスからidの型を特定し、アノテーションに付け加える
+        from caty.core.typeinterface import dereference
+        from caty.core.casm.language.schemaparser import CasmJSONPathSelectorParser
+        from caty.core.casm.cursor.dump import TreeDumper
+        from caty.core.casm.language.ast import ClassIntersectionOperator, ClassReference, ScalarNode
+        for k, v in self.schema_ns.items():
+            if u'__collection' in v.annotations and u'__identified' in v.annotations and u'__id-type' not in v.annotations:
+                path = CasmJSONPathSelectorParser().run(v.annotations[u'__identified'].value)
+                try:
+                    p = path.select(dereference(v.body)).next()
+                    v.annotations.add(Annotation(u'__id-type', p.type))
+                except Exception as e:
+                    print u'[Warning]', v.canonical_name, e
+                else:
+                    clsnames = [k, k.replace(u'Record', u'')]
+                    for c in clsnames:
+                        if self.has_class(c):
+                            cls = self.get_class(c)._clsobj
+                            if isinstance(cls.expression, ClassIntersectionOperator):
+                                for n in [cls.expression.left, cls.expression.right]:
+                                    if isinstance(n, ClassReference) and n.name == u'Collection' and len(n.type_params) == 1:
+                                        n.type_params.append(ScalarNode(p.type))
+                                        break
+                            break
+        for m in self.class_ns.values() + self.sub_modules.values() + self.sub_packages.values():
+            m._post_process()
 
     def reify(self):
         import caty.jsontools as json
