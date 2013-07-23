@@ -985,7 +985,7 @@ class CollectionDeclNode(object):
             self.type = ASTRoot(name, None, coltype, a, doc)
         else:
             recname = name+'Record'
-            self.rectype = ASTRoot(recname, None, coltype, a, doc)
+            self.rectype = ASTRoot(recname, None, coltype, Annotations([]), None)
             self.type = ASTRoot(name, None, ScalarNode(recname), a, doc)
         self.command2 = CommandNode(name, 
                                      [CallPattern(None, 
