@@ -90,9 +90,9 @@ class ClassModule(Module):
 
     def _register_command(self):
         try:
-            self.refered_modules = list(self._load_refered_modules())
+            refered_modules = list(self._load_refered_modules(self))
             for cmd in self.proto_ns.values():
-                self._attache_class(cmd)
+                self._attache_class(cmd, refered_modules)
         except:
             print '    [ERROR]', u'%s::%s' % (self._app.name, self.canonical_name)
             raise
@@ -123,6 +123,14 @@ class ClassModule(Module):
                             m.module = self
                         if m.application is None:
                             m.application = self.application
+
+                        try:
+                            refered_modules = list(self._load_refered_modules(class_body))
+                            self._attache_class(m, refered_modules)
+                        except:
+                            print '    [ERROR]', u'%s::%s' % (self._app.name, self.canonical_name)
+                            raise
+
                         cursor = m.module.make_profile_builder()
                         self.add_command(cursor.visit(m))
                     else:
@@ -131,8 +139,8 @@ class ClassModule(Module):
             print '    [ERROR]', u'%s::%s' % (self._app.name, self.canonical_name)
             raise
 
-    def _attache_class(self, cmd):
-        for modname, refered_module in self.refered_modules:
+    def _attache_class(self, cmd, refered_modules):
+        for modname, refered_module in refered_modules:
             if refered_module is None:
                 continue
             for name, obj in refered_module.items():
@@ -153,12 +161,12 @@ class ClassModule(Module):
             del v['classes']
         return json.tagged(u'_class', v)
 
-    def _load_refered_modules(self):
-        if self.uri is None:
+    def _load_refered_modules(self, cls):
+        if cls.uri is None:
             raise StopIteration()
-        if 'python' not in self.uri:
+        if 'python' not in cls.uri:
             raise StopIteration()
-        for mod in self.uri.python:
+        for mod in cls.uri.python:
             modname = mod.split(u':')[-1]
             if modname == 'caty.core.command':
                 yield None, None
@@ -178,7 +186,7 @@ class ClassExprInterpreter(object):
     def visit_class_intersection(self, obj):
         l = obj.left.accept(self)
         r = obj.right.accept(self)
-        new = ClassBody([], None)
+        new = ClassBody([], ClassURI([('python', ['caty.core.command'])], False))
         if not l.opened:
             throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'closed class')
         if not r.opened:
@@ -187,7 +195,18 @@ class ClassExprInterpreter(object):
             new.member.append(m)
         for m in r.member:
             new.member.append(m)
+        self._append_uri(new, l)
+        self._append_uri(new, r)
         return new.accept(self)
+
+    def _append_uri(self, dest, src):
+        us = src.uri.get('python')
+        for u in us:
+            if u not in dest.uri['python']:
+                dest.uri['python'].append(u)
+        if len(dest.uri['python']) > 1 and 'caty.core.command' in dest.uri['python']:
+            dest.uri['python'].remove('caty.core.command')
+            dest.uri.defined = True
 
     def visit_class_use(self, obj):
         r = obj.cls.accept(self)
@@ -292,7 +311,7 @@ class ClassExprInterpreter(object):
                     else:
                         a.name = u'_assert_' + str(max_num)
                         max_num += 1
-        return ClassBody(member, None)
+        return ClassBody(member, cls.uri)
 
     def __build_profile(self, pat, cls, tp, type_params):
         from caty.core.casm.cursor.base import SchemaBuilder
