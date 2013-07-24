@@ -85,9 +85,10 @@ signature Collection
  command all :: void -> Iterable<Record>; // eachの入力
 
  /** コレクションにレコードを挿入する 
-  * 引数にキーが指定されれば、そのキーを使う。
+  * 引数にキーが指定されれば、そのキーを使う。この場合、入力データであるレコードにキーがあっても無視される。
+  *
   * 引数にキーが指定されず、レコードにもIDがないきは可能なら自動生成する、
-  * 不可能ならBadInput例外。
+  * 自動生成が不可能ならBadInput例外。
   */
  @[updater]
  command insert [Key? key] :: Record -> Record
