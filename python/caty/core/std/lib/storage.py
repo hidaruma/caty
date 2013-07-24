@@ -27,7 +27,12 @@ class DefaultStorage(Facility):
 
     def create(self, mode, user_param=u'default-collection'):
         obj = Facility.create(self, mode)
+        if ':' in user_param:
+            mod, user_param = user_param.split(':', 1)
+        else:
+            mod = None
         obj.collname = user_param
+        self.module_name = mod
         if user_param not in DefaultStorage.__db__[self.dbname]:
             DefaultStorage.__db__[self.dbname][user_param] = {}
         return obj
@@ -91,7 +96,11 @@ class DefaultStorage(Facility):
 
     @property
     def keytype(self):
-        tp = self.app._schema_module.get_type(self.collname)
+        if self.module_name:
+            mod = self.app._schema_module.get_module(self.module_name)
+        else:
+            mod = self.app._schema_module
+        tp = mod.get_type(self.collname)
         return tp.annotations['__identified'].value
 
 

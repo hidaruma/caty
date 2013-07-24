@@ -1008,7 +1008,7 @@ class CollectionDeclNode(object):
                                   ScalarNode(u'univ'), 
                                   None, None, 
                                   Annotations([Annotation(u'__collection')]), [])
-        self.entity = EntityNode(name, dbname, name, None, Annotations([]))
+        self.entity = lambda m: EntityNode(name, dbname, m.name+':' + name, None, Annotations([]))
 
     def declare(self, module):
         self.type.declare(module)
@@ -1016,7 +1016,7 @@ class CollectionDeclNode(object):
             self.rectype.declare(module)
         #self.command2.declare(module)
         self.catyclass.declare(module)
-        self.entity.declare(module)
+        self.entity(module).declare(module)
 
 class TypeFunctionNode(TypeFunction, SchemaBase):
     def __init__(self, funcname, typename):
