@@ -78,6 +78,8 @@ class DefaultStorage(Facility):
             k = v.get(self.keytype)
             if not k:
                 throw_caty_exception(u'BadInput', pp(v))
+        else:
+            v[self.keytype] = k
         if k in self.db:
             throw_caty_exception(u'AlreadyExists', pp(k))
         self.db[k] = v
