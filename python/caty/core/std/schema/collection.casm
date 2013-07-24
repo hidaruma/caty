@@ -84,6 +84,13 @@ signature Collection
  @[reader]
  command all :: void -> Iterable<Record>; // eachの入力
 
+ /** 型チェックなしですべてのレコードを列挙する 
+  * allと同じだが、型チェックはしない。
+  * スキーマが変更された場合でも動作する。
+  */
+ @[reader]
+ command dump :: void -> Iterable<any>;
+
  /** コレクションにレコードを挿入する 
   * 引数にキーが指定されれば、そのキーを使う。この場合、入力データであるレコードにキーがあっても無視される。
   *
@@ -111,6 +118,8 @@ signature Collection
  command delete [Key key] :: void -> any
    throws NotFound
  ;
+
+
 
  /* == デフォルト実装付きのコマンドプロファイル == */
 
