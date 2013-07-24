@@ -76,8 +76,9 @@ class DefaultStorage(Facility):
     def insert(self, k, v):
         if k == None:
             path = selector.compile(self.keytype, True)
-            k = path.select(v).next()
-            if not k:
+            try:
+                k = path.select(v).next()
+            except KeyError as e:
                 throw_caty_exception(u'BadInput', pp(v))
         else:
             path = selector.compile(self.keytype)
