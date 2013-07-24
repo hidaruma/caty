@@ -75,11 +75,13 @@ class DefaultStorage(Facility):
 
     def insert(self, k, v):
         if k == None:
-            k = v.get(self.keytype)
+            path = selector.compile(self.keytype, True)
+            k = path.select(v).next()
             if not k:
                 throw_caty_exception(u'BadInput', pp(v))
         else:
-            v[self.keytype] = k
+            path = selector.compile(self.keytype)
+            path.replace(v, k)
         if k in self.db:
             throw_caty_exception(u'AlreadyExists', pp(k))
         self.db[k] = v
@@ -88,6 +90,8 @@ class DefaultStorage(Facility):
     def replace(self, k, v):
         if k not in self.db:
             throw_caty_exception(u'NotFound', pp(k))
+        path = selector.compile(self.keytype)
+        path.replace(v, k)
         self.db[k] = v
         return v
 
