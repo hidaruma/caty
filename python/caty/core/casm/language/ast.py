@@ -580,7 +580,7 @@ class CommandNode(Function):
         self.application = None
 
     def clone(self):
-        r = self.__class__(self.name, [p.clone() for p in self.patterns], self.reference_to_implementation, self.doc, self.annotation, self.type_params, self.command_type)
+        r = self.__class__(self.name, [p.clone() for p in self.patterns], self.reference_to_implementation, self.doc, self.annotation, self.type_params_ast[:], self.command_type)
         return r
 
     @property
@@ -746,7 +746,7 @@ class CommandDecl(object):
         self.signals = NeverSchema()
 
     def clone(self):
-        new = CommandDecl(self.profile_ast, self.jump_decl, self.resource)
+        new = CommandDecl(self.profile_ast, self.jump_decl, self.resource[:])
         new.uri = self.uri
         new.profile = self.profile
         new.throws = self.throws
@@ -1007,7 +1007,7 @@ class CollectionDeclNode(object):
                                   ScalarNode(u'univ'), 
                                   ScalarNode(u'univ'), 
                                   None, None, 
-                                  Annotations([]), [])
+                                  Annotations([Annotation(u'__collection')]), [])
         self.entity = EntityNode(name, dbname, name, None, Annotations([]))
 
     def declare(self, module):

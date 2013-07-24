@@ -29,7 +29,8 @@ class ProfileContainer(object):
             self.implemented = u'none'
         else:
             pkgname, cmdname = path.rsplit('.', 1)
-            self.command_class = commands.get(pkgname, cmdname)
+            c = commands.get(pkgname, cmdname)
+            self.command_class = new_class(c)
             self.implemented = u'python'
         self._annotations = annotations or {}
         self.doc = doc if doc else u''
@@ -97,6 +98,12 @@ class ProfileContainer(object):
     def resolve(self, module):
         for p in self.profiles:
             p.resolve()
+
+def new_class(cls):
+    class NewClass(cls):
+        pass
+    NewClass.__name__ = cls.__name__
+    return NewClass
 
 class CommandProfile(object):
     u"""コマンドの引数や型の宣言を定義するクラス。

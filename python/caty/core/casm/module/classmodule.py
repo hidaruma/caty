@@ -130,7 +130,6 @@ class ClassModule(Module):
                         except:
                             print '    [ERROR]', u'%s::%s' % (self._app.name, self.canonical_name)
                             raise
-
                         cursor = m.module.make_profile_builder()
                         self.add_command(cursor.visit(m))
                     else:
@@ -253,6 +252,7 @@ class ClassExprInterpreter(object):
     def visit_class_ref(self, obj):
         from caty.core.casm.language.ast import ASTRoot, CommandNode
         from caty.core.script.builder import ClassModuleWrapper
+        COLLECTION_COMMANDS = set([u'lookup', u'get', u'belongs', u'exists', u'keys', u'all', u'insert', u'replace', u'delete'])
         try:
             cls = self.module.get_class(obj.name)
         except:
@@ -285,6 +285,8 @@ class ClassExprInterpreter(object):
                     m = m.clone()
                     for ptn in m.patterns:
                         self.__build_profile(ptn, cls, tp, m.type_params)
+                        if u'__collection' in self.module.annotations and m.name in COLLECTION_COMMANDS:
+                            ptn.decl.resource.append((u'uses', [FacilityDecl(self.module.name, None, u'arg0')]))
                     member.append(m)
                 else:
                     member.append(m)
@@ -314,6 +316,7 @@ class ClassExprInterpreter(object):
         return ClassBody(member, cls.uri)
 
     def __build_profile(self, pat, cls, tp, type_params):
+        from caty.core.casm.language.ast import FacilityDecl
         from caty.core.casm.cursor.base import SchemaBuilder
         from caty.core.casm.cursor.resolver import ReferenceResolver
         from caty.core.casm.cursor.typevar import TypeVarApplier
