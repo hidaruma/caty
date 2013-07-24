@@ -89,6 +89,7 @@ class DefaultStorage(Facility):
             throw_caty_exception(u'NotFound', pp(k))
         del self.db[k]
 
+    @property
     def keytype(self):
         tp = self.app._schema_module.get_type(self.collname)
         return tp.annotations['__identified'].value

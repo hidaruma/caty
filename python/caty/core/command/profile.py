@@ -30,7 +30,10 @@ class ProfileContainer(object):
         else:
             pkgname, cmdname = path.rsplit('.', 1)
             c = commands.get(pkgname, cmdname)
-            self.command_class = new_class(c)
+            if issubclass(c, Syntax):
+                self.command_class = c
+            else:
+                self.command_class = new_class(c)
             self.implemented = u'python'
         self._annotations = annotations or {}
         self.doc = doc if doc else u''
