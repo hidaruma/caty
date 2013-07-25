@@ -60,3 +60,18 @@ class Delete(Builtin):
     def execute(self):
         return self.arg0.delete(self.key)
 
+class DeleteAll(Builtin):
+    def execute(self):
+        for k in self.arg0.keys():
+            self.arg0.delete(k)
+
+class Dump(Builtin):
+    def execute(self):
+        return self.arg0.dump()
+
+class Count(Builtin):
+    def execute(self):
+        return len(self.arg0.all())
+
+
+

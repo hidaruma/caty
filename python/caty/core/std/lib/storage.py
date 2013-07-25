@@ -101,6 +101,8 @@ class DefaultStorage(Facility):
             throw_caty_exception(u'NotFound', pp(k))
         del self.db[k]
 
+    dump = all
+
     @property
     def keytype(self):
         if self.module_name:
