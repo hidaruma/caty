@@ -19,6 +19,7 @@ kind FragmentPathType = lower string?;
 type Iterable<T> = (foreign | [T*]);
 
 
+
 /** 
  * ベースコレクションとして必要なコマンドセット 
  */
@@ -67,3 +68,4 @@ signature Basable
 };
 
 // end of module
+
