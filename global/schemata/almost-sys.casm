@@ -7,4 +7,53 @@
  */
 module almost-sys; 
 
+
+/** 
+ * ベースコレクションとして必要なコマンドセット 
+ */
+@[register-public]
+signature Basable
+<
+  /** 主キー（IDフィールド）の型 */
+  Key in KeyType default string,
+
+  /** フラグメントパスの型
+   * string または undefined に具体化して使う。
+   */
+  FragmentPath in FragmentPathType default string,
+> =
+{
+
+ /* 接頭辞の p- は、partial(ly), portion を意味する */
+
+ /** 入力データが指定されたレコードポーションにサブレコードとしてマッチするかどうか判定する 
+  * 判定が困難なら indef を出力する。
+  */
+ @[reader]
+ command p-matches [Key key, FragmentPathType? frag-path]  :: any -> tboolean;
+
+ /** キーとパスに対応するレコードポーションが存在するかどうか判定する */
+ @[reader]
+ command p-exists [Key key, FragmentPathType? frag-path] :: void -> boolean;
+
+ /** パスに対応するレコードポーションが存在するすべてのキーを列挙する */
+ @[reader]
+ command p-keys [FragmentPathType? frag-path]:: void -> Iterable<Key>;
+
+ /** コレクション内の、パスに対応するレコードポーションが存在するレコードの個数を返す */
+ @[reader]
+ command p-count [FragmentPathType? frag-path] :: void -> integer(minimum=0);
+
+ /** パスに対応するレコードポーションを列挙する */
+ @[reader]
+ command p-all [FragmentPathType? frag-path] :: void -> Iterable<any>;
+
+ /** 型チェックなしで、パスに対応するレコードポーションを列挙する
+  */
+ @[reader]
+ command p-dump [FragmentPathType? frag-path] :: void -> Iterable<any>;
+
+};
+
+
 // AppManifest

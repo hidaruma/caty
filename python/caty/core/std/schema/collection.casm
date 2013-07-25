@@ -47,11 +47,11 @@ signature Collection
 {
  /** 主キー（IDフィールド）の型の名前
   */
-  property keyType :: string(remark="キーの型の名前") ;
+  property _keyType :: string(remark="キーの型の名前") ;
 
  /** レコードの型の名前
   */
-  property recordType :: string(remark="キーの型の名前") ;
+  property _recordType :: string(remark="レコードの型の名前") ;
 
 
  /** 引数に与えられたキーにより単一レコードを取得する */
@@ -60,17 +60,18 @@ signature Collection
          throws NotFound;
 
  /** 引数に与えられたキーとフラグメントパスからレコードポーションを得る 
-  * フラグメントが返るので、出力型は動的。
+  * レコードの一部（ポーション、フラグメント）が返るので、出力型は動的。
   */
  @[reader]
  command get [Key key, FragmentPath? fragment-path] :: void -> any
          throws NotFound;
 
  /** レコードがコレクションに所属（∈）するかどうか判定する 
-  * IDだけでなく、値の同一性もチェックする。
+  * IDだけでなく、値の同一性も完全にチェックする。
+  * 判定が困難なら indef を出力する。
   */
  @[reader]
- command belongs :: Record -> boolean;
+ command belongs :: univ -> tboolean;
 
  /** キーに対応するレコードが存在するかどうか判定する */
  @[reader]
@@ -79,6 +80,10 @@ signature Collection
  /** すべてのキーを列挙する */
  @[reader]
  command keys :: void -> Iterable<Key>; // eachの入力
+
+ /** コレクション内のレコードの個数を返す */
+ @[reader]
+ command count :: void -> integer(minimum=0);
 
  /** すべてのレコードを列挙する */
  @[reader]
@@ -91,39 +96,53 @@ signature Collection
  @[reader]
  command dump :: void -> Iterable<any>;
 
+
+ /* === updaters == */
+
  /** コレクションにレコードを挿入する 
   * 引数にキーが指定されれば、そのキーを使う。この場合、入力データであるレコードにキーがあっても無視される。
   *
   * 引数にキーが指定されず、レコードにもIDがないきは可能なら自動生成する、
   * 自動生成が不可能ならBadInput例外。
+  *
+  * 出力は任意である。
   */
  @[updater]
- command insert [Key? key] :: Record -> Record
+ command insert [Key? key] :: Record -> any?
    throws [AlreadyExists, BadInput]
  ;
 
  /** 単一レコードを置き換える 
   * 必ず既存レコードを置き換える。
+  * 出力は任意である。
   */
  @[updater]
- command replace [Key key] :: Record -> Record
+ command replace [Key key] :: Record -> any?
    throws NotExist
  ;
 
  /** 引数に指定されたキーのレコードを削除する 
-  * 出力は任意である。
   * 削除に失敗した場合は例外とする。
+  * 出力は任意である。
   */
  @[updater]
- command delete [Key key] :: void -> any
+ command delete [Key key] :: void -> any?
    throws NotFound
  ;
 
+ /** コレクション内の全てのレコードを削除する 
+  * データベース管理コマンド clear-collection と同じ。
+  * 出力は任意である。
+  */
+ @[optional, updater]
+ command delete-all:: void -> any?
+ ;
 
 
  /* == デフォルト実装付きのコマンドプロファイル == */
 
  /** 入力に与えられたキーとフラグメントパスからレコードポーションを得る */
+ @[reader]
  command get_ :: [Key, FragmentPath?] -> any throws NotFound {
    =[ pass > k, pass > p];
    get %k %p?
@@ -131,7 +150,7 @@ signature Collection
 
  /** 存在すればレコードを取得し、そうでないならundefinedを返す */
  @[reader]
- command get-if-exists [Key key, FragmentPath? fragment-path] :: void -> Record? {
+ command get-if-exists [Key key, FragmentPath? fragment-path] :: void -> any? {
    exists %1 |
    case {
     true  => get %1 %2?,
@@ -141,7 +160,7 @@ signature Collection
 
  /** 存在すればレコードを置換し、そうでないなら新規作成する */
  @[updater]
- command put [Key? key] :: Record -> Record {
+ command put [Key? key] :: Record -> any? {
    pass > record;
    %1? |
    when {
