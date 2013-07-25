@@ -65,6 +65,25 @@ signature Collection
  command get [Key key, FragmentPath? fragment-path] :: void -> any
          throws NotFound;
 
+
+ /** 入力に与えられたキーとフラグメントパス（オプショナル）の配列からレコードポーションの配列を得る 
+  * --strict=true では、1個でも見つからないレコードポーションがあれば、エラー（例外）となる。
+  * --strict=false では、見つかったレコードポーションだけを配列にする。
+  * レコードポーションがまったく見つからなくても空配列が返るだけ。
+  */
+ @[reader]
+ command mget 
+         {
+          /** 1個でも見つからないレコードポーションがあればエラー（例外）とする */
+          @[default(false)]
+          "strict": boolean?,
+         }
+         :: [(Key|[Key, FragmentPath?])*]  -> [any*]
+         throws NotFound;
+
+ @[reader]
+ command multi-get := mget;
+
  /** レコードがコレクションに所属（∈）するかどうか判定する 
   * IDだけでなく、値の同一性も完全にチェックする。
   * 判定が困難なら indef を出力する。
@@ -188,6 +207,7 @@ signature Collection
 
 |コマンド                |入力                    | 別名   |
 |------------------------|------------------------|--------|
+| list-databases         |void                    |        |
 | create-database 名前?  |DatabaseOptions         |        |
 | activate-database 名前?|ActivationOptions       |connect |
 | confirm-database 名前? |ConfirmOptions          |confirm |
@@ -210,6 +230,12 @@ signature Collection
  type ConfirmOptions;
  type ActivationOptions;
 
+
+ /** データベースを列挙する
+  */
+ command list-databases
+  :: void -> [DatabaseInfo*]
+ ;
 
  /** データベースを作成する
   * 1つのストレージバックエンドが1つのデータベースしかサポートしない場合は、
