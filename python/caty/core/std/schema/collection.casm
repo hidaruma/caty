@@ -132,6 +132,8 @@ signature Collection
  /** コレクション内の全てのレコードを削除する 
   * データベース管理コマンド clear-collection と同じ。
   * 出力は任意である。
+  *
+  * このコマンドは危険過ぎると判断するなら、実装しなくてもよい。
   */
  @[optional, updater]
  command delete-all:: void -> any?
@@ -277,6 +279,7 @@ signature Collection
 
 };
 
+
 /** 
  * ベースコレクションとして必要なコマンドセット 
  */
@@ -323,7 +326,4 @@ signature Basable
  command p-dump [FragmentPath? frag-path] :: void -> Iterable<any>;
 
 };
-
-
-// AppManifest
 
