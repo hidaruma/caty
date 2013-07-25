@@ -1,5 +1,7 @@
 #coding:utf-8
 from caty.core.casm.cursor.base import *
+from caty.core.exception import SystemResourceNotFound
+from caty.core.casm.language.ast import KindReference
 
 class ReferenceResolver(SchemaBuilder):
     def _visit_root(self, node):
@@ -11,6 +13,8 @@ class ReferenceResolver(SchemaBuilder):
     def _visit_scalar(self, node):
         if isinstance(node, TypeReference):
             schema = node.module.get_type(node.name)
+            if isinstance(schema, KindReference):
+                raise SystemResourceNotFound(u'TypeNotFound', u'$name', name=node.name)
             node.body = schema
             type_args = []
             for arg in node.type_args:
@@ -20,7 +24,10 @@ class ReferenceResolver(SchemaBuilder):
             if self.module.has_schema(node.name):
                 return self.module.get_type(node.name)
             if node.default and self.module.has_schema(node.default):
-                node.set_default(self.module.get_type(node.default))
+                schema = self.module.get_type(node.default)
+                if isinstance(schema, KindReference):
+                    raise SystemResourceNotFound(u'TypeNotFound', u'$name', name=node.default)
+                node.set_default(schema)
         return node
 
     def _visit_kind(self, node):

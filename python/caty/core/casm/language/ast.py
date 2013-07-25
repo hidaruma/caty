@@ -847,6 +847,8 @@ class KindReference(object):
         self.name = name
         self.annotations = annotations
         self.docstring = docstring
+        self.optional = False
+        self.type_params = []
 
     def declare(self, module):
         self.module = module
