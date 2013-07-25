@@ -57,7 +57,7 @@ class DefaultStorage(Facility):
                 return r
             else:
                 stm = selector.compile(p)
-                return list(stm.select(input))[0]
+                return list(stm.select(r))[0]
         except:
             throw_caty_exception(u'NotFound', pp(k))
         
