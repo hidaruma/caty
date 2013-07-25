@@ -51,7 +51,7 @@ signature Collection
 
  /** レコードの型の名前
   */
-  property _recordType :: string(remark="キーの型の名前") ;
+  property _recordType :: string(remark="レコードの型の名前") ;
 
 
  /** 引数に与えられたキーにより単一レコードを取得する */
@@ -68,9 +68,10 @@ signature Collection
 
  /** レコードがコレクションに所属（∈）するかどうか判定する 
   * IDだけでなく、値の同一性も完全にチェックする。
+  * 判定が困難なら indef を出力する。
   */
  @[reader]
- command belongs :: univ -> boolean;
+ command belongs :: univ -> tboolean;
 
  /** キーに対応するレコードが存在するかどうか判定する */
  @[reader]
@@ -82,7 +83,7 @@ signature Collection
 
  /** コレクション内のレコードの個数を返す */
  @[reader]
- command countd :: void -> integer(minimum=0);
+ command count :: void -> integer(minimum=0);
 
  /** すべてのレコードを列挙する */
  @[reader]
