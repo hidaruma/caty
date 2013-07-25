@@ -1,11 +1,22 @@
 // -*- coding: utf-8 -*-
 
-
 /** システム定義の候補 
  * 一時的にこのモジュールに定義するが、
  * システム側に移される予定。
  */
 module almost-sys; 
+
+/* カインド式に他のカインドの名前が使えない */
+/*
+kind KeyType = collection:KeyType;
+kind FragmentPathType = collection:FragmentPathType;
+*/
+
+/* collection.casm よりコピペ */
+kind KeyType = lower (number | string | binary);
+kind FragmentPathType = lower string?;
+
+type Iterable<T> = (foreign | [T*]);
 
 
 /** 
@@ -30,30 +41,29 @@ signature Basable
   * 判定が困難なら indef を出力する。
   */
  @[reader]
- command p-matches [Key key, FragmentPathType? frag-path]  :: any -> tboolean;
+ command p-matches [Key key, FragmentPath? frag-path]  :: any -> tboolean;
 
  /** キーとパスに対応するレコードポーションが存在するかどうか判定する */
  @[reader]
- command p-exists [Key key, FragmentPathType? frag-path] :: void -> boolean;
+ command p-exists [Key key, FragmentPath? frag-path] :: void -> boolean;
 
  /** パスに対応するレコードポーションが存在するすべてのキーを列挙する */
  @[reader]
- command p-keys [FragmentPathType? frag-path]:: void -> Iterable<Key>;
+ command p-keys [FragmentPath? frag-path]:: void -> Iterable<Key>;
 
  /** コレクション内の、パスに対応するレコードポーションが存在するレコードの個数を返す */
  @[reader]
- command p-count [FragmentPathType? frag-path] :: void -> integer(minimum=0);
+ command p-count [FragmentPath? frag-path] :: void -> integer(minimum=0);
 
  /** パスに対応するレコードポーションを列挙する */
  @[reader]
- command p-all [FragmentPathType? frag-path] :: void -> Iterable<any>;
+ command p-all [FragmentPath? frag-path] :: void -> Iterable<any>;
 
  /** 型チェックなしで、パスに対応するレコードポーションを列挙する
   */
  @[reader]
- command p-dump [FragmentPathType? frag-path] :: void -> Iterable<any>;
+ command p-dump [FragmentPath? frag-path] :: void -> Iterable<any>;
 
 };
 
-
-// AppManifest
+// end of module
