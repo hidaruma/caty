@@ -42,9 +42,12 @@ class Keys(Builtin):
     def execute(self):
         return self.arg0.keys()
 
-class All(Builtin):
+class List(Builtin):
     def execute(self):
         return self.arg0.all()
+
+class All(List):
+    pass
 
 class Replace(Builtin):
     def setup(self, key):
@@ -74,4 +77,24 @@ class Count(Builtin):
         return len(self.arg0.all())
 
 
+class Mget(Builtin):
+    def setup(self, opts):
+        self.strict = opts['strict']
+
+    def execute(self, input):
+        r = []
+        for i in input:
+            if len(i) == 2:
+                k, p = i
+            else:
+                k = i[0]
+                p = None
+            try:
+                r.append(self.arg0.get(k, p))
+            except:
+                if self.strict:
+                    raise
+                else:
+                    pass
+        return r
 
