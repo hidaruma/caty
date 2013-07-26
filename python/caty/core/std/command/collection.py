@@ -1,6 +1,7 @@
 #coding: utf-8
 import caty
 from caty.core.command import Builtin
+import caty.jsontools.selector as selector
 
 
 class Lookup(Builtin):
@@ -98,3 +99,20 @@ class Mget(Builtin):
                     pass
         return r
 
+
+class Poke(Insert):
+    pass
+
+class Set(Builtin):
+    def setup(self, key, path=None):
+        self.key = key
+        self.path = path
+
+    def execute(self, rec):
+        if not self.path:
+            return self.arg0.replace(self.key, rec)
+        else:
+            v = self.arg0.get(self.key)
+            path = selector.compile(self.path)
+            path.replace(v, rec)
+            return self.arg0.replace(self.key, v)
