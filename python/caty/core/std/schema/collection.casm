@@ -65,6 +65,25 @@ signature Collection
  command get [Key key, FragmentPath? fragment-path] :: void -> any
          throws NotFound;
 
+
+ /** 入力に与えられたキーとフラグメントパス（オプショナル）の配列からレコードポーションの配列を得る 
+  * --strict=true では、1個でも見つからないレコードポーションがあれば、エラー（例外）となる。
+  * --strict=false では、見つかったレコードポーションだけを配列にする。
+  * レコードポーションがまったく見つからなくても空配列が返るだけ。
+  */
+ @[reader]
+ command mget 
+         {
+          /** 1個でも見つからないレコードポーションがあればエラー（例外）とする */
+          @[default(false)]
+          "strict": boolean?,
+         }
+         :: [(Key|[Key, FragmentPath?])*]  -> [any*]
+         throws NotFound;
+
+ @[reader]
+ command multi-get := mget;
+
  /** レコードがコレクションに所属（∈）するかどうか判定する 
   * IDだけでなく、値の同一性も完全にチェックする。
   * 判定が困難なら indef を出力する。
@@ -84,9 +103,34 @@ signature Collection
  @[reader]
  command count :: void -> integer(minimum=0);
 
- /** すべてのレコードを列挙する */
+ /** レコードがインデックス（連番）を持つとき、次のインデックスを返す 
+  * レコードがインデックスを持たないときは Unsupported例外を投げる。
+  */
  @[reader]
+ command next-index :: void -> integer(minimum=0)
+   throws Unsupported
+ ;
+
+ /** すべてのレコードを列挙する */
+ @[deprecated, reader]
  command all :: void -> Iterable<Record>; // eachの入力
+
+ /** レコードを列挙する 
+  * 先頭から何個かのレコードをスキップでき、
+  * 列挙するレコードの最大数を指定できる。
+  */
+ @[reader]
+ command list 
+   {
+     /** 先頭からスキップするレコードの個数 */
+     @[default(0)]
+     "skip": integer(minimum=0)?,
+     /** リストするレコードの最大個数 */
+     @[default("unbounded")]
+     "max": (integer(minimum=0) | "unbounded")?,
+   }
+   :: void -> Iterable<Record>;
+
 
  /** 型チェックなしですべてのレコードを列挙する 
   * allと同じだが、型チェックはしない。
@@ -111,6 +155,20 @@ signature Collection
    throws [AlreadyExists, BadInput]
  ;
 
+ /** コレクションにバリデーションなしでレコードを挿入する 
+  * 引数にキーが指定されれば、そのキーを使う。この場合、入力データであるレコードにキーがあっても無視される。
+  *
+  * 引数にキーが指定されず、レコードにもIDがないきは可能なら自動生成する、
+  * 自動生成が不可能ならBadInput例外。
+  *
+  * 出力は任意である。
+  */
+ @[updater]
+ command poke [Key? key] :: any -> any?
+   throws [AlreadyExists, BadInput]
+ ;
+
+
  /** 単一レコードを置き換える 
   * 必ず既存レコードを置き換える。
   * 出力は任意である。
@@ -119,6 +177,19 @@ signature Collection
  command replace [Key key] :: Record -> any?
    throws NotExist
  ;
+
+ /** レコードの全体またはポーションを置き換える 
+  * 必ず既存レコード（のポーション）を置き換える。
+  * パスが指定されたときは、そのパス自体か親パスのロケーションは存在している必要がある。
+  * パスのロケーションが不正なときはConsistencyViolation例外を投げる。
+  * 入力のバリデーションは行わない。
+  * 出力は任意である。
+  */
+ @[updater]
+ command set [Key key, FragmentPath? frag-path] :: any -> any?
+   throws [NotExist, ConsistencyViolation]
+ ;
+
 
  /** 引数に指定されたキーのレコードを削除する 
   * 削除に失敗した場合は例外とする。
@@ -132,6 +203,8 @@ signature Collection
  /** コレクション内の全てのレコードを削除する 
   * データベース管理コマンド clear-collection と同じ。
   * 出力は任意である。
+  *
+  * このコマンドは危険過ぎると判断するなら、実装しなくてもよい。
   */
  @[optional, updater]
  command delete-all:: void -> any?
@@ -186,6 +259,7 @@ signature Collection
 
 |コマンド                |入力                    | 別名   |
 |------------------------|------------------------|--------|
+| list-databases         |void                    |        |
 | create-database 名前?  |DatabaseOptions         |        |
 | activate-database 名前?|ActivationOptions       |connect |
 | confirm-database 名前? |ConfirmOptions          |confirm |
@@ -208,6 +282,12 @@ signature Collection
  type ConfirmOptions;
  type ActivationOptions;
 
+
+ /** データベースを列挙する
+  */
+ command list-databases
+  :: void -> [DatabaseInfo*]
+ ;
 
  /** データベースを作成する
   * 1つのストレージバックエンドが1つのデータベースしかサポートしない場合は、
@@ -246,36 +326,44 @@ signature Collection
   :: void -> any
  ;
 
+ /* == コレクションの操作 == */
+
 
  /** コレクションを新規作成する */
- command create-collection [string? database-name] 
+ command create-collection [string database-name, string collection-name] 
   :: CollectionOptions -> any
  ;
 
  /** コレクションを削除する */
- command drop-collection [string? database-name]
+ command drop-collection [string database-name, string collection-name]
    :: void -> any
  ;
 
  /** コレクションに含まれるすべてのレコードを削除して空にする */
- command clear-collection [string? database-name]
+ command clear-collection [string database-name, string collection-name]
   :: void -> any
  ;
  command truncate := clear-collection;
 
  /** コレクションに関する設定を変更する */
- command alter-collection [string? database-name]
+ command alter-collection [string database-name, string collection-name]
   :: CollectionOptions -> any
  ;
 
  /** コレクションに関する情報を出力する */
- command show-collectin [string? database-name]
+ command show-collectin [string database-name, string collection-name]
   :: void -> CollectionInfo
  throws NotFound
  ;
  command describe := show-collection;
 
+//unload --fs  --format database-name collection-name file-name
+//load --fs    --format database-name collection-name file-namea
+
+
+
 };
+
 
 /** 
  * ベースコレクションとして必要なコマンドセット 
@@ -323,7 +411,4 @@ signature Basable
  command p-dump [FragmentPath? frag-path] :: void -> Iterable<any>;
 
 };
-
-
-// AppManifest
 
