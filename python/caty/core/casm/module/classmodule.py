@@ -199,13 +199,14 @@ class ClassExprInterpreter(object):
         return new.accept(self)
 
     def _append_uri(self, dest, src):
-        us = src.uri.get('python')
-        for u in us:
-            if u not in dest.uri['python']:
-                dest.uri['python'].append(u)
-        if len(dest.uri['python']) > 1 and 'caty.core.command' in dest.uri['python']:
-            dest.uri['python'].remove('caty.core.command')
-            dest.uri.defined = True
+        if src.uri:
+            us = src.uri.get('python')
+            for u in us:
+                if u not in dest.uri['python']:
+                    dest.uri['python'].append(u)
+            if len(dest.uri['python']) > 1 and 'caty.core.command' in dest.uri['python']:
+                dest.uri['python'].remove('caty.core.command')
+                dest.uri.defined = True
 
     def visit_class_use(self, obj):
         r = obj.cls.accept(self)
