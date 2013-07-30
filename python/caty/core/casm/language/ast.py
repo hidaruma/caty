@@ -1023,13 +1023,18 @@ class CollectionDeclNode(object):
 class TypeFunctionNode(TypeFunction, SchemaBase):
     def __init__(self, funcname, typename):
         self.funcname = funcname
-        self.typename = typename
+        self.typename = ScalarNode(typename)
         SchemaBase.__init__(self)
         self._module = None
+        self._type = u'<%s>' % funcname
 
     @property
     def module(self):
         return self._module
+
+    @property
+    def type(self):
+        return self._type
 
 class NamedParameterNode(SchemaBase):
     def __init__(self, name, schema):

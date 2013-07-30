@@ -425,6 +425,23 @@ class TypeCalcurator(_SubNormalizer):
             return node.path.select(body).next()
         return res
 
+    def _visit_type_function(self, node):
+        node.typename = node.typename.accept(self)
+        schema = node.typename
+        if isinstance(schema, TypeReference):
+            schema = schema.body
+        elif isinstance(schema, TypeVariable):
+            if schema._schema:
+                schema = schema._schema
+            else:
+                return node
+        if node.funcname == u'typeName':
+            return EnumSchema([schema.name])
+        elif node.funcname == u'recordType':
+            if u'__collection' not in schema.annotations:
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % schema.name)
+            return schema.accept(self).body
+
 class NeverChecker(_SubNormalizer):
     def __init__(self, module, safe=False, into_optional=False):
         _SubNormalizer.__init__(self, module)
@@ -538,6 +555,8 @@ class NeverChecker(_SubNormalizer):
     def _visit_function(self, node):
         assert False
 
+    def _visit_type_function(self, node):
+        return []
 
 class VariableChecker(_SubNormalizer):
     def __init__(self, *args):

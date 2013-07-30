@@ -74,6 +74,9 @@ class CycleDetecter(SchemaBuilder):
                 raise Exception(ro.i18n.get(u'Infinite expansion was detected'))
         return node
 
+    def _visit_type_function(self, node):
+        return node
+
 class _VariableFinderInRecType(TreeCursor):
     def __init__(self, param_name):
         self._param_name = param_name

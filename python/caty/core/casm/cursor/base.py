@@ -155,7 +155,7 @@ class SchemaBuilder(TreeCursor):
         return UndefinedSchema()
 
     def _visit_type_function(self, node):
-        node._module = self.module
+        node.typename = node.typename.accept(self)
         return node
 
     def __is_irregular_refinement(self, node):

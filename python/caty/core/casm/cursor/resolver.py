@@ -5,8 +5,16 @@ from caty.core.casm.language.ast import KindReference
 
 class ReferenceResolver(SchemaBuilder):
     def _visit_root(self, node):
+        _ = False
+        if self._root_name is None:
+            self._root_name = node.name
+            self._type_params = node._type_params
+            _ = True
         body = node.body.accept(self)
         node._schema = body
+        if _:
+            self._type_params = None
+            self._root_name = None
         return node
 
     @apply_annotation
@@ -54,10 +62,19 @@ class ReferenceResolver(SchemaBuilder):
         return r
 
     def _visit_type_function(self, node):
-        schema = node.module.get_type(node.typename)
+        node.typename = node.typename.accept(self)
+        schema = node.typename
+        print schema
+        if isinstance(schema, TypeReference):
+            schema = schema.body
+        elif isinstance(schema, TypeVariable):
+            if schema._schema:
+                schema = schema._schema
+            else:
+                return node
         if node.funcname == u'typeName':
-            return EnumSchema([node.typename])
+            return EnumSchema([schema.name])
         elif node.funcname == u'recordType':
             if u'__collection' not in schema.annotations:
-                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % node.typename)
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % schema.name)
             return schema.accept(self).body
