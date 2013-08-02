@@ -20,5 +20,192 @@ type Iterable<T> = (foreign | [T*]);
 
 
 
+/** 主キーとフラグメントパスによりレコードポーションが得られる集合
+ * !!! これは collection:Collection の定義の一部のコピーである !!!
+ */
+@[single-hidden]
+signature FragmentGettable
+<
+   /** キーの型 */ 
+   Key in KeyType default string,
+
+   /** フラグメントパスの型 */
+   FragmentPath in FragmentPathType default string,
+> = 
+{
+
+ /** 引数に与えられたキーとフラグメントパスからレコードポーションを得る */
+ command get [Key key, FragmentPath? frag-path] :: void -> any 
+    throws NotFound;
+
+ /** 入力に与えられたキーとフラグメントパス（オプショナル）の配列からレコードポーションの配列を得る 
+  * --strict=true では、1個でも見つからないレコードポーションがあれば、エラー（例外）となる。
+  * --strict=false では、見つかったレコードポーションだけを配列にする。
+  * レコードポーションがまったく見つからなくても空配列が返るだけ。
+  */
+ @[reader]
+ command mget 
+         {
+          /** 1個でも見つからないレコードポーションがあればエラー（例外）とする */
+          @[default(false)]
+          "strict": boolean?,
+         }
+         :: [(Key|[Key, FragmentPath?])*]  -> [any*]
+         throws NotFound;
+
+ @[reader]
+ command multi-get := mget;
+};
+
+
+
+
+type OptionalScalarArray = [scalar*]?;
+kind OptionalScalarArrayType = lower OptionalScalarArray;
+
+/** 
+ * 一般的な手続き呼び出し(xPC)用のデータ 
+ * 距離にも方式にも依存しない手続き呼び出し（Procedure Call）を行う。
+ *
+ * xPCで呼び出し可能な手続きは：
+ *
+ * # 有限個の引数を許す。引数の型はスカラーである。
+ * # 1個の標準入力を許す。入力の型は（実装上の都合を除いて）自由である。
+ * # オプション（名前付き引数）は使用しない。
+ * # 入力は、事前には確定せず、対話的に供給されることもある。
+ * # 引数は、事前に確定することを仮定する。
+ */
+type Caller
+<
+   /** 引数配列の型 */
+   Args in OptionalScalarArrayType default OptionalScalarArray,
+>
+= @* {
+
+/* 
+ * 実行すべき手続きの指定 
+ *
+ */
+
+ /** ターゲット（エントリーポイント）の名前
+  * ターゲットを固定して使用する場合は省略可能。
+  */
+ "target": string?,
+
+ /** ターゲットの種別 
+  * ターゲットの種別を固定するか、ターゲット名から種別が判断できるときは省略可能。
+  */
+ "targetKind": string?,
+
+ /** 動詞 
+  * ターゲット内での機能・動作の分類に使う名前
+  */
+ "verb": string?,
+
+/* 
+ * 実行時の引数と入力の指定 
+ *
+ */
+
+ /** arg0を含まない引数配列 
+  */
+ "args": Args,
+
+ /** 入力 
+  */
+ @[default(null)]
+ "input": any?,
+
+ /** 入力の型 
+  * 入力を対話的に供給するときの制約となる。
+  */
+ "inputType": string(remark="型の完全修飾名")?,
+};
+
+/** 具体的な参照データ型 */
+type Reference = @__ref {
+  /** コレクションを参照する */
+  "target": string(remark="コレクションの完全修飾名"),
+  /** 第1引数がレコードを識別するキー値、第2引数がフラグメントへのパス */
+  "args": [(null | number | string | binary), string(remark="XJSONパス")?],
+};
+
+
+/** 複数の対象物への参照データ型 */
+type MultiReference = @__mref {
+  /** コレクションを参照する */
+  "target": string(remark="コレクションの完全修飾名"),
+  /** 参照の引数の配列 */
+  "margs": [
+    (
+      (null | number | string | binary)
+    | [(null | number | string | binary), string(remark="XJSONパス")?]
+    )*
+   ],
+};
+
+/* 以下の2つの型定義で、パラメータ具体化が早すぎるのでコメントアウトしている。
+ * 修正が入ったら、コメントマークを取る。
+ */
+
+/** コレクションをパラメータとする参照データ型 
+ */
+type reference<C> = @__ref {
+ /** 具体化されると型名の文字列リテラルになる */
+ "target": string/*typeName<C>*/, 
+
+ /** 第1引数がレコードを識別するキー値、第2引数がフラグメントへのパス */
+ "args": [(null | number | string | binary), string(remark="XJSONパス")?],
+};
+
+/** コレクションのレコードへの参照、またはレコードのデータ型 
+ */
+type conref<C> = ( (/*recordType<C> &*/ (@(string(excludes=["__ref"])) any?)) | reference<C>);
+
+
+
+/** 具体的なトリガー型 
+ */
+type Trigger =
+@__trigger {
+ "target": string,
+ "verb": string?,
+ "inputType": string?,
+ "args": [scalar*]?,
+};
+
+
+kind StringSubtype = lower string;
+
+type V_Get = "get";    // 型名だけで型表現をdefaultに書けないので
+type IT_Void = "void"; // 〃
+
+/** パラメータ付きトリガー型 
+ */
+type GTrigger
+<
+  /** アクションを起動する動詞 */
+  verb=V       in StringSubtype   default V_Get, 
+
+  /** 入力の型の名前 */
+  inputType=IT in StringSubtype   default V_Get, 
+
+  /** 補助的な情報を与える引数 */
+  args=AT      in OptionalScalarArrayType default OptionalScalarArry,
+
+  /** ターゲットを指定する */
+  Trg  in StringSubtype default string,
+> = 
+@__trigger {
+ "target": Trg,
+ "verb": V?,
+ "inputType": IT,
+ "args": AT,
+};
+
+//type Anchor<C> = Trigger<C>;
+//type AnchorToHome = Anchor<"main:Home">;
+
+
 // end of module
 
