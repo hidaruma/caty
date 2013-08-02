@@ -556,8 +556,12 @@ class DataGenerator(TreeCursor):
             if node.tag in ('*', '*!'):
                 return json.tagged(u'auto-gen-tag', r)
             else:
+                if not isinstance(node.tag, basestring):
+                    return json.tagged(node.tag.accept(self).replace('\n', '').replace('\r', '').replace(' ', ''), r)
                 return json.tagged(node.tag, r)
         else:
+            if not isinstance(node.tag, basestring):
+                return json.TagOnly(node.tag.accept(self).replace('\n', '').replace('\r', '').replace(' ', ''))
             return json.TagOnly(node.tag)
 
 class Url(Builtin):
