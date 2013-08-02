@@ -64,7 +64,6 @@ class ReferenceResolver(SchemaBuilder):
     def _visit_type_function(self, node):
         node.typename = node.typename.accept(self)
         schema = node.typename
-        print schema
         if isinstance(schema, TypeReference):
             schema = schema.body
         elif isinstance(schema, TypeVariable):
