@@ -1,0 +1,4 @@
+module xjx;
+
+command markup :: any -> string 
+ refers python:xjx.Markup0;
