@@ -245,6 +245,7 @@ class Command(object):
         _set = set()
         self.__current_application = target_app or facilities.app
         self.__i18n = I18nMessageWrapper(self._defined_application.i18n, facilities['env'])
+        self.__var_loader.env = facilities['env']
         for mode, decl in self.profile_container.profiles[0].facilities:
             name = decl.name
             key = decl.alias if decl.alias else name
@@ -572,9 +573,10 @@ def compile_builtin(module, registrar):
             registrar.compile(schema_string)
 
 class VarLoader(object):
-    def __init__(self, opts_ref, args_ref):
+    def __init__(self, opts_ref, args_ref, env={}):
         self.opts = opts_ref if opts_ref else []
         self.args = args_ref if args_ref else []
+        self.env = env
 
     def load_arg0(self, opt, storage):
         opts = storage.opts
@@ -626,6 +628,8 @@ class VarLoader(object):
             elif opt.type == 'var':
                 if opt.value.name in opts:
                     o[opt.key] = opts[opt.value.name]
+                elif opt.value.name in self.env:
+                    a.append(self.env[opt.value.name])
                 else:
                     if not opt.optional:
                         raise Exception(u'Variable %%%s is not defined' % opt.value.name)
@@ -669,6 +673,8 @@ class VarLoader(object):
             else:
                 if arg.key in opts:
                     a.append(opts[arg.key])
+                elif arg.key in self.env:
+                    a.append(self.env[arg.key])
                 else:
                     if not arg.optional:
                         raise Exception(u'Variable %%%s is not defined' % arg.key)
