@@ -562,6 +562,8 @@ class DataGenerator(TreeCursor):
         else:
             if not isinstance(node.tag, basestring):
                 return json.TagOnly(node.tag.accept(self).replace('\n', '').replace('\r', '').replace(' ', ''))
+            if isinstance(node.body, Optional):
+                return _EMPTY
             return json.TagOnly(node.tag)
 
 class Url(Builtin):
