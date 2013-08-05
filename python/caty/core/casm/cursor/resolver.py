@@ -31,11 +31,14 @@ class ReferenceResolver(SchemaBuilder):
         elif isinstance(node, TypeVariable):
             if self.module.has_schema(node.name):
                 return self.module.get_type(node.name)
-            if node.default and self.module.has_schema(node.default):
-                schema = self.module.get_type(node.default)
-                if isinstance(schema, KindReference):
+            if node.default:
+                if self.module.has_schema(node.default):
+                    schema = self.module.get_type(node.default)
+                    if isinstance(schema, KindReference):
+                        raise SystemResourceNotFound(u'TypeNotFound', u'$name', name=node.default)
+                    node.set_default(schema)
+                else:
                     raise SystemResourceNotFound(u'TypeNotFound', u'$name', name=node.default)
-                node.set_default(schema)
         return node
 
     def _visit_kind(self, node):

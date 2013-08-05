@@ -191,7 +191,7 @@ type GTrigger
   inputType=IT in StringSubtype   default V_Get, 
 
   /** 補助的な情報を与える引数 */
-  args=AT      in OptionalScalarArrayType default OptionalScalarArry,
+  args=AT      in OptionalScalarArrayType default OptionalScalarArray,
 
   /** ターゲットを指定する */
   Trg  in StringSubtype default string,
