@@ -380,8 +380,9 @@ class TypeBodyReifier(TreeCursor):
 
     @format_result(u'array-of')
     def _visit_array(self, node):
+        r = self._extract_common_data(node)
         r[u'specified'] = []
-        for k, v in node.items():
+        for v in node.items:
             r[u'specified'].append(v.accept(self))
         if r[u'repeat']:
             r[u'additional'] = r[u'specified'].pop(-1)
