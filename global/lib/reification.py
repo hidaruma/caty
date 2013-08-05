@@ -63,7 +63,7 @@ class ShallowReifier(object):
         if a.parent:
             r[u'visibleParent'] = a.parent.name
         if a.deprecated:
-            r['anno']['deprecated'] = a.deprecated
+            r[u'anno'][u'deprecated'] = a.deprecated
         return r
 
     def reify_state(self, s):
@@ -236,7 +236,7 @@ class ShallowReifier(object):
                 exc = tagged(u'only', exc)
             else:
                 exc = tagged(u'likely', exc)
-            o['exception'] = exc
+            o[u'exception'] = exc
             sig = []
             if p.signal_schema.type != 'never':
                 for e in self._flatten(p.signal_schema):
@@ -245,7 +245,7 @@ class ShallowReifier(object):
                 sig = tagged(u'only', sig)
             else:
                 sig = tagged(u'likely', sig)
-                o['signal'] = sig
+                o[u'signal'] = sig
             if p.opts_schema.type != 'null':
                 o[u'opts'] = self._dump_schema(p.opts_schema)
             if p.args_schema.type != 'null':
@@ -278,13 +278,13 @@ class ShallowReifier(object):
 class StringReifier(ShallowReifier):
     def reify_type(self, t):
         sr = ShallowReifier.reify_type(self, t)
-        sr['body'] = TreeDumper().visit(t.body)
+        sr[u'body'] = TreeDumper().visit(t.body)
         return tagged(u'type', sr)
 
 class FullReifier(ShallowReifier):
     def reify_type(self, t):
         sr = ShallowReifier.reify_type(self, t)
-        sr['body'] = TypeBodyReifier(sr['location']).visit(t.body)
+        sr[u'body'] = TypeBodyReifier(sr[u'location']).visit(t.body)
         return tagged(u'type', sr)
 
 from caty.core.spectypes import UNDEFINED
@@ -309,9 +309,9 @@ class TypeBodyReifier(TreeCursor):
             if k != 'pseudoTag':
                 r[k] = v
         if isinstance(node, Root):
-            r['location'] = node.canonical_name
+            r[u'location'] = node.canonical_name
         elif isinstance(node, Ref):
-            r['location'] = node.module.canonical_name + ':' + node.name
+            r[u'location'] = node.module.canonical_name + ':' + node.name
         return r
 
     @format_result(u'params')
@@ -336,8 +336,8 @@ class TypeBodyReifier(TreeCursor):
         if not self.root_found:
             self.root_found = True
             r = self._extract_common_data(node)
-            r['params'] = self.__reify_params(node._type_params)
-            r['expr'] = node.body.accept(self)
+            r[u'params'] = self.__reify_params(node._type_params)
+            r[u'expr'] = node.body.accept(self)
             return tagged(u'type', r)
         else:
             return node.body.accept(self)
@@ -352,15 +352,15 @@ class TypeBodyReifier(TreeCursor):
     def __reify_builtin(self, node):
         print node
         r = self._extract_common_data(node)
-        r['typeName'] = node.name
+        r[u'typeName'] = node.name
         return r
 
     @format_result(u'type-ref')
     def __reify_ref(self, node):
         r = self._extract_common_data(node)
-        r['ref'] = node.name
+        r[u'ref'] = node.name
         #if node.body.kind:
-        #    r['kind'] = self.__reify_kind(node.body.kind)
+        #    r[u'kind'] = self.__reify_kind(node.body.kind)
         return r
 
     @format_result(u'optional')
@@ -373,20 +373,20 @@ class TypeBodyReifier(TreeCursor):
     @format_result(u'object-of')
     def _visit_object(self, node):
         r = self._extract_common_data(node)
-        r['specified'] = {}
+        r[u'specified'] = {}
         for k, v in node.items():
-            r['specified'][k] = v.accept(self)
-        r['additional'] = node.wildcard.accept(self)
+            r[u'specified'][k] = v.accept(self)
+        r[u'additional'] = node.wildcard.accept(self)
         return r
 
     @format_result(u'array-of')
     def _visit_array(self, node):
-        r['specified'] = []
+        r[u'specified'] = []
         for k, v in node.items():
-            r['specified'].append(v.accept(self))
-        if r['repeat']:
-            r['additional'] = r['specified'].pop(-1)
-            del r['repeat']
+            r[u'specified'].append(v.accept(self))
+        if r[u'repeat']:
+            r[u'additional'] = r[u'specified'].pop(-1)
+            del r[u'repeat']
         return r
 
     @format_result(u'bag')
@@ -399,7 +399,7 @@ class TypeBodyReifier(TreeCursor):
             mi = s.pop('minCount', 1)
             ma = s.pop('maxCount', u'unbounded')
             items.append(tagged('bag-item', {'minOccurs': mi, 'maxOccurs': ma, 'type': tagged(t, s)}))
-        r['items'] = items
+        r[u'items'] = items
         return r
 
     @format_result(u'intersection')
@@ -471,7 +471,7 @@ class FormReifier(ShallowReifier):
 
     def reify_type(self, t):
         sr = ShallowReifier.reify_type(self, t)
-        sr['body'] = ObjectDumper(sr['location']).visit(t.body)
+        sr[u'body'] = ObjectDumper(sr[u'location']).visit(t.body)
         return tagged(u'type', sr)
 
 class ObjectDumper(TypeBodyReifier):
