@@ -498,7 +498,7 @@ class ObjectNode(Node, Object):
     def __init__(self, items=None, wildcard=None, options=None):
         Node.__init__(self, options)
         self.leaves = items if items else {}
-        self.wildcard = wildcard if wildcard else ScalarNode(u'never')
+        self.wildcard = wildcard if wildcard else ScalarNode(u'undefined')
         self.options = options if options else {}
 
     def items(self):

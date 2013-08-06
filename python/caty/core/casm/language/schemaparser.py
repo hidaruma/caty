@@ -321,6 +321,7 @@ def object_(seq):
     if '*' in items:
         w = items['*']
         del items['*']
+        # ワイルドカードの正規化
         if not isinstance(w, OptionNode):
             w = OptionNode(w)
     return ObjectNode(items, w, o)
