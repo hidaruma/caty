@@ -2,6 +2,8 @@
 import caty
 from caty.core.command import Builtin
 import caty.jsontools.selector as selector
+import caty.jsontools as json
+from caty.core.exception import throw_caty_exception
 
 
 class Lookup(Builtin):
@@ -101,7 +103,10 @@ class Mget(Builtin):
 
 
 class Poke(Insert):
-    pass
+    def execute(self, obj):
+        if not isinstance(obj, dict):
+            throw_caty_exception(u'BadInput', json.pp(obj))
+        Insert.execute(self, obj)
 
 class Set(Builtin):
     def setup(self, key, path=None):
