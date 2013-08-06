@@ -334,6 +334,10 @@ def _normalize_option(node):
             if w.name == u'undefined':
                 w.docstring = node.docstring
                 return w
+            elif w.name == u'never':
+                w.name = u'undefined'
+                w.docstring = node.docstring
+                return w
             else:
                 return node
         elif isinstance(w, OptionNode):
