@@ -385,7 +385,7 @@ class TypeBodyReifier(TreeCursor):
         for v in node.items:
             r[u'specified'].append(v.accept(self))
         if r[u'repeat']:
-            r[u'additional'] = r[u'specified'].pop(-1)
+            r[u'additional'] = json.tagged(u'optional', {u'operand': r[u'specified'].pop(-1)})
             del r[u'repeat']
         return r
 
