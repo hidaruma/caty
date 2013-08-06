@@ -19,6 +19,19 @@ kind FragmentPathType = lower string?;
 type Iterable<T> = (foreign | [T*]);
 
 
+type Anchor = @__a {
+ "href" : common:uri,
+
+ "rel" : string?,
+ "rev" : string?,
+ "type" : common:mediaType?,
+ "title": string?,
+ "class" : string?,
+ "text": @* string?,
+};
+
+
+
 
 /** 主キーとフラグメントパスによりレコードポーションが得られる集合
  * !!! これは collection:Collection の定義の一部のコピーである !!!

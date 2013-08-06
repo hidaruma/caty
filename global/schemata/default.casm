@@ -285,3 +285,16 @@ command acts [string mod] :: void -> [reif:ActionSummary*]? {
 command loaded-apps :: void -> [reif:ApplicationSummary*] {
   sreif:list-applications | take {$.loaded}
 };
+
+/** 参照を作る */
+command make-ref [string t, scalar? a1, scalar? a2] :: void -> any/*Reference*/ {
+  %2? |
+  when {
+    undefined => [null],
+    *        => %_ARGV | list:slice 2,
+  } > as;
+  @__r {
+    "t": %1,
+    "a": %as,
+  }
+};
