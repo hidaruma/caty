@@ -409,7 +409,7 @@ class TypeBodyReifier(TreeCursor):
     @format_result(u'union')
     def _visit_union(self, node):
         spec = list(self.__flatten_union(node))
-        return {'specified': spec, 'additional': tagged(u'builtin', {'typeName': u'undefined'})}
+        return {'specified': spec, 'additional': tagged(u'builtin', {'typeName': u'never'})}
 
     def __flatten_union(self, node):
         if isinstance(node, Union):
