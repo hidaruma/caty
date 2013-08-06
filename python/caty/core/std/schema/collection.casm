@@ -29,13 +29,13 @@ type Iterable<T> = ([T*] | foreign);
 /** 
  * コレクションを操作するコマンドセット 
  */
-@[register-public]
+@[register-public, single-hidden]
 signature Collection
 <
   /** レコードの型 */
   Record in RecordType default DefaultRecord,
 
-  /** 主キー（IDフィールド）の型 */
+  /** 主キー（＝IDフィールド）の型 */
   Key in KeyType default string,
 
   /** フラグメントパスの型
@@ -44,7 +44,7 @@ signature Collection
   FragmentPath in FragmentPathType default string,
 > =
 {
- /** 主キー（IDフィールド）の型の名前
+ /** 主キー（＝IDフィールド）の型の名前
   */
   property _keyType :: string(remark="キーの型の名前") ;
 
@@ -87,6 +87,9 @@ signature Collection
  /** レコードがコレクションに所属（∈）するかどうか判定する 
   * IDだけでなく、値の同一性も完全にチェックする。
   * 判定が困難なら indef を出力する。
+  *
+  * IDフィールドを持たないレコードをorderedコレクションに対して照合するときなどは
+  * indef でもよい。
   */
  @[reader]
  command belongs :: univ -> tboolean;
@@ -103,17 +106,17 @@ signature Collection
  @[reader]
  command count :: void -> integer(minimum=0);
 
- /** レコードがインデックス（連番）を持つとき、次のインデックスを返す 
-  * レコードがインデックスを持たないときは Unsupported例外を投げる。
+ /** 次のレコード挿入時の自動生成キーが確定するとき、そのキーを返す 
+  * 次のキーが確定できないときは Unsupported例外を投げる。
   */
  @[reader]
- command next-index :: void -> integer(minimum=0)
+ command next-new-key :: void -> Key
    throws Unsupported
  ;
 
  /** すべてのレコードを列挙する */
  @[deprecated, reader]
- command all :: void -> Iterable<Record>; // eachの入力
+ command all :: void -> Iterable<Record>;
 
  /** レコードを列挙する 
   * 先頭から何個かのレコードをスキップでき、
@@ -133,7 +136,7 @@ signature Collection
 
 
  /** 型チェックなしですべてのレコードを列挙する 
-  * allと同じだが、型チェックはしない。
+  * list と同じだが、型チェックはしない。
   * スキーマが変更された場合でも動作する。
   */
  @[reader]
@@ -145,7 +148,7 @@ signature Collection
  /** コレクションにレコードを挿入する 
   * 引数にキーが指定されれば、そのキーを使う。この場合、入力データであるレコードにキーがあっても無視される。
   *
-  * 引数にキーが指定されず、レコードにもIDがないきは可能なら自動生成する、
+  * 引数にキーが指定されず、レコードにもIDがないきは、可能ならキーを自動生成する、
   * 自動生成が不可能ならBadInput例外。
   *
   * 出力は任意である。
@@ -156,9 +159,9 @@ signature Collection
  ;
 
  /** コレクションにバリデーションなしでレコードを挿入する 
-  * 引数にキーが指定されれば、そのキーを使う。この場合、入力データであるレコードにキーがあっても無視される。
+  * 引数にキーが指定されれば、そのキーを使う。この場合、入力データであるレコードにIDがあっても無視される。
   *
-  * 引数にキーが指定されず、レコードにもIDがないきは可能なら自動生成する、
+  * 引数にキーが指定されず、レコードにもIDがないきは、可能ならキーを自動生成する、
   * 自動生成が不可能ならBadInput例外。
   *
   * 出力は任意である。
@@ -167,7 +170,6 @@ signature Collection
  command poke [Key? key] :: any -> any?
    throws [AlreadyExists, BadInput]
  ;
-
 
  /** 単一レコードを置き換える 
   * 必ず既存レコードを置き換える。
@@ -197,7 +199,7 @@ signature Collection
   */
  @[updater]
  command delete [Key key] :: void -> any?
-   throws NotFound
+   throws [NotFound, ConsistencyViolation, BadSituation]
  ;
 
  /** コレクション内の全てのレコードを削除する 
@@ -214,7 +216,7 @@ signature Collection
  /* == デフォルト実装付きのコマンドプロファイル == */
 
  /** 入力に与えられたキーとフラグメントパスからレコードポーションを得る */
- @[reader]
+ @[deprecated, reader]
  command get_ :: [Key, FragmentPath?] -> any throws NotFound {
    =[ pass > k, pass > p];
    get %k %p?
@@ -251,9 +253,64 @@ signature Collection
 } refers python:collection;
 
 
+/** 
+ * ベースコレクションとして必要なコマンドセット 
+ */
+@[register-public, single-hidden]
+signature Basable
+<
+  /** 主キー（IDフィールド）の型 */
+  Key in KeyType default string,
+
+  /** フラグメントパスの型
+   * string または undefined に具体化して使う。
+   */
+  FragmentPath in FragmentPathType default string,
+> =
+{
+
+ /* 接頭辞の p- は、partial(ly), portion を意味する */
+
+ /** 入力データが指定されたレコードポーションにサブレコードとしてマッチするかどうか判定する 
+  * 判定が困難なら indef を出力する。
+  */
+ @[reader]
+ command p-matches [Key key, FragmentPath? frag-path]  :: any -> tboolean;
+
+ /** キーとパスに対応するレコードポーションが存在するかどうか判定する */
+ @[reader]
+ command p-exists [Key key, FragmentPath? frag-path] :: void -> boolean;
+
+ /** パスに対応するレコードポーションが存在するすべてのキーを列挙する */
+ @[reader]
+ command p-keys [FragmentPath? frag-path]:: void -> Iterable<Key>;
+
+ /** コレクション内の、パスに対応するレコードポーションが存在するレコードの個数を返す */
+ @[reader]
+ command p-count [FragmentPath? frag-path] :: void -> integer(minimum=0);
+
+ /** パスに対応するレコードポーションを列挙する */
+ @[reader]
+ command p-list 
+   {
+     /** 先頭からスキップするレコードの個数 */
+     @[default(0)]
+     "skip": integer(minimum=0)?,
+     /** リストするレコードの最大個数 */
+     @[default("unbounded")]
+     "max": (integer(minimum=0) | "unbounded")?,
+   }
+   [FragmentPath? frag-path] :: void -> Iterable<any>;
+
+ /** 型チェックなしで、パスに対応するレコードポーションを列挙する
+  */
+ @[reader]
+ command p-dump [FragmentPath? frag-path] :: void -> Iterable<any>;
+
+};
 
 
-@[hidden] signature StorageAdmin = {
+@[single-hidden] signature StorageAdmin = {
 /*
 
 
@@ -361,54 +418,4 @@ signature Collection
 //load --fs    --format database-name collection-name file-namea
 
 
-
 };
-
-
-/** 
- * ベースコレクションとして必要なコマンドセット 
- */
-@[register-public]
-signature Basable
-<
-  /** 主キー（IDフィールド）の型 */
-  Key in KeyType default string,
-
-  /** フラグメントパスの型
-   * string または undefined に具体化して使う。
-   */
-  FragmentPath in FragmentPathType default string,
-> =
-{
-
- /* 接頭辞の p- は、partial(ly), portion を意味する */
-
- /** 入力データが指定されたレコードポーションにサブレコードとしてマッチするかどうか判定する 
-  * 判定が困難なら indef を出力する。
-  */
- @[reader]
- command p-matches [Key key, FragmentPath? frag-path]  :: any -> tboolean;
-
- /** キーとパスに対応するレコードポーションが存在するかどうか判定する */
- @[reader]
- command p-exists [Key key, FragmentPath? frag-path] :: void -> boolean;
-
- /** パスに対応するレコードポーションが存在するすべてのキーを列挙する */
- @[reader]
- command p-keys [FragmentPath? frag-path]:: void -> Iterable<Key>;
-
- /** コレクション内の、パスに対応するレコードポーションが存在するレコードの個数を返す */
- @[reader]
- command p-count [FragmentPath? frag-path] :: void -> integer(minimum=0);
-
- /** パスに対応するレコードポーションを列挙する */
- @[reader]
- command p-all [FragmentPath? frag-path] :: void -> Iterable<any>;
-
- /** 型チェックなしで、パスに対応するレコードポーションを列挙する
-  */
- @[reader]
- command p-dump [FragmentPath? frag-path] :: void -> Iterable<any>;
-
-};
-
