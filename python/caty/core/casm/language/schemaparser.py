@@ -324,7 +324,22 @@ def object_(seq):
         # ワイルドカードの正規化
         if not isinstance(w, OptionNode):
             w = OptionNode(w)
+        w = _normalize_option(w)
     return ObjectNode(items, w, o)
+
+def _normalize_option(node):
+    if isinstance(node, OptionNode):
+        w = _normalize_option(node.body)
+        if isinstance(w, ScalarNode):
+            if w.name == u'undefined':
+                w.docstring = node.docstring
+                return w
+            else:
+                return node
+        elif isinstance(w, OptionNode):
+            w.docstring = node.docstring
+            return w
+    return node
 
 def item(seq):
     doc = seq.parse(option(docstring))
