@@ -429,6 +429,12 @@ type TaggedTypeOf<ContentType> = @tagged (TypeQualifierMixin & {
  */
 type UndefinedType = BuiltinTypeOf<"undefined">;
 
+/** never型
+ * 型定数 
+ */
+type NeverType = BuiltinTypeOf<"never">;
+
+
 /** 排他的ユニオン型を構成する型関数 */
 type UnionTypeOf<ChoiceType, AdditionalType> = @union (TypeQualifierMixin & {
 
@@ -439,7 +445,7 @@ type UnionTypeOf<ChoiceType, AdditionalType> = @union (TypeQualifierMixin & {
 });
 
 /** 閉じたユニオン型の型関数 */
-type ClosedUnionTypeOf<ChoiceType> = UnionTypeOf<ChoiceType, UndefinedType>;
+type ClosedUnionTypeOf<ChoiceType> = UnionTypeOf<ChoiceType, NeverType>;
 
 
 
