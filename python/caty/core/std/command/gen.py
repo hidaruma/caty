@@ -435,7 +435,7 @@ class DataGenerator(TreeCursor):
             if not deleted:
                 break
 
-        if node.wildcard.type != 'never':
+        if node.wildcard.type != 'never' and self.__occur != u'min':
             num = 0
             mi = node.minProperties if node.minProperties != -1 else len(r)
             ma = node.maxProperties if node.maxProperties != -1 else mi + 2
