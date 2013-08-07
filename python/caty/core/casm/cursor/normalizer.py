@@ -60,6 +60,14 @@ class UndefinedEraser(_SubNormalizer):
         else:
             return node
 
+    @apply_annotation
+    def _visit_object(self, node):
+        w = node.wildcard.type
+        r = _SubNormalizer._visit_object(self, node)
+        if w == u'undefined':
+            r.wildcard = UndefinedSchema()
+        return r
+
 class OptionLifter(_SubNormalizer):
     def __init__(self, *args):
         _SubNormalizer.__init__(self, *args)
@@ -83,6 +91,7 @@ class OptionLifter(_SubNormalizer):
         if o1 or o2:
             i = OptionalSchema(i)
         return i
+
 
 class TypeCalcurator(_SubNormalizer):
     def __init__(self, module):
@@ -420,7 +429,7 @@ class TypeCalcurator(_SubNormalizer):
             else:
                 body.wildcard = AnySchema()
         elif node.operator == u'close':
-            body.wildcard = NeverSchema()
+            body.wildcard = UndefinedSchema()
         else:
             return node.path.select(body).next()
         return res

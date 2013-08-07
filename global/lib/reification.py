@@ -485,7 +485,6 @@ class ObjectDumper(TypeBodyReifier):
     def _visit_scalar(self, node):
         from caty.core.schema import TypeReference
         if isinstance(node, (TypeReference)):
-            print node.canonical_name
             if node.canonical_name in self._history:
                 raise Exception(u'To reify recursive type definition is not implemented')
             self._history[node.canonical_name] = True
