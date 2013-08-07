@@ -203,7 +203,7 @@ class CommandProfile(object):
             if opts is None:
                 opts = {}
             o_s = self.opts_schema.schema_obj
-            has_wildcard = self.opts_schema.wildcard.type != 'never'
+            has_wildcard = self.opts_schema.wildcard.type not in (u'never', u'undefined')
             key_set = set(o_s.keys())
             found_key = set()
             for k, v in opts.items():

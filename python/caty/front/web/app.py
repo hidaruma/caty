@@ -86,7 +86,6 @@ class CatyApp(object):
             headers = list(self.create_header(json['header']))
         except Exception, e:
             print traceback.format_exc()
-            print e
             return {}, list(self.create_header({'status': 500}))
         return json, headers
 

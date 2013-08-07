@@ -43,7 +43,7 @@ class Expand(Builtin, MafsMixin):
         if not path.startswith('include@') and not '@' in path:
             path = 'include@' + path
         from caty.core.command.param import Argument
-        p = Expand([], [Argument(path)])
+        p = self.__class__([], [Argument(path)])
         p.pub = self.pub
         p.include = self.include
         p.env = self.env
