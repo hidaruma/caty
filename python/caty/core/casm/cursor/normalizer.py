@@ -92,6 +92,14 @@ class OptionLifter(_SubNormalizer):
             i = OptionalSchema(i)
         return i
 
+    @apply_annotation
+    def _visit_option(self, node):
+        s = node.body.accept(self)
+        if isinstance(s, UndefinedSchema):
+            return s
+        elif isinstance(s, OptionalSchema):
+            return s.accept(self)
+        return OptionalSchema(s)
 
 class TypeCalcurator(_SubNormalizer):
     def __init__(self, module):

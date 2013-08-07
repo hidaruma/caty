@@ -17,7 +17,7 @@ class ObjectSchema(SchemaBase, Object):
 
     def __init__(self, schema_obj=None, wildcard=None, options=None):
         SchemaBase.__init__(self, options)
-        self._wildcard = wildcard if wildcard else OptionalSchema(NeverSchema())
+        self._wildcard = wildcard if wildcard else UndefinedSchema()
         if not isinstance(self._wildcard, (UndefinedSchema, OptionalSchema)):
             self._wildcard = OptionalSchema(self._wildcard)
         self.schema_obj = schema_obj if schema_obj else {}

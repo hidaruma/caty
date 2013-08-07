@@ -80,3 +80,14 @@ class ReferenceResolver(SchemaBuilder):
             if u'__collection' not in schema.annotations:
                 throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % schema.name)
             return schema.accept(self).body
+
+    @apply_annotation
+    def _visit_object(self, node):
+        o = {}
+        for k, v in node.items():
+            o[k] = v.accept(self)
+        w = node.wildcard.accept(self)
+        if w.type == u'undefined':
+            w = UndefinedSchema()
+        return ObjectSchema(o, w, node.options)
+
