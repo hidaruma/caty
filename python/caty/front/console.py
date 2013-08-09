@@ -48,6 +48,7 @@ class CatyShell(cmd.Cmd, FakeFacility):
         self.last_session = None
         self.server = None
         self.hcon = None
+        self.performer = None
         self.system = system
         self.env = {}
         self.deleted_env = set([])
@@ -226,6 +227,8 @@ server, hconなどの起動・停止を行う。
             self.do_server('status')
             self._echo(u'hcon: ', True)
             self.do_hcon('status')
+            self._echo(u'performer: ', True)
+            self._do_performer('status')
             return
         if not ' ' in arg:
             srv = arg
@@ -236,6 +239,8 @@ server, hconなどの起動・停止を行う。
             self.do_server(args)
         elif srv == 'hcon':
             self.do_hcon(args)
+        elif srv == 'performer':
+            self._do_performer(args)
         else:
             self._echo(u'Unknown service: %s' % srv)
 
@@ -330,6 +335,54 @@ Web hconサーバの起動・停止を行う
         else:
             self._echo(u'未知の引数: %s' % cmd)
             usage()
+
+
+    @catch
+    def _do_performer(self, line):
+        u"""
+Usage: service performer start [PORT]|stop
+Webパフォーマーの起動・停止を行う
+デフォルトのパフォーマーポートは8000
+        """
+        def usage():
+            self._echo(u'使い方: service performer start [port] または server stop')
+        from caty.front.web import build_performer
+        cmd = line.strip()
+        if ' ' in cmd:
+            cmd, rest = map(str.strip, line.split(' ', 1))
+        else:
+            rest = ''
+        port = 8000
+        if cmd == 'start':
+            if self.server is None:
+                if rest:
+                    from caty.util import try_parse
+                    port = try_parse(int, rest) or 8000
+                self.performer = build_performer(self.system, self.debug, port)
+                self.performer.start()
+                if sys.platform == 'win32':
+                    windll.kernel32.SetConsoleTitleW(u'Caty Console (%d)' % port)
+            else:
+                self._echo(u'パフォーマーは既に起動しています')
+        elif cmd == 'stop':
+            if self.performer is not None:
+                self.performer.shutdown()
+                self.performer.stop()
+                self.performer = None
+                if sys.platform == 'win32':
+                    windll.kernel32.SetConsoleTitleW(u'Caty Console')
+                self.app._global_config._configure_server()
+            else:
+                self._echo(u'サーバが起動していません')
+        elif cmd == 'status' or cmd == '':
+            if self.performer is not None:
+                self._echo(self.performer.status())
+            else:
+                self._echo(u'stopped')
+        else:
+            self._echo(u'未知の引数: %s' % cmd)
+            usage()
+
 
     @catch
     def default(self, line):

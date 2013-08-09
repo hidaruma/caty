@@ -204,6 +204,7 @@ class CatyPerformerFacade(object):
                                  server_class, 
                                  handler_class)
         from caty.util import cout
+        self.port = port
         cout.writeln("Performer serving on port %d..." % port)
 
     def main(self):
@@ -223,3 +224,7 @@ class PerformerThread(threading.Thread):
 
     def shutdown(self):
         self.server.close()
+
+    def status(self):
+        return u'running on port %d' % self.server.port
+

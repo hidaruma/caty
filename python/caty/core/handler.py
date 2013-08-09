@@ -204,6 +204,7 @@ class PipelineAdaptor(object):
                 result = self.error_dispatcher.dispatch_signal(e)
         except CatyException, e:
             transaction = False
+
             if self.schema.has_command_type('map-exception') and not self.schema.is_runaway_exception(e):
                 cmd = self.__interpreter.build(u'map-exception', 
                                               None, 
@@ -347,10 +348,12 @@ class ErrorDispacher(object):
                 'body': e.get_message(self.i18n)
             }
         else:
+            print e.tag
             if e.tag.startswith('HTTP_'):
                 status = int(e.tag.replace('HTTP_', ''))
             else:
                 status = 500
+            print status
             result = {
                 'status': status,
                 'body': e.get_message(self.i18n),
