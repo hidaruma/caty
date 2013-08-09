@@ -228,7 +228,7 @@ server, hconなどの起動・停止を行う。
             self._echo(u'hcon: ', True)
             self.do_hcon('status')
             self._echo(u'uuserver: ', True)
-            self._do_uuserver('status')
+            self.do_uuserver('status')
             return
         if not ' ' in arg:
             srv = arg
@@ -338,7 +338,7 @@ Web hconサーバの起動・停止を行う
 
 
     @catch
-    def _do_uuserver(self, line):
+    def do_uuserver(self, line):
         u"""
 Usage: service uuserver start [PORT]|stop
 Ugly URIサーバーの起動・停止を行う
