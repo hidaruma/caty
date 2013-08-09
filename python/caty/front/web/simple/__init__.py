@@ -81,17 +81,17 @@ def get_dispatcher(system, is_debug):
 def get_app_class():
     return CatyApp
 
-def get_performer(system, is_debug):
-    return CatyWSGIPerformerDispatcher(system, is_debug)
+def get_uuserver(system, is_debug):
+    return CatyWSGIUglyURIDispatcher(system, is_debug)
 
-class CatyWSGIPerformerDispatcher(CatyWSGIDispatcher):
+class CatyWSGIUglyURIDispatcher(CatyWSGIDispatcher):
     def __call__(self, environ, start_response):
         path = environ['PATH_INFO']
         app = self.dispatch(path)
-        return CatyPerformer(app, self.is_debug, self._system).start(environ, start_response)
+        return CatyUUApp(app, self.is_debug, self._system).start(environ, start_response)
 
 from caty.core.performer import PerformerRequestHandler
-class CatyPerformer(CatyApp):
+class CatyUUApp(CatyApp):
     def get_request_handler_class(self):
         return PerformerRequestHandler
 

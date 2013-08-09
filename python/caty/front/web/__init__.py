@@ -28,7 +28,7 @@ def main(args):
     sl.info(ro.i18n.get('Caty server started'))
     while terminator.continue_process == Terminator.CONTINUE:
         try:
-            system, is_debug, port, hcon_port, performer_port = setup(args)
+            system, is_debug, port, hcon_port, uuserver_port = setup(args)
             system.hcon_port = hcon_port
         except HelpFound:
             return 0
@@ -40,17 +40,17 @@ def main(args):
             return 0
         try:
             http_console = None
-            performer_thread = None
+            uuserver_thread = None
             server = build_server(system, is_debug, port)
             if hcon_port:
                 http_console = HTTPConsoleThread(system, hcon_port)
-            if performer_port:
-                performer_thread = build_performer(system, is_debug, performer_port)
+            if uuserver_port:
+                uuserver_thread = build_uuserver(system, is_debug, uuserver_port)
             terminator.set_server(server)
             if http_console:
                 http_console.start()
-            if performer_thread:
-                performer_thread.start()
+            if uuserver_thread:
+                uuserver_thread.start()
             server.main()
         except select.error, e:
             if e.args[0] == 4:
@@ -63,8 +63,8 @@ def main(args):
             terminator.continue_process = Terminator.FAIL
     if http_console:
         http_console.httpd.shutdown()
-    if performer_thread:
-        performer_thread.shutdown()
+    if uuserver_thread:
+        uuserver_thread.shutdown()
     if terminator.continue_process == Terminator.END:
         sl.info(ro.i18n.get('Caty server ended'))
     else:
@@ -103,7 +103,7 @@ def make_server_opt_parser():
     parser.add_option('--hcon-port', dest='hcon', type='string', action='callback', callback=check_hcon, help=u'hconの動作するポート(uwsgi動作時には無効, hcon-nameと排他)')
     parser.add_option('--hcon-name', dest='hcon', type='string', action='callback', callback=check_hcon, help=u'hconアプリケーション名(uwsgi動作時のみ有効, hcon-portと排他)')
     parser.add_option('--public-commands', choices=['action', 'all'])
-    parser.add_option('--performer-port', type='int', help='パフォーマースレッドのポート番号')
+    parser.add_option('--uuserver-port', type='int', help='Ugly URIスレッドのポート番号')
     return parser
 
 def setup(args):
@@ -119,7 +119,7 @@ def setup(args):
         print
         print options.goodbye
         return None, None, None, None
-    return system, options.debug, options.port, options.hcon, options.performer_port
+    return system, options.debug, options.port, options.hcon, options.uuserver_port
 
 class ConsoleThread(threading.Thread):
     def __init__(self, shell, server):
@@ -186,18 +186,18 @@ class CatyServerFacade(object):
         self.httpd.server_close()
         os.unlink(ro.PID_FILE)
 
-def build_performer(system, is_debug, port=8000):
+def build_uuserver(system, is_debug, port=8000):
     server_module_name = system.server_module_name
     exec 'import %s as server_module' % server_module_name
-    server = PerformerThread(CatyPerformerFacade(server_module, system, is_debug, port))
+    server = PerformerThread(CatyUUServerFacade(server_module, system, is_debug, port))
     return server
 
-class CatyPerformerFacade(object):
+class CatyUUServerFacade(object):
     def __init__(self, server_module, system, is_debug, port):
         self.is_debug = is_debug
         server_class = server_module.get_server(system, is_debug)
         handler_class = server_module.get_handler(system, is_debug)
-        dispatcher = system._global_config.session.wrapper(server_module.get_performer(system, is_debug), system._global_config.session.conf)
+        dispatcher = system._global_config.session.wrapper(server_module.get_uuserver(system, is_debug), system._global_config.session.conf)
         self.httpd = make_server('', 
                                  port, 
                                  dispatcher, 
