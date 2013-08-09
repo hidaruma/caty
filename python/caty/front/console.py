@@ -240,7 +240,7 @@ server, hconなどの起動・停止を行う。
         elif srv == 'hcon':
             self.do_hcon(args)
         elif srv == 'uuserver':
-            self._do_uuserver(args)
+            self.do_uuserver(args)
         else:
             self._echo(u'Unknown service: %s' % srv)
 
