@@ -781,7 +781,7 @@ class CommandExecutor(BaseInterpreter):
                 if qo.type == u'address':
                     return data
                 if (node.deref_depth > depth):
-                    if json.tag(data) != u'__reference':
+                    if json.tag(data) != u'__r':
                         #参照型ではなく_selfに参照がある場合、あらかじめderefが済んでいるものとする。
                         data = data
                     else:
@@ -851,11 +851,11 @@ class CommandExecutor(BaseInterpreter):
                         context.pop(-1)
                 return r
             elif qo.type == u'address':
-                if json.tag(orig) == '__reference':
+                if json.tag(orig) == '__r':
                     p = json.untagged(orig)
                 else:
                     p = json.untagged(orig['_self'])
-                return json.tagged(u'__reference', {u'type': p['type'], u'arg': p['arg'], u'ext': u'.'.join(['$'] +context)})
+                return json.tagged(u'__r', {u't': p['type'], u'a': [p['arg'], u'.'.join(['$'] +context)]})
             assert False, qo.type
 
         return filter(self.input, node.queries, self.input)
