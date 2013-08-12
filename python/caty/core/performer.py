@@ -14,6 +14,7 @@ from caty.core.script.builder import CommandBuilder, CommandCombinator, DiscardC
 from caty.core.script.interpreter.executor import CommandExecutor
 import traceback
 from caty.core.script.proxy import Proxy, EnvelopeProxy
+from caty.core.script.node import Try, Catch
 
 class PerformerRequestHandler(RequestHandler):
     def _build(self, path, opts, verb, method, transaction):
@@ -38,16 +39,12 @@ class PerformerRequestHandler(RequestHandler):
                     raise IOError(path)
                 cmd = containerobj.get_command(cmdname)
                 emitter = containerobj.get_command(u'emit-normal')
+                exhandler = containerobj.get_command(u'map-exception')
+                sighandler = containerobj.get_command(u'map-signal')
                 self._env.put(u'ACTION', cmd.canonical_name)
                 if 'deprecated' in cmd.annotations:
                     self._app._system.deprecate_logger.debug(u'path: %s verb: %s' % (path, verb))
-                executable = self._make_executable(cmd, emitter, containerobj, opts, args, transaction)
-                #source = [cmd.canonical_name]
-                #for k, v in opts.items():
-                #    source.append('--%s=%s' % (k, v if ' ' not in v else '"%s"' % v))
-                #for a in args:
-                #    source.append(a if ' ' not in a else '"%s"' % a)
-                #executable = self._interpreter.build(u' '.join(source), None, [path], transaction=transaction)
+                executable = self._make_executable(cmd, emitter, exhandler, sighandler, containerobj, opts, args, transaction)
         except Exception, e:
             return ExceptionAdaptor(e, self._interpreter, traceback.format_exc(), self, error_logger)
         return PipelineAdaptor(executable, self._interpreter, self, error_logger, None, transaction)
@@ -68,7 +65,7 @@ class PerformerRequestHandler(RequestHandler):
         else:
             return mod
 
-    def _make_executable(self, profile, emitter, module, opts, args, transaction):
+    def _make_executable(self, profile, emitter, exhandler, sighandler, module, opts, args, transaction):
         builder = CommandBuilder(self._interpreter._facilities, module)
         opts_ref, args_ref = self._sift_opts_and_args(profile, opts, args)
         em_opts_ref, em_args_ref = self._sift_opts_and_args(emitter, opts, args)
@@ -78,7 +75,14 @@ class PerformerRequestHandler(RequestHandler):
             cmd = obj(opts_ref, args_ref, module=module)
         else:
             cmd = cls(opts_ref, args_ref, module=module)
-        cmd = CommandCombinator(cmd, builder.build(emitter, [], em_opts_ref, em_args_ref, (0, 0), module))
+        cmd = CommandCombinator(
+            Try(cmd, [Option(u'wall', u'superhard')]), 
+            Catch({
+                u'normal': builder.build(emitter, [], em_opts_ref, em_args_ref, (0, 0), module),
+                u'except': builder.build(exhandler, [], [], [], (0, 0), module),
+                u'signal': builder.build(sighandler, [], [], [], (0, 0), module),
+            })
+        )
         cmd.set_facility(self._interpreter._facilities)
         executable =  CommandExecutor(cmd, self._app, self._interpreter._facilities)
         if transaction == COMMIT:

@@ -210,9 +210,11 @@ command perform :: Environ -> any
   refers python:wsgilib.Perform
 ;
 
+@[register-public]
 command map-exception :: Exception -> WebOutput
   refers python:wsgilib.MapException
 ;
+@[register-public]
 command map-signal :: Exception -> WebOutput
   refers python:wsgilib.MapSignal
 ;
