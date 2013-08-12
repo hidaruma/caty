@@ -212,7 +212,8 @@ class NodeCounter(TreeCursor):
         for k, v in node.items():
             v.accept(self)
             num += 1
-        node.wildcard.body.accept(self)
+        if node.wildcard.type not in ('never', 'undefined'):
+            node.wildcard.accept(self)
 
 
     def _visit_array(self, node):
@@ -435,7 +436,7 @@ class DataGenerator(TreeCursor):
             if not deleted:
                 break
 
-        if node.wildcard.type != 'never' and self.__occur != u'min':
+        if node.wildcard.type not in ('never', 'undefined') and self.__occur != u'min':
             num = 0
             mi = node.minProperties if node.minProperties != -1 else len(r)
             ma = node.maxProperties if node.maxProperties != -1 else mi + 2
