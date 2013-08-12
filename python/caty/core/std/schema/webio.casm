@@ -612,5 +612,9 @@ command not-allowed [string path, string method] :: void -> never
     refers python:webio.NotAllowed;
 
 
+@[register-public]
+command emit-normal :: any -> WebOutput {
+    xjson:to-json | json:response
+};
 
 // End of Module

@@ -348,12 +348,10 @@ class ErrorDispacher(object):
                 'body': e.get_message(self.i18n)
             }
         else:
-            print e.tag
             if e.tag.startswith('HTTP_'):
                 status = int(e.tag.replace('HTTP_', ''))
             else:
                 status = 500
-            print status
             result = {
                 'status': status,
                 'body': e.get_message(self.i18n),
