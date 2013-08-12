@@ -69,18 +69,16 @@ class PerformerRequestHandler(RequestHandler):
             return mod
 
     def _make_executable(self, profile, emitter, module, opts, args, transaction):
-        opts_ref = []
-        for k, v in opts.items():
-            opts_ref.append(Option(k, v))
         builder = CommandBuilder(self._interpreter._facilities, module)
-        args_ref = [Argument(a) for a in args]
+        opts_ref, args_ref = self._sift_opts_and_args(profile, opts, args)
+        em_opts_ref, em_args_ref = self._sift_opts_and_args(emitter, opts, args)
         cls = profile.get_command_class()
         if isinstance(cls, Proxy):
             obj = scriptwrapper(profile, lambda :cls.instantiate(builder))
             cmd = obj(opts_ref, args_ref, module=module)
         else:
             cmd = cls(opts_ref, args_ref, module=module)
-        cmd = CommandCombinator(cmd, builder.build(emitter, [], [], [], (0, 0), module))
+        cmd = CommandCombinator(cmd, builder.build(emitter, [], em_opts_ref, em_args_ref, (0, 0), module))
         cmd.set_facility(self._interpreter._facilities)
         executable =  CommandExecutor(cmd, self._app, self._interpreter._facilities)
         if transaction == COMMIT:
@@ -93,3 +91,24 @@ class PerformerRequestHandler(RequestHandler):
             return executable
         else:
             raise Exception(self.module._app.i18n.get(u'Invalid transaction mode: $mode', mode=str(transaction)))
+
+    def _sift_opts_and_args(self, pc, opts, args):
+        o_schm = pc.profiles[0].opts_schema
+        a_schm = pc.profiles[0].args_schema
+        cmd_opts = {}
+        cmd_args = []
+        if o_schm.type == 'object':
+            for k, v in o_schm.items():
+                if k in opts:
+                    cmd_opts.append(opts[k])
+        if a_schm.type == 'array':
+            if a_schm.repeat:
+                cmd_args = args
+            else:
+                cmd_args = args[:len(a_schm)]
+        opts_ref = []
+        for k, v in cmd_opts.items():
+            opts_ref.append(Option(k, v))
+        args_ref = [Argument(a) for a in cmd_args]
+        return opts_ref, args_ref
+
