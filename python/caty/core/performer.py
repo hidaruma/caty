@@ -104,7 +104,7 @@ class PerformerRequestHandler(RequestHandler):
         if o_schm.type == 'object':
             for k, v in o_schm.items():
                 if k in opts:
-                    cmd_opts.append(opts[k])
+                    cmd_opts[k] = opts[k]
         if a_schm.type == 'array':
             if a_schm.repeat:
                 cmd_args = args
