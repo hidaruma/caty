@@ -6,6 +6,7 @@ from caty.core.schema import schemata
 from caty.core.schema.base import Annotations, Annotation
 from caty.core.casm.language.casmparser import parse, parse_literate
 from caty.core.casm.language import xcasmparser as xcasm
+from caty.core.casm.language.ast import ClassReference
 from caty.core.casm.cursor import (SchemaBuilder, 
                                    ReferenceResolver, 
                                    CycleDetecter, 
@@ -183,6 +184,8 @@ class Module(Facility):
                     target.defined = False
                     target.redifinable = False
                 elif type == u'Class':
+                    #if isinstance(target.expression, ClassReference):
+                    #    target = self.get_class(target.expression.name)._clsobj
                     for m in target.member:
                         m.declare(t)
                     return

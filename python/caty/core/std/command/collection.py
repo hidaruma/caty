@@ -87,7 +87,10 @@ class Mget(Builtin):
     def execute(self, input):
         r = []
         for i in input:
-            if len(i) == 2:
+            if not isinstance(i, list):
+                k = i
+                p = None
+            elif len(i) == 2:
                 k, p = i
             else:
                 k = i[0]
