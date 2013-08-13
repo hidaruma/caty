@@ -30,7 +30,7 @@ class OptionVarLoader(Param):
         self.default = default
 
     def reify(self):
-        return tagged(u'_optVarLoader', {'key': self.key, 'value': self.value, 'optional': self.optional})
+        return tagged(u'_optVarLoader', {'key': self.key, 'value': self.value, 'optional': self.optional, 'default': self.default})
 
 class ArgVarLoader(Param):
     type = 'var_arg'

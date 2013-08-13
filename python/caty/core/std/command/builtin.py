@@ -144,6 +144,8 @@ class Response(Builtin):
     
     def setup(self, opts):
        self.ext = opts.get('ext', caty.UNDEFINED)
+       if self.ext and self.ext[0] != '.':
+         self.ext = u'.' + self.ext
        self.content_type = opts.get('content-type', caty.UNDEFINED)
        self.encoding = opts.get('encoding', caty.UNDEFINED)
        self.status = opts.get('status', caty.UNDEFINED) 

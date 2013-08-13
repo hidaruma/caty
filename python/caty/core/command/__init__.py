@@ -626,10 +626,10 @@ class VarLoader(object):
             if opt.type == 'option':
                 o[opt.key] = opt.value
             elif opt.type == 'var':
-                if opt.value.name in opts:
+                if opt.value.name in opts and opts[opt.value.name] is not UNDEFINED:
                     o[opt.key] = opts[opt.value.name]
                 elif opt.value.name in self.env:
-                    a.append(self.env[opt.value.name])
+                    o[opt.key] = self.env[opt.value.name]
                 else:
                     if not opt.optional:
                         raise Exception(u'Variable %%%s is not defined' % opt.value.name)
