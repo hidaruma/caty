@@ -253,7 +253,7 @@ class ScriptProfileContainer(ProfileContainer):
         assert proxy is not None, module.canonical_name + ':' + name
         self.profiles = []
         self.name = name
-        self.command_class = proxy
+        self.command_class = proxy.clone()
         self._annotations = annotations or {}
         self.doc = doc if doc else u''
         self.defined_application = app

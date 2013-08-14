@@ -142,7 +142,7 @@ class CommandExecutor(BaseInterpreter):
                     node.in_schema.validate(input)
                 except JsonSchemaError, e:
                     info = e.error_report(self.app.i18n)
-                    print u'[DEBUG]', node.name
+                    print u'[DEBUG]', node.canonical_name
                     print prettyprint(input)
                     throw_caty_exception(u'InputTypeError', prettyprint(info), errorInfo=info)
                 if u'no-auto-fill' in node.annotations:
@@ -173,7 +173,7 @@ class CommandExecutor(BaseInterpreter):
             raise e
         except CatyException as e:
             if self.facility_set['env'].get('DEBUG'):
-                msg = u'[DEBUG] {0}: Col {1}, Line {2}'.format(node.name, node.col, node.line)
+                msg = u'[DEBUG] {0}: Col {1}, Line {2}'.format(node.canonical_name, node.col, node.line)
                 util.cout.writeln(msg)
             import sys
             info = sys.exc_info()[2]

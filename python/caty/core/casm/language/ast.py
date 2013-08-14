@@ -580,7 +580,13 @@ class CommandNode(Function):
         self.application = None
 
     def clone(self):
-        r = self.__class__(self.name, [p.clone() for p in self.patterns], self.reference_to_implementation, self.doc, self.annotation, self.type_params_ast[:], self.command_type)
+        r = self.__class__(self.name, 
+                           [p.clone() for p in self.patterns], 
+                           self.reference_to_implementation, 
+                           self.doc, 
+                           self.annotation, 
+                           self.type_params_ast[:], 
+                           self.command_type)
         return r
 
     @property
@@ -833,6 +839,9 @@ class CommandURI(dict):
             self[tp] = val
         self.defined = defined
 
+    def clone(self):
+        return self
+
 class ClassURI(dict):
     def __init__(self, types, defined=True):
         for tp, val in types:
@@ -840,6 +849,9 @@ class ClassURI(dict):
             self[tp] = val
             assert(isinstance(val, list)), val
         self.defined = defined
+
+    def clone(self):
+        return self
 
 class KindReference(object):
     is_alias = False

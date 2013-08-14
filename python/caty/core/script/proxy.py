@@ -30,6 +30,9 @@ class Proxy(object):
     def _reify(self):
         raise NotImplementedError(u'{0}.reify'.format(self.__class__.__name__))
 
+    def clone(self):
+        raise NotImplementedError(u'{0}.clone'.format(self.__class__.__name__))
+
 class CommandProxy(Proxy):
     u"""コマンド呼び出しに遭遇したときに構築されるプロキシクラス。
     """
@@ -42,6 +45,10 @@ class CommandProxy(Proxy):
         self.type_args = type_args
         self.module = None
         self.pos = pos
+
+    def clone(self):
+        new = CommandProxy(self.name, self.type_args, self.opts, self.args, self.pos)
+        return new
 
     def set_module(self, module):
         self.module = module
@@ -67,6 +74,11 @@ class ScalarProxy(Proxy):
     def __init__(self):
         self.value = None
 
+    def clone(self):
+        new = ScalarProxy()
+        new.value = self.value
+        return new
+
     def __call__(self):
         import traceback
         for l in traceback.format_stack(): print l
@@ -90,6 +102,11 @@ class ListProxy(Proxy):
     def __init__(self):
         self.values= []
     
+    def clone(self):
+        new = ListProxy()
+        new.values = [v.clone() for v in self.values]
+        return new
+
     def set_values(self, values):
         self.values = values
 
@@ -110,6 +127,11 @@ class ListProxy(Proxy):
         return [v.reify() for v in self.values]
 
 class ParallelListProxy(ListProxy):
+    def clone(self):
+        new = ParallelListProxy()
+        new.values = [v.clone() for v in self.values]
+        new.wildcard = self.wildcard
+        return new
 
     def set_wildcard(self, wildcard):
         self.wildcard = wildcard
@@ -124,6 +146,12 @@ class ObjectProxy(Proxy):
     reification_type = u'_object'
     def __init__(self):
         self.nodes = []
+
+    def clone(self):
+        new = ObjectProxy()
+        for n in self.nodes:
+            new.add_node(n.clone())
+        return new
 
     def add_node(self, node):
         self.nodes.append(node)
@@ -153,6 +181,12 @@ class ParallelObjectProxy(Proxy):
     def __init__(self):
         self.nodes = []
 
+    def clone(self):
+        new = ParallelObjectProxy()
+        for n in self.nodes:
+            new.add_node(n.clone())
+        return new
+
     def add_node(self, node):
         self.nodes.append(node)
 
@@ -181,6 +215,9 @@ class ConstNodeProxy(Proxy):
         self.name = n
         self.value = v
 
+    def clone(self):
+        return ConstNodeProxy(self.name, self.value)
+
     def instantiate(self, builder):
         return ConstNode(self.name, self.value)
 
@@ -194,6 +231,9 @@ class CommandNodeProxy(Proxy):
     def __init__(self, n, c):
         self.name = n
         self.cmdproxy = c
+
+    def clone(self):
+        return CommandNodeProxy(self.name, self.cmdproxy.clone())
 
     def instantiate(self, builder):
         return CommandNode(self.name, self.cmdproxy.instantiate(builder))
@@ -212,6 +252,12 @@ class DispatchProxy(Proxy):
     def __init__(self, opts):
         self.cases = []
         self.opts = opts
+
+    def clone(self):
+        new = DispatchProxy(self.opts)
+        for c in self.cases:
+            new.add_case(c.clone())
+        return new
 
     def add_case(self, case):
         self.cases.append(case)
@@ -242,6 +288,12 @@ class TypeCaseProxy(Proxy):
         self.cases = []
         self.path = path
         self.via = via
+
+    def clone(self):
+        new = TypeCaseProxy(self.path, self.via.clone() if self.via else None)
+        for c in self.cases:
+            new.add_case(c.clone())
+        return new
 
     def add_case(self, case):
         self.cases.append(case)
@@ -299,6 +351,12 @@ class TypeCondProxy(Proxy):
         self.cases = []
         self.path = path
 
+    def clone(self):
+        new =TypeCondProxy(self.path)
+        for c in self.cases:
+            new.add_case(c.clone())
+        return new
+
     def add_case(self, case):
         self.cases.append(case)
 
@@ -331,6 +389,10 @@ class BranchProxy(Proxy):
         self.cmdproxy = cmdproxy
         self.type = None
 
+    def clone(self):
+        new = BranchProxy(self.typedef, self.cmdproxy.clone())
+        return new
+
     def set_module(self, module):
         self.cmdproxy.set_module(module)
         if self.typedef == u'*': return
@@ -361,6 +423,10 @@ class ChoiceBranchItemProxy(Proxy):
         self.cmdproxy = cmdproxy
         self.type = None
 
+    def clone(self):
+        new = ChoiceBranchProxy(self.typedef, self.cmdproxy.clone())
+        return new
+
     def set_module(self, module):
         self.cmdproxy.set_module(module)
 
@@ -381,6 +447,12 @@ class TagProxy(Proxy):
     def __init__(self, t, c):
         self.tag = t
         self.cmdproxy = c
+
+    def clone(self):
+        if isinstance(self.tag, unicode):
+            return TagProxy(self.tag, self.cmdproxy.clone())
+        else:
+            return TagProxy(self.tag.clone(), self.cmdproxy.clone())
 
     def instantiate(self, builder):
         if isinstance(self.tag, unicode):
@@ -409,6 +481,12 @@ class UnaryTagProxy(Proxy):
     def __init__(self, t):
         self.tag = t
 
+    def clone(self):
+        if isinstance(self.tag, unicode):
+            return UnaryTagProxy(self.tag)
+        else:
+            return UnaryTagProxy(self.tag.clone())
+
     def instantiate(self, builder):
         if isinstance(self.tag, unicode):
             return UnaryTagBuilder(self.tag)
@@ -433,6 +511,9 @@ class ParTagProxy(Proxy):
     def __init__(self, t, c):
         self.tagcmd = t
         self.cmdproxy = c
+    
+    def clone(self):
+        return ParTagProxy(self.tagcmd.clone(), self.cmdproxy.clone())
 
     def instantiate(self, builder):
         return ParTagBuilder(self.tagcmd.instantiate(builder), self.cmdproxy.instantiate(builder))
@@ -453,11 +534,17 @@ class ParTagProxy(Proxy):
 
 
 class CaseProxy(TagProxy):
+    def clone(self):
+        return CaseProxy(self.tag, self.cmdproxy.clone())
+
     def instantiate(self, builder):
         return Case(self.tag, self.cmdproxy.instantiate(builder))
 
 class UntagCaseProxy(TagProxy):
     reification_type = u'_untag'
+    def clone(self):
+        return UntagCaseProxy(self.tag, self.cmdproxy.clone())
+
     def instantiate(self, builder):
         return UntagCase(self.tag, self.cmdproxy.instantiate(builder))
 
@@ -465,6 +552,9 @@ class FunctorProxy(Proxy):
     def __init__(self, c, opts):
         self.cmdproxy = c
         self.opts = opts
+
+    def clone(self):
+        return self.__class__(self.cmdproxy.clone(), self.opts)
 
     def instantiate(self, builder):
         r = self._get_class()(self.cmdproxy.instantiate(builder), self.opts)
@@ -509,6 +599,9 @@ class BeginProxy(FunctorProxy):
         return Begin
 
 class RepeatProxy(Proxy):
+    def clone(self):
+        return RepeatProxy()
+
     def instantiate(self, builder):
         return Repeat()
 
@@ -523,6 +616,9 @@ class CombinatorProxy(Proxy):
         self.a = a
         self.b = b
         self.reification_type = u'_pipe' if not isinstance(self.b, DiscardProxy) else u'_discard'
+
+    def clone(self):
+        return CombinatorProxy(self.a.clone(), self.b.clone())
 
     def instantiate(self, builder):
         if isinstance(self.b, DiscardProxy):
@@ -546,6 +642,9 @@ class VarStoreProxy(CommandProxy):
     def __init__(self, name):
         self.name = name
 
+    def clone(self):
+        return VarStoreProxy(self.name)
+
     def instantiate(self, builder):
         return VarStore(self.name)
 
@@ -566,6 +665,9 @@ class VarRefProxy(CommandProxy):
         self.name = name
         self.optional = optional
         self.default = default
+
+    def clone(self):
+        return VarRefProxy(self.name, self.optional, self.default)
 
     def instantiate(self, builder):
         return VarRef(self.name, self.optional, self.default)
@@ -589,6 +691,9 @@ class ArgRefProxy(CommandProxy):
         self.optional = optional
         self.default = default
 
+    def clone(self):
+        return ArgRefProxy(self.name, self.optional, self.default)
+
     def instantiate(self, builder):
         return ArgRef(self.name, self.optional, self.default)
 
@@ -608,6 +713,9 @@ class DiscardProxy(Proxy):
     def __init__(self, target):
         self.target = target
 
+    def clone(self):
+        return DiscardProxy(self.target.clone())
+
     def instantiate(self, builder):
         return self.target.instantiate(builder)
     
@@ -625,6 +733,9 @@ class FragmentProxy(Proxy):
     def __init__(self, c, fragment_name):
         self.cmdproxy = c
         self.fragment_name = fragment_name
+
+    def clone(self):
+        return FragmentProxy(self.cmdproxy.clone(), self.fragment_name)
 
     def instantiate(self, builder):
         r = PipelineFragment(self.cmdproxy.instantiate(builder), self.fragment_name)
@@ -648,6 +759,9 @@ class EnvelopeProxy(Proxy):
         self.cmdproxy = c
         self.action_name = name
 
+    def clone(self):
+        return EnvelopeProxy(self.cmdproxy.clone(), self.action_name)
+
     def instantiate(self, builder):
         r = ActionEnvelope(self.cmdproxy.instantiate(builder), self.action_name)
         return r
@@ -667,6 +781,9 @@ class JsonPathProxy(Proxy):
         self.stm = stm
         self.pos = pos
 
+    def clone(self):
+        return JsonPathProxy(self.stm, self.pos)
+
     def set_module(self, module):
         self.module = module
 
@@ -685,6 +802,9 @@ class TryProxy(Proxy):
         self.pipeline = pipeline
         self.opts = opts
 
+    def clone(self):
+        return TryProxy(self.pipeline.clone(), self.opts)
+
     def instantiate(self, builder):
         return Try(self.pipeline.instantiate(builder), self.opts)
 
@@ -698,6 +818,8 @@ class CatchProxy(Proxy):
     def __init__(self, handler):
         self.handler = handler
 
+    def clone(self):
+        return CatchProxy(dict([(k, v.clone()) for k, v in self.handler.items()]) if self.handler is not None else None)
 
     def instantiate(self, builder):
         return Catch(dict([(k, v.instantiate(builder)) for k, v in self.handler.items()]) if self.handler is not None else None)
@@ -717,6 +839,9 @@ class UncloseProxy(Proxy):
         self.pipeline = pipeline
         self.opts = opts
 
+    def clone(self):
+        return UncloseProxy(self.pipeline.clone(), self.opts)
+
     def instantiate(self, builder):
         return Unclose(self.pipeline.instantiate(builder), self.opts)
 
@@ -730,6 +855,12 @@ class ChoiceBranchProxy(Proxy):
     reification_type = u'_branch'
     def __init__(self):
         self.cases = []
+
+    def clone(self):
+        new = ChoiceBranchProxy()
+        for c in self.cases:
+            new.add_case(c.clone())
+        return new
 
     def add_case(self, node):
         self.cases.append(node)
@@ -759,6 +890,9 @@ class EmptyProxy(Proxy):
     def __init__(self):
         pass
 
+    def clone(self):
+        return self
+
     def instantiate(self, builder):
         return Empty()
 
@@ -770,6 +904,9 @@ class BreakProxy(Proxy):
     def __init__(self):
         pass
 
+    def clone(self):
+        return self
+
     def instantiate(self, builder):
         return Break()
 
@@ -779,6 +916,9 @@ class BreakProxy(Proxy):
 class MethodChainProxy(Proxy):
     def __init__(self, pipeline):
         self.pipeline = pipeline
+
+    def clone(self):
+        return MethodChainProxy(self.pipeline.clone())
 
     def instantiate(self, builder):
         return MethodChain(self.pipeline, builder)
@@ -794,6 +934,9 @@ class FetchProxy(Proxy):
         self.queries = queries
         self.opts = opts
 
+    def clone(self):
+        return self
+
     def instantiate(self, builder):
         return Fetch(self.queries, self.opts)
 
@@ -804,6 +947,9 @@ class MutatingProxy(Proxy):
     def __init__(self, pipeline, envname):
         self.pipeline = pipeline
         self.envname = envname
+
+    def clone(self):
+        return MutatingProxy(self.pipeline.clone(), self.envname)
 
     def instantiate(self, builder):
         return Mutating(self.pipeline.instantiate(builder), self.envname)
@@ -817,6 +963,9 @@ class MutatingProxy(Proxy):
 class CommitMProxy(Proxy):
     def __init__(self, args):
         self.args = args
+
+    def clone(self):
+        return self
 
     def instantiate(self, builder):
         return CommitM(self.args)
@@ -835,6 +984,9 @@ class ClassProxy(Proxy):
         self.name = name
         self.type_args = type_args
         self.command = command
+
+    def clone(self):
+        return ClassProxy(self.name, self.type_args, self.command.clone())
 
     def set_module(self, module):
         self.module = module

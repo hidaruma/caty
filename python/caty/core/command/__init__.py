@@ -226,6 +226,10 @@ class Command(object):
         return self.profile_container.name
 
     @property
+    def canonical_name(self):
+        return self.profile_container.canonical_name
+
+    @property
     def current_app(self):
         return self.__current_application
 

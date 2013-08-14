@@ -284,6 +284,7 @@ class ClassExprInterpreter(object):
                     print m
                 elif isinstance(m, CommandNode):
                     m = m.clone()
+                    m.module = self.module
                     for ptn in m.patterns:
                         self.__build_profile(ptn, cls, tp, m.type_params)
                         if u'__collection' in self.module.annotations and m.name in COLLECTION_COMMANDS:
