@@ -184,10 +184,10 @@ class Module(Facility):
                     target.defined = False
                     target.redifinable = False
                 elif type == u'Class':
-                    #if isinstance(target.expression, ClassReference):
-                    #    target = self.get_class(target.expression.name)._clsobj
+                    if isinstance(target.expression, ClassReference):
+                        target = self.get_class(target.expression.name)._clsobj
                     for m in target.member:
-                        m.declare(t)
+                        m.clone().declare(t)
                     return
         if see_register_public and ('register-public' in target.annotations or (not self.is_class and 'register-public' in self.annotations)):
             if not self.is_root:
