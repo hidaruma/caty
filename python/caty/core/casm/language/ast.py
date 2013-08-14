@@ -575,7 +575,7 @@ class CommandNode(Function):
             self.defined = False
         else:
             self.defined = True
-        self.redifinable = False
+        self.redifinable = True
         self.module = None
         self.application = None
 
@@ -1021,7 +1021,7 @@ class CollectionDeclNode(object):
                                   ScalarNode(u'univ'), 
                                   ScalarNode(u'univ'), 
                                   None, None, 
-                                  Annotations([Annotation(u'__collection')]), [])
+                                  Annotations([Annotation(u'__collection')]), [], u'?=')
         self.entity = lambda m: EntityNode(name, dbname, m.name+':' + name, None, Annotations([]))
 
     def declare(self, module):

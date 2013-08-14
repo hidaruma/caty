@@ -640,38 +640,6 @@ signature LatSemiring<A> = {
    [pass, top] | fold {[%_acc, pass] | meet2}
  };
 
- 
- /** 左単位律 */
- command _assert_0 :: [A] -> Logical {
-   =[pass> x];
-
-   [
-     [top, %x] | meet2,
-     %x,
-   ] | eq
- };
-
- /** 右単位律 */
- command _assert_1 :: [A] -> Logical {
-   =[pass> x];
-
-   [
-     [%x, top] | meet2,
-     %x,
-   ] | eq
- };
-
-
- /** 結合律 */
- command _assert_2 :: [A, A, A] -> Logical {
-   =[pass> x, pass> y, pass> z];
-
-   [
-     [[%x, %y] | meet2, %z] | meet2,
-     [%x, [%y, %z] | meet2] | meet2,
-   ] | eq
- };
-
  /** モノイド単位 */
  command bottom :: void -> A;
 
