@@ -354,7 +354,7 @@ class ErrorDispacher(object):
                 status = 500
             result = {
                 'status': status,
-                'body': e.get_message(self.i18n),
+                'body': u'Internal Server Error: ' +  e.tag + ': ' + e.get_message(self.i18n),
                 'header': {
                     'content-type': u'text/plain; charset=utf-8',
                 }

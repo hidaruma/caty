@@ -313,4 +313,4 @@ class MapException(Builtin):
 class MapSignal(Builtin):
     def execute(self, e):
         from caty.core.handler import ErrorDispacher
-        return ErrorDispacher(self.i18n).dispatch_signal(e)       
+        return ErrorDispacher(self.i18n).dispatch_signal(e)
