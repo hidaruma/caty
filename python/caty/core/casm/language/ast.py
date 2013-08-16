@@ -149,6 +149,8 @@ class ClassNode(object):
     def visit_class_body(self, obj):
         for m in obj.member:
             self.member.append(m)
+            if u'__signature' in self.annotations:
+                m.defined = False
         self.uri = obj.uri
         obj.visited = True
         return obj
@@ -575,7 +577,7 @@ class CommandNode(Function):
             self.defined = False
         else:
             self.defined = True
-        self.redifinable = True
+        self.redifinable = False
         self.module = None
         self.application = None
 
@@ -587,6 +589,8 @@ class CommandNode(Function):
                            self.annotation, 
                            self.type_params_ast[:], 
                            self.command_type)
+        r.defined = self.defined
+        r.redifinable = self.redifinable
         return r
 
     @property
