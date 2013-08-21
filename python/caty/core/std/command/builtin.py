@@ -393,51 +393,38 @@ class TypeCalculator(object):
             self.converter = scm
         if close:
             self.converter = tn.visit(UnaryOpNode(u'close', self.converter))
+        if self.converter.type == u'never':
+            raise Exception(self.i18n.get(u'Type representation is never: $typedef', typedef=s))
 
     def parse(self, s):
-        return as_parser(self.parse_type).run(s, auto_remove_ws=True)
-
-    def parse_type(self, seq):
-        return chainl(self.term, self.op)(seq)
-
-    def term(self, seq):
-        return seq.parse([self.type, self.tag, self.group])
-    
-    def tag(self, seq):
-        _ = seq.parse('@')
-        n = seq.parse(self.tag_name)
-        t = seq.parse(self.type_name)
-        return TagSchema(n, self.schema.get_type(n))
-
-    def group(self, seq):
-        _ = seq.parse('(')
-        d = seq.parse(self.parse_type)
-        _ = seq.parse(')')
-        return d
-
-    def op(self, seq):
-        o = seq.parse(['&', '|', '++'])
-        if o == '&':
-            return operator.and_
-        elif o == '++':
-            return operator.pow
-        else:
-            return operator.or_
-
-    def name(self, seq):
-        return util.name(seq)
-    
-    def type(self, seq):
+        from caty.core.casm.language.schemaparser import typedef
+        from caty.core.casm.language.ast import ASTRoot
+        from caty.core.schema.base import Annotations
+        from topdown import as_parser
         if self.mod:
-            from caty.core.language import split_colon_dot_path
-            app, mod, _ = split_colon_dot_path(self.mod, u'mod')
-            mod = self.schema.app.get_app(app)._schema_module.get_module(mod)
+            app_name, mod_name, _ = split_colon_dot_path(self.mod, u'mod')
+            if _:
+                throw_caty_exception('BadArg', u'$arg', arg=self.mod)
+            if app_name == 'this':
+                app = self.current_app
+            else:
+                app = self.current_app._system.get_app(app_name)
+            mod = app._schema_module.get_module(mod_name)
         else:
-            mod = self.schema
-        return mod.get_type(self.type_name(seq))
-
-    def type_name(self, seq):
-        return schemaparser.typename(seq)
+            mod = self.current_module.schema_finder
+        ast = ASTRoot(u'', [], as_parser(typedef).run(s, auto_remove_ws=True), Annotations([]), u'')
+        sb = mod.make_schema_builder()
+        rr = mod.make_reference_resolver()
+        cd = mod.make_cycle_detecter()
+        ta = mod.make_typevar_applier()
+        tn = mod.make_type_normalizer()
+        sb._root_name = u'validate'
+        t = ast.accept(sb)
+        t = t.accept(rr)
+        t = t.accept(cd)
+        t = t.accept(ta)
+        t = t.accept(tn).body
+        return t
 
 class Validate(Builtin, TypeCalculator):
     
