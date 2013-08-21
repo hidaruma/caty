@@ -880,7 +880,8 @@ class Module(Facility):
         for m in self.class_ns.values():
             m.clear_namespace()
         for k in self.facility_ns.keys() + self.entity_ns.keys():
-            m.app._facility_classes.pop(k)
+            if k in self.app._facility_classes:
+                self.app._facility_classes.pop(k)
 
     def is_runaway_exception(self, e):
         try:

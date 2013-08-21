@@ -21,6 +21,8 @@ class TypeNormalizer(TreeCursor):
         nc.visit(normalized)
         vc = VariableChecker(self.module)
         vc.visit(normalized)
+        dc = DefaultChecker(self.module)
+        dc.visit(normalized)
         return normalized
 
     def _visit_kind(self, node):
@@ -604,4 +606,80 @@ class VariableChecker(_SubNormalizer):
         return node
 
 
+class DefaultChecker(TreeCursor):
+    def __init__(self, *args):
+        self._path = []
+
+    def visit(self, node):
+        node.accept(self)
+
+    def _visit_root(self, node):
+        try:
+            node.body.accept(self)
+        except InvalidDefaultValue as e:
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Invalid default value: %s: %s' % (u'$.' + ''.join(self._path), json.pp(e.value)))
+
+    def _visit_kind(self, node):
+        pass
+
+    def _visit_scalar(self, node):
+        self._validate_default(node)
+
+    def _visit_option(self, node):
+        self._validate_default(node)
+
+    def _visit_enum(self, node):
+        self._validate_default(node)
+
+    def _visit_object(self, node):
+        self._validate_default(node)
+        for k, v in node.items():
+            self._path.append(k)
+            v.accept(self)
+            self._path.pop(-1)
+        node.wildcard.accept(self)
+
+    def _visit_array(self, node):
+        self._validate_default(node)
+        for k, v in enumerate(node):
+            self._path.append(str(k))
+            v.accept(self)
+            self._path.pop(-1)
+
+    def _visit_bag(self, node):
+        self._validate_default(node)
+        for k, v in enumerate(node):
+            self._path.append(str(k))
+            v.accept(self)
+            self._path.pop(-1)
+
+    def _visit_union(self, node):
+        self._validate_default(node)
+        l = node.left.accept(self)
+        r = node.right.accept(self)
+    
+    def _visit_tag(self, node):
+        self._validate_default(node)
+        node.body.accept(self)
+
+    def _visit_pseudo_tag(self, node):
+        pass
+
+    def _validate_default(self, node):
+        if u'default' in node.annotations:
+            dval = node.annotations[u'default'].value
+            try:
+                node.validate(dval)
+            except:
+                raise InvalidDefaultValue(dval)
+
+    def _visit_type_function(self, node):
+        pass
+
+class InvalidDefaultValue(Exception):
+    def __init__(self, value):
+        Exception.__init__(self)
+        self.value = value
+
+    
 
