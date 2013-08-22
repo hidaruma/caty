@@ -3,6 +3,7 @@ from caty.core.schema.base import *
 from decimal import Decimal
 import caty.core.runtimeobject as ro
 import random
+from caty.core.exception import throw_caty_exception
 
 class NumberSchema(ScalarSchema):
     minimum = attribute('minimum')
@@ -13,11 +14,11 @@ class NumberSchema(ScalarSchema):
     def __init__(self, *args, **kwds):
         ScalarSchema.__init__(self, *args, **kwds)
         if self.minimum > self.maximum and self.maximum is not None:
-            raise JsonSchemaError(dict(msg='minmum($min) is bigger than maximum($max)', min=self.minimum, max=self.maximum))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'minmum($min) is bigger than maximum($max)', min=self.minimum, max=self.maximum)
         self.is_integer = False
         if self.excludes:
             if not isinstance(self.excludes, list) or not all(map(lambda a: isinstance(a, (int, Decimal)), self.excludes)):
-                raise JsonSchemaError(dict(msg='excludes attribute must be list of number'))
+                throw_caty_exception(u'excludes attribute must be list of number')
 
     def _validate(self, value):
         if not self.optional and value == None:
@@ -46,7 +47,7 @@ class NumberSchema(ScalarSchema):
         else:
             maximum = min(self.maximum, another.maximum)
         if minimum > maximum and maximum is not None:
-            return NeverSchema()
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'minmum($min) is bigger than maximum($max)', min=minimum, max=maximum)
         is_integer = self.is_integer or another.is_integer
         excludes = []
         if self.excludes:

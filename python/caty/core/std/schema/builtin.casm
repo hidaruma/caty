@@ -841,6 +841,10 @@ exception CollectionNotFound = object;
 /** 例外：データベースのレコードが見つからない。*/
 exception RecordNotFound = object;
 
+/** 例外：スキーマのコンパイルに失敗。*/
+@[runaway]
+exception SCHEMA_COMPILE_ERROR = object;
+
 /** 例外：そういう例外型は存在しない
  * 例外型（Excetpion）のデータではあるが、タグが登録されてない。
  */

@@ -481,7 +481,7 @@ class NeverChecker(_SubNormalizer):
                 else:
                     paths.append(p[0])
             if not self.safe:
-                raise Exception(ro.i18n.get(u'Type representation is never: $typedef', typedef='\n'.join(paths)))
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', ro.i18n.get(u'Type representation is never: $typedef', typedef='\n'.join(paths)))
         return r
 
     def _visit_option(self, node):
@@ -530,19 +530,27 @@ class NeverChecker(_SubNormalizer):
     def _visit_union(self, node):
         # タイミングの関係上、ノーマライズ後のユニオンの排他性チェックはここで
         from operator import truth
+        from caty.core.exception import throw_caty_exception, CatyException
         tc = TypeCalcurator(self.module)
         nodes = self.__flatten_union(node)
         unions = [(a, b) for a in nodes for b in nodes if a != b]
         for u in unions:
-            o = u[0] & u[1]
-            c = tc.visit(o)
-            if c.optional:
-                c = c.body
-            is_never = truth(c.accept(self))
-            if is_never:
-                pass
+            try:
+                o = u[0] & u[1]
+                c = tc.visit(o)
+                if c.optional:
+                    c = c.body
+            except CatyException as e:
+                if e.tag == u'SCHEMA_COMPILE_ERROR': #&演算でエラーになる=排他
+                    pass
+                else:   
+                    raise
             else:
-                throw_caty_exception('CompileError', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
+                is_never = truth(c.accept(self))
+                if is_never:
+                    pass
+                else:
+                    throw_caty_exception(ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
             a = u[0].accept(self)
             b = u[1].accept(self)
             if a and b:
