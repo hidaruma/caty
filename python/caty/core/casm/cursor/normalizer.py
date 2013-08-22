@@ -625,7 +625,7 @@ class DefaultChecker(TreeCursor):
         try:
             node.body.accept(self)
         except InvalidDefaultValue as e:
-            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Invalid default value: %s: %s' % (u'$.' + ''.join(self._path), json.pp(e.value)))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Invalid default value at %s: %s: %s' % (node.name, u'$.' + ''.join(self._path), json.pp(e.value)))
 
     def _visit_kind(self, node):
         pass
