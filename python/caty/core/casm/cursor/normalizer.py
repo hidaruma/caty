@@ -32,7 +32,7 @@ class _SubNormalizer(SchemaBuilder):
     def _visit_root(self, node):
         try:
             body = node.body.accept(self)
-        except:
+        except Exception as e:
             print u'[DEBUG]', node.name
             raise
         node._schema = body

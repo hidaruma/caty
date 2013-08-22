@@ -3,13 +3,15 @@ from caty.core.schema.base import *
 from decimal import Decimal
 import caty.core.runtimeobject as ro
 import random
-from caty.core.exception import throw_caty_exception
+from caty.core.exception import throw_caty_exception, CatyException
 
 class NumberSchema(ScalarSchema):
     minimum = attribute('minimum')
     maximum = attribute('maximum')
     excludes = attribute('excludes', [])
-    __options__ = SchemaBase.__options__ | set(['minimum', 'maximum', 'excludes'])
+    origin = attribute('origin', 0)
+    step = attribute('step', None)
+    __options__ = SchemaBase.__options__ | set(['minimum', 'maximum', 'excludes', 'step', 'origin'])
 
     def __init__(self, *args, **kwds):
         ScalarSchema.__init__(self, *args, **kwds)
@@ -18,7 +20,13 @@ class NumberSchema(ScalarSchema):
         self.is_integer = False
         if self.excludes:
             if not isinstance(self.excludes, list) or not all(map(lambda a: isinstance(a, (int, Decimal)), self.excludes)):
-                throw_caty_exception(u'excludes attribute must be list of number')
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'excludes attribute must be list of number')
+        if self.origin:
+            if not isinstance(self.origin, (int, Decimal)):
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'origin attribute must be number')
+        if self.step:
+            if not isinstance(self.step, (int, Decimal)):
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'origin attribute must be number')
 
     def _validate(self, value):
         if not self.optional and value == None:
@@ -39,6 +47,9 @@ class NumberSchema(ScalarSchema):
         if self.excludes:
             if value in self.excludes:
                 raise JsonSchemaError(dict(msg=u'value matched to exclusion pattern: $pattern', pattern='|'.join(map(str, self.excludes))))
+        if self.step:
+            if (value - self.origin) % self.step != 0:
+                raise JsonSchemaError(dict(msg=u'valuie is not divisible: ($value - $origin) / $step', value=value, origin=self.origin, step=self.step), value, '')
 
     def intersect(self, another):
         minimum = max(self.minimum, another.minimum)
@@ -50,6 +61,35 @@ class NumberSchema(ScalarSchema):
             throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'minmum($min) is bigger than maximum($max)', min=minimum, max=maximum)
         is_integer = self.is_integer or another.is_integer
         excludes = []
+        step = None
+        origin = 0
+        if self.step:
+            if not another.step:
+                step = self.step
+                origin = self.origin
+            else:
+                if self.step > another.step:
+                    s = self.step
+                    o = self.origin
+                    s2 = another.step
+                    o2 = another.step
+                else:
+                    s = another.step
+                    o = another.origin
+                    s2 = self.step
+                    o2 = self.origin
+                i = 1
+                while True:
+                    n = s * i + o
+                    if (n - o2) % s2 == 0:
+                        step = self.step * another.step
+                        origin = n
+                        break
+                    if i > 100: #アルゴリズムがアレなので、無限ループ防止
+                        assert False
+        elif another.step:
+            step = another.step
+            origin = another.origin
         if self.excludes:
             if another.excludes:
                 excludes = list(set(self.excludes).union(set(another.excludes)))
@@ -59,6 +99,8 @@ class NumberSchema(ScalarSchema):
             'minimum': minimum,
             'maximum': maximum,
             'excludes': excludes,
+            'origin': origin,
+            'step': step,
         }
         r = self.clone(opts)
         r.is_integer = is_integer
