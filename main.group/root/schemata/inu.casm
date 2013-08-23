@@ -769,7 +769,7 @@ type Executable = {
   "defaultEnv" : ("frame" | "app")?,
 
   /** デフォルト環境変数をクリアするか */
-  @[default("false")]
+  @[default(false)]
   "clearEnv" : boolean?,
 
   /** セットする環境変数と値 */
