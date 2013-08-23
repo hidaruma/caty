@@ -144,6 +144,8 @@ class ClassModule(Module):
             if refered_module is None:
                 continue
             for name, obj in refered_module.items():
+                if u'__origin_module' in cmd.annotations:
+                    return
                 if self._is_same_name(name, cmd.name):
                     cmd.uri = modname + u'.' + name
 
@@ -286,6 +288,7 @@ class ClassExprInterpreter(object):
             raise
         tp = []
         member = []
+        origin_module = cls.module
         for p ,p2 in zip(cls.type_params, obj.type_params):
             sb = self.module.make_schema_builder()
             sb._type_params = []
@@ -295,6 +298,7 @@ class ClassExprInterpreter(object):
             x = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
             x._schema = t
             tp.append(x)
+
         assertions = []
         for m in cls._clsobj.member:
             if isinstance(m, ASTRoot):
@@ -312,6 +316,8 @@ class ClassExprInterpreter(object):
                     self.__build_profile(ptn, cls, tp, m.type_params)
                     if u'__collection' in self.module.annotations and m.name in COLLECTION_COMMANDS:
                         ptn.decl.resource.append((u'uses', [FacilityDecl(self.module.name, None, u'arg0')]))
+                if origin_module and origin_module != self.module and origin_module.name != u'collection':
+                    m.annotations.add(Annotation(u'__origin_module', origin_module.name))
                 member.append(m)
             else:
                 member.append(m)

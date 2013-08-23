@@ -58,6 +58,7 @@ class Module(Facility):
         self.annotation_proto_ns = {}
         self.command_ns = {}
         self.class_ns = {}
+        self.redif_class_ns = {}
         self.facility_ns = {}
         self.entity_ns = {}
         self.command_loader = None
@@ -113,6 +114,7 @@ class Module(Facility):
         self.add_class = partial(self._add_resource, scope_func=lambda x:x.class_ns, type=u'Class', see_register_public=True, callback=lambda target: ClassModule(self._app, self, target))
         self.get_class = partial(self._get_resource, scope_func=lambda x:x.class_ns, type=u'Class')
         self.has_class = partial(self._has_resource, scope_func=lambda x:x.class_ns, type=u'Class')
+        self.add_redif_class = partial(self._add_resource, scope_func=lambda x:x.redif_class_ns, type=u'Class', see_register_public=True, callback=lambda target: ClassModule(self._app, self, target))
  
         self.add_facility = partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility', see_register_public=True)
         self.get_facility = partial(self._get_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
@@ -186,12 +188,6 @@ class Module(Facility):
                     target.body = IntersectionNode(scope[name].body, target.body)
                     target.defined = False
                     target.redifinable = False
-                elif type == u'Class':
-                    if isinstance(target.expression, ClassReference):
-                        target = self.get_class(target.expression.name)._clsobj
-                    for m in target.member:
-                        m.clone().declare(t)
-                    return
         if see_register_public and ('register-public' in target.annotations or (not self.is_class and 'register-public' in self.annotations)):
             if not self.is_root:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)
@@ -457,6 +453,7 @@ class Module(Facility):
         u"""型参照の解決
         """
         self._attache_module()
+        self._redefine_class()
         #self._resolve_alias()
         self._build_schema_tree()
         self._resolve_reference()
@@ -534,6 +531,19 @@ class Module(Facility):
         for v in self.sub_packages.values():
             m._attache_module()
         return r
+
+    def _redefine_class(self):
+        from caty.core.casm.language.ast import ClassIntersectionOperator, ClassNode
+        for c in self.redif_class_ns.values():
+            t = self.get_class(c.name)
+            t._clsobj.expression = ClassIntersectionOperator(t._clsobj.expression.clone(), c._clsobj.expression.clone())
+            o = t._clsobj
+            self.class_ns.pop(t.name)
+            ClassNode(o.name, o.expression, o.restriction, o.codomain, o.conforms, o.docstring, o.annotations, o.type_args, '?=').declare(self)
+        for m in self.sub_modules.values():
+            m._redefine_class()
+        for v in self.sub_packages.values():
+            m._redefine_class()
 
     def _resolve_alias(self):
         for k, c in self.class_ns.items():
@@ -821,13 +831,21 @@ class Module(Facility):
                         if self.has_class(c):
                             cls = self.get_class(c)._clsobj
                             if isinstance(cls.expression, ClassIntersectionOperator):
-                                for n in [cls.expression.left, cls.expression.right]:
-                                    if isinstance(n, ClassReference) and n.name == u'Collection' and len(n.type_params) == 1:
-                                        n.type_params.append(ScalarNode(p.type))
-                                        break
-                            break
+                                self._recursive_apply_typeparam_for_collection(cls.expression, p)
+                                break
         for m in self.class_ns.values() + self.sub_modules.values() + self.sub_packages.values():
             m._post_process()
+
+    def _recursive_apply_typeparam_for_collection(self, cls, t):
+        from caty.core.casm.language.ast import ClassIntersectionOperator, ClassReference, ScalarNode
+        if isinstance(cls, ClassIntersectionOperator):
+            for n in [cls.left, cls.right]:
+                if self._recursive_apply_typeparam_for_collection(n, t):
+                    return True
+        elif isinstance(cls, ClassReference) and cls.name == u'Collection' and len(cls.type_params) == 1:
+            cls.type_params.append(ScalarNode(t.type))
+            return True
+        return False
 
     def reify(self):
         import caty.jsontools as json
@@ -868,6 +886,7 @@ class Module(Facility):
         self.compiled = False
         self.schema_ns = {}
         self.command_ns = {}
+        self.redif_class_ns = {}
         self.saved_st = {}
         self.annotation_ns = {}
 

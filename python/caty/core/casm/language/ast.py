@@ -144,7 +144,10 @@ class ClassNode(object):
             except:
                 raise
         self.module = module
-        module.add_class(self)
+        if self.redifinable:
+            module.add_redif_class(self)
+        else:
+            module.add_class(self)
 
     def visit_class_body(self, obj):
         for m in obj.member:
@@ -187,6 +190,11 @@ class ClassBody(object):
     def accept(self, visitor):
         return visitor.visit_class_body(self)
 
+    def clone(self):
+        r = ClassBody([m.clone() for m in self.member], self.uri)
+        r.opened = self.opened
+        return self
+
 class ClassReference(object):
     def __init__(self, name, type_params):
         self.name = name
@@ -194,6 +202,9 @@ class ClassReference(object):
 
     def accept(self, visitor):
         return visitor.visit_class_ref(self)
+
+    def clone(self):
+        return ClassReference(self.name, self.type_params)
 
 class ClassIntersectionOperator(object):
     def __init__(self, left, right):
@@ -203,6 +214,9 @@ class ClassIntersectionOperator(object):
     def accept(self, visitor):
         return visitor.visit_class_intersection(self)
 
+    def clone(self):
+        return ClassIntersectionOperator(self.left.clone(), self.right.clone())
+
 class UseOperator(object):
     def __init__(self, names, cls):
         self.names = names
@@ -210,6 +224,9 @@ class UseOperator(object):
 
     def accept(self, visitor):
         return visitor.visit_class_use(self)
+
+    def clone(self):
+        return UseOperator(self.names, self.cls.clone())
 
 class UnuseOperator(object):
     def __init__(self, names, cls):
@@ -219,12 +236,18 @@ class UnuseOperator(object):
     def accept(self, visitor):
         return visitor.visit_class_unuse(self)
 
+    def clone(self):
+        return UnuseOperator(self.names, self.cls.clone())
+
 class CloseOperator(object):
     def __init__(self, cls):
         self.cls = cls
 
     def accept(self, visitor):
         return visitor.visit_class_close(self)
+
+    def clone(self):
+        return CloseOperator(self.cls.clone())
 
 class OpenOperator(object):
     def __init__(self, cls):
@@ -233,6 +256,8 @@ class OpenOperator(object):
     def accept(self, visitor):
         return visitor.visit_class_open(self)
 
+    def clone(self):
+        return OpenOperator(self.cls.clone())
 
 class FacilityNode(object):
     is_alias = False
