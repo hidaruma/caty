@@ -151,10 +151,18 @@ signature Collection
   * 引数にキーが指定されず、レコードにもIDがないきは、可能ならキーを自動生成する、
   * 自動生成が不可能ならBadInput例外。
   *
-  * 出力は任意である。
+  * 出力のプロファイルは any だが、--output-rec オプションの有無（true/false）で変化する。
+  * * --output-rec がfalseならvoid、
+  * * --output-rec がtrueならレコード型
+  *
   */
  @[updater]
- command insert [Key? key] :: Record -> any?
+ command insert 
+   {
+     @[default(false)]
+     "output-rec": boolean?,
+   }
+   [Key? key] :: Record -> any
    throws [AlreadyExists, BadInput]
  ;
 
@@ -164,19 +172,28 @@ signature Collection
   * 引数にキーが指定されず、レコードにもIDがないきは、可能ならキーを自動生成する、
   * 自動生成が不可能ならBadInput例外。
   *
-  * 出力は任意である。
+  * 出力のプロファイルは any だが、--output-rec オプションの有無（true/false）で変化する。
+  * * --output-rec がfalseならvoid、
+  * * --output-rec がtrueならレコード型
+  *
   */
  @[updater]
- command poke [Key? key] :: any -> any?
+ command poke 
+   {
+     @[default(false)]
+     "output-rec": boolean?,
+   }
+   [Key? key] :: any -> any
    throws [AlreadyExists, BadInput]
  ;
 
  /** 単一レコードを置き換える 
   * 必ず既存レコードを置き換える。
+  *
   * 出力は任意である。
   */
  @[updater]
- command replace [Key key] :: Record -> any?
+ command replace [Key key] :: Record -> any
    throws NotExist
  ;
 
@@ -185,6 +202,7 @@ signature Collection
   * パスが指定されたときは、そのパス自体か親パスのロケーションは存在している必要がある。
   * パスのロケーションが不正なときはConsistencyViolation例外を投げる。
   * 入力のバリデーションは行わない。
+  *
   * 出力は任意である。
   */
  @[updater]
@@ -195,6 +213,7 @@ signature Collection
 
  /** 引数に指定されたキーのレコードを削除する 
   * 削除に失敗した場合は例外とする。
+  *
   * 出力は任意である。
   */
  @[updater]
@@ -204,6 +223,7 @@ signature Collection
 
  /** コレクション内の全てのレコードを削除する 
   * データベース管理コマンド clear-collection と同じ。
+  *
   * 出力は任意である。
   *
   * このコマンドは危険過ぎると判断するなら、実装しなくてもよい。
