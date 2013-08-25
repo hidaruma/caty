@@ -1,0 +1,102 @@
+/* -*- coding: utf-8 -*- */
+
+module ex;
+
+type givenName = (
+  "明"
+ | "健二"
+ | "太郎"
+ | "次郎"
+ | "大樹"
+ | "翔太"
+ | "和彦"
+ | "ひろし"
+ | "若菜"
+ | "あゆみ"
+ | "メグミ"
+ | "恭子"
+ | "由美"
+ | "恵子"
+);
+
+type familyName = (
+  "山田"
+ | "鈴木"
+ | "高橋"
+ | "大山"
+ | "富士"
+ | "秋田"
+);
+
+type personName  = (
+  "山田太郎"
+| "鈴木明"
+| "高橋惠子"
+| "元木ひろし"
+);
+
+
+/* メールアドレス */
+type email = (
+   "foo@example.com"
+ | "bar@example.com"
+ | "baz@example.com"
+ | "foo.bar@example.net"
+ | "foo-bar-baz@example.org"
+ | "hasimoto-ss@example.jp"
+);
+
+type url = (
+   "http://www.w3.org"
+ | "http://www.example.org"
+ | "http://www.example.com"
+ | "http://example.jp"
+ | "http://main.example.net"
+);
+
+
+type tel = (
+   "03-1234-5678"
+ | "090-1234-5678"
+ | "080-1234-5678"
+ | "04-1234-5678"
+);
+
+/* date …… yyyy-MM-dd（例：2011-02-06） */
+type date = (
+  "2013-08-26"
+| "2010-10-01"
+| "2011-12-31"
+);
+
+/* datetime …… yyyy-MM-ddTHH:mm:ssZ（例：2011-02-06T05:53:22Z） */
+type datetime = (
+ "2013-08-26T08:29:14Z"
+);
+
+/* datetime-local …… yyyy-MM-ddTHH:mm:ss（例：2011-02-06T14:53:22）*/
+type datetime-local = (
+ "2013-08-26T08:29:14"
+);
+
+/* month …… yyyy-MM（例：2011-02） */
+type month = (
+ "2013-08"
+);
+
+/* week …… yyyy-Www（例：2011-W05）。その年における何週目かを表す */
+type week = (
+ "2013-W22"
+);
+
+/* time …… HH:mm:ss（例：14:53:22）*/
+type time = (
+  "11:30:46"
+);
+
+/* 色のRGB値を16進数で表した文字列 （例：#ffaec9） */
+
+type color = (
+  "#ffaec9"
+);
+
