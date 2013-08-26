@@ -442,6 +442,8 @@ class TypeCalcurator(_SubNormalizer):
         elif node.operator == u'close':
             body.wildcard = UndefinedSchema()
         else:
+            if isinstance(body, TypeVariable):
+                return node
             return node.path.select(body).next()
         return res
 
@@ -586,6 +588,9 @@ class NeverChecker(_SubNormalizer):
     def _visit_type_function(self, node):
         return []
 
+    def _visit_unary_op(self, node):
+        return [] #この時点で演算子が残っている=型変数なので
+
 class VariableChecker(_SubNormalizer):
     def __init__(self, *args):
         _SubNormalizer.__init__(self, *args)
@@ -684,6 +689,9 @@ class DefaultChecker(TreeCursor):
 
     def _visit_type_function(self, node):
         pass
+
+    def _visit_unary_op(self, node):
+        pass #この時点で演算子が残っている=型変数なので
 
 class InvalidDefaultValue(Exception):
     def __init__(self, value):

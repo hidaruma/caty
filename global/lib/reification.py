@@ -382,7 +382,7 @@ class TypeBodyReifier(TreeCursor):
     def _visit_array(self, node):
         r = self._extract_common_data(node)
         r[u'specified'] = []
-        for v in node.items:
+        for v in node:
             r[u'specified'].append(v.accept(self))
         if r[u'repeat']:
             r[u'additional'] = json.tagged(u'optional', {u'operand': r[u'specified'].pop(-1)})
