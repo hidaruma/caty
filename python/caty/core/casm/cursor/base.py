@@ -155,6 +155,7 @@ class SchemaBuilder(TreeCursor):
         return UndefinedSchema()
 
     def _visit_type_function(self, node):
+        node = TypeFunctionNode(node.funcname, node.typename)
         node.typename = node.typename.accept(self)
         return node
 

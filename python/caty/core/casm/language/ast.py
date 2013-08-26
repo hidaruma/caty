@@ -1064,7 +1064,7 @@ class CollectionDeclNode(object):
 class TypeFunctionNode(TypeFunction, SchemaBase):
     def __init__(self, funcname, typename):
         self.funcname = funcname
-        self.typename = ScalarNode(typename)
+        self.typename = ScalarNode(typename) if isinstance(typename, basestring) else typename
         SchemaBase.__init__(self)
         self._module = None
         self._type = u'<%s>' % funcname

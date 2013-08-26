@@ -263,3 +263,7 @@ class TreeDumper(TreeCursor):
 
     def _visit_kind(self, node):
         return u'$kind$'
+
+    def _visit_type_function(self, node):
+        return node.funcname + '<' + node.typename.name + '>'
+

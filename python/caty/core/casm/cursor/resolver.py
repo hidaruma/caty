@@ -1,7 +1,7 @@
 #coding:utf-8
 from caty.core.casm.cursor.base import *
 from caty.core.exception import SystemResourceNotFound
-from caty.core.casm.language.ast import KindReference
+from caty.core.casm.language.ast import KindReference, TypeFunctionNode
 
 class ReferenceResolver(SchemaBuilder):
     def _visit_root(self, node):
@@ -65,6 +65,7 @@ class ReferenceResolver(SchemaBuilder):
         return r
 
     def _visit_type_function(self, node):
+        node = TypeFunctionNode(node.funcname, node.typename)
         node.typename = node.typename.accept(self)
         schema = node.typename
         if isinstance(schema, TypeReference):
@@ -78,6 +79,7 @@ class ReferenceResolver(SchemaBuilder):
             return EnumSchema([schema.name])
         elif node.funcname == u'recordType':
             if u'__collection' not in schema.annotations:
+                print schema, schema.annotations
                 throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % schema.name)
             return schema.accept(self).body
 
