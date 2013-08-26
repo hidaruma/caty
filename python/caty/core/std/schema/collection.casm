@@ -158,12 +158,10 @@ signature Collection
   */
  @[updater]
  command insert 
-/*
    {
      @[default(false)]
      "output-rec": boolean?,
    }
-*/
    [Key? key] :: Record -> any
    throws [AlreadyExists, BadInput]
  ;
@@ -181,12 +179,10 @@ signature Collection
   */
  @[updater]
  command poke 
-/*
    {
      @[default(false)]
      "output-rec": boolean?,
    }
-*/
    [Key? key] :: any -> any
    throws [AlreadyExists, BadInput]
  ;

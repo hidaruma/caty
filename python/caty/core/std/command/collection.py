@@ -14,11 +14,14 @@ class Lookup(Builtin):
         return self.arg0.lookup(self.key)
 
 class Insert(Builtin):
-    def setup(self, key=None):
+    def setup(self, opts, key=None):
         self.key = key
+        self.output_rec = opts['output-rec']
 
     def execute(self, rec):
-        return self.arg0.insert(self.key, rec)
+        r = self.arg0.insert(self.key, rec)
+        if self.output_rec:
+            return r
 
 
 class Get(Builtin):
@@ -109,7 +112,7 @@ class Poke(Insert):
     def execute(self, obj):
         if not isinstance(obj, dict):
             throw_caty_exception(u'BadInput', json.pp(obj))
-        Insert.execute(self, obj)
+        return Insert.execute(self, obj)
 
 class Set(Builtin):
     def setup(self, key, path=None):
