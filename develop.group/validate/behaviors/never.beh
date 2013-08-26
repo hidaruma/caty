@@ -5,12 +5,12 @@ never 型は適合する値が空、即ち妥当性検証に成功する値が�
 == !exec
 
 |= input|= command |= params      |= output|= 備考                       |
-| 0     | validate | --boolean never | false  |                             |
-| false | validate | --boolean never | false  |                             |
-| ""    | validate | --boolean never | false  |                             |
-| []    | validate | --boolean never | false  |                             |
-| {}    | validate | --boolean never | false  |                             |
-| null  | validate | --boolean never | false  | null はシングルトン値である |
+| 0     | validate | --boolean --accept-never-type never | false  |                             |
+| false | validate | --boolean --accept-never-type never | false  |                             |
+| ""    | validate | --boolean --accept-never-type never | false  |                             |
+| []    | validate | --boolean --accept-never-type never | false  |                             |
+| {}    | validate | --boolean --accept-never-type never | false  |                             |
+| null  | validate | --boolean --accept-never-type never | false  | null はシングルトン値である |
 
 == 注意
 
