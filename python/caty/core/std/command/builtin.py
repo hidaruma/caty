@@ -418,6 +418,7 @@ class TypeCalculator(object):
         cd = mod.make_cycle_detecter()
         ta = mod.make_typevar_applier()
         tn = mod.make_type_normalizer()
+        tn.safe = True
         sb._root_name = u'validate'
         t = ast.accept(sb)
         t = t.accept(rr)

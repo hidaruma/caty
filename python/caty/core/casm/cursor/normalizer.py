@@ -8,6 +8,7 @@ _builtin_types = schemata.keys()
 class TypeNormalizer(TreeCursor):
     def __init__(self, module):
         self.module = module
+        self.safe = False
 
     def _visit_root(self, node):
         return self.visit(node)
@@ -17,7 +18,7 @@ class TypeNormalizer(TreeCursor):
         ol = OptionLifter(self.module)
         tc = TypeCalcurator(self.module)
         normalized = tc.visit(ol.visit(ue.visit(node)))
-        nc = NeverChecker(self.module)
+        nc = NeverChecker(self.module, self.safe)
         nc.visit(normalized)
         vc = VariableChecker(self.module)
         vc.visit(normalized)
