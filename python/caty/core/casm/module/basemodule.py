@@ -968,6 +968,8 @@ class LocalModule(Module):
         self.const_ns = {}
         self.schema_ns = {}
         self.command_ns = {}
+        self.class_ns = {}
+        self.redif_class_ns = {}
 
         self._name = as_parser(modname).run(schema_string)
         for t in parse(schema_string):
