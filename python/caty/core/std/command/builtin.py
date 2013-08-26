@@ -393,7 +393,7 @@ class TypeCalculator(object):
             self.converter = scm
         if close:
             self.converter = tn.visit(UnaryOpNode(u'close', self.converter))
-        if self.converter.type == u'never':
+        if self.converter.type == u'never' and not self.converter.optional and not self.accept_never:
             raise Exception(self.i18n.get(u'Type representation is never: $typedef', typedef=s))
 
     def parse(self, s):
@@ -431,6 +431,7 @@ class Validate(Builtin, TypeCalculator):
     def setup(self, opts, schema_name=u'univ'):
         self.pred = opts.get('boolean', caty.UNDEFINED)
         self.mod = opts.get('mod')
+        self.accept_never = opts['accept-never-type']
         self.schema_name = schema_name
         self.set_schema(schema_name, opts.get('close'))
 

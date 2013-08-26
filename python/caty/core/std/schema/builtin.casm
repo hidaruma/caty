@@ -1219,10 +1219,11 @@ command request {
   }
 };
 
-/**
+/** 
  * 引数で指定された型で入力値を検証する。
+ * accpept-never-typeはテスト時にあえてnever型のバリデーションを行いたいときに用いる。
  */
-command validate<T default univ> {"mod": string?, "boolean": boolean?, "close": boolean?} [string?] :: univ -> @OK univ | @NG MiniErrorInfo | boolean
+command validate<T default univ> {"mod": string?, "boolean": boolean?, "close": boolean?, "accept-never-type": boolean?} [string?] :: univ -> @OK univ | @NG MiniErrorInfo | boolean
     reads schema
     refers python:builtin.Validate;
 

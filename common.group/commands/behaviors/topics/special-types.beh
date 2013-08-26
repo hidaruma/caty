@@ -7,11 +7,11 @@
 * neverは空集合である。
 
 |= !input  |= !command         |= !params  |= !output |
-|null      | validate<never>   | --boolean | false |
-|undefined | validate<never>   | --boolean | false |
-| ""       | validate<never>   | --boolean | false |
-| false    | validate<never>   | --boolean | false |
-|foreign   | validate<never>   | --boolean | false |
+|null      | validate<never> --accept-never-type  | --boolean | false |
+|undefined | validate<never> --accept-never-type | --boolean | false |
+| ""       | validate<never> --accept-never-type | --boolean | false |
+| false    | validate<never> --accept-never-type | --boolean | false |
+|foreign   | validate<never> --accept-never-type | --boolean | false |
 
 
 * univはあらゆるデータを含む全体集合である。
@@ -61,13 +61,13 @@
 * never? = never∪undefined = undefined （neverは空集合だから）
 
 |= !input  |= !command        |= !params  |= !output |
-|null      | validate<never?> | --boolean | false |
-|undefined | validate<never?> | --boolean | true |
-| ""       | validate<never?> | --boolean | false |
-| false    | validate<never?> | --boolean | false |
-|foreign   | validate<never?> | --boolean | false |
-|"hello"   | validate<never?> | --boolean | false |
-|123       | validate<never?> | --boolean | false |
+|null      | validate<never?> --accept-never-type | --boolean | false |
+|undefined | validate<never?> --accept-never-type | --boolean | true |
+| ""       | validate<never?> --accept-never-type | --boolean | false |
+| false    | validate<never?> --accept-never-type | --boolean | false |
+|foreign   | validate<never?> --accept-never-type | --boolean | false |
+|"hello"   | validate<never?> --accept-never-type | --boolean | false |
+|123       | validate<never?> --accept-never-type | --boolean | false |
 
 
 * X? = X∪undefined
@@ -109,13 +109,13 @@
 * X?? = (X∪undefined)∪undefined = X∪(undefined∪undefined) = X∪undefined = X?
 
 |= !input  |= !command        |= !params  |= !output |
-|null      | validate<(never?)?> | --boolean | false |
-|undefined | validate<(never?)?> | --boolean | true |
-| ""       | validate<(never?)?> | --boolean | false |
-| false    | validate<(never?)?> | --boolean | false |
-|foreign   | validate<(never?)?> | --boolean | false |
-|"hello"   | validate<(never?)?> | --boolean | false |
-|123       | validate<(never?)?> | --boolean | false |
+|null      | validate<(never?)?> --accept-never-type | --boolean | false |
+|undefined | validate<(never?)?> --accept-never-type | --boolean | true |
+| ""       | validate<(never?)?> --accept-never-type | --boolean | false |
+| false    | validate<(never?)?> --accept-never-type | --boolean | false |
+|foreign   | validate<(never?)?> --accept-never-type | --boolean | false |
+|"hello"   | validate<(never?)?>  --accept-never-type| --boolean | false |
+|123       | validate<(never?)?> --accept-never-type | --boolean | false |
 
 
 |= !input  |= !command        |= !params  |= !output |
