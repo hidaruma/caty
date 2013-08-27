@@ -1,0 +1,189 @@
+/* -*- coding: utf-8 -*- */
+/** 任意のXJSONデータをクリーンにHTML化する
+ */
+module xj2h;
+
+/** 参照型 
+ */
+type Reference = @__r ReferenceObj;
+
+type ReferenceObj = {
+ "t": string,
+ "a":[scalar, string?],
+};
+
+/** XJSON encoded XML 暫定的定義
+ */
+type XJX = deferred any;
+
+/** 任意のXJSONデータをXJX形式のHTMLに変換する 
+ */
+@[register-public]
+command xjson-to-html :: any -> XJX {
+ when {
+  /* スカラー */
+  null    => xj2h-null,
+  boolean => xj2h-boolean,
+  indef   => xj2h-indef,
+  number  => xj2h-number,
+  string  => xj2h-string,
+  binary  => xj2h-binary,
+
+  /* 複合型 */
+  object  => xj2h-object,
+  array   => xj2h-array,
+
+  /* セマンティック・スカラー 参照 */
+  __r     ==> xj2h-reference,
+
+  /* その他のタグ付き */
+  * ==> xj2h-tagged,
+ }
+};
+
+command xj2h-null :: null -> XJX {
+  @span {"data-type": "null", "": "null"}
+};
+
+command xj2h-boolean :: boolean -> XJX {
+ case {
+  true  => @span {"data-type":"boolean", "":"true"},
+  false => @span {"data-type":"boolean", "":"false"},
+ }
+};
+
+command xj2h-indef :: indef -> XJX {
+  @span {"data-type": "indef", "":"indef"}
+};
+
+command xj2h-number :: number -> XJX {
+  @span {
+    "data-type": "number",
+    "": to-string
+  }
+};
+
+command xj2h-string :: string -> XJX {
+  @span {
+    "data-type": "string",
+    "": pass
+  }
+};
+
+command xj2h-binary :: binary -> XJX {
+    @span {
+      "data-type": "binary",
+      "": base64:encode
+    }
+};
+
+command xj2h-object :: object -> XJX {
+ each {
+   @li {
+     "": [@span {"": %_key}, ":", xjson-to-html],
+     "name" : %_key,
+     "data-key" : %_key,
+   }
+ } > con;
+
+ @ul {
+   "data-type": "object",
+   "" : %con
+ }
+};
+
+command xj2h-array :: array -> XJX {
+ each {
+   @li {
+     "": [xjson-to-html],
+     "name" : %_key | to-string,
+     "data-key": %_key | to-string,
+   }
+ } > con;
+
+ @ol {
+   "data-type": "array",
+   "start": "0",
+   "" : %con
+ }
+};
+
+command xj2h-tagged :: @*! any -> XJX {
+  [tag> t, content> c];
+
+  @div {
+    "data-type": "tagged",
+    "data-tag": %t,
+     "class": %t, 
+     "": [%c| xjson-to-html]
+  }
+};
+
+command xj2h-reference :: Reference -> XJX {
+/*
+ [
+    $.t                  > target,
+    $.a.0 | to-string    > id,
+    $.a.1?=""            > path,
+ ];
+*/
+ ref:to-url > url;
+
+ @a {
+   "data-type": "reference",
+   "href": %url | dump --force,
+   "": [ %url ],
+ }
+};
+
+
+/* == 補助的なコマンド == */
+
+command style :: void -> string {
+'''<style>
+[data-type=null] {
+  color: gray
+}
+[data-type=boolean],[data-type=indef] {
+  color: red
+}
+[data-type=number] {
+  color: blue
+}
+[data-type=string] {
+  color: orange
+}
+[data-type=binary] {
+  color: yellow;
+  background-color: black;
+}
+
+
+</style>
+'''
+};
+
+command sample :: void -> any {
+/* object */
+{
+  "a": /* array */[
+        null,
+        true,
+        false,
+        indef,
+        100,
+        3.14,
+        "hello",
+        b"hello",
+        @__r {"t": "app:mod.foo", "a":[32, "$.a.1"]}
+      ],
+  "b": 10,
+  "c": {
+     "x": null,
+     "y": "foo",
+  }
+}
+/* end */
+
+};
+

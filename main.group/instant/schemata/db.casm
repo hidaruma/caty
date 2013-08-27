@@ -1,0 +1,58 @@
+// -*- coding: utf-8 -*- 
+module db;
+
+/** コレクション参照型（実験的） 
+ */
+type reference<C> = @__r {
+ "a": [integer],
+ "t": typeName<C>, // targetName<C> が望ましいだろう。
+};
+
+collection company of {
+ "id": integer, // gen:sampleが空にしないように必須にしておく
+ "会社名": string,
+ "代表": reference<db:person>, // db: が必要
+};
+class company &= WebMethod_company;
+
+collection person of {
+ "id" : integer, // gen:sampleが空にしないように必須にしておく
+ "名前": {
+     "名": ex:givenName,
+     "性": ex:familyName,
+  },
+ "年齢": integer(minimum=20, maximum=30),
+ "知り合い達": [reference<db:person>*], //(maxItems=5), // gen:sampleが見ない
+ "会社":  reference<db:company>?,
+};
+class person &= WebMethod_person;
+
+/* コピペ */
+// person
+class WebMethod_person = {
+    command GET [integer/*modify*/ id] :: void -> any {
+        %1 > id;
+        try { get %id } | catch {
+            normal => pass,
+            except => //レコードがなかったら適当な値を生成
+              gen:sample<db:person>/* modify */ --string=implied | insert --output-rec %id,
+        }
+    };
+
+    command emit-normal {"ft" : string?} :: any -> WebOutput {
+      xj2h:xjson-to-html | xjx:markup | response --ext=html
+    };
+};
+
+/* コピペ */
+// company
+class WebMethod_company = {
+    command GET [integer/*modify*/ id] :: void -> any {
+        %1 > id;
+        try { get %id } | catch {
+            normal => pass,
+            except => //レコードがなかったら適当な値を生成
+              gen:sample<db:company>/* modify */  --string=implied | insert --output-rec %id,
+        }
+    };
+};

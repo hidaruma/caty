@@ -1,0 +1,23 @@
+/* -*- coding: utf-8 -*- */
+/** 
+ * 参照の操作 
+ */
+module ref;
+
+
+/** 参照から対応するURLを作る 
+ */
+command to-url :: Reference -> any {
+ [
+   $.a.0 | to-string > id,
+   $.a.1?="$"        > path,
+   $.t | text:split ":" | =[pass > mod, pass > cls],
+ ];
+ [%HOST_URL, app | $.path ] | text:concat   > base;
+
+ [%base, %mod, %cls?="", ""] | text:join "/"    > target-cls;
+ ["?_1=", %id, "&_2=", %path] | text:concat > qstring;
+ 
+ [%target-cls, %qstring] | text:concat
+
+};
