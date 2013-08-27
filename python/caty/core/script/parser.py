@@ -499,7 +499,7 @@ class ScriptParser(Parser):
 
     def unquoted(self, seq):
         #v = seq.parse(Regex('([^;\\t\\r\\n <>|%+"(){},\\[\\]]|(?!\\\'\\\'\\\'))([^;\\t\\r\\n <>|%+"(){},\\[\\]]|\\(\\)|(?!\\\'\\\'\\\'))*'))
-        delim = list(u';\t\r\n <>|%+"(){},[]') + [u"'''"]
+        delim = list(u';\t\r\n <>|%+"(){},[]') + [u"'''"] + ['//'] + ['/*']
         v = until(delim)(seq)
         if not v:
             raise ParseFailed(seq, self.unquoted)
