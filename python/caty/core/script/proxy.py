@@ -470,7 +470,7 @@ class ChoiceBranchItemProxy(Proxy):
         self.type = None
 
     def clone(self):
-        new = ChoiceBranchProxy(self.typedef, self.cmdproxy.clone())
+        new = ChoiceBranchItemProxy(self.typedef, self.cmdproxy.clone())
         return new
 
     def set_module(self, module):
