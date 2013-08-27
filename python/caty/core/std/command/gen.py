@@ -12,44 +12,19 @@ from caty.core.language import split_colon_dot_path
 from caty.core.exception import throw_caty_exception
 from caty.core.casm.cursor.dump import TreeDumper
 from caty.core.typeinterface import flatten_union
+from caty.core.std.command.builtin import TypeCalculator
 
-class Sample(Builtin):
+class Sample(Builtin, TypeCalculator):
    
-    def setup(self, opts, type_repr):
+    def setup(self, opts, type_repr=u'univ'):
         self.__type_repr = type_repr
-        self.__mod = opts.pop(u'mod')
+        self.mod = opts.pop(u'mod')
         self._gen_options = opts
 
     def execute(self):
-        from caty.core.casm.language.schemaparser import typedef
-        from caty.core.casm.language.ast import ASTRoot
-        from caty.core.schema.base import Annotations
-        from topdown import as_parser
-        if self.__mod:
-            app_name, mod_name, _ = split_colon_dot_path(self.__mod, u'mod')
-            if _:
-                throw_caty_exception('BadArg', u'$arg', arg=self.__mod)
-            if app_name == 'this':
-                app = self.current_app
-            else:
-                app = self.current_app._system.get_app(app_name)
-            mod = app._schema_module.get_module(mod_name)
-        else:
-            mod = self.current_module.schema_finder
-        ast = ASTRoot(u'', [], as_parser(typedef).run(self.__type_repr, auto_remove_ws=True), Annotations([]), u'')
-        sb = mod.make_schema_builder()
-        rr = mod.make_reference_resolver()
-        cd = mod.make_cycle_detecter()
-        ta = mod.make_typevar_applier()
-        tn = mod.make_type_normalizer()
-        sb._root_name = u'gen:sample'
-        t = ast.accept(sb)
-        t = t.accept(rr)
-        t = t.accept(cd)
-        t = t.accept(ta)
-        t = t.accept(tn).body
+        self.set_schema(self.__type_repr)
         re = ReferenceExpander(self._gen_options)
-        t = re.expand(t)
+        t = re.expand(self.converter)
         data = t.accept(DataGenerator(self._gen_options))
         return self._empty_to_undefined(data)
 

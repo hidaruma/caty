@@ -419,7 +419,7 @@ class TypeCalculator(object):
         ta = mod.make_typevar_applier()
         tn = mod.make_type_normalizer()
         tn.safe = True
-        sb._root_name = u'validate'
+        sb._root_name = self.__class__.__name__.lower()
         t = ast.accept(sb)
         t = t.accept(rr)
         t = t.accept(cd)
