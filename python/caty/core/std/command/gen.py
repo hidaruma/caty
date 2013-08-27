@@ -66,6 +66,7 @@ class ReferenceExpander(SchemaBuilder):
                 break
         return type.accept(ReferenceDeleter(None))
 
+    @apply_annotation
     def _visit_root(self, node):
         return node.body.accept(self)
 
@@ -283,6 +284,7 @@ class DataGenerator(TreeCursor):
             else:
                 return self.__rand_number(node)
         elif isinstance(node, TypeReference):
+            print node.name, node.annotations
             return node.body.accept(self)
         elif isinstance(node, UnionSchema):
             return self.__union(node)
