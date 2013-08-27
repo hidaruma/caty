@@ -55,4 +55,9 @@ class WebMethod_company = {
               gen:sample<db:company>/* modify */  --string=implied | insert --output-rec %id,
         }
     };
+
+    command emit-normal {"ft" : string?} :: any -> WebOutput {
+      xj2h:xjson-to-html | xjx:markup | response --ext=html
+    };
+
 };
