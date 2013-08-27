@@ -210,7 +210,7 @@ _name_start = _name_start_base + u'|' + _extend_name_start
 _ext_name = unicode('\u00B7 | [\u0300-\u036F] | [\u203F-\u2040]', 'unicode-escape')
 _name_char = u'|'.join([_name_start, '-', '[0-9]', _ext_name])
 _name_token_ptn = u'({0})({1})*'.format(_name_start, _name_char)
-_identifier_ptn = _name_token_ptn + u'(\\.{0})*'.format(_name_token_ptn)
+_identifier_ptn = _name_token_ptn
 _mod_identifier_ptn = u'({0}:)?{1}'.format(_identifier_ptn, _identifier_ptn)
 _app_identifier_ptn = u'({n}::({i}|:{n}))|({i})'.format(n=_name_token_ptn, i=_mod_identifier_ptn)
 

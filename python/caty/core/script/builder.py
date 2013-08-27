@@ -74,6 +74,9 @@ class ClassModuleWrapper(object):
         if _ta:
             self.__apply_type_params(_ta, type_args)
 
+    def get_origin_module_type_params(self, name):
+        return self.module.get_origin_module_type_params(name)
+
     def __apply_type_params(self, type_params, type_args):
         if not type_params:
             return

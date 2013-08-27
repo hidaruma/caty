@@ -288,7 +288,7 @@ class ScriptParser(Parser):
     def command(self, seq, no_opt=False):
         if option(peek('$'))(seq):
             return self.xjson_path(seq)
-        name = class_identifier_token_a(seq)
+        name = identifier_token_a(seq)
         if name == u'commitm':
             return CommitM(self.arguments(seq))
         #if name.endswith('.caty') and name[0] != '/':

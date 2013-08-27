@@ -11,6 +11,7 @@ import types
 import caty.util as util
 from caty.core.exception import InternalException
 from caty.util.collection import OverlayedDict, MultiMap
+from caty.core.schema.base import SchemaBase
 from caty.core.schema.errors import JsonSchemaError
 from caty import UNDEFINED
 
@@ -131,6 +132,9 @@ class Command(object):
             for i, p in enumerate(self.profile_container.type_params):
                 if i < l:
                     s = self.__type_args[i]
+                    if isinstance(s, SchemaBase):
+                        _ta.append(s)
+                        continue
                     sb = self.__module.make_schema_builder()
                     sb._type_params = self.type_params
                     rr = self.__module.make_reference_resolver()

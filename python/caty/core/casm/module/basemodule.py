@@ -938,6 +938,7 @@ class LocalModule(Module):
         self.parent = parent
         self.is_root = False
         self._name = u'$local$' # 絶対に使われない名前をデフォルトにしておく
+        self.type_params = self.parent.type_params
         
     @property
     def schema_finder(self):

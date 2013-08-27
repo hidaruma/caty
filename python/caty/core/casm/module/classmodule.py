@@ -38,6 +38,7 @@ class ClassModule(Module):
         self.defined = True
         self.redifinable = False
         self.refered_module = None
+        self.module_and_type_param_map = {}
 
     def clone(self):
         return ClassModule(self.app, self.parent, self.clsobj)
@@ -57,6 +58,9 @@ class ClassModule(Module):
     @property
     def conforms(self):
         return self._clsobj.conforms
+
+    def get_origin_module_type_params(self, name):
+        return self.module_and_type_param_map[name]
 
     def _get_full_name(self):
         return u'class ' + self.name
@@ -298,7 +302,6 @@ class ClassExprInterpreter(object):
             x = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
             x._schema = t
             tp.append(x)
-
         assertions = []
         for m in cls._clsobj.member:
             if isinstance(m, ASTRoot):
@@ -312,6 +315,9 @@ class ClassExprInterpreter(object):
                     assertions.append(m)
                     if m not in self.module.assertions:
                         self.module.assertions.append(m)
+                if m.script_proxy:
+                    m.script_proxy = m.script_proxy.clone()
+                    ScriptTypeVarApplier(tp, cls).visit(m.script_proxy)
                 for ptn in m.patterns:
                     self.__build_profile(ptn, cls, tp, m.type_params)
                     if u'__collection' in self.module.annotations and m.name in COLLECTION_COMMANDS:
@@ -365,4 +371,22 @@ class ClassExprInterpreter(object):
 class Dummy(object):
     def __init__(self, params):
         self.type_params = params
+
+class ScriptTypeVarApplier(object):
+    def __init__(self, type_params, class_module):
+        self.type_params = type_params
+        self.class_module = class_module
+
+    def visit(self, node):
+        node.accept(self)
+
+    def _visit_command(self, node):
+        l = len(node.type_args)
+        for i, t in enumerate(node.type_args):
+            for p in self.type_params:
+                if p.var_name == t.name:
+                    node.type_args[i] = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.class_module)
+                    node.type_args[i]._schema = p._schema
+                    break
+    
 
