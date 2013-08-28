@@ -126,7 +126,7 @@ class XJXMarkup(object):
                         #    base, id = v.split('#', 1)
                         #    attrs[k] = u'%s#%s' % (escape_html(base), escape_html(urllib.quote(id.encode('utf-8'))))
                         else:
-                            attrs[k] = escape_html(v)
+                            attrs[k] = v
                     elem = self._to_element(tag, attrs, body)
                     r.append(elem)
                     if tag in BLOCK:
