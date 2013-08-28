@@ -513,6 +513,8 @@ class NeverChecker(_SubNormalizer):
         never_found = []
         for k, v in enumerate(node):
             r = v.accept(self)
+            if isinstance(r, NamedParameterNode):
+                continue
             if r:
                 for p in r:
                     never_found.append([str(k)] + p)

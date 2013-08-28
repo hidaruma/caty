@@ -10,6 +10,7 @@ from caty.core.typeinterface import *
 import caty.core.runtimeobject as ro
 from caty.core.language.util import make_structured_doc
 import caty.jsontools as json
+from caty.core.spectypes import UNDEFINED
 
 class Provide(object):
     def __init__(self, names):
@@ -1098,11 +1099,11 @@ class NamedParameterNode(SchemaBase):
         return self._schema.options
 
     def validate(self, value, path=None):
-        if not (value is caty.UNDEFINED):
+        if not (value is UNDEFINED):
             self._schema.validate(value, path)
 
     def convert(self, value):
-        if not (value is caty.UNDEFINED):
+        if not (value is UNDEFINED):
             return self._schema.convert(value)
 
     @property
