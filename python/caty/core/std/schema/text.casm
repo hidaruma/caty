@@ -108,3 +108,8 @@ refers python:text.VerifyChars;
 /** 文字列から、引数で与えられた接頭辞を取り除く */
 command rest [string prefix] :: string -> (string|null)
   refers python:text.Rest;
+
+
+command escape-html :: string -> string
+    refers python:text.EscapeHTML;
+

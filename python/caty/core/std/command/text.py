@@ -150,3 +150,8 @@ class VerifyChars(Builtin):
             'code': unicode(str(hex(code)))
         }
 
+from caty.util import escape_html
+class EscapeHTML(Builtin):
+    def execute(self, t):
+        return escape_html(t)
+
