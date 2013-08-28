@@ -1027,6 +1027,10 @@ class TypeVariable(SchemaBase, Scalar):
         return self.var_name if not self._schema else self._schema.name
     
     @property
+    def canonical_name(self):
+        return self.var_name if not self._schema else self._schema.canonical_name
+
+    @property
     def definition(self):
         return self.name
 
@@ -1437,6 +1441,10 @@ class TypeReference(SchemaBase, Scalar, Ref):
     def name(self):
         return self._name
 
+    @property
+    def canonical_name(self):
+        return self._name if self.body is None else self.body.canonical_name
+    
     @property
     def type(self):
         return self.body.type

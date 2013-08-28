@@ -1555,7 +1555,6 @@ class Dissoc(Builtin):
 
 class TypeName(Builtin):
     def execute(self):
-        print self.type_params[0]
         return self.type_params[0].canonical_name
 
 
