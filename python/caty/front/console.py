@@ -360,6 +360,8 @@ Ugly URIサーバーの起動・停止を行う
                     port = try_parse(int, rest) or 8000
                 self.uuserver = build_uuserver(self.system, self.debug, port)
                 self.uuserver.start()
+                if self.app._system.uuserver_port != port:
+                    self.app._system.uuserver_port = port
                 if sys.platform == 'win32':
                     windll.kernel32.SetConsoleTitleW(u'Caty Console (%d)' % port)
             else:

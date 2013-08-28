@@ -677,6 +677,8 @@ class Application(object):
         env.put(u'DEBUG', system.debug)
         env.put(u'HOST_URL', unicode(self.host_url))
         env.put(u'HOST_NAME', unicode(self.host_name))
+        if self._system.get_uuserver_url():
+            env.put(u'UUSERVER_URL', unicode(self._system.get_uuserver_url()))
         env.put(u'CATY_VERSION', unicode(caty.__version__))
         env.put(u'RUN_MODE', modes)
         env.put(u'PROJECT', {'name': self._system.project_name, 'location': unicode(os.getcwd(), self._system.sysencoding)})

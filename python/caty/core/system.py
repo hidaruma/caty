@@ -33,6 +33,7 @@ class System(object):
         self.no_ambient = no_ambient
         self.wildcat = wildcat
         self.hcon_port = None
+        self.uuserver_port = None
         self.hcon_name = None
         self.public_commands = None
         if quiet:
@@ -371,6 +372,13 @@ class System(object):
             return '%s://%s:%s' % (r.scheme, r.netloc.split(':')[0], self.hcon_port)
         elif self.hcon_name:
             return '%s/%s' % (self._global_config.host_url, self.hcon_name)
+
+    def get_uuserver_url(self):
+        if self.uuserver_port == None:
+            return None
+        from urlparse import urlsplit
+        r = urlsplit(self._global_config.host_url)
+        return '%s://%s:%s' % (r.scheme, r.netloc.split(':')[0], self.uuserver_port)
 
 class CoreApplication(Application):
     def __init__(self, system):
