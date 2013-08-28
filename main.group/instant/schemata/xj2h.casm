@@ -16,6 +16,7 @@ type ReferenceObj = {
  */
 type XJX = deferred any;
 
+
 /** 任意のXJSONデータをXJX形式のHTMLに変換する 
  */
 @[register-public]
@@ -66,7 +67,7 @@ command xj2h-number :: number -> XJX {
 command xj2h-string :: string -> XJX {
   @span {
     "data-type": "string",
-    "": text:escape-html
+    "": pass, // text:escape-html
   }
 };
 
@@ -88,6 +89,7 @@ command xj2h-object :: object -> XJX {
 
  @ul {
    "data-type": "object",
+   "data-role": "listview",
    "" : %con
  }
 };
