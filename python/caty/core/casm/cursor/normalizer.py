@@ -458,7 +458,7 @@ class TypeCalcurator(_SubNormalizer):
             else:
                 return node
         if node.funcname == u'typeName':
-            return EnumSchema([schema.name])
+            return EnumSchema([schema.canonical_name])
         elif node.funcname == u'recordType':
             if u'__collection' not in schema.annotations:
                 throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % schema.name)

@@ -76,7 +76,7 @@ class ReferenceResolver(SchemaBuilder):
             else:
                 return node
         if node.funcname == u'typeName':
-            return EnumSchema([schema.name])
+            return EnumSchema([schema.canonical_name])
         elif node.funcname == u'recordType':
             if u'__collection' not in schema.annotations:
                 print schema, schema.annotations
