@@ -354,7 +354,7 @@ Ugly URIサーバーの起動・停止を行う
             rest = ''
         port = 8000
         if cmd == 'start':
-            if self.server is None:
+            if self.uuserver is None:
                 if rest:
                     from caty.util import try_parse
                     port = try_parse(int, rest) or 8000
