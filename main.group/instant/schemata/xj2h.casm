@@ -66,7 +66,7 @@ command xj2h-number :: number -> XJX {
 command xj2h-string :: string -> XJX {
   @span {
     "data-type": "string",
-    "": pass
+    "": text:escape-html
   }
 };
 
@@ -131,7 +131,7 @@ command xj2h-reference :: Reference -> XJX {
 
  @a {
    "data-type": "reference",
-   "href": %url | dump --force,
+   "href": %url | dump,
    "": [ %url ],
  }
 };
