@@ -2,101 +2,113 @@
 
 module ex;
 
-type givenName = (
+@[typical([
   "明"
- | "健二"
- | "太郎"
- | "次郎"
- | "大樹"
- | "翔太"
- | "和彦"
- | "ひろし"
- | "若菜"
- | "あゆみ"
- | "メグミ"
- | "恭子"
- | "由美"
- | "恵子"
-);
+ , "健二"
+ , "太郎"
+ , "次郎"
+ , "大樹"
+ , "翔太"
+ , "和彦"
+ , "ひろし"
+ , "若菜"
+ , "あゆみ"
+ , "メグミ"
+ , "恭子"
+ , "由美"
+ , "恵子"
+])]
+type givenName = string;
 
-type familyName = (
+@[typical([
   "山田"
- | "鈴木"
- | "高橋"
- | "大山"
- | "富士"
- | "秋田"
-);
+ , "鈴木"
+ , "高橋"
+ , "大山"
+ , "富士"
+ , "秋田"
+])]
+type familyName = string;
 
-type personName  = (
+@[typical([
   "山田太郎"
-| "鈴木明"
-| "高橋惠子"
-| "元木ひろし"
-);
-
+, "鈴木明"
+, "高橋惠子"
+, "元木ひろし"
+])]
+type personName  = string;
 
 /* メールアドレス */
-type email = (
+@[typical([
    "foo@example.com"
- | "bar@example.com"
- | "baz@example.com"
- | "foo.bar@example.net"
- | "foo-bar-baz@example.org"
- | "hasimoto-ss@example.jp"
-);
+ , "bar@example.com"
+ , "baz@example.com"
+ , "foo.bar@example.net"
+ , "foo-bar-baz@example.org"
+ , "hasimoto-ss@example.jp"
+])]
+type email = string;
 
-type url = (
+
+@[typical([
    "http://www.w3.org"
- | "http://www.example.org"
- | "http://www.example.com"
- | "http://example.jp"
- | "http://main.example.net"
-);
+ , "http://www.example.org"
+ , "http://www.example.com"
+ , "http://example.jp"
+ , "http://main.example.net"
+])]
+type url = string;
 
 
-type tel = (
+@[typical([
    "03-1234-5678"
- | "090-1234-5678"
- | "080-1234-5678"
- | "04-1234-5678"
-);
+ , "090-1234-5678"
+ , "080-1234-5678"
+ , "04-1234-5678"
+])]
+type tel = string;
 
 /* date …… yyyy-MM-dd（例：2011-02-06） */
-type date = (
+@[typical([
   "2013-08-26"
-| "2010-10-01"
-| "2011-12-31"
-);
+, "2010-10-01"
+, "2011-12-31"
+])]
+type date = string;
 
 /* datetime …… yyyy-MM-ddTHH:mm:ssZ（例：2011-02-06T05:53:22Z） */
-type datetime = (
+@[typical([
  "2013-08-26T08:29:14Z"
-);
+])]
+type datetime = string;
 
 /* datetime-local …… yyyy-MM-ddTHH:mm:ss（例：2011-02-06T14:53:22）*/
-type datetime-local = (
+@[typical([
  "2013-08-26T08:29:14"
-);
+])]
+type datetime-local = string;
 
 /* month …… yyyy-MM（例：2011-02） */
-type month = (
+@[typical([
  "2013-08"
-);
+])]
+type month = string;
 
 /* week …… yyyy-Www（例：2011-W05）。その年における何週目かを表す */
-type week = (
+@[typical([
  "2013-W22"
-);
+])]
+type week = string;
 
 /* time …… HH:mm:ss（例：14:53:22）*/
-type time = (
+@[typical([
   "11:30:46"
-);
+])]
+type time = string;
 
 /* 色のRGB値を16進数で表した文字列 （例：#ffaec9） */
 
-type color = (
+@[typical([
   "#ffaec9"
-);
-
+])]
+type color = string;
