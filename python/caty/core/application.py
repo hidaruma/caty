@@ -561,6 +561,7 @@ class Application(object):
                 self.cout.writeln(traceback)
                 self.cout.writeln(e)
                 raise Exception(self.i18n.get("Failed to validate the AppSpec: $app", app=self.name))
+        self._schema_module.exec_property_command()
 
     def _create_dispatcher(self):
         from caty.core.action import create_resource_action_dispatcher

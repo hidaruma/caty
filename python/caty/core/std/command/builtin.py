@@ -1551,3 +1551,11 @@ class Dissoc(Builtin):
             else:
                 body[u'value'] = json.untagged(body[u'value'])
                 return json.tagged(u'normal', json.tagged(u'__mutate', body))
+
+
+class TypeName(Builtin):
+    def execute(self):
+        print self.type_params[0]
+        return self.type_params[0].canonical_name
+
+

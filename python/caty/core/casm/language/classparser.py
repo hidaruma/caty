@@ -5,7 +5,7 @@ from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, Class
 from caty.core.casm.language.schemaparser import schema, typedef, type_arg, scalar, type_var
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.facilityparser import _entity
-from caty.core.casm.language.commandparser import command, refer, xjson, CallPattern, CommandDecl, CommandURI
+from caty.core.casm.language.commandparser import command, refer, refers as command_refer, xjson, CallPattern, CommandDecl, CommandURI, jump, resource, script, RESERVED
 from caty.core.casm.language.constparser import const
 from caty.core.casm.language.kindparser import kind
 from caty.core.language.util import *
@@ -134,16 +134,26 @@ def property(seq):
     keyword(u'property')(seq)
     with strict():
         pname = name_token(seq)
+        if pname in RESERVED:
+            raise ParseFailed(seq, command, '%s is reserved.' % n)
         S('::')(seq)
         tp = typedef(seq)
-        if option(S('='))(seq):
-            val = seq.parse(xjson.parsers)
-            annotations.add(Annotation(u'__init__', val))
-        S(u';')(seq)
         annotations.add(Annotation(u'__property__'))
-        annotations.add(Annotation(u'bind'))
-        return CommandNode(pname, [CallPattern(None, None, CommandDecl((ScalarNode(u'void'), tp), [], []))], CommandURI([(u'python', 'caty.core.command.Dummy')], False), doc, annotations, [])
-
+        try:
+            patterns = [lambda a, b: CallPattern(None, None, CommandDecl((ScalarNode(u'void'), tp), a, b))]
+        except:
+            import traceback
+            print '+++++++++++++++++++++++++'
+            traceback.print_exc()
+            print '+++++++++++++++++++++++++'
+            raise
+        j = seq.parse(jump)
+        r = seq.parse(many(resource))
+        rf = seq.parse(option([command_refer, script]))
+        nohook(S(u';'))(seq)
+        doc2 = postfix_docstring(seq)
+        doc = concat_docstring(doc, doc2)
+        return CommandNode(pname, map(lambda p:p(j, r), patterns), rf, doc, annotations, [])
 
 def refers(seq):
     try:

@@ -1080,6 +1080,11 @@ exception ArgsTypeError = TypeErrorInfo;
 @[runaway]
 exception Arg0TypeError = TypeErrorInfo;
 
+/** 
+ * 与えられた型パラメータの完全修飾名を出力する。
+ */
+command typeName<S> :: void -> string
+    refers python:builtin.TypeName;
 
 /** タグを除いた内容を出力する 
  * untagged の別名だが、untaggedよりこちらを推奨

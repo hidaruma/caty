@@ -368,6 +368,7 @@ class ClassExprInterpreter(object):
         new_prof[1] = tn.visit(p[1].accept(tc))
         pat.decl.profile = tuple(new_prof)
 
+                
 class Dummy(object):
     def __init__(self, params):
         self.type_params = params

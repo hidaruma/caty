@@ -795,6 +795,36 @@ class Module(Facility):
         for m in self.class_ns.values() + self.sub_modules.values() + self.sub_packages.values():
             m._validate_signature()
 
+    def exec_property_command(self):
+        from caty.core.script.builder import CommandBuilder
+        from caty.core.script.interpreter import CommandExecutor
+        from caty.core.facility import TransactionAdaptor
+        from caty.core.script.proxy import Proxy
+        from caty.core.schema import Annotation
+        from caty.core.command import scriptwrapper
+        if u'__signature' in self.annotations:
+            return
+        facilities = self._app.create_facilities()
+        for m in self.command_ns.values():
+            if u'__property__' in m.annotations:
+                try:
+                    builder = CommandBuilder(facilities, self)
+                    cls = m.get_command_class()
+                    if isinstance(cls, Proxy):
+                        obj = scriptwrapper(m, lambda :cls.instantiate(builder))
+                        cmd = obj([], [], module=self)
+                    else:
+                        cmd = cls([], [], module=self)
+                    cmd.set_facility(facilities)
+                    executable =  CommandExecutor(cmd, self._app, facilities)
+                    r = TransactionAdaptor(executable, facilities)(None)
+                    m.annotations.add(Annotation('__init__', r))
+                except:
+                    print '[DEBUG]', m.canonical_name
+                    raise
+        for m in self.class_ns.values() + self.sub_modules.values() + self.sub_packages.values():
+            m.exec_property_command()
+
     def _loop_exec(self, target, cursor_factory, callback):
         try:
             for k, v in target.items():

@@ -127,3 +127,5 @@ class Set(Builtin):
             path = selector.compile(self.path)
             path.replace(v, rec)
             return self.arg0.replace(self.key, v)
+
+

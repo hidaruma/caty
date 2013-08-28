@@ -25,7 +25,6 @@ kind RecordType = lower object;
 
 type Iterable<T> = ([T*] | foreign);
 
-
 /** 
  * コレクションを操作するコマンドセット 
  */
@@ -46,12 +45,11 @@ signature Collection
 {
  /** 主キー（＝IDフィールド）の型の名前
   */
-  property _keyType :: string(remark="キーの型の名前") ;
+  property keyType :: string(remark="キーの型の名前") = {typeName<Key>};
 
  /** レコードの型の名前
   */
-  property _recordType :: string(remark="レコードの型の名前") ;
-
+  property recordType :: string(remark="レコードの型の名前") = {typeName<Record>};
 
  /** 引数に与えられたキーにより単一レコードを取得する */
  @[reader]
