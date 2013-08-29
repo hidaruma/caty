@@ -1,0 +1,17 @@
+// -*- coding: utf-8 -*- 
+
+module web-util;
+
+
+/* 型パラメータを持つクラス、型に対して汎用なコマンドを定義 
+ */
+class MagicGet<Key=Key default integer, Rec> = {
+    command GET [Key id] :: void -> any {
+        %1 > id;
+        try { get %id } | catch {
+            normal => pass,
+            except => //レコードがなかったら適当な値を生成
+              gen:sample<Rec> --string=implied | insert --output-rec %id,
+        }
+    };
+};

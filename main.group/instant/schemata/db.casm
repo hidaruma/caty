@@ -1,4 +1,5 @@
 // -*- coding: utf-8 -*- 
+
 module db;
 
 /** コレクション参照型（実験的） 
@@ -8,57 +9,26 @@ type reference<C> = @__r {
  "t": typeName<C>, // targetName<C> が望ましいだろう。
 };
 
-
-command to-html [string?] :: any -> string {
-  xj2h:xjson-to-html | xjx:markup  > content;
-[
-'''
-<!DOCTYPE html>
-<html>
-<head>
- <meta charset="utf-8" >
- <title>''',
-%1?="",
-
-'''</title>
- <link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css" />
- <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
- <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
-</head>
-<body>
- <div data-role="page">
-   <div data-role="content" data-add-back-btn="true">
-''',
-%content,
-'''
-  </div>
- </div>
-</body>
-'''
-] | text:concat
+/** エミッター */
+command emit-normal :: any -> WebOutput {
+  wrap-lib:to-jqm-html %UUSERVER_URL | response --ext=html
+  // xjson:to-json | json:response
 };
 
-
-
-/* 型パラメータを持つクラス、型に対して汎用なコマンドを定義 
- */
-class WebMethod<Key, Rec> = {
-    command GET [Key id] :: void -> any {
-        %1 > id;
-        try { get %id } | catch {
-            normal => pass,
-            except => //レコードがなかったら適当な値を生成
-              gen:sample<Rec> --string=implied | insert --output-rec %id,
-        }
-    };
-    
-    command emit-normal :: any -> WebOutput {
-      to-html %UUSERVER_URL | response --ext=html
-    };
+/** 共通に使うMixinクラス */
+class Index = {
+  command index :: void -> [Reference*] {
+    recordType > t;
+    keys |
+    each {
+     pass > k;
+     make-ref %t %k
+    }
+  };
+ 
 };
 
 /* == コレクションの定義 == */
-
 
 /**
  * ランチのコレクション
@@ -78,19 +48,7 @@ collection lunch of {
     "コメント" : ex:sentence?,
   },
 };
-class lunch &= WebMethod<integer, recordType<lunch> > & {
-
-  command index :: void -> [Reference*] {
-    keys |
-    each {
-     pass > k;
-     make-ref db:lunch %k
-    }
-  };
- 
-};
-
-
+class lunch &= web-util:MagicGet<Key=integer, recordType<lunch> > & Index;
 
 /**
  * 会社のコレクション
@@ -101,8 +59,7 @@ collection company of {
  "会社名": string,
  "代表": reference<person>,
 };
-class company &= WebMethod<integer, recordType<company> >;
-
+class company &= web-util:MagicGet<Key=integer, recordType<company> >  & Index;
 
 /**
  * 人物のコレクション
@@ -118,5 +75,5 @@ collection person of {
  "知り合い達": [reference<person>*], //(maxItems=5), // gen:sampleが見ない
  "会社":  reference<company>?,
 };
-class person &= WebMethod<integer, recordType<person> >;
+class person &= web-util:MagicGet<Key=integer, recordType<person> > & Index;
 
