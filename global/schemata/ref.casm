@@ -7,16 +7,17 @@ module ref;
 
 /** 参照から対応するURLを作る 
  */
-command to-url :: Reference -> string {
+command to-url [string? format] :: Reference -> string {
  [
    $.a.0 | to-string > id,
    $.a.1?="$"        > path,
    $.t | text:split ":" | =[pass > mod, pass > cls],
  ];
  [%UUSERVER_URL, app | $.path ] | text:concat   > base;
+ %1?="json"  > format;
 
  [%base, %mod, %cls?="", ""] | text:join "/"    > target-cls;
- ["?_1=", %id, "&_2=", %path] | text:concat > qstring;
+ ["?_1=", %id, "&_2=", %path, "&ft=", %format] | text:concat > qstring;
  
  [%target-cls, %qstring] | text:concat
 

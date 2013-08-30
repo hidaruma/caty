@@ -1,11 +1,16 @@
 /* -*- coding: utf-8 -*- */
+
+module emit-lib;
+
 /** 任意のXJSONデータをクリーンにHTML化する
  */
-module xj2h;
+//module xj2h;
 
 /** 参照型 
  */
-type Reference = @__r {
+type Reference = @__r ReferenceObj;
+
+type ReferenceObj = {
  "t": string,
  "a":[scalar, string?],
 };
@@ -17,7 +22,7 @@ type XJX = deferred any;
 
 /** 任意のXJSONデータをXJX形式のHTMLに変換する 
  */
-@[register-public]
+
 command xjson-to-html :: any -> XJX {
  when {
   /* スカラー */
@@ -127,7 +132,7 @@ command xj2h-reference :: Reference -> XJX {
     $.a.1?=""            > path,
  ];
 */
- ref:to-url html > url;
+ ref:to-url > url;
 
  @a {
    "data-type": "reference",
