@@ -32,17 +32,12 @@ _BLOCK = [
     'blockquote',
 ]
 
-class Markup0(Command):
-    def execute(self, input):
-        return markup(input, u'preview')
-
-
 class Markup(Command):
     def setup(self, opts):
-        self.__media = opts['media'] or u'preview'
+        self.__html = opts['html']
 
     def execute(self, input):
-        return markup(input, self.__media)
+        return markup(input, 'html' if self.__html else None)
 
 class Strip(Command):
 

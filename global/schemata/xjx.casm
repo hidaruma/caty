@@ -1,4 +1,4 @@
 module xjx;
 
-command markup :: any -> string 
- refers python:xjx.Markup0;
+command markup {@[default(false)]"html": boolean?} :: any -> string 
+ refers python:xjx.Markup;
