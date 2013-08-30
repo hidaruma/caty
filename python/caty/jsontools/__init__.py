@@ -470,11 +470,11 @@ def encode(obj):
     u"""Caty 内部形式から JSON 標準形式へと変換する。
     """
     if isinstance(obj, TaggedValue):
-        return {'$$tag': obj.tag, '$$val': encode(obj.value)}
+        return {u'$$tag': obj.tag, u'$$val': encode(obj.value)}
     elif isinstance(obj, TagOnly):
-        return {'$$tag': obj.tag, '$$no-value': True}
+        return {u'$$tag': obj.tag, u'$$no-value': True}
     elif obj is INDEF:
-        return {'$$tag': u'indef', '$$no-value': True}
+        return {u'$$tag': u'indef', u'$$no-value': True}
     elif isinstance(obj, dict):
         n = {}
         for k, v in obj.items():
@@ -490,13 +490,13 @@ def decode(obj):
     内部形式ではタグの扱いが異なる。
     """
     if isinstance(obj, dict):
-        if '$$tag' in obj:
-            if '$$val' in obj:
-                return TaggedValue(obj['$$tag'], decode(obj['$$val']))
-            elif '$$no-value' in obj:
-                if obj['$$tag'] == u'indef':
+        if u'$$tag' in obj:
+            if u'$$val' in obj:
+                return TaggedValue(obj[u'$$tag'], decode(obj[u'$$val']))
+            elif u'$$no-value' in obj:
+                if obj[u'$$tag'] == u'indef':
                     return INDEF
-                return TagOnly(obj['$$tag'])
+                return TagOnly(obj[u'$$tag'])
             else:
                 raise JsonError(ro.i18n.get(u'No $$val or $$no-value that matches to $$tag'))
         else:
