@@ -55,7 +55,7 @@ class JsonResponse(Builtin):
         self._encoding = opts['encoding']
 
     def execute(self, input):
-        out = stdjson.dumps(input, ensure_ascii=False)
+        out = stdjson.dumps(json.normalize(input), ensure_ascii=False)
         return {
             'status': self._status,
             'body': out,
