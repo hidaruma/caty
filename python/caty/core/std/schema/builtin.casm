@@ -1834,6 +1834,9 @@ type DataAddr = @* {
 type Reference = @__r {
  "t": string(remark="型の完全修飾名"),
  "a": [(null|number|string|boolean), string(remark="XJSONパス")?],
+
+ // 実験用にしばらくopenにする。
+ *: any?
 };
 
 /** 参照を解決する */
