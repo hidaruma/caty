@@ -5,9 +5,7 @@ module xj2h;
 
 /** 参照型 
  */
-type Reference = @__r ReferenceObj;
-
-type ReferenceObj = {
+type Reference = @__r {
  "t": string,
  "a":[scalar, string?],
 };
@@ -129,7 +127,7 @@ command xj2h-reference :: Reference -> XJX {
     $.a.1?=""            > path,
  ];
 */
- ref:to-url > url;
+ ref:to-url html > url;
 
  @a {
    "data-type": "reference",

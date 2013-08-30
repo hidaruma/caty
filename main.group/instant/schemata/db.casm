@@ -9,26 +9,21 @@ type reference<C> = @__r {
  "t": typeName<C>, // targetName<C> が望ましいだろう。
 };
 
-/** エミッター */
-command emit-normal :: any -> WebOutput {
-  wrap-lib:to-jqm-html %UUSERVER_URL | response --ext=html
-  // xjson:to-json | json:response
+/** モジュールのエミッター */
+command emit-normal {"ft": string?} :: any -> WebOutput {
+  pass > in;
+  %ft?="json" |
+  cond {
+    "json" => %in | xjson:to-json | json:response,
+    "html" => %in | wrap-lib:to-jqm-html %UUSERVER_URL | response --ext=html,
+     *     => "output format error" | json:response,
+ }
 };
 
-/** 共通に使うMixinクラス */
-class Index = {
-  command index :: void -> [Reference*] {
-    recordType > t;
-    keys |
-    each {
-     pass > k;
-     make-ref %t %k
-    }
-  };
- 
-};
 
-/* == コレクションの定義 == */
+/* 
+ * == コレクションの定義 == 
+ */
 
 /**
  * ランチのコレクション
@@ -48,7 +43,7 @@ collection lunch of {
     "コメント" : ex:sentence?,
   },
 };
-class lunch &= web-util:MagicGet<Key=integer, recordType<lunch> > & Index;
+class lunch &= web-util:MagicGetMix<Key=integer, recordType<lunch> > & web-util:IndexMix;
 
 /**
  * 会社のコレクション
@@ -59,7 +54,7 @@ collection company of {
  "会社名": string,
  "代表": reference<person>,
 };
-class company &= web-util:MagicGet<Key=integer, recordType<company> >  & Index;
+class company &= web-util:MagicGetMix<Key=integer, recordType<company> >  & web-util:IndexMix;
 
 /**
  * 人物のコレクション
@@ -75,5 +70,4 @@ collection person of {
  "知り合い達": [reference<person>*], //(maxItems=5), // gen:sampleが見ない
  "会社":  reference<company>?,
 };
-class person &= web-util:MagicGet<Key=integer, recordType<person> > & Index;
-
+class person &= web-util:MagicGetMix<Key=integer, recordType<person> > & web-util:IndexMix;
