@@ -103,6 +103,7 @@ command xj2h-array :: array -> XJX {
 
  @ol {
    "data-type": "array",
+//   "data-role": "listview",
    "start": "0",
    "" : %con
  }

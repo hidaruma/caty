@@ -4,6 +4,29 @@
  */
 module ref;
 
+/*
+type Reference = @__r {
+ "a": [scalar, string?],
+ "t": string,
+ "v": string?,
+};
+*/
+
+/** 参照を作る */
+@[register-public]
+command make-ref {"verb":string?} [string t, scalar? a1, scalar? a2] :: void -> any/*Reference*/ {
+  %2? |
+  when {
+    undefined => [null],
+    *        => %_ARGV | list:slice 2,
+  } > as;
+  @__r {
+    "t": %1,
+    "a": %as,
+    "v": %verb?,
+  }
+};
+
 
 /** 参照から対応するURLを作る 
  */
@@ -12,13 +35,21 @@ command to-url [string? format] :: Reference -> string {
    $.a.0 | to-string > id,
    $.a.1?="$"        > path,
    $.t | text:split ":" | =[pass > mod, pass > cls],
+   $.v?=""           > verb,
  ];
  [%UUSERVER_URL, app | $.path ] | text:concat   > base;
  %1?="json"  > format;
 
  [%base, %mod, %cls?="", ""] | text:join "/"    > target-cls;
- ["?_1=", %id, "&_2=", %path, "&ft=", %format] | text:concat > qstring;
+ ["?_verb=", %verb, "&_1=", %id, "&_2=", %path, "&ft=", %format] | text:concat > qstring;
  
  [%target-cls, %qstring] | text:concat
 
+};
+
+/** 参照から対応するURLを作る public版
+ */
+@[register-public]
+command ref-to-url [string? format] :: Reference -> string {
+  to-url %--format
 };

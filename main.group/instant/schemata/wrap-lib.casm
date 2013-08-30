@@ -4,7 +4,7 @@ module wrap-lib;
 
 /** XJSONデータをプレーンなのHTML5に変換 */
 command to-plain-html [string?] :: any -> string {
-  xj2h:xjson-to-html | xjx:markup  > content;
+  xj2h:xjson-to-html | xjx:markup --html > content;
 [
 '''
 <!DOCTYPE html>
@@ -30,7 +30,7 @@ command to-plain-html [string?] :: any -> string {
 
 /** XJSONデータをjQueryMobileのHTML5に変換 */
 command to-jqm-html [string?] :: any -> string {
-  xj2h:xjson-to-html | xjx:markup  > content;
+  xj2h:xjson-to-html | xjx:markup --html > content;
 [
 '''
 <!DOCTYPE html>
