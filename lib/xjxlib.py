@@ -101,8 +101,10 @@ class XJXMarkup(object):
                 return u'<%(tag)s>%(body)s</%(tag)s>' % ({'tag': tag, 'body': body})
         else:
             if attrs:
+                if tag in ('li', 'ul', 'ol') and self.mode == u'html':
+                    return u'<%s %s></%s>' % (tag, self._to_attr(attrs), tag) 
                 return u'<%s %s />' % (tag, self._to_attr(attrs)) 
-            elif tag == 'li' and self.mode == u'html':
+            elif tag in ('li', 'ul', 'ol') and self.mode == u'html':
                 return u'<%s></%s>' % (tag, tag) 
             else:
                 return u'<%s />' % (tag)
