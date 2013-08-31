@@ -1072,7 +1072,9 @@ class TypeVariable(SchemaBase, Scalar):
 
 
     def convert(self, value):
-        return self._schema.convert(value) if self._schema else AnySchema().convert(value)
+        return (self._schema.convert(value) if self._schema 
+                else self._default_schema.convert(value) if sefl._default_schema 
+                else AnySchema().convert(value))
 
     def fill_default(self, value):
         return self._schema.fill_default(value) if self._schema else value
