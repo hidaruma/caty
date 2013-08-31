@@ -29,10 +29,23 @@ command emit-normal {"ft": string?} :: any -> WebOutput {
   }
 };
 
+class home = {
+ command GET [(null|number|string) id, string?] :: void -> any {
+  {
+    "title": "home",
+    "content": "hello",
+  }
+ };
+};
+
+command home :: void -> Reference {
+ make-ref db:home null
+};
 
 /* 
  * == コレクションの定義 == 
  */
+
 
 /**
  * ランチのコレクション

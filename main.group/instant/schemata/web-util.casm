@@ -17,6 +17,10 @@ class MagicGetMix
            normal => pass,
            except => //レコードがなかったら適当な値を生成
              gen:sample<Rec> --string=implied | insert --output-rec %id,
+       } |
+       ={
+          "home": home, // homeというコマンドがスコープ内に存在する必要がある。
+          * : pass, 
        }
    };
 };
