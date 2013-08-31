@@ -39,6 +39,7 @@ class PerformerRequestHandler(RequestHandler):
                 for c in cmdnames:
                     if containerobj.has_command_type(c):
                         cmdname = c
+                        break
                 if not c:
                     raise IOError(path)
                 cmd = containerobj.get_command(cmdname)
