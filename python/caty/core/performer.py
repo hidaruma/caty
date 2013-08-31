@@ -27,15 +27,19 @@ class PerformerRequestHandler(RequestHandler):
         args = int_dict_to_list(args)
         opts['0'] = path
         if verb:
-            cmdname = verb
+            cmdnames = [verb]
         else:
-            cmdname = method.upper()
+            cmdnames = [method.upper(), method.lower()]
         try:
             containerobj = self._path_to_container(path)
             if containerobj is None:
                 raise IOError(path)
             else:
-                if not containerobj.has_command_type(cmdname):
+                cmdname = None
+                for c in cmdnames:
+                    if containerobj.has_command_type(c):
+                        cmdname = c
+                if not c:
                     raise IOError(path)
                 cmd = containerobj.get_command(cmdname)
                 emitter = containerobj.get_command(u'emit-normal')
