@@ -118,12 +118,5 @@ class personAlt = {
  };
 
 };
-class home = {
- command get [(null|number|string) id, string?] :: void -> any {
-  {
-    "title": "home",
-    "content": "hello",
-  }
- };
-};
+
 
