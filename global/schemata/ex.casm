@@ -38,6 +38,19 @@ type familyName = string;
 ])]
 type personName  = string;
 
+@[typical([
+  "foo"
+, "bar"
+, "baz"
+, "zot"
+, "hoge"
+, "fuga"
+, "hage"
+, "moo"
+, "goo"
+])]
+type something = string;
+
 
 @[typical([
   "(有)モリモリ商会"
