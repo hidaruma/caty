@@ -84,6 +84,7 @@ class TypeVarApplier(SchemaBuilder):
                             a = arg.body.accept(self)
                             self.type_args[param.var_name] = a
                             args.append(a)
+                            break
                 key = (node.module.name+':'+TreeDumper(True).visit(node), tuple(node.options.items()), tuple(ta))
                 if key in self.history:
                     self.history[key].recursive = True

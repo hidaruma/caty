@@ -293,7 +293,19 @@ class ClassExprInterpreter(object):
         tp = []
         member = []
         origin_module = cls.module
-        for p ,p2 in zip(cls.type_params, obj.type_params):
+        for p in [a for a in cls.type_params if isinstance(a, NamedTypeParam)]:
+            for p2 in [b for b in obj.type_params if isinstance(b, NamedParameterNode)]:
+                if p.arg_name == p2.name:
+                    sb = self.module.make_schema_builder()
+                    sb._type_params = []
+                    rr = self.module.make_reference_resolver()
+                    tn = self.module.make_type_normalizer()
+                    t = tn.visit(p2.accept(sb).accept(rr))
+                    x = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
+                    x._schema = t
+                    tp.append(x)
+        for p ,p2 in zip([a for a in cls.type_params if not isinstance(a, NamedTypeParam)], 
+                         [b for b in obj.type_params if not isinstance(b, NamedParameterNode)]):
             sb = self.module.make_schema_builder()
             sb._type_params = []
             rr = self.module.make_reference_resolver()

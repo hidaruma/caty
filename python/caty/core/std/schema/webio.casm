@@ -613,7 +613,7 @@ command not-allowed [string path, string method] :: void -> never
 
 
 @[register-public]
-command emit-normal :: any -> WebOutput {
+command emit-normal  :: any -> WebOutput {
     xjson:to-json | json:response
 };
 

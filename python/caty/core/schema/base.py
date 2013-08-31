@@ -1447,7 +1447,7 @@ class TypeReference(SchemaBase, Scalar, Ref):
     
     @property
     def type(self):
-        return self.body.type
+        return self.body.type if self.body else u'__reference__'
 
     @property
     def tag(self):

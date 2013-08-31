@@ -64,6 +64,9 @@ class ASTRoot(Root):
     def clone(self):
         return ASTRoot(self._name, self._type_params, self.body, self.__annotation, self.__docstring, self.kind, self.defined, self.redifinable)
 
+    def __repr__(self):
+        return 'ASTRoot<%s>: %s: %s' % (self._type_params, self._name, self.body)
+
     @property
     def type_params(self):
         return self._type_params
@@ -606,6 +609,8 @@ class CommandNode(Function):
         self.redifinable = False
         self.module = None
         self.application = None
+        for p in patterns:
+            p.parent = self
 
     def clone(self):
         r = self.__class__(self.name, 
@@ -697,6 +702,7 @@ class CallPattern(object):
         self.decl = decl
         self.opt_schema = None
         self.arg_schema = None
+        self.parent = None
 
     def clone(self):
         r = CallPattern(self.opts, self.args, self.decl.clone())

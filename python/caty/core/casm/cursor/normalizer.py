@@ -9,6 +9,7 @@ class TypeNormalizer(TreeCursor):
     def __init__(self, module):
         self.module = module
         self.safe = False
+        self.debug = False
 
     def _visit_root(self, node):
         return self.visit(node)
@@ -17,7 +18,14 @@ class TypeNormalizer(TreeCursor):
         ue = UndefinedEraser(self.module)
         ol = OptionLifter(self.module)
         tc = TypeCalcurator(self.module)
-        normalized = tc.visit(ol.visit(ue.visit(node)))
+        if self.debug:
+            normalized = node
+            print normalized
+            for s in [ue, ol, tc]:
+                normalized = s.visit(normalized)
+                print normalized
+        else:
+            normalized = tc.visit(ol.visit(ue.visit(node)))
         nc = NeverChecker(self.module, self.safe)
         nc.visit(normalized)
         vc = VariableChecker(self.module)
