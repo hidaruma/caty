@@ -102,6 +102,7 @@ class PerformerRequestHandler(RequestHandler):
             raise Exception(self.module._app.i18n.get(u'Invalid transaction mode: $mode', mode=str(transaction)))
 
     def _sift_opts_and_args(self, pc, opts, args):
+        from caty.util import try_parse_to_num
         o_schm = pc.profiles[0].opts_schema
         a_schm = pc.profiles[0].args_schema
         cmd_opts = {}
@@ -117,7 +118,7 @@ class PerformerRequestHandler(RequestHandler):
                 cmd_args = args[:len(a_schm)]
         opts_ref = []
         for k, v in cmd_opts.items():
-            opts_ref.append(Option(k, v))
-        args_ref = [Argument(a) for a in cmd_args]
+            opts_ref.append(Option(k, try_parse_to_num(v)))
+        args_ref = [Argument(try_parse_to_num(a)) for a in cmd_args]
         return opts_ref, args_ref
 

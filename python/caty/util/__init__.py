@@ -15,6 +15,10 @@ def try_parse(type, s, fallback=None):
     except:
         return fallback
 
+def try_parse_to_num(o):
+    from decimal import Decimal
+    return try_parse(int, o, try_parse(Decimal, o, o))
+
 def bind1st(f, a):
     def bound(b):
         return f(a, b)

@@ -806,7 +806,7 @@ class CommandExecutor(BaseInterpreter):
                 return data
             if qo.type == u'tag':
                 if json.tag(data) == qo.tag:
-                    return filter(data, qo.value, orig, depth)
+                    return filter_internal(data, qo.value, orig, depth)
                 else:
                     throw_caty_exception(u'BadInput', json.pp(data))
             elif qo.type == u'object':
@@ -817,7 +817,7 @@ class CommandExecutor(BaseInterpreter):
                 obj.update(data)
                 for k, q in qo.queries.items():
                     context.append(k)
-                    r[k] = filter(obj.pop(k, UNDEFINED), q, orig, depth=depth)
+                    r[k] = filter_internal(obj.pop(k, UNDEFINED), q, orig, depth=depth)
                     context.pop(-1)
                 if qo.wildcard:
                     for k, v in obj.items():
@@ -825,7 +825,7 @@ class CommandExecutor(BaseInterpreter):
                             r[k] = v
                         else:
                             context.append(k)
-                            r[k] = filter(v, qo.wildcard, orig, depth=depth)
+                            r[k] = filter_internal(v, qo.wildcard, orig, depth=depth)
                             context.pop(-1)
                 
                 if not node.noself:
@@ -840,13 +840,13 @@ class CommandExecutor(BaseInterpreter):
                 num = 0
                 for q, v in zip(qo.queries, ls):
                     context.append(str(num))
-                    r.append(filter(v, q, orig, depth=depth))
+                    r.append(filter_internal(v, q, orig, depth=depth))
                     context.pop(-1)
                     num += 1
                 if qo.repeat:
                     for v in data[len(qo.queries):]:
                         context.append(str(num))
-                        r.append(filter(v, qo.repeat, orig, depth=depth))
+                        r.append(filter_internal(v, qo.repeat, orig, depth=depth))
                         num += 1
                         context.pop(-1)
                 return r
@@ -857,7 +857,16 @@ class CommandExecutor(BaseInterpreter):
                     p = json.untagged(orig['_self'])
                 return json.tagged(u'__r', {u't': p['type'], u'a': [p['arg'], u'.'.join(['$'] +context)]})
             assert False, qo.type
-
+        def filter_internal(val, q, o, depth):
+            if q.type == 'type' and q.value in (u'any', u'_'):
+                if isinstance(val, dict):
+                    r = {}
+                    for k, v in val.items():
+                        r[k] = filter(v, q, o, depth)
+                    return r
+                elif isinstance(val, list):
+                    return map(lambda v: filter(v, q, o, depth), val)
+                return filter(val, q, o, depth)
         return filter(self.input, node.queries, self.input)
 
     def visit_mutating(self, node):
