@@ -414,6 +414,7 @@ class TypeCalculator(object):
             mod = self.schema.schema_finder
         ast = ASTRoot(u'', [], as_parser(typedef).run(s, auto_remove_ws=True), Annotations([]), u'')
         sb = mod.make_schema_builder()
+        sb._root_name = self.__class__.__name__.lower()
         rr = mod.make_reference_resolver()
         cd = mod.make_cycle_detecter()
         ta = mod.make_typevar_applier()

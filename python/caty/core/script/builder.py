@@ -74,8 +74,8 @@ class ClassModuleWrapper(object):
         if _ta:
             self.__apply_type_params(_ta, type_args)
 
-    def get_origin_module_type_params(self, name):
-        return self.module.get_origin_module_type_params(name)
+    def get_origin_module(self, name):
+        return self.module.get_origin_module(name)
 
     def __apply_type_params(self, type_params, type_args):
         if not type_params:
@@ -165,7 +165,7 @@ class CommandCombinator(Command):
         return self.af(r)
 
     def __repr__(self):
-        return '%s | %s' % (repr(self.bf), repr(self.af))
+        return 'CommandCombinator: %s | %s' % (repr(self.bf), repr(self.af))
 
     def _prepare(self):
         self._prepare_opts()
@@ -192,6 +192,9 @@ class DiscardCombinator(CommandCombinator):
     def __call__(self, input):
         self.bf(input)
         return self.af(None)
+
+    def __repr__(self):
+        return 'DiscardCombinator: %s | %s' % (repr(self.bf), repr(self.af))
 
     def accept(self, visitor):
         return visitor.visit_discard_pipe(self)

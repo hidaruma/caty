@@ -808,7 +808,7 @@ class DiscardProxy(Proxy):
         return self.target.reify()
 
     def accept(self, visitor):
-        pass
+        self.target.accept(visitor)
 
 class FragmentProxy(Proxy):
     reification_type = u'_fragment'
