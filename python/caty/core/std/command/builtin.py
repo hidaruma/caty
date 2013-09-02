@@ -1530,7 +1530,7 @@ class DerefWrapper(Selector):
 
     def run(self, obj):
         for r in self.selector.run(obj):
-            if json.tag(r) == u'__reference':
+            if json.tag(r) == u'__r':
                 yield self.follow.deref(r)
             else:
                 yield r
