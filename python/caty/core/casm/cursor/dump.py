@@ -162,6 +162,11 @@ class TreeDumper(TreeCursor):
         self._process_option(node, buff)
         return ''.join(buff)
 
+    def _visit_named_parameter(self, node):
+        buff = [node.name]
+        buff.append(node.body.accept(self))
+        return ''.join(buff)
+
     def __vist_iter(self, node, buff):
         _buff = []
         self.depth += 1

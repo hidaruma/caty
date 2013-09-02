@@ -1131,5 +1131,7 @@ class NamedParameterNode(SchemaBase):
         return self.body.tag
 
     def accept(self, visitor):
-        return NamedParameterNode(self.name, self.body.accept(visitor))
-
+        if not hasattr(visitor, '_visit_named_parameter'):
+            return NamedParameterNode(self.name, self.body.accept(visitor))
+        else:
+            return visitor._visit_named_parameter(self)
