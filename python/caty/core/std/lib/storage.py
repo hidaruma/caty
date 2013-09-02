@@ -53,14 +53,14 @@ class DefaultStorage(Facility):
     def get(self, k, p=None):
         try:
             r = self.db[k]
-            if not p:
-                return r
-            else:
-                stm = selector.compile(p)
-                return list(stm.select(r))[0]
         except:
             throw_caty_exception(u'NotFound', pp(k))
-        
+        if not p:
+            return r
+        else:
+            stm = selector.compile(p)
+            return list(stm.select(r))[0]
+
     def belongs(self, record):
         return record in self.db.values()
     

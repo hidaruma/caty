@@ -3,7 +3,8 @@ from topdown import *
 from caty.jsontools import stdjson
 from caty.jsontools import xjson
 from caty.jsontools.selector import stm as default_factory
-from caty import UNDEFINED
+from caty.core.spectypes import UNDEFINED
+from caty.core.language import name_token
 
 class JSONPathSelectorParser(Parser):
     def __init__(self, empty_when_error=False, ignore_rest=False, factory=None):
@@ -59,7 +60,7 @@ class JSONPathSelectorParser(Parser):
         return self.factory.PropertySelector(key, optional)
 
     def namestr(self, seq):
-        return seq.parse(Regex(r'[a-z_A-Z][-a-zA-Z_0-9]*'))
+        return seq.parse(name_token)
 
     def quoted(self, seq, qc):
         def series_of_escape(s):

@@ -1452,7 +1452,7 @@ import caty.jsontools.selector as selector
 from caty.core.script.query import Fetcher
 class Dereference(Internal):
     def execute(self, ref):
-        val = Fetcher().fetch_addr(ref, self.current_app, self._facilities)
+        val = Fetcher().fetch_addr(ref, self.current_app, self._facilities, True)
         ref = untagged(ref)
         if u'ext' in ref:
             stm = selector.compile(ref['ext'])
