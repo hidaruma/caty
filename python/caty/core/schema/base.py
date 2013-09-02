@@ -279,7 +279,7 @@ class SchemaBase(Resource):
         try:
             self._check_type_variable([t.name for t in self.type_vars], [])
         except KeyError, e:
-            raise JsonSchemaError(dict(msg=u'Undeclared type variable at $this: $name', name=', '.join(e.args), this=self.name))
+            raise JsonSchemaError(dict(msg=u'Undeclared type variable `$name` in the definition of $this', name=', '.join(e.args), this=self.name))
         except RuntimeError, e:
             print '[ERROR]', self.name
             raise e

@@ -47,7 +47,7 @@ class ProfileBuilder(SchemaBuilder):
             e = pat.verify_type_var(node.type_var_names + [t.var_name for t in self.module.type_params])
             if e:
                 raise CatyException(u'SCHEMA_COMPILE_ERROR', 
-                                    u'Undeclared type variable at $this: $name',
+                                    u'Undeclared type variable `$name` in the definition of $this',
                                     this=node.name, name=e)
             tc = TypeVarApplier(self.module)
             tn = TypeNormalizer(self.module)

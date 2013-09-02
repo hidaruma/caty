@@ -361,7 +361,7 @@ class ClassExprInterpreter(object):
         e = pat.verify_type_var([p.var_name for p in type_params] + [t.var_name for t in cls.type_params])
         if e:
             raise CatyException(u'SCHEMA_COMPILE_ERROR', 
-                                u'Undeclared type variable at $this: $name',
+                                u'Undeclared type variable `$name` in the definition of $this',
                                 this=node.name, name=e)
         tc = TypeVarApplier(cls)
         tn = TypeNormalizer(cls)

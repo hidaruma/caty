@@ -70,7 +70,7 @@ class SchemaBuilder(TreeCursor):
                 if node.default:
                     return node
             raise CatyException(u'SCHEMA_COMPILE_ERROR', 
-                                u'Undeclared type variable at $this: $name',
+                                u'Undeclared type variable `$name` in the definition of $this',
                                 this=(self._root_name or u'public'), name=node.name)
 
     @apply_annotation
