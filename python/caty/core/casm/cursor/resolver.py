@@ -79,7 +79,7 @@ class ReferenceResolver(SchemaBuilder):
             return EnumSchema([schema.canonical_name])
         elif node.funcname == u'recordType':
             if u'__collection' not in schema.annotations:
-                print schema, schema.annotations
+                debug(schema, schema.annotations)
                 throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % schema.name)
             return schema.accept(self).body
 

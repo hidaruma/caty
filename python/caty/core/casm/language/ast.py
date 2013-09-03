@@ -1135,3 +1135,7 @@ class NamedParameterNode(SchemaBase):
             return NamedParameterNode(self.name, self.body.accept(visitor))
         else:
             return visitor._visit_named_parameter(self)
+
+    def __repr__(self):
+        assert False
+

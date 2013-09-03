@@ -13,6 +13,7 @@ from caty.core.exception import throw_caty_exception
 from caty.core.casm.cursor.dump import TreeDumper
 from caty.core.typeinterface import flatten_union
 from caty.core.std.command.builtin import TypeCalculator
+from caty.util.dev import debug
 
 class Sample(Builtin, TypeCalculator):
    
@@ -84,6 +85,11 @@ class ReferenceExpander(SchemaBuilder):
             if node._default_schema:
                 return node._default_schema.accept(self)
         return node
+
+    def _visit_named_parameter(self, node):
+        if node._schema:
+            return node._schema.accept(self)
+        assert False
 
     @apply_annotation
     def _visit_object(self, node):
@@ -212,7 +218,7 @@ class DataGenerator(TreeCursor):
         
     def __has_loop_ref(self, node, cache):
         if isinstance(node, (Root, Ref)):
-            print node
+            debug(node)
             assert False, u'This is a bug'
         elif isinstance(node, Union):
             for n in flatten_union(node, debug=True):
@@ -284,7 +290,7 @@ class DataGenerator(TreeCursor):
             else:
                 return self.__rand_number(node)
         elif isinstance(node, TypeReference):
-            print node.name, node.annotations
+            #print node.name, node.annotations
             return node.body.accept(self)
         elif isinstance(node, UnionSchema):
             return self.__union(node)

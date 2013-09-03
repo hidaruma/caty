@@ -16,7 +16,7 @@ class TypeVarApplier(SchemaBuilder):
         try:
             return SchemaBuilder.visit(self, node)
         except:
-            print TreeDumper().visit(node)
+            debug(TreeDumper().visit(node))
             raise
 
     @apply_annotation

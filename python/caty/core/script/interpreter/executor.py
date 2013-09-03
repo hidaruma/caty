@@ -24,6 +24,7 @@ from caty.core.schema.errors import JsonSchemaError
 
 from caty.core.script.interpreter.base import BaseInterpreter
 from caty.core.script.interpreter.typevar import TypeVarApplier
+from caty.util.dev import debug
 
 class CommandExecutor(BaseInterpreter):
     def __init__(self, cmd, app, facility_set):

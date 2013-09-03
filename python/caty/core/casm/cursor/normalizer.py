@@ -20,10 +20,10 @@ class TypeNormalizer(TreeCursor):
         tc = TypeCalcurator(self.module)
         if self.debug:
             normalized = node
-            print normalized
+            debug(normalized)
             for s in [ue, ol, tc]:
                 normalized = s.visit(normalized)
-                print normalized
+                debug(normalized)
         else:
             normalized = tc.visit(ol.visit(ue.visit(node)))
         nc = NeverChecker(self.module, self.safe)
@@ -42,7 +42,7 @@ class _SubNormalizer(SchemaBuilder):
         try:
             body = node.body.accept(self)
         except Exception as e:
-            print u'[DEBUG]', node.name
+            debug(node.name)
             raise
         node._schema = body
         return node

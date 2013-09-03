@@ -48,6 +48,7 @@ from caty.core.script.proxy import ClassProxy
 from caty.core.script.query import *
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
+from caty.util.dev import debug
 import caty.jsontools.xjson as xjson
 from caty.core.exception import SubCatyException
 from caty.core.command.param import *

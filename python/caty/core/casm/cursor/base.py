@@ -8,6 +8,7 @@ from caty.util.collection import OverlayedDict
 import caty.jsontools as json
 from caty.core.exception import CatyException, throw_caty_exception
 from caty.util import DEBUG
+from caty.util.dev import debug
 
 def apply_annotation(f):
     def _apply(cursor, node):
