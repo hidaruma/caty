@@ -10,7 +10,13 @@ class Fetcher(object):
         import caty.jsontools as json
         import caty.jsontools.selector as selector
         ref = json.untagged(ref)
-        name = ref[u't'] + '.get'
+        cmd_class = None
+        for name in (ref['t'] + '.GET', ref[u't'] + '.get'):
+            if app._schema_module.has_command_type(name):
+                cmd_class = app._schema_module.get_command(name)
+                break
+        if not cmd_class:
+            throw_caty_exception(u'CommandNotFound', name)
         raw_args = [ref[u'a'][0]]
         if len(ref['a']) == 2 and auto_extract:
             raw_args.append(ref[u'a'][1])
