@@ -776,7 +776,7 @@ class CommandExecutor(BaseInterpreter):
             try:
                 node.in_schema.validate(data)
             except:
-                return data
+                pass
             else:
                 orig = data
                 if qo.type == u'address':
@@ -856,7 +856,7 @@ class CommandExecutor(BaseInterpreter):
                     p = json.untagged(orig)
                 else:
                     p = json.untagged(orig['_self'])
-                return json.tagged(u'__r', {u't': p['type'], u'a': [p['arg'], u'.'.join(['$'] +context)]})
+                return json.tagged(u'__r', {u't': p['t'], u'a': [p['a'], u'.'.join(['$'] +context)]})
             assert False, qo.type
         def filter_internal(val, q, o, depth):
             if q.type == 'type' and q.value in (u'any', u'_'):
