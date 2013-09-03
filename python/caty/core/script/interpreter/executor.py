@@ -866,7 +866,7 @@ class CommandExecutor(BaseInterpreter):
                     return r
                 elif isinstance(val, list):
                     return map(lambda v: filter(v, q, o, depth), val)
-                return filter(val, q, o, depth)
+            return filter(val, q, o, depth)
         return filter(self.input, node.queries, self.input)
 
     def visit_mutating(self, node):
