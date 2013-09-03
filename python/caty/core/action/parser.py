@@ -3,7 +3,7 @@ from topdown import *
 from caty.core.casm.language.casmparser import module_decl
 from caty.core.casm.language.schemaparser import object_, typedef
 from caty.core.casm.language.commandparser import resource, jump, CommandScriptParser
-from caty.core.language.util import docstring, annotation, action_fragment_name, annotation, identifier_token, identifier_token_m, name_token, some_token
+from caty.core.language.util import docstring, annotation, action_fragment_name, annotation, identifier_token, identifier_token_m, name_token, some_token, class_identifier_token, class_identifier_token_m
 from caty.jsontools.xjson import obj
 from caty.core.action.resource import ResourceClass
 from caty.core.action.module import ResourceModule
@@ -431,16 +431,16 @@ class StateBlock(Parser):
         return self._script_parser.command(seq, no_opt=True)
 
     def state_ref(self, seq):
-        stname = identifier_token_m(seq)
+        stname = class_identifier_token_m(seq)
         orelse = []
         if option(keyword(u'orelse'))(seq):
             if option(S(u'[')):
-                orelse = split(identifier_token_m, ',')(seq)
+                orelse = split(class_identifier_token_m, ',')(seq)
                 S(']')(seq)
             else:
-                orelse = [identifier_token_m(seq)]
+                orelse = [class_identifier_token_m(seq)]
         if option(keyword(u'by'))(seq):
-            cmd = identifier_token(seq)
+            cmd = class_identifier_token(seq)
         else:
             cmd = None
         return LinkDest(stname, orelse, cmd)
