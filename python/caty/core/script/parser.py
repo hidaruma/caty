@@ -921,9 +921,8 @@ class ScriptParser(Parser):
         o = option(peek(_OPERATORS))(seq)
         if o in ('|', ';'):
             return Empty()
-        if len(self._context) > 1:
-            if option(peek('}'))(seq):
-                return Empty()
+        if option(peek('}'))(seq):
+            return Empty()
         raise ParseFailed(seq, self.pipeline)
 
 def anything(l):
