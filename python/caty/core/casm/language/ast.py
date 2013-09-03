@@ -1136,6 +1136,3 @@ class NamedParameterNode(SchemaBase):
         else:
             return visitor._visit_named_parameter(self)
 
-    def __repr__(self):
-        assert False
-

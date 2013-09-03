@@ -78,6 +78,7 @@ class TypeVarApplier(SchemaBuilder):
                     a = type.accept(self)
                     self.type_args[param.var_name] = a
                     args.append(a)
+                check_named_type_param(node.type_params, node.type_args)
                 for param in [a for a in node.type_params if isinstance(a, NamedTypeParam)]:
                     for arg in [b for b in node.type_args if isinstance(b, NamedParameterNode)]:
                         if param.arg_name == arg.name:

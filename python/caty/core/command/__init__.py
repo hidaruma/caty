@@ -13,6 +13,7 @@ from caty.core.exception import InternalException
 from caty.util.collection import OverlayedDict, MultiMap
 from caty.core.schema.base import SchemaBase
 from caty.core.schema.errors import JsonSchemaError
+from caty.util.dev import debug
 from caty import UNDEFINED
 
 __all__ = ['Command', 'Builtin', 'ScriptError', 'PipelineInterruption', 'PipelineErrorExit', 'compile_builtin']
@@ -108,6 +109,7 @@ class Command(object):
             try:
                 self._opts = self.profile.opts_schema.fill_default(self.profile.opts_schema.convert(self._opts), True)
             except JsonSchemaError, e:
+                debug(self._opts)
                 info = e.error_report(self.i18n)
                 throw_caty_exception(u'OptsTypeError', prettyprint(info), errorInfo=info)
         else:
@@ -116,6 +118,7 @@ class Command(object):
             try:
                 self._args = self.profile.args_schema.convert(self._args)
             except JsonSchemaError, e:
+                debug(self._args)
                 info = e.error_report(self.i18n)
                 throw_caty_exception(u'ArgsTypeError', prettyprint(info), errorInfo=e.error_report(self.i18n))
         else:

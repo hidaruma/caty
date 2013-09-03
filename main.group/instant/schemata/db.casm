@@ -134,7 +134,7 @@ collection person of {
 class person &= 
    web-util:MagicGetMix< recordType<person> > 
  & web-util:IndexMix
- & GenMix<K=integer, recordType<person> > 
+ & GenMix<Key=integer, recordType<person> > 
 ;
 
 

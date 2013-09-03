@@ -1,6 +1,7 @@
 #coding:utf-8
 from caty.core.casm.module.basemodule import *
 from caty.core.casm.language.ast import *
+from caty.core.casm.cursor.base import check_named_type_param
 
 def error_wrapper(f):
     def _(self, *args, **kwds):
@@ -293,6 +294,8 @@ class ClassExprInterpreter(object):
         tp = []
         member = []
         origin_module = cls.module
+        default_named_params = []
+        check_named_type_param(cls.type_params, obj.type_params)
         for p in [a for a in cls.type_params if isinstance(a, NamedTypeParam)]:
             for p2 in [b for b in obj.type_params if isinstance(b, NamedParameterNode)]:
                 if p.arg_name == p2.name:
@@ -304,6 +307,9 @@ class ClassExprInterpreter(object):
                     x = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
                     x._schema = t
                     tp.append(x)
+                    break
+            else:
+                default_named_params.append(TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module))
         for p ,p2 in zip([a for a in cls.type_params if not isinstance(a, NamedTypeParam)], 
                          [b for b in obj.type_params if not isinstance(b, NamedParameterNode)]):
             sb = self.module.make_schema_builder()
@@ -329,7 +335,7 @@ class ClassExprInterpreter(object):
                         self.module.assertions.append(m)
                 if m.script_proxy:
                     m.script_proxy = m.script_proxy.clone()
-                    ScriptTypeVarApplier(tp, cls).visit(m.script_proxy)
+                    ScriptTypeVarApplier(tp, default_named_params, cls).visit(m.script_proxy)
                 for ptn in m.patterns:
                     self.__build_profile(ptn, cls, tp, m.type_params)
                     if u'__collection' in self.module.annotations and m.name in COLLECTION_COMMANDS:
@@ -386,9 +392,10 @@ class Dummy(object):
         self.type_params = params
 
 class ScriptTypeVarApplier(object):
-    def __init__(self, type_params, class_module):
+    def __init__(self, type_params, default_named_params, class_module):
         self.type_params = type_params
         self.class_module = class_module
+        self.default_named_params = default_named_params
 
     def visit(self, node):
         node.accept(self)
@@ -401,5 +408,11 @@ class ScriptTypeVarApplier(object):
                     node.type_args[i] = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.class_module)
                     node.type_args[i]._schema = p._schema
                     break
-    
+            for n in self.default_named_params:
+                if n.var_name == t.name:
+                    scm = self.class_module.get_type(n.default)
+                    node.type_args[i] = TypeVariable(n.var_name, [], n.kind, n.default, {}, self.class_module)
+                    node.type_args[i]._schema = scm
+                    break
+
 

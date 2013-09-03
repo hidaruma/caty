@@ -184,3 +184,10 @@ class SchemaBuilder(TreeCursor):
         else:
             yield node
 
+
+def check_named_type_param(x, y):
+    ntp =  [a.arg_name for a in x if isinstance(a, NamedTypeParam)]
+    npn =  [b.name for b in y if isinstance(b, NamedParameterNode)]
+    for n in npn:
+        if n not in ntp:
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Unknown named type parameter `$name`', name=n)
