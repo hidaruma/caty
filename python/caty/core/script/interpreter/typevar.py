@@ -1,5 +1,6 @@
 from caty.core.script.interpreter.base import BaseInterpreter
 from caty.core.schema.base import TypeVariable
+from caty.util.dev import debug
 
 class TypeVarApplier(BaseInterpreter):
     def __init__(self, type_params):

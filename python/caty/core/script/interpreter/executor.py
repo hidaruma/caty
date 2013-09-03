@@ -856,7 +856,7 @@ class CommandExecutor(BaseInterpreter):
                     p = json.untagged(orig)
                 else:
                     p = json.untagged(orig['_self'])
-                return json.tagged(u'__r', {u't': p['t'], u'a': [p['a'], u'.'.join(['$'] +context)]})
+                return json.tagged(u'__r', {u't': p['t'], u'a': [p['a'][0], u'.'.join(['$'] +context)]})
             assert False, qo.type
         def filter_internal(val, q, o, depth):
             if q.type == 'type' and q.value in (u'any', u'_'):
