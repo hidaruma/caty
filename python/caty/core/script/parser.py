@@ -288,15 +288,25 @@ class ScriptParser(Parser):
     def command(self, seq, no_opt=False):
         if option(peek('$'))(seq):
             return self.xjson_path(seq)
-        name = identifier_token_a(seq)
+        name = choice(class_identifier_token_a, identifier_token_a)(seq)
         if name == u'commitm':
             return CommitM(self.arguments(seq))
-        #if name.endswith('.caty') and name[0] != '/':
-        #    return self.__make_exec_script(name, seq)
+        elif '.' in name:
+            pos = (seq.col-len(name), seq.line)
+            name, mname = name.split('.', 1)
+            type_args2 = option(self.type_args, [])(seq)
+            if not no_opt:
+                opts = self.options(seq)
+                args = self.arguments(seq)
+            else:
+                opts = []
+                args = []
+            return ClassProxy(name, [], CommandProxy(mname, type_args2, opts, args, pos))
         pos = (seq.col-len(name), seq.line)
-        type_args = option(self.type_args, [])(seq)
-        if option(S(u'.'))(seq):
-            mname = name_token(seq)
+        type_args = option(nohook(self.type_args), [])(seq)
+        if option(nohook(peek(u'.')))(seq) and type_args:
+            nohook(S('.'))(seq)
+            mname = nohook(name_token)(seq)
             type_args2 = option(self.type_args, [])(seq)
             if not no_opt:
                 opts = self.options(seq)
