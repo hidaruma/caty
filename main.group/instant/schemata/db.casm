@@ -2,6 +2,29 @@
 
 module db;
 
+/** レコードの自動生成機能をサポートするMixin */
+class GenMix<Key=Key default integer, Rec> = {
+ command generate [integer(minimum=0, maximum=500) n] :: void -> any {
+   list:range 0 %1 |
+   each {
+      gen:sample<Key> > id;
+      gen:sample<Rec> > rec;
+      exists %id |
+      case {
+        true  => undefined,
+        false => %rec | insert %id; %id
+      }
+   } | 
+   list:tighten > inserted;
+   {
+     "inserted": %inserted,
+     "count": (%inserted | list:length), 
+   }
+ };
+
+};
+
+
 /** コレクション参照型（実験的） 
  */
 type reference<C> = @__r {
@@ -64,8 +87,17 @@ collection lunch of {
     "写真": [ex:photo, ex:photo*]?,
     "コメント" : ex:sentence?,
   },
+  "detail": {
+    "お店の地図": ex:photo,
+    "詳しい感想": ex:parag?,
+    "似たランチ一覧": [reference<lunch>, reference<lunch>*]?,
+  }
 };
-class lunch &= web-util:MagicGetMix< recordType<lunch> > & web-util:IndexMix;
+class lunch &= 
+   web-util:MagicGetMix< recordType<lunch> > 
+ & web-util:IndexMix
+ & GenMix<Key=integer, recordType<lunch> > 
+ ;
 
 /**
  * 会社のコレクション
@@ -76,7 +108,11 @@ collection company of {
  "会社名": string,
  "代表": reference<person>,
 };
-class company &= web-util:MagicGetMix< recordType<company> >  & web-util:IndexMix;
+class company &= 
+   web-util:MagicGetMix< recordType<company> >  
+ & web-util:IndexMix
+ & GenMix< recordType<company> > 
+;
 
 /**
  * 人物のコレクション
@@ -95,7 +131,11 @@ collection person of {
  "ランチレポート": [reference<lunch>, reference<lunch>*]?,
 
 } identified ID;
-class person &= web-util:MagicGetMix< recordType<person> > & web-util:IndexMix;
+class person &= 
+   web-util:MagicGetMix< recordType<person> > 
+ & web-util:IndexMix
+ & GenMix<K=integer, recordType<person> > 
+;
 
 
 /** fetchを使った事例
@@ -105,9 +145,30 @@ class personAlt = {
    %1 > id;
 
    make-ref db:person %id | dump --prefix="reference:" |
-   fetch --deref-depth=3 {
+   fetch --deref-depth=2 {
      "ID": _,
-     "知り合い達": _?,
+     "知り合い達": [_*]?,
+//     "知り合い達": _?,
+   }
+ };
+
+};
+
+/**
+ * ランチのサマリー
+ *
+ */
+class lunchSummary = {
+
+ command GET [integer id, string? path] :: void -> any {
+
+   make-ref db:lunch %1 %2? | dump --prefix="reference:" |
+   fetch --deref-depth=1
+   {
+     "id": _,
+     "author": _,
+     "content": _,
+     "detail": &?,
    }
  };
 

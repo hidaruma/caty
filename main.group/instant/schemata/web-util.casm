@@ -11,13 +11,15 @@ class MagicGetMix
   Rec
 > 
 = {
-   command GET [Key id] :: void -> any {
+   command GET [Key id, string? path] :: void -> any {
        %1 > id;
+       %2?="$" > path;
+
        try { get %id } | catch {
            normal => pass,
            except => //レコードがなかったら適当な値を生成
              gen:sample<Rec> --string=implied | insert --output-rec %id,
-       } |
+       } | xjson:get %path | 
        ={
           "home": home, // homeというコマンドがスコープ内に存在する必要がある。
           * : pass, 
@@ -36,3 +38,25 @@ class IndexMix = {
   };
 };
 
+/*
+class Gen<Key=Key default integer, Rec> = {
+ command generate [integer(minimum=0, maximum=500) n] :: void -> any {
+   list:range 0 %1 |
+   each {
+      gen:sample<Key> > id;
+      gen:sample<Rec> > rec;
+      exists %id |
+      case {
+        true  => undefined,
+        false => %rec | insert %id; %id
+      }
+   } | 
+   list:tighten > inserted;
+   {
+     "inserted": %inserted,
+     "count": (%inserted | list:length), 
+   }
+ };
+
+};
+*/
