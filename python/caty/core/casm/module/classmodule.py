@@ -342,7 +342,7 @@ class ClassExprInterpreter(object):
                     m.script_proxy = m.script_proxy.clone()
                     ScriptTypeVarApplier(tp, default_named_params, cls).visit(m.script_proxy)
                 for ptn in m.patterns:
-                    self.__build_profile(ptn, cls, tp, m.type_params)
+                    self.__build_profile(ptn, cls, tp, m.type_params, m.name)
                     if u'__collection' in self.module.annotations and m.name in COLLECTION_COMMANDS:
                         ptn.decl.resource.append((u'uses', [FacilityDecl(self.module.name, None, u'arg0')]))
                 if origin_module and origin_module != self.module and origin_module.name != u'collection':
@@ -352,7 +352,7 @@ class ClassExprInterpreter(object):
                 member.append(m)
         return ClassBody(member, cls.uri)
 
-    def __build_profile(self, pat, cls, tp, type_params):
+    def __build_profile(self, pat, cls, tp, type_params, cmdname):
         from caty.core.casm.language.ast import FacilityDecl
         from caty.core.casm.cursor.base import SchemaBuilder
         from caty.core.casm.cursor.resolver import ReferenceResolver
@@ -373,7 +373,7 @@ class ClassExprInterpreter(object):
         if e:
             raise CatyException(u'SCHEMA_COMPILE_ERROR', 
                                 u'Undeclared type variable `$name` in the definition of $this',
-                                this=node.name, name=e)
+                                this=cmdname, name=e)
         tc = TypeVarApplier(cls)
         tn = TypeNormalizer(cls)
         tc.real_root = False
