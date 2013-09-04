@@ -93,11 +93,7 @@ collection lunch of {
     "似たランチ一覧": [reference<lunch>, reference<lunch>*]?,
   }
 };
-class lunch &= 
-   web-util:MagicGetMix< recordType<lunch> > 
- & web-util:IndexMix
- & GenMix<Key=integer, recordType<lunch> > 
- ;
+class lunch &= WebUtilMix< recordType<lunch> >;
 
 /**
  * 会社のコレクション
@@ -137,6 +133,12 @@ class person &=
  & GenMix<Key=integer, recordType<person> > 
 ;
 
+
+class WebUtilMix<Rec> = 
+   web-util:MagicGetMix< Rec > 
+ & web-util:IndexMix
+ & GenMix< Rec > 
+;
 
 /** fetchを使った事例
  */

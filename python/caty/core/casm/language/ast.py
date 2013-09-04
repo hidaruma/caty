@@ -334,6 +334,9 @@ class AliasNode(object):
         #elif self.type == u'class':
         #    module.add_class(self)
 
+    def clone(self):
+        return self
+
 class Node(object):
     is_alias = False
     def __init__(self, options=None):

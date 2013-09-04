@@ -316,12 +316,17 @@ class ClassExprInterpreter(object):
             sb._type_params = []
             rr = self.module.make_reference_resolver()
             tn = self.module.make_type_normalizer()
+            sb._root_name = cls.name
+            rr._root_name = cls.name
+            tn._root_name = cls.name
             t = tn.visit(p2.accept(sb).accept(rr))
             x = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
             x._schema = t
             tp.append(x)
         assertions = []
-        for m in cls._clsobj.member:
+        exp = cls._clsobj.expression.clone()
+        ClassExpTypeVarApplier(tp).visit(exp)
+        for m in exp.accept(self).member:
             if isinstance(m, ASTRoot):
                 print m
             elif isinstance(m, CommandNode):
@@ -415,4 +420,32 @@ class ScriptTypeVarApplier(object):
                     node.type_args[i]._schema = scm
                     break
 
+class ClassExpTypeVarApplier(object):
+    def __init__(self, type_params):
+        self.type_params = type_params
+     
+    def visit_class_body(self, obj):
+        pass
+
+    def visit_class_intersection(self, obj):
+        obj.left.accept(self)
+        obj.right.accept(self)
+
+    def visit_class_ref(self, obj):
+        obj.type_params = self.type_params
+
+    def visit_class_use(self, obj):
+        obj.cls.accept(self)
+    
+    def visit_class_unuse(self, obj):
+        obj.cls.accept(self)
+    
+    def visit_class_open(self, obj):
+        obj.cls.accept(self)
+
+    def visit_class_close(self, obj):
+        obj.cls.accept(self)
+
+    def visit(self, node):
+        node.accept(self)
 
