@@ -1139,3 +1139,6 @@ class NamedParameterNode(SchemaBase):
         else:
             return visitor._visit_named_parameter(self)
 
+    def __repr__(self):
+        return '%s=%s' % (self.name, repr(self._schema))
+
