@@ -137,6 +137,7 @@ class ClassModule(Module):
                             print '    [ERROR]', u'%s::%s' % (self._app.name, self.canonical_name)
                             raise
                         cursor = m.module.make_profile_builder()
+
                         self.add_command(cursor.visit(m))
                     else:
                         pass
@@ -325,7 +326,7 @@ class ClassExprInterpreter(object):
             tp.append(x)
         assertions = []
         exp = cls._clsobj.expression.clone()
-        ClassExpTypeVarApplier(tp).visit(exp)
+        ClassExpTypeVarApplier(tp, default_named_params).visit(exp)
         for m in exp.accept(self).member:
             if isinstance(m, ASTRoot):
                 print m
@@ -340,6 +341,7 @@ class ClassExprInterpreter(object):
                         self.module.assertions.append(m)
                 if m.script_proxy:
                     m.script_proxy = m.script_proxy.clone()
+                    m.reference_to_implementation = m.script_proxy
                     ScriptTypeVarApplier(tp, default_named_params, cls).visit(m.script_proxy)
                 for ptn in m.patterns:
                     self.__build_profile(ptn, cls, tp, m.type_params, m.name)
@@ -347,6 +349,7 @@ class ClassExprInterpreter(object):
                         ptn.decl.resource.append((u'uses', [FacilityDecl(self.module.name, None, u'arg0')]))
                 if origin_module and origin_module != self.module and origin_module.name != u'collection':
                     m.annotations.add(Annotation(u'__origin_module', origin_module.name))
+
                 member.append(m)
             else:
                 member.append(m)
@@ -421,8 +424,9 @@ class ScriptTypeVarApplier(object):
                     break
 
 class ClassExpTypeVarApplier(object):
-    def __init__(self, type_params):
+    def __init__(self, type_params, default_named_params):
         self.type_params = type_params
+        self.default_named_params  = default_named_params
      
     def visit_class_body(self, obj):
         pass
@@ -433,6 +437,8 @@ class ClassExpTypeVarApplier(object):
 
     def visit_class_ref(self, obj):
         obj.type_params = self.type_params
+        #for p in reversed(self.default_named_params):
+        #    obj.type_params.insert(0, NamedParameterNode(p.var_name, p.default))
 
     def visit_class_use(self, obj):
         obj.cls.accept(self)
