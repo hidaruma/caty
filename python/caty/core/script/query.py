@@ -59,6 +59,7 @@ class ObjectQuery(object):
         self.label = None
         self.optional = False
         self.repeat = False
+        self.value = queries
 
 class ArrayQuery(object):
     type = u'array'
@@ -67,6 +68,7 @@ class ArrayQuery(object):
         self.repeat = repeat
         self.label = None
         self.optional = False
+        self.value = queries
 
 class AddressQuery(object):
     type = u'address'

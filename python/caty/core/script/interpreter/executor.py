@@ -771,7 +771,7 @@ class CommandExecutor(BaseInterpreter):
                     throw_caty_exception(u'Undefined', '.'.join(context) or u'undefined')
             through = False
             resolved = False
-            if qo.type == u'any' and qo.value in labels:
+            if qo.type == u'type' and qo.value in labels:
                 qo = labels[qo.value]
             try:
                 node.in_schema.validate(data)

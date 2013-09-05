@@ -147,9 +147,9 @@ class personAlt = {
    %1 > id;
 
    make-ref db:person %id | dump --prefix="reference:" |
-   fetch --deref-depth=2 {
+   fetch --deref-depth=2 @=Flink {
      "ID": _,
-     "知り合い達": [_*]?,
+     "知り合い達": [Flink*]?,
 //     "知り合い達": _?,
    }
  };
