@@ -7,6 +7,7 @@ class Fetcher(object):
         from caty.core.script.interpreter.executor import CommandExecutor
         from caty.core.script.builder import CommandBuilder
         from caty.core.facility import TransactionPendingAdaptor
+        from caty.core.exception import throw_caty_exception
         import caty.jsontools as json
         import caty.jsontools.selector as selector
         ref = json.untagged(ref)
