@@ -699,8 +699,32 @@ class AssertionNode(CommandNode):
             self.type_var_names = [n.var_name for n in type_params]
             self.type_params = type_params
             self.type_params_ast = type_params
-        module.add_proto_type(self)
+        self._reset_assertion_name(module)
         self.application = module.application
+
+    def _reset_assertion_name(self, module):
+        import re
+        ptn = re.compile(u'_assert_[0-9]+$')
+        nums = []
+        for a in module.assertions + module.proto_ns.values():
+            if '__assert' in a.annotations:
+                if ptn.match(a.name):
+                    nums.append(int(a.name.rsplit('_', 1)[1]))
+        nums.sort()
+        if nums:
+            max_num = nums[-1] + 1
+        else:
+            max_num = 1
+        usables = []
+        for i in range(1, max_num):
+            if i not in nums:
+                usables.append(i)
+        
+        if not self.name or module.has_proto_type(self.name):
+            if usables:
+                self.name = u'_assert_' + str(usables.pop(0))
+            else:
+                self.name = u'_assert_' + str(max_num)
 
 class CallPattern(object):
     def __init__(self, opts, args, decl):

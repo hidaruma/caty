@@ -200,7 +200,7 @@ signature JSLat<T> conforms LBounded<T> = {
 /** 上と下に有界な順序集合 
  */
 @[pure]
-signature Bounded<T> conforms [LBounded<T>, UBounded<T>] = {};
+signature Bounded<T> = use(bottom, first) LBounded<T> & UBounded<T>;
 
 /*{{{
 

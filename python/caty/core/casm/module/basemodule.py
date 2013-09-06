@@ -176,7 +176,9 @@ class Module(Facility):
             if (t.defined and not target.defined):
                 # 定義済みのところを未定義で上書きはできない
                 return
-            elif (t.defined and not target.redifinable) or (type == u'Type' and target.defined == t.defined and t.redifinable == target.redifinable):
+            elif ((t.defined and not target.redifinable) 
+                   or (type == u'Type' and target.defined == t.defined and t.redifinable == target.redifinable)
+                   or (not t.defined and not target.defined)):
                 m, a = self._get_mod_and_app(t)
                 raise Exception(self.application.i18n.get(u'%s $name of $this is already defined in $module of $app' % type, 
                                                    name=name, 

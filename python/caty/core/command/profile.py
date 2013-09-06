@@ -41,6 +41,8 @@ class ProfileContainer(object):
         self.uri = uri
         self.module = module
         self.type_params = []
+        self.defined = self.implemented != u'none'
+        self.redifinable = True
 
     def accept(self, cursor):
         return cursor._visit_profile(self)
@@ -262,6 +264,8 @@ class ScriptProfileContainer(ProfileContainer):
         self.module = module
         self.command_class.set_module(module)
         self.implemented = u'catyscript'
+        self.defined = True
+        self.redifinable = True
 
 class CommandUsageError(Exception): pass
 

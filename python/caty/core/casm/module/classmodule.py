@@ -31,7 +31,7 @@ class ClassModule(Module):
         if auto_decl:
             for m in clsobj.member:
                 m.declare(self)
-                self._declared.add(m)
+                self._declared.add(m.name)
         self._clsrestriction_proto = clsobj.restriction
         self.is_root = False
         self.annotations = clsobj.annotations
@@ -113,20 +113,14 @@ class ClassModule(Module):
                 v.set_arg0_type(self._clsrestriction)
             class_expr_interpreter = ClassExprInterpreter(self)
             class_body = class_expr_interpreter.visit(self._clsobj.expression)
-            self._reset_assertion_names()
             for m in class_body.member:
-                if m in self._declared:
+                if m.name in self._declared:
                     pass
                 else:
                     if isinstance(m, AssertionNode):
                         m.re_declare(self)
-                    elif isinstance(m, CommandNode):
-                        if m.name in self.proto_ns and (m.defined or self.get_proto_type(m.name).defined):
-                            self.add_proto_type(m)
-                        if m.name in self.proto_ns:
-                            continue
-                        if m.name in self.command_ns:
-                            continue
+                    if isinstance(m, CommandNode):
+                        self.add_proto_type(m)
                         if m.module is None:
                             m.module = self
                         if m.application is None:
@@ -139,7 +133,6 @@ class ClassModule(Module):
                             print '    [ERROR]', u'%s::%s' % (self._app.name, self.canonical_name)
                             raise
                         cursor = m.module.make_profile_builder()
-
                         self.add_command(cursor.visit(m))
                     else:
                         pass
@@ -182,30 +175,6 @@ class ClassModule(Module):
                 yield None, None
             elif self.command_loader and self.command_loader.has_module(modname):
                 yield modname, self.command_loader.get_module(modname)
-
-    def _reset_assertion_names(self):
-        import re
-        ptn = re.compile(u'_assert_[0-9]+$')
-        nums = []
-        for a in self.assertions:
-            if ptn.match(a.name):
-                nums.append(int(a.name.rsplit('_', 1)[1]))
-        if nums:
-            max_num = nums[-1] + 1
-        else:
-            max_num = 1
-        usables = []
-        for i in range(1, max_num):
-            if i not in nums:
-                usables.append(i)
-        
-        for a in self.assertions:
-            if not a.name:
-                if usables:
-                    a.name = u'_assert_' + str(usables.pop(0))
-                else:
-                    a.name = u'_assert_' + str(max_num)
-                    max_num += 1
 
 class ClassExprInterpreter(object):
     def __init__(self, class_module):
@@ -330,7 +299,6 @@ class ClassExprInterpreter(object):
             x = TypeVariable(p.var_name, [], p.kind, p.default, {}, self.module)
             x._schema = t
             tp.append(x)
-        assertions = []
         exp = cls._clsobj.expression.clone()
         ClassExpTypeVarApplier(tp, default_named_params).visit(exp)
         for m in exp.accept(self).member:
@@ -342,7 +310,6 @@ class ClassExprInterpreter(object):
                 if isinstance(m, AssertionNode):
                     if m.name in self.module.command_ns:
                         m.name = u''
-                    assertions.append(m)
                     if m not in self.module.assertions:
                         self.module.assertions.append(m)
                 if m.script_proxy:
