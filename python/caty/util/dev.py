@@ -1,4 +1,4 @@
-import traceback
+import sys, traceback
 def debug(*args):
     try:
         print u'(debug)',
@@ -9,4 +9,9 @@ def debug(*args):
         print
     except:
         traceback.print_exc()
+
+def inject_tb(obj):
+    import traceback, sys
+    obj.traceback = ''.join(traceback.format_list(traceback.extract_stack(sys._getframe())))
+
 

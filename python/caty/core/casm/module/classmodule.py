@@ -20,7 +20,7 @@ class ClassModule(Module):
     """
     is_class = True
     is_alias = False
-    def __init__(self, app, parent, clsobj):
+    def __init__(self, app, parent, clsobj, auto_decl=True):
         Module.__init__(self, app, parent)
         self._type = u'class'
         self.command_loader = parent.command_loader
@@ -28,9 +28,10 @@ class ClassModule(Module):
         self._clsobj = clsobj
         self._declared = set()
         self.type_params = clsobj.type_args
-        for m in clsobj.member:
-            m.declare(self)
-            self._declared.add(m)
+        if auto_decl:
+            for m in clsobj.member:
+                m.declare(self)
+                self._declared.add(m)
         self._clsrestriction_proto = clsobj.restriction
         self.is_root = False
         self.annotations = clsobj.annotations
@@ -42,7 +43,8 @@ class ClassModule(Module):
         self.module_and_type_param_map = {}
 
     def clone(self):
-        return ClassModule(self.app, self.parent, self.clsobj)
+        r = ClassModule(self.app, self.parent, self._clsobj.clone(), False)
+        return r
 
     @property
     def uri(self):
@@ -344,7 +346,13 @@ class ClassExprInterpreter(object):
                     m.reference_to_implementation = m.script_proxy
                     ScriptTypeVarApplier(tp, default_named_params, cls).visit(m.script_proxy)
                 for ptn in m.patterns:
-                    self.__build_profile(ptn, cls, tp, m.type_params, m.name)
+                    try:
+                        self.__build_profile(ptn, cls, tp, m.type_params, m.name)
+                    except:
+                        print 'debug', tp
+                        print 'debug', cls.type_params
+                        print 'debug', [p.name if isinstance(p, ScalarNode) else p for p in obj.type_params]
+                        raise
                     if u'__collection' in self.module.annotations and m.name in COLLECTION_COMMANDS:
                         ptn.decl.resource.append((u'uses', [FacilityDecl(self.module.name, None, u'arg0')]))
                 if origin_module and origin_module != self.module and origin_module.name != u'collection':
@@ -372,7 +380,8 @@ class ClassExprInterpreter(object):
         sb = SchemaBuilder(cls)
         sb._type_params = params
         pat.build([sb, rr])
-        e = pat.verify_type_var([p.var_name for p in type_params] + [t.var_name for t in cls.type_params])
+        names = [reduce_type_var_nest(q).var_name for q in tp] + [reduce_type_var_nest(p).var_name for p in type_params] + [t.var_name for t in cls.type_params]
+        e = pat.verify_type_var(names)
         if e:
             raise CatyException(u'SCHEMA_COMPILE_ERROR', 
                                 u'Undeclared type variable `$name` in the definition of $this',
@@ -436,7 +445,8 @@ class ClassExpTypeVarApplier(object):
         obj.right.accept(self)
 
     def visit_class_ref(self, obj):
-        obj.type_params = self.type_params
+        if self.type_params:
+            obj.type_params = self.type_params
         #for p in reversed(self.default_named_params):
         #    obj.type_params.insert(0, NamedParameterNode(p.var_name, p.default))
 
@@ -454,4 +464,10 @@ class ClassExpTypeVarApplier(object):
 
     def visit(self, node):
         node.accept(self)
+
+def reduce_type_var_nest(obj):
+    if isinstance(obj, TypeVariable):
+        if isinstance(obj._schema, TypeVariable):
+            return reduce_type_var_nest(obj._schema)
+    return obj
 

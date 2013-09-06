@@ -995,6 +995,7 @@ class EmptySchema(SchemaBase, Scalar):
     def tag(self):
         return self.type
 
+from caty.util.dev import inject_tb
 class TypeVariable(SchemaBase, Scalar):
     def __init__(self, var_name, type_arguments, kind, default, options, module):
         self.var_name = var_name
@@ -1008,7 +1009,7 @@ class TypeVariable(SchemaBase, Scalar):
         SchemaBase.__init__(self, options)
 
     def __repr__(self):
-        return 'Var<%s>: %s, %s, %s %s' % (self.var_name, repr(self._type_arguments), repr(self._schema), repr(self._default), str(id(self)))
+        return 'Var<%s>: [%s %s %s %s]' % (self.var_name, repr(self._type_arguments), repr(self._schema), repr(self._default), str(id(self)))
 
     @property
     def default(self):

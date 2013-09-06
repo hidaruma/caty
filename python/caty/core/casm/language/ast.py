@@ -140,6 +140,10 @@ class ClassNode(object):
         self.redifinable = type == u'&='
         self.underlyingtype = None
         self.module = None
+        self.__type = type
+
+    def clone(self):
+        return ClassNode(self.name, self.expression.clone(), self.restriction, self.codomain, None, self.docstring, self.annotations, self.type_args[:], self.__type)
 
     def declare(self, module):
         if self.module is None: # 他のモジュールへのアタッチ時には不要な処理
@@ -208,7 +212,7 @@ class ClassReference(object):
         return visitor.visit_class_ref(self)
 
     def clone(self):
-        return ClassReference(self.name, self.type_params)
+        return ClassReference(self.name, self.type_params[:])
 
 class ClassIntersectionOperator(object):
     def __init__(self, left, right):
