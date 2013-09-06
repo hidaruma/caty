@@ -2,28 +2,11 @@
 
 module db;
 
-/** レコードの自動生成機能をサポートするMixin */
-class GenMix<Key=Key default integer, Rec> = {
- command generate [integer(minimum=0, maximum=500) n] :: void -> any {
-   list:range 0 %1 |
-   each {
-      gen:sample<Key> > id;
-      gen:sample<Rec> > rec;
-      exists %id |
-      case {
-        true  => undefined,
-        false => %rec | insert %id; %id
-      }
-   } | 
-   list:tighten > inserted;
-   {
-     "inserted": %inserted,
-     "count": (%inserted | list:length), 
-   }
- };
-
-};
-
+class WebUtilMix<Rec> = 
+   web-util:MagicGetMix< Rec > 
+ & web-util:IndexMix
+ & web-util:GenMix< Rec > 
+;
 
 /** コレクション参照型（実験的） 
  */
@@ -66,6 +49,42 @@ command home :: void -> Reference {
 };
 
 /* 
+ * == 参照の書き換え
+ */
+
+command rewrite-reference [string from, string to] :: any -> any {
+ when {
+  /* スカラー */
+  null    => pass,
+  boolean => pass,
+  indef   => pass,
+  number  => pass,
+  string  => pass,
+  binary  => pass,
+
+  /* 複合型 */
+  object  => each --obj {rewrite-reference %1 %2 },
+
+  array   => each {rewrite-reference %1 %2},
+
+  __r     => rr-reference %1 %2,
+
+  /* その他のタグ付き */
+  * ==> [tag, content | rewrite-reference %1 %2] | tagged
+ }
+};
+
+command rr-reference  [string form, string to] :: object -> Reference {
+  pass > in |
+  [$.t, %1] | eq |
+  when {
+   True  => @__r (%in | ={"t": %2, *:pass}),
+   False => @__r %in,
+  }
+};
+
+
+/* 
  * == コレクションの定義 == 
  */
 
@@ -95,6 +114,7 @@ collection lunch of {
 };
 class lunch &= WebUtilMix< recordType<lunch> >;
 
+
 /**
  * 会社のコレクション
  *
@@ -107,7 +127,7 @@ collection company of {
 class company &= 
    web-util:MagicGetMix< recordType<company> >  
  & web-util:IndexMix
- & GenMix< recordType<company> > 
+ & web-util:GenMix< recordType<company> > 
 ;
 
 /**
@@ -130,28 +150,26 @@ collection person of {
 class person &= 
    web-util:MagicGetMix< recordType<person> > 
  & web-util:IndexMix
- & GenMix<Key=integer, recordType<person> > 
+ & web-util:GenMix< recordType<person> > 
 ;
 
-
-class WebUtilMix<Rec> = 
-   web-util:MagicGetMix< Rec > 
- & web-util:IndexMix
- & GenMix< Rec > 
-;
+/*
+ *==  fetchを使った事例 ==
+ */
 
 /** fetchを使った事例
  */
 class personAlt = {
+
  command GET [integer id, string? path] :: void -> any {
    %1 > id;
 
    make-ref db:person %id | dump --prefix="reference:" |
    fetch --deref-depth=2 @=Flink {
      "ID": _,
+     "名前":_,
      "知り合い達": [Flink*]?,
-//     "知り合い達": _?,
-   }
+   } | rewrite-reference db:person db:personAlt
  };
 
 };
@@ -163,7 +181,6 @@ class personAlt = {
 class lunchSummary = {
 
  command GET [integer id, string? path] :: void -> any {
-
    make-ref db:lunch %1 %2? | dump --prefix="reference:" |
    fetch --deref-depth=1
    {
@@ -175,3 +192,4 @@ class lunchSummary = {
  };
 
 };
+
