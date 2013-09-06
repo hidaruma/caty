@@ -48,7 +48,10 @@ def op(seq):
 
 @try_
 def class_expression(seq):
-    return chainl(choice(class_term, use, unuse, open,  close, class_definition, class_ref), op, allow_trailing_operator=True)(seq)
+    return chainl(class_main, op, allow_trailing_operator=True)(seq)
+
+def class_main(seq):
+    return choice(class_term, use, unuse, open,  close, class_definition, class_ref)(seq)
 
 def class_definition(seq):
     S(u'{')(seq)
@@ -82,7 +85,7 @@ def use(seq):
     _ = seq.parse('(')
     r = option(split(_use_item, u','), [])(seq)
     _ = seq.parse(')')
-    body = class_expression(seq)
+    body = class_main(seq)
     return UseOperator(r, body)
 
 def unuse(seq):
@@ -94,17 +97,17 @@ def unuse(seq):
     _ = seq.parse('(')
     r = option(split(_unuse_item, u','), [])(seq)
     _ = seq.parse(')')
-    body = class_expression(seq)
+    body = class_main(seq)
     return UnuseOperator(r, body)
 
 def close(seq):
     keyword(u'close')(seq)
-    body = class_expression(seq)
+    body = class_main(seq)
     return CloseOperator(body)
 
 def open(seq):
     keyword(u'open')(seq)
-    body = class_expression(seq)
+    body = class_main(seq)
     return OpenOperator(body)
 
 def abs_type(seq):

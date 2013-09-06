@@ -258,7 +258,11 @@ class ClassExprInterpreter(object):
                     if a is not None:
                         m = m.clone()
                         m.name = a
-                    new_mem.add(m)
+                    for i in new_mem:
+                        if i.name == m.name:
+                            break
+                    else:
+                        new_mem.add(m)
         r.member = list(new_mem)
         return r
 
