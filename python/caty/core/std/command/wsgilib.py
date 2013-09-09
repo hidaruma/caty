@@ -308,7 +308,7 @@ class MapException(Builtin):
     def execute(self, e):
         from caty.core.handler import ErrorDispacher
         from caty.core.exception import CatyException
-        return ErrorDispacher(self.i18n).dispatch_error(CatyException(e.tag, e.value['message'], e.value))
+        return ErrorDispacher(self.i18n).dispatch_error(CatyException(e.tag, **e.value))
 
 class MapSignal(Builtin):
     def execute(self, e):
