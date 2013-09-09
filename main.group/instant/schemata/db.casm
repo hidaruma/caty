@@ -48,6 +48,10 @@ command home :: void -> Reference {
  make-ref db:home null
 };
 
+command collections :: void -> [string*] {
+    sreif:list-classes db | take {$.anno | $.__collection? } | each {$.name}
+};
+
 /* 
  * == 参照の書き換え
  */
