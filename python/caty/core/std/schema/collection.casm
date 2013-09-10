@@ -112,10 +112,6 @@ signature Collection
    throws Unsupported
  ;
 
- /** すべてのレコードを列挙する */
- @[deprecated, reader]
- command all :: void -> Iterable<Record>;
-
  /** レコードを列挙する 
   * 先頭から何個かのレコードをスキップでき、
   * 列挙するレコードの最大数を指定できる。
@@ -232,13 +228,6 @@ signature Collection
 
 
  /* == デフォルト実装付きのコマンドプロファイル == */
-
- /** 入力に与えられたキーとフラグメントパスからレコードポーションを得る */
- @[deprecated, reader]
- command get_ :: [Key, FragmentPath?] -> any throws NotFound {
-   =[ pass > k, pass > p];
-   get %k %p?
- };
 
  /** 存在すればレコードを取得し、そうでないならundefinedを返す */
  @[reader]
