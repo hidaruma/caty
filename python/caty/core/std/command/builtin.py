@@ -1216,11 +1216,14 @@ class Help(Builtin):
         mode = 'usage' # usage or list or module_usage oe list_modules
         command = ''
         chunk = line.split(':')
+        cls = u''
         if len(chunk) == 1:
-            if chunk[0] != '*':
+            if chunk[0] != '*' and not '.*' in chunk[0]:
                 command = chunk[0]
                 mode = 'usage'
             else:
+                if chunk[0] != '*':
+                    cls = chunk[0].split('.*')[0]
                 mode = 'list'
         elif len(chunk) == 2:
             if chunk[0] == '*':
@@ -1258,6 +1261,8 @@ class Help(Builtin):
             for module in modules:
                 if '.' not in module:
                     mod = self.schema.get_module(module)
+                    if cls and mod.has_class(cls):
+                        mod = mod.get_class(cls)
                 else:
                     m, c = module.split('.')
                     mod = self.schema.get_module(m).get_class(c)
