@@ -78,3 +78,11 @@ class AddressQuery(object):
         self.label = None
         self.optional = False
         self.repeat = False
+
+class ReferenceQuery(object):
+    type = u'reference'
+    def __init__(self):
+        self.value = None
+        self.label = None
+        self.optional = False
+        self.repeat = False

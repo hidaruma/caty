@@ -781,7 +781,7 @@ class CommandExecutor(BaseInterpreter):
                 orig = data
                 if qo.type == u'address':
                     return data
-                if (node.deref_depth > depth) and (node.auto or depth == 0):
+                if (node.deref_depth > depth) and (node.auto or depth == 0 or qo.type == u'reference'):
                     if json.tag(data) != u'__r':
                         #参照型ではなく_selfに参照がある場合、あらかじめderefが済んでいるものとする。
                         data = data
@@ -791,16 +791,15 @@ class CommandExecutor(BaseInterpreter):
                     resolved = True
                 else:
                     return data
-            if qo.type == u'type':
-                if qo.value in (u'any', u'_'):
-                    if isinstance(data, dict):
-                        qo = ObjectQuery({}, TypeQuery(None, u'any'))
-                    elif isinstance(data, list):
-                        qo = ArrayQuery([], TypeQuery(None, u'any'))
-                    elif isinstance(data, TaggedValue):
-                        qo = TagQuery(data.tag, TypeQuery(None, u'any'))
-                    else:
-                        through = True
+            if (qo.type == u'type' and qo.value in (u'any', u'_')) or qo.type == u'reference':
+                if isinstance(data, dict):
+                    qo = ObjectQuery({}, TypeQuery(None, u'any'))
+                elif isinstance(data, list):
+                    qo = ArrayQuery([], TypeQuery(None, u'any'))
+                elif isinstance(data, TaggedValue):
+                    qo = TagQuery(data.tag, TypeQuery(None, u'any'))
+                else:
+                    through = True
             if qo.label:
                 labels[qo.label] = qo
             if through:

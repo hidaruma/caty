@@ -168,8 +168,8 @@ class ScriptParser(Parser):
             label_list = set([label])
         else:
             label_list.add(label)
-        v = option(choice(u'&', name_token))(seq)
-        if v and v not in (u'any', u'_', u'&') and v not in label_list:
+        v = option(choice(u'&', u'!', name_token))(seq)
+        if v and v not in (u'any', u'_', u'&', u'!') and v not in label_list:
             raise ParseError(seq, u'Undefined label: %s' % v)
         if not v:
             r = choice(#xjson.string, 
@@ -186,6 +186,8 @@ class ScriptParser(Parser):
             r.label = label
         elif v == u'&':
             r = AddressQuery()
+        elif v == u'!':
+            r = ReferenceQuery()
         else:
             r = TypeQuery(label, v)
         r.optional = option(S(u'?'))(seq)
