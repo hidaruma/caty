@@ -781,7 +781,7 @@ class CommandExecutor(BaseInterpreter):
                 orig = data
                 if qo.type == u'address':
                     return data
-                if (node.deref_depth > depth):
+                if (node.deref_depth > depth) and (node.auto or depth == 0):
                     if json.tag(data) != u'__r':
                         #参照型ではなく_selfに参照がある場合、あらかじめderefが済んでいるものとする。
                         data = data
