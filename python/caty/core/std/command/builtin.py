@@ -1234,6 +1234,10 @@ class Help(Builtin):
                     return (u'引数エラー: %s' % line)
                 elif chunk[1] == '*':
                     mode = 'list'
+                elif '.*' in chunk[1]:
+                    cls = chunk[1].split('.*', 1)[0]
+                    module = module + '.' + cls
+                    mode = 'list'
                 else:
                     command = chunk[1]
         if mode == 'usage':
@@ -1252,8 +1256,13 @@ class Help(Builtin):
             else:
                 modules = [u'builtin', u'public']
             for module in modules:
+                if '.' not in module:
+                    mod = self.schema.get_module(module)
+                else:
+                    m, c = module.split('.')
+                    mod = self.schema.get_module(m).get_class(c)
                 commands = [(s.name, make_structured_doc(s.docstring).get('description', u'undocumented')) 
-                         for s in self.schema.get_module(module).command_ns.values()
+                         for s in mod.command_ns.values()
                          if (not query) or (query in s.annotations) and not s.name.startswith('__')
                         ]
                 commands.sort(cmp=lambda x, y:cmp(x[0], y[0]))
