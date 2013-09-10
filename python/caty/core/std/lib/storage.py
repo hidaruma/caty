@@ -73,6 +73,12 @@ class DefaultStorage(Facility):
     def all(self):
         return list(self.db.values())
 
+    def slice(self, from_idx, to_idx=None):
+        if to_idx:
+            return self.db.values()[from_idx:from_idx+to_idx]
+        else:
+            return self.db.values()[from_idx:]
+
     def insert(self, k, v):
         if k == None:
             path = selector.compile(self.keytype, True)

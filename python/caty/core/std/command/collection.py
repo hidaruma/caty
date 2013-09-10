@@ -49,7 +49,18 @@ class Keys(Builtin):
         return self.arg0.keys()
 
 class List(Builtin):
+    def setup(self, opts):
+        self.skip = opts['skip']
+        self.max = opts['max']
+
     def execute(self):
+        if self.max != u'unbounded':
+            if self.skip:
+                return self.arg0.slice(self.skip, self.max)
+            else:
+                return self.arg0.slice(0, self.max)
+        if self.skip:
+            return self.arg0.slice(self.skip)
         return self.arg0.all()
 
 class All(List):
