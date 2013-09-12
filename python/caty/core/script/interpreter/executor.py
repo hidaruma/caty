@@ -763,6 +763,23 @@ class CommandExecutor(BaseInterpreter):
         fetcher = Fetcher()
         labels = {}
         context = []
+        def process_type_query(qo, data):
+            through = False
+            if (qo.type == u'type' and qo.value in (u'any', u'_')):
+                if isinstance(data, dict):
+                    qo = ObjectQuery({}, TypeQuery(None, u'any'))
+                elif isinstance(data, list):
+                    qo = ArrayQuery([], TypeQuery(None, u'any'))
+                elif isinstance(data, TaggedValue):
+                    qo = TagQuery(data.tag, TypeQuery(None, u'any'))
+                else:
+                    through = True
+            elif qo.type == u'reference':
+                qo, through = process_type_query(qo.value, data)
+                if qo.type == u'type' and qo.value in labels:
+                    qo = labels[qo.value]
+            return qo, through
+
         def filter(data, qo, orig, depth=0):
             if data is UNDEFINED:
                 if qo.optional:
@@ -791,15 +808,8 @@ class CommandExecutor(BaseInterpreter):
                     resolved = True
                 else:
                     return data
-            if (qo.type == u'type' and qo.value in (u'any', u'_')) or qo.type == u'reference':
-                if isinstance(data, dict):
-                    qo = ObjectQuery({}, TypeQuery(None, u'any'))
-                elif isinstance(data, list):
-                    qo = ArrayQuery([], TypeQuery(None, u'any'))
-                elif isinstance(data, TaggedValue):
-                    qo = TagQuery(data.tag, TypeQuery(None, u'any'))
-                else:
-                    through = True
+
+            qo, through = process_type_query(qo, data)
             if qo.label:
                 labels[qo.label] = qo
             if through:

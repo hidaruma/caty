@@ -81,8 +81,8 @@ class AddressQuery(object):
 
 class ReferenceQuery(object):
     type = u'reference'
-    def __init__(self):
-        self.value = None
+    def __init__(self, subq):
+        self.value = subq
         self.label = None
         self.optional = False
         self.repeat = False

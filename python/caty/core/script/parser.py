@@ -152,9 +152,9 @@ class ScriptParser(Parser):
         n = choice(S(u'*'), xjson.string)(seq)
         if not seq.parse(option(':')):
             if seq.eof:
-                raise EndOfBuffer(seq, self.query)
+                raise EndOfBuffer(seq, self.query_item)
             else:
-                raise ParseError(seq, self.query)
+                raise ParseError(seq, self.query_item)
         return (n, self.query_value(seq, label_list))
 
     def query_value(self, seq, label_list=frozenset()):
@@ -168,26 +168,22 @@ class ScriptParser(Parser):
             label_list = set([label])
         else:
             label_list.add(label)
+        q = choice(try_(bind2nd(self.obj_query, label_list)),
+                       try_(bind2nd(self.array_query, label_list)),
+                       try_(bind2nd(self.tag_query, label_list)))
         v = option(choice(u'&', u'!', name_token))(seq)
         if v and v not in (u'any', u'_', u'&', u'!') and v not in label_list:
             raise ParseError(seq, u'Undefined label: %s' % v)
         if not v:
-            r = choice(#xjson.string, 
-                          #xjson.binary,
-                          #xjson.multiline_string,
-                          #bind2nd(xjson.null, True), 
-                          #bind2nd(xjson.number, True), 
-                          #bind2nd(xjson.integer, True), 
-                          #bind2nd(xjson.boolean, True),
-                          try_(bind2nd(self.obj_query, label_list)),
-                          try_(bind2nd(self.array_query, label_list)),
-                          try_(bind2nd(self.tag_query, label_list)),
-                          )(seq)
+            r = q(seq)
             r.label = label
         elif v == u'&':
             r = AddressQuery()
         elif v == u'!':
-            r = ReferenceQuery()
+            subq = option(lambda s: self.query_value(s, label_list), TypeQuery(label, u'_'))(seq)
+            if isinstance(subq, ReferenceQuery):
+                raise ParseFailed(seq, u'!')
+            r = ReferenceQuery(subq)
         else:
             r = TypeQuery(label, v)
         r.optional = option(S(u'?'))(seq)
