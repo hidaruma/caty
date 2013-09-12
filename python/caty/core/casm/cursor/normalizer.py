@@ -563,7 +563,7 @@ class NeverChecker(_SubNormalizer):
                 if is_never:
                     pass
                 else:
-                    throw_caty_exception(ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
+                    throw_caty_exception(u'SCHEMA_COMPILE_ERROR', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
             a = u[0].accept(self)
             b = u[1].accept(self)
             if a and b:
