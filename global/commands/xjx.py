@@ -44,6 +44,30 @@ class Strip(Command):
     def execute(self, input):
         return strip(input)
 
+import xml.dom.minidom as dom
+class Parse(Command):
+    def execute(self, input):
+        tree = dom.parseString(input.encode(u'utf-8'))
+        return self._tree_to_xjx(tree)
+
+    def _tree_to_xjx(self, tree):
+        if tree.nodeType == dom.Document.nodeType:
+            r = []
+            for c in tree.childNodes:
+                r.append(self._tree_to_xjx(c))
+            return filter(lambda x: x is not None, r)
+        elif tree.nodeType == dom.Text.nodeType:
+            return tree.data
+        elif tree.nodeType == dom.Element.nodeType:
+            r = {u'': []}
+            for k, v in tree.attributes.items():
+                r[k] = v
+            b = []
+            for c in tree.childNodes:
+                b.append(self._tree_to_xjx(c))
+            r[u''] = filter(lambda x: x is not None, b)
+            return json.tagged(tree.nodeName, r)
+
 class Validate(Command, TypeCalculator):
 
     def setup(self, opts, schema_name):

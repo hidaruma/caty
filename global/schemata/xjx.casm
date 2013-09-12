@@ -1,4 +1,16 @@
 module xjx;
 
-command markup {@[default(false)]"html": boolean?} :: any -> string 
- refers python:xjx.Markup;
+command markup {@[default(false)]"html": boolean?} :: Content | Text | Element -> string 
+    refers python:xjx.Markup;
+
+command parse :: string -> Content | Text | Element
+    refers python:xjx.Parse;
+
+type Content = [(Text | Element)*];
+type Text = string(minLength = 1);
+type AttributeValue = string; // 将来、変更されるかもしれない、例えば (string | [string*])
+type Element = @* {
+  "": Content, // 内容
+  *: AttributeValue?, // 属性
+};
+
