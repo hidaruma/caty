@@ -1392,7 +1392,7 @@ class ArrayToObject(Builtin):
                 if k not in r:
                     r[k] = v
                 else:
-                    throw_caty_exception(u'BadInput', u'$data', data=input)
+                    throw_caty_exception(u'BadInput', u'Duplicated key: $data', data=k)
             return r
 
 
