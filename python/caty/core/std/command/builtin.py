@@ -1388,7 +1388,7 @@ class ArrayToObject(Builtin):
             return r
         else:
             r = {}
-            for k, v in input:
+            for k, v in filter(lambda x: x is not UNDEFINED, input):
                 if k not in r:
                     r[k] = v
                 else:
