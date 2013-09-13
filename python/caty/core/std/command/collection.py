@@ -139,4 +139,48 @@ class Set(Builtin):
             path.replace(v, rec)
             return self.arg0.replace(self.key, v)
 
+class Grep(Builtin):
+    def execute(self, query):
+        r = []
+        for k in self.arg0.keys():
+            if self.match(self.arg0.get(k), query):
+                r.append(k)
+        return r
+
+    def match(self, value, query):
+        for k, q in query.items():
+            if k not in value:
+                return False
+            data = value[k]
+            if isinstance(q, unicode):
+                if not isinstance(data, unicode):
+                    return False
+                if q not in data:
+                    return False
+            elif isinstance(q, list):
+                if not isinstance(data, unicode):
+                    return False
+                for subq in q:
+                    if subq not in data:
+                        return False
+            elif isinstance(q, dict):
+                if not isinstance(data, dict):
+                    return False
+                if not self.match(data, q):
+                    return False
+            else:
+                if not isinstance(data, unicode):
+                    return False
+                if q.tag == u'or':
+                    for subq in q.value:
+                        if subq in data:
+                            break
+                    else:
+                        return False
+                else:
+                    for subq in q.value:
+                        if subq not in data:
+                            return False
+        return True
+
 
