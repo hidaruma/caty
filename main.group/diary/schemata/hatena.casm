@@ -248,5 +248,6 @@ syntax 内容 = string(remark="次のヘッドラインまたはストリーム�
 /** 一日分のデータに含まれるエントリーを抜き出す 
  */
 command entries-from-day :: day -> [entry*]
+    refers python:hatena.EntriesFromDay
 ;
 
