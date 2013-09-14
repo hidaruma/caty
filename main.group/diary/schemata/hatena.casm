@@ -1,0 +1,252 @@
+// -*- coding: utf-8 -*-
+
+module hatena;
+
+/*== はてなXML形式の定義 ==*/
+
+type diaryElement = @diary {
+ "": [ (string | dayElement)* ]
+};
+
+type dayElement = @day {
+  "date": string?,
+  "title": string?,
+
+  "": [ (string|bodyElement|commentsElement)* ]
+};
+type dayContent = extract $.'' dayElement;
+
+type bodyElement = @body {
+  "": [ string* ]
+};
+
+type commentsElement = @comments {
+  "": [ (string | commentElement)* ]
+};
+type commentsContent = extract $.'' commentsElement;
+
+type commentElement = @comment {
+  "": [ (string | bodyElement|usernameElement|timestampElement)* ]
+};
+
+type usernameElement = @username {
+  "": [string*]
+};
+
+type timestampElement = @timestamp {
+  "": [string*]
+};
+
+/*== JSON形式の定義 ==*/
+
+type diary = [day*];
+
+type dayMain = {
+ "body": string,
+ "comments": [comment, comment*]?,
+};
+
+type day = dayMain ++ {
+ "id": integer?,
+ "date": common:date,
+ "title": string,
+};
+
+type comment = {
+ "commentBody": string,
+ "username": string,
+ "timestamp": string
+};
+
+/*== 処理コマンド ==*/
+
+command process :: [ diaryElement ] -> diary {
+ $.0 | process-diary
+};
+
+command process-diary :: diaryElement -> [day*] {
+ $.'' > con;
+ // %con : [ (string | dayElement)* ]
+
+ %con |
+ each {
+  when {
+    string => undefined,
+    day ==> process-day,
+  }
+ } | list:tighten // 余分なテキストノードがあるので
+};
+
+command process-day :: dayElement -> day {
+ [
+   $.date?=""  > date,
+   $.title?="" > title,
+   $.'' |  process-day-content > con,
+ ];
+
+ [
+   {
+    "date": %date,
+    "title": %title
+   },
+   %con
+ ] | xjson:merge
+};
+
+command process-day-content :: dayContent -> dayMain {
+ // [ (string|bodyElement|commentsElement)* ]
+ each {
+  when {
+   string => undefined,
+   body => ["body", $.''| text:concat],
+   comments ==> ["comments", process-comments],
+  }
+ } | array-to-object 
+};
+
+command process-comments :: commentsElement -> [comment*] { 
+ $.'' > con;
+ // %con :  [ (string | commentElement)* ]
+
+ %con |
+ each {
+  when {
+    string => undefined,
+    comment ==> process-comment
+  } 
+ } | list:tighten // 余分なテキストノードがあるので
+};
+
+command process-comment :: commentElement -> comment { 
+ $.'' > con;
+ // %con : [ (string | bodyElement|usernameElement|timestampElement)* ]
+
+ %con |
+ each {
+  when {
+    string => undefined,
+    body => ["commentBody", $.''| text:concat],
+    username => ["username", $.''| text:concat],
+    timestamp => ["timestamp", $.''| text:concat],
+  } 
+ } | array-to-object
+};
+
+
+collection d of day ;
+collection tmp of day ;
+
+/** XMLファイルからコレクションにデータをロードする */
+command load [string file] :: void -> void {
+ d.delete-all;
+ %1 > file;
+ file:read %file | xjx:parse | process |
+ each {
+   d.insert %_key
+ }
+};
+
+/** IDのリストで与えられたレコード群をtmpコレクションにコピーする */
+command send {@[default(false)] "clear": boolean?}:: [integer*] -> void {
+ pass > in;
+ %clear |
+ case {
+  true  => tmp.delete-all,
+  false => void,
+ };
+ %in |
+ each {
+   pass > k;
+   d.get %k | tmp.put %k
+ }
+};
+
+/** 一日のなかに含まれるエントリーのヘッドラインをリストする */
+command ent-headlines :: day -> [string*] {
+   $.body|text:split "\n" | 
+   each {
+     text:regmatch "^\\*[0-9]+\\*" |
+     when {
+       OK => $.src,
+       NG => undefined,
+     }
+   } | list:tighten
+};
+
+
+/*
+
+「はてな」は：
+
+  * XML的にイリーガルな文字があっても検出しない。バイト列扱いなのだろう。
+
+  * commentBodyに <br> はタグとして含まれる。
+   しかし、< のHTMLエスケープがしてないときがある。
+   &はどうなるかわからない。
+
+
+*/
+
+/*== エントリーの定義 ==*/
+
+/** エントリー
+ */
+type entry = {
+ /** dayのtitleをそのままコピー */
+ "dayTitle": string,
+
+ /** dayのdateをそのままコピー */
+ "dayDate": string,
+
+/*{{{
+ /** dayレコードへの参照
+  * 今は使わない。
+  */
+ "day": reference<d>?,
+}}}*/
+
+ /** エントリーのID、整数値
+  * ヘッドラインに埋め込まれている時刻を使う。
+  */
+ "id": integer,
+
+ /** 作成された時刻
+  * エントリーIDとまったく同じ値、だが解釈は異なる。
+  * IDを連番などに切り替える可能性があるので独立に持つ。
+  */
+ "created": integer,
+
+ /** 分類タグ
+  * ヘッドライン（大見出し）から抽出する 
+  */
+ "tags": [string*],
+
+ /** エントリータイトル
+  * ヘッドライン（大見出し）のテキストのみ 
+  */
+ "title": string,
+
+ /** 記事本文テキスト */
+ "content": string,
+
+};
+
+/*== エントリーのテキスト構文 ==*/
+
+syntax EOL = "\n" ;
+syntax 空行 = EOL ;
+
+syntax headline ::= lexcial '*' timestamp '*' tag* title EOL;
+syntax timestamp = string(pattern = "[0-9p]+");
+syntax tag = string(pattern = "\\[.+\\]");
+
+syntax entryText ::= lexical headline 空行 内容 ;
+syntax 内容 = string(remark="次のヘッドラインまたはストリーム終端までのテキスト") ;
+
+/*== コマンド ==*/
+
+/** 一日分のデータに含まれるエントリーを抜き出す 
+ */
+command entries-from-day :: day -> [entry*]
+;
+
