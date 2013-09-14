@@ -6,6 +6,61 @@
  */
 module almost-sys; 
 
+
+/** データベース管理用コマンドセット
+ */
+signature DatabaseAdm
+<
+   /** データベースの情報 */
+   DatabaseInfo, 
+
+   /** データベース生成時のオプション */
+   DatabaseOptions, 
+
+   /** コレクションの情報 */
+   CollectionInfo,
+
+   /** コレクション生成時のオプション */
+   CollectionOptions
+> = {
+
+ /** データベースを列挙する
+  */
+ command list-databases
+  :: void -> [DatabaseInfo*]
+ ;
+
+ /** データベースを作成する
+  * 1つのストレージバックエンドが1つのデータベースしかサポートしない場合は、
+  * データベース名は不要。
+  */
+ command create-database [string? database-name] 
+  :: DatabaseOptions -> any
+ ;
+
+ /** データベース内のすべてのコレクションを列挙する */
+ command list-collecions [string? database-name]
+  :: void -> [CollectionInfo*]
+ ;
+
+ /** データベースを削除する */
+ command drop-database [string? database-name]
+  :: void -> any
+ ;
+
+ /** コレクションを新規作成する */
+ command create-collection [string? database-name, string? collection-name] 
+  :: CollectionOptions -> any
+ ;
+
+ /** コレクションを削除する */
+ command drop-collection [string? database-name, string? collection-name] 
+   :: void -> any
+ ;
+
+};
+
+
 /* カインド式に他のカインドの名前が使えない */
 /*
 kind KeyType = collection:KeyType;
