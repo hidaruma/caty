@@ -51,17 +51,18 @@ class Keys(Builtin):
 class List(Builtin):
     def setup(self, opts):
         self.skip = opts['skip']
+        self.order_by = opts['order-by']
         self.max = opts['max']
 
     def execute(self):
         if self.max != u'unbounded':
             if self.skip:
-                return self.arg0.slice(self.skip, self.max)
+                return sort_items(self.arg0.slice(self.skip, self.max), self.order_by)
             else:
-                return self.arg0.slice(0, self.max)
+                return sort_items(self.arg0.slice(0, self.max), self.order_by)
         if self.skip:
-            return self.arg0.slice(self.skip)
-        return self.arg0.all()
+            return sort_items(self.arg0.slice(self.skip), self.order_by)
+        return sort_items(self.arg0.all(), self.order_by)
 
 class All(List):
     pass
@@ -140,12 +141,16 @@ class Set(Builtin):
             return self.arg0.replace(self.key, v)
 
 class Grep(Builtin):
+    def setup(self, opts):
+        self.order_by = opts['order-by']
+
     def execute(self, query):
         r = []
         for k in self.arg0.keys():
             if self.match(self.arg0.get(k), query):
-                r.append(k)
-        return r
+                r.append(self.arg0.get(k))
+        items = sort_items(r, self.order_by)
+        return map(lambda x: x[self.arg0.keytype], items)       
 
     def match(self, value, query):
         for k, q in query.items():
@@ -182,5 +187,29 @@ class Grep(Builtin):
                         if subq not in data:
                             return False
         return True
+
+
+def sort_items(items, order_by):
+    if not order_by:
+        return items
+    func = _make_comparator(order_by)
+    items.sort(func)
+    return items
+
+def _make_comparator(key):
+    if isinstance(key, basestring):
+        path = selector.compile(key)
+        def cmp_obj(a, b):
+            return cmp(path.select(a).next(), path.select(b).next())
+    else:
+        path_list = map(selector.compile, key)
+        def cmp_obj(a, b):
+            r = 0
+            for p in path_list:
+                r = cmp(p.select(a).next(), p.select(b).next())
+                if r != 0:
+                    return r
+            return r
+    return cmp_obj
 
 

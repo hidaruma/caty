@@ -125,6 +125,7 @@ signature Collection
      /** リストするレコードの最大個数 */
      @[default("unbounded")]
      "max": (integer(minimum=0) | "unbounded")?,
+     "order-by": (string | [string, string*])?,
    }
    :: void -> Iterable<Record>;
 
@@ -268,7 +269,9 @@ signature Collection
   * エラーとはせずに、検索がヒットしないときと同じ扱いにする。
   * 
   */
- command grep :: GrepCond  -> [Key*];
+ command grep {
+  "order-by": (string | [string, string*])?,
+} :: GrepCond  -> [Key*];
 } refers python:collection;
 
 /** Grepに渡す条件 

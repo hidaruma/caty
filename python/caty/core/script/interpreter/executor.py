@@ -491,8 +491,8 @@ class CommandExecutor(BaseInterpreter):
                     self.input = v
                     if not v is UNDEFINED:
                         x = node.cmd.accept(self)
-                    if self.__truth(x, node):
-                        r.append(v)
+                        if self.__truth(x, node):
+                            r.append(v)
                 finally:
                     node.var_storage.del_scope()
         else:
