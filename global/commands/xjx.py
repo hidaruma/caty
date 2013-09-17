@@ -47,6 +47,8 @@ class Strip(Command):
 import xml.dom.minidom as dom
 class Parse(Command):
     def execute(self, input):
+        if isinstance(input, list):
+            input = u'<!DOCTYPE local [%s]>\n%s' % (input[1], input[0])
         tree = dom.parseString(input.encode(u'utf-8'))
         return self._tree_to_xjx(tree)
 

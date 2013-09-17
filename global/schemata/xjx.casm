@@ -3,7 +3,7 @@ module xjx;
 command markup {@[default(false)]"html": boolean?} :: Content | Text | Element -> string 
     refers python:xjx.Markup;
 
-command parse :: string -> Content | Text | Element
+command parse :: string | [string src, string entity-def]-> Content | Text | Element
     refers python:xjx.Parse;
 
 type Content = [(Text | Element)*];
