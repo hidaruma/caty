@@ -845,26 +845,41 @@ class Module(Facility):
         # 型計算の後処理
         # 現状ではコレクション型のうちid-typeが不明の物の処理を行う
         # identifiedで指定されたパスからidの型を特定し、アノテーションに付け加える
-        from caty.core.typeinterface import dereference
+        from caty.core.typeinterface import dereference, flatten_union_node
         from caty.core.casm.language.schemaparser import CasmJSONPathSelectorParser
         from caty.core.casm.cursor.dump import TreeDumper
         from caty.core.casm.language.ast import ClassIntersectionOperator, ClassReference, ScalarNode
         for k, v in self.schema_ns.items():
             if u'__collection' in v.annotations and u'__identified' in v.annotations and u'__id-type' not in v.annotations:
                 path = CasmJSONPathSelectorParser().run(v.annotations[u'__identified'].value)
-                try:
-                    p = path.select(dereference(v.body)).next()
+                b = dereference(v.body)
+                if b.type == '__union__':
+                    p = None
+                    for n in flatten_union_node(b):
+                        try:
+                            p2 = path.select(dereference(n)).next()
+                        except Exception as e:
+                            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'$name: $emsg', name=k, emsg=str(e))
+                        if not p2:
+                            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Identifier field is not same: $name', name=k)
+                        if p and p.type != p2.type:
+                            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Identifier type is not same: $name', name=k)
+                        else:
+                            p = p2
                     v.annotations.add(Annotation(u'__id-type', p.type))
-                except Exception as e:
-                    print u'[Warning]', v.canonical_name, e
                 else:
-                    clsnames = [k, k.replace(u'Record', u'')]
-                    for c in clsnames:
-                        if self.has_class(c):
-                            cls = self.get_class(c)._clsobj
-                            if isinstance(cls.expression, ClassIntersectionOperator):
-                                self._recursive_apply_typeparam_for_collection(cls.expression, p)
-                                break
+                    try:
+                        p = path.select(b).next()
+                    except Exception as e:
+                        throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'$name: $emsg', name=k, emsg=str(e))
+                    v.annotations.add(Annotation(u'__id-type', p.type))
+                clsnames = [k, k.replace(u'Record', u'')]
+                for c in clsnames:
+                    if self.has_class(c):
+                        cls = self.get_class(c)._clsobj
+                        if isinstance(cls.expression, ClassIntersectionOperator):
+                            self._recursive_apply_typeparam_for_collection(cls.expression, p)
+                            break
         for m in self.class_ns.values() + self.sub_modules.values() + self.sub_packages.values():
             m._post_process()
 
