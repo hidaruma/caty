@@ -2,6 +2,8 @@
 
 module hatena;
 
+
+
 /*== はてなXML形式の定義 ==*/
 
 type diaryElement = @diary {
@@ -50,6 +52,8 @@ type day = dayMain ++ {
  "id": integer?,
  "date": common:date,
  "title": string,
+ "uri": string?,
+ "sysTags": [string*]?,
 };
 
 type comment = {
@@ -83,11 +87,14 @@ command process-day :: dayElement -> day {
    $.title?="" > title,
    $.'' |  process-day-content > con,
  ];
+ %date | text:split - | text:concat > uri-d;
+ ["http://d.hatena.ne.jp/m-hiyama/", %uri-d] | text:concat > uri;
 
  [
    {
     "date": %date,
-    "title": %title
+    "title": %title,
+    "uri": %uri,
    },
    %con
  ] | xjson:merge
@@ -133,14 +140,19 @@ command process-comment :: commentElement -> comment {
 };
 
 
-collection d of day ;
+collection d of day identified id;
+collection e of entry ;
 collection tmp of day ;
+collection t of {"id": integer?, *:any}; // 作業用
+collection map of mapItem; // 実験用
+
 
 /** XMLファイルからコレクションにデータをロードする */
-command load [string file] :: void -> void {
+command load /*[string file]*/ :: void -> void {
  d.delete-all;
- %1 > file;
- file:read %file | xjx:parse | process |
+ e.delete-all;
+ //%1 > file;
+ file:read /m-hiyama-memo.xml /*%file*/ | xjx:parse | process |
  each {
    d.insert %_key
  }
@@ -198,11 +210,34 @@ type entry = {
  /** dayのdateをそのままコピー */
  "dayDate": string,
 
+ /** エントリーのWeb上のURI */
+ "uri": string?,
+
 /*{{{
  /** dayレコードへの参照
   * 今は使わない。
   */
  "day": reference<d>?,
+
+ /** このエントリーから参照している他の関連エントリー達 */
+ @[can-generate]
+ "refersTo": multiref<d>,
+
+ /** このエントリーが参照されている他の関連エントリー達 */
+ @[can-generate]
+ "referedFrom": multiref<d>,
+
+ /** このエントリーで使用している内部画像 */
+ @[can-generate]
+ "inImg": multiref<img>,
+
+ /** このエントリーで使用している外部画像 */
+ @[can-generate]
+ "exImg": [Anchor*],
+
+ /** キーワード */
+ "keywords": [string*],
+
 }}}*/
 
  /** エントリーのID、整数値
@@ -220,6 +255,10 @@ type entry = {
   * ヘッドライン（大見出し）から抽出する 
   */
  "tags": [string*],
+
+ /** システムが使う分類タグ
+  */
+ "sysTags": [string*]?,
 
  /** エントリータイトル
   * ヘッドライン（大見出し）のテキストのみ 
@@ -243,6 +282,10 @@ syntax tag = string(pattern = "\\[.+\\]");
 syntax entryText ::= lexical headline 空行 内容 ;
 syntax 内容 = string(remark="次のヘッドラインまたはストリーム終端までのテキスト") ;
 
+syntax leadingText = string(remark="headlineにマッチしないテキスト行達");
+syntax dayBody ::= lexical leadingText? entryText* ;
+
+
 /*== コマンド ==*/
 
 /** 一日分のデータに含まれるエントリーを抜き出す 
@@ -251,3 +294,138 @@ command entries-from-day :: day -> [entry*]
     refers python:hatena.EntriesFromDay
 ;
 
+
+/** 日（day）のデータからエントリー群を作り出す 
+ */
+command make-entries 
+ {
+  /** 先頭からスキップするレコードの個数 */
+   @[default(0)]
+  "skip": integer(minimum=0)?,
+  /** リストするレコードの最大個数 */
+  @[default("unbounded")]
+  "max": (integer(minimum=0) | "unbounded")?,
+ }
+ :: void -> void
+{
+  d.list %--skip %--max | 
+  each {
+     pass > d | $.date > dt;
+     %d |
+     try --wall=superhard {
+       hatena:entries-from-day | each {e.put}
+     } | 
+     catch {
+      normal => void,
+      except => ["Oops ", (%_key | to-string), " ", %dt, "\n\n", $.message ] | text:concat | cout; break
+     }
+  };
+  "End" | cout
+};
+
+/*
+ * == 実験用のゴチャゴチャ == 
+ *
+ */
+
+command modify-entries 
+ {
+  /** 先頭からスキップするレコードの個数 */
+   @[default(0)]
+  "skip": integer(minimum=0)?,
+  /** リストするレコードの最大個数 */
+  @[default("unbounded")]
+  "max": (integer(minimum=0) | "unbounded")?,
+ }
+ :: void -> void
+{
+ t.delete-all;
+ e.list %--skip %--max |
+ each {
+  pass > in |
+  [
+     $.dayDate | text:split "-" | text:concat > date,
+     $.id | to-string > ts,
+  ];
+  %in |
+  ={
+     "tags": text:join "|", 
+     "uri": ["http://d.hatena.ne.jp/m-hiyama/", %date, "/", %ts] | text:concat,
+     * : pass
+   } | t.insert
+ };
+
+};
+
+/** JavaScriptをタイトルに含むエントリーを集める */
+
+command tt :: void -> void {
+{"title": "JavaS"} | hatena:t.grep | hatena:t.mget | 
+each {
+  [
+    $.dayDate | text:split "-" | text:concat > d,
+    $.id | to-string > i,
+    $.title  > title,
+    $.uri > uri,
+    $.content > content,
+  ];
+
+  [
+    "++++++++\n", 
+    ["+ Name: ", %d, "-", %i, "\n"] | text:concat,
+    ["+ Title: ", %title, "\n"  ]   | text:concat,
+    "\n",
+    "(Original Article: ", %uri, ")\n",
+    %content, 
+    "\n\n"
+  ] | text:concat
+} 
+| text:concat 
+| file:write /tt.txt
+};
+
+
+command to-int :: string -> integer
+ refers python:misc.ToInt;
+
+/** 日付でエントリーをソートする */
+command sort-by-date :: [integer*] -> [integer*] {
+  hatena:e.mget | 
+  each {
+     [$.dayDate, "!", $.id|to-string] |text:concat
+  } | list:sort | 
+  each {
+    text:split "!" | $.1 | to-int
+  }
+};
+
+
+command make-proxy [integer id] ::void -> void;
+command confirm-proxy [integer id] ::void -> void;
+
+command make-proxies :: [integer*] -> void;
+
+command make-group [integer grp-id] :: [integer*] -> integer {
+ pass > in;
+ %1 > grp-id;
+
+ {
+   "id": %grp-id,
+   "group": true,
+   "children": %in,
+ } | map.insert;
+
+ %grp-id
+};
+
+type mapItem = @_nmi {
+  "id": integer,
+  "group": true?,
+ 
+  @[without("group")]
+  "ref": {"t":string, "a": integer}?,
+
+  "parent": integer?,
+  "children": [integer*]?,
+//   *: any?
+};
