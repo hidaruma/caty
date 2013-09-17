@@ -386,7 +386,8 @@ each {
 
 
 command to-int :: string -> integer
- refers python:misc.ToInt;
+ //refers python:misc.ToInt
+ ;
 
 /** 日付でエントリーをソートする */
 command sort-by-date :: [integer*] -> [integer*] {

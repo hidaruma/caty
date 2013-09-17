@@ -7,6 +7,8 @@ class EntriesFromDay(Command):
     def execute(self, day):
         r = []
         for ent in process_day(day):
+            if ent is None:
+                continue
             ent[u'dayTitle'] = day['title']
             ent[u'dayDate'] = day['date']
             r.append(ent)
@@ -27,6 +29,8 @@ def process_day(day):
 def process_ent(buff):
     ent = {u'tags': []}
     headline = buff.pop(0)
+    if not ent_headline.match(headline): #leading text
+        return None
     _, ts, rest = ent_headline.split(headline)
     ent[u'id'] = int(ts.strip('*'))
     ent[u'created'] = ent[u'id']
