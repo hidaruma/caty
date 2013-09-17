@@ -150,41 +150,57 @@ class Grep(Builtin):
             if self.match(self.arg0.get(k), query):
                 r.append(self.arg0.get(k))
         items = sort_items(r, self.order_by)
-        return map(lambda x: x[self.arg0.keytype], items)       
+        p = selector.compile(self.arg0.keytype)
+        return map(lambda x: p.select(x).next(), items)
 
-    def match(self, value, query):
-        for k, q in query.items():
-            if k not in value:
+    def match(self, data, query):
+        if isinstance(query, unicode):
+            if not isinstance(data, unicode):
                 return False
-            data = value[k]
-            if isinstance(q, unicode):
-                if not isinstance(data, unicode):
+            if query not in data:
+                return False
+        elif isinstance(query, list):
+            if not isinstance(data, unicode):
+                return False
+            for subquery in query:
+                if subquery not in data:
                     return False
-                if q not in data:
+        elif isinstance(query, dict):
+            if not isinstance(data, dict):
+                return False
+            for k, q in query.items():
+                if k not in data:
                     return False
-            elif isinstance(q, list):
-                if not isinstance(data, unicode):
+                if not self.match(data[k], q):
                     return False
-                for subq in q:
-                    if subq not in data:
+        elif isinstance(query, json.TaggedValue):
+            t, query = json.split_tag(query)
+            if t == u'every':
+                if not isinstance(data, list):
+                    return False
+                for v in data:
+                    if not self.match(v, query):
                         return False
-            elif isinstance(q, dict):
-                if not isinstance(data, dict):
+            elif t == u'some':
+                if not isinstance(data, list):
                     return False
-                if not self.match(data, q):
+                for v in data:
+                    if self.match(v, query):
+                        break
+                else:
                     return False
             else:
                 if not isinstance(data, unicode):
                     return False
-                if q.tag == u'or':
-                    for subq in q.value:
-                        if subq in data:
+                if t == u'or':
+                    for subquery in query:
+                        if subquery in data:
                             break
                     else:
                         return False
                 else:
-                    for subq in q.value:
-                        if subq not in data:
+                    for subquery in query:
+                        if subquery not in data:
                             return False
         return True
 

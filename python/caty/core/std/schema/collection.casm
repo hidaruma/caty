@@ -280,8 +280,16 @@ signature Collection
  * 複数の文字列の配列は論理ANDの意味となる。
  */
 type GrepCond = {
-  *: (string | [string*] | @or [string*] | @and [string*] | GrepCond)?
+  *: GrepCondItem?
 };
+
+type GrepCondItem = (string 
+                    | [string*] 
+                    | @or [string*]
+                    | @and [string*] 
+                    | @every GrepCondItem
+                    | @some GrepCondItem
+                    | GrepCond);
 
 /** 
  * ベースコレクションとして必要なコマンドセット 
