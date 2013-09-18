@@ -430,3 +430,7 @@ type mapItem = @_nmi {
   "children": [integer*]?,
 //   *: any?
 };
+
+command to-creole :: string -> string
+    refers python:hatena.ToCreole;
+
