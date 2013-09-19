@@ -63,9 +63,9 @@ master mongodb = MongoDB("mongo-default");
 
 collection person of {
  "id" : integer,  // とりあえず、gen:sampleが空にしないように必須にしておく
- "handle": string,
- "name": {
-     "given": string,
-     "family": string,
+ "ハンドル": string,
+ "名前": {
+     "名": string,
+     "性": string,
   },
 } within mongodb;

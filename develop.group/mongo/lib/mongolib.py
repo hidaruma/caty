@@ -32,6 +32,7 @@ class MongoDB(Facility):
             mod = self.app._schema_module
         tp = mod.get_type(self.collname)
         self.keytype = tp.annotations['__identified'].value
+        self.keyname = self.keytype.rstrip('$.')
 
     @classmethod
     def initialize(cls, app, sys_config):
@@ -66,7 +67,7 @@ class MongoDB(Facility):
         return self
 
     def lookup(self, k):
-        o = xjson_from_bson(self.collection.find_one({self.keytype: k}))
+        o = xjson_from_bson(self.collection.find_one({self.keyname: k}))
         if not o:
             throw_caty_exception(u'NotFound', pp(k))
         return o
@@ -84,10 +85,10 @@ class MongoDB(Facility):
         return o == record
 
     def exists(self, k):
-        return self.collection.find_one({self.keytype: k}) is not None
+        return self.collection.find_one({self.keyname: k}) is not None
 
     def keys(self):
-        return [xjson_from_bson(o)[self.keytype] for o in self.collection.find()]
+        return [xjson_from_bson(o)[self.keyname] for o in self.collection.find()]
 
     def all(self):
         return [xjson_from_bson(o) for o in self.collection.find()]
@@ -100,13 +101,13 @@ class MongoDB(Facility):
 
     def insert(self, k, v):
         if k == None:
-            path = selector.compile(self.keytype, True)
+            path = selector.compile(self.keyname, True)
             try:
                 k = path.select(v).next()
             except KeyError as e:
                 throw_caty_exception(u'BadInput', pp(v))
         else:
-            path = selector.compile(self.keytype)
+            path = selector.compile(self.keyname)
             path.replace(v, k)
         if self.collection.find_one(v):
             throw_caty_exception(u'AlreadyExists', pp(k))
@@ -114,17 +115,17 @@ class MongoDB(Facility):
         return v
 
     def replace(self, k, v):
-        if not self.collection.find_one({self.keytype: k}):
+        if not self.collection.find_one({self.keyname: k}):
             throw_caty_exception(u'NotFound', pp(k))
-        path = selector.compile(self.keytype)
+        path = selector.compile(self.keyname)
         path.replace(v, k)
-        self.collection.find_and_modify({self.keytype: k}, {'$set': v})
+        self.collection.find_and_modify({self.keyname: k}, {'$set': v})
         return v
 
     def delete(self, k):
-        if not self.collection.find_one({self.keytype: k}):
+        if not self.collection.find_one({self.keyname: k}):
             throw_caty_exception(u'NotFound', pp(k))
-        self.collection.remove({self.keytype: k})
+        self.collection.remove({self.keyname: k})
 
     dump = all
 
@@ -150,7 +151,7 @@ def xjson_from_bson(o):
 
 
 import re
-bson_key_pattern = re.compile("[_a-zA-Z!'#&%@,=~^][_a-zA-Z0-9!'#&%@,=~^$]{0,255}")
+bson_key_pattern = re.compile("[^$.0-9][^.]{0,255}")
 def bson_from_xjson(o, is_query=False):
     if isinstance(o, json.TaggedValue):
         if o.tag == 'ObjectId':
