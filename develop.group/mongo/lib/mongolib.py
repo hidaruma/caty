@@ -1,100 +1,136 @@
-from interfaces.mongo.MongoHandler import MongoHandlerBase
-from interfaces.mongo.Database import DatabaseBase
-from interfaces.mongo.Collection import CollectionBase
-from caty.core.facility import Facility
+from caty.core.facility import Facility, READ
 from caty.core.exception import *
 from caty.core.spectypes import UNDEFINED
 import caty.jsontools as json
 
+import caty.jsontools.selector as selector
+from caty.jsontools import pp
 from decimal import Decimal
 
 from bson import ObjectId
 from pymongo import Connection
 from pymongo.errors import ConnectionFailure
 
-class MongoHandler(MongoHandlerBase):
+class MongoDB(Facility):
     config = {}
+    conn = None
+
+    def __init__(self, mode, system_param):
+        Facility.__init__(self, mode)
+        self.dbname = system_param
+        self.module_name = None
+        self.db = self.conn[self.dbname]
+        #self._new_collection(u'default-collection')
+
+
+    def _new_collection(self, collname):
+        self.collname = collname
+        self.collection = self.db[self.collname]
+        if self.module_name:
+            mod = self.app._schema_module.get_module(self.module_name)
+        else:
+            mod = self.app._schema_module
+        tp = mod.get_type(self.collname)
+        self.keytype = tp.annotations['__identified'].value
+
     @classmethod
     def initialize(cls, app, sys_config):
-        cls.config = {}
+        cls.config = sys_config
+        try:
+            cls.conn = Connection(host=cls.config.get('host', u'localhost'), port=cls.config.get('port', 27017))
+        except ConnectionFailure as e:
+            app.i18n.write(u'DatabaseAccessError: error=$e', e=str(e))
+            cls.conn = None
 
     @classmethod
     def instance(cls, app, system_param):
-        return MongoHandler(app, system_param)
+        r = cls(READ, system_param)
+        r.app = app
+        return r
 
     @classmethod
     def finalize(cls, app):
         pass
 
-    def create(self, mode, user_param=None):
+    def create(self, mode, user_param=u'default-collection'):
         obj = Facility.create(self, mode)
+        if ':' in user_param:
+            mod, user_param = user_param.split(':', 1)
+        else:
+            mod = None
+        obj.module_name = mod
+        obj._new_collection(user_param)
         return obj
 
     def clone(self):
         return self
 
-    def __init__(self, app, system_param):
-        self.app = app
-        self.system_param = system_param
-        try:
-            self.conn = Connection(host=self.config.get('host', u'localhost'), port=self.config.get('port', 27017))
-        except ConnectionFailure as e:
-            self.app.i18n.write(u'DatabaseAccessError: error=$e', e=str(e))
-            self.conn = None
+    def lookup(self, k):
+        o = xjson_from_bson(self.collection.find_one({self.keytype: k}))
+        if not o:
+            throw_caty_exception(u'NotFound', pp(k))
+        return o
 
-    def list_databases(self):
-        return self.conn.database_names()
-
-    def create_database(self, name):
-        return {u'className': u'mongo:Database', u'state': DatabaseWrapper(self.conn[name], self.mode)}
-
-class DatabaseWrapper(DatabaseBase):
-    def __init__(self, database, mode):
-        self.database = database
-        DatabaseBase.__init__(self, mode)
-
-    def create_collection(self, name):
-        return {'className': u'mongo:Collection', 'state': CollectionWrapper(self.database[name], self.mode)}
-
-    def list_collections(self):
-        return self.database.collection_names()
-
-    def drop_collection(self, name):
-        self.database.drop_collection(name)
-
-    def clear_collection(self, name):
-        self.database[name].remove(None)
-
-class CollectionWrapper(CollectionBase):
-    def __init__(self, collection, mode):
-        self.collection = collection
-        CollectionBase.__init__(self, mode)
-
-    def get(self, id):
-        return xjson_from_bson(self.collection.find_one(ObjectId(id)))
-
-    def set(self, input, id=UNDEFINED):
-        if id:
-            self.collection.update({'_id': ObjectId(id)}, bson_from_xjson(input))
+    def get(self, k, p=None):
+        o = self.lookup(k)
+        if p:
+            stm = selector.compile(p)
+            return list(stm.select(o))[0]
         else:
-            self.collection.insert(bson_from_xjson(input))
+            return o
 
-    def select(self, input):
-        if input:
-            q = compile_query(input)
-            return map(xjson_from_bson, self.collection.find(bson_from_xjson(q, True)))
-        else:
-            return map(xjson_from_bson, self.collection.find())
+    def belongs(self, record):
+        o = self.lookup(record)
+        return o == record
 
-    def delete(self, input, id=UNDEFINED):
-        if id:
-            self.collection.remove(ObjectId(id))
+    def exists(self, k):
+        return self.collection.find_one({self.keytype: k}) is not None
+
+    def keys(self):
+        return [xjson_from_bson(o)[self.keytype] for o in self.collection.find()]
+
+    def all(self):
+        return [xjson_from_bson(o) for o in self.collection.find()]
+
+    def slice(self, from_idx, to_idx=None):
+        if to_idx:
+            return self.all()[from_idx:from_idx+to_idx]
         else:
-            self.collection.remove(bson_from_xjson(input))
+            return self.all()[from_idx:]
+
+    def insert(self, k, v):
+        if k == None:
+            path = selector.compile(self.keytype, True)
+            try:
+                k = path.select(v).next()
+            except KeyError as e:
+                throw_caty_exception(u'BadInput', pp(v))
+        else:
+            path = selector.compile(self.keytype)
+            path.replace(v, k)
+        if self.collection.find_one(v):
+            throw_caty_exception(u'AlreadyExists', pp(k))
+        self.collection.insert(bson_from_xjson(v))
+        return v
+
+    def replace(self, k, v):
+        if not self.collection.find_one({self.keytype: k}):
+            throw_caty_exception(u'NotFound', pp(k))
+        path = selector.compile(self.keytype)
+        path.replace(v, k)
+        self.collection.find_and_modify({self.keytype: k}, {'$set': v})
+        return v
+
+    def delete(self, k):
+        if not self.collection.find_one({self.keytype: k}):
+            throw_caty_exception(u'NotFound', pp(k))
+        self.collection.remove({self.keytype: k})
+
+    dump = all
 
 def xjson_from_bson(o):
     if isinstance(o, ObjectId):
-        return json.tagged(u'ObjectId', unicode(str(o)))
+        return UNDEFINED #json.tagged(u'ObjectId', unicode(str(o)))
     elif isinstance(o, list):
         return  map(xjson_from_bson, o)
     elif isinstance(o, dict):

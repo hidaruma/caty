@@ -41,21 +41,17 @@ type BArray = [(BScalar|BArray|Record)*];
 type QueryExpr = query:Pred | query:ObjSelector;
 type EncodedObjectId = @ObjectId string;
 
-
-@[signature]
-class MongoHandler(foreign) {
-};
-
 type MongoConfig = {
     "host": string,
     "port": integer,
 };
 
-facility MongoHandler(null) configured MongoConfig
-    conforms MongoHandler
-    refers python:mongolib.MongoHandler;
 
-entity mongo = MongoHandler(null);
+facility MongoDB(string database-name)
+   applying (string collection-name)
+   conforms {* => Collection}
+   refers python:mongolib.MongoDB
+;
 
 type Status = {
   "status": ("stopped" | "running" | "unknown"),
@@ -63,78 +59,13 @@ type Status = {
   "port": integer(remark="ポート番号"),
 };
 
-command status :: void -> Status
-    reads mongo
-    refers python:mongo.Status
-;
+master mongodb = MongoDB("mongo-default");
 
-command list-databases :: void -> [string*]
-    uses mongo
-    refers python:mongo.ListDatabases
-;
-
-command create-database [string] :: void -> Classed<Database>
-    uses mongo
-    refers python:mongo.CreateDatabase
-;
-
-command activate-database [string] :: void -> Classed<Database>
-    uses mongo
-    refers python:mongo.ActivateDatabase
-;
-
-@[signature]
-class Database(Database) {
-    @[reader, bind]
-    command list-collections :: void -> [string*];
-
-    @[updater, bind]
-    command drop-collection [string] :: void -> void;
-    
-    @[updater, bind]
-    command create-collection [string] :: void -> Classed<Collection>;
-    
-    @[updater, bind]
-    command clear-collection [string] :: void -> void;
-} refers python:mongolib.DatabaseWrapper;
-
-@[signature]
-class Collection(Collection) {
-    @[reader, bind]
-    command get [string id] :: void -> Record | null;
-    
-    @[updater, bind]
-    command set [string? id] :: Record -> void;
-    
-    @[reader, bind]
-    command select :: QueryExpr -> [Record*];
-    
-    @[updater, bind]
-    command delete [string? id] :: QueryExpr -> void;
-    
-    @[reader, bind]
-    command exists [string id] :: void -> boolean {
-        get %1 | when {
-            None => false,
-            * => true
-        }
-    };
-    
-    @[reader, bind]
-    command clone [string id] :: void -> void {
-        [get %1, undefined] | xjson:put $._id | set
-    };
-
-    @[reader, bind]
-    command list-ids :: QueryExpr -> [string*] {
-        select | each {
-            $._id
-        }
-    };
-} refers python:mongolib.CollectionWrapper;
-
-
-type Database = foreign;
-
-type Collection = foreign;
-
+collection person of {
+ "id" : integer,  // とりあえず、gen:sampleが空にしないように必須にしておく
+ "handle": string,
+ "name": {
+     "given": string,
+     "family": string,
+  },
+} within mongodb;

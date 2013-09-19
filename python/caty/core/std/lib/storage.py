@@ -32,7 +32,7 @@ class DefaultStorage(Facility):
         else:
             mod = None
         obj.collname = user_param
-        self.module_name = mod
+        obj.module_name = mod
         if user_param not in DefaultStorage.__db__[self.dbname]:
             DefaultStorage.__db__[self.dbname][user_param] = {}
         return obj
