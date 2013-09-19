@@ -32,7 +32,7 @@ class MongoDB(Facility):
             mod = self.app._schema_module
         tp = mod.get_type(self.collname)
         self.keytype = tp.annotations['__identified'].value
-        self.keyname = self.keytype.rstrip('$.')
+        self.keyname = self.keytype.strip('$.')
 
     @classmethod
     def initialize(cls, app, sys_config):
