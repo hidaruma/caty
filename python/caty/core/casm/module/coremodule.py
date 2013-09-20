@@ -36,10 +36,8 @@ class CoreModule(Module):
         Module.clear_namespace(self)
         self.schema_ns.update(schemata)
 
-    def _load_facility_class(self, name, uri):
-        if not uri.startswith(u'python:'):
-            raise Exception(self.application.i18n.get(u'Invalid reference: $ref, $name, $mod', ref=uri, name=name, mod=self.name))
-        uri = uri.replace('python:', '')
+    def _load_facility_class(self, name):
+        uri = self.application.find_backend(name)['module']
         lib, cls = uri.split('.', 1)
         code = 'from caty.core.std.lib.%s import %s' % (lib, cls)
         g_dict = {}

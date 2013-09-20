@@ -1,0 +1,10 @@
+{
+
+  "backend": "mongo",// $.facilityBackends.mongo から情報を取れる
+
+  // configの型は、mongo:MongoConfig型
+  "config": {
+    "host": "localhost",
+    "port": 27017,
+   }
+}

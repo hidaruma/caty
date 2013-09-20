@@ -50,7 +50,7 @@ type MongoConfig = {
 facility MongoDB(string database-name)
    applying (string collection-name)
    conforms {* => Collection}
-   refers python:mongolib.MongoDB
+   //refers python:mongolib.MongoDB
 ;
 
 type Status = {

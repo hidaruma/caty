@@ -1,0 +1,18 @@
+{
+  /** バックエンド名 */
+  "name": "mongo",
+  /** バックエンドのモジュール＆クラスの名前 */
+  "module": "mongolib.MongoDB",
+  /** バックエンドの設定情報の型
+   * 型の修飾名を指定する。
+   */
+  "configType": "mongo:MongoConfig",
+
+  /** このバックエンドの短い説明 */
+  "description": "Caty Storage Backend for MongoDB",
+
+  /** このバックエンドが実現するファシリティの用途とデザインパターン */
+  "targetDomain": "storage",
+  /** ファシリティ宣言で使う標準的なファシリティ名 */
+  "stdFacilityName": "MongoDB",
+}

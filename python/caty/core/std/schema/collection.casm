@@ -2,8 +2,8 @@ module collection;
 
 facility default-storage (string database-name)
    applying (string collection-name)
-   conforms Collection
-   refers python:storage.DefaultStorage;
+   conforms Collection;
+   //refers python:storage.DefaultStorage;
 
 master default-database = default-storage("default-database");
 entity default-collection = default-database("default-collection");

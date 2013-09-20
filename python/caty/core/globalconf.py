@@ -63,7 +63,8 @@ class GlobalConfig(object):
         self._enableScriptCache = obj.get('enableScriptCache', False)
         self._enableHTTPMethodTunneling = obj.get('enableHTTPMethodTunneling', False)
         self._useMultiprocessing = obj.get('useMultiprocessing', True)
-        self._facilities = obj.get('facilities', {})
+        self._facilities_conf = obj.get('facilities', {})
+        self._backend_conf = obj.get(u'facilityBackends', {})
 
     def mafs_initializer(self, app, system, type):
         initializer = MafsInitializer(self._mafs_module, app, system, type)
@@ -154,7 +155,7 @@ class GlobalConfig(object):
 
     @property
     def facilities(self):
-        return self._facilities
+        return self._facilities_conf
 
 
 class MafsInitializer(object):

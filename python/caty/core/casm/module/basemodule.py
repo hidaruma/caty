@@ -729,26 +729,20 @@ class Module(Facility):
             if self.is_root:
                 self.application.cout.write(u'  * ' + self.application.i18n.get(u'Initializing facilities') + '...')
             for k, v in self.facility_ns.items():
-                if not v.clsname:
-                    emsgs.append(self.application.i18n.get(u'Facility class not specified: $name', name=k))
-
-                    facility_class = None
-                    config = {}
-                else:
+                try:
+                    facility_class = self._load_facility_class(k)
                     try:
-                        facility_class = self._load_facility_class(k, v.clsname)
-                        try:
-                            config = self._load_facility_config(k)
-                        except:
-                            import traceback
-                            traceback.print_exc()
-                            emsgs.append(self.application.i18n.get(u'Failed to load facility config: $name', name=v.clsname))
-                            config = {}
+                        config = self._load_facility_config(k)
                     except:
                         import traceback
                         traceback.print_exc()
-                        emsgs.append(self.application.i18n.get(u'Failed to load facility class: $name', name=v.clsname))
-                        facility_class = None
+                        emsgs.append(self.application.i18n.get(u'Failed to load facility config: $name', name=v.clsname))
+                        config = {}
+                except:
+                    import traceback
+                    traceback.print_exc()
+                    emsgs.append(self.application.i18n.get(u'Failed to load facility class: $name', name=v.clsname))
+                    facility_class = None
                 if facility_class:
                     facility_class.__system_config__ = config
                 self.facility_classes[v.name] = facility_class
@@ -776,16 +770,14 @@ class Module(Facility):
         for e in emsgs:
             self.application.cout.writeln(u'  [Warning] ' + e)
 
-    def _load_facility_class(self, name, uri):
+    def _load_facility_class(self, name):
         from caty.core.casm.loader import dynamic_load
-        if not uri.startswith(u'python:'):
-            raise Exception(self.application.i18n.get(u'Invalid reference: $ref, $name, $mod', ref=uri, name=name, mod=self.name))
-        uri = uri.replace('python:', '')
-        loader = _FaciltyLoader(uri, name, self)
+        backend = self.application.find_backend(name)
+        loader = _FacilityLoader(backend['module'], name, self)
         return loader.load()
 
     def _load_facility_config(self, fclname):
-        return self.system._global_config.facilities.get(fclname, {})
+        return self.application.find_config(fclname).get('config', {})
 
     def get_facility_or_entity(self, name):
         if self.has_facility(name):
@@ -962,9 +954,9 @@ class Module(Facility):
     def apply(self, ignore):
         return ignore
 
-class _FaciltyLoader(object):
+class _FacilityLoader(object):
     def __init__(self, clsref, facility_name, module):
-        self.path = facility_name + '.py'
+        self.path = clsref.replace('.', '/') + '.py'
         self.abspath = join(module._app._physical_path, module.name, self.path)
         self.name = facility_name
         self.modname, self.clsname = clsref.rsplit('.', 1)

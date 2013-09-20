@@ -291,7 +291,8 @@ class Application(object):
         self._deprecated = cfg.get('deprecated', False)
         self._manifest = cfg
         self._lock_wait_limit = cfg.get('lockWaitLimit', 60)
-        self.backend_info = cfg.get(u'facilityBackends', {})
+        self._facilities_conf = cfg.get('facilities', {})
+        self._backend_conf = cfg.get(u'facilityBackends', {})
 
     def _read_config(self):
         app_dir = self._group._make_super_root(join(self._group.path, self.name)).start()
@@ -704,6 +705,19 @@ class Application(object):
         env.put(u'CONTENT_LENGTH', unicode(environ.get('CONTENT_LENGTH', '-1')))
         env.put(u'HCON_URL', self._system.get_hcon_url())
         env.put(u'LOGGED', CATY_USER_INFO_KEY in facilities['session'])
+
+    def find_backend(self, name):
+        o = self.find_config(name)
+        b = self._backend_conf.get(o['backend'], self._system._global_config._backend_conf.get(o['backend']))
+        if not b:
+            throw_caty_exception(u'UnknownBackend', u'Unknown backend: $name', name=o['backend'])
+        return b
+
+    def find_config(self, name):
+        o = self._facilities_conf.get(name, self._system._global_config._facilities_conf.get(name))
+        if not o:
+            throw_caty_exception(u'UnknownFacility', u'Unknown facility: $name', name=name)
+        return o
 
     @property
     def cout(self):

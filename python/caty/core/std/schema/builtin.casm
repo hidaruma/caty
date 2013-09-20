@@ -397,8 +397,34 @@ type PrjManifest = {
      */
     "packages" : {
      /** プロパティ名はパッケージ名とする */
-       *: any?
-     }
+        *: any?
+     }?,
+
+     "facilities": FacilitiesConfig?,
+
+     "facilityBackends": {
+        *: BackendConfig,
+     }?,
+
+};
+
+type BackendConfig = {
+    /** バックエンド名 */
+    "name": string,
+    /** バックエンドのモジュール＆クラスの名前 */
+    "module": string,
+    /** バックエンドの設定情報の型
+     * 型の修飾名を指定する。
+     */
+    "configType": string,
+
+    /** このバックエンドの短い説明 */
+    "description": string,
+
+    /** このバックエンドが実現するファシリティの用途とデザインパターン */
+    "targetDomain": string,
+    /** ファシリティ宣言で使う標準的なファシリティ名 */
+    "stdFacilityName": string,
 };
 
 /** マニフェストの "facilities" 項目の値の型 
