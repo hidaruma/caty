@@ -48,5 +48,5 @@ class ListBackends(Builtin):
         else:
             system = self.current_app._system
             app = system.get_app(self.app_name)
-        return app.backend_info.values()
+        return app._system._global_config._backend_conf.values() + app._backend_conf.values()
 
