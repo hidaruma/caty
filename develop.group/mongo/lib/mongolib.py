@@ -40,6 +40,9 @@ class MongoDB(Facility):
         try:
             cls.conn = Connection(host=cls.config.get('host', u'localhost'), port=cls.config.get('port', 27017))
         except ConnectionFailure as e:
+            if app._system.debug:
+                import traceback
+                traceback.print_exc()
             app.i18n.write(u'DatabaseAccessError: error=$e', e=str(e))
             cls.conn = None
 
