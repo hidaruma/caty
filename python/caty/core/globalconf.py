@@ -65,6 +65,17 @@ class GlobalConfig(object):
         self._useMultiprocessing = obj.get('useMultiprocessing', True)
         self._facilities_conf = obj.get('facilities', {})
         self._backend_conf = obj.get(u'facilityBackends', {})
+        if 'default-storage' not in self._facilities_conf:
+            self._facilities_conf['default-storage'] = {"backend": u"memory-storage", "config": {}}
+        if 'memory-storage' not in self._backend_conf:
+            self._backend_conf['memory-storage'] = {
+                "name": u"memory-storage",
+                "description": u"",
+                "module": u"storage.DefaultStorage",
+                "configType": u"object",
+                "targetDomain": u"storage",
+                "stdFacilityName": u"default-storage",
+            }
 
     def mafs_initializer(self, app, system, type):
         initializer = MafsInitializer(self._mafs_module, app, system, type)
