@@ -214,15 +214,29 @@ def sort_items(items, order_by):
 
 def _make_comparator(key):
     if isinstance(key, basestring):
-        path = selector.compile(key)
+        asc = True
+        if key.startswith('-'):
+            asc = False
+        k = key.lstrip('-+')
+        path = selector.compile(k)
         def cmp_obj(a, b):
-            return cmp(path.select(a).next(), path.select(b).next())
+            if asc:
+                return cmp(path.select(a).next(), path.select(b).next())
+            else:
+                return cmp(path.select(b).next(), path.select(a).next())
     else:
-        path_list = map(selector.compile, key)
         def cmp_obj(a, b):
             r = 0
-            for p in path_list:
-                r = cmp(p.select(a).next(), p.select(b).next())
+            for k in key:
+                asc = True
+                if k.startswith('-'):
+                    asc = False
+                k = k.lstrip('-+')
+                path = selector.compile(k)
+                if asc:
+                    r = cmp(path.select(a).next(), path.select(b).next())
+                else:
+                    r = cmp(path.select(b).next(), path.select(a).next())
                 if r != 0:
                     return r
             return r
