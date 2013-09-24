@@ -118,12 +118,12 @@ class HTMLReplacer(object):
         'strong': u'**',
         'em': u'//',
         'span': u'[[[',
-        'b': u'**:b',
-        'del': u'[[[:del',
-        'ins': u'[[[:ins',
-        'code': u'{{{:code',
-        'i': u'//:i',
-        's': u'[[[:s',
+        'b': u'**:b ',
+        'del': u'[[[:del ',
+        'ins': u'[[[:ins ',
+        'code': u'{{{:code ',
+        'i': u'//:i ',
+        's': u'[[[:s ',
         'sub': u',,',
         'sup': u'^^',
         'pre': u'{{{',
@@ -315,7 +315,10 @@ class HTMLReplacer(object):
         elif elem == u'hr':
             buff.append(u'----')
         else:
-            buff.append(self.OPENING_MAP[elem])
+            if not attrs:
+                buff.append(self.OPENING_MAP[elem])
+            else:
+                buff.append(self.OPENING_MAP[elem].strip())
             for k, v in attrs:
                 if k == u'class':
                     for s in v.split(u' '):
