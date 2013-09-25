@@ -64,9 +64,9 @@ class PerformerRequestHandler(RequestHandler):
         cls_or_cmd = cls_or_cmd.strip('/')
         mod = self._app._schema_module.get_module(pkg_mod_name)
         if cls_or_cmd:
-            if mod.has_class(cls_or_cmd):
+            if not mod.has_class(cls_or_cmd):
                 throw_caty_exception(u'HTTP_400', u'Not implemented: $path', path=path)
-                return mod.get_class(cls_or_cmd), None
+            return mod.get_class(cls_or_cmd), None
         if not cls_or_cmd:
             throw_caty_exception(u'HTTP_400', u'Not implemented: $path', path=path)
         return mod, cls_or_cmd
