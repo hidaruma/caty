@@ -269,9 +269,9 @@ signature Collection
   * エラーとはせずに、検索がヒットしないときと同じ扱いにする。
   * 
   */
- command grep {
+ command choose {
   "order-by": (string | [string, string*])?,
-} :: GrepCond  -> [Key*];
+} :: ChooseCond  -> [Key*];
 } refers python:collection;
 
 /** Grepに渡す条件 
@@ -279,17 +279,18 @@ signature Collection
  * 複数の文字列を、論理ANDまたは論理ORで複合することができる。
  * 複数の文字列の配列は論理ANDの意味となる。
  */
-type GrepCond = {
-  *: GrepCondItem?
+type ChooseCond = {
+  *: ChooseCondItem?
 };
 
-type GrepCondItem = (string 
+type ChooseCondItem = (string 
                     | [string*] 
                     | @or [string*]
                     | @and [string*] 
-                    | @every GrepCondItem
-                    | @some GrepCondItem
-                    | GrepCond);
+                    | @every ChooseCondItem
+                    | @some ChooseCondItem
+                    | @not ChooseCondItem
+                    | ChooseCond);
 
 /** 
  * ベースコレクションとして必要なコマンドセット 

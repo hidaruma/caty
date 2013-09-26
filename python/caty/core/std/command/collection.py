@@ -140,7 +140,7 @@ class Set(Builtin):
             path.replace(v, rec)
             return self.arg0.replace(self.key, v)
 
-class Grep(Builtin):
+class Choose(Builtin):
     def setup(self, opts):
         self.order_by = opts['order-by']
 
@@ -155,17 +155,23 @@ class Grep(Builtin):
 
     def match(self, data, query):
         if isinstance(query, unicode):
+            if isinstance(data, list):
+                return self.match(data, json.tagged(u'some', query))
             if not isinstance(data, unicode):
                 return False
             if query not in data:
                 return False
         elif isinstance(query, list):
+            if isinstance(data, list):
+                return self.match(data, json.tagged(u'some', query))
             if not isinstance(data, unicode):
                 return False
             for subquery in query:
                 if subquery not in data:
                     return False
         elif isinstance(query, dict):
+            if isinstance(data, list):
+                return self.match(data, json.tagged(u'some', query))
             if not isinstance(data, dict):
                 return False
             for k, q in query.items():
@@ -175,7 +181,9 @@ class Grep(Builtin):
                     return False
         elif isinstance(query, json.TaggedValue):
             t, query = json.split_tag(query)
-            if t == u'every':
+            if t == u'not':
+                return not self.match(data, query)
+            elif t == u'every':
                 if not isinstance(data, list):
                     return False
                 for v in data:
@@ -190,6 +198,8 @@ class Grep(Builtin):
                 else:
                     return False
             else:
+                if isinstance(data, list):
+                    return self.match(data, json.tagged(u'some', json.tagged(t, query)))
                 if not isinstance(data, unicode):
                     return False
                 if t == u'or':
