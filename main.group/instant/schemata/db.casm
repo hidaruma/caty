@@ -197,3 +197,17 @@ class lunchSummary = {
 
 };
 
+@[predefined]
+type email = string(format="email");
+@[predefined]
+type tel = string(format="tel");
+@[predefined]
+type url = string(format="url");
+
+type Form = {
+  "name": string,
+  "mail": email,
+  "tel": tel?,
+  "webPage": url?
+};
+

@@ -133,6 +133,10 @@ type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE> = @builtin (QualifierMixin 
  */
 type BuiltinType = BuiltinTypeOf<builtinTypeName>;
 
+type PredefinedType = @predefined (QualifierMixin & {
+  "typeName" : catyTypeName,
+   *: any? // open
+});
 
 /* objectは構文上の予約語だが、レイフィケーションでは次の型にpredefineされている */
 /** 事前定義された object 型 */
@@ -350,6 +354,7 @@ type TypeSpec = catyTypeText|TypeExpr;
  */
 type TypeExpr = (
   TypeConst // 組み込み型、シングルトン型
+| PredefinedType // 事前定義型
 | TypeRef // 型変数＝型名、型関数名
 | TypeAbst // 型のラムダ抽象
 | AppliedType // 引数を渡された型

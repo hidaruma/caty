@@ -344,6 +344,8 @@ class TypeBodyReifier(TreeCursor):
 
     def _visit_scalar(self, node):
         if node.name not in RESERVED:
+            if u'predefined' in node.annotations:
+                return self.__reify_predefined(node)
             return self.__reify_ref(node)
         else:
             return self.__reify_builtin(node)
@@ -354,6 +356,12 @@ class TypeBodyReifier(TreeCursor):
         r[u'typeName'] = node.name
         return r
 
+    @format_result(u'predefined')
+    def __reify_predefined(self, node):
+        r = self._extract_common_data(node)
+        r[u'typeName'] = node.name
+        return r
+    
     @format_result(u'type-ref')
     def __reify_ref(self, node):
         r = self._extract_common_data(node)
@@ -480,6 +488,8 @@ class ObjectDumper(TypeBodyReifier):
         self._history = {}
 
     def _visit_root(self, node):
+        if u'predefined' in node.annotations:
+            return tagged(u'predefined', {u'typeName': node.name})
         return node.body.accept(self)
 
     def _visit_scalar(self, node):
