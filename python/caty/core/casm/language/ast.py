@@ -134,8 +134,8 @@ class ClassNode(object):
         self.codomain = codomain
         self.type_args = type_args
         self.conforms = conforms
-        if conforms:
-            self.expression = ClassIntersectionOperator(expression, conforms)
+        #if conforms:
+        #    self.expression = ClassIntersectionOperator(expression, conforms)
         self.defined = type != u'?='
         self.redifinable = type == u'&='
         self.underlyingtype = None
@@ -618,6 +618,10 @@ class CommandNode(Function):
         self.application = None
         for p in patterns:
             p.parent = self
+
+    @property
+    def implemented(self):
+        return not (self.script_proxy is None and self.uri in (None, 'caty.core.command.Dummy'))
 
     def clone(self):
         r = self.__class__(self.name, 

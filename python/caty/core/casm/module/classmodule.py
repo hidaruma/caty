@@ -113,6 +113,10 @@ class ClassModule(Module):
                 v.set_arg0_type(self._clsrestriction)
             class_expr_interpreter = ClassExprInterpreter(self)
             class_body = class_expr_interpreter.visit(self._clsobj.expression)
+            if self._clsobj.conforms:
+                conform_cls = class_expr_interpreter.visit(self._clsobj.conforms)
+            else:
+                conform_cls = None
             for m in class_body.member:
                 if m.name in self._declared:
                     pass
@@ -136,6 +140,33 @@ class ClassModule(Module):
                         self.add_command(cursor.visit(m))
                     else:
                         pass
+            if not conform_cls:
+                return
+            for m in conform_cls.member:
+                if isinstance(m, AssertionNode):
+                    m.re_declare(self)
+                if isinstance(m, CommandNode):
+                    self.add_proto_type(m)
+                    if m.module is None:
+                        m.module = self
+                    if m.application is None:
+                        m.application = self.application
+
+                    try:
+                        refered_modules = list(self._load_refered_modules(conform_cls))
+                        self._attache_class(m, refered_modules)
+                    except:
+                        print '    [ERROR]', u'%s::%s' % (self._app.name, self.canonical_name)
+                        raise
+                    cursor = m.module.make_profile_builder()
+                    if not m.implemented:
+                        if m.name not in self._declared:
+                            print '    [Warning]', u'%s is not implemented at %s' % (m.name, self.canonical_name)
+                        continue # XXX: 本来ならシグネチャのチェック
+                    o = cursor.visit(m)
+                    self.add_command(o)
+                else:
+                    pass
         except:
             print '    [ERROR]', u'%s::%s' % (self._app.name, self.canonical_name)
             raise
