@@ -302,7 +302,7 @@ class ScriptParser(Parser):
                 args = []
             return ClassProxy(name, [], CommandProxy(mname, type_args2, opts, args, pos))
         pos = (seq.col-len(name), seq.line)
-        type_args = option(nohook(self.type_args), [])(seq)
+        type_args = option(try_(self.type_args), [])(seq)
         if option(nohook(peek(u'.')))(seq) and type_args:
             nohook(S('.'))(seq)
             mname = nohook(name_token)(seq)
