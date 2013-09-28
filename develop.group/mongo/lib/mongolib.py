@@ -19,7 +19,11 @@ class MongoDB(Facility):
         Facility.__init__(self, mode)
         self.dbname = system_param
         self.module_name = None
-        self.db = self.conn[self.dbname]
+        if self.conn:
+            self.db = self.conn[self.dbname]
+        else:
+            self.db = None
+            print u'[Warning] Could not connect to server: %s:%d' % (self.config.get('host', u'localhost'), self.config.get('port', 27017))
         #self._new_collection(u'default-collection')
 
 
