@@ -98,9 +98,9 @@ class MongoDB(Facility):
 
     def slice(self, from_idx, to_idx=None):
         if to_idx:
-            return self.all()[from_idx:from_idx+to_idx]
+            return [xjson_from_bson(o) for o in self.collection.find(skip=from_idx, limit=to_idx)]
         else:
-            return self.all()[from_idx:]
+            return [xjson_from_bson(o) for o in self.collection.find()]
 
     def insert(self, k, v):
         if k == None:

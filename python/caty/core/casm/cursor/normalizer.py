@@ -158,17 +158,21 @@ class TypeCalcurator(_SubNormalizer):
             # 仕方がないのでまとめて宣言のみのスキーマに潰す。
             res = EmptySchema()
         # 型変数の場合はデフォルトもしくはカインドを元に計算する。
-        # XXX:現状デフォルトのみ実装
+        # XXX:現状カインドは無視して計算結果はペンディング
         if lt == '__variable__':
             d = self._dereference(l)._default_schema
             if d:
                 lt = d.type
                 l = self._dereference(d)
+            else:
+                return node
         if rt == '__variable__':
             d = self._dereference(r)._default_schema
             if d:
                 rt = d.type
                 r = self._dereference(d)
+            else:
+                return node
         # 一方がneverであれば演算結果はnever
         if lt == 'never' or rt == 'never':
             res = NeverSchema()
@@ -538,7 +542,9 @@ class NeverChecker(_SubNormalizer):
         return never_found
 
     def _visit_intersection(self, node):
-        assert False, TreeDumper().visit(node)
+        #XXX:ここまで残ると言うことは型変数が含まれている。
+        #    つまり実体化するまでわからんので一旦見逃し。
+        return []
 
     def _visit_union(self, node):
         # タイミングの関係上、ノーマライズ後のユニオンの排他性チェックはここで
@@ -563,7 +569,10 @@ class NeverChecker(_SubNormalizer):
                 if is_never:
                     pass
                 else:
-                    throw_caty_exception(u'SCHEMA_COMPILE_ERROR', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
+                    if u[0].type == '__variable__' or u[1].type == '__variable__':
+                        pass
+                    else:
+                        throw_caty_exception(u'SCHEMA_COMPILE_ERROR', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
             a = u[0].accept(self)
             b = u[1].accept(self)
             if a and b:
@@ -702,6 +711,11 @@ class DefaultChecker(TreeCursor):
 
     def _visit_unary_op(self, node):
         pass #この時点で演算子が残っている=型変数なので
+
+    def _visit_intersection(self, node):
+        self._validate_default(node)
+        l = node.left.accept(self)
+        r = node.right.accept(self)
 
 class InvalidDefaultValue(Exception):
     def __init__(self, value):
