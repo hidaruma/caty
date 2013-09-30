@@ -118,4 +118,7 @@ class DefaultStorage(Facility):
         tp = mod.get_type(self.collname)
         return tp.annotations['__identified'].value
 
+    @property
+    def recordtype(self):
+        return self.collname
 

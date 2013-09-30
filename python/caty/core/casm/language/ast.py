@@ -1072,6 +1072,19 @@ class CollectionDeclNode(object):
             recname = name+'Record'
             self.rectype = ASTRoot(recname, None, coltype, Annotations([]), None)
             self.type = ASTRoot(name, None, ScalarNode(recname), a, doc)
+        self.command1 = CommandNode(name, 
+                                     [CallPattern(None, 
+                                                 None, 
+                                                 CommandDecl(
+                                                    (ScalarNode(u'void'), ScalarNode(u'foreign')),
+                                                    [], 
+                                                    [(u'uses', [FacilityDecl(name, None, u'arg0')])]
+                                                 ), 
+                                     )],
+                                     CommandURI([(u'python', 'caty.core.std.command.collection.GetEntity')], True),
+                                     doc, 
+                                     Annotations([Annotation(u'__collection')]),
+                                     [])
         self.command2 = CommandNode(name, 
                                      [CallPattern(None, 
                                                  None, 
@@ -1099,7 +1112,7 @@ class CollectionDeclNode(object):
         self.type.declare(module)
         if self.rectype:
             self.rectype.declare(module)
-        #self.command2.declare(module)
+        self.command1.declare(module)
         self.catyclass.declare(module)
         self.entity(module).declare(module)
 

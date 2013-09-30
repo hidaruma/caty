@@ -813,7 +813,7 @@ class Module(Facility):
                     else:
                         cmd = cls([], [], module=self)
                     cmd.set_facility(facilities)
-                    executable =  CommandExecutor(cmd, self._app, facilities)
+                    executable = CommandExecutor(cmd, self._app, facilities)
                     r = TransactionAdaptor(executable, facilities)(None)
                     m.annotations.add(Annotation('__init__', r))
                 except:

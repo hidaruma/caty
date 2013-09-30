@@ -211,3 +211,14 @@ type Form = {
   "webPage": url?
 };
 
+collection tree of collection:TreeStructure identified name;
+
+type Page = {
+    "id": integer,
+    "content": string,
+};
+
+collection pages of Page;
+
+class page_tree = collection:TreeOperator<pages> & tree;
+

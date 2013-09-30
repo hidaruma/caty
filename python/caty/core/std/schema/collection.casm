@@ -294,6 +294,44 @@ type ChooseCondItem = (string
                     | @ic ChooseCondItem
                     | ChooseCond);
 
+
+/** ツリー構造全体 */
+type TreeStructure = {
+    /** ツリー構造の名前 */
+    "name": string,
+    
+    /** レコード名 */
+    "nodeSet": string,
+
+    /** ツリー構造
+     */
+    "nodes": [TreeData*]
+};
+
+/** ツリー構造の情報 */
+type TreeData = {
+    /** エントリーの識別子と一致させる */
+    "id": string | integer,
+
+    /** 親エントリーのID。トップレベルの場合はnull */
+    "parent": string | integer | null,
+
+    /** 子エントリーのIDリスト */
+    "childNodes": [(string|integer)*],
+};
+
+kind ObjType = lower object;
+
+type TreeStructureApplied<T in ObjType> = (open T) & {"parent": string | integer | null, "childNodes": [(string|integer)*], *:any?};
+
+/** ツリー操作機能を提供するクラス */
+class TreeOperator<Record> = {
+    /** 主要データにツリー構造をマージする。 */
+    command merge [string tree_name] :: Record -> TreeStructureApplied<Record>;
+    /** 主要データからツリー構造を取り除く。 */
+    command extract :: TreeStructureApplied<Record> -> Record;
+} refers python:tree;
+
 /** 
  * ベースコレクションとして必要なコマンドセット 
  */

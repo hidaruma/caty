@@ -441,6 +441,8 @@ class TypeCalcurator(_SubNormalizer):
     def _visit_unary_op(self, node):
         res = node.body.accept(self)
         body = dereference(res)
+        if body.type == u'__variable__':
+            return node
         if node.operator != u'extract':
             if body.type != 'object':
                raise CatyException(u'SchemaCompileError', 

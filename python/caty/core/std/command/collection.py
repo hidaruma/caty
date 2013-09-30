@@ -269,4 +269,7 @@ def _make_comparator(key):
             return r
     return cmp_obj
 
+class GetEntity(Builtin):
+    def execute(self):
+        return self.arg0
 
