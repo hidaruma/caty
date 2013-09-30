@@ -143,6 +143,7 @@ class Set(Builtin):
 class Choose(Builtin):
     def setup(self, opts):
         self.order_by = opts['order-by']
+        self.mode = u'ic'
 
     def execute(self, query):
         r = []
@@ -159,6 +160,8 @@ class Choose(Builtin):
                 return self.match(data, json.tagged(u'some', query))
             if not isinstance(data, unicode):
                 return False
+            if self.mode == u'ic':
+                data = data.lower()
             if query not in data:
                 return False
         elif isinstance(query, list):
@@ -183,6 +186,20 @@ class Choose(Builtin):
             t, query = json.split_tag(query)
             if t == u'not':
                 return not self.match(data, query)
+            elif t == u'ic':
+                p = self.mode
+                self.mode = u'ic'
+                try:
+                    return self.match(data, query)
+                finally:
+                    self.mode = p
+            elif t == u'cs':
+                p = self.mode
+                self.mode = u'cs'
+                try:
+                    return self.match(data, query)
+                finally:
+                    self.mode = p
             elif t == u'every':
                 if not isinstance(data, list):
                     return False

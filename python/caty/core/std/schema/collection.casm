@@ -290,6 +290,8 @@ type ChooseCondItem = (string
                     | @every ChooseCondItem
                     | @some ChooseCondItem
                     | @not ChooseCondItem
+                    | @cs ChooseCondItem
+                    | @ic ChooseCondItem
                     | ChooseCond);
 
 /** 
