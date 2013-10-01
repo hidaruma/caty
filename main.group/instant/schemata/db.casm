@@ -220,5 +220,5 @@ type Page = {
 
 collection pages of Page;
 
-class page_tree = collection:TreeOperator<pages> & tree;
+class page_tree = collection:TreeOperator<pages>;
 

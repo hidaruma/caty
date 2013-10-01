@@ -22,7 +22,12 @@ class Merge(Builtin):
         else:
             throw_caty_exception(u'RecordNotFound', u'id=$id', id=id)
         record['parent'] = rel['parent']
-        record['childNodes'] = rel['childNodes']
+        if rel['parent'] is not None:
+            p = None
+            for n in ts['nodes']:
+                if n['id'] == rel['parent']:
+                    record['position'] = n['childNodes'].index(id)
+                    break
         return record
         
 

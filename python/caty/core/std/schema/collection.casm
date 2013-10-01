@@ -322,12 +322,18 @@ type TreeData = {
 
 kind ObjType = lower object;
 
-type TreeStructureApplied<T in ObjType> = (open T) & {"parent": string | integer | null, "childNodes": [(string|integer)*], *:any?};
+type TreeStructureApplied<T in ObjType> = (open T) & {"parent": string | integer | null, "position": integer?, *:any?};
 
 /** ツリー操作機能を提供するクラス */
 class TreeOperator<Record> = {
+    /** ノードの情報を更新する。 
+     * 
+     */
+    command update [string tree_name] :: TreeStructureApplied<Record> -> Record;
+    
     /** 主要データにツリー構造をマージする。 */
     command merge [string tree_name] :: Record -> TreeStructureApplied<Record>;
+
     /** 主要データからツリー構造を取り除く。 */
     command extract :: TreeStructureApplied<Record> -> Record;
 } refers python:tree;
