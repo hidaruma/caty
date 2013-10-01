@@ -308,7 +308,7 @@ type TreeStructure = {
     "nodes": [TreeData*]
 };
 
-/** ツリー構造の情報 */
+/** ツリー構造の内部情報 */
 type TreeData = {
     /** エントリーの識別子と一致させる */
     "id": string | integer,
@@ -322,14 +322,17 @@ type TreeData = {
 
 kind ObjType = lower object;
 
-type TreeStructureApplied<T in ObjType> = (open T) & {"parent": string | integer | null, "position": integer?, *:any?};
+/** ツリー操作の外部APIで使われるデータ。 */
+type TreeIF = {"parent": string | integer | null, "position": integer?, *:any?};
+type TreeStructureApplied<T in ObjType> = (open T) & TreeIF;
 
 /** ツリー操作機能を提供するクラス */
 class TreeOperator<Record> = {
-    /** ノードの情報を更新する。 
-     * 
-     */
-    command update [string tree_name] :: TreeStructureApplied<Record> -> Record;
+    /** ノードの親子関係の情報を更新する。 */
+    command update [string tree_name] :: TreeIF -> TreeIF;
+
+    /** ノードの親子関係の情報を削除する。引数が指定されない場合、全てのツリーから情報を削除する。 */
+    command delete [string? tree_name] :: TreeIF -> TreeIF;
     
     /** 主要データにツリー構造をマージする。 */
     command merge [string tree_name] :: Record -> TreeStructureApplied<Record>;
