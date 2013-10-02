@@ -285,8 +285,8 @@ type ChooseCond = {
 
 type ChooseCondItem = (string 
                     | [string*] 
-                    | @or [string*]
-                    | @and [string*] 
+                    | @or [ChooseCondItem*]
+                    | @and [ChooseCondItem*] 
                     | @every ChooseCondItem
                     | @some ChooseCondItem
                     | @not ChooseCondItem

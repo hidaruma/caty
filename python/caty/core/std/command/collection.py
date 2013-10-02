@@ -221,13 +221,13 @@ class Choose(Builtin):
                     return False
                 if t == u'or':
                     for subquery in query:
-                        if subquery in data:
+                        if self.match(subquery, data):
                             break
                     else:
                         return False
                 else:
                     for subquery in query:
-                        if subquery not in data:
+                        if self.match(subquery, data):
                             return False
         return True
 
