@@ -470,6 +470,7 @@ class Module(Facility):
         self._post_process()
         self._register_command()
         self._register_facility()
+        self._register_entity()
         self._validate_signature()
         self.set_compiled(True)
 
@@ -762,17 +763,21 @@ class Module(Facility):
                 if '__master' not in v.annotations:
                     continue
                 self._app.register_facility(v.name, self.get_facility_classes(v.facility_name), v.user_param)
+        if emsgs:
+            self.application.cout.writeln(u'')
+        for e in emsgs:
+            self.application.cout.writeln(u'  [Warning] ' + e)
 
+    def _register_entity(self):
+        if not self.compiled:
             for k, v in self.entity_ns.items():
                 if not v.facility_name:
                     continue
                 if '__master' in v.annotations:
                     continue
                 self._app.register_entity(v.name, v.facility_name, v.user_param)
-        if emsgs:
-            self.application.cout.writeln(u'')
-        for e in emsgs:
-            self.application.cout.writeln(u'  [Warning] ' + e)
+        for m in self.sub_modules.values() + self.sub_packages.values() + self.class_ns.values():
+            m._register_entity()
 
     def _load_facility_class(self, name):
         from caty.core.casm.loader import dynamic_load
