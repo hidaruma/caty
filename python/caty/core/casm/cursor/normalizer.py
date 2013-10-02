@@ -54,12 +54,12 @@ class _SubNormalizer(SchemaBuilder):
             try:
                 o[k] = v.accept(self)
             except:
-                print '[DEBUG]', k
+                debug(k)
                 raise
         try:
             w = node.wildcard.accept(self)
         except:
-            print '[DEBUG] *'
+            debug(u'*')
             raise
         return ObjectSchema(o, w, node.options)
 
@@ -127,7 +127,8 @@ class TypeCalcurator(_SubNormalizer):
             try:
                 node.body = node.body.accept(self)
             except Exception as e:
-                print '[DEBUG]', node.name
+                debug(node.name)
+                raise
         return node
 
     @apply_annotation
@@ -417,20 +418,18 @@ class TypeCalcurator(_SubNormalizer):
     def _visit_updator(self, node):
         l = node.left
         r = node.right
+        if '__variable__' in (self._dereference(l).type, self._dereference(r).type):
+            return node
         if self.__can_not_merge(l, r):
             t1 = l.type if l.type != '__variable__' else ro.i18n.get(u'type variable($name)', name=l.name)
             t2 = r.type if r.type != '__variable__' else ro.i18n.get(u'type variable($name)', name=r.name)
             raise Exception(ro.i18n.get(u'unsupported operand types for $op: $type1, $type2', type1=str(t1), type2=t2, op='++'))
-
         l = l.accept(self)
         r = r.accept(self)
         n = l.update(r)
         return n.accept(self)
 
     def __can_not_merge(self, l, r):
-        if '__variable__' in (l.type, r.type):
-            return True
-
         if l.type != r.type:
             if len(set([l.type, r.type]).union(set(['__merging__', '__intersection__', 'object']))) != 3:
                 if l.type not in ('integer', 'number') and r.type not in ('integer', 'number'):
@@ -595,7 +594,7 @@ class NeverChecker(_SubNormalizer):
         return r
 
     def _visit_updator(self, node):
-        assert False, TreeDumper().visit(node)
+        return []
 
     def _visit_tag(self, node):
         return node.body.accept(self)
@@ -715,6 +714,11 @@ class DefaultChecker(TreeCursor):
         pass #この時点で演算子が残っている=型変数なので
 
     def _visit_intersection(self, node):
+        self._validate_default(node)
+        l = node.left.accept(self)
+        r = node.right.accept(self)
+
+    def _visit_updator(self, node):
         self._validate_default(node)
         l = node.left.accept(self)
         r = node.right.accept(self)

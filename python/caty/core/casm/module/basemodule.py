@@ -27,6 +27,7 @@ from threading import RLock
 from StringIO import StringIO
 from caty.core.facility import Facility
 from functools import partial
+from caty.util.dev import debug
 
 class Module(Facility):
     class Relation(object):
@@ -817,7 +818,7 @@ class Module(Facility):
                     r = TransactionAdaptor(executable, facilities)(None)
                     m.annotations.add(Annotation('__init__', r))
                 except:
-                    print '[DEBUG]', m.canonical_name
+                    debug(m.canonical_name)
                     raise
         for m in self.class_ns.values() + self.sub_modules.values() + self.sub_packages.values():
             m.exec_property_command()
@@ -829,7 +830,7 @@ class Module(Facility):
                     cursor = cursor_factory()
                     callback(k, cursor.visit(v))
                 except:
-                    print '[DEBUG]', k
+                    debug(k)
                     raise
 
         except:
