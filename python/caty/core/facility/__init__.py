@@ -90,9 +90,10 @@ class Facility(object):
 
 class EntityProxy(Facility):
 
-    def __init__(self, base, user_param):
+    def __init__(self, base, user_param, module_name):
         self.base = base
         self.user_param = user_param
+        self.module_name = module_name
 
     def start(self):
         return EntityProxy(self.base.start(), self.user_param)

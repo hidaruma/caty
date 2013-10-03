@@ -1,0 +1,54 @@
+#coding: utf-8
+import caty
+from caty.core.command import Builtin
+import caty.jsontools.selector as selector
+import caty.jsontools as json
+from caty.core.exception import throw_caty_exception
+from caty.core.facility import DUAL
+
+class Grouping(Builtin):
+    def execute(self, gi):
+        src_ent = self.current_app.get_entity(gi['src'])
+        src = src_ent.create(DUAL)
+        trg_ent = self.current_app.get_entity(gi['trg'])
+        trg = trg_ent.create(DUAL)
+        keys = gi['keys']
+        cond = gi['cond']
+        records = map(lambda k: [k, src.get(k)], keys)
+        gid = gi['name']
+        groups = self._make_groups(cond, records)
+        grec = {u'name': gid, u'nodes': groups.values(), u'nodeSet': src_ent.module_name + ':' + gi['src']}
+        if trg.exists(gid):
+            trg.replace(gid, grec)
+        else:
+            trg.insert(gid, grec)
+        return json.tagged(u'__r', {u't': trg_ent.module_name + ':' + gi['trg'], u'a': [gid]})
+
+    def _make_groups(self, cond, records):
+        groups = {}
+        if self._is_value_cond(cond):
+            q = json.untagged(cond)
+            if isinstance(q, dict):
+                path = q['field']
+            else:
+                path = q
+            s = selector.compile(path)
+            for i, r in records:
+                try:
+                    v = s.select(r).next()
+                except:
+                    v = u'None'
+                key = u'__id_%s' % (json.pp(v).strip(u'"'))
+                if key not in groups:
+                    groups[key] = {
+                        u'id': key,
+                        u'parent': None,
+                        u'childNodes': [i]
+                    }
+                else:
+                    groups[key][u'childNodes'].append(i)
+        return groups
+
+    def _is_value_cond(self, cond):
+        return True
+

@@ -310,8 +310,16 @@ type TreeStructure = {
 
 /** ツリー構造の内部情報 */
 type TreeData = {
-    /** エントリーの識別子と一致させる */
+    /** 
+     * 通常のノードではノードの識別子と一致させる
+     * グループノードに対しては通常のノードと異なるIDを付ける。
+     */
     "id": string | integer,
+
+    /** 
+     * グループノードか否か。プロパティが存在しない場合は通常のノード。
+     */
+    "isGroup": boolean?,
 
     /** 親エントリーのID。トップレベルの場合はnull */
     "parent": string | integer | null,
@@ -340,6 +348,151 @@ class TreeOperator<Record> = {
     /** 主要データからツリー構造を取り除く。 */
     command extract :: TreeStructureApplied<Record> -> Record;
 } refers python:tree;
+
+/** グループノードは、通常のリレーションシップノードと同じ構造
+ */
+type GroupNode = TreeData;
+
+type fieldPath = string(remark="フィールドパス");
+type sortKey = string(remark="フィールドパスと符号");
+
+/** ノードの順序指定
+ */
+type OrderBy = {
+  /** グループノードの順序
+   * ソートキーは、fieldで指定されたフィールド
+   * 昇順か降順かを符号で指定する。
+   * 指定されないと実装依存の順序となる。
+   */
+  "groupOrderBy": ("+"|"-")?,
+
+  /** メンバーノードの順序
+   * ソートキーは任意。フィールドパスと昇順・降順の符号を指定する。
+   * マルチキーも許す。
+   * 指定されないと実装依存の順序となる。
+   *
+   * メンバーノードがグループノードのときは、この値を指定しない。指定するとエラーとなる。
+   */
+  "memberOrderBy": (sortKey | [sortKey, sortKey*])?,
+};
+
+/** 等値グルーピング条件のオブジェクト部分
+ * 指定されたフィールドの値が同じときは同じグループに入れる
+ */
+type ValueCondObj = OrderBy ++ {
+  /** グルーピングに使うフィールド 
+   * スカラーフィールドでなくてはならない。
+   */
+  "field": fieldPath,
+};
+
+
+/** ショートハンド記法も含めた等値グルーピング条件
+ */
+type ValueCond = (@val (ValueCondObj | fieldPath) | fieldPath);
+
+
+
+/** 範囲グルーピング条件
+ * 指定された範囲（区間）群で、値が同じ区間に入るときは同じグループに入れる
+ */
+type RangeCond = @range (OrderBy ++ {
+  /** グルーピングに使うフィールド 
+   * 数値フィールドでなくてはならない。
+   */
+  "field": fieldPath,
+
+  /** 区間分割に使う原点の値 */
+  @[default(0)]
+  "origin": number?,
+
+  /** 区間分割に使う区間の幅 */
+  "step": number,
+
+});
+
+
+
+/** 原子的グルーピング条件 
+ */
+type AtomicCond = (ValueCond | RangeCond);
+
+
+
+/** 多次元マトリックスグルーピング条件
+ * 等値条件または範囲条件が軸を形成し、
+ * 複数の軸からなるマトリックス状のグループができる。
+ * マトリックスのセルが1つのグループとなる。
+ * 複数の条件を指定しても、ツリーの高さ（深さ）は変わらない。
+ */
+type MultiCond = @multi {
+
+
+ /** 軸の記述
+  * 軸の名前が不要なときは配列を使う。
+  * 配列のときは、配列インデックスが軸名（軸番号）として使われる。
+  */
+ "axes" : 
+  (
+    {
+      /** プロパティ名は軸の名前 */
+      *: AtomicCond?,
+    }(minProperties=1)
+  | 
+    [AtomicCond, AtomicCond*]
+  ),
+
+  /** グループのソートキーもフルに指定する。
+   * ソートキーが軸のグルーピングフィールドでない場合はエラーとなる
+   */
+  "groupOrderBy": (sortKey | [sortKey, sortKey*])?,
+
+  /** メンバーノードの順序
+   * OerderByのときと同じ
+   */
+  "memberOrderBy": (sortKey | [sortKey, sortKey*])?,
+};
+
+/** 単純なグルーピング条件
+ */
+type SimpleCond = (AtomicCond | MultiCond);
+
+/** 多段入れ子グルーピング条件
+ * 多段階のツリー構造を一気に作る
+ */
+type NestCond = (@nest [SimpleCond, SimpleCond*] | [SimpleCond, SimpleCond*]);
+
+/** グルーピング条件 */
+type Cond = (SimpleCond | NestCond);
+
+/** groupingコマンドへの入力 
+ */
+type GroupingInput = {
+ /** ソース（入力元）コレクションの名前 */
+ "src": string(remark="コレクション名"),
+
+ /** ターゲット（出力先）コレクションの名前 
+  * ターゲットコレクションは、リレーションシップを格納できる必要がある。
+  * また、グループノードのIDを生成する能力が要求される。
+  */
+ "trg": string(remark="コレクション名"),
+
+ /** グルーピングの対象となるレコード群 */
+ "keys": [scalar*],
+
+ /** グルーピング条件 */
+ "cond": Cond,
+
+ /** グルーピング名 */
+ "name": string,
+};
+
+class Forest = {
+    /** グルーピング処理コマンド
+     * 生成したツリーのルートへの参照を返す
+     */
+    command grouping :: GroupingInput -> Reference;
+} refers python:forest;
 
 /** 
  * ベースコレクションとして必要なコマンドセット 
@@ -507,3 +660,4 @@ signature Basable
 
 
 };
+

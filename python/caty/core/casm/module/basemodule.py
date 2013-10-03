@@ -775,7 +775,7 @@ class Module(Facility):
                     continue
                 if '__master' in v.annotations:
                     continue
-                self._app.register_entity(v.name, v.facility_name, v.user_param)
+                self._app.register_entity(v.name, v.facility_name, v.user_param, self.canonical_name)
         for m in self.sub_modules.values() + self.sub_packages.values() + self.class_ns.values():
             m._register_entity()
 

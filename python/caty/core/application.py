@@ -491,12 +491,12 @@ class Application(object):
         if self.parent:
             self.parent.facility_name_conflicted(name)
 
-    def register_entity(self, name, facility_name, user_param):
+    def register_entity(self, name, facility_name, user_param, module_name):
         self.facility_name_conflicted(name)
         res = self.get_facility_class(facility_name)
         if not res:
             raise Exception(self.i18n.get("Unknown facility: $name", name=facility_name, app=self.name))
-        self._facility_classes[name] = (res[0], res[1], user_param, facility_name)
+        self._facility_classes[name] = (res[0], res[1], user_param, facility_name, module_name)
 
     def get_facility_class(self, facility_name):
         if facility_name in self._facility_classes:
@@ -612,9 +612,9 @@ class Application(object):
             try:
                 if v[0] is None: continue
                 if len(v) == 2:
-                    facilities[k] = AbstractEntityProxy(v[0].instance(self, v[1]), None)
+                    facilities[k] = AbstractEntityProxy(v[0].instance(self, v[1]), None, None)
                 else:
-                    facilities[k] = EntityProxy(v[0].instance(self, v[1]), v[2])
+                    facilities[k] = EntityProxy(v[0].instance(self, v[1]), v[2], v[4])
             except:
                 import traceback
                 traceback.print_exc()
@@ -626,6 +626,15 @@ class Application(object):
         fset = FacilitySet(facilities, self)
         facilities['interpreter'] = self._interpreter.file_mode(fset)
         return fset
+
+    def get_entity(self, name):
+        if name in self._facility_classes:
+            v = self._facility_classes[name]
+            return EntityProxy(v[0].instance(self, v[1]), v[2], v[4])
+        elif self.parent:
+            return self.parent.get_entity(name)
+        else:
+            throw_caty_exception(u'UnknownEntity', name)
 
     def get_facility_items(self):
         for k, v in self._facility_classes.items():
