@@ -705,6 +705,12 @@ class Application(object):
         env.put(u'CONTENT_LENGTH', unicode(environ.get('CONTENT_LENGTH', '-1')))
         env.put(u'HCON_URL', self._system.get_hcon_url())
         env.put(u'LOGGED', CATY_USER_INFO_KEY in facilities['session'])
+        if environ.get('X-FORWARDED-FOR'):
+            env.put(u'REMOTE_ADDR', environ.get('X-FORWARDED-FOR'))
+        elif environ.get('REMOTE_ADDR'):
+            env.put(u'REMOTE_ADDR', environ.get('REMOTE_ADDR'))
+        else:
+            env.put(u'REMOTE_ADDR', u'127.0.0.1')
 
     def find_backend(self, name):
         o = self.find_config(name)
