@@ -149,7 +149,9 @@ def xjson_from_bson(o):
             return Decimal(o['__int__'])
         r = {}
         for k, v in o.items():
-            r[k] = xjson_from_bson(v)
+            a = xjson_from_bson(v)
+            if a is not UNDEFINED:
+                r[k] = a
         return r
     elif o is None:
         return UNDEFINED
