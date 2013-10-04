@@ -181,19 +181,19 @@ class Response(Builtin):
                 r['header']['content_type'] = tp
             input = u''
         else:
+            if isinstance(input, unicode):
+                length = len(input.encode(encoding))
+            else:
+                length = len(input)
             r = {
             'status': st,
             'encoding': encoding,
             'body': input,
             'header': {
                 'content-type': unicode(tp),
-                'content-length': u''
+                'content-length': length
             }
         }
-        if isinstance(input, unicode):
-            length = len(input.encode(encoding))
-        else:
-            length = len(input)
         return r
 
 
