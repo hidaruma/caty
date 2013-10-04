@@ -24,7 +24,7 @@ class Grouping(Builtin):
             trg.insert(gid, grec)
         return json.tagged(u'__r', {u't': trg_ent.module_name + ':' + gi['trg'], u'a': [gid]})
 
-    def _make_groups(self, cond, records):
+    def _make_groups(self, cond, records, parent=None):
         groups = {}
         q = json.untagged(cond)
         if self._is_value_cond(cond):
@@ -42,8 +42,9 @@ class Grouping(Builtin):
                 if key not in groups:
                     groups[key] = {
                         u'id': key,
-                        u'parent': None,
-                        u'childNodes': [[i, r]]
+                        u'parent': parent,
+                        u'childNodes': [[i, r]],
+                        u'isGroup': True,
                     }
                 else:
                     groups[key][u'childNodes'].append([i, r])
@@ -63,11 +64,27 @@ class Grouping(Builtin):
                 if key not in groups:
                     groups[key] = {
                         u'id': key,
-                        u'parent': None,
-                        u'childNodes': [[i, r]]
+                        u'parent': parent,
+                        u'childNodes': [[i, r]],
+                        u'isGroup': True,
                     }
                 else:
                     groups[key][u'childNodes'].append([i, r])
+        elif self._is_nest_cond(cond):
+            groups = self._make_groups(q[0], records, parent)
+            if len(q) == 1:
+                return groups
+            for k, v in groups.items():
+                subrec = []
+                for c in v['childNodes']:
+                    for i, r in records:
+                        if i == c:
+                            subrec.append((i, r))
+                subg = self._make_groups(q[1:], subrec, k)
+                v['childNodes'] = list(subg.keys())
+                for id, g in subg.items():
+                    groups[id] = g
+            return groups
         else:
             raise NotImplementedError()
         if isinstance(q, dict):
@@ -88,6 +105,8 @@ class Grouping(Builtin):
     def _is_range_cond(self, cond):
         return json.tag(cond) == u'range'
 
+    def _is_nest_cond(self, cond):
+        return json.tag(cond) in (u'nest', u'array')
 
     def _sort_groups(self, groups, mob):
         if not isinstance(mob, list):
