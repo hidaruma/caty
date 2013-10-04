@@ -192,9 +192,7 @@ class Module(Facility):
                     target.defined = False
                     target.redifinable = False
         if see_register_public and (
-            ('register-public' in target.annotations or (not self.is_class and 'register-public' in self.annotations)) or 
-            ('predefined' in target.annotations)
-            ):
+            ('register-public' in target.annotations or (not self.is_class and 'register-public' in self.annotations))):
             if not self.is_root:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)
         if see_register_public and ('override-public' in target.annotations or 'override-public' in self.annotations) and not force:

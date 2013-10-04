@@ -359,7 +359,7 @@ class TypeBodyReifier(TreeCursor):
     @format_result(u'predefined')
     def __reify_predefined(self, node):
         r = self._extract_common_data(node)
-        r[u'typeName'] = node.name
+        r[u'typeName'] = node.canonical_name
         return r
     
     @format_result(u'type-ref')
@@ -489,7 +489,7 @@ class ObjectDumper(TypeBodyReifier):
 
     def _visit_root(self, node):
         if u'predefined' in node.annotations:
-            return tagged(u'predefined', {u'typeName': node.name})
+            return tagged(u'predefined', {u'typeName': node.canonical_name})
         return node.body.accept(self)
 
     def _visit_scalar(self, node):
