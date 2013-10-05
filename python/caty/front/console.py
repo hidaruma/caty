@@ -422,7 +422,7 @@ Ugly URIサーバーの起動・停止を行う
             self.set_prompt()
             self.interpreter = None
         except Exception, e:
-            self._echo(traceback)
+            #self._echo(traceback)
             self._echo(e)
             self.set_prompt()
             self.interpreter = None

@@ -1,7 +1,7 @@
 #coding:utf-8
 from caty.core.command import Builtin
 from caty.core.typeinterface import *
-from caty.core.schema import TagSchema, StringSchema, NamedSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema, NeverSchema, UndefinedSchema, ArraySchema, ObjectSchema, TypeVariable
+from caty.core.schema import TagSchema, StringSchema, NamedSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema, NeverSchema, UndefinedSchema, ArraySchema, ObjectSchema, TypeVariable, BagSchema
 from caty.core.schema import types as reserved
 import caty.jsontools as json
 import random
@@ -492,8 +492,12 @@ class DataGenerator(TreeCursor):
 
     def _visit_bag(self, node):
         r = []
-        for s in self.schema_list:
-            r.append(s.accept(self))
+        for s in node.schema_list:
+            sub = []
+            minimum = s.minCount or 0
+            maximum = s.maxCount or 1
+            for i in range(minimum, random.randrange(minimum, maximum+1)):
+                r.append(s.accept(self))
         random.shuffle(r)
         return [i for i in r if i is not _EMPTY]
 
