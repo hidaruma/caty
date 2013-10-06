@@ -39,11 +39,11 @@ type Kind = reif:Kind;
  */
 type TypeQualifierMixin = LocatedQualifierMixin & {
      /** スキーマ属性 */
-    "attributes": object?,
+    "attributes": object?, // 廃止予定
 
     /** 型が名前空間（束縛セット、コンテキスト）内で名前に束縛されているとき、その名前が再帰的かどうか 
      */
-    @[default(@Indef)]
+    @[default(indef)]
     "recursive": tboolean?,
 
     *: any?  // open
@@ -375,7 +375,7 @@ type TypeExpr = (
 
 // 特殊な構成法で作られる型、PER（or settoid）として解釈する
 | BagType
-
+//| LetrecExpr // 定義できない ??
 );
 }>>
 
@@ -571,21 +571,22 @@ type RPseudoTag = @_pseudoTag ([string, any] | [null, null]); //@ 塩漬け
 // type ReifiedKind = deferred @kind object;  //@ 塩漬け
 }>>
 
-=== 型let式
+=== 型letrec式
 
 
 <<{
 
-/** 型let式 
- * let式とletrec式を区別せずに、どちらも一律にlet式と呼ぶ。
+/** 型letrec式 
+ * 型letrec式は、当面、完全展開形レイフィケーションの出力としてだけ使う。
+ * bindingsとexprを分けないで、フラットなオブジェクト形式とする。
  */
 
-type LetExpr = @type-let (TypeQualifierMixin & {
+type LetrecExpr = @letrec (TypeQualifierMixin & {
+  "$": string(remark="変数名（関数名を含む）"),
 
-  "bindings": {*: (TypeExpr | LetExpr)?},
-  "expr": TypeExpr,
-
-  *: any?
+  /* プロパティ名は変数名 */
+  *: TypeExpr?
 });
+
 
 }>>
