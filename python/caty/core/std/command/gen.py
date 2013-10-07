@@ -1,12 +1,12 @@
 #coding:utf-8
 from caty.core.command import Builtin
 from caty.core.typeinterface import *
-from caty.core.schema import TagSchema, StringSchema, NamedSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema, NeverSchema, UndefinedSchema, ArraySchema, ObjectSchema, TypeVariable, BagSchema
+from caty.core.schema import TagSchema, StringSchema, NamedSchema, NumberSchema, BoolSchema, BinarySchema, TypeReference, ForeignSchema, UnionSchema, NeverSchema, UndefinedSchema, ArraySchema, ObjectSchema, TypeVariable, BagSchema, IndefSchema
 from caty.core.schema import types as reserved
 import caty.jsontools as json
 import random
 from string import printable
-from caty import ForeignObject, UNDEFINED
+from caty.core.spectypes import ForeignObject, UNDEFINED, INDEF
 from decimal import Decimal
 from caty.core.language import split_colon_dot_path
 from caty.core.exception import throw_caty_exception
@@ -300,6 +300,8 @@ class DataGenerator(TreeCursor):
             return _EMPTY
         elif isinstance(node, UndefinedSchema):
             return UNDEFINED
+        elif isinstance(node, IndefSchema):
+            return INDEF
         elif isinstance(node, TypeVariable):
             if node._schema:
                 return node._schema.accept(self)
