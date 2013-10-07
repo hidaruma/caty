@@ -375,7 +375,7 @@ type TypeExpr = (
 
 // 特殊な構成法で作られる型、PER（or settoid）として解釈する
 | BagType
-//| LetrecExpr // 定義できない ??
+| LetrecExpr // 定義できない ??
 );
 }>>
 

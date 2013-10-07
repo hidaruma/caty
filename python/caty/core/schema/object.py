@@ -53,6 +53,10 @@ class ObjectSchema(SchemaBase, Object):
         return another.intersect(self)
 
     def _intersect_obj(self, another):
+        if self.wildcard.type in (u'any', u'univ') and not self.schema_obj:
+            return another
+        if another.wildcard.type in (u'any', u'univ') and not another.schema_obj:
+            return self
         newobj = ObjectSchema()
         newschema_obj = {}
         for k, v in self.items():

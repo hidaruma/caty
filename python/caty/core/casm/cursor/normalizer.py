@@ -190,6 +190,11 @@ class TypeCalcurator(_SubNormalizer):
                 res = UndefinedSchema()
             else:
                 res = NeverSchema()
+        elif lt == 'indef' or rt == 'indef':
+            if lt == rt:
+                return l
+            else:
+                return NeverSchema()
         # anyはforeignとundefined以外に対して単位元
         elif lt == 'any':
             res = r
@@ -199,11 +204,12 @@ class TypeCalcurator(_SubNormalizer):
         elif lt == '__union__' and rt == '__union__':
             l = self._dereference(l)
             r = self._dereference(r)
-            xl = self.__intersect(l.left, r.left)
-            xr = self.__intersect(l.right, r.left)
-            yl = self.__intersect(l.left, r.right)
-            yr = self.__intersect(l.right, r.right)
-            comb = filter(lambda x: x.type != 'never', [xl, xr, yl, yr])
+            xs = flatten_union_node(l)
+            ys = flatten_union_node(r)
+            path = []
+            for a, b in [(x, y) for x in xs for y in ys]:
+                path.append(self.__intersect(a, b))
+            comb = filter(lambda x: x.type != 'never', path)
             length = len(comb)
             if length == 0:
                 res = NeverSchema()
@@ -377,6 +383,12 @@ class TypeCalcurator(_SubNormalizer):
         else:
             if l in self.history and r in self.history:
                 return NeverSchema() # 再帰的定義で止まってしまうのを修正
+            lt = l.type
+            rt = r.type
+            if lt != rt:
+                if not (lt in ('number', 'integer') and rt in ('number', 'integer')):
+                    if '*' not in lt and '*' not in rt and not lt.startswith('__') and not rt.startswith('__'):
+                        return NeverSchema()
             return (l & r).accept(self)
 
     def _intersect_enum_and_scalar(self, enum, scalar):
