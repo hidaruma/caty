@@ -309,3 +309,20 @@ class LengthSelector(Selector):
     def _to_str(self):
         return 'length()'
 
+class ItSelector(Selector):
+
+    def __init__(self):
+        Selector.__init__(self)
+
+    def run(self, obj, ignored=False):
+        if isinstance(obj, (list, tuple)):
+            if len(obj) > 0:
+                yield obj[0]
+            else:
+                yield UNDEFINED
+        else:
+            yield obj
+
+    def _to_str(self):
+        return 'it()'
+

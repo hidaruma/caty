@@ -19,6 +19,7 @@ class JSONPathSelectorParser(Parser):
                     self.exp_tag,
                     self.untagged,
                     self.length,
+                    self.it,
                     self.name, 
                     self.index, 
                     self.namewildcard, 
@@ -126,3 +127,8 @@ class JSONPathSelectorParser(Parser):
     def length(self, seq):
         seq.parse('length()')
         return self.factory.LengthSelector()
+
+    def it(self, seq):
+        seq.parse('it()')
+        return self.factory.ItSelector()
+
