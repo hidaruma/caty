@@ -74,6 +74,7 @@ class Application(object):
         self._system = system
         self._path = unicode(name)
         self._facility_classes = {}
+        self._master_entities = {}
         self._facilities = {}
         self._group = group
         self._finished = False
@@ -481,22 +482,25 @@ class Application(object):
             for tp in LOG_TYPES:
                 logger.init(self, tp)
 
-    def register_facility(self, name, cls, system_param):
-        self.facility_name_conflicted(name)
-        self._facility_classes[name] = (cls, system_param)
-
     def facility_name_conflicted(self, name):
-        if name in self._facility_classes:
+        if name in self._master_entities:
             raise Exception(self.i18n.get("Facility name conflicted: $name at $app", name=name, app=self.name))
         if self.parent:
             self.parent.facility_name_conflicted(name)
 
+    def register_facility_class(self, name, cls):
+        self._facility_classes[name] = cls
+
+    def register_master(self, name, cls, system_param):
+        self.facility_name_conflicted(name)
+        self._master_entities[name] = (cls, system_param)
+
     def register_entity(self, name, facility_name, user_param, module_name):
         self.facility_name_conflicted(name)
-        res = self.get_facility_class(facility_name)
+        res = self.get_master_entity(facility_name)
         if not res:
             raise Exception(self.i18n.get("Unknown facility: $name", name=facility_name, app=self.name))
-        self._facility_classes[name] = (res[0], res[1], user_param, facility_name, module_name)
+        self._master_entities[name] = (res[0], res[1], user_param, facility_name, module_name)
 
     def get_facility_class(self, facility_name):
         if facility_name in self._facility_classes:
@@ -506,9 +510,17 @@ class Application(object):
         else:
             return None
 
+    def get_master_entity(self, facility_name):
+        if facility_name in self._master_entities:
+            return self._master_entities[facility_name]
+        if self.parent:
+            return self.parent.get_master_entity(facility_name)
+        else:
+            return None
+
     def _init_facilities(self):
         initialized = set()
-        for k, v in self._facility_classes.items():
+        for k, v in self._master_entities.items():
             if v[0] is None:
                 continue
             if v[0] in initialized:
@@ -628,8 +640,8 @@ class Application(object):
         return fset
 
     def get_entity(self, name):
-        if name in self._facility_classes:
-            v = self._facility_classes[name]
+        if name in self._master_entities:
+            v = self._master_entities[name]
             return EntityProxy(v[0].instance(self, v[1]), v[2], v[4])
         elif self.parent:
             return self.parent.get_entity(name)
@@ -637,14 +649,14 @@ class Application(object):
             throw_caty_exception(u'UnknownEntity', name)
 
     def get_facility_items(self):
-        for k, v in self._facility_classes.items():
+        for k, v in self._master_entities.items():
             yield k, v
         if self.parent:
             for k, v in self.parent.get_facility_items():
                 yield k, v
 
     def has_facility(self, name):
-        if name in self._facility_classes:
+        if name in self._master_entities:
             return True
         reserved = set([
             'pub',
@@ -876,7 +888,7 @@ class Application(object):
         return r
 
     def finalize(self):
-        for f in set([v[0] for v in self._facility_classes.values()]):
+        for f in set([v[0] for v in self._master_entities.values()]):
             if f:
                 f.finalize(self)
 

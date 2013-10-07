@@ -86,7 +86,6 @@ class Module(Facility):
         self.loaded = True
         self.annotations = Annotations([])
         self.package_root_path = u'/'
-        self.facility_classes = {}
         self.assertions = []
 
         self.add_schema = partial(self._add_resource, scope_func=lambda x:x.schema_ns, type=u'Type')
@@ -120,7 +119,7 @@ class Module(Facility):
         self.add_facility = partial(self._add_resource, scope_func=lambda x:x.facility_ns, type=u'Facility', see_register_public=True)
         self.get_facility = partial(self._get_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
         self.has_facility = partial(self._has_resource, scope_func=lambda x:x.facility_ns, type=u'Facility')
-        self.get_facility_classes = partial(self._get_resource, scope_func=lambda x:x.facility_classes, type=u'Facility')
+        self.get_master_entities = partial(self._get_resource, scope_func=lambda x:x.facility_classes, type=u'Facility')
 
         self.add_entity = partial(self._add_resource, scope_func=lambda x:x.entity_ns, type=u'Entity', see_register_public=True)
         self.get_entity = partial(self._get_resource, scope_func=lambda x:x.entity_ns, type=u'Entity')
@@ -192,7 +191,9 @@ class Module(Facility):
                     target.defined = False
                     target.redifinable = False
         if see_register_public and (
-            ('register-public' in target.annotations or (not self.is_class and 'register-public' in self.annotations))):
+            ('register-public' in target.annotations or (not self.is_class and 'register-public' in self.annotations)) or 
+            ('predefined' in target.annotations)
+            ):
             if not self.is_root:
                 self.parent._add_resource(target, scope_func, type, see_register_public=True, see_filter=False, callback=callback)
         if see_register_public and ('override-public' in target.annotations or 'override-public' in self.annotations) and not force:
@@ -342,7 +343,7 @@ class Module(Facility):
                 if u'register-public' in v.annotations:
                     m.find_root().ast_ns.pop(k)
         for k in m.facility_ns.keys() + m.entity_ns.keys():
-            m.app._facility_classes.pop(k)
+            m.app._master_entities.pop(k)
         m.ast_ns = {}
         m.proto_ns = {}
         m.class_ns = {}
@@ -369,8 +370,8 @@ class Module(Facility):
                     if k in r.ast_ns:
                         r.ast_ns.pop(k)
         for k in m.facility_ns.keys() + self.entity_ns.keys():
-            if k in m.app._facility_classes:
-                m.app._facility_classes.pop(k)
+            if k in m.app._master_entities:
+                m.app._master_entities.pop(k)
         m.ast_ns = {}
         m.proto_ns = {}
         m.class_ns = {}
@@ -468,6 +469,7 @@ class Module(Facility):
         self._post_process()
         self._register_command()
         self._register_facility()
+        self._register_master_entity()
         self._register_entity()
         self._validate_signature()
         self.set_compiled(True)
@@ -748,23 +750,27 @@ class Module(Facility):
                     facility_class = None
                 if facility_class:
                     facility_class.__system_config__ = config
-                self.facility_classes[v.name] = facility_class
+                self.app.register_facility_class(v.name, facility_class)
         for m in self.sub_modules.values() + self.sub_packages.values() + self.class_ns.values():
             m._register_facility()
         if self.is_root and not self.compiled:
             self.application.cout.writeln('OK')
 
+        if emsgs:
+            self.application.cout.writeln(u'')
+        for e in emsgs:
+            self.application.cout.writeln(u'  [Warning] ' + e)
+
+    def _register_master_entity(self):
         if not self.compiled:
             for k, v in self.entity_ns.items():
                 if not v.facility_name:
                     continue
                 if '__master' not in v.annotations:
                     continue
-                self._app.register_facility(v.name, self.get_facility_classes(v.facility_name), v.user_param)
-        if emsgs:
-            self.application.cout.writeln(u'')
-        for e in emsgs:
-            self.application.cout.writeln(u'  [Warning] ' + e)
+                self._app.register_master(v.name, self.app.get_facility_class(v.facility_name), v.user_param)
+        for m in self.sub_modules.values() + self.sub_packages.values() + self.class_ns.values():
+            m._register_master_entity()
 
     def _register_entity(self):
         if not self.compiled:
@@ -817,7 +823,7 @@ class Module(Facility):
                     else:
                         cmd = cls([], [], module=self)
                     cmd.set_facility(facilities)
-                    executable = CommandExecutor(cmd, self._app, facilities)
+                    executable =  CommandExecutor(cmd, self._app, facilities)
                     r = TransactionAdaptor(executable, facilities)(None)
                     m.annotations.add(Annotation('__init__', r))
                 except:
@@ -945,8 +951,8 @@ class Module(Facility):
         for m in self.class_ns.values():
             m.clear_namespace()
         for k in self.facility_ns.keys() + self.entity_ns.keys():
-            if k in self.app._facility_classes:
-                self.app._facility_classes.pop(k)
+            if k in self.app._master_entities:
+                self.app._master_entities.pop(k)
 
     def is_runaway_exception(self, e):
         try:
