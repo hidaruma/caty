@@ -2,7 +2,8 @@
 
 module ex;
 
-@[typical([
+@[predefined,
+typical([
   "明"
  , "健二"
  , "太郎"
@@ -20,7 +21,8 @@ module ex;
 ])]
 type givenName = string;
 
-@[typical([
+@[predefined,
+typical([
   "山田"
  , "鈴木"
  , "高橋"
@@ -30,7 +32,8 @@ type givenName = string;
 ])]
 type familyName = string;
 
-@[typical([
+@[predefined,
+typical([
   "山田太郎"
 , "鈴木明"
 , "高橋惠子"
@@ -38,7 +41,8 @@ type familyName = string;
 ])]
 type personName  = string;
 
-@[typical([
+@[predefined,
+typical([
   "foo"
 , "bar"
 , "baz"
@@ -52,7 +56,8 @@ type personName  = string;
 type something = string;
 
 
-@[typical([
+@[predefined,
+typical([
   "(有)モリモリ商会"
 , "株式会社・遊星惑星社"
 , "イクゾー(株)"
@@ -62,7 +67,8 @@ type companyName  = string;
 
 
 /* メールアドレス */
-@[typical([
+@[predefined,
+typical([
    "foo@example.com"
  , "bar@example.com"
  , "baz@example.com"
@@ -73,7 +79,8 @@ type companyName  = string;
 type email = string;
 
 
-@[typical([
+@[predefined,
+typical([
    "http://www.w3.org"
  , "http://www.example.org"
  , "http://www.example.com"
@@ -83,7 +90,8 @@ type email = string;
 type url = string;
 
 
-@[typical([
+@[predefined,
+typical([
    "03-1234-5678"
  , "090-1234-5678"
  , "080-1234-5678"
@@ -92,7 +100,8 @@ type url = string;
 type tel = string;
 
 /* date …… yyyy-MM-dd（例：2011-02-06） */
-@[typical([
+@[predefined,
+typical([
   "2013-08-26"
 , "2010-10-01"
 , "2011-12-31"
@@ -100,27 +109,31 @@ type tel = string;
 type date = string;
 
 /* datetime …… yyyy-MM-ddTHH:mm:ssZ（例：2011-02-06T05:53:22Z） */
-@[typical([
+@[predefined,
+typical([
   "2013-08-26T08:29:14Z"
 , "2013-04-01T00:01:02Z"
 ])]
 type datetime = string;
 
 /* datetime-local …… yyyy-MM-ddTHH:mm:ss（例：2011-02-06T14:53:22）*/
-@[typical([
+@[predefined,
+typical([
   "2013-08-26T08:29:14"
 , "2013-04-01T00:01:02"
 ])]
 type datetime-local = string;
 
 /* month …… yyyy-MM（例：2011-02） */
-@[typical([
+@[predefined,
+typical([
  "2013-08"
 ])]
 type month = string;
 
 /* week …… yyyy-Www（例：2011-W05）。その年における何週目かを表す */
-@[typical([
+@[predefined,
+typical([
    "2013-W22"
  , "2012-W10"
  , "2010-W08"
@@ -128,7 +141,8 @@ type month = string;
 type week = string;
 
 /* time …… HH:mm:ss（例：14:53:22）*/
-@[typical([
+@[predefined,
+typical([
   "11:30:46"
   ,"08:09:11"
 ])]
@@ -136,12 +150,14 @@ type time = string;
 
 /* 色のRGB値を16進数で表した文字列 （例：#ffaec9） */
 
-@[typical([
+@[predefined,
+typical([
   "#ffaec9"
 ])]
 type color = string;
 
-@[typical([
+@[predefined,
+typical([
    "こんにちは。"
  , "いいね。"
  , "まーまーだった。"
@@ -155,7 +171,8 @@ type color = string;
 ])]
 type sentence = string(remark="自然言語による文");
 
-@[typical([
+@[predefined,
+typical([
    "画像のつもり.gif"
  , "なんちゃって画像.png"
  , "写真だと思って.jpg"
@@ -164,7 +181,8 @@ type sentence = string(remark="自然言語による文");
 ])]
 type photo = string(remark="ダミー画像");
 
-@[typical([
+@[predefined,
+typical([
 '''私は事実とにかくこの滅亡方というのの後が作るうで。いよいよほかへ評めもたといこの永続うでなどが思うて来るたをは区別知れなたて、だんだんには申し上げるんたくたで。
 '''
 ,
