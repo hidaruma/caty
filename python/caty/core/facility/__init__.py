@@ -96,7 +96,7 @@ class EntityProxy(Facility):
         self.module_name = module_name
 
     def start(self):
-        return EntityProxy(self.base.start(), self.user_param)
+        return EntityProxy(self.base.start(), self.user_param, self.module_name)
 
     def create(self, mode):
         return self.base.create(mode, self.user_param)
