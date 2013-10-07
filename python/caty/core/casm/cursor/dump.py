@@ -180,7 +180,7 @@ class TreeDumper(TreeCursor):
                     _buff.append(' ' + c.options['subName'])
                 _buff.append(', ')
             _buff.append(ls[-1].accept(self))
-            if node.repeat:
+            if isinstance(node, Array) and node.repeat:
                 _buff.append('*')
             if u'subName' in ls[-1].options:
                 _buff.append(' ' + ls[-1].options['subName'])

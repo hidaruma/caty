@@ -243,16 +243,23 @@ def bag_type(seq):
     s = seq.parse(term)
     _ = seq.parse(option('{'))
     if not _:
-        return s
-    a = int(seq.parse(Regex(r'([0-9])|([1-9][0-9]+)')))
-    _ = seq.parse(option(',', False))
-    if _:
-        b = seq.parse(option(Regex(r'([0-9])|([1-9][0-9]+)'), None))
+        if isinstance(s, OptionNode):
+            s = s.body
+            s.options['minCount'] = 0
+            s.options['maxCount'] = 1
+            return s
+        else:
+            return s
     else:
-        b = a
-    seq.parse('}')
-    s.options['minCount'] = a
-    s.options['maxCount'] = int(b) if b else b
+        a = int(seq.parse(Regex(r'([0-9])|([1-9][0-9]+)')))
+        _ = seq.parse(option(',', False))
+        if _:
+            b = seq.parse(option(Regex(r'([0-9])|([1-9][0-9]+)'), None))
+        else:
+            b = a
+        seq.parse('}')
+        s.options['minCount'] = a
+        s.options['maxCount'] = int(b) if b else b
     return s
 
 def array(seq):
