@@ -30,6 +30,75 @@ type Kind = reif:Kind;
 
 }>>
 
+=== スキーマ属性の定義
+
+スカラーに適用：
+
+* minimum
+* maximum
+* minLength
+* maxLength
+* format
+* pattern
+* origin
+* step
+* exclusiveMinimum （予定）
+* exclusiveMaximum （予定）
+
+配列に適用：
+
+* minItems
+* maxItems
+* tight
+
+オブジェクトに適用：
+
+* minProperties
+* maxProperties
+* propNameFormat
+* propNameType （予定）
+
+すべてに適用：
+
+* remark
+
+<<{
+
+type CommonAttributes = {
+ "remark": string?,
+};
+
+type ScalarAttributes = CommonAttributes ++ {
+ "minimum": scalar?,
+ "maximum": scalar?,
+ "minLength": integer(minimum=0)?,
+ "maxLength": integer(minimum=0)?,
+ "format": string(remark="フォーマット名")?,
+ "pattern": string(remark="正規表現パターン")?,
+ "origin": number?,
+ "step": number?,
+ "exclusiveMinimum": scalar?,
+ "exclusiveMaximum": scalar?,
+
+};
+
+type ArrayAttributes = CommonAttributes ++ {
+ "minItems": integer(minimum=0)?,
+ "maxItems": integer(minimum=0)?,
+ "tight": boolean?,
+};
+
+type ObjectAttributes = CommonAttributes ++ {
+ "minProperties": integer(minimum=0)?,
+ "maxProperties": integer(minimum=0)?,
+ "propNameFormat": string(remark="フォーマット名")?,
+ "propNameType": string(remark="型名")?,
+
+};
+
+}>>
+
+
 
 ===  共通の定義
 
@@ -39,12 +108,12 @@ type Kind = reif:Kind;
  */
 type TypeQualifierMixin = LocatedQualifierMixin & {
      /** スキーマ属性 */
-    "attributes": object?, // 廃止予定
+    "attributes": object, // 廃止予定、一時的に必須化する
 
     /** 型が名前空間（束縛セット、コンテキスト）内で名前に束縛されているとき、その名前が再帰的かどうか 
      */
     @[default(indef)]
-    "recursive": tboolean?,
+    "recursive": tboolean, // 一時的に必須化する
 
     *: any?  // open
 };
@@ -122,7 +191,7 @@ type builtinTypeName = (
 kind STRING_ENUM_TYPE = lower string /* and finite */;
 
 /** 組み込み型の型関数 */
-type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE> = @builtin (QualifierMixin & {
+type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE> = @builtin (QualifierMixin & (open ScalarAttributes) & {
   "typeName" : TypeNameType,
    *: any? // open
 });
@@ -138,6 +207,7 @@ type PredefinedType = @predefined (QualifierMixin & {
    *: any? // open
 });
 
+
 /* objectは構文上の予約語だが、レイフィケーションでは次の型にpredefineされている */
 /** 事前定義された object 型 */
 const PredefinedObjectType :: ObjectType = @object-of {
@@ -151,6 +221,7 @@ const PredefinedArrayType :: ArrayType = @array-of {
  "specified" : [],
  "additional" : @builtin {"typeName": "univ"}
 };
+
 
 /** ブーリアンシングルトン型  */
 type BooleanSingletonType = @boolean-val (QualifierMixin & {
@@ -395,7 +466,7 @@ type TypeExpr = (
 /** オブジェクト型を構成する型関数
  * オブジェクト型は名前付きタプルの型
  */
-type ObjectTypeOf<PropType, AdditionalType> = @object-of (TypeQualifierMixin & {
+type ObjectTypeOf<PropType, AdditionalType> = @object-of (TypeQualifierMixin & (open ObjectAttributes) & {
   "pseudoTag": RPseudoTag?, //@ 塩漬け
 
   "specified": {*: PropType}, 
@@ -407,7 +478,7 @@ type ObjectTypeOf<PropType, AdditionalType> = @object-of (TypeQualifierMixin & {
 /** 配列型を構成する型関数
  * 配列型は、名前なしタプルの型
  */
-type ArrayTypeOf<ItemType, AdditionalType> = @array-of (TypeQualifierMixin & {
+type ArrayTypeOf<ItemType, AdditionalType> = @array-of (TypeQualifierMixin &  (open ArrayAttributes) & {
 
   "specified": [ItemType*], 
   "additional": AdditionalType,
@@ -582,10 +653,19 @@ type RPseudoTag = @_pseudoTag ([string, any] | [null, null]); //@ 塩漬け
  */
 
 type LetrecExpr = @letrec (TypeQualifierMixin & {
-  "$": string(remark="変数名（関数名を含む）"),
 
-  /* プロパティ名は変数名 */
-  *: TypeExpr?
+  /** letrec式の値ととなる型変数名 
+   */
+  "main": string(remark="変数名（関数名を含む）"),
+
+  /** letrec式の束縛 */
+  "bindings" : {
+     /* プロパティ名は変数名 */
+     *: TypeExpr?
+  },
+ 
+  *: any?
+
 });
 
 
