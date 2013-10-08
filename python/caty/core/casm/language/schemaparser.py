@@ -60,7 +60,7 @@ def schema(seq):
     return ASTRoot(name_of_type, type_args, definition, annotations, doc, k_of, defined, redifinable)
 
 def typedef(seq):
-    return chainl(term, op, allow_trailing_operator=True)(seq)
+    return chainl(annotated_term, op, allow_trailing_operator=True)(seq)
 
 def op(seq):
     o = seq.parse(['&', '|', '++'])
@@ -240,7 +240,7 @@ def bag(seq):
     return BagNode(r, o)
 
 def bag_type(seq):
-    s = seq.parse(term)
+    s = seq.parse(annotated_typedef)
     _ = seq.parse(option('{'))
     if not _:
         if isinstance(s, OptionNode):
@@ -278,18 +278,28 @@ def array(seq):
         return a
 
 def repeatable_type(seq):
-    s = seq.parse([annotated_term, loose_item])
+    s = seq.parse([annotated_typedef, loose_item])
     r = seq.parse(option('*'))
     n = seq.parse(option(name))
     if n:
         s.options['subName'] = n
     return [s, r]
 
-def annotated_term(seq):
+def annotated_typedef(seq):
     doc = seq.parse(option(docstring))
     a = seq.parse(option(annotation, Annotations([])))
     s = typedef(seq)
     s.annotations = a
+    if doc:
+        s.docstring = doc
+    return s
+
+def annotated_term(seq):
+    doc = seq.parse(option(docstring))
+    a = seq.parse(option(annotation))
+    s = term(seq)
+    if a:
+        s.annotations = a
     if doc:
         s.docstring = doc
     return s
