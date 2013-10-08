@@ -22,7 +22,7 @@ def _facility(seq):
         sys_param_type = typename(seq)
         option(name_token)(seq)
         seq.parse(')')
-        config_type = option(parse_config_type, ScalarNode(u'null'))(seq)
+        config_type = option(parse_config_type, SymbolNode(u'null'))(seq)
         indices_type = option(parse_indices_type, {})(seq)
         ref = option(refer)(seq)
         clsname = None

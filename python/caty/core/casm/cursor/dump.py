@@ -53,7 +53,7 @@ class TreeDumper(TreeCursor):
             r.append('\n')
         return ''.join(r)
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         buff = []
         if isinstance(node, TypeReference) and self.deep and self.recursive and node.body and not node.recursive:
             buff.append(node.body.accept(self))
@@ -108,6 +108,9 @@ class TreeDumper(TreeCursor):
 
     def _visit_option(self, node):
         return node.body.accept(self) + '?'
+
+    def _visit_scalar(self, node):
+        return self._to_str(node.value)
 
     def _visit_enum(self, node):
         if len(node.enum) > 1:

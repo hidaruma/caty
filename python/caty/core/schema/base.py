@@ -682,7 +682,7 @@ class TagSchema(SchemaBase, Tag):
     def resolve_reference(self):
         self.__schema.resolve_reference()
 
-class ScalarSchema(SchemaBase, Scalar):
+class ScalarSchema(SchemaBase, Symbol):
     @property
     def tag(self):
         return self.type
@@ -703,7 +703,7 @@ class ScalarSchema(SchemaBase, Scalar):
         return self.__class__(options if options else self.options)
 
 
-class UnivSchema(SchemaBase, Scalar):
+class UnivSchema(SchemaBase, Symbol):
     u"""あらゆる型を受け付けるスキーマ。
     つまり何もしない。
     """
@@ -734,7 +734,7 @@ class UnivSchema(SchemaBase, Scalar):
     def tag(self):
         return self.type
 
-class ForeignSchema(SchemaBase, Scalar):
+class ForeignSchema(SchemaBase, Symbol):
     u"""フォーリンデータ型を受け付けるスキーマ。
     """
 
@@ -767,7 +767,7 @@ class ForeignSchema(SchemaBase, Scalar):
     def tag(self):
         return self.type
 
-class AnySchema(SchemaBase, Scalar):
+class AnySchema(SchemaBase, Symbol):
     u"""undefined、foreign以外のあらゆる型を受け付けるスキーマ。
     """
 
@@ -800,7 +800,7 @@ class AnySchema(SchemaBase, Scalar):
     def tag(self):
         return self.type
 
-class NullSchema(SchemaBase, Scalar):
+class NullSchema(SchemaBase, Symbol):
     u"""値が null 値、つまり None であれば良とするスキーマ。
     """
     def validate(self, value, path=None):
@@ -834,7 +834,7 @@ class NullSchema(SchemaBase, Scalar):
     def tag(self):
         return self.type
 
-class IndefSchema(SchemaBase, Scalar):
+class IndefSchema(SchemaBase, Symbol):
     u"""値がindefであれば良とするスキーマ。
     """
     def validate(self, value, path=None):
@@ -868,7 +868,7 @@ class IndefSchema(SchemaBase, Scalar):
     def tag(self):
         return self.type
 
-class VoidSchema(SchemaBase, Scalar):
+class VoidSchema(SchemaBase, Symbol):
     u"""Null と同じ unit だが、値なしを意味するところが違う。
     """
     def validate(self, value, path=None):
@@ -901,7 +901,7 @@ class VoidSchema(SchemaBase, Scalar):
     def tag(self):
         return self.type
 
-class NeverSchema(SchemaBase, Scalar):
+class NeverSchema(SchemaBase, Symbol):
     u"""そもそもアクセスがあってはいけないスキーマ。
     """
     def validate(self, value, path=None):
@@ -931,7 +931,7 @@ class NeverSchema(SchemaBase, Scalar):
     def tag(self):
         return self.type
 
-class UndefinedSchema(SchemaBase, Scalar):
+class UndefinedSchema(SchemaBase, Symbol):
     u"""undefinedのみを受け付けるシングルトン
     """
     @property
@@ -963,7 +963,7 @@ class UndefinedSchema(SchemaBase, Scalar):
     def tag(self):
         return self.type
 
-class EmptySchema(SchemaBase, Scalar):
+class EmptySchema(SchemaBase, Symbol):
     u"""宣言のみされたスキーマ。
     """
     def __init__(self, name):
@@ -996,7 +996,7 @@ class EmptySchema(SchemaBase, Scalar):
         return self.type
 
 from caty.util.dev import inject_tb
-class TypeVariable(SchemaBase, Scalar):
+class TypeVariable(SchemaBase, Symbol):
     def __init__(self, var_name, type_arguments, kind, default, options, module):
         self.var_name = var_name
         self._type_arguments = type_arguments
@@ -1413,7 +1413,7 @@ class NamedSchema(SchemaBase, Root):
         return self._schema.optional
     
 
-class TypeReference(SchemaBase, Scalar, Ref):
+class TypeReference(SchemaBase, Symbol, Ref):
 
     # 参照先がオブジェクトの可能性もあるので擬似タグをサポート
     pseudoTag = attribute('pseudoTag', PseudoTag(None, None))
@@ -1627,6 +1627,88 @@ class ExtractorSchema(SchemaBase, UnaryOperator):
     @property
     def tag(self):
         return self.body.tag
+
+class ValueSchema(SchemaBase, Scalar):
+    def __init__(self, value, *args, **kwds):
+        SchemaBase.__init__(self, *args, **kwds)
+        self.value = value
+
+    def _validate(self, value):
+        if value is None:
+            raise JsonSchemaError(dict(msg=u'null is not allowed'), value, '')
+        if self.value == value:
+            if (type(self.value) == type(value)) or (not isinstance(value, bool) and not isinstance(self.value, bool) and isinstance(self.value, (int, Decimal)) and isinstance(value, (int, Decimal))):
+                return
+        raise JsonSchemaError(dict(msg=u'value should be $type', type=self.value), value, '')
+
+    def intersect(self, another):
+        if not isinstance(another, Scalar):
+            try:
+                another.validate(self)
+            except Exception as e:
+                return NeverSchema()
+            else:
+                return self
+        else:
+            if another.value == self.value:
+                return self
+            else:
+                return NeverSchema()
+
+    def _deepcopy(self, ignore):
+        return ValueSchema(self.value, self.options)
+
+    def _clone(self, ignore, options=None):
+        return ValueSchema(self.scalar, 
+                          options if options else self.options)
+
+    def _convert(self, value):
+        if isinstance(e, unicode):
+            if value == self.value:
+                return value
+        else:
+            if try_parse(int, value) == self.value:
+                return value
+        raise JsonSchemaError(dict(msg=u'value should be $type', type=self.value), value, '')
+
+    def apply(self, vars):
+        pass
+
+    def set_reference(self, referent):
+        pass
+
+    def _to_str(self):
+        r = []
+        for e in self.enum:
+            if isinstance(e, unicode):
+                r.append('"%s"' % e)
+            else:
+                r.append(str(e))
+        return ', '.join(r)
+
+    def dump(self, depth, node=[]):
+        r = []
+        for e in self.enum:
+            if isinstance(e, unicode):
+                r.append('"%s"' % e)
+            else:
+                r.append(str(e))
+        return ' | '.join(r)
+
+    @property
+    def type(self):
+        return u'__value__'
+
+    def _check_type_variable(self, declared_type_vars, checked):
+        pass
+
+
+    def resolve_reference(self):
+        pass
+
+    def tag(self):
+        return u'__value__'
+
 
 class OverlayedDict(object):
     def __init__(self, a, b):

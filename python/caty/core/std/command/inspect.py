@@ -112,12 +112,12 @@ class ReifyType(Builtin):
         self._type_name = type_name
 
     def execute(self):
-        from caty.core.casm.language.ast import ScalarNode, BagNode, ObjectNode, ArrayNode
+        from caty.core.casm.language.ast import SymbolNode, BagNode, ObjectNode, ArrayNode
         mod = self.schema
         if self._type_name in ('integer', 'number', 'boolean', 'string', 'binary', 'null', 'undefined', 'any', 'never', 'univ'):
-            return ScalarNode(self._type_name).reify()
+            return SymbolNode(self._type_name).reify()
         elif self._type_name == 'object':
-            return ObjectNode(wildcard=ScalarNode(u'any')).reify()
+            return ObjectNode(wildcard=SymbolNode(u'any')).reify()
         elif self._type_name == 'array':
             return ArrayNode(wildcard=ArrayNode(u'any'), options={'repeat': True}).reify()
         elif self._type_name == 'bag':

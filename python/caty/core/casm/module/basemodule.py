@@ -853,7 +853,7 @@ class Module(Facility):
         from caty.core.typeinterface import dereference, flatten_union_node
         from caty.core.casm.language.schemaparser import CasmJSONPathSelectorParser
         from caty.core.casm.cursor.dump import TreeDumper
-        from caty.core.casm.language.ast import ClassIntersectionOperator, ClassReference, ScalarNode
+        from caty.core.casm.language.ast import ClassIntersectionOperator, ClassReference, SymbolNode
         for k, v in self.schema_ns.items():
             if u'__collection' in v.annotations and u'__identified' in v.annotations and u'__id-type' not in v.annotations:
                 path = CasmJSONPathSelectorParser().run(v.annotations[u'__identified'].value)
@@ -889,13 +889,13 @@ class Module(Facility):
             m._post_process()
 
     def _recursive_apply_typeparam_for_collection(self, cls, t):
-        from caty.core.casm.language.ast import ClassIntersectionOperator, ClassReference, ScalarNode
+        from caty.core.casm.language.ast import ClassIntersectionOperator, ClassReference, SymbolNode
         if isinstance(cls, ClassIntersectionOperator):
             for n in [cls.left, cls.right]:
                 if self._recursive_apply_typeparam_for_collection(n, t):
                     return True
         elif isinstance(cls, ClassReference) and cls.name == u'Collection' and len(cls.type_params) == 1:
-            cls.type_params.append(ScalarNode(t.type))
+            cls.type_params.append(SymbolNode(t.type))
             return True
         return False
 

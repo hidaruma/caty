@@ -47,6 +47,9 @@ class _SubNormalizer(SchemaBuilder):
         node._schema = body
         return node
 
+    def _visit_scalar(self, node):
+        return node
+
     @apply_annotation
     def _visit_object(self, node):
         o = {}
@@ -65,7 +68,7 @@ class _SubNormalizer(SchemaBuilder):
 
 class UndefinedEraser(_SubNormalizer):
     @apply_annotation
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, UndefinedSchema):
             return OptionalSchema(NeverSchema())
         else:
@@ -83,7 +86,7 @@ class OptionLifter(_SubNormalizer):
     def __init__(self, *args):
         _SubNormalizer.__init__(self, *args)
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         return node
 
     @apply_annotation
@@ -119,7 +122,7 @@ class TypeCalcurator(_SubNormalizer):
         self.traced = set()
     
     @apply_annotation
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, TypeReference):
             if node in self.history:
                 return node
@@ -349,10 +352,10 @@ class TypeCalcurator(_SubNormalizer):
                     if self.__exclusive_pseudotag(l, r):
                         return NeverSchema()
                 res = l.intersect(r).accept(self)
-            elif lt == 'enum' and isinstance(r, Scalar):
-                res = self._intersect_enum_and_scalar(self._dereference(l), r)
-            elif rt == 'enum' and isinstance(l, Scalar):
-                res = self._intersect_enum_and_scalar(self._dereference(r), l)
+            elif lt == '__value__' and isinstance(r, Symbol):
+                res = self._intersect_value_and_scalar(self._dereference(l), r)
+            elif rt == '__value__' and isinstance(l, Symbol):
+                res = self._intersect_value_and_scalar(self._dereference(r), l)
             elif set([lt, rt]) == set([u'null', u'void']):
                 res = l
             else:
@@ -366,18 +369,18 @@ class TypeCalcurator(_SubNormalizer):
         r = self._dereference(r)
         if l == r:
             return l
-        if isinstance(l, EnumSchema):
+        if isinstance(l, ValueSchema):
             if isinstance(r, OperatorSchema):
                 x = (l & r.left).accept(self)
                 y = (l & r.right).accept(self)
                 return r.operate(x, y).accept(self)
             else:
                 return l.intersect(self._dereference(r))
-        elif isinstance(r, EnumSchema):
-            if isinstance(r, OperatorSchema):
-                x = (l & r.left).accept(self)
-                y = (l & r.right).accept(self)
-                return r.operate(x, y)
+        elif isinstance(r, ValueSchema):
+            if isinstance(l, OperatorSchema):
+                x = (r & l.left).accept(self)
+                y = (r & l.right).accept(self)
+                return l.operate(x, y)
             else:
                 return r.intersect(self._dereference(l))
         else:
@@ -391,18 +394,13 @@ class TypeCalcurator(_SubNormalizer):
                         return NeverSchema()
             return (l & r).accept(self)
 
-    def _intersect_enum_and_scalar(self, enum, scalar):
-        r = []
-        for e in enum:
-            try:
-                scalar.validate(e)
-            except:
-                pass
-            else:
-                r.append(e)
-        if not r:
+    def _intersect_value_and_scalar(self, value, scalar):
+        try:
+            scalar.validate(value.value)
+        except Exception as e:
             return NeverSchema()
-        return EnumSchema(r, enum.options)
+        else:
+            return value
 
     def __exclusive_pseudotag(self, a, b):
         if a.type != 'object':
@@ -483,7 +481,7 @@ class TypeCalcurator(_SubNormalizer):
             else:
                 return node
         if node.funcname == u'typeName':
-            return EnumSchema([schema.canonical_name])
+            return ValueSchema(schema.canonical_name)
         elif node.funcname == u'recordType':
             if u'__collection' not in schema.annotations:
                 throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % schema.name)
@@ -495,7 +493,7 @@ class NeverChecker(_SubNormalizer):
         self.safe = safe
         self.into_optional = into_optional
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if node.type == 'never' and not node.optional:
             return [[u'never']]
 
@@ -623,12 +621,15 @@ class NeverChecker(_SubNormalizer):
     def _visit_unary_op(self, node):
         return [] #この時点で演算子が残っている=型変数なので
 
+    def _visit_scalar(self, node):
+        return []
+
 class VariableChecker(_SubNormalizer):
     def __init__(self, *args):
         _SubNormalizer.__init__(self, *args)
         self.__suspcious_var = []
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, TypeVariable):
             if node._schema is None and node._default_schema is None:
                 if self.__suspcious_var and node.name in self.__suspcious_var[-1]:
@@ -669,6 +670,9 @@ class DefaultChecker(TreeCursor):
         pass
 
     def _visit_scalar(self, node):
+        pass
+
+    def _visit_symbol(self, node):
         self._validate_default(node)
 
     def _visit_option(self, node):
@@ -716,7 +720,8 @@ class DefaultChecker(TreeCursor):
             dval = node.annotations[u'default'].value
             try:
                 node.validate(dval)
-            except:
+            except Exception as e:
+                print e
                 raise InvalidDefaultValue(dval)
 
     def _visit_type_function(self, node):

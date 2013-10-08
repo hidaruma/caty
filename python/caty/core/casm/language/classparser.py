@@ -1,7 +1,7 @@
 #coding: utf-8
 from topdown import *
 
-from caty.core.casm.language.ast import ClassNode, ScalarNode, CommandURI, ClassURI, CommandNode, ClassBody, ClassIntersectionOperator, UseOperator, UnuseOperator, CloseOperator, ClassReference, OpenOperator, AliasNode
+from caty.core.casm.language.ast import ClassNode, SymbolNode, CommandURI, ClassURI, CommandNode, ClassBody, ClassIntersectionOperator, UseOperator, UnuseOperator, CloseOperator, ClassReference, OpenOperator, AliasNode
 from caty.core.casm.language.schemaparser import schema, typedef, type_arg, scalar, type_var
 from caty.core.casm.language.syntaxparser import syntax
 from caty.core.casm.language.facilityparser import _entity
@@ -25,7 +25,7 @@ def classdef(seq):
         S(u';')(seq)
         return AliasNode(classname, ref, u'class')
     type_args = seq.parse(option(type_arg, []))
-    dom, codom = option(restriction, (ScalarNode(u'univ'), None))(seq)
+    dom, codom = option(restriction, (SymbolNode(u'univ'), None))(seq)
     if '+' not in classname or classname.endswith('+'):
         conform = option(conforms)(seq)
     elif '+' in classname:
@@ -124,10 +124,10 @@ def abs_command(seq):
 
 def restriction(seq):
     S('(')(seq)
-    dom = option(typedef, ScalarNode(u'univ'))(seq)
+    dom = option(typedef, SymbolNode(u'univ'))(seq)
     codom = None
     if option(S(u'->'))(seq):
-       codom = option(typedef, ScalarNode(u'univ'))(seq)
+       codom = option(typedef, SymbolNode(u'univ'))(seq)
     S(')')(seq)
     return dom, codom
 
@@ -143,7 +143,7 @@ def property(seq):
         tp = typedef(seq)
         annotations.add(Annotation(u'__property__'))
         try:
-            patterns = [lambda a, b: CallPattern(None, None, CommandDecl((ScalarNode(u'void'), tp), a, b))]
+            patterns = [lambda a, b: CallPattern(None, None, CommandDecl((SymbolNode(u'void'), tp), a, b))]
         except:
             import traceback
             print '+++++++++++++++++++++++++'

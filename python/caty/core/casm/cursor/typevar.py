@@ -67,7 +67,7 @@ class TypeVarApplier(SchemaBuilder):
         self.type_args = self.scope_stack.pop(-1)
 
     @apply_annotation
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, TypeReference):
             self.type_args.new_scope()
             try:
@@ -114,9 +114,12 @@ class TypeVarApplier(SchemaBuilder):
     def _visit_kind(self, node):
         return node
 
+    def _visit_scalar(self, node):
+        return node
+
 class TypeParamApplier(SchemaBuilder):
     @apply_annotation
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, TypeReference):
             self.type_args.new_scope() 
             try:

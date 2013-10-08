@@ -142,7 +142,7 @@ class ResourceBodyBlock(Parser):
         seq.parse(';')
 
     def action(self, seq):
-        from caty.core.casm.language.ast import ObjectNode, ScalarNode
+        from caty.core.casm.language.ast import ObjectNode, SymbolNode
         ds = seq.parse(option(docstring, u''))
         a = seq.parse(option(annotation, Annotations([])))
         seq.parse(keyword('action'))

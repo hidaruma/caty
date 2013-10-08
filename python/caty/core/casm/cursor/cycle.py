@@ -15,7 +15,7 @@ class CycleDetecter(SchemaBuilder):
             node.body.accept(self)
         return node
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, TypeReference):
             # 型引数の中に自身への言及があり、それが型パラメータを取る場合、
             # コンパイル不能なのでエラーメッセージを出す。
@@ -85,7 +85,7 @@ class _VariableFinderInRecType(TreeCursor):
     def _visit_root(self, node):
         return node.body.accept(self)
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, TypeReference):
             return node.body.accept(self)
         elif isinstance(node, TypeVariable):
@@ -170,7 +170,7 @@ class _AlphaTransformer(TreeCursor):
                            node.body.accept(self), 
                            node.module)
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, TypeReference):
             if isinstance(node.body, NamedSchema):
                 r = TypeReference(node.name, node.type_args, node.module)

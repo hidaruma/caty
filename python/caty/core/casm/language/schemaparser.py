@@ -44,11 +44,11 @@ def schema(seq):
         annotations.add(Annotation(u'__deferred'))
         definition = seq.parse(option(typedef))
         if not definition:
-            definition = ScalarNode(u'any')
+            definition = SymbolNode(u'any')
     else:
         definition = seq.parse(typedef)
     if t == 'exception':
-        definition = IntersectionNode(TaggedNode(name_of_type, definition), ScalarNode(u'Exception'))
+        definition = IntersectionNode(TaggedNode(name_of_type, definition), SymbolNode(u'Exception'))
         annotations.add(Annotation(u'__exception'))
         annotations.add(Annotation(u'register-public'))
     else:
@@ -132,7 +132,7 @@ def term(seq):
 
     def _never(s):
         _ = s.parse(Regex(r'\(\s*\)'))
-        return ScalarNode(u'never', {}, [])
+        return SymbolNode(u'never', {}, [])
 
     doc = option(docstring)(seq)
     s = seq.parse(map(try_, [_tag_exp, _pseudo_tag, _type_name_tag, _tag, _never, _unary]) + [enum, _term, bag, object_, array, exponent, type_function, scalar])
@@ -212,7 +212,7 @@ def scalar(seq):
     n = seq.parse(typename)
     o = seq.parse(option(options, {}))
     t = seq.parse(option(type_var, []))
-    node = ScalarNode(n, o, t)
+    node = SymbolNode(n, o, t)
     return node
 
 def typename(seq):
@@ -308,7 +308,7 @@ def loose_item(seq):
     from caty import UNDEFINED
     if not seq.peek(option(comma)):
         raise ParseFailed(seq, array)
-    return ScalarNode(u'undefined')
+    return SymbolNode(u'undefined')
 
 def maybe_tagged_value(seq):
     @try_
@@ -321,8 +321,8 @@ def maybe_tagged_value(seq):
 
 def enum(seq):
     #values = seq.parse(chain_flat(maybe_tagged_value, '|'))
-    v = [maybe_tagged_value(seq)]
-    return EnumNode(v)
+    v = maybe_tagged_value(seq)
+    return ScalarNode(v)
 
 def object_(seq):
     _ = seq.parse('{')
@@ -347,7 +347,7 @@ def object_(seq):
 def _normalize_option(node):
     if isinstance(node, OptionNode):
         w = _normalize_option(node.body)
-        if isinstance(w, ScalarNode):
+        if isinstance(w, SymbolNode):
             if w.name == u'undefined':
                 w.docstring = node.docstring
                 return w
