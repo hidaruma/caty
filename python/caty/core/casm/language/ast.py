@@ -53,7 +53,7 @@ class ASTRoot(Root):
         self._name = name
         self._reference_schema = None
         self._type_params = type_params if type_params else []
-        self.body = ast if ast else ScalarNode(u'univ')
+        self.body = ast if ast else SymbolNode(u'univ')
         self.options = None
         self.__annotation = annotation
         self.__docstring = docstring if docstring else u''
@@ -365,7 +365,7 @@ class Node(object):
         o['options'] = self.options
         return json.tagged(self.reification_type, o)
 
-class ScalarNode(Scalar, Node):
+class SymbolNode(Symbol, Node):
     reification_type = u'_scalar'
 
     def __init__(self, schema_name, options=None, type_args=None):
@@ -446,7 +446,7 @@ class TaggedNode(Node, Tag):
     def __init__(self, tag, node):
         Node.__init__(self)
         self._tag = tag
-        self.body = node if node else ScalarNode(u'undefined')
+        self.body = node if node else SymbolNode(u'undefined')
 
     @property
     def tag(self):
@@ -462,7 +462,7 @@ class NamedTaggedNode(TaggedNode):
     def __init__(self, node):
         Node.__init__(self)
         self._tag = None
-        self.body = node if node else ScalarNode('any')
+        self.body = node if node else SymbolNode('any')
 
 class PseudoTaggedNode(Node, PseudoTag):
     def __init__(self, name, value, node):
@@ -485,17 +485,17 @@ class PseudoTaggedNode(Node, PseudoTag):
             v['options']['pseudoTag'] = p
         return o
 
-class EnumNode(Node, Enum):
+class ScalarNode(Node, Scalar):
     reification_type = u'_enum'
-    def __init__(self, enum):
+    def __init__(self, value):
         Node.__init__(self)
         #t = type(enum[0])
         #if not all(map(lambda x:t==type(x), enum)):
         #    raise ValueError(t)
-        self.enum = enum
+        self.value = value
 
     def _reify(self):
-        return  {'enum': self.enum if isinstance(self.enum, (list, tuple)) else [self.enum]}
+        return  {'enum': self.value}
 
 class ArrayNode(Node, Array):
     reification_type = u'_array'
@@ -536,7 +536,7 @@ class ObjectNode(Node, Object):
     def __init__(self, items=None, wildcard=None, options=None):
         Node.__init__(self, options)
         self.leaves = items if items else {}
-        self.wildcard = wildcard if wildcard else ScalarNode(u'undefined')
+        self.wildcard = wildcard if wildcard else SymbolNode(u'undefined')
         self.options = options if options else {}
 
     def items(self):
@@ -846,7 +846,7 @@ class CommandDecl(object):
         if self.__initialized:
             return
         i, o = self.profile_ast
-        if isinstance(o, ScalarNode) and o.name == '_' and cursors[0].module.is_class and cursors[0].module._clsobj.codomain:
+        if isinstance(o, SymbolNode) and o.name == '_' and cursors[0].module.is_class and cursors[0].module._clsobj.codomain:
             o = cursors[0].module._clsobj.codomain
         for cursor in cursors:
             i = i.accept(cursor)
@@ -991,7 +991,7 @@ class ConstDecl(object):
                                      [CallPattern(None, 
                                                  None, 
                                                  CommandDecl(
-                                                    (ScalarNode(u'void'), type if type is not None else schema),
+                                                    (SymbolNode(u'void'), type if type is not None else schema),
                                                     [], 
                                                     []
                                                  ), 
@@ -1033,7 +1033,7 @@ class AnnotationDecl(object):
         #                             [CallPattern(None, 
         #                                         None, 
         #                                         CommandDecl(
-        #                                            (type if type is not None else schema, ScalarNode(u'void')),
+        #                                            (type if type is not None else schema, SymbolNode(u'void')),
         #                                            [], 
         #                                            []
         #                                         ), 
@@ -1065,18 +1065,18 @@ class CollectionDeclNode(object):
         a.add(Annotation(u'__identified', keypath))
         if keytype:
             a.add(Annotation(u'__id-type', keytype))
-        if isinstance(coltype, ScalarNode):
+        if isinstance(coltype, SymbolNode):
             self.rectype = None
             self.type = ASTRoot(name, None, coltype, a, doc)
         else:
             recname = name+'Record'
             self.rectype = ASTRoot(recname, None, coltype, Annotations([]), None)
-            self.type = ASTRoot(name, None, ScalarNode(recname), a, doc)
+            self.type = ASTRoot(name, None, SymbolNode(recname), a, doc)
         self.command1 = CommandNode(name, 
                                      [CallPattern(None, 
                                                  None, 
                                                  CommandDecl(
-                                                    (ScalarNode(u'void'), ScalarNode(u'foreign')),
+                                                    (SymbolNode(u'void'), SymbolNode(u'foreign')),
                                                     [], 
                                                     [(u'uses', [FacilityDecl(name, None, u'arg0')])]
                                                  ), 
@@ -1089,7 +1089,7 @@ class CollectionDeclNode(object):
                                      [CallPattern(None, 
                                                  None, 
                                                  CommandDecl(
-                                                    (ScalarNode(u'void'), ScalarNode(u'sequence', None, [coltype])),
+                                                    (SymbolNode(u'void'), SymbolNode(u'sequence', None, [coltype])),
                                                     [], 
                                                     []
                                                  ), 
@@ -1101,9 +1101,9 @@ class CollectionDeclNode(object):
         self.catyclass = ClassNode(name, 
                                   ClassIntersectionOperator(
                                     ClassBody([], ClassURI([(u'python', ['caty.core.command'])], False)),
-                                    ClassReference(u'Collection', [ScalarNode(name)])),
-                                  ScalarNode(u'univ'), 
-                                  ScalarNode(u'univ'), 
+                                    ClassReference(u'Collection', [SymbolNode(name)])),
+                                  SymbolNode(u'univ'), 
+                                  SymbolNode(u'univ'), 
                                   None, None, 
                                   Annotations([Annotation(u'__collection')]), [], u'?=')
         self.entity = lambda m: EntityNode(name, dbname, m.name+':' + name, None, Annotations([]))
@@ -1119,7 +1119,7 @@ class CollectionDeclNode(object):
 class TypeFunctionNode(TypeFunction, SchemaBase):
     def __init__(self, funcname, typename):
         self.funcname = funcname
-        self.typename = ScalarNode(typename) if isinstance(typename, basestring) else typename
+        self.typename = SymbolNode(typename) if isinstance(typename, basestring) else typename
         SchemaBase.__init__(self)
         self._module = None
         self._type = u'<%s>' % funcname

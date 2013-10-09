@@ -18,7 +18,7 @@ class ReferenceResolver(SchemaBuilder):
         return node
 
     @apply_annotation
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, TypeReference):
             schema = node.module.get_type(node.name)
             if isinstance(schema, KindReference):
@@ -41,6 +41,9 @@ class ReferenceResolver(SchemaBuilder):
                     raise SystemResourceNotFound(u'TypeNotFound', u'$name', name=node.default)
         return node
 
+    def _visit_scalar(self, node):
+        return node
+
     def _visit_kind(self, node):
         return node
 
@@ -52,8 +55,8 @@ class ReferenceResolver(SchemaBuilder):
             pass
         elif isinstance(t, SchemaBase):
             t = t.accept(self)
-            if isinstance(t, EnumSchema):
-                t = t.enum[0]
+            if isinstance(t, ValueSchema):
+                t = t.value
                 if not isinstance(t, unicode):
                     throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'%s' % str(t))
             elif not isinstance(t, StringSchema):
@@ -76,7 +79,7 @@ class ReferenceResolver(SchemaBuilder):
             else:
                 return node
         if node.funcname == u'typeName':
-            return EnumSchema([schema.canonical_name])
+            return ValueSchema(schema.canonical_name)
         elif node.funcname == u'recordType':
             if u'__collection' not in schema.annotations:
                 debug(schema, schema.annotations)

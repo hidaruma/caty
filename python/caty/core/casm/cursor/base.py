@@ -45,7 +45,7 @@ class SchemaBuilder(TreeCursor):
         return s
 
     @apply_annotation
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if self.module.has_ast(node.name):
             type_args = []
             for arg in node.type_args:
@@ -80,8 +80,8 @@ class SchemaBuilder(TreeCursor):
         return OptionalSchema(s)
 
     @apply_annotation
-    def _visit_enum(self, node):
-        return EnumSchema(node.enum, node.options)
+    def _visit_scalar(self, node):
+        return ValueSchema(node.value, node.options)
 
     @apply_annotation
     def _visit_unary_op(self, node):

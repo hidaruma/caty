@@ -221,7 +221,7 @@ def assertion(seq, doc, annotation):
                 bound_names.append(n)
             else:
                 raise ParseFailed(seq, u'Conflicted variable: %s' % n)
-            in_type_items.append(ScalarNode(tn))
+            in_type_items.append(SymbolNode(tn))
     parser = CommandScriptParser()
     S(u'{')(seq)
     body = parser(seq)
@@ -232,7 +232,7 @@ def assertion(seq, doc, annotation):
     if in_type_items:
         in_type = ArrayNode(in_type_items, {})
     else:
-        in_type = ScalarNode(u'null')
+        in_type = SymbolNode(u'null')
     setup = []
     for i, k in enumerate(bound_names):
         jp = JsonPath(JSONPathSelectorParser(False, True).run(u'$.' + str(i)), (0,0))
@@ -240,7 +240,7 @@ def assertion(seq, doc, annotation):
     type_args = []
     for tn, names in bound_vars:
         type_args.append(TypeParam(tn, None, None))
-    patterns = [lambda j, r: CallPattern(None, None, CommandDecl(((in_type), ScalarNode(u'Logical')), j, r))]
+    patterns = [lambda j, r: CallPattern(None, None, CommandDecl(((in_type), SymbolNode(u'Logical')), j, r))]
     l = ListBuilder()
     l.set_values(setup)
     script = combine_proxy([l, body])

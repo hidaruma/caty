@@ -18,7 +18,7 @@ def syntax(seq):
         bnf = seq.parse(bnf_def)
         if seq.parse([':=', '=', ';']) == ';':
             a.add(Annotation(u'__deferred'))
-            d = ScalarNode(u'any')
+            d = SymbolNode(u'any')
             doc2 = postfix_docstring(seq)
             doc = concat_docstring(doc, doc2)
             return ASTRoot(n, v, d, a, doc)
@@ -27,7 +27,7 @@ def syntax(seq):
         a.add(Annotation(u'__deferred'))
         d = seq.parse(option(typedef))
         if not d:
-            d = ScalarNode(u'any')
+            d = SymbolNode(u'any')
     elif ann == u'lexical':
         if '__lexical' not in a:
             a.add(Annotation(u'__lexical'))
@@ -37,7 +37,7 @@ def syntax(seq):
     if d.optional:
         raise ParseFailed(seq, schema)
     if t == 'exception':
-        d = IntersectionNode(TaggedNode(n, d), ScalarNode(u'Exception'))
+        d = IntersectionNode(TaggedNode(n, d), SymbolNode(u'Exception'))
         a.add(Annotation('__exception'))
         a.add(Annotation('register-public'))
     d.apply_type_name(n)

@@ -2,7 +2,7 @@
 from caty.core.action.selector import *
 from caty.core.action.resource import *
 from caty.core.exception import *
-from caty.core.casm.language.ast import CommandNode, ClassNode, ScalarNode, CommandURI, ASTRoot, ClassBody
+from caty.core.casm.language.ast import CommandNode, ClassNode, SymbolNode, CommandURI, ASTRoot, ClassBody
 from caty.core.casm.language.commandparser import call_pattern
 from caty.core.schema.base import Annotations, Annotation
 from caty.core.casm.module import Module, ClassModule
@@ -144,7 +144,7 @@ class ResourceModule(Module):
 
     def add_resource(self, res):
         from caty.core.script.proxy import EnvelopeProxy as ActionEnvelope
-        from caty.core.casm.language.ast import ScalarNode, CommandDecl, CallPattern, UnionNode, ArrayNode
+        from caty.core.casm.language.ast import SymbolNode, CommandDecl, CallPattern, UnionNode, ArrayNode
         if res.name in self.resources:
             throw_caty_exception(
                 u'CARA_COMPILE_ERROR',
@@ -161,8 +161,8 @@ class ResourceModule(Module):
             c = CommandNode(act.name, 
                             [CallPattern(opt, 
                                          arg, 
-                                         CommandDecl((ScalarNode(u'WebInput'), 
-                                                      ScalarNode(u'WebOutput')), 
+                                         CommandDecl((SymbolNode(u'WebInput'), 
+                                                      SymbolNode(u'WebOutput')), 
                                                       [], 
                                                       []))], 
                             ActionEnvelope(script, act.canonical_name.split(':')[-1]), 
@@ -171,7 +171,7 @@ class ResourceModule(Module):
                             [],
                             u'action')
             member.append(c)
-        clsnode = ResourceNode(res.name, member, ScalarNode(u'string', {u'remark': res.url_pattern}), CommandURI([(u'python', u'')]), res.docstring, res.annotations)
+        clsnode = ResourceNode(res.name, member, SymbolNode(u'string', {u'remark': res.url_pattern}), CommandURI([(u'python', u'')]), res.docstring, res.annotations)
         clsnode.declare(self)
 
     def _register_command(self):

@@ -72,7 +72,7 @@ class ReferenceExpander(SchemaBuilder):
         return node.body.accept(self)
 
     @apply_annotation
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, TypeReference):
             if node.canonical_name in self._history:
                 return node
@@ -84,6 +84,9 @@ class ReferenceExpander(SchemaBuilder):
                 return node._schema.accept(self)
             if node._default_schema:
                 return node._default_schema.accept(self)
+        return node
+
+    def _visit_scalar(self, node):
         return node
 
     def _visit_named_parameter(self, node):
@@ -143,9 +146,12 @@ class ReferenceExpander(SchemaBuilder):
             yield node
 
 class ReferenceDeleter(SchemaBuilder):
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, TypeReference):
             return NeverSchema()
+        return node
+
+    def _visit_scalar(self, node):
         return node
 
     def _visit_root(self, node):
@@ -171,9 +177,12 @@ class NodeCounter(TreeCursor):
     def __init__(self):
         self.node_num = 0
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if node.type != 'never':
             self.node_num += 1
+
+    def _visit_scalar(self, node):
+        pass
 
     def _visit_tag(self, node):
         node.body.accept(self)
@@ -277,7 +286,7 @@ class DataGenerator(TreeCursor):
             if loop:
                 self.cache[node] -= 1
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, StringSchema):
             return self.__gen_string(node)
         elif isinstance(node, BinarySchema):
@@ -365,8 +374,8 @@ class DataGenerator(TreeCursor):
             else:
                 return node.body.accept(self)
 
-    def _visit_enum(self, node):
-        return random.choice(node.enum)
+    def _visit_scalar(self, node):
+        return node.value
 
     def _visit_object(self, node):
         def generate(k, v):
@@ -603,7 +612,7 @@ class ObjectDumper(TreeCursor):
     def _visit_root(self, node):
         return node.body.accept(self)
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, (TypeReference)):
             if node.canonical_name in self._history:
                 raise
@@ -614,6 +623,12 @@ class ObjectDumper(TreeCursor):
             r['attributes'].update(node.options)
             r['typeName'] = node.name
             return r
+
+    def _visit_scalar(self, node):
+        r = {u'attributes': {}}
+        r['attributes'].update(node.options)
+        r['value'] = node.value
+        return r
 
     def _visit_option(self, node):
         r = node.body.accept(self)

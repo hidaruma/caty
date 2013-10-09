@@ -13,7 +13,7 @@ class DependencyAnalizer(TreeCursor):
         node.body.accept(self)
         return self.dependency_graph
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if isinstance(node, TypeReference):
             if node.module != node.body.module:
                 self.dependency_graph.add((node.module, node.body.module))
@@ -21,6 +21,9 @@ class DependencyAnalizer(TreeCursor):
                 return 
             self.history.add(node)
             node.body.accept(self)
+
+    def _visit_scalar(self, node):
+        pass
 
     def _visit_option(self, node):
         node.body.accept(self)

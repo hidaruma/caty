@@ -353,7 +353,7 @@ class ClassExprInterpreter(object):
                     except:
                         print 'debug', tp
                         print 'debug', cls.type_params
-                        print 'debug', [p.name if isinstance(p, ScalarNode) else p for p in obj.type_params]
+                        print 'debug', [p.name if isinstance(p, SymbolNode) else p for p in obj.type_params]
                         raise
                     if u'__collection' in self.module.annotations and m.name in COLLECTION_COMMANDS:
                         ptn.decl.resource.append((u'uses', [FacilityDecl(self.module.name, None, u'arg0')]))

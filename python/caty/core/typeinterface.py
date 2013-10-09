@@ -6,6 +6,10 @@ class Root(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_root(self)
 
+class Symbol(AbstractNode):
+    def accept(self, cursor):
+        return cursor._visit_symbol(self)
+
 class Scalar(AbstractNode):
     def accept(self, cursor):
         return cursor._visit_scalar(self)
@@ -27,6 +31,7 @@ class Bag(AbstractNode):
 
     def __iter__(self):
         raise NotImplementedError
+
 
 class Enum(AbstractNode):
 
@@ -137,6 +142,9 @@ class TreeCursor(object):
 
     def _visit_root(self, node):
         raise NotImplementedError(u'{0}._visit_root'.format(self.__class__.__name__))
+
+    def _visit_symbol(self, node):
+        raise NotImplementedError(u'{0}._visit_symbol'.format(self.__class__.__name__))
 
     def _visit_scalar(self, node):
         raise NotImplementedError(u'{0}._visit_scalar'.format(self.__class__.__name__))
