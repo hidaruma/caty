@@ -110,7 +110,15 @@ class TreeDumper(TreeCursor):
         return node.body.accept(self) + '?'
 
     def _visit_scalar(self, node):
-        return self._to_str(node.value)
+        buff = []
+        if node.annotations:
+            buff.append(node.annotations.to_str())
+            buff.append(u'\n')
+            buff.append(self._to_str(node.value))
+            buff.append(u'\n')
+        else:
+            buff.append(self._to_str(node.value))
+        return u''.join(buff)
 
     def _visit_enum(self, node):
         if len(node.enum) > 1:
