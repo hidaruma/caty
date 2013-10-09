@@ -108,12 +108,12 @@ type ObjectAttributes = CommonAttributes ++ {
  */
 type TypeQualifierMixin = LocatedQualifierMixin & {
      /** スキーマ属性 */
-    "attributes": object, // 廃止予定、一時的に必須化する
+    "attributes": object?, // 廃止予定
 
     /** 型が名前空間（束縛セット、コンテキスト）内で名前に束縛されているとき、その名前が再帰的かどうか 
      */
     @[default(indef)]
-    "recursive": tboolean, // 一時的に必須化する
+    "recursive": tboolean?, 
 
     *: any?  // open
 };

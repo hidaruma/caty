@@ -143,11 +143,22 @@ command process-comment :: commentElement -> comment {
 collection d of day identified id;
 collection e of entry ;
 collection tmp of day ;
-collection t of {"id": integer?, *:any}; // 作業用
 collection map of mapItem; // 実験用
 
+collection t of {"id": integer?, *:any}; // 作業用
+class t &= {
+  command index :: void -> [string*] {
+      keys | each {to-string}
+  };
 
-/** XMLファイルからコレクションにデータをロードする */
+};
+
+
+
+
+
+
+/** XMLファイルからコレクションdにデータをロードする */
 command load /*[string file]*/ :: void -> void {
  d.delete-all;
  e.delete-all;
@@ -295,7 +306,7 @@ command entries-from-day :: day -> [entry*]
 ;
 
 
-/** 日（day）のデータからエントリー群を作り出す 
+/** 日（day）のデータからエントリー群を作り出す、コレクションeにデータが入る。
  */
 command make-entries 
  {
@@ -308,6 +319,7 @@ command make-entries
  }
  :: void -> void
 {
+  e.delete-all;
   d.list %--skip %--max | 
   each {
      pass > d | $.date > dt;
@@ -328,6 +340,7 @@ command make-entries
  *
  */
 
+/** 変更したエントリーを、コレクションtに書き込む */
 command modify-entries 
  {
   /** 先頭からスキップするレコードの個数 */
@@ -340,7 +353,7 @@ command modify-entries
  :: void -> void
 {
  t.delete-all;
- e.list %--skip %--max |
+ e.list %--skip %--max --order-by=-dayDate |
  each {
   pass > in |
   [
@@ -349,10 +362,11 @@ command modify-entries
   ];
   %in |
   ={
+     "content": hatena:to-creole,
      "tags": text:join "|", 
-     "uri": ["http://d.hatena.ne.jp/m-hiyama/", %date, "/", %ts] | text:concat,
+     "uri": ["http://d.hatena.ne.jp/m-hiyama-memo/", %date, "/", %ts] | text:concat,
      * : pass
-   } | t.insert
+   } | t.insert %_key;  %_key | dump --force 
  };
 
 };
