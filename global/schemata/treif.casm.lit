@@ -189,9 +189,13 @@ type builtinTypeName = (
 <<{
 
 kind STRING_ENUM_TYPE = lower string /* and finite */;
+kind OBJECT_TYPE = lower {*: any?};
 
 /** 組み込み型の型関数 */
-type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE> = @builtin (QualifierMixin & (open ScalarAttributes) & {
+type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE, 
+                   AttrsType in OBJECT_TYPE default ScalarAttributes
+>
+= @builtin (QualifierMixin & (open AttrsType) & {
   "typeName" : TypeNameType,
    *: any? // open
 });
@@ -200,7 +204,7 @@ type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE> = @builtin (QualifierMixin 
  * スキーマ属性があるため、
  * 内包的に定義された部分集合かもしれない点に注意。
  */
-type BuiltinType = BuiltinTypeOf<builtinTypeName>;
+type BuiltinType = BuiltinTypeOf<builtinTypeName, ScalarAttributes>;
 
 type PredefinedType = @predefined (QualifierMixin & {
   "typeName" : catyTypeName,
@@ -466,7 +470,10 @@ type TypeExpr = (
 /** オブジェクト型を構成する型関数
  * オブジェクト型は名前付きタプルの型
  */
-type ObjectTypeOf<PropType, AdditionalType> = @object-of (TypeQualifierMixin & (open ObjectAttributes) & {
+type ObjectTypeOf<PropType, AdditionalType, 
+                  AttrsType in OBJECT_TYPE default ObjectAttributes
+> = 
+@object-of (TypeQualifierMixin & (open AttrsType) & {
   "pseudoTag": RPseudoTag?, //@ 塩漬け
 
   "specified": {*: PropType}, 
@@ -478,7 +485,10 @@ type ObjectTypeOf<PropType, AdditionalType> = @object-of (TypeQualifierMixin & (
 /** 配列型を構成する型関数
  * 配列型は、名前なしタプルの型
  */
-type ArrayTypeOf<ItemType, AdditionalType> = @array-of (TypeQualifierMixin &  (open ArrayAttributes) & {
+type ArrayTypeOf<ItemType, AdditionalType,
+                 AttrsType in OBJECT_TYPE default ArrayAttributes
+> = 
+@array-of (TypeQualifierMixin &  (open AttrsType) & {
 
   "specified": [ItemType*], 
   "additional": AdditionalType,
@@ -492,7 +502,7 @@ type Tag = string;
 /** タグ付き型を構成する型関数 */
 type TaggedTypeOf<ContentType> = @tagged (TypeQualifierMixin & {
 
-  // プロパティ名は、仮想プロパティにあわせる。
+  // プロパティ名 tag, content は、仮想プロパティにあわせた。
 
   "tag": Tag,
   "content": ContentType,
@@ -532,55 +542,19 @@ type ClosedUnionTypeOf<ChoiceType> = UnionTypeOf<ChoiceType, NeverType>;
 /** オブジェクト型
  * 名前付きタプルの型
  */
-type ObjectType = ObjectTypeOf<TypeExpr, TypeExpr>;
-
-
-/*
-@object-of (TypeQualifierMixin & {
-  "pseudoTag": RPseudoTag?, //@ 塩漬け
-
-  "specified": {*: TypeExpr}, 
-  "additional": TypeExpr,
-
-  *: any? // open
-});
-*/
+type ObjectType = ObjectTypeOf<TypeExpr, TypeExpr, ObjectAttributes>;
 
 /** 配列型
  * 具体的な型
  */
-type ArrayType = ArrayTypeOf<TypeExpr, TypeExpr>;
-
-
+type ArrayType = ArrayTypeOf<TypeExpr, TypeExpr, ArrayAttributes>;
 
 /** タグ付き型 */
-type TaggedType = @tagged (TypeQualifierMixin & {
-
-  // プロパティ名は、仮想プロパティにあわせる。
-
-  "tag": Tag,
-  "content": TypeExpr,
-
-  *: any? // open
-});
-
-
-// 型演算
-
+type TaggedType = TaggedTypeOf<TypeExpr>;
 
 
 /** 排他的ユニオン型 */
 type UnionType = UnionTypeOf<TypeExpr, TypeExpr>;
-
-/*
-@union (TypeQualifierMixin & {
-
-  "specified": [TypeExpr*], // 互いに排他的な型
-  "additional": TypeExpr, // その他
-
-   *: any? // open
-});
-*/
 
 
 /** オプショナル型 */
