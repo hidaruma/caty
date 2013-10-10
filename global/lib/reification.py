@@ -514,7 +514,10 @@ class ObjectDumper(TypeBodyReifier):
             if node.canonical_name in self._history:
                 raise Exception(u'To reify recursive type definition is not implemented')
             self._history[node.canonical_name] = True
-            return node.body.accept(self)
+            try:
+                return node.body.accept(self)
+            finally:
+                del self._history[node.canonical_name]
         else:
             return TypeBodyReifier._visit_symbol(self, node)
 

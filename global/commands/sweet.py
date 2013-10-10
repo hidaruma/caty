@@ -90,7 +90,10 @@ class ObjectDumper(TypeBodyReifier):
             if node.canonical_name in self._history:
                 throw_caty_exception(u'BadArg', u'not a sweet type')
             self._history[node.canonical_name] = True
-            return node.body.accept(self)
+            try:
+                return node.body.accept(self)
+            finally:
+                del self._history[node.canonical_name]
         elif isinstance(node, TypeVariable):
             throw_caty_exception(u'BadArg', u'not a sweet type')
         else:
