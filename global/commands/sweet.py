@@ -26,10 +26,11 @@ class ReifyType(SafeReifier):
         return r
 
 
-
 class SweetFormReifier(ShallowReifier):
 
     def reify_type(self, t):
+        if u'predefined' in t.annotations:
+            return tagged(u'predefined', {u'typeName': t.canonical_name})
         sr = ShallowReifier.reify_type(self, t)
         return ObjectDumper(sr[u'location']).visit(t.body)
 

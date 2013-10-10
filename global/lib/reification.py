@@ -495,7 +495,10 @@ class FormReifier(ShallowReifier):
 
     def reify_type(self, t):
         sr = ShallowReifier.reify_type(self, t)
-        sr[u'body'] = ObjectDumper(sr[u'location']).visit(t.body)
+        if u'predefined' in t.annotations:
+            sr[u'body'] = tagged(u'predefined', {u'typeName': t.canonical_name})
+        else:
+            sr[u'body'] = ObjectDumper(sr[u'location']).visit(t.body)
         return tagged(u'type', sr)
 
 class ObjectDumper(TypeBodyReifier):
