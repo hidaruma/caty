@@ -141,7 +141,7 @@ type QualifierMixin = {
   /** ドキュメンテーションコメント */
   "document": Doc?, // いずれ必須にすべき
   /** アノテーション */
-  "anno": object?, // いずれ必須にすべき
+  "anno": object?, // いずれ必須にすべき -- いや必須にできない。sweetでは削る。
 
    *: any?
 };
