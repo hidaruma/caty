@@ -312,6 +312,13 @@ class TypeBodyReifier(TreeCursor):
             r[u'location'] = node.canonical_name
         elif isinstance(node, Ref):
             r[u'location'] = node.module.canonical_name + ':' + node.name
+        r['anno'] = self.reify_annotations(node.annotations)
+        return r
+
+    def reify_annotations(self, a):
+        r = {}
+        for an in a.values():
+            r[an.name] = an.value
         return r
 
     @format_result(u'params')
@@ -342,7 +349,7 @@ class TypeBodyReifier(TreeCursor):
         else:
             return node.body.accept(self)
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         if node.name not in RESERVED:
             if u'predefined' in node.annotations:
                 return self.__reify_predefined(node)
@@ -374,8 +381,17 @@ class TypeBodyReifier(TreeCursor):
     def _visit_option(self, node):
         return {'operand': node.body.accept(self)}
 
-    def _visit_enum(self, node):
-        raise NotImplementedError(u'{0}._visit_enum'.format(self.__class__.__name__))
+    def _visit_scalar(self, node):
+        r = self._extract_common_data(node)
+        r[u'value'] = node.value
+        if isinstance(node.value, unicode):
+            return tagged(u'string-val', r)
+        elif isinstance(node.value, bool):
+            return tagged(u'boolean-val', r)
+        elif isinstance(node.value, str):
+            return tagged(u'binary-val', r)
+        else:
+            return tagged(u'number-val', r)
 
     @format_result(u'object-of')
     def _visit_object(self, node):
@@ -492,7 +508,7 @@ class ObjectDumper(TypeBodyReifier):
             return tagged(u'predefined', {u'typeName': node.canonical_name})
         return node.body.accept(self)
 
-    def _visit_scalar(self, node):
+    def _visit_symbol(self, node):
         from caty.core.schema import TypeReference
         if isinstance(node, (TypeReference)):
             if node.canonical_name in self._history:
@@ -500,7 +516,7 @@ class ObjectDumper(TypeBodyReifier):
             self._history[node.canonical_name] = True
             return node.body.accept(self)
         else:
-            return TypeBodyReifier._visit_scalar(self, node)
+            return TypeBodyReifier._visit_symbol(self, node)
 
 
 

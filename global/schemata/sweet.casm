@@ -1,0 +1,95 @@
+/* -*- coding: utf-8 -*- */
+/** Sweetな型表現の型
+ *
+ */
+module sweet;
+
+type TypeQualifierMixin = treif:TypeQualifierMixin;
+
+/** Sweetな組み込み型
+ */
+type sweetBuiltinTypeName = (
+  "undefined"
+| "null"
+| "boolean"
+| "number"
+| "string"   
+| "binary"   
+| "integer" // numberの部分型
+
+/* 構成と表現の都合で必要 */
+| "any"
+| "never"
+);
+
+/** Sweet組み込み型 
+ */
+type BuiltinType = treif:BuiltinTypeOf<sweetBuiltinTypeName>;
+
+/** 事前定義型 */
+type PredefinedType = treif:PredefinedType;
+
+/** シングルトン型 */
+type SingletonType = treif:SingletonType;
+
+
+/** Sweet基本型 
+ */
+type BasicType = (
+  BuiltinType
+| SingletonType
+| PredefinedType
+| EnumType
+| MultiEnumType
+);
+
+/** オブジェクト型
+ */
+type ObjectType = treif:ObjectTypeOf<TypeExpr, TypeExpr>;
+
+/** 配列型
+ */
+type ArrayType = treif:ArrayTypeOf<TypeExpr, TypeExpr>;
+
+/** 列挙型 
+ */
+type EnumType = @enum [EnumItem, EnumItem, EnumItem*];
+
+/** 列挙型の項目 */
+type EnumItem = @item (TypeQualifierMixin & {
+  "value": (null | boolean | string | number),
+  "label": string?,
+
+  "attributes": undefined, // 廃止予定
+  *: any?
+});
+
+
+/** 多値列挙型 
+ */
+type MultiEnumType = @multi-enum [MultiEnumItem, MultiEnumItem, MultiEnumItem*];
+
+/** 多値列挙型の項目 */
+type MultiEnumItem = @multi-item (TypeQualifierMixin & {
+  "value": (null | boolean | string | number),
+  "minOccurs": integer(minimum=0),
+  "maxOccurs": integer(minimum=1),
+  "label": string?,
+
+  "attributes": undefined, // 廃止予定
+  *: any?
+});
+
+/** Sweetな型表現
+ */
+type TypeExpr = (BasicType | ObjectType | ArrayType);
+
+command reify-type
+  {
+    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
+    @[default(false)]
+    "safe": boolean?,
+  }
+  [string cdpath] :: void -> TypeExpr
+    refers python:sweet.ReifyType;
+
