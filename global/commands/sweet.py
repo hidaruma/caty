@@ -112,6 +112,8 @@ class ObjectDumper(TypeBodyReifier):
             untagged(rep)[u'optional'] = True
             r[u'additional'] = rep
             del r[u'repeat']
+        else:
+            r[u'additional'] = tagged(u'builtin', {'typeName': u'undefined'})
         return r
 
 

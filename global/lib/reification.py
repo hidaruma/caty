@@ -411,6 +411,8 @@ class TypeBodyReifier(TreeCursor):
         if r[u'repeat']:
             r[u'additional'] = json.tagged(u'optional', {u'operand': r[u'specified'].pop(-1)})
             del r[u'repeat']
+        else:
+            r[u'additional'] = tagged(u'builtin', {'typeName': u'never'})
         return r
 
     @format_result(u'bag')
