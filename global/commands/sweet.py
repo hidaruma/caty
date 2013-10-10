@@ -29,13 +29,19 @@ class ReifyType(SafeReifier):
 class SweetFormReifier(ShallowReifier):
 
     def reify_type(self, t):
-        if u'predefined' in t.annotations:
+        if self._is_predefined(t):
             return tagged(u'predefined', {u'typeName': t.canonical_name})
         sr = ShallowReifier.reify_type(self, t)
         return ObjectDumper(sr[u'location']).visit(t.body)
 
-SINGLETON_TYPES = set([u'string-val', u'binary-val', u'number-val', u'boolean-val'])
+    def _is_predefined(self, node):
+        if u'predefined' in node.annotations:
+            return True
+        elif isinstance(node.body, (Root, Ref)):
+            return self._is_predefined(node.body)
+        return False
 
+SINGLETON_TYPES = set([u'string-val', u'binary-val', u'number-val', u'boolean-val'])
 class ObjectDumper(TypeBodyReifier):
     def __init__(self, location):
         self.default_loc = location
@@ -113,7 +119,7 @@ class ObjectDumper(TypeBodyReifier):
             r[u'additional'] = rep
             del r[u'repeat']
         else:
-            r[u'additional'] = tagged(u'builtin', {'typeName': u'undefined'})
+            r[u'additional'] = tagged(u'builtin', {'typeName': u'never'})
         return r
 
 
