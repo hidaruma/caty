@@ -100,6 +100,17 @@ class ObjectDumper(TypeBodyReifier):
             return TypeBodyReifier._visit_symbol(self, node)
 
 
-
+    @format_result(u'array-of')
+    def _visit_array(self, node):
+        r = self._extract_common_data(node)
+        r[u'specified'] = []
+        for v in node:
+            r[u'specified'].append(v.accept(self))
+        if r[u'repeat']:
+            rep = r[u'specified'].pop(-1)
+            untagged(rep)[u'optional'] = True
+            r[u'additional'] = rep
+            del r[u'repeat']
+        return r
 
 
