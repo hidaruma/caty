@@ -102,7 +102,7 @@ class NumberSchema(ScalarSchema):
             'origin': origin,
             'step': step,
         }
-        r = self.clone(opts)
+        r = self.clone(None, opts)
         r.is_integer = is_integer
         return r
 
