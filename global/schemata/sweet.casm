@@ -122,7 +122,7 @@ type SweetArrayAttributes = (ArrayAttributes ++ SweetAttributes);
 type ArrayType = ArrayTypeOf
 <
 //  Attrs = (ArrayAttributes ++ SweetAttributes), // @@@これはダメ
-//  Attrs = SweetArrayAttributes, // @@@これもダメ
+  Attrs = SweetArrayAttributes, 
   TypeExpr,
   TypeExpr
 >;
