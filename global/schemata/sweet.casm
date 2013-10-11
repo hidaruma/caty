@@ -4,7 +4,7 @@
  */
 module sweet;
 
-type TypeQualifierMixin = (treif:TypeQualifierMixin & {"ann": undefined, *:any?});
+type TypeQualifierMixin = (treif:TypeQualifierMixin & {"anno": undefined, *:any?});
 
 /** 入力に使用するUIの種類 */
 type ui = (
@@ -85,9 +85,47 @@ type BasicType = (
  */
 type ObjectType = treif:ObjectTypeOf<TypeExpr, TypeExpr, /*ObjectAttributes ++ SweetAttributes */>;
 
+
+/** 配列型を構成する型関数
+ */
+type ArrayTypeOf
+<
+// オプショナルパラメータ
+
+ /** スキーマ属性の型 */ 
+ Attrs = AttrsType default ArrayAttributes,
+
+ /** 共通のミクシンの型 */
+ Common = CommonMixin default TypeQualifierMixin,
+
+// 必須パラメータ
+
+ /** 配列項目の型 */
+ ItemType, 
+
+ /** 追加部分（ワイルドカード）の型 */
+ AdditionalType,
+> = 
+@array-of (CommonMixin & open AttrsType & {
+
+  "specified": [ItemType*], 
+  "additional": AdditionalType,
+
+  *: any?
+});
+
+type SweetArrayAttributes = (ArrayAttributes ++ SweetAttributes);
+
+
 /** 配列型
  */
-type ArrayType = treif:ArrayTypeOf<TypeExpr, TypeExpr, /*ArrayAttributes ++ SweetAttributes */>;
+type ArrayType = ArrayTypeOf
+<
+//  Attrs = (ArrayAttributes ++ SweetAttributes), // @@@これはダメ
+//  Attrs = SweetArrayAttributes, // @@@これもダメ
+  TypeExpr,
+  TypeExpr
+>;
 
 /** 列挙型 
  */
