@@ -91,16 +91,16 @@ def term(seq):
         k = choice(keyword(u'open'), keyword(u'close'), keyword(u'extract'))(s)
         if k == u'extract':
             path = CasmJSONPathSelectorParser()(seq)
-            body = s.parse(typedef)
+            body = s.parse(term)
             return ExtractorNode(path, body)
         elif k == u'close':
-            body = s.parse(typedef)
+            body = s.parse(term)
             return UnaryOpNode(k, body, [])
         else:
             t = seq.parse(option(type_var, []))
             if len(t) > 1:
                 raise ParseError(s, _unary)
-            body = s.parse(typedef)
+            body = s.parse(term)
             return UnaryOpNode(k, body, t)
 
     def _type_name_tag(s):
