@@ -453,11 +453,7 @@ class TypeCalcurator(_SubNormalizer):
         res = node.body.accept(self)
         body = dereference(res)
         if body.type == u'__variable__':
-            if body.default:
-                b = node.new_node(body._default_schema).accept(self)
-                return b
-            else:
-                return node.new_node(res)
+            return node.new_node(res)
         if node.operator != u'extract':
             if body.type != 'object':
                raise CatyException(u'SchemaCompileError', 
