@@ -193,9 +193,9 @@ kind OBJECT_TYPE = lower {*: any?};
 
 /** 組み込み型の型関数 */
 type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE, 
-//                   AttrsType in OBJECT_TYPE default ScalarAttributes
+                   AttrsType in OBJECT_TYPE default ScalarAttributes
 >
-= @builtin (QualifierMixin & (open ScalarAttributes)/*(open AttrsType)*/ & {
+= @builtin (QualifierMixin & open ScalarAttributes/*(open AttrsType)*/ & {
   "typeName" : TypeNameType,
    *: any? // open
 });
@@ -473,7 +473,7 @@ type TypeExpr = (
 type ObjectTypeOf<PropType, AdditionalType, 
                  // AttrsType in OBJECT_TYPE default ObjectAttributes
 > = 
-@object-of (TypeQualifierMixin & (open ObjectAttributes)/*(open AttrsType)*/ & {
+@object-of (TypeQualifierMixin & open ObjectAttributes /*(open AttrsType)*/ & {
 //  "pseudoTag": RPseudoTag?, //@ 塩漬け// @@ここがエラーする
 
   "specified": {*: PropType}, 
@@ -488,7 +488,7 @@ type ObjectTypeOf<PropType, AdditionalType,
 type ArrayTypeOf<ItemType, AdditionalType,
                  //AttrsType in OBJECT_TYPE default ArrayAttributes
 > = 
-@array-of (TypeQualifierMixin & (open ArrayAttributes)/* (open AttrsType)*/ & {
+@array-of (TypeQualifierMixin & open ArrayAttributes /* (open AttrsType)*/ & {
 
   "specified": [ItemType*], 
   "additional": AdditionalType,
