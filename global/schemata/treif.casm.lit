@@ -195,7 +195,7 @@ kind OBJECT_TYPE = lower {*: any?};
 type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE, 
                    AttrsType in OBJECT_TYPE default ScalarAttributes
 >
-= @builtin (QualifierMixin & open ScalarAttributes/*(open AttrsType)*/ & {
+= @builtin (QualifierMixin & (open AttrsType) & {
   "typeName" : TypeNameType,
    *: any? // open
 });
