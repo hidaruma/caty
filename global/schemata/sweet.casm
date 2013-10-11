@@ -62,7 +62,7 @@ type sweetBuiltinTypeName = (
 
 /** Sweet組み込み型 
  */
-type BuiltinType = treif:BuiltinTypeOf<sweetBuiltinTypeName, /*ScalarAttributes ++ SweetAttributes*/>;
+type BuiltinType = treif:BuiltinTypeOf<sweetBuiltinTypeName, ScalarAttributes ++ SweetAttributes>;
 
 /** 事前定義型 */
 type PredefinedType = treif:PredefinedType;

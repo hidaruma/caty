@@ -204,7 +204,7 @@ type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE,
  * スキーマ属性があるため、
  * 内包的に定義された部分集合かもしれない点に注意。
  */
-type BuiltinType = BuiltinTypeOf<builtinTypeName/*, ScalarAttributes*/>;
+type BuiltinType = BuiltinTypeOf<builtinTypeName, ScalarAttributes>;
 
 type PredefinedType = @predefined (QualifierMixin & {
   "typeName" : catyTypeName,
