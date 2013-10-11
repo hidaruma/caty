@@ -10,7 +10,7 @@ class WebUtilMix<Rec> =
 
 /** コレクション参照型（実験的） 
  */
-type reference<C> = @__r {
+type reference<C> = /*@__r*/ {
  "a": [integer],
  "t": typeName<C>, // targetName<C> が望ましいだろう。
 };
