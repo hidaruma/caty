@@ -6,44 +6,6 @@ module sweet;
 
 type TypeQualifierMixin = treif:TypeQualifierMixin;
 
-/** 入力に使用するUIの種類 */
-type ui = (
- /** 一般的な入力フィールド */
-  "field" | 
- /** テキストエリア */
-  "textarea" | 
- /** 検索ボックス */
-   "search" |
- /** ファイルアップロード */
-   "file" |
- /** ラジオボタングループ */
-  "radio" | 
- /** チェックボックスグループ */
-  "checkbox" | 
- /** 選択メニュー */
-  "select" |
-);
-
-type ScalarAttributes = treif:ScalarAttributes;
-type ObjectAttributes = treif:ObjectAttributes;
-type ArrayAttributes = treif:ArrayAttributes;
-
-/** sweet型システム特有のスキーマ属性 
- */
-type SweetAttributes = {
- /** UI上で使うラベル文字列 */
- "label": string?,
- /** 入力コントロール（ウィジェット）の種類 */
- "ui" : ui?,
- /** HTML5のautofocus */
- "autofocus": boolean?,
- /** HTML5のplaceholder */
- "placeholder": string?,
- /** HTML5のdatalist（list属性） */
- "datalist": [scalar*]?,
-};
-
-
 /** Sweetな組み込み型
  */
 type sweetBuiltinTypeName = (
@@ -62,7 +24,7 @@ type sweetBuiltinTypeName = (
 
 /** Sweet組み込み型 
  */
-type BuiltinType = treif:BuiltinTypeOf<sweetBuiltinTypeName, (ScalarAttributes/* ++ SweetAttributes*/)>;
+type BuiltinType = treif:BuiltinTypeOf<sweetBuiltinTypeName>;
 
 /** 事前定義型 */
 type PredefinedType = treif:PredefinedType;
@@ -81,53 +43,44 @@ type BasicType = (
 | MultiEnumType
 );
 
+
 /** オブジェクト型
  */
-type ObjectType = treif:ObjectTypeOf<TypeExpr, TypeExpr, (ObjectAttributes/* ++ SweetAttributes*/)>;
+type ObjectType = treif:ObjectTypeOf<TypeExpr, TypeExpr>;
 
 /** 配列型
  */
-type ArrayType = treif:ArrayTypeOf<TypeExpr, TypeExpr, (ObjectAttributes/* ++ SweetAttributes*/)>;
+type ArrayType = treif:ArrayTypeOf<TypeExpr, TypeExpr>;
 
 /** 列挙型 
  */
 type EnumType = @enum [EnumItem, EnumItem, EnumItem*];
 
 /** 列挙型の項目 */
-type EnumItem = @item (TypeQualifierMixin & (open SweetAttributes) & {
+type EnumItem = @item (TypeQualifierMixin & {
   "value": (null | boolean | string | number),
-//  "label": string?,
+  "label": string?,
 
-  "attributes": undefined, // 廃止予定
+//  "attributes": undefined, // 廃止予定
   *: any?
 });
-
+   
 
 /** 多値列挙型 
  */
 type MultiEnumType = @multi-enum [MultiEnumItem, MultiEnumItem, MultiEnumItem*];
 
 /** 多値列挙型の項目 */
-type MultiEnumItem = @multi-item (TypeQualifierMixin & (open SweetAttributes) & {
+type MultiEnumItem = @multi-item (TypeQualifierMixin & {
   "value": (null | boolean | string | number),
   "minOccurs": integer(minimum=0),
   "maxOccurs": integer(minimum=1),
-//  "label": string?,
+  "label": string?,
 
-  "attributes": undefined, // 廃止予定
+//  "attributes": undefined, // 廃止予定
   *: any?
 });
 
 /** Sweetな型表現
  */
 type TypeExpr = (BasicType | ObjectType | ArrayType);
-
-command reify-type
-  {
-    /** 指定されたシステム要素が存在しないときはundefinedを返すか */
-    @[default(false)]
-    "safe": boolean?,
-  }
-  [string cdpath] :: void -> TypeExpr
-    refers python:sweet.ReifyType;
-
