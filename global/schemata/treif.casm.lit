@@ -193,9 +193,9 @@ kind OBJECT_TYPE = lower {*: any?};
 
 /** 組み込み型の型関数 */
 type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE, 
-                   AttrsType in OBJECT_TYPE default ScalarAttributes
+//                   AttrsType in OBJECT_TYPE default ScalarAttributes
 >
-= @builtin (QualifierMixin & (open AttrsType) & {
+= @builtin (QualifierMixin & open ScalarAttributes/*(open AttrsType)*/ & {
   "typeName" : TypeNameType,
    *: any? // open
 });
@@ -204,7 +204,7 @@ type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE,
  * スキーマ属性があるため、
  * 内包的に定義された部分集合かもしれない点に注意。
  */
-type BuiltinType = BuiltinTypeOf<builtinTypeName, ScalarAttributes>;
+type BuiltinType = BuiltinTypeOf<builtinTypeName/*, ScalarAttributes*/>;
 
 type PredefinedType = @predefined (QualifierMixin & {
   "typeName" : catyTypeName,
@@ -471,10 +471,10 @@ type TypeExpr = (
  * オブジェクト型は名前付きタプルの型
  */
 type ObjectTypeOf<PropType, AdditionalType, 
-                  AttrsType in OBJECT_TYPE default ObjectAttributes
+                 // AttrsType in OBJECT_TYPE default ObjectAttributes
 > = 
-@object-of (TypeQualifierMixin & (open AttrsType) & {
-  "pseudoTag": RPseudoTag?, //@ 塩漬け
+@object-of (TypeQualifierMixin & open ObjectAttributes/*(open AttrsType)*/ & {
+//  "pseudoTag": RPseudoTag?, //@ 塩漬け// @@ここがエラーする
 
   "specified": {*: PropType}, 
   "additional": AdditionalType,
@@ -486,9 +486,9 @@ type ObjectTypeOf<PropType, AdditionalType,
  * 配列型は、名前なしタプルの型
  */
 type ArrayTypeOf<ItemType, AdditionalType,
-                 AttrsType in OBJECT_TYPE default ArrayAttributes
+                 //AttrsType in OBJECT_TYPE default ArrayAttributes
 > = 
-@array-of (TypeQualifierMixin &  (open AttrsType) & {
+@array-of (TypeQualifierMixin & open ArrayAttributes/* (open AttrsType)*/ & {
 
   "specified": [ItemType*], 
   "additional": AdditionalType,
@@ -542,12 +542,12 @@ type ClosedUnionTypeOf<ChoiceType> = UnionTypeOf<ChoiceType, NeverType>;
 /** オブジェクト型
  * 名前付きタプルの型
  */
-type ObjectType = ObjectTypeOf<TypeExpr, TypeExpr, ObjectAttributes>;
+type ObjectType = ObjectTypeOf<TypeExpr, TypeExpr/*, ObjectAttributes*/>;
 
 /** 配列型
  * 具体的な型
  */
-type ArrayType = ArrayTypeOf<TypeExpr, TypeExpr, ArrayAttributes>;
+type ArrayType = ArrayTypeOf<TypeExpr, TypeExpr/*, ArrayAttributes*/>;
 
 /** タグ付き型 */
 type TaggedType = TaggedTypeOf<TypeExpr>;
