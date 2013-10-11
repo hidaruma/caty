@@ -177,6 +177,8 @@ class TypeCalcurator(_SubNormalizer):
                 r = self._dereference(d)
             else:
                 return node
+        if u'__intersection__' in (lt, rt): #一方がintersection==型変数が残っているのでそのまま
+            return node
         # 一方がneverであれば演算結果はnever
         if lt == 'never' or rt == 'never':
             res = NeverSchema()
@@ -580,8 +582,8 @@ class NeverChecker(_SubNormalizer):
                 if is_never:
                     pass
                 else:
-                    if u[0].type == '__variable__' or u[1].type == '__variable__':
-                        pass
+                    if u[0].type == '__variable__' or u[1].type == '__variable__' or u[0].type == u'__intersection__' or u[1].type == u'__intersection__':
+                        pass # 型変数が残っている場合は実体化されるまでわからんので
                     else:
                         throw_caty_exception(u'SCHEMA_COMPILE_ERROR', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
             a = u[0].accept(self)
