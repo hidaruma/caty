@@ -1130,6 +1130,9 @@ class TypeFunctionNode(TypeFunction, SchemaBase):
         self._module = None
         self._type = u'<%s>' % funcname
 
+    def _deepcopy(self, ignore):
+        return TypeFunctionNode(self.funcname, self.typename)
+
     @property
     def module(self):
         return self._module

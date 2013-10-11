@@ -5,6 +5,7 @@ import caty.core.runtimeobject as ro
 import caty.jsontools as json
 import random
 from caty.core.spectypes import UNDEFINED
+from caty.util.dev import debug
 
 class ObjectSchema(SchemaBase, Object):
     u"""JSON オブジェクトの妥当性検証を行うクラス。

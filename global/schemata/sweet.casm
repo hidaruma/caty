@@ -87,7 +87,7 @@ type ObjectType = treif:ObjectTypeOf<TypeExpr, TypeExpr, /*ObjectAttributes ++ S
 
 /** 配列型
  */
-type ArrayType = treif:ArrayTypeOf<TypeExpr, TypeExpr, /*ArrayAttributes ++ SweetAttributes */>;
+type ArrayType = treif:ArrayTypeOf<TypeExpr, TypeExpr, ArrayAttributes ++ SweetAttributes>;
 
 /** 列挙型 
  */

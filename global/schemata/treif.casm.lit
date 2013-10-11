@@ -486,9 +486,9 @@ type ObjectTypeOf<PropType, AdditionalType,
  * 配列型は、名前なしタプルの型
  */
 type ArrayTypeOf<ItemType, AdditionalType,
-                 //AttrsType in OBJECT_TYPE default ArrayAttributes
+                 AttrsType in OBJECT_TYPE default ArrayAttributes
 > = 
-@array-of (TypeQualifierMixin & open ArrayAttributes /* (open AttrsType)*/ & {
+@array-of (TypeQualifierMixin & open AttrsType & {
 
   "specified": [ItemType*], 
   "additional": AdditionalType,

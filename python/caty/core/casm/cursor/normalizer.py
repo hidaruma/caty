@@ -450,7 +450,7 @@ class TypeCalcurator(_SubNormalizer):
 
     @apply_annotation
     def _visit_unary_op(self, node):
-        res = node.body.accept(self)
+        res = node.body.accept(self).clone(None)
         body = dereference(res)
         if body.type == u'__variable__':
             if body.default:
