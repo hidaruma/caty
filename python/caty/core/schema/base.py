@@ -1531,6 +1531,9 @@ class UnaryOpSchema(SchemaBase, UnaryOperator):
         self._operator = operator
         self._type_args = type_args
 
+    def new_node(self, schema):
+        return UnaryOpSchema(self._operator, schema, self.type_args)
+
     @property
     def type_args(self):
         return self._type_args
@@ -1585,6 +1588,9 @@ class ExtractorSchema(SchemaBase, UnaryOperator):
         self._docstring = u''
         self._operator = u'extract'
         self.path = path
+
+    def new_node(self, schema):
+        return ExtractorSchema(self.path, schema)
 
     @property
     def operator(self):

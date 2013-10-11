@@ -405,6 +405,9 @@ class UnaryOpNode(Node, UnaryOperator):
         self._body = body
         self._type_args = type_args
 
+    def new_node(self, s):
+        return UnaryOpNode(self._operator, self._body, self._type_args)
+
     @property
     def body(self):
         return self._body
@@ -431,6 +434,9 @@ class ExtractorNode(Node, UnaryOperator):
     @property
     def operator(self):
         return self._operator
+
+    def new_node(self, s):
+        return ExtractorNode(self.path, self._body)
 
 class UnionNode(OperatorNode, Union):
     reification_type = u'_union'
