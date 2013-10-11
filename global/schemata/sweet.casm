@@ -28,11 +28,18 @@ type ScalarAttributes = treif:ScalarAttributes;
 type ObjectAttributes = treif:ObjectAttributes;
 type ArrayAttributes = treif:ArrayAttributes;
 
+/** sweet型システム特有のスキーマ属性 
+ */
 type SweetAttributes = {
+ /** UI上で使うラベル文字列 */
  "label": string?,
+ /** 入力コントロール（ウィジェット）の種類 */
  "ui" : ui?,
+ /** HTML5のautofocus */
  "autofocus": boolean?,
+ /** HTML5のplaceholder */
  "placeholder": string?,
+ /** HTML5のdatalist（list属性） */
  "datalist": [scalar*]?,
 };
 
