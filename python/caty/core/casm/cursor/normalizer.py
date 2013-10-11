@@ -509,7 +509,10 @@ class NeverChecker(_SubNormalizer):
                 else:
                     paths.append(p[0])
             if not self.safe:
-                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', ro.i18n.get(u'Type representation is never: $typedef', typedef='\n'.join(paths)))
+                path = '\n'.join(paths)
+                if path == u'never':
+                    path = u''
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', ro.i18n.get(u'$type is never: $typedef', type=node.canonical_name, typedef=path))
         return r
 
     def _visit_option(self, node):
