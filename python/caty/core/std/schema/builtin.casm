@@ -728,10 +728,10 @@ type Negative = (false | @False univ | @NG univ);
 /** 三値の真偽値型 */
 type tboolean = (true | false | indef);
 
-type Logical = (LogicalTrue | LogicalFalse | LogicalIndef);
-type LogicalTrue  = (true  | @True  univ | @OK univ);
-type LogicalFalse = (false | @False univ | @NG univ);
-type LogicalIndef = (indef | @Indef univ);
+type Logical<T default univ> = (LogicalTrue<T> | LogicalFalse<T> | LogicalIndef<T>);
+type LogicalTrue<T default univ>  = (true  | @True  T | @OK T);
+type LogicalFalse<T default univ> = (false | @False T | @NG T);
+type LogicalIndef<T default univ> = (indef | @Indef T);
 
 /** 単一指定はT型データ、複数指定はT型項目の配列を使う型 */
 type multiItem<T> = (T | [T, T, T*]);
