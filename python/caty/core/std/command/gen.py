@@ -222,6 +222,7 @@ class DataGenerator(TreeCursor):
     def __init__(self, gen_options):
         self.__gen_str = gen_options['string']
         self.__occur = gen_options['occur']
+        self.__no_additional = gen_options['no-additional']
         self.cache = {}
         self.depth = 0
         
@@ -430,7 +431,7 @@ class DataGenerator(TreeCursor):
             if not deleted:
                 break
 
-        if node.wildcard.type not in ('never', 'undefined') and self.__occur != u'min':
+        if node.wildcard.type not in ('never', 'undefined') and (not self.__no_additional and self.__occur != u'min'):
             num = 0
             mi = node.minProperties if node.minProperties != -1 else len(r)
             ma = node.maxProperties if node.maxProperties != -1 else mi + 2
@@ -477,7 +478,7 @@ class DataGenerator(TreeCursor):
                     for i in range(l - len(r)):
                         r.append(self.__imply_array_item(node.schema_list[-1], num))
                         num += 1
-            elif self.__occur == 'min':
+            elif self.__occur == 'min' or self.__no_additional:
                 pass
         if node.repeat and (len(r) >= len(node.schema_list)) and self.__occur == 'min':
             r.pop(-1)
