@@ -557,11 +557,17 @@ class DataGenerator(TreeCursor):
                 return json.tagged(u'auto-gen-tag', r)
             else:
                 if not isinstance(node.tag, basestring):
-                    return json.tagged(node.tag.accept(self).replace('\n', '').replace('\r', '').replace(' ', ''), r)
+                    t = node.tag.accept(self).replace('\n', '').replace('\r', '').replace(' ', '')
+                    if t == u'string':
+                        t = u'tag'
+                    return json.tagged(t, r)
                 return json.tagged(node.tag, r)
         else:
             if not isinstance(node.tag, basestring):
-                return json.TagOnly(node.tag.accept(self).replace('\n', '').replace('\r', '').replace(' ', ''))
+                t = node.tag.accept(self).replace('\n', '').replace('\r', '').replace(' ', '')
+                if t == u'string':
+                    t = u'tag'
+                return json.TagOnly(t)
             if isinstance(node.body, Optional):
                 return _EMPTY
             return json.TagOnly(node.tag)
