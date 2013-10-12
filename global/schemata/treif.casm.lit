@@ -68,18 +68,25 @@ type CommonAttributes = {
  "remark": string?,
 };
 
-type ScalarAttributes = CommonAttributes ++ {
- "minimum": scalar?,
- "maximum": scalar?,
- "minLength": integer(minimum=0)?,
- "maxLength": integer(minimum=0)?,
- "format": string(remark="フォーマット名")?,
- "pattern": string(remark="正規表現パターン")?,
+type NumberOnlyAttributes = {
+ "minimum": number?,
+ "maximum": number?,
  "origin": number?,
  "step": number?,
- "exclusiveMinimum": scalar?,
- "exclusiveMaximum": scalar?,
+ "exclusiveMinimum": number?,//@@@未実装
+ "exclusiveMaximum": number?,//@@@未実装
+};
 
+type StringOnlyAttributes = {
+ "minLength": integer(minimum=0)?,
+ "maxLength": integer(minimum=0)?,
+ "pattern": string(remark="正規表現パターン")?,
+};
+
+type ScalarAttributes = CommonAttributes ++ NumberOnlyAttributes ++ StringOnlyAttributes ++ {
+ // undefined, null, boolean はスキー魔属性を持たない
+ "format": string(remark="フォーマット名")?,
+ "excludes": [(number|string)*]?,
 };
 
 type ArrayAttributes = CommonAttributes ++ {
@@ -92,12 +99,11 @@ type ObjectAttributes = CommonAttributes ++ {
  "minProperties": integer(minimum=0)?,
  "maxProperties": integer(minimum=0)?,
  "propNameFormat": string(remark="フォーマット名")?,
- "propNameType": string(remark="型名")?,
+ "propNameType": string(remark="型名")?, //@@@未実装
 
 };
 
 }>>
-
 
 
 ===  共通の定義
@@ -107,8 +113,8 @@ type ObjectAttributes = CommonAttributes ++ {
  * スキーマ属性と再帰性のフラグが付く
  */
 type TypeQualifierMixin = LocatedQualifierMixin & {
-     /** スキーマ属性 */
-    "attributes": object?, // 廃止予定
+    // /** スキーマ属性 */
+    //"attributes": object?, // 廃止予定
 
     /** 型が名前空間（束縛セット、コンテキスト）内で名前に束縛されているとき、その名前が再帰的かどうか 
      */
@@ -191,11 +197,26 @@ type builtinTypeName = (
 kind STRING_ENUM_TYPE = lower string /* and finite */;
 kind OBJECT_TYPE = lower {*: any?};
 
-/** 組み込み型の型関数 */
-type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE, 
-                   AttrsType in OBJECT_TYPE default ScalarAttributes
+/** 組み込み型を構築する型関数 
+ */
+type BuiltinTypeOf
+<
+ /** スキーマ属性の型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  */
+ Attrs = AttrsType in OBJECT_TYPE default ScalarAttributes,
+
+ /** 共通のミクシンまたはパートの型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  * @@@名前はMixinだが
+  */
+ Common = CommonMixin default TypeQualifierMixin,
+
+ /** 型名の集合の型 */
+ TypeNameType in STRING_ENUM_TYPE, 
+
 >
-= @builtin (QualifierMixin & (open AttrsType) & {
+= @builtin (open CommonMixin & open AttrsType & {
   "typeName" : TypeNameType,
    *: any? // open
 });
@@ -204,7 +225,7 @@ type BuiltinTypeOf<TypeNameType in STRING_ENUM_TYPE,
  * スキーマ属性があるため、
  * 内包的に定義された部分集合かもしれない点に注意。
  */
-type BuiltinType = BuiltinTypeOf<builtinTypeName, ScalarAttributes>;
+type BuiltinType = BuiltinTypeOf< builtinTypeName >;
 
 type PredefinedType = @predefined (QualifierMixin & {
   "typeName" : catyTypeName,
@@ -225,6 +246,54 @@ const PredefinedArrayType :: ArrayType = @array-of {
  "specified" : [],
  "additional" : @builtin {"typeName": "univ"}
 };
+
+
+type EmptyObj = {};
+
+/** シングルトン型を構築する型関数 
+ */
+type SingletonTypeOf
+<
+ /** スキーマ属性の型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  */
+ Attrs = AttrsType in OBJECT_TYPE default EmptyObj,
+
+ /** 共通のミクシンまたはパートの型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  * @@@名前はMixinだが
+  */
+ Common = CommonMixin default TypeQualifierMixin,
+
+ /** 唯一の値が属する型 */
+ TheValueType,
+>
+= @singleton (open CommonMixin & open AttrsType & {
+  "value": TheValueType,
+  "underlying": typeName<TheValueType>,
+
+  *:any?
+});
+
+/** 新 ブーリアンシングルトン型  */
+type _BooleanSingletonType = SingletonTypeOf<boolean>;
+
+/** 新 数値シングルトン型  */
+type _NumberSingletonType  = SingletonTypeOf<number>;
+
+/** 新 文字列シングルトン型  */
+type _StringSingletonType  = SingletonTypeOf<string>;
+
+/** 新 バイナリシングルトン型  */
+type _BinarySingletonType  = SingletonTypeOf<binary>;
+
+/** 新 シングルトン型 */
+type _SingletonType = (
+   _BooleanSingletonType
+ | _NumberSingletonType
+ | _StringSingletonType
+ | _BinarySingletonType
+);
 
 
 /** ブーリアンシングルトン型  */
@@ -384,7 +453,7 @@ type TypeAbst = @type (TypeQualifierMixin & { //@ 旧 TypeTerm
  */
 type TypeParam = @param {
     "document" : Doc?,
-    "annotations" : object?,
+    "anno" : object?,
 
     "name": string,
     "kind": Kind?,
@@ -470,11 +539,29 @@ type TypeExpr = (
 /** オブジェクト型を構成する型関数
  * オブジェクト型は名前付きタプルの型
  */
-type ObjectTypeOf<PropType, AdditionalType, 
-                 // AttrsType in OBJECT_TYPE default ObjectAttributes
+type ObjectTypeOf
+<
+ /** スキーマ属性の型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  */
+ Attrs = AttrsType in OBJECT_TYPE default ObjectAttributes,
+
+ /** 共通のミクシンまたはパートの型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  */
+ Common = CommonMixin default TypeQualifierMixin,
+
+ /** プロパティの型
+  */
+ PropType, 
+
+ /** 追加部分（ワイルドカード）の型
+  */
+ AdditionalType, 
+
 > = 
-@object-of (TypeQualifierMixin & open ObjectAttributes /*(open AttrsType)*/ & {
-//  "pseudoTag": RPseudoTag?, //@ 塩漬け// @@ここがエラーする
+@object-of (open CommonMixin & open AttrsType & {
+  "pseudoTag": RPseudoTag?, //@@@ 塩漬け
 
   "specified": {*: PropType}, 
   "additional": AdditionalType,
@@ -482,13 +569,32 @@ type ObjectTypeOf<PropType, AdditionalType,
   *: any? // open
 });
 
+
 /** 配列型を構成する型関数
  * 配列型は、名前なしタプルの型
  */
-type ArrayTypeOf<ItemType, AdditionalType,
-                 AttrsType in OBJECT_TYPE default ArrayAttributes
+type ArrayTypeOf
+<
+ /** スキーマ属性の型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  */
+ Attrs = AttrsType in OBJECT_TYPE default ObjectAttributes,
+
+ /** 共通のミクシンまたはパートの型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  */
+ Common = CommonMixin default TypeQualifierMixin,
+
+ /** 項目の型
+  */
+ ItemType,
+
+ /** 追加部分（ワイルドカード）の型
+  */
+ AdditionalType, 
+
 > = 
-@array-of (TypeQualifierMixin & open AttrsType & {
+@array-of (open CommonMixin & open AttrsType & {
 
   "specified": [ItemType*], 
   "additional": AdditionalType,
@@ -500,7 +606,22 @@ type ArrayTypeOf<ItemType, AdditionalType,
 type Tag = string;
 
 /** タグ付き型を構成する型関数 */
-type TaggedTypeOf<ContentType> = @tagged (TypeQualifierMixin & {
+type TaggedTypeOf
+<
+ /** スキーマ属性の型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  */
+ Attrs = AttrsType in OBJECT_TYPE default ObjectAttributes,
+
+ /** 共通のミクシンまたはパートの型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  */
+ Common = CommonMixin default TypeQualifierMixin,
+
+ /** コンテントの型 */
+  ContentType,
+> = 
+@tagged (open CommonMixin  & {
 
   // プロパティ名 tag, content は、仮想プロパティにあわせた。
 
@@ -522,7 +643,26 @@ type NeverType = BuiltinTypeOf<"never">;
 
 
 /** 排他的ユニオン型を構成する型関数 */
-type UnionTypeOf<ChoiceType, AdditionalType> = @union (TypeQualifierMixin & {
+type UnionTypeOf
+<
+ /** スキーマ属性の型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  */
+ Attrs = AttrsType in OBJECT_TYPE default ObjectAttributes,
+
+ /** 共通のミクシンまたはパートの型 （オプショナル）
+  * オブジェクト型なら、openでもclosedでもどちらも可
+  */
+ Common = CommonMixin default TypeQualifierMixin,
+
+ /** 選択肢の型 */
+ ChoiceType, 
+
+ /** 追加部分（ワイルドカード）の型 */
+ AdditionalType,
+
+> = 
+@union (open CommonMixin & {
 
   "specified": [ChoiceType*], // 条件： 互いに排他的な型
   "additional": AdditionalType, // その他
@@ -542,12 +682,12 @@ type ClosedUnionTypeOf<ChoiceType> = UnionTypeOf<ChoiceType, NeverType>;
 /** オブジェクト型
  * 名前付きタプルの型
  */
-type ObjectType = ObjectTypeOf<TypeExpr, TypeExpr/*, ObjectAttributes*/>;
+type ObjectType = ObjectTypeOf<TypeExpr, TypeExpr>;
 
 /** 配列型
  * 具体的な型
  */
-type ArrayType = ArrayTypeOf<TypeExpr, TypeExpr/*, ArrayAttributes*/>;
+type ArrayType = ArrayTypeOf<TypeExpr, TypeExpr>;
 
 /** タグ付き型 */
 type TaggedType = TaggedTypeOf<TypeExpr>;

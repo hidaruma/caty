@@ -4,7 +4,10 @@
  */
 module sweet;
 
-type TypeQualifierMixin = (treif:TypeQualifierMixin & {"anno": undefined, *:any?});
+type Doc = treif:Doc;
+
+type TypeQualifierPart = {"document": Doc?, "name": string?};
+type TypeQualifierMixin = open TypeQualifierPart;
 
 /** 入力に使用するUIの種類 */
 type ui = (
@@ -17,11 +20,20 @@ type ui = (
  /** ファイルアップロード */
    "file" |
  /** ラジオボタングループ */
-  "radio" | 
+  "radio-group" | 
  /** チェックボックスグループ */
+  "checkbox-group" | 
+ /** ラジオボタン */
+  "radio" | 
+ /** チェックボックス */
   "checkbox" | 
  /** 選択メニュー */
   "select" |
+ /** メニューのオプション */
+  "optiont" |
+
+ /** 隠蔽 */
+  "hidden" |
 );
 
 type ScalarAttributes = treif:ScalarAttributes;
@@ -40,19 +52,28 @@ type SweetAttributes = {
  /** HTML5のplaceholder */
  "placeholder": string?,
  /** HTML5のdatalist（list属性） */
- "datalist": [scalar*]?,
+ "datalist": [(number|string)*]?,
 };
 
+type SweetValueAttributes = {
+ /** UI上で使うラベル文字列 */
+ "label": string?,
+ /** 入力コントロール（ウィジェット）の種類 */
+ "ui" : ("checkbox"|"radio"|"option")?,
+
+ @[default(false)]
+ "selected": boolean?,
+};
 
 /** Sweetな組み込み型
  */
 type sweetBuiltinTypeName = (
-  "undefined"
+  "undefined" // データの不在を表す
 | "null"
-| "boolean"
+/*| "boolean" // 列挙型に吸収する */
 | "number"
 | "string"   
-| "binary"   
+| "binary" // fileアップロードで入力可能
 | "integer" // numberの部分型
 
 /* 構成と表現の都合で必要 */
@@ -62,13 +83,73 @@ type sweetBuiltinTypeName = (
 
 /** Sweet組み込み型 
  */
-type BuiltinType = treif:BuiltinTypeOf<sweetBuiltinTypeName, ScalarAttributes ++ SweetAttributes>;
+type BuiltinType = treif:BuiltinTypeOf
+<
+  Attrs = (ScalarAttributes ++ SweetAttributes),
+  Common = TypeQualifierPart,
+
+  sweetBuiltinTypeName
+>;
+
+type NumberType = treif:BuiltinTypeOf
+<
+  Attrs = ScalarAttributes ++ SweetAttributes,
+  Common = TypeQualifierPart,
+ 
+  "number"
+>;
+
+type StringType = treif:BuiltinTypeOf
+<
+  Attrs = ScalarAttributes ++ SweetAttributes,
+  Common = TypeQualifierPart,
+ 
+  "string"
+>;
+
+
 
 /** 事前定義型 */
 type PredefinedType = treif:PredefinedType;
 
 /** シングルトン型 */
-type SingletonType = treif:SingletonType;
+type SingletonType = treif:SingletonType; // 新シングルトンに変更する
+
+/** 新 シングルトン型 */
+type _SingletonType = (
+   BooleanSingletonType
+ | NumberSingletonType
+ | StringSingletonType
+ | BinarySingletonType
+);
+
+type BooleanSingletonType = treif:SingletonTypeOf
+<
+  Attrs=SweetValueAttributes, 
+  Common=TypeQualifierMixin,
+  boolean
+>;
+
+type NumberSingletonType = treif:SingletonTypeOf
+<
+  Attrs=SweetValueAttributes, 
+  Common=TypeQualifierMixin,
+  number
+>;
+
+type StringSingletonType = treif:SingletonTypeOf
+<
+  Attrs=SweetValueAttributes, 
+  Common=TypeQualifierMixin,
+  string
+>;
+
+type BinarySingletonType = treif:SingletonTypeOf
+<
+  Attrs=SweetValueAttributes, 
+  Common=TypeQualifierMixin,
+  binary
+>;
 
 
 /** Sweet基本型 
@@ -83,60 +164,54 @@ type BasicType = (
 
 /** オブジェクト型
  */
-type ObjectType = treif:ObjectTypeOf<TypeExpr, TypeExpr, /*ObjectAttributes ++ SweetAttributes */>;
-
-
-/** 配列型を構成する型関数
- */
-type ArrayTypeOf
+type ObjectType = treif:ObjectTypeOf
 <
-// オプショナルパラメータ
+  Attrs = (ObjectAttributes ++ SweetAttributes),
+  Common = TypeQualifierPart,
 
- /** スキーマ属性の型 */ 
- Attrs = AttrsType default ArrayAttributes,
+  TypeExpr, 
+  TypeExpr,
+>;
 
- /** 共通のミクシンの型 */
- Common = CommonMixin default TypeQualifierMixin,
 
-// 必須パラメータ
-
- /** 配列項目の型 */
- ItemType, 
-
- /** 追加部分（ワイルドカード）の型 */
- AdditionalType,
-> = 
-@array-of (CommonMixin & open AttrsType & {
-
-  "specified": [ItemType*], 
-  "additional": AdditionalType,
-
-  *: any?
-});
-
-type SweetArrayAttributes = (ArrayAttributes ++ SweetAttributes);
+//type SweetArrayAttributes = (ArrayAttributes ++ SweetAttributes);
 
 
 /** 配列型
  */
-type ArrayType = ArrayTypeOf
+type ArrayType = treif:ArrayTypeOf
 <
-//  Attrs = (ArrayAttributes ++ SweetAttributes), // @@@これはダメ
-  Attrs = SweetArrayAttributes, 
+   Attrs = (ArrayAttributes ++ SweetAttributes),
+   Common = TypeQualifierPart,
+
+//  Attrs = SweetArrayAttributes, 
   TypeExpr,
-  TypeExpr
+  TypeExpr,
 >;
+
+
+type EnumTypeOf
+<
+ Attrs = AttrsType default SweetAttributes,
+ Common = CommonComp default TypeQualifierMixin,
+ TagType,
+ ItemType,
+>
+= @(TagType) (close CommonComp ++ close AttrsType ++ {
+ "items": [ItemType, ItemType, ItemType*]
+});
+
+type _EnumType = EnumTypeOf<"enum", EnumItem>;
+type _MultiEnumType = EnumTypeOf<"multi-enum", MultiEnumItem>;
 
 /** 列挙型 
  */
 type EnumType = @enum [EnumItem, EnumItem, EnumItem*];
 
 /** 列挙型の項目 */
-type EnumItem = @item (TypeQualifierMixin & (open SweetAttributes) & {
+type EnumItem = @item (open TypeQualifierPart & (open SweetAttributes) & {
   "value": (null | boolean | string | number),
-//  "label": string?,
 
-  "attributes": undefined, // 廃止予定
   *: any?
 });
 
@@ -146,13 +221,11 @@ type EnumItem = @item (TypeQualifierMixin & (open SweetAttributes) & {
 type MultiEnumType = @multi-enum [MultiEnumItem, MultiEnumItem, MultiEnumItem*];
 
 /** 多値列挙型の項目 */
-type MultiEnumItem = @multi-item (TypeQualifierMixin & (open SweetAttributes) & {
+type MultiEnumItem = @multi-item (open TypeQualifierPart & (open SweetAttributes) & {
   "value": (null | boolean | string | number),
   "minOccurs": integer(minimum=0),
   "maxOccurs": integer(minimum=1),
-//  "label": string?,
 
-  "attributes": undefined, // 廃止予定
   *: any?
 });
 
