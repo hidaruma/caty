@@ -551,6 +551,9 @@ class UpdatorSchema(OperatorSchema, Updator):
         self._left.resolve_reference()
         self._right.resolve_reference()
 
+    def update(self, another):
+        return UpdatorSchema(self, another)
+
 _builtin_tags = [
     u'integer',
     u'number',

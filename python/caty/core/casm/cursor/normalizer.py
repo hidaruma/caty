@@ -430,7 +430,9 @@ class TypeCalcurator(_SubNormalizer):
     def _visit_updator(self, node):
         l = node.left
         r = node.right
-        if '__variable__' in (self._dereference(l).type, self._dereference(r).type):
+        lt = self._dereference(l).type
+        rt = self._dereference(r).type
+        if '__variable__' in (lt, rt):
             return node
         if self.__can_not_merge(l, r):
             t1 = l.type if l.type != '__variable__' else ro.i18n.get(u'type variable($name)', name=l.name)
@@ -439,6 +441,8 @@ class TypeCalcurator(_SubNormalizer):
         l = l.accept(self)
         r = r.accept(self)
         n = l.update(r)
+        if isinstance(n, UpdatorSchema) and ('__variable__' in (lt, rt) or u'__merging__' in (lt, rt)):
+            return n
         return n.accept(self)
 
     def __can_not_merge(self, l, r):
@@ -458,6 +462,8 @@ class TypeCalcurator(_SubNormalizer):
                 return b
             else:
                 return node.new_node(res)
+        if body.type in (u'__merging__',):
+            return node.new_node(res)
         if node.operator != u'extract':
             if body.type != 'object':
                raise CatyException(u'SchemaCompileError', 
