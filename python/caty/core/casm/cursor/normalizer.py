@@ -441,6 +441,8 @@ class TypeCalcurator(_SubNormalizer):
             raise Exception(ro.i18n.get(u'unsupported operand types for $op: $type1, $type2', type1=str(t1), type2=t2, op='++'))
         l = l.accept(self)
         r = r.accept(self)
+        lt = self._dereference(l).type
+        rt = self._dereference(r).type
         n = l.update(r)
         if isinstance(n, UpdatorSchema) and ('__variable__' in (lt, rt) or u'__merging__' in (lt, rt)):
             return n
