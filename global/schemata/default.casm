@@ -285,3 +285,22 @@ command acts [string mod] :: void -> [reif:ActionSummary*]? {
 command loaded-apps :: void -> [reif:ApplicationSummary*] {
   sreif:list-applications | take {$.loaded}
 };
+
+/** よく使うgen:sample */
+command type-sample
+{
+  @[default(false)]
+  "min": boolean?,
+  @[default(false)]
+  "additional": boolean?,
+}
+[string type-name] 
+:: void -> any 
+{
+  %min | case {true=> "min", false=> "once"}>occur;
+  %additional | not > no-additional;
+
+  gen:sample --occur=%occur --string=implied --no-additional=%no-additional %1
+};
+
+

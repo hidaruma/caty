@@ -77,11 +77,28 @@ type NumberOnlyAttributes = {
  "exclusiveMaximum": number?,//@@@未実装
 };
 
+type NumberAttributes = CommonAttributes ++ NumberOnlyAttributes ++ {
+ "format": string(remark="フォーマット名")?,
+ "excludes": [number*]?,
+};
+
+
 type StringOnlyAttributes = {
  "minLength": integer(minimum=0)?,
  "maxLength": integer(minimum=0)?,
  "pattern": string(remark="正規表現パターン")?,
 };
+
+type StringAttributes = CommonAttributes ++ StringOnlyAttributes ++ {
+ "format": string(remark="フォーマット名")?,
+ "excludes": [string*]?,
+};
+
+type BinaryAttributes = CommonAttributes ++ {
+ "format": string(remark="フォーマット名")?,
+};
+
+type EmptyAttributes = {};
 
 type ScalarAttributes = CommonAttributes ++ NumberOnlyAttributes ++ StringOnlyAttributes ++ {
  // undefined, null, boolean はスキー魔属性を持たない
@@ -188,6 +205,25 @@ type builtinTypeName = (
 | "never" // 空集合、データは一切なし
 );
 
+type attributedTypeName = (
+  "number"
+| "integer"
+| "string"   
+| "binary"   
+);
+
+type unattributedTypeName = (
+  "undefined"
+|  "null"
+| "boolean"
+| "void"
+| "foreign"  
+| "any"
+| "univ"
+| "never"
+);
+
+
 }>>
 
 {{http://static.return0.info/images/caty_type_hierarchy.png|type_hieracchy}}
@@ -208,24 +244,53 @@ type BuiltinTypeOf
 
  /** 共通のミクシンまたはパートの型 （オプショナル）
   * オブジェクト型なら、openでもclosedでもどちらも可
-  * @@@名前はMixinだが
   */
- Common = CommonMixin default TypeQualifierMixin,
+ Common = CommonComp default TypeQualifierMixin,
 
  /** 型名の集合の型 */
  TypeNameType in STRING_ENUM_TYPE, 
 
 >
-= @builtin (open CommonMixin & open AttrsType & {
+/*
+= @builtin (open CommonComp & opene AttrsType & {
   "typeName" : TypeNameType,
    *: any? // open
 });
+*/
+
+= @builtin (close CommonComp ++ close AttrsType ++ {
+  "typeName" : TypeNameType,
+});
+
+
 
 /** 組み込み型 
  * スキーマ属性があるため、
  * 内包的に定義された部分集合かもしれない点に注意。
  */
 type BuiltinType = BuiltinTypeOf< builtinTypeName >;
+
+
+type NumberType = BuiltinTypeOf<
+ Attrs = NumberAttributes,
+ ("number" | "integer")
+>;
+
+type StringType = BuiltinTypeOf<
+ Attrs = StringAttributes,
+ "string"
+>;
+
+type BinaryType = BuiltinTypeOf<
+ Attrs = BinaryAttributes,
+ "binary"
+>;
+
+
+type UnattributedType = BuiltinTypeOf<
+ Attrs = EmptyAttributes,
+ unattributedTypeName
+>;
 
 type PredefinedType = @predefined (QualifierMixin & {
   "typeName" : catyTypeName,
@@ -578,7 +643,7 @@ type ArrayTypeOf
  /** スキーマ属性の型 （オプショナル）
   * オブジェクト型なら、openでもclosedでもどちらも可
   */
- Attrs = AttrsType in OBJECT_TYPE default ObjectAttributes,
+ Attrs = AttrsType in OBJECT_TYPE default ArrayAttributes,
 
  /** 共通のミクシンまたはパートの型 （オプショナル）
   * オブジェクト型なら、openでもclosedでもどちらも可
@@ -608,11 +673,6 @@ type Tag = string;
 /** タグ付き型を構成する型関数 */
 type TaggedTypeOf
 <
- /** スキーマ属性の型 （オプショナル）
-  * オブジェクト型なら、openでもclosedでもどちらも可
-  */
- Attrs = AttrsType in OBJECT_TYPE default ObjectAttributes,
-
  /** 共通のミクシンまたはパートの型 （オプショナル）
   * オブジェクト型なら、openでもclosedでもどちらも可
   */
