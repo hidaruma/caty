@@ -1570,10 +1570,10 @@ class UnaryOpSchema(SchemaBase, UnaryOperator):
         return True
 
     def _clone(self, *args, **kwds):
-        return UnaryOpSchema(self._operator, self.body.clone(*args, **kwds))
+        return UnaryOpSchema(self._operator, self.body.clone(*args, **kwds), self.type_args)
 
     def _deepcopy(self, checked):
-        return UnaryOpSchema(self._operator, self.body.clone(*args, **kwds))
+        return UnaryOpSchema(self._operator, self.body.clone(checked), self.type_args)
 
     @property
     def type(self):
@@ -1582,6 +1582,12 @@ class UnaryOpSchema(SchemaBase, UnaryOperator):
     @property
     def tag(self):
         return self.body.tag
+
+    def update(self, another):
+        return UpdatorSchema(self, another)
+
+    def __repr__(self):
+        return str(self._operator) + ' ' + repr(self.body)
 
 class ExtractorSchema(SchemaBase, UnaryOperator):
     def __init__(self, path, schema):
@@ -1636,6 +1642,9 @@ class ExtractorSchema(SchemaBase, UnaryOperator):
     @property
     def tag(self):
         return self.body.tag
+
+    def update(self, another):
+        return UpdatorSchema(self, another)
 
 class ValueSchema(SchemaBase, Scalar):
     def __init__(self, value, *args, **kwds):

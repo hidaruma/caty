@@ -249,3 +249,21 @@ def flatten_union_node(node):
     else:
         r.append(node)
     return r
+
+def is_not_usable_type_var(node):
+    from caty.core.schema import TypeVariable
+    if isinstance(node, TypeVariable):
+        if not node._schema and not node.default:
+            return True
+    return False
+
+def extract_type_var(node):
+    from caty.core.schema import TypeVariable
+    if isinstance(node, TypeVariable):
+        if node._schema:
+            return node._schema
+        elif node.default:
+            return node._default_schema
+    elif isinstance(node, UnaryOperator):
+        return extract_type_var(node.body)
+    return node

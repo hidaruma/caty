@@ -433,7 +433,8 @@ class TypeCalcurator(_SubNormalizer):
         lt = self._dereference(l).type
         rt = self._dereference(r).type
         if '__variable__' in (lt, rt):
-            return node
+            if is_not_usable_type_var(self._dereference(l)) or is_not_usable_type_var(self._dereference(r)):
+                return node
         if self.__can_not_merge(l, r):
             t1 = l.type if l.type != '__variable__' else ro.i18n.get(u'type variable($name)', name=l.name)
             t2 = r.type if r.type != '__variable__' else ro.i18n.get(u'type variable($name)', name=r.name)
@@ -446,6 +447,8 @@ class TypeCalcurator(_SubNormalizer):
         return n.accept(self)
 
     def __can_not_merge(self, l, r):
+        l = extract_type_var(l)
+        r = extract_type_var(r)
         if l.type != r.type:
             if len(set([l.type, r.type]).union(set(['__merging__', '__intersection__', 'object']))) != 3:
                 if l.type not in ('integer', 'number') and r.type not in ('integer', 'number'):
