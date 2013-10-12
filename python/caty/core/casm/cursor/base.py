@@ -137,7 +137,7 @@ class SchemaBuilder(TreeCursor):
         s = node.body.accept(self)
         if isinstance(t, unicode):
             pass
-        elif isinstance(t, Node):
+        elif isinstance(t, (SchemaBase, Node)):
             t = t.accept(self)
         r = TagSchema(t, s)
         r._options = node.options

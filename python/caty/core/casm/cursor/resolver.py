@@ -68,6 +68,8 @@ class ReferenceResolver(SchemaBuilder):
                 t = t.value
                 if not isinstance(t, unicode):
                     throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'%s' % str(t))
+            elif isinstance(t, (TypeVariable, TypeReference)):
+                pass
             elif not isinstance(t, StringSchema):
                 throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'%s' % t.type)
         else:
