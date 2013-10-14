@@ -12,11 +12,11 @@ command sample<T default univ> {
     @[default(5)] "max-depth": integer(minimum=1)?,
     @[default(50)] "max-nodes": integer(minimum=1)?,
     @[default(5)] "max-branches": integer(minimum=2)?,
-    /** 型のadditional項目・プロパティの出力を抑制する
-     * このオプションの効果は再帰的で、入れ子の内部でも出力は抑制される。
+    /** 型のadditional項目・プロパティの出力個数を指定する
+     * このオプションの効果は再帰的で、入れ子の内部でも同じ値が適用される。
+     * 未指定のときは、additional項目・プロパティの出力個数は乱数で決められる。
      */
-    @[default(false)]
-    "no-additional": boolean?,
+    "additional": integer?,
     "mod": string?,
   } [string? typerepr] :: void -> T
   throws BadArg

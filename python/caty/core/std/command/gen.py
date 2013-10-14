@@ -222,7 +222,7 @@ class DataGenerator(TreeCursor):
     def __init__(self, gen_options):
         self.__gen_str = gen_options['string']
         self.__occur = gen_options['occur']
-        self.__no_additional = gen_options['no-additional']
+        self.__additional = gen_options['additional']
         self.cache = {}
         self.depth = 0
         
@@ -324,16 +324,12 @@ class DataGenerator(TreeCursor):
     def __rand_int(self, node):
         import sys
         max_i = node.maximum if node.maximum is not None else 100
-        min_i = node.minimum if node.minimum is not None else max_i - 100
-        if node.maximum is None:
-            max_i = min_i + 100
+        min_i = node.minimum if node.minimum is not None else max_i - 150
         return random.randint(min_i, max_i)
 
     def __rand_number(self, node):
         max_i = node.maximum if node.maximum is not None else 100.0
-        min_i = node.minimum if node.minimum is not None else max_i - 100.0
-        if node.maximum is None:
-            max_i = min_i + 100
+        min_i = node.minimum if node.minimum is not None else max_i - 150.0
         return Decimal(str(random.uniform(min_i, max_i)))
     
     def __gen_string(self, node):
@@ -431,12 +427,16 @@ class DataGenerator(TreeCursor):
             if not deleted:
                 break
 
-        if node.wildcard.type not in ('never', 'undefined') and (not self.__no_additional and self.__occur != u'min'):
+        if node.wildcard.type not in ('never', 'undefined') and (not self.__additional == 0 and self.__occur != u'min'):
             num = 0
             mi = node.minProperties if node.minProperties != -1 else len(r)
             ma = node.maxProperties if node.maxProperties != -1 else mi + 2
             upper = random.randint(mi, ma)
-            while len(r) < upper:
+            a = self.__additional or upper
+            while num < a:
+                r[u'$random_gen_%d' % num] = node.wildcard.body.accept(self)
+                num += 1
+            while len(r) < upper and num < a:
                 r[u'$random_gen_%d' % num] = node.wildcard.body.accept(self)
                 num += 1
         return r
