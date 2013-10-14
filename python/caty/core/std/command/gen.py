@@ -478,7 +478,7 @@ class DataGenerator(TreeCursor):
                     for i in range(l - len(r)):
                         r.append(self.__imply_array_item(node.schema_list[-1], num))
                         num += 1
-            elif self.__occur == 'min' or self.__no_additional:
+            elif self.__occur == 'min' or self.__additional == 0:
                 pass
         if node.repeat and (len(r) >= len(node.schema_list)) and self.__occur == 'min':
             r.pop(-1)
