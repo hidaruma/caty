@@ -310,8 +310,6 @@ class SchemaBase(Resource):
         return UnionSchema(self, another)
 
     def __and__(self, another):
-        if isinstance(another, (TypeReference, NamedSchema)):
-            another = another.body
         return IntersectionSchema(self, another)
 
     def __pow__(self, another):
@@ -328,10 +326,25 @@ class PseudoTag(object):
         return self.name == another.name and self.value != another.value
 
     def defined(self):
-        return self.name
+        return bool(self.name)
+
+    def __nonzero__(self):
+        return bool(self.name)
 
     def __str__(self):
         return '%s=%s' % (self.name, repr(self.value))
+
+    def validate(self, value):
+        from caty.jsontools.selector import compile
+        s = compile(self.name)
+        errors = {}
+        try:
+            v = s.select(value).next()
+            if v != self.value:
+                errors[self.name.lstrip('$.')] = ErrorObj(True, u'', u'', dict(msg=u'Not matched to pseudo tag $tag: $value != $value2', tag=str(self.name), value=self.value, value2=v))
+        except:
+            errors[self.name.lstrip('$.')] = ErrorObj(True, u'', u'', dict(msg=u'Property does not exist: $key', key=str(self.name)))
+        return errors
 
 class SchemaAttribute(property):
     def __init__(self, name, default=None):
@@ -1480,14 +1493,11 @@ class TypeReference(SchemaBase, Symbol, Ref):
     def validate(self, value, path=None):
         self.body.validate(value, path)
         if isinstance(value, dict): 
-            errors = {}
-            is_error = False
-            for k, v in value.iteritems():
-                if self.pseudoTag.name == k:
-                    if self.pseudoTag.value != v:
-                        errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Not matched to pseudo tag $tag: $value', tag=str(self.pseudoTag), value=v))
-                        is_error = True
-            if is_error:
+            if self.pseudoTag:
+                errors = self.pseudoTag.validate(value)
+            else:
+                errors = {}
+            if errors:
                 e = JsonSchemaErrorObject({u'msg': u'Failed to validate object'})
                 e.update(errors)
                 raise e
@@ -1501,6 +1511,7 @@ class TypeReference(SchemaBase, Symbol, Ref):
             raise
         b = self.body.clone(checked, options)
         t.body = b
+        t.pseudoTag = self.pseudoTag
         return t
 
     def _deepcopy(self, checked):
@@ -1677,7 +1688,7 @@ class ValueSchema(SchemaBase, Scalar):
         return ValueSchema(self.value, self.options)
 
     def _clone(self, ignore, options=None):
-        return ValueSchema(self.scalar, 
+        return ValueSchema(self.value, 
                           options if options else self.options)
 
     def _convert(self, value):

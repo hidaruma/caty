@@ -255,7 +255,7 @@
 
     "This type must contain $min elements or more": "この型は$min以上の要素を含めなければなりません",
 
-    "Pseudo tag is not exclusive: $tag1, $tag2": "議事タグが排他になっていません: $tag1, $tag2",
+    "Pseudo tag is not exclusive: $tag1, $tag2": "擬似タグが排他になっていません: $tag1, $tag2",
 
     "Number of property should be smaller than $min": "プロパティの数は$min未満でなければなりません",
 
@@ -265,7 +265,7 @@
 
     "Property not exists: $name": "プロパティが足りません: $name",
 
-    "Not matched to pseudo tag $tag: $value": "議事タグの値$tagに合致していません: $value",
+    "Not matched to pseudo tag $tag: $value": "擬似タグの値$tagに合致していません: $value",
 
     "Elements of Bag type is not exclusive: $types": "バッグ型の要素が排他になっていません: $types",
 

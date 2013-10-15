@@ -188,6 +188,11 @@ class ObjectSchema(SchemaBase, Object):
             if not v.optional and k not in value and v.type != u'univ':
                 errors[k] = ErrorObj(True, u'', u'', dict(msg=u'Property not exists: $name', name=k))
                 is_error = True
+        # 擬似タグ
+        if self.pseudoTag:
+            for k, v in self.pseudoTag.validate(value).items():
+                if k not in errors:
+                    errors[k] = v
         if is_error:
             e = JsonSchemaErrorObject({u'msg': u'Failed to validate object'})
             e.update(errors)

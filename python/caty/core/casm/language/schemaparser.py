@@ -117,12 +117,19 @@ def term(seq):
     def _pseudo_tag(s):
         s.parse('@?')
         s.parse('(')
-        n = seq.parse([string, Regex(u'(([a-zA-Z_][a-zA-Z0-9_]*)|\$)')])
+        n = seq.parse(option([string, Regex(u'(((\$\.)?[a-zA-Z_][a-zA-Z0-9_.]*)|\$)')], UNDEFINED))
+        if n and not n.startswith('$'):
+            n = u'$.' + n
         s.parse(':')
-        v = s.parse([singleton, value])
+        v = s.parse(option([singleton, value], UNDEFINED))
+        if n == v == UNDEFINED:
+            raise ParseError(s, _pseudo_tag)
         s.parse(')')
         t = s.parse(term)
-        return PseudoTaggedNode(n, v, t)
+        r = build_pseudo_tag(n, v, t)
+        if r is None:
+            raise ParseError(s, _pseudo_tag)
+        return r
 
     def _term(s):
         _ = s.parse('(')
@@ -484,4 +491,20 @@ def type_function(seq):
     S(u'>')(seq)
     node = TypeFunctionNode(t, n)
     return node
+
+def build_pseudo_tag(path, value, node):
+    if isinstance(node, PseudoTaggedNode):
+        if not ((node._name is UNDEFINED and path is not UNDEFINED and node._value is not UNDEFINED and value is UNDEFINED) 
+               or (node._name is not UNDEFINED and path is UNDEFINED and node._value is UNDEFINED and value is not UNDEFINED)):
+            return None
+        if node._name is UNDEFINED:
+            return PseudoTaggedNode(path, node._value, node.body)
+        else:
+            return PseudoTaggedNode(node._name, value, node.body)
+    elif isinstance(node, OperatorNode):
+        l = build_pseudo_tag(path, value, node.left)
+        r = build_pseudo_tag(path, value, node.right)
+        return node.__class__(l, r)
+    else:
+        return PseudoTaggedNode(path, value, node)
 

@@ -120,6 +120,7 @@ class TypeCalcurator(_SubNormalizer):
         _SubNormalizer.__init__(self, module)
         self.history = set()
         self.traced = set()
+        self.debug = False
     
     @apply_annotation
     def _visit_symbol(self, node):
@@ -353,11 +354,11 @@ class TypeCalcurator(_SubNormalizer):
                 if lt == rt == 'object':
                     if self.__exclusive_pseudotag(l, r):
                         return NeverSchema()
-                res = l.intersect(r).accept(self)
+                res = l.intersect(self._dereference(r)).accept(self)
             elif lt == '__value__' and isinstance(r, Symbol):
-                res = self._intersect_value_and_scalar(self._dereference(l), r)
+                res = self._intersect_value_and_scalar(self._dereference(l), self._dereference(r))
             elif rt == '__value__' and isinstance(l, Symbol):
-                res = self._intersect_value_and_scalar(self._dereference(r), l)
+                res = self._intersect_value_and_scalar(self._dereference(r), self._dereference(l))
             elif set([lt, rt]) == set([u'null', u'void']):
                 res = l
             else:
@@ -603,6 +604,8 @@ class NeverChecker(_SubNormalizer):
                     if u[0].type == '__variable__' or u[1].type == '__variable__' or u[0].type == u'__intersection__' or u[1].type == u'__intersection__':
                         pass # 型変数が残っている場合は実体化されるまでわからんので
                     else:
+                        for n in nodes:
+                            print n, n.pseudoTag
                         throw_caty_exception(u'SCHEMA_COMPILE_ERROR', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
             a = u[0].accept(self)
             b = u[1].accept(self)

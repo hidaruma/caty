@@ -46,7 +46,7 @@ type SweetAttributes = {
  /** UI上で使うラベル文字列 */
  "label": string?,
  /** 入力コントロール（ウィジェット）の種類 */
- "ui" : ui?,
+ "ui" : ui2?,
  /** HTML5のautofocus */
  "autofocus": boolean?,
  /** HTML5のplaceholder */
@@ -242,3 +242,32 @@ command reify-type
   [string cdpath] :: void -> TypeExpr
     refers python:sweet.ReifyType;
 
+type ui2 = (specialUi | textFieldUi | numberFieldUi | optionUi | groupUi );
+
+type specialUi = (
+   "search" |
+   "file" |
+  "hidden" |
+  "readonly" |
+);
+
+type textFieldUi = (
+  "textfield" | 
+  "textarea" | 
+);
+
+type numberFieldUi = (
+  "numberfield" | 
+);
+
+type optionUi = (
+  "radio" | 
+  "checkbox" | 
+  "option" |
+);
+
+type groupUi = (
+  "radio-group" | 
+  "checkbox-group" | 
+  "select" |
+);
