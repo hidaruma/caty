@@ -218,8 +218,8 @@ def named_typedef(seq):
 
 def scalar(seq):
     n = seq.parse(typename)
-    o = seq.parse(option(options, {}))
     t = seq.parse(option(type_var, []))
+    o = seq.parse(option(options, {}))
     node = SymbolNode(n, o, t)
     return node
 

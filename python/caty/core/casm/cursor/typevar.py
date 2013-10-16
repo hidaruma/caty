@@ -90,7 +90,7 @@ class TypeVarApplier(SchemaBuilder):
                             self.type_args[param.var_name] = a
                             args.append(a)
                             break
-                key = (node.module.name+':'+TreeDumper(True).visit(node), tuple(node.options.items()), tuple(ta))
+                key = (node.module.name+':'+TreeDumper(True).visit(node), tuple([(k, tuple(v) if isinstance(v, list) else v) for k, v in node.options.items()]), tuple(ta))
                 if key in self.history:
                     self.history[key].recursive = True
                     return self.history[key]
@@ -119,8 +119,8 @@ class TypeVarApplier(SchemaBuilder):
             options = node.options
             for k, v in options.items():
                 if isinstance(v, AttrRef):
-                    if k in self.attr_args:
-                        options[k] = self.attr_args[k]
+                    if v.name in self.attr_args:
+                        options[k] = self.attr_args[v.name]
             n = node.clone(None, options=options)
             return n
         return node
