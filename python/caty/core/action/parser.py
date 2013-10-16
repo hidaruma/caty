@@ -10,7 +10,7 @@ from caty.core.action.module import ResourceModule
 from caty.core.action.entry import ResourceActionEntry, ActionProfiles, ActionProfile
 from caty.core.schema.base import Annotations
 from caty.core.casm.language import schemaparser, commandparser, constparser
-from caty.core.casm.language.ast import ASTRoot, CommandNode, ConstDecl
+from caty.core.casm.language.ast import Root, CommandNode, ConstDecl
 from caty.util import bind2nd
 from caty.core.exception import throw_caty_exception
 from caty.core.language.util import make_structured_doc
@@ -37,7 +37,7 @@ class ResourceActionDescriptorParser(Parser):
         if not seq.eof:
             raise ParseError(seq, self)
         for c in classes:
-            if isinstance(c, (ASTRoot, CommandNode, ConstDecl)):
+            if isinstance(c, (Root, CommandNode, ConstDecl)):
                 c.declare(rm)
             else:
                 if isinstance(c, ResourceClass):
@@ -592,7 +592,7 @@ class LiterateRADParser(ResourceActionDescriptorParser):
         if not seq.eof:
             raise ParseError(seq, self)
         for c in classes:
-            if isinstance(c, (ASTRoot, CommandNode, ConstDecl)):
+            if isinstance(c, (Root, CommandNode, ConstDecl)):
                 c.declare(rm)
             else:
                 if isinstance(c, ResourceClass):

@@ -290,7 +290,7 @@ class ClassExprInterpreter(object):
         return n
 
     def visit_class_ref(self, obj):
-        from caty.core.casm.language.ast import ASTRoot, CommandNode
+        from caty.core.casm.language.ast import TypeDefNode, CommandNode
         from caty.core.script.builder import ClassModuleWrapper
         COLLECTION_COMMANDS = set([u'lookup', u'get', u'belongs', u'exists', u'keys', u'all', u'insert', u'replace', u'delete', u'count', u'dump', u'delete-all', u'list', u'mget', u'multi-get', u'next-index', u'poke', u'set', u'choose'])
         try:
@@ -333,7 +333,7 @@ class ClassExprInterpreter(object):
         exp = cls._clsobj.expression.clone()
         ClassExpTypeVarApplier(tp, default_named_params).visit(exp)
         for m in exp.accept(self).member:
-            if isinstance(m, ASTRoot):
+            if isinstance(m, TypeDefNode):
                 print m
             elif isinstance(m, CommandNode):
                 m = m.clone()
