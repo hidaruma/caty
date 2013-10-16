@@ -146,7 +146,12 @@ class SchemaBuilder(TreeCursor):
     @apply_annotation
     def _visit_pseudo_tag(self, node):
         s = node.body.accept(self)
-        s.pseudoTag = pseudoTag(node._name, node._value)
+        if isinstance(s, (Ref, Object)):
+            s.pseudoTag = pseudoTag(node._name, node._value)
+        elif isinstance(s, Tag):
+            s.body.pseudoTag = pseudoTag(node._name, node._value)
+        else:
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Can not apply pseudo tag: $type', type=node.body)
         return s
 
     def _visit_kind(self, node):

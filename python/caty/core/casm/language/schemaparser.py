@@ -498,13 +498,16 @@ def build_pseudo_tag(path, value, node):
                or (node._name is not UNDEFINED and path is UNDEFINED and node._value is UNDEFINED and value is not UNDEFINED)):
             return None
         if node._name is UNDEFINED:
-            return PseudoTaggedNode(path, node._value, node.body)
+            return build_pseudo_tag(path, node._value, node.body)
         else:
-            return PseudoTaggedNode(node._name, value, node.body)
+            return build_pseudo_tag(node._name, value, node.body)
     elif isinstance(node, OperatorNode):
         l = build_pseudo_tag(path, value, node.left)
         r = build_pseudo_tag(path, value, node.right)
         return node.__class__(l, r)
+    elif isinstance(node, TaggedNode):
+        s = build_pseudo_tag(path, value, node.body)
+        return TaggedNode(node.tag, s)
     else:
         return PseudoTaggedNode(path, value, node)
 

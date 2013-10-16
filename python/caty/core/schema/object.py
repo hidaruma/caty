@@ -193,6 +193,7 @@ class ObjectSchema(SchemaBase, Object):
             for k, v in self.pseudoTag.validate(value).items():
                 if k not in errors:
                     errors[k] = v
+                    is_error = True
         if is_error:
             e = JsonSchemaErrorObject({u'msg': u'Failed to validate object'})
             e.update(errors)
