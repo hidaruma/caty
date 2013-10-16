@@ -17,7 +17,7 @@ def apply_annotation(f):
             s.annotations = node.annotations
         if node.docstring:
             s.docstring = node.docstring
-        if node.options:
+        if node.options and not s.options:
             s._options = node.options
         return s
     return _apply

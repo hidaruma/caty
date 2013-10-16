@@ -258,7 +258,14 @@ class SchemaBase(Resource):
             return
         for k, v in self._options.items():
             if isinstance(v, AttrRef):
-                throw_caty_exception(u'RuntimeError', u'Schema attribute `$key` is not initialized: $name', key=k, name=self.canonical_name)
+                new = {}
+                for a, b in self._options.items():
+                    if isinstance(b, AttrRef):
+                        new[a] = getattr(self.__class__, a).default
+                    else:
+                        new[a] = b
+                self.clone(None, new).validate(value)
+                return
         self._validate(value)
 
     def to_tagged(self, tag):
@@ -354,6 +361,7 @@ class PseudoTag(object):
 class SchemaAttribute(property):
     def __init__(self, name, default=None):
         property.__init__(self, lambda obj: obj.options.get(name, default), lambda obj, v: obj._options.__setitem__(name, v))
+        self.default = default
 
 attribute = SchemaAttribute
 

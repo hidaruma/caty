@@ -604,8 +604,6 @@ class NeverChecker(_SubNormalizer):
                     if u[0].type == '__variable__' or u[1].type == '__variable__' or u[0].type == u'__intersection__' or u[1].type == u'__intersection__':
                         pass # 型変数が残っている場合は実体化されるまでわからんので
                     else:
-                        for n in nodes:
-                            print n, n.pseudoTag
                         throw_caty_exception(u'SCHEMA_COMPILE_ERROR', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
             a = u[0].accept(self)
             b = u[1].accept(self)

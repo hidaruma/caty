@@ -6,6 +6,7 @@ class TypeVarApplier(SchemaBuilder):
     def __init__(self, module):
         SchemaBuilder.__init__(self, module)
         self.type_args = None
+        self.attr_args = OverlayedDict({})
         self.scope_stack = []
         self.real_root = True
         self.history = dict()
@@ -24,8 +25,6 @@ class TypeVarApplier(SchemaBuilder):
         r = self.real_root
         if r:
             self._init_type_params(node)
-        if node.name == u'PAnchor':
-            self.debug = True
         body = node.body.accept(self)
         if r:
             node._schema = body
@@ -57,6 +56,10 @@ class TypeVarApplier(SchemaBuilder):
             parameters[v.var_name] = v
         self.type_args = OverlayedDict(parameters)
 
+    def _init_attr_params(self, node):
+        for k, v in node.options.items():
+            self.attr_args[k] = v
+
     def _mask_scope(self):
         self.scope_stack.append(self.type_args)
         self.type_args = OverlayedDict({})
@@ -70,6 +73,7 @@ class TypeVarApplier(SchemaBuilder):
     def _visit_symbol(self, node):
         if isinstance(node, TypeReference):
             self.type_args.new_scope()
+            self.attr_args.new_scope()
             try:
                 ta = zip([a for a in node.type_params if not isinstance(a, NamedTypeParam)], 
                          [b for b in node.type_args if not isinstance(b, NamedParameterNode)])
@@ -92,11 +96,13 @@ class TypeVarApplier(SchemaBuilder):
                     return self.history[key]
                 r = TypeReference(node.name, args, node.module)
                 self.history[key] = r
+                self._init_attr_params(node)
                 r.body = node.body.accept(self)
                 r._options = node.options
                 return r
             finally:
                 self.type_args.del_scope()
+                self.attr_args.del_scope()
         elif isinstance(node, TypeVariable):
             if node.var_name in self.type_args:
                 r = self.type_args[node.var_name]
@@ -109,6 +115,14 @@ class TypeVarApplier(SchemaBuilder):
                     return r._schema if isinstance(r, TypeVariable) and r._schema else r
             else:
                 return node
+        elif isinstance(node, (ObjectSchema, ArraySchema, ScalarSchema)):
+            options = node.options
+            for k, v in options.items():
+                if isinstance(v, AttrRef):
+                    if k in self.attr_args:
+                        options[k] = self.attr_args[k]
+            n = node.clone(None, options=options)
+            return n
         return node
 
     def _visit_kind(self, node):
