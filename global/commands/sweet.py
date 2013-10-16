@@ -17,7 +17,12 @@ class ReifyType(SafeReifier):
         if not name:
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         module = app._schema_module.get_module(module_name)
-        reifier = SweetFormReifier()
+        attrs = set()
+        for k, v in app._schema_module.get_module(u'sweet').get_type(u'SweetAttributes').items():
+            attrs.add(k)
+        for k, v in app._schema_module.get_module(u'sweet').get_type(u'SweetValueAttributes').items():
+            attrs.add(k)
+        reifier = SweetFormReifier(attrs)
         # 型の展開を行った後の物に限る。
         try:
             r = reifier.reify_type(module.get_type(name))
@@ -27,12 +32,15 @@ class ReifyType(SafeReifier):
 
 
 class SweetFormReifier(ShallowReifier):
+    def __init__(self, sweet_attrs):
+        ShallowReifier.__init__(self)
+        self.SWEET_ATTRIBUTES = frozenset(sweet_attrs)
 
     def reify_type(self, t):
         if self._is_predefined(t):
             return tagged(u'predefined', {u'typeName': t.canonical_name})
         sr = ShallowReifier.reify_type(self, t)
-        return ObjectDumper(sr[u'location']).visit(t.body)
+        return ObjectDumper(sr[u'location'], self.SWEET_ATTRIBUTES).visit(t.body)
 
     def _is_predefined(self, node):
         if u'predefined' in node.annotations:
@@ -43,9 +51,18 @@ class SweetFormReifier(ShallowReifier):
 
 SINGLETON_TYPES = set([u'string-val', u'binary-val', u'number-val', u'boolean-val'])
 class ObjectDumper(TypeBodyReifier):
-    def __init__(self, location):
+    def __init__(self, location, sweet_attrs):
         self.default_loc = location
         self._history = {}
+        self.SWEET_ATTRIBUTES = sweet_attrs
+
+    def _extract_common_data(self, node):
+        r = TypeBodyReifier._extract_common_data(self, node)
+        anno = r.pop(u'anno', {})
+        for k, v in anno.items():
+            if k in self.SWEET_ATTRIBUTES:
+                r[k] = v
+        return r
 
     def _visit_root(self, node):
         if u'predefined' in node.annotations:
