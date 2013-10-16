@@ -47,12 +47,13 @@ class ModuleName(object):
             module.loaded = False
             return u'stop'
 
-class ASTRoot(Root):
+class TypeDefNode(Root):
     is_alias = False
-    def __init__(self, name, type_params, ast, annotation, docstring, kind=None, defined=True, redifinable=False):
+    def __init__(self, name, type_params, attr_params, ast, annotation, docstring, kind=None, defined=True, redifinable=False):
         self._name = name
         self._reference_schema = None
         self._type_params = type_params if type_params else []
+        self._attr_params = attr_params if attr_params else []
         self.body = ast if ast else SymbolNode(u'univ')
         self.options = None
         self.__annotation = annotation
@@ -62,10 +63,10 @@ class ASTRoot(Root):
         self.redifinable = redifinable
 
     def clone(self):
-        return ASTRoot(self._name, self._type_params, self.body, self.__annotation, self.__docstring, self.kind, self.defined, self.redifinable)
+        return TypeDefNode(self._name, self._type_params, self._attr_params, self.body, self.__annotation, self.__docstring, self.kind, self.defined, self.redifinable)
 
     def __repr__(self):
-        return 'ASTRoot<%s>: %s: %s' % (self._type_params, self._name, self.body)
+        return 'TypeDefNode<%s>: %s: %s' % (self._type_params, self._name, self.body)
 
     @property
     def type_params(self):
@@ -117,6 +118,14 @@ class ASTRoot(Root):
     @property
     def app(self):
         return self.module.app
+
+from abc import ABCMeta
+class ASTRoot(TypeDefNode):
+    is_alias = False
+    def __init__(self, name, type_params, ast, annotation, docstring, kind=None, defined=True, redifinable=False):
+        TypeDefNode.__init__(self, name, type_params, [], ast, annotation, docstring, kind, defined, redifinable)
+
+
 
 class ClassNode(object):
 

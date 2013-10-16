@@ -31,8 +31,9 @@ def schema(seq):
     if nohook(option(S(u';')))(seq):
         doc2 = postfix_docstring(seq)
         doc = concat_docstring(doc, doc2)
-        return ASTRoot(name_of_type, [], None, annotations, doc, None, False, False)
+        return TypeDefNode(name_of_type, [], [], None, annotations, doc, None, False, False)
     type_args = seq.parse(option(type_arg))
+    attr_args = seq.parse(option(attr_arg))
     k_of = option(kind_of)(seq)
     e = choice(S(u'='), S(u'?='), S(u'&='))(seq)
     if e == '?=':
@@ -57,7 +58,7 @@ def schema(seq):
     nohook(S(u';'))(seq)
     doc2 = postfix_docstring(seq)
     doc = concat_docstring(doc, doc2)
-    return ASTRoot(name_of_type, type_args, definition, annotations, doc, k_of, defined, redifinable)
+    return TypeDefNode(name_of_type, type_args, attr_args, definition, annotations, doc, k_of, defined, redifinable)
 
 def typedef(seq):
     return chainl(annotated_term, op, allow_trailing_operator=True)(seq)
@@ -236,8 +237,12 @@ def options(seq):
 def optval(seq):
     k = seq.parse(name)
     _ = seq.parse('=')
-    v = xjson.parse(seq)
+    v = choice(xjson.parse, attr_ref)(seq)
     return [k, v]
+
+def attr_ref(seq):
+    S(u'%')(seq)
+    return AttrRef(name(seq))
 
 def bag(seq):
     seq.parse('{[')
@@ -491,6 +496,12 @@ def type_function(seq):
     S(u'>')(seq)
     node = TypeFunctionNode(t, n)
     return node
+
+def attr_arg(seq):
+    S(u'(')(seq)
+    args = split(name, u',', allow_last_delim=True)(seq)
+    S(u')')(seq)
+    return args
 
 def build_pseudo_tag(path, value, node):
     if isinstance(node, PseudoTaggedNode):

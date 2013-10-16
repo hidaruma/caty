@@ -2,16 +2,18 @@
 from caty.core.resource import Resource
 from caty.jsontools import TaggedValue, tag, tagged, untagged, obj2path
 from caty.util import merge_dict, error_to_ustr, bind2nd, to_unicode
+from caty.core.exception import throw_caty_exception
 from caty.core.schema.errors import *
 import caty
 import caty.core.runtimeobject as ro
 from caty.core.typeinterface import *
 from caty.core.spectypes import UNDEFINED, INDEF, Indef
+from caty.jsontools import TaggedValue, TagOnly, prettyprint
+from caty.core.typeinterface import AttrRef
 
 import copy
 import random
 from decimal import Decimal
-from caty.jsontools import TaggedValue, TagOnly, prettyprint
 from types import NoneType
 
 class SchemaBase(Resource):
@@ -254,6 +256,9 @@ class SchemaBase(Resource):
             raise JsonSchemaError(dict(msg=u'Tagged value is passed: $tag', tag=tag(value)))
         if self.optional and (value is caty.UNDEFINED):
             return
+        for k, v in self._options.items():
+            if isinstance(v, AttrRef):
+                throw_caty_exception(u'RuntimeError', u'Schema attribute `$key` is not initialized: $name', key=k, name=self.canonical_name)
         self._validate(value)
 
     def to_tagged(self, tag):

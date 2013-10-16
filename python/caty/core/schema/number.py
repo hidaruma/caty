@@ -4,6 +4,7 @@ from decimal import Decimal
 import caty.core.runtimeobject as ro
 import random
 from caty.core.exception import throw_caty_exception, CatyException
+from caty.core.typeinterface import AttrRef
 
 class NumberSchema(ScalarSchema):
     minimum = attribute('minimum')
@@ -15,7 +16,7 @@ class NumberSchema(ScalarSchema):
 
     def __init__(self, *args, **kwds):
         ScalarSchema.__init__(self, *args, **kwds)
-        if self.minimum > self.maximum and self.maximum is not None:
+        if not isinstance(self.minimum, AttrRef) and not isinstance(self.maximum, AttrRef) and self.minimum > self.maximum and self.maximum is not None:
             throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'minmum($min) is bigger than maximum($max)', min=self.minimum, max=self.maximum)
         self.is_integer = False
         if self.excludes:

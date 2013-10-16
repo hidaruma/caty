@@ -267,3 +267,11 @@ def extract_type_var(node):
     elif isinstance(node, UnaryOperator):
         return extract_type_var(node.body)
     return node
+
+class AttrRef(object):
+
+    def __init__(self, name):
+        self.name = name
+
+    def __nonzero__(self):
+        return False
