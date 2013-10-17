@@ -26,7 +26,7 @@ class ArraySchema(SchemaBase, Array):
         elif self.optional and value is None:
             return
         if not (isinstance(value, list) or isinstance(value, tuple)):
-            raise JsonSchemaError(dict(msg=u'value should be $type', type='array'))
+            raise JsonSchemaError(dict(msg=u'value should be $type: $val', type='array', val=value))
         import caty
         if self.tight is not None and caty.UNDEFINED in value:
             raise JsonSchemaError(dict(msg=u'This type can not contain undefined'))

@@ -252,8 +252,8 @@ class SchemaBase(Resource):
         u"""スキーマ処理のベース。
         タグ付きの値は基本的に共通でエラーとし、タグを扱う場合はこのメソッドをサブクラスでオーバーライドする。
         """
-        if isinstance(value, TaggedValue):
-            raise JsonSchemaError(dict(msg=u'Tagged value is passed: $tag', tag=tag(value)))
+        #if isinstance(value, TaggedValue):
+        #    raise JsonSchemaError(dict(msg=u'Tagged value is passed: $tag', tag=tag(value)))
         if self.optional and (value is caty.UNDEFINED):
             return
         for k, v in self._options.items():

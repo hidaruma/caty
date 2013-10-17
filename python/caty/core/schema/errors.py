@@ -109,6 +109,14 @@ class JsonSchemaError(ErrorObj, Exception):
         for k, v in x.items():
             msg = _message(v)
             r[unicode(k)] = msg
+        prev = None
+        for k in reversed(sorted(r.keys())):
+            if prev and prev.startswith(k+'.'):
+                del r[k]
+            elif r[k] == u'':
+                del r[k]
+            else:
+                prev = k
         return r 
 
 class JsonSchemaErrorObject(JsonSchemaError):
