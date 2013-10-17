@@ -195,8 +195,13 @@ class ObjectSchema(SchemaBase, Object):
                     errors[k] = v
                     is_error = True
         if is_error:
+            edict = {}
+            for k, v in errors.items():
+                if not k:
+                    k = u"''"
+                edict[k] = v
             e = JsonSchemaErrorObject({u'msg': u'Failed to validate object'})
-            e.update(errors)
+            e.update(edict)
             raise e
 
     def __check_with_ann(self, value, k):
