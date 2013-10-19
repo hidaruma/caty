@@ -20,7 +20,7 @@ class ReifyType(SafeReifier):
         attrs = set()
         for k, v in app._schema_module.get_module(u'sweet').get_type(u'SweetAttributes').items():
             attrs.add(k)
-        for k, v in app._schema_module.get_module(u'sweet').get_type(u'SweetValueAttributes').items():
+        for k, v in app._schema_module.get_module(u'sweet').get_type(u'SweetItemAttributes').items():
             attrs.add(k)
         reifier = SweetFormReifier(attrs)
         # 型の展開を行った後の物に限る。
@@ -71,7 +71,7 @@ class ObjectDumper(TypeBodyReifier):
 
     def _visit_union(self, node):
         r = untagged(TypeBodyReifier._visit_union(self, node))
-        types = r['specified']
+        types = r[u'specified']
         items = []
         for t in types:
             if tag(t) not in SINGLETON_TYPES:
@@ -79,14 +79,14 @@ class ObjectDumper(TypeBodyReifier):
             else:
                 i = untagged(t)
                 v = {u'value': i[u'value']}
-                if u'label' in i[u'anno']:
+                if u'label' in i.get(u'anno', {}):
                     v[u'label'] = i[u'anno'][u'label']
                 items.append(tagged(u'item', v))
         return tagged(u'enum', items)
 
     def _visit_bag(self, node):
         r = untagged(TypeBodyReifier._visit_bag(self, node))
-        types = r['items']
+        types = r[u'items']
         items = []
         for bagitem in types:
             i = untagged(bagitem)
@@ -105,7 +105,12 @@ class ObjectDumper(TypeBodyReifier):
 
     def _visit_option(self, node):
         r = node.body.accept(self)
-        untagged(r)['optional'] = True
+        b = untagged(r)
+        if isinstance(b, dict):
+            b[u'optional'] = True
+        else:
+            for i in b:
+                untagged(i)[u'optional'] = True
         return r
 
     def _visit_symbol(self, node):
