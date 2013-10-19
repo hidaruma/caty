@@ -292,15 +292,15 @@ command type-sample
   @[default(false)]
   "min": boolean?,
   @[default(false)]
-  "additional": boolean?,
+  "no-additional": boolean?,
 }
 [string type-name] 
 :: void -> any 
 {
-  %min | case {true=> "min", false=> "once"}>occur;
-  %additional | not > no-additional;
+  %min | case {true=> "min", false=> "once"} >occur;
+  %no-additional | case {true=> 0, false=> 1} > _additional;
 
-  gen:sample --occur=%occur --string=implied --no-additional=%no-additional %1
+  gen:sample --occur=%occur --string=implied --additional=%_additional %1
 };
 
 

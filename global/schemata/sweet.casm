@@ -10,30 +10,54 @@ type TypeQualifierPart = {"document": Doc?, "name": string?};
 type TypeQualifierMixin = open TypeQualifierPart;
 
 /** 入力に使用するUIの種類 */
-type ui = (
- /** 一般的な入力フィールド */
-  "field" | 
- /** テキストエリア */
-  "textarea" | 
+type ui = (specialUi | textFieldUi | numberFieldUi | optionUi | groupUi );
+
+type specialUi = (
  /** 検索ボックス */
    "search" |
  /** ファイルアップロード */
    "file" |
- /** ラジオボタングループ */
-  "radio-group" | 
- /** チェックボックスグループ */
-  "checkbox-group" | 
+ /** 隠蔽 */
+  "hidden" |
+ /** リードオンリーフィールド */
+  "readonly" |
+);
+
+/** テキスト入力 */
+type textFieldUi = (
+ /** 一般的な入力フィールド */
+  "textfield" | 
+ /** テキストエリア */
+  "textarea" | 
+);
+
+/** 数値入力 */
+type numberFieldUi = (
+  "numberfield" | 
+  "range" |
+);
+
+/** 一般的な入力フィールド */
+type fieldUi = (textFieldUi | numberFieldUi);
+
+type optionUi = (
  /** ラジオボタン */
   "radio" | 
  /** チェックボックス */
   "checkbox" | 
+ /** メニューのオプション */
+  "option" |
+ /** グループからの継承 */
+  "implied" |
+);
+
+type groupUi = (
+ /** ラジオボタングループ */
+  "radio-group" | 
+ /** チェックボックスグループ */
+  "checkbox-group" | 
  /** 選択メニュー */
   "select" |
- /** メニューのオプション */
-  "optiont" |
-
- /** 隠蔽 */
-  "hidden" |
 );
 
 type ScalarAttributes = treif:ScalarAttributes;
@@ -53,13 +77,20 @@ type SweetAttributes = {
  "placeholder": string?,
  /** HTML5のdatalist（list属性） */
  "datalist": [(number|string)*]?,
+ /** HTML5のautocomplete */
+ @[default(false)]
+ "autocomplete": boolean?,
 };
 
-type SweetValueAttributes = {
+@[deprecated]
+type SweetValueAttributes = SweetItemAttributes;
+
+type SweetItemAttributes = {
  /** UI上で使うラベル文字列 */
  "label": string?,
  /** 入力コントロール（ウィジェット）の種類 */
- "ui" : ("checkbox"|"radio"|"option")?,
+ @[default("implied")]
+ "ui" : optionUi?,
 
  @[default(false)]
  "selected": boolean?,
@@ -70,7 +101,7 @@ type SweetValueAttributes = {
 type sweetBuiltinTypeName = (
   "undefined" // データの不在を表す
 | "null"
-/*| "boolean" // 列挙型に吸収する */
+| "boolean" // やっぱり入れる
 | "number"
 | "string"   
 | "binary" // fileアップロードで入力可能
@@ -125,28 +156,28 @@ type _SingletonType = (
 
 type BooleanSingletonType = treif:SingletonTypeOf
 <
-  Attrs=SweetValueAttributes, 
+  Attrs=SweetItemAttributes, 
   Common=TypeQualifierMixin,
   boolean
 >;
 
 type NumberSingletonType = treif:SingletonTypeOf
 <
-  Attrs=SweetValueAttributes, 
+  Attrs=SweetItemAttributes, 
   Common=TypeQualifierMixin,
   number
 >;
 
 type StringSingletonType = treif:SingletonTypeOf
 <
-  Attrs=SweetValueAttributes, 
+  Attrs=SweetItemAttributes, 
   Common=TypeQualifierMixin,
   string
 >;
 
 type BinarySingletonType = treif:SingletonTypeOf
 <
-  Attrs=SweetValueAttributes, 
+  Attrs=SweetItemAttributes, 
   Common=TypeQualifierMixin,
   binary
 >;
@@ -172,10 +203,6 @@ type ObjectType = treif:ObjectTypeOf
   TypeExpr, 
   TypeExpr,
 >;
-
-
-//type SweetArrayAttributes = (ArrayAttributes ++ SweetAttributes);
-
 
 /** 配列型
  */
@@ -239,34 +266,6 @@ command reify-type
     @[default(false)]
     "safe": boolean?,
   }
-  [string cdpath] :: void -> TypeExpr
+  [string cdpath] :: void -> any/*TypeExpr //一時的にコメントアウト */
     refers python:sweet.ReifyType;
 
-
-type specialUi = (
-   "search" |
-   "file" |
-  "hidden" |
-  "readonly" |
-);
-
-type textFieldUi = (
-  "textfield" | 
-  "textarea" | 
-);
-
-type numberFieldUi = (
-  "numberfield" | 
-);
-
-type optionUi = (
-  "radio" | 
-  "checkbox" | 
-  "option" |
-);
-
-type groupUi = (
-  "radio-group" | 
-  "checkbox-group" | 
-  "select" |
-);

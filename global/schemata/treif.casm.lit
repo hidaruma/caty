@@ -328,16 +328,16 @@ type SingletonTypeOf
   * オブジェクト型なら、openでもclosedでもどちらも可
   * @@@名前はMixinだが
   */
- Common = CommonMixin default TypeQualifierMixin,
+ Common = CommonComp default TypeQualifierMixin,
 
  /** 唯一の値が属する型 */
  TheValueType,
 >
-= @singleton (open CommonMixin & open AttrsType & {
+= @singleton (close CommonComp ++ close AttrsType ++ {
   "value": TheValueType,
   "underlying": typeName<TheValueType>,
 
-  *:any?
+//  *:any?
 });
 
 /** 新 ブーリアンシングルトン型  */
@@ -614,7 +614,7 @@ type ObjectTypeOf
  /** 共通のミクシンまたはパートの型 （オプショナル）
   * オブジェクト型なら、openでもclosedでもどちらも可
   */
- Common = CommonMixin default TypeQualifierMixin,
+ Common = CommonComp default TypeQualifierMixin,
 
  /** プロパティの型
   */
@@ -625,13 +625,13 @@ type ObjectTypeOf
  AdditionalType, 
 
 > = 
-@object-of (open CommonMixin & open AttrsType & {
+@object-of (close CommonComp ++ close AttrsType ++ {
   "pseudoTag": RPseudoTag?, //@@@ 塩漬け
 
   "specified": {*: PropType}, 
   "additional": AdditionalType,
 
-  *: any? // open
+//  *: any? // open
 });
 
 
@@ -648,7 +648,7 @@ type ArrayTypeOf
  /** 共通のミクシンまたはパートの型 （オプショナル）
   * オブジェクト型なら、openでもclosedでもどちらも可
   */
- Common = CommonMixin default TypeQualifierMixin,
+ Common = CommonComp default TypeQualifierMixin,
 
  /** 項目の型
   */
@@ -659,12 +659,12 @@ type ArrayTypeOf
  AdditionalType, 
 
 > = 
-@array-of (open CommonMixin & open AttrsType & {
+@array-of (close CommonComp ++ close AttrsType ++ {
 
   "specified": [ItemType*], 
   "additional": AdditionalType,
 
-  *: any? // open
+//  *: any? // open
 });
 
 /** タグの型 */
@@ -676,19 +676,19 @@ type TaggedTypeOf
  /** 共通のミクシンまたはパートの型 （オプショナル）
   * オブジェクト型なら、openでもclosedでもどちらも可
   */
- Common = CommonMixin default TypeQualifierMixin,
+ Common = CommonComp default TypeQualifierMixin,
 
  /** コンテントの型 */
   ContentType,
 > = 
-@tagged (open CommonMixin  & {
+@tagged (close CommonComp ++ {
 
   // プロパティ名 tag, content は、仮想プロパティにあわせた。
 
   "tag": Tag,
   "content": ContentType,
 
-  *: any? // open
+//  *: any? // open
 });
 
 /** undefined型
@@ -713,7 +713,7 @@ type UnionTypeOf
  /** 共通のミクシンまたはパートの型 （オプショナル）
   * オブジェクト型なら、openでもclosedでもどちらも可
   */
- Common = CommonMixin default TypeQualifierMixin,
+ Common = CommonComp default TypeQualifierMixin,
 
  /** 選択肢の型 */
  ChoiceType, 
@@ -722,12 +722,12 @@ type UnionTypeOf
  AdditionalType,
 
 > = 
-@union (open CommonMixin & {
+@union (close CommonComp ++ {
 
   "specified": [ChoiceType*], // 条件： 互いに排他的な型
   "additional": AdditionalType, // その他
 
-   *: any? // open
+//   *: any? // open
 });
 
 /** 閉じたユニオン型の型関数 */

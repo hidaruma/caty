@@ -31,6 +31,7 @@ command make-ref {"verb":string?} [string t, scalar? a1, scalar? a2] :: void -> 
 /** 参照から対応するURLを作る 
  */
 command to-url [string? format] :: Reference -> string {
+ dump --prefix="this is ref, input:" |
  [
    $.a.0 | to-string > id,
    $.a.1?="$"        > path,
@@ -40,7 +41,7 @@ command to-url [string? format] :: Reference -> string {
  [%UUSERVER_URL, app | $.path ] | text:concat   > base;
  %1?="json"  > format;
 
- [%base, %mod, %cls?="", ""] | text:join "/"    > target-cls;
+ [%base, %mod, %cls?="", ""] | text:join "/" | dump --prefix="this is ref, target:" --force > target-cls;
  ["?_verb=", %verb, "&_1=", %id, "&_2=", %path, "&ft=", %format] | text:concat > qstring;
  
  [%target-cls, %qstring] | text:concat
