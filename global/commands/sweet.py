@@ -18,10 +18,16 @@ class ReifyType(SafeReifier):
             throw_caty_exception('BadArg', u'$arg', arg=self._cdpath)
         module = app._schema_module.get_module(module_name)
         attrs = set()
-        for k, v in app._schema_module.get_module(u'sweet').get_type(u'SweetAttributes').items():
-            attrs.add(k)
-        for k, v in app._schema_module.get_module(u'sweet').get_type(u'SweetItemAttributes').items():
-            attrs.add(k)
+        try:
+            for k, v in app._schema_module.get_module(u'sweet').get_type(u'SweetAttributes').items():
+                attrs.add(k)
+        except:
+            throw_caty_exception(u'RuntimeError', u'sweet:SweetAttributes is required by sweet:reif')
+        try:
+            for k, v in app._schema_module.get_module(u'sweet').get_type(u'SweetItemAttributes').items():
+                attrs.add(k)
+        except:
+            throw_caty_exception(u'RuntimeError', u'sweet:SweetItemAttributes is required by sweet:reif')
         reifier = SweetFormReifier(attrs)
         # 型の展開を行った後の物に限る。
         try:
