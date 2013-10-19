@@ -66,6 +66,7 @@ type ArrayAttributes = treif:ArrayAttributes;
 
 /** sweet型システム特有のスキーマ属性 
  */
+@[system]
 type SweetAttributes = {
  /** UI上で使うラベル文字列 */
  "label": string?,
@@ -82,6 +83,7 @@ type SweetAttributes = {
  "autocomplete": boolean?,
 };
 
+@[system]
 type SweetItemAttributes = {
  /** UI上で使うラベル文字列 */
  "label": string?,

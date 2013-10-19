@@ -126,7 +126,7 @@ type ErrorResponse = CommonResponsePart ++ {
     "status": integer(minimum=400, maximum=599),
 };
 
-@[unquiet]
+@[unquiet, system]
 type WebOutput = Response | Redirect | ErrorResponse;
 
 @[unquiet]
@@ -1989,6 +1989,9 @@ annotation typical :: [univ*];
 @[target("TYPE_DECL")]
 annotation runaway :: boolean?;
 
+/** 
+ * Catyランタイムが内部的に参照している型やコマンド。
+ */
 @[target(["TYPE_DECL", "COMMAND_DECL"])]
 annotation system :: boolean?;
 

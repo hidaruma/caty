@@ -28,7 +28,7 @@ type Iterable<T> = ([T*] | foreign);
 /** 
  * コレクションを操作するコマンドセット 
  */
-@[register-public, single-hidden]
+@[register-public, single-hidden, system]
 signature Collection
 <
   /** レコードの型 */
