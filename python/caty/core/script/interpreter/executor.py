@@ -831,7 +831,7 @@ class CommandExecutor(BaseInterpreter):
                     context.pop(-1)
                 if qo.wildcard:
                     for k, v in obj.items():
-                        if k == '_self':
+                        if k == u'_self':
                             r[k] = v
                         else:
                             context.append(k)
@@ -839,8 +839,8 @@ class CommandExecutor(BaseInterpreter):
                             context.pop(-1)
                 
                 if not node.noself:
-                    if resolved and '_self' not in r:
-                        r['_self'] = orig
+                    if resolved and u'_self' not in r:
+                        r[u'_self'] = orig
                 return r
             elif qo.type == u'array':
                 if not isinstance(data, list):
@@ -864,7 +864,7 @@ class CommandExecutor(BaseInterpreter):
                 if json.tag(orig) == '__r':
                     p = json.untagged(orig)
                 else:
-                    p = json.untagged(orig['_self'])
+                    p = json.untagged(orig[u'_self'])
                 return json.tagged(u'__r', {u't': p['t'], u'a': [p['a'][0], u'.'.join(['$'] +context)]})
             assert False, qo.type
         def filter_internal(val, q, o, depth):
