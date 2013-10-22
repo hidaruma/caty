@@ -5,6 +5,7 @@ from caty import UNDEFINED
 from topdown import *
 from caty.core.casm.language.ast import *
 from caty.core.casm.language.schemaparser import *
+from caty.core.casm.language.classparser import *
 
 def collection_decl(seq):
     doc = option(docstring)(seq)
@@ -14,6 +15,10 @@ def collection_decl(seq):
     with strict():
         keyword(u'of')(seq)
         coltype = typedef(seq)
+        if option(keyword(u'with'))(seq):
+            mixinclass = class_expression(seq)
+        else:
+            mixinclass = None
         if option(keyword(u'identified'))(seq):
             keypath = CasmJSONPathSelectorParser()(seq)._to_str()
             keytype = option(col_key_type)(seq)
@@ -24,10 +29,11 @@ def collection_decl(seq):
             dbname = name_token(seq)
         else:
             dbname = u'default-database'
+
         nohook(S(u';'))(seq)
         doc2 = postfix_docstring(seq)
         doc = concat_docstring(doc, doc2)
-    return CollectionDeclNode(name, coltype, keypath, keytype, dbname, doc, annotations)
+    return CollectionDeclNode(name, coltype, mixinclass, keypath, keytype, dbname, doc, annotations)
 
 @try_
 def col_key_type(seq):

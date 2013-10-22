@@ -1067,7 +1067,7 @@ class AnnotationDecl(object):
         return self.type.accept(visitor)
 
 class CollectionDeclNode(object):
-    def __init__(self, name, coltype, keypath, keytype, dbname, doc, ann):
+    def __init__(self, name, coltype, mixinclass, keypath, keytype, dbname, doc, ann):
         from caty.core.script.parser import ScriptParser
         self.name = name
         self.dbname = dbname
@@ -1113,10 +1113,13 @@ class CollectionDeclNode(object):
                                      doc, 
                                      Annotations([Annotation(u'__collection')]),
                                      [])
-        self.catyclass = ClassNode(name, 
-                                  ClassIntersectionOperator(
+        clsexp = ClassIntersectionOperator(
                                     ClassBody([], ClassURI([(u'python', ['caty.core.command'])], False)),
-                                    ClassReference(u'Collection', [SymbolNode(name)])),
+                                    ClassReference(u'Collection', [SymbolNode(name)]))
+        if mixinclass:
+            clsexp = ClassIntersectionOperator(clsexp, mixinclass)
+        self.catyclass = ClassNode(name, 
+                                  clsexp,
                                   SymbolNode(u'univ'), 
                                   SymbolNode(u'univ'), 
                                   None, None, 
