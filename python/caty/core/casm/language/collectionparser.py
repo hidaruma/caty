@@ -15,16 +15,16 @@ def collection_decl(seq):
     with strict():
         keyword(u'of')(seq)
         coltype = typedef(seq)
-        if option(keyword(u'with'))(seq):
-            mixinclass = class_expression(seq)
-        else:
-            mixinclass = None
         if option(keyword(u'identified'))(seq):
             keypath = CasmJSONPathSelectorParser()(seq)._to_str()
             keytype = option(col_key_type)(seq)
         else:
             keypath = u'$.id'
             keytype = None
+        if option(keyword(u'with'))(seq):
+            mixinclass = class_expression(seq)
+        else:
+            mixinclass = None
         if option(keyword(u'within'))(seq):
             dbname = name_token(seq)
         else:
@@ -38,7 +38,7 @@ def collection_decl(seq):
 @try_
 def col_key_type(seq):
     r = scalar(seq)
-    if r.name == u'within':
-        raise ParseFailed(seq, u'within')
+    if r.name in (u'with', u'within'):
+        raise ParseFailed(seq, r.name)
     return r
 

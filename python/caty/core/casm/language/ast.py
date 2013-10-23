@@ -1117,6 +1117,7 @@ class CollectionDeclNode(object):
                                     ClassBody([], ClassURI([(u'python', ['caty.core.command'])], False)),
                                     ClassReference(u'Collection', [SymbolNode(name)]))
         if mixinclass:
+            mixinclass.accept(self) # パラメータの_を書き換え
             clsexp = ClassIntersectionOperator(clsexp, mixinclass)
         self.catyclass = ClassNode(name, 
                                   clsexp,
@@ -1133,6 +1134,32 @@ class CollectionDeclNode(object):
         self.command1.declare(module)
         self.catyclass.declare(module)
         self.entity(module).declare(module)
+
+    def visit_class_intersection(self, obj):
+        l = obj.left.accept(self)
+        r = obj.right.accept(self)
+        if isinstance(l, ClassBody):
+            return l
+        else:
+            return r
+
+    def visit_class_use(self, obj):
+        return obj.cls
+
+    def visit_class_unuse(self, obj):
+        return obj.cls
+
+    def visit_class_close(self, obj):
+        return obj.cls
+
+    def visit_class_open(self, obj):
+        return obj.cls
+
+    def visit_class_ref(self, obj):
+        for p in obj.type_params:
+            if isinstance(p, SymbolNode):
+                if p.name == u'_':
+                    p.name = self.name
 
 class TypeFunctionNode(TypeFunction, SchemaBase):
     def __init__(self, funcname, typename):
