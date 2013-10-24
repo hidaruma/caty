@@ -34,6 +34,7 @@ __all__ = ['load',
            'split_tag',
            'split_exp_tag',
            'CatyEncoder',
+           'doc_pp',
            'raw_json']
 
 raw_json = json
@@ -377,7 +378,7 @@ class PPEncoder(CatyEncoder):
                 else:
                     yield u'#<foreign %s>' % repr(o)
             else:
-                for e in CatyEncoder._iterencode(self, self.__normalize(o), markers):
+                for e in CatyEncoder._iterencode(self, self._normalize(o), markers):
                     yield e
     else:
         def _iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
@@ -399,30 +400,30 @@ class PPEncoder(CatyEncoder):
                 else:
                     yield u'#<foreign %s>' % repr(o)
             else:
-                for e in CatyEncoder._iterencode(self, self.__normalize(o), _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
+                for e in CatyEncoder._iterencode(self, self._normalize(o), _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
                     yield e
 
-    def __normalize(self, o):
+    def _normalize(self, o):
         if isinstance(o, (tuple, list)):
-            return self.__erase_undef(o)
+            return self._erase_undef(o)
         elif isinstance(o, dict):
-            return self.__reduce_undef(o)
+            return self._reduce_undef(o)
         else:
             return o
 
-    def __erase_undef(self, r):
+    def _erase_undef(self, r):
         from caty import UNDEFINED
         import itertools
         l = itertools.dropwhile(lambda x: x==UNDEFINED, reversed(r))
-        return [(self.__normalize(a) if a is not UNDEFINED else _empty) for a in reversed(list(l))]
+        return [(self._normalize(a) if a is not UNDEFINED else _empty) for a in reversed(list(l))]
 
-    def __reduce_undef(self, o):
+    def _reduce_undef(self, o):
         r = {}
         for k, v in o.items():
             if v is UNDEFINED:
                 pass
             else:
-                r[k] = self.__normalize(v)
+                r[k] = self._normalize(v)
         return r
 
 
@@ -522,19 +523,6 @@ def prettyprint(obj, depth=0, encoding=None):
 pp = prettyprint
 
 class PPEncoderWithDoc(PPEncoder):
-    if _is26:
-        def _iterencode(self, o, markers=None):
-            if hasattr(o, u'docstring'):
-                yield u'/* %s */\n' % (o.docstring)
-            for r in PPEncoder._iterencode(self, o, markers):
-                yield r
-    else:
-        def _iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
-            if hasattr(o, u'docstring'):
-                yield _current_indent_level * ' ' + u'/* %s */\n' % (o.docstring)
-            for r in PPEncoder._iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
-                yield r
-
     def _make_iterencode(self, markers, _default, _encoder, _indent, _floatstr,
             _key_separator, _item_separator, _sort_keys, _skipkeys, _one_shot, iterencode,
             ## HACK: hand-optimized bytecode; turn globals into locals
@@ -690,6 +678,29 @@ class PPEncoderWithDoc(PPEncoder):
                                                            markers,
                                                            _encoder)
         return _iterencode
+
+
+    def _erase_undef(self, o):
+        from caty import UNDEFINED
+        import itertools
+        l = itertools.dropwhile(lambda x: x==UNDEFINED, reversed(o))
+        r = o.__class__()
+        for a in reversed(list(l)):
+            r.append((self._normalize(a) if a is not UNDEFINED else _empty))
+        if hasattr(o, 'docstring'):
+            r.docstring = o.docstring
+        return r
+
+    def _reduce_undef(self, o):
+        r = o.__class__()
+        for k, v in o.items():
+            if v is UNDEFINED:
+                pass
+            else:
+                r[k] = self._normalize(v)
+        if hasattr(o, 'docstring'):
+            r.docstring = o.docstring
+        return r
 
 def doc_pp(obj):
     v = json.dumps(obj, cls=PPEncoderWithDoc, indent=4, ensure_ascii=False)

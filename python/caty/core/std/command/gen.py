@@ -33,12 +33,12 @@ class Sample(Builtin, TypeCalculator):
         if o is _EMPTY:
             return UNDEFINED
         elif isinstance(o, dict):
-            r = {}
+            r = o.__class__()
             for k, v in o.items():
                 r[k] = self._empty_to_undefined(v)
             return r
         elif isinstance(o, list):
-            r = []
+            r = o.__class__()
             for a in o:
                 r.append(self._empty_to_undefined(a))
             return r
@@ -470,7 +470,7 @@ class DataGenerator(TreeCursor):
             r.append(self.__imply_array_item(s, num))
             num += 1
 
-        if self.__additional != 0 and len(r) < max_i:
+        if self.__additional and len(r) < max_i:
             for i in range(self.__additional):
                 r.append(item_with_doc(self.__imply_array_item(node.schema_list[-1], num)))
                 num += 1
@@ -482,7 +482,7 @@ class DataGenerator(TreeCursor):
                     for i in range(l - len(r)):
                         r.append(item_with_doc(self.__imply_array_item(node.schema_list[-1], num)))
                         num += 1
-                        if num >= self.__additional:
+                        if self.__additional and num >= self.__additional:
                             break
             elif self.__occur == 'min' or self.__additional == 0:
                 pass
@@ -751,6 +751,8 @@ class ObjectDumper(TreeCursor):
         return u'$kind$'
 
 def item_with_doc(obj):
+    if obj is None:
+        return obj
     class DocItem(obj.__class__):
         pass
     r = DocItem(obj)
