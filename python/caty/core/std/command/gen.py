@@ -757,9 +757,18 @@ class ObjectDumper(TreeCursor):
 def item_with_doc(obj):
     if obj is None:
         return obj
+    if obj is UNDEFINED:
+        return obj
+    if isinstance(obj, ForeignObject):
+        return obj
     class DocItem(obj.__class__):
         def __repr__(self):
             return 'doc:' + obj.__class__.__repr__(self)
-    r = DocItem(obj)
+    if isinstance(obj, json.TaggedValue):
+        r = DocItem(*json.split_tag(obj))
+    elif isinstance(obj, json.TagOnly):
+        r = DocItem(obj.tag)
+    else:
+        r = DocItem(obj)
     r.docstring = u'additional'
     return r
