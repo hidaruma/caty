@@ -18,19 +18,19 @@ from caty.core.script.node import Try, Catch
 
 class PerformerRequestHandler(RequestHandler):
     def _build(self, path, opts, verb, method, transaction):
-        error_logger = ErrorLogHandler(self._app, path, verb, method)
-        args = {}
-        for k, v in opts.items():
-            if k.startswith(u'_') and k.strip('_1234567890') == u'' and len(k) >= 2 and k != '_0':
-                args[int(k.strip('_'))-1] = v
-                opts.pop(k)
-        args = int_dict_to_list(args)
-        opts['0'] = path
-        if verb:
-            cmdnames = [verb]
-        else:
-            cmdnames = [method.upper(), method.lower()]
         try:
+            error_logger = ErrorLogHandler(self._app, path, verb, method)
+            args = {}
+            for k, v in opts.items():
+                if k.startswith(u'_') and k.strip('_1234567890') == u'' and len(k) >= 2 and k != '_0':
+                    args[int(k.strip('_'))-1] = v
+                    opts.pop(k)
+            args = int_dict_to_list(args)
+            opts['0'] = path
+            if verb:
+                cmdnames = [verb]
+            else:
+                cmdnames = [method.upper(), method.lower()]
             containerobj, cmd_name = self._path_to_container(path)
             if containerobj is None:
                 raise IOError(path)
@@ -69,6 +69,8 @@ class PerformerRequestHandler(RequestHandler):
         if cls_or_cmd:
             if not mod.has_class(cls_or_cmd):
                 if mod.has_command_type(cls_or_cmd):
+                    if path.endswith(u'/'):
+                        throw_caty_exception(u'HTTP_403', u'Forbidden: $path', path=path)
                     return mod, cls_or_cmd
                 else:
                     throw_caty_exception(u'HTTP_400', u'Not implemented: $path', path=path)
