@@ -36,11 +36,15 @@ class Sample(Builtin, TypeCalculator):
             r = o.__class__()
             for k, v in o.items():
                 r[k] = self._empty_to_undefined(v)
+            if hasattr(o, 'docstring'):
+                r.docstring = o.docstring
             return r
         elif isinstance(o, list):
             r = o.__class__()
             for a in o:
                 r.append(self._empty_to_undefined(a))
+            if hasattr(o, 'docstring'):
+                r.docstring = o.docstring
             return r
         elif isinstance(o, json.TaggedValue):
             return json.tagged(o.tag, self._empty_to_undefined(json.untagged(o)))
@@ -754,7 +758,8 @@ def item_with_doc(obj):
     if obj is None:
         return obj
     class DocItem(obj.__class__):
-        pass
+        def __repr__(self):
+            return 'doc:' + obj.__class__.__repr__(self)
     r = DocItem(obj)
     r.docstring = u'additional'
     return r

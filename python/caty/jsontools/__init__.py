@@ -688,6 +688,7 @@ class PPEncoderWithDoc(PPEncoder):
         for a in reversed(list(l)):
             r.append((self._normalize(a) if a is not UNDEFINED else _empty))
         if hasattr(o, 'docstring'):
+            print o.docstring
             r.docstring = o.docstring
         return r
 
