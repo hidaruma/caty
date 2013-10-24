@@ -74,7 +74,12 @@ class PerformerRequestHandler(RequestHandler):
                     return mod, cls_or_cmd
                 else:
                     throw_caty_exception(u'HTTP_400', u'Not implemented: $path', path=path)
-            return mod.get_class(cls_or_cmd), None
+            if u'/' in cls_or_cmd:
+                clsn, cmdn = cls_or_cmd.split('/', 1)
+                cls = mod.get_class(clsn)
+                return cls, cmdn
+            else:
+                return mod.get_class(cls_or_cmd), None
         if not cls_or_cmd:
             throw_caty_exception(u'HTTP_400', u'Not implemented: $path', path=path)
         return mod, cls_or_cmd
