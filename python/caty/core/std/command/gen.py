@@ -755,6 +755,7 @@ class ObjectDumper(TreeCursor):
         return u'$kind$'
 
 def item_with_doc(obj):
+    return obj
     if obj is None:
         return obj
     if obj is UNDEFINED:
