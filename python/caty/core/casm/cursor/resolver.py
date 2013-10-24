@@ -91,6 +91,11 @@ class ReferenceResolver(SchemaBuilder):
                 return node
         if node.funcname == u'typeName':
             return ValueSchema(schema.canonical_name)
+        elif node.funcname == u'keyType':
+            if u'__collection' not in schema.annotations:
+                debug(schema, schema.annotations)
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % schema.name)
+            return self.module.get_type((schema.annotations[u'__id-type'].value))
         elif node.funcname == u'recordType':
             if u'__collection' not in schema.annotations:
                 debug(schema, schema.annotations)

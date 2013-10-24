@@ -1156,10 +1156,76 @@ class CollectionDeclNode(object):
         return obj.cls
 
     def visit_class_ref(self, obj):
+        vr = _VariableReplacer(self.name)
         for p in obj.type_params:
-            if isinstance(p, SymbolNode):
-                if p.name == u'_':
-                    p.name = self.name
+            p.accept(vr)
+
+from caty.core.typeinterface import TreeCursor
+class _VariableReplacer(TreeCursor):
+    def __init__(self, name):
+        self.target_name = name
+
+    def _visit_root(self, node):
+        node.body.accept(self)
+
+    def _visit_symbol(self, node):
+        if node.name == u'_':
+            node.name = self.target_name
+
+    def _visit_option(self, node):
+        node.body.accept(self)
+
+    def _visit_scalar(self, node):
+        pass
+
+    def _visit_unary_op(self, node):
+        node.body.accept(self)
+
+    def _visit_object(self, node):
+        for k, v in node.items():
+            v.accept(self)
+        node.wildcard.accept(self)
+
+    def _visit_array(self, node):
+        for c in node:
+            c.accept(self)
+
+    def _visit_bag(self, node):
+        r = []
+        for c in node:
+            c.accept(self)
+
+    def _visit_intersection(self, node):
+        node.left.accept(self)
+        node.right.accept(self)
+
+    def _visit_union(self, node):
+        node.left.accept(self)
+        node.right.accept(self)
+
+    def _visit_updator(self, node):
+        node.left.accept(self)
+        node.right.accept(self)
+
+    def _visit_tag(self, node):
+        t = node.tag
+        node.body.accept(self)
+        if isinstance(t, unicode):
+            pass
+        elif isinstance(t, (SchemaBase, Node)):
+            t.accept(self)
+
+    def _visit_pseudo_tag(self, node):
+        node.body.accept(self)
+
+    def _visit_kind(self, node):
+        pass
+
+    def _visit_exponent(self, node):
+        pass
+
+    def _visit_type_function(self, node):
+        node.typename.accept(self)
 
 class TypeFunctionNode(TypeFunction, SchemaBase):
     def __init__(self, funcname, typename):

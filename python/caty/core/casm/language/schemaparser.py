@@ -490,7 +490,7 @@ def exponent(seq):
         return ExponentNode(intype, outtype, args, opts)
 
 def type_function(seq):
-    t = choice(keyword(u'typeName'), keyword(u'recordType'))(seq)
+    t = choice(keyword(u'typeName'), keyword(u'recordType'), keyword(u'keyType'))(seq)
     S(u'<')(seq)
     n = seq.parse(typename)
     S(u'>')(seq)
