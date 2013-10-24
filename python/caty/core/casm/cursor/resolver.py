@@ -92,10 +92,13 @@ class ReferenceResolver(SchemaBuilder):
         if node.funcname == u'typeName':
             return ValueSchema(schema.canonical_name)
         elif node.funcname == u'keyType':
+            from caty.core.casm.language.schemaparser import CasmJSONPathSelectorParser
             if u'__collection' not in schema.annotations:
                 debug(schema, schema.annotations)
                 throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % schema.name)
-            return self.module.get_type((schema.annotations[u'__id-type'].value))
+            path = CasmJSONPathSelectorParser().run(schema.annotations['__identified'].value)
+            print schema
+            return path.select(dereference(schema)).next()
         elif node.funcname == u'recordType':
             if u'__collection' not in schema.annotations:
                 debug(schema, schema.annotations)
