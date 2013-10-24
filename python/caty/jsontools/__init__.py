@@ -521,6 +521,183 @@ def prettyprint(obj, depth=0, encoding=None):
 
 pp = prettyprint
 
+class PPEncoderWithDoc(PPEncoder):
+    if _is26:
+        def _iterencode(self, o, markers=None):
+            if hasattr(o, u'docstring'):
+                yield u'/* %s */\n' % (o.docstring)
+            for r in PPEncoder._iterencode(self, o, markers):
+                yield r
+    else:
+        def _iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
+            if hasattr(o, u'docstring'):
+                yield _current_indent_level * ' ' + u'/* %s */\n' % (o.docstring)
+            for r in PPEncoder._iterencode(self, o, _current_indent_level, _iterencode_list, _iterencode_dict, markers, _encoder):
+                yield r
+
+    def _make_iterencode(self, markers, _default, _encoder, _indent, _floatstr,
+            _key_separator, _item_separator, _sort_keys, _skipkeys, _one_shot, iterencode,
+            ## HACK: hand-optimized bytecode; turn globals into locals
+            ValueError=ValueError,
+            basestring=basestring,
+            dict=dict,
+            float=float,
+            id=id,
+            int=int,
+            isinstance=isinstance,
+            list=list,
+            long=long,
+            str=str,
+            tuple=tuple,
+        ):
+
+        def _iterencode_list(lst, _current_indent_level):
+            if not lst:
+                yield '[]'
+                return
+            if markers is not None:
+                markerid = id(lst)
+                if markerid in markers:
+                    raise ValueError("Circular reference detected")
+                markers[markerid] = lst
+            buf = '['
+            if _indent is not None:
+                _current_indent_level += 1
+                newline_indent = '\n' + (' ' * (_indent * _current_indent_level))
+                separator = _item_separator + newline_indent
+                buf += newline_indent
+            else:
+                newline_indent = None
+                separator = _item_separator
+            first = True
+            for value in lst:
+                if first:
+                    first = False
+                else:
+                    buf = separator
+                if hasattr(value, u'docstring'):
+                    yield buf + u'/* %s */' % value.docstring
+                    buf = separator
+                if isinstance(value, unicode):
+                    yield buf + _encoder(value)
+                elif value is None:
+                    yield buf + 'null'
+                elif value is True:
+                    yield buf + 'true'
+                elif value is False:
+                    yield buf + 'false'
+                elif isinstance(value, (int, long)):
+                    yield buf + str(value)
+                elif isinstance(value, float):
+                    yield buf + _floatstr(value)
+                else:
+                    yield buf
+                    if isinstance(value, (list, tuple)):
+                        chunks = _iterencode_list(value, _current_indent_level)
+                    elif isinstance(value, dict):
+                        chunks = _iterencode_dict(value, _current_indent_level)
+                    else:
+                        chunks = _iterencode(value, _current_indent_level)
+                    for chunk in chunks:
+                        yield chunk
+            if newline_indent is not None:
+                _current_indent_level -= 1
+                yield '\n' + (' ' * (_indent * _current_indent_level))
+            yield ']'
+            if markers is not None:
+                del markers[markerid]
+
+        def _iterencode_dict(dct, _current_indent_level):
+            if not dct:
+                yield '{}'
+                return
+            if markers is not None:
+                markerid = id(dct)
+                if markerid in markers:
+                    raise ValueError("Circular reference detected")
+                markers[markerid] = dct
+            yield '{'
+            if _indent is not None:
+                _current_indent_level += 1
+                newline_indent = '\n' + (' ' * (_indent * _current_indent_level))
+                item_separator = _item_separator + newline_indent
+                yield newline_indent
+            else:
+                newline_indent = None
+                item_separator = _item_separator
+            first = True
+            if _sort_keys:
+                items = sorted(dct.items(), key=lambda kv: kv[0])
+            else:
+                items = dct.iteritems()
+            for key, value in items:
+                if isinstance(key, basestring):
+                    pass
+                # JavaScript is weakly typed for these, so it makes sense to
+                # also allow them.  Many encoders seem to do something like this.
+                elif isinstance(key, float):
+                    key = _floatstr(key)
+                elif key is True:
+                    key = 'true'
+                elif key is False:
+                    key = 'false'
+                elif key is None:
+                    key = 'null'
+                elif isinstance(key, (int, long)):
+                    key = str(key)
+                elif _skipkeys:
+                    continue
+                else:
+                    raise TypeError("key " + repr(key) + " is not a string")
+                if first:
+                    first = False
+                else:
+                    yield item_separator
+                yield _encoder(key)
+                yield _key_separator
+                if isinstance(value, unicode):
+                    yield _encoder(value)
+                elif value is None:
+                    yield 'null'
+                elif value is True:
+                    yield 'true'
+                elif value is False:
+                    yield 'false'
+                elif isinstance(value, (int, long)):
+                    yield str(value)
+                elif isinstance(value, float):
+                    yield _floatstr(value)
+                else:
+                    if isinstance(value, (list, tuple)):
+                        chunks = _iterencode_list(value, _current_indent_level)
+                    elif isinstance(value, dict):
+                        chunks = _iterencode_dict(value, _current_indent_level)
+                    else:
+                        chunks = _iterencode(value, _current_indent_level)
+                    for chunk in chunks:
+                        yield chunk
+            if newline_indent is not None:
+                _current_indent_level -= 1
+                yield '\n' + (' ' * (_indent * _current_indent_level))
+            yield '}'
+            if markers is not None:
+                del markers[markerid]
+            
+        _iterencode = lambda o, _current_indent_level: iterencode(o, 
+                                                           _current_indent_level, 
+                                                           _iterencode_list, 
+                                                           _iterencode_dict,
+                                                           markers,
+                                                           _encoder)
+        return _iterencode
+
+def doc_pp(obj):
+    v = json.dumps(obj, cls=PPEncoderWithDoc, indent=4, ensure_ascii=False)
+    if isinstance(v, unicode):
+        return v
+    else:
+        return unicode(str(v))
+
 import types
 import caty
 import caty.core.spectypes

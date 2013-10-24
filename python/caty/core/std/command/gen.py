@@ -466,18 +466,24 @@ class DataGenerator(TreeCursor):
         l = random.randint(min_i, max_i)
         num = 0
         for s in node.schema_list:
-            if num >= l: break
+            if num >= mandatory: break
             r.append(self.__imply_array_item(s, num))
             num += 1
 
-        if node.repeat and len(r) < l:
-            if self.__occur == 'var':
+        if self.__additional != 0 and len(r) < max_i:
+            for i in range(self.__additional):
+                r.append(item_with_doc(self.__imply_array_item(node.schema_list[-1], num)))
+                num += 1
+        elif node.repeat and len(r) < l:
+            if self.__occur == 'var' and self.__additional != 0:
                 if l < len(r):
                     r.pop(-1)
                 else:
                     for i in range(l - len(r)):
-                        r.append(self.__imply_array_item(node.schema_list[-1], num))
+                        r.append(item_with_doc(self.__imply_array_item(node.schema_list[-1], num)))
                         num += 1
+                        if num >= self.__additional:
+                            break
             elif self.__occur == 'min' or self.__additional == 0:
                 pass
         if node.repeat and (len(r) >= len(node.schema_list)) and self.__occur == 'min':
@@ -744,5 +750,9 @@ class ObjectDumper(TreeCursor):
     def _visit_kind(self, node):
         return u'$kind$'
 
-
-
+def item_with_doc(obj):
+    class DocItem(obj.__class__):
+        pass
+    r = DocItem(obj)
+    r.docstring = u'additional'
+    return r

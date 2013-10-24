@@ -4,7 +4,7 @@ from caty.core.system import System, StdStream, StreamWrapper
 from caty.core.script.builder import CommandCombinator
 from caty.core.script.parser import NothingTodo
 from caty.core.facility import FakeFacility
-from caty.jsontools import pp
+from caty.jsontools import pp, doc_pp
 from caty.core.schema import VoidSchema, ArraySchema
 from caty.core.exception import CatyException, SystemResourceNotFound
 from caty.mafs.authorization import AuthoriToken
@@ -409,7 +409,7 @@ Ugly URIサーバーの起動・停止を行う
             if c:
                 r = c(None)
                 if self.not_void_out(c):
-                    o = pp(r)
+                    o = doc_pp(r)
                     self._echo(o)
                 self.set_prompt()
                 self.interpreter = None
@@ -438,7 +438,7 @@ Ugly URIサーバーの起動・停止を行う
         if isinstance(obj, unicode):
             o = '"%s"' % obj
         elif isinstance(obj, dict):
-            o = pp(obj)
+            o = doc_pp(obj)
         elif isinstance(obj, list):
             o = '[%s]' % ', '.join([self.format(v) for v in obj])
         else:
