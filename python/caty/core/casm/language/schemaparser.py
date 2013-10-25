@@ -10,7 +10,7 @@ from caty.jsontools.selector.parser import JSONPathSelectorParser
 from caty.core.typeinterface import flatten_union_node
 import caty.jsontools.xjson as xjson
 
-RESERVED = frozenset(schemata.keys() + ['type', 'typeName', 'recordType', 'within', 'with', '_', '__'])
+RESERVED = frozenset(schemata.keys() + ['type', 'typeName', 'recordType', 'under', 'with', '_', '__'])
 
 def schema(seq):
     doc = option(docstring)(seq)

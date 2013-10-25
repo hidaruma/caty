@@ -25,7 +25,7 @@ def collection_decl(seq):
             mixinclass = class_expression(seq)
         else:
             mixinclass = None
-        if option(keyword(u'within'))(seq):
+        if option(keyword(u'under'))(seq):
             dbname = name_token(seq)
         else:
             dbname = u'default-database'
@@ -38,7 +38,7 @@ def collection_decl(seq):
 @try_
 def col_key_type(seq):
     r = scalar(seq)
-    if r.name in (u'with', u'within'):
+    if r.name in (u'with', u'under'):
         raise ParseFailed(seq, r.name)
     return r
 
