@@ -162,6 +162,8 @@ class Draw(Builtin):
             a.pop('label', None) #何故か\Nがラベルに設定されている
             a.update(n.attr)
             sg.add_node(n.name, **a)
+        self._add_cluster_nodes(sg, cluster)
+        self._add_cluster_edges(sg, cluster)
 
     def _add_cluster_edges(self, G, src):
         for e in flatten(src['elements']):
