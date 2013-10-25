@@ -5,7 +5,7 @@ facility default-storage (string database-name)
    conforms Collection;
    //refers python:storage.DefaultStorage;
 
-master default-database = default-storage("default-database");
+database default-database = default-storage("default-database");
 entity default-collection = default-database("default-collection");
 
 /** デフォルトのレコード型 

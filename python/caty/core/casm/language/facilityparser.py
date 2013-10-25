@@ -78,8 +78,8 @@ def index_list(seq):
 def _entity(seq):
     doc = option(docstring)(seq)
     a = seq.parse(annotation)
-    tp = choice(keyword(u'master'), keyword(u'entity'))(seq)
-    if tp == u'master':
+    tp = choice(keyword(u'master'), keyword(u'entity'), keyword(u'database'))(seq)
+    if tp in (u'master', u'database'):
         a.add(Annotation(u'__master'))
     n = seq.parse(name_token)
     if option(nohook(S(u';')))(seq):
