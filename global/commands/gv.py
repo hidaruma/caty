@@ -206,6 +206,7 @@ class Draw(Builtin):
             self._id_set.add(id)
             return id
         else:
+            print u'[Warning] Duplicated ID', id
             id += u'_2'
             return self._make_id(id)
 
