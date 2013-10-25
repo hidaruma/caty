@@ -7,6 +7,8 @@ def kind(seq):
     annotations = seq.parse(annotation)
     seq.parse(keyword('kind'))
     name_of_kind = seq.parse(name_token)
+    if name_of_kind in RESERVED:
+        raise ParseFailed(seq, kind, '%s is reserved.' % name_of_kind)
     seq.parse('=')
     seq.parse(expr)
     nohook(S(u';'))(seq)

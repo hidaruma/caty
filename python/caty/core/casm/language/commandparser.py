@@ -9,6 +9,7 @@ RESERVED = frozenset([
 'number', 'integer', 'string', 'boolean', 'array', 'object',
 'null', 'true', 'false',
 'command',
+'_', '__',
 ])
 
 
