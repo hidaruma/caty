@@ -27,6 +27,7 @@ class Draw(Builtin):
         self._if_modified = opts['if-modified']
         self._engine = opts['engine']
         self._cluster_num = 0
+        self._id_set = set()
 
     def execute(self, graph):
         if (self._time_file or self._time_file) and self._out_file and self._if_modified:
@@ -79,6 +80,7 @@ class Draw(Builtin):
         type, graph = json.split_tag(graph)
         if cluster:
             if graph['id']:
+                graph['id'] = self._make_id(graph['id'])
                 name = u'cluster_' + graph['id']
             else:
                 i = unicode(str(self._cluster_num))
@@ -86,6 +88,7 @@ class Draw(Builtin):
                 graph['id'] = i
                 self._cluster_num += 1
         else:
+            graph['id'] = self._make_id(graph['id'])
             name = graph['id']
     
         buff = []
@@ -117,10 +120,10 @@ class Draw(Builtin):
 
     def _add_node(self, graph, node):
         if isinstance(node, basestring):
-            graph.add_node(node)
+            graph.add_node(self._make_id(node))
         else:
             i = node.pop('id')
-            graph.add_node(i, **node)
+            graph.add_node(self._make_id(i), **node)
 
     def _add_edges(self, G, src, parent=None):
         for e in flatten(src['elements']):
@@ -197,4 +200,13 @@ class Draw(Builtin):
         for c in doc.childNodes:
             if c.nodeType == dom.Element.ELEMENT_NODE:
                 return c.toxml().replace('<?xml version="1.0" encoding="utf-8"?>', '')
+
+    def _make_id(self, id):
+        if id not in self._id_set:
+            self._id_set.add(id)
+            return id
+        else:
+            id += u'_2'
+            return self._make_id(id)
+
 
