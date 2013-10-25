@@ -179,6 +179,8 @@ class ResourceModule(Module):
         for k, v in self._resources.items():
             for a in v.actions:
                 try:
+                    if a.instance:
+                        a.instance.set_module(self)
                     for p in a.profiles:
                         self._compile_type(a.name, p._input_type)
                         self._compile_type(a.name, p._output_type, False)

@@ -97,7 +97,6 @@ class ReferenceResolver(SchemaBuilder):
                 debug(schema, schema.annotations)
                 throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Not a collection type: %s' % schema.name)
             path = CasmJSONPathSelectorParser().run(schema.annotations['__identified'].value)
-            print schema
             return path.select(dereference(schema)).next()
         elif node.funcname == u'recordType':
             if u'__collection' not in schema.annotations:

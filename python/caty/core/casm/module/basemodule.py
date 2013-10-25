@@ -135,6 +135,7 @@ class Module(Facility):
 
         self.type_params = []
         self.__related = Module.Relation()
+        self.__hierarchy = None
 
     @property
     def type(self):
@@ -159,6 +160,15 @@ class Module(Facility):
     @property
     def related(self):
         return self.__related
+
+    @property
+    def hierarchy(self):
+        if self.__hierarchy is None:
+            self.__hierarchy = set()
+            if self.parent:
+                self.__hierarchy.add(parent.name)
+                self.__hierarchy.update(parent.hierarchy)
+        return self.__hierarchy
 
     def _get_full_name(self):
         return self.canonical_name+'.'+self.type
@@ -1042,6 +1052,6 @@ def is_valid_call(res, mod_name):
         return True
     if mod_name in ('builtin', 'public'):
         return True
-    if res.module.parent and res.module.parent.name == mod_name:
+    if mod_name in res.hierarchy:
         return True
     return False
