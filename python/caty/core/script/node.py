@@ -294,9 +294,9 @@ class Dispatch(Syntax):
                         refers python:caty.core.script.node.Dispatch;
     """
 
-    def __init__(self):
+    def __init__(self, selector=None):
         self.__cases = {}
-        self.__query = build_query('$')
+        self.__query = selector
         self.__scalar_tag_map = _scalar_tag_map
         Syntax.__init__(self)
     

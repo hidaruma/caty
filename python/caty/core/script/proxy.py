@@ -315,6 +315,27 @@ class DispatchProxy(Proxy):
         for c in self.cases:
             c.accept(visitor)
 
+
+
+class LiteralDispatchProxy(DispatchProxy):
+    reification_type = u'_when'
+    def __init__(self, path, opts):
+        self.cases = []
+        self.opts = opts
+        self.path = path
+
+    def clone(self):
+        new = LiteralDispatchProxy(self.path, self.opts)
+        for c in self.cases:
+            new.add_case(c.clone())
+        return new
+
+    def instantiate(self, builder):
+        d = Dispatch(self.path)
+        for c in self.cases:
+            d.add_case(c.instantiate(builder))
+        return d
+
 class TypeCaseProxy(Proxy):
     reification_type = u'_case'
     def __init__(self, path, via):
@@ -510,7 +531,7 @@ class TagProxy(Proxy):
             return ExtendedTagBuilder(self.tag.instantiate(builder), self.cmdproxy.instantiate(builder))
 
     def set_module(self, module):
-        if not isinstance(self.tag, unicode):
+        if isinstance(self.tag, Proxy):
             self.tag.set_module(module)
         self.cmdproxy.set_module(module)
 

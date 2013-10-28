@@ -322,11 +322,15 @@ class CommandExecutor(BaseInterpreter):
     def visit_when(self, node):
         node._prepare()
         jsobj = self.input
-        target = node.query.find(jsobj).next()
-        if not isinstance(target, (TagOnly, TaggedValue)) and not (isinstance(target, dict) and '$$tag' in target):
-            return self.__not_tagged_value_case(node, target)
+        if node.query:
+            target = node.query.select(jsobj).next()
+            return self.__scalar_match(node, target, jsobj)
         else:
-            return self.__tagged_value_case(node, target)
+            target = jsobj
+            if not isinstance(target, (TagOnly, TaggedValue)) and not (isinstance(target, dict) and '$$tag' in target):
+                return self.__not_tagged_value_case(node, target)
+            else:
+                return self.__tagged_value_case(node, target)
 
     def __tagged_value_case(self, node, target):
         tag = target.tag if isinstance(target, (TagOnly, TaggedValue)) else target['$$tag']
@@ -340,7 +344,7 @@ class CommandExecutor(BaseInterpreter):
                     throw_caty_exception('TagNotMatched', '$type', type=tag)
             else:
                 throw_caty_exception('TagNotMatched', '$type', type=tag)
-        return self.__exec_cmd(node, tag, target)
+        return self.__exec_cmd(node, tag)
 
     def __not_tagged_value_case(self, node, target):
         t = tag(target)
@@ -357,6 +361,12 @@ class CommandExecutor(BaseInterpreter):
             throw_caty_exception('TagNotMatched', '$type', type=t)
         return self.__exec_cmd(node, t, target)
     
+    def __scalar_match(self, node, target, input):
+        if target in node.cases:
+            return self.__exec_cmd(node, target, input)
+        else:
+            throw_caty_exception('ValueNotMatched', '$path: $type', path=node.query.to_str(), type=target)
+
     def __exec_cmd(self, node, tag, jsobj):
         childcmd = node.cases[tag].cmd
         if isinstance(node.cases[tag], UntagCase):

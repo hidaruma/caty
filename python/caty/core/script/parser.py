@@ -12,6 +12,7 @@ from caty.core.script.proxy import ParallelObjectProxy as ParallelObjectBuilder
 from caty.core.script.proxy import ConstNodeProxy as ConstNode
 from caty.core.script.proxy import CommandNodeProxy as CommandNode
 from caty.core.script.proxy import DispatchProxy as Dispatch
+from caty.core.script.proxy import LiteralDispatchProxy as LiteralDispatch
 from caty.core.script.proxy import TagProxy as TagBuilder
 from caty.core.script.proxy import ParTagProxy as ParTagBuilder
 from caty.core.script.proxy import UnaryTagProxy as UnaryTagBuilder
@@ -846,11 +847,18 @@ class ScriptParser(Parser):
     def cond(self, seq):
         seq.parse('when')
         opts = self.options(seq)
+        path = try_(option(JSONPathSelectorParser(False, True)))(seq)
+        if path:
+            d = LiteralDispatch(path, opts)
+        else:
+            d = Dispatch(opts)
         seq.parse('{')
         name_set = set()
-        cases = seq.parse(split(lambda s:self.case(s, name_set), self.comma, allow_last_delim=True))
+        if path:
+            cases = seq.parse(split(lambda s:self.literal_case(s, name_set), self.comma, allow_last_delim=True))
+        else:
+            cases = seq.parse(split(lambda s:self.case(s, name_set), self.comma, allow_last_delim=True))
         seq.parse('}')
-        d = Dispatch(opts)
         for c in anything(cases):
             d.add_case(c)
         return d
@@ -859,6 +867,25 @@ class ScriptParser(Parser):
         t = seq.parse(self.tag_name)
         if t in name_set:
             raise ParseFailed(seq, self.case, t)
+        name_set.add(t)
+        tp = seq.parse(['==>', '=>'])
+        try:
+            v = self.make_pipeline(seq)
+        except NothingTodo:
+            raise ParseFailed(seq, self.case)
+        return Case(t, v) if tp == '==>' else UntagCase(t, v)
+
+    def literal_case(self, seq, name_set):
+        t = seq.parse([xjson.string, 
+                      xjson.binary,
+                      xjson.multiline_string,
+                      bind2nd(xjson.null, True), 
+                      bind2nd(xjson.number, True), 
+                      bind2nd(xjson.integer, True), 
+                      bind2nd(xjson.boolean, True),
+                      ])
+        if t in name_set:
+            raise ParseFailed(seq, self.literal_case, t)
         name_set.add(t)
         tp = seq.parse(['==>', '=>'])
         try:
