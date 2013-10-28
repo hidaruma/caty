@@ -78,13 +78,13 @@ class Expand(Builtin, MafsMixin):
         _f = self.fs.open(path)
         if not _f.exists:
             raise CatyException(
-                'HTTP_404', 
+                u'HTTP_404', 
                 u'File does not exists: $path',
                 path=path
                 )
         if _f.is_dir:
             raise CatyException(
-                'HTTP_400',
+                u'HTTP_400',
                 u'Failed to read file: $path',
                 path=path
             )

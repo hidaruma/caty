@@ -283,7 +283,7 @@ class Forbidden(Builtin):
 
     def execute(self):
         raise CatyException(
-            'HTTP_403',
+            u'HTTP_403',
             u'Can not access to $path',
             path=self._path
         )
@@ -295,7 +295,7 @@ class NotFound(Builtin):
 
     def execute(self):
         raise CatyException(
-            'HTTP_404', 
+            u'HTTP_404', 
             u'File does not exists: $path',
             path=self._path
             )
@@ -309,7 +309,7 @@ class BadRequest(Builtin):
 
     def execute(self):
         raise CatyException(
-            'HTTP_400', 
+            u'HTTP_400', 
             u'Bad Access: path=$path, method=$method',
             path=self._path,
             method=self._method
@@ -322,7 +322,7 @@ class NotAllowed(Builtin):
 
     def execute(self):
         raise CatyException(
-            'HTTP_405', 
+            u'HTTP_405', 
             u'HTTP method `$mthod` is not allowed for `$path`',
             path=self._path
             )
