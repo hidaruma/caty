@@ -416,7 +416,7 @@ type RVarStore = @_store {"name": string};
 type RVarRef = @_varref {"name": string, "optional": boolean};
 type RArgRef = @_argref {"name": string, "optional": boolean};
 
-type ReifiedConst = @const (TypeAttribute ++ {"name": string, "constBody": string|binary|number|integer|null|boolean|array|object|undefined|@*! (any|undefined)});
+type ReifiedConst = @const (TypeAttribute ++ {"name": string, "constBody": string|binary|number|integer|null|boolean|array|object|undefined|@(explicitTag) (any|undefined)});
 type ReifiedClass = @_class NSAttribute;
 type ReifiedResource = @_res {
     "name": string,

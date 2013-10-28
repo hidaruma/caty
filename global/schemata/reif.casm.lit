@@ -232,7 +232,7 @@ type namespaceSort = (
 
 
 /** 値の型がTの名前空間 */
-type NamespaceOf<T> = @* {
+type NamespaceOf<T> = @(anyTag) {
 
   */* 名前 */: T?,
 };

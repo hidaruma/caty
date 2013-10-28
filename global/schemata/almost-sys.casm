@@ -82,7 +82,7 @@ type Anchor = @__a {
  "type" : common:mediaType?,
  "title": string?,
  "class" : string?,
- "text": @* string?,
+ "text": @(anyTag) string?,
 };
 
 
@@ -148,7 +148,7 @@ type Caller
    /** 引数配列の型 */
    Args in OptionalScalarArrayType default OptionalScalarArray,
 >
-= @* {
+= @(anyTag) {
 
 /* 
  * 実行すべき手続きの指定 

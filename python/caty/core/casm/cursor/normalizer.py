@@ -3,6 +3,7 @@ from caty.core.casm.cursor.base import *
 from caty.core.casm.cursor.dump import TreeDumper
 from caty.core.exception import throw_caty_exception
 from caty.core.schema import schemata
+import operator
 _builtin_types = schemata.keys()
 
 class TypeNormalizer(TreeCursor):
@@ -222,34 +223,31 @@ class TypeCalcurator(_SubNormalizer):
             elif length == 1:
                 res = comb[0]
             else:
-                import operator
                 res = reduce(operator.or_, comb)
         elif lt == '__union__':
-            l = self._dereference(l)
+            ls = flatten_union_node(self._dereference(l))
             r = self._dereference(r)
-            xl = self.__intersect(l.left, r)
-            xr = self.__intersect(l.right, r)
-            comb = filter(lambda x: x.type != 'never', [xl, xr])
+            xs = map(lambda a: self.__intersect(a, r), ls)
+            comb = filter(lambda x: x.type != 'never', xs)
             length = len(comb)
             if length == 0:
                 res = NeverSchema()
             elif length == 1:
                 res = comb[0]
             else:
-                res = comb[0] | comb[1]
+                res = reduce(operator.or_, comb)
         elif rt == '__union__':
             l = self._dereference(l)
-            r = self._dereference(r)
-            xl = self.__intersect(l, r.left)
-            xr = self.__intersect(l, r.right)
-            comb = filter(lambda x: x.type != 'never', [xl, xr])
+            rs = flatten_union_node(self._dereference(r))
+            xs = map(lambda a: self.__intersect(l, a), rs)
+            comb = filter(lambda x: x.type != 'never', xs)
             length = len(comb)
             if length == 0:
                 res = NeverSchema()
             elif length == 1:
                 res = comb[0]
             else:
-                res = comb[0] | comb[1]
+                res = reduce(operator.or_, comb)
         elif lt.startswith('@'): # タグ型の場合はタグ名一致時は中身を計算
             l = self._dereference(l, False)
             r = self._dereference(r, False)
@@ -259,15 +257,21 @@ class TypeCalcurator(_SubNormalizer):
                     res.set_tag_constraint(l.tag)
                 else:
                     if r.is_extra_tag:
-                        t = (l.tag & r.tag).accept(self)
+                        t = (self._dereference(l.tag) & self._dereference(r.tag)).accept(self)
                     else:
                         if rt.startswith('@'):
                             rt = rt[1:]
-                        t = rt if rt not in l.tag.excludes else None
+                        try:
+                            l.tag.validate(rt)
+                            t = rt 
+                        except:
+                            t = None
                     if t is None or isinstance(t, NeverSchema):
                         res = NeverSchema()
                     else:
                         n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
+                        if n.type == u'never':
+                            return n
                         if t in _builtin_types:
                             res = n
                         else:
@@ -277,21 +281,17 @@ class TypeCalcurator(_SubNormalizer):
                     if r.is_extra_tag:
                         if lt.startswith('@'):
                             lt = lt[1:]
-                        t = lt if lt not in r.tag.excludes else None
+
+                        try:
+                            r.tag.validate(lt)
+                            t = lt 
+                        except:
+                            t = None
                         if t is None or isinstance(t, NeverSchema):
                             res = NeverSchema()
                         else:
                             n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
                             res = TagSchema(t, n)
-
-                    elif lt == '@*!' or lt == '@*': 
-                        # ワイルドカードタグ & 通常タグ
-                        n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
-                        res = TagSchema(r.tag, n)
-                    elif  rt == '@*!' or rt == '@*':
-                        # 通常タグ & ワイルドカードタグ 
-                        n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
-                        res = TagSchema(l.tag, n)
                     else:
                         res = NeverSchema()
                 else:
@@ -299,17 +299,12 @@ class TypeCalcurator(_SubNormalizer):
                     n = (self._dereference(l, True) & self._dereference(r, True)).accept(self)
                     res = TagSchema(r.tag, n.accept(self))
             else:
-                if lt == '@*': 
-                    # ワイルドカードタグ
-                    n = (self._dereference(l, True) & r).accept(self)
-                    res = n
+                if lt == 'integer': lt = 'number'
+                if rt == 'integer': rt = 'number'
+                if '@' + rt == lt:
+                    res = (self._dereference(l, True) & r).accept(self)
                 else:
-                    if lt == 'integer': lt = 'number'
-                    if rt == 'integer': rt = 'number'
-                    if '@' + rt == lt:
-                        res = (self._dereference(l, True) & r).accept(self)
-                    else:
-                        res = NeverSchema()
+                    res = NeverSchema()
         elif rt.startswith('@'):
             l = self._dereference(l, False)
             r = self._dereference(r, False)
@@ -323,7 +318,7 @@ class TypeCalcurator(_SubNormalizer):
                     else:
                         if lt.startswith('@'):
                             lt = lt[1:]
-                        t = lt if lt not in r.tag.excludes else None
+                        t = lt if lt not in self._dereference(r.tag).excludes else None
                     if t is None or isinstance(t, NeverSchema):
                         res = NeverSchema()
                     else:
@@ -332,9 +327,6 @@ class TypeCalcurator(_SubNormalizer):
                             res = n
                         else:
                             res = TagSchema(t, n)
-            elif rt == u'@*':
-                n = (l & self._dereference(r, True)).accept(self)
-                res = n
             else:
                 if lt == 'integer': lt = 'number'
                 if rt == 'integer': rt = 'number'
@@ -394,6 +386,17 @@ class TypeCalcurator(_SubNormalizer):
             if lt != rt:
                 if not (lt in ('number', 'integer') and rt in ('number', 'integer')):
                     if '*' not in lt and '*' not in rt and not lt.startswith('__') and not rt.startswith('__'):
+                        return NeverSchema()
+                if l.is_extra_tag:
+                    if not r.is_extra_tag:
+                        try:
+                            l.tag.validate(rt[1:])
+                        except:
+                            return NeverSchema()
+                elif r.is_extra_tag:
+                    try:
+                        r.tag.validate(lt[1:])
+                    except:
                         return NeverSchema()
             return (l & r).accept(self)
 
@@ -604,7 +607,9 @@ class NeverChecker(_SubNormalizer):
                     if u[0].type == '__variable__' or u[1].type == '__variable__' or u[0].type == u'__intersection__' or u[1].type == u'__intersection__':
                         pass # 型変数が残っている場合は実体化されるまでわからんので
                     else:
-                        throw_caty_exception(u'SCHEMA_COMPILE_ERROR', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
+                        print TreeDumper().visit(u[0])
+                        print TreeDumper().visit(u[1])
+                        throw_caty_exception(u'SCHE0MA_COMPILE_ERROR', ro.i18n.get(u'types are not exclusive: $type', type=TreeDumper().visit(node)))
             a = u[0].accept(self)
             b = u[1].accept(self)
             if a and b:

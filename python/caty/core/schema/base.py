@@ -874,7 +874,8 @@ class IndefSchema(SchemaBase, Symbol):
 
     def intersect(self, another):
         if type(another) != IndefSchema:
-            raise JsonSchemaError(dict(msg='Unsupported operand types for $op: $type1, $type2', op='&', type1='null', type2=another.type))
+            return NeverSchema()
+            #raise JsonSchemaError(dict(msg='Unsupported operand types for $op: $type1, $type2', op='&', type1='null', type2=another.type))
         return IndefSchema()
 
     def _convert(self, value):

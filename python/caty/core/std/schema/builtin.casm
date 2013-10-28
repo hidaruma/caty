@@ -21,8 +21,8 @@ type StdArray = [StandardJson*](tight=true);
 /** 
  * foreign, undefinedを含まない標準JSONに変換可能なXJSONデータ。
  */
-type StandardXJson = JsonScalar | XArray | XObject | TaggedData | @*! undefined;
-type TaggedData = @*! JsonScalar | @*! XObject | @*! XArray | @*! TaggedData;
+type StandardXJson = JsonScalar | XArray | XObject | TaggedData | @(explicitTag) undefined;
+type TaggedData = @(explicitTag) JsonScalar | @(explicitTag) XObject | @(explicitTag) XArray | @(explicitTag) TaggedData;
 type XArray = [StandardXJson*];
 type XObject = {*:StandardXJson?};
 
@@ -178,6 +178,26 @@ type FacilityBackendInfo =  {
   *: any?
 
 };
+
+/** 暗黙的タグ名の型 */
+@[system, register-public]
+type implicitTag =(
+    "null" | "boolean" | "number" | "string" | "binary" | "indef" | "array" | "object" |
+    "undefined" | "foreign"
+);
+
+/** 明示的タグ名の型 */
+@[system, register-public]
+type explicitTag = string(
+  excludes=[
+    "null", "boolean", "number", "string", "binary", "array", "object", "indef",
+    "undefined", "foreign"
+  ]
+);
+
+/** 任意のタグ名の型 */
+@[system, register-public]
+type anyTag = string;
 
 /**
  * Catyのアプリケーション毎の設定ファイル。
@@ -597,7 +617,7 @@ type Message = {
 
 /** 例外型 Exceptionとダブっているため使用禁止 */
 @[deprecated]
-type CatyException = @* {
+type CatyException = @(anyTag) {
  "message" : Message, 
 
  // 以下の2つのプロパティは、必要なら分類に使用する
@@ -705,7 +725,7 @@ type Form = Trigger & {
 };
 
 @[system]
-type Exception = @*! {
+type Exception = @(explicitTag) {
  "message" : string, 
 
  // 以下の2つのプロパティは、必要なら分類に使用する
@@ -1315,7 +1335,7 @@ command nth<T default univ>
    "safe": boolean?,
  }
  [integer(minimum=1) n]
- :: (@* [T*] | undefined) -> T?
+ :: (@(anyTag) [T*] | undefined) -> T?
     refers python:builtin.Nth;
 
 /**
@@ -1332,7 +1352,7 @@ command item<T default any>
    "safe": boolean?,
  }
  [integer i] 
- :: (@* [T*] | undefined) -> T?
+ :: (@(anyTag) [T*] | undefined) -> T?
     refers python:builtin.Item;
 
 /**
@@ -1349,7 +1369,7 @@ command pv<T default univ>
    "safe": boolean?,
  }
  [string propName] 
-:: (@* object | undefined) -> T?
+:: (@(anyTag) object | undefined) -> T?
    refers python:builtin.GetPV;
 
 /**
@@ -1642,7 +1662,7 @@ command trace-dispatch
     refers python:builtin.TraceDispatch;
 
 @[unquiet]
-type HelpInfo = deferred @* object;
+type HelpInfo = deferred @(anyTag) object;
 
 /**
 * モジュール/コマンド/型のヘルプを表示する。
@@ -1795,7 +1815,7 @@ command never :: void -> never throws Never
 command fill<T default univ> :: T -> T
     refers python:builtin.Fill;
 
-command keys :: array | object | @*! (array|object) -> [(string|integer)*] {
+command keys :: array | object | @(explicitTag) (array|object) -> [(string|integer)*] {
     content | xjson:normalize | each {
         when {
             undefined => undefined,
@@ -1808,7 +1828,7 @@ command keys :: array | object | @*! (array|object) -> [(string|integer)*] {
  * 複合データとは、配列またはオブジェクトにタグを許したデータである。
  * そのサイズは、有効な（undefinedでない）項目数またはプロパティ数である。
  */
-command size :: (@* object | @* array) -> integer {
+command size :: (@(anyTag) object | @(anyTag) array) -> integer {
  content | keys | list:length
 };
 
@@ -1850,7 +1870,7 @@ command reject-non-json
 command error-to-string :: Exception -> string
     refers python:builtin.ErrorToString;
 
-type DataAddr = @* {
+type DataAddr = @(anyTag) {
  "type": string(remark="型の完全修飾名"),
  "arg": (null|number|string|boolean),
  "ext": string(remark="XJSONパス")?,

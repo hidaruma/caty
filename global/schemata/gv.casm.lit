@@ -608,7 +608,7 @@ command data-to-graph [string? path] :: any? -> (gv:Node | gv:ElementList) {
      ]
      ,
    // 明示的タグ付き
-   @*! any? =>
+   @(explicitTag) any? =>
      [tag > tag, untagged > con];
 
      [

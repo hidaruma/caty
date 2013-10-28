@@ -19,7 +19,7 @@ command fullpath
     refers python:mos.FullPath;
 
 /** メタオブジェクトから完全修飾名を取り出す。 */
-command get-canonical-name :: @* {"name": string, "location": {*:string}, *:any?} -> string {
+command get-canonical-name :: @(anyTag) {"name": string, "location": {*:string}, *:any?} -> string {
     $.content() > src;
     %src|$.location.app? | case {
         undefined => [] > app,

@@ -15,7 +15,7 @@ command rand-index
 
 /** 引数で指定された長さの配列のインデックスを、乱数で生成してタグとして付加する
  */
-command rand-tag [integer(minimum=1) length] :: univ -> @*! univ {
+command rand-tag [integer(minimum=1) length] :: univ -> @(explicitTag) univ {
   [rand-index --string %1, pass] | tagged
 };
 

@@ -6,7 +6,7 @@ module exec;
 /** 実行可能なコマンドクロージャ
  */ 
 @[register-public]
-type Executable = @* {
+type Executable = @(anyTag) {
 
 /* ---- 実行すべきコマンドの指定 ---- */
 

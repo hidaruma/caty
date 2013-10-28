@@ -5,7 +5,7 @@ module xjson in casm;
 
 type AnyObject = {*:any};
 
-type ObjectModifier = @* {
+type ObjectModifier = @(anyTag) {
  @[defaut(false)]
  "clear": boolean?,
 
@@ -117,7 +117,7 @@ command flatten
    @[default(false)]
    "rec": boolean?,
  }
- :: @* (array | object) -> @* array 
+ :: @(anyTag) (array | object) -> @(anyTag) array 
  
     refers python:xjsonlib.Flatten
  ;
@@ -160,7 +160,7 @@ command read-config [string token] :: void -> any
 command is-subobject :: [object expected, object target] -> boolean
     refers python:xjsonlib.IsSubobject;
 
-command apply-update :: [@* object input, ObjectModifier modifier] -> @* object
+command apply-update :: [@(anyTag) object input, ObjectModifier modifier] -> @(anyTag) object
     throws SetUnsetConflict
     refers python:xjsonlib.ApplyUpdate;
 
@@ -168,7 +168,7 @@ command compose-updates :: [ObjectUpdate*] -> ObjectUpdate
     refers python:xjsonlib.ComposeUpdate;
 
 @[register-public]
-command app-u :: [@* object input, ObjectModifier modifier] -> @* object {
+command app-u :: [@(anyTag) object input, ObjectModifier modifier] -> @(anyTag) object {
     apply-update
 };
 @[register-public]

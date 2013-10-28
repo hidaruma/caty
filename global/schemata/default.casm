@@ -39,7 +39,7 @@ command params {* : univ?} [univ* args] :: void -> {"Opts (_OPTS)":object, "Argv
 };
 
 /** 入力にタグを加えて出力とする */
-command add-tag [string tag] :: any -> @* any {
+command add-tag [string tag] :: any -> @(anyTag) any {
   [%1 , pass] | tagged
 };
 
@@ -219,7 +219,7 @@ command caras [string? app] :: void -> [inspect:Module*] {
 };
 
 /** オブジェクトのリストがあるとき、そのオブジェクト達の名前のリストを出力する */
-command names :: [(@* object)*] -> [string*] {
+command names :: [(@(anyTag) object)*] -> [string*] {
  each {$.name}
 };
 

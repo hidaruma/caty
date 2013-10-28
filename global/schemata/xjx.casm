@@ -9,7 +9,7 @@ command parse :: string | [string src, string entity-def]-> Content | Text | Ele
 type Content = [(Text | Element)*];
 type Text = string(minLength = 1);
 type AttributeValue = string; // 将来、変更されるかもしれない、例えば (string | [string*])
-type Element = @* {
+type Element = @(anyTag) {
   "": Content, // 内容
   *: AttributeValue?, // 属性
 };

@@ -85,6 +85,12 @@ def term(seq):
     def _tag(s):
         _ = s.parse('@')
         t = s.parse([tagname, string, u'*!', u'*'])
+        if t == u'*!':
+            print u'[WARNING] @*! is deprecated'
+            t = SymbolNode(u'explicitTag')
+        elif t == u'*':
+            print u'[WARNING] @* is deprecated'
+            t = SymbolNode(u'anyTag')
         v = s.parse(option(try_(term)))
         return TaggedNode(t, v)
 
