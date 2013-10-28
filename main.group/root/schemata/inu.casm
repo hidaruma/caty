@@ -165,7 +165,7 @@ command remote-gen-and-check-one-type
 
 
 
-type NoTypeParams = @* {
+type NoTypeParams = @(anyTag) {
  "typeParams" : [],
  * : any?
 };

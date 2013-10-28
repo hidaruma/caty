@@ -8,11 +8,11 @@
 {{{
 module tagwild; 
 
-type AnyObj = @* {*:any?};
+type AnyObj = @(anyTag) {*:any?};
 
-type AnyArr = @* [any*];
+type AnyArr = @(anyTag) [any*];
 
-type AnyStr = @* string;
+type AnyStr = @(anyTag) string;
 }}}
 
 

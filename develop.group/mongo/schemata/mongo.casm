@@ -13,7 +13,7 @@ type BsonizableUntaggedObject = {
 
 
 /** オブジェクトにタグを許す */
-type BsonizableObject = @* BsonizableUntaggedObject;
+type BsonizableObject = @(anyTag) BsonizableUntaggedObject;
 
 /** 
  * mongodbに格納される形の値に変換する。

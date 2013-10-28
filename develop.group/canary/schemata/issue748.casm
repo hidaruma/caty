@@ -1,6 +1,6 @@
 module issue748 in casm;
 
-type Foo = @* {
+type Foo = @(anyTag) {
    *: any?
 };
 
