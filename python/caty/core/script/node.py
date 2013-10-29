@@ -524,8 +524,8 @@ class Branch(object):
 
 class Each(Syntax):
     command_decl = u"""command __each-functor-applied<S default univ, T default univ> 
-           {"seq":boolean?} :: sequence<S> | object  -> [T*]|object
-           {"iter":boolean} :: sequence<S> -> foreign(remark="iterator")
+           {"seq":boolean?} :: seq<S> | object  -> [T*]|object
+           {"iter":boolean} :: seq<S> -> seq<T>
            {"seq":boolean?, "obj": boolean} :: object -> object
                         refers python:caty.core.script.node.Each;"""
     def __init__(self, cmd, opts_ref):
@@ -714,7 +714,8 @@ class Time(Syntax):
 
 class Take(Syntax):
     command_decl = u"""
-    command __take-functor<T default any> {"indef": boolean?} :: array | object -> [T*]
+    command __take-functor<T default any> {"indef": boolean?} :: seq<T> | object -> [T*]
+                                        {"indef": boolean?, "iter": boolean} :: seq<T> | object -> seq<T>
                                         {"indef": boolean?, "obj": true} :: object -> object
         refers python:caty.core.script.node.Take;
     """
@@ -725,6 +726,7 @@ class Take(Syntax):
     def setup(self, opts, *ignore):
         self.__obj = opts['obj'] if 'obj' in opts else None
         self.__indef = opts['indef'] if 'indef' in opts else None
+        self.__iter = opts['iter'] if 'iter' in opts else None
 
     def _prepare(self):
         Command._prepare(self)
@@ -736,6 +738,10 @@ class Take(Syntax):
     @property
     def indef(self):
         return self.__indef
+
+    @property
+    def iter(self):
+        return self.__iter
 
     def set_facility(self, facilities, app=None):
         self.cmd.set_facility(facilities, app)

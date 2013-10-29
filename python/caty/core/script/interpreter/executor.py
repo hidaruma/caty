@@ -487,6 +487,9 @@ class CommandExecutor(BaseInterpreter):
     def visit_take(self, node):
         node._prepare()
         if not node.obj:
+            if node.iter:
+                node.context = self.input
+                return self.__iter_take(node)
             r = []
             i = self.input
             if isinstance(i, dict):
@@ -519,6 +522,25 @@ class CommandExecutor(BaseInterpreter):
                 finally:
                     node.var_storage.del_scope()
         return r
+
+    def __iter_take(self, node):
+        i = node.context
+        if isinstance(i, dict):
+            i = i.items()
+        else:
+            i = enumerate(i)
+        for k, v in i:
+            node.var_storage.new_scope()
+            node.var_storage.opts['_key'] = k
+            node.var_storage.opts['_value'] = v
+            try:
+                self.input = v
+                if not v is UNDEFINED:
+                    x = node.cmd.accept(self)
+                    if self.__truth(x, node):
+                        yield v
+            finally:
+                node.var_storage.del_scope()
 
     def __truth(self, v, node):
         if node.indef:

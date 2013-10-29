@@ -60,7 +60,17 @@ type ErrorInfo = {
     "errorMap": ErrorMap
 };
 
-type sequence<T> = [T*] | foreign(remark="iterator");
+/** イテレータのインターフェイスを実装したPythonオブジェクト
+ * foreign型データであるが特別に扱う。
+ * アンダースコア始まりなのは、ユーザーが直接使うことを意図してないから。
+ * ユーザーは seq<T> 型を使う。
+ */
+type _iterable<T> = deferred foreign;
+
+/** シーケンス型
+ * メモリ内に展開される配列、または_iterableによるストリーム
+ */
+type seq<T> = [T*] | _iterable<T>;
 
 type MiniErrorInfo = MiniErrorObj | MiniError;
 

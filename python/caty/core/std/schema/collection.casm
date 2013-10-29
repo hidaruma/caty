@@ -23,8 +23,6 @@ kind KeyType = lower (number | string | binary);
 kind FragmentPathType = lower string?;
 kind RecordType = lower object;
 
-type Iterable<T> = ([T*] | foreign);
-
 /** 
  * コレクションを操作するコマンドセット 
  */
@@ -98,7 +96,7 @@ signature Collection
 
  /** すべてのキーを列挙する */
  @[reader]
- command keys :: void -> Iterable<Key>; // eachの入力
+ command keys :: void -> seq<Key>; // eachの入力
 
  /** コレクション内のレコードの個数を返す */
  @[reader]
@@ -127,7 +125,7 @@ signature Collection
      "max": (integer(minimum=0) | "unbounded")?,
      "order-by": (string | [string, string*])?,
    }
-   :: void -> Iterable<Record>;
+   :: void -> seq<Record>;
 
 
  /** 型チェックなしですべてのレコードを列挙する 
@@ -135,7 +133,7 @@ signature Collection
   * スキーマが変更された場合でも動作する。
   */
  @[reader]
- command dump :: void -> Iterable<any>;
+ command dump :: void -> seq<any>;
 
 
  /* === updaters == */
@@ -524,7 +522,7 @@ signature Basable
 
  /** パスに対応するレコードポーションが存在するすべてのキーを列挙する */
  @[reader]
- command p-keys [FragmentPath? frag-path]:: void -> Iterable<Key>;
+ command p-keys [FragmentPath? frag-path]:: void -> seq<Key>;
 
  /** コレクション内の、パスに対応するレコードポーションが存在するレコードの個数を返す */
  @[reader]
@@ -541,12 +539,12 @@ signature Basable
      @[default("unbounded")]
      "max": (integer(minimum=0) | "unbounded")?,
    }
-   [FragmentPath? frag-path] :: void -> Iterable<any>;
+   [FragmentPath? frag-path] :: void -> seq<any>;
 
  /** 型チェックなしで、パスに対応するレコードポーションを列挙する
   */
  @[reader]
- command p-dump [FragmentPath? frag-path] :: void -> Iterable<any>;
+ command p-dump [FragmentPath? frag-path] :: void -> seq<any>;
 
 };
 
