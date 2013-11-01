@@ -2,11 +2,13 @@
 
 module ex;
 
-
 /** placeより細かい、一緒に使う */
 @[predefined, register-public,
 typical([
-  "1-12-5 Sビル2F"
+   "1-2-3 OKビル302"
+ , "10-5-1 メゾン女神101"
+ , "1丁目3番地"
+ , "1-12-5 Sビル2F"
  , "53-2-11"
  , "2-3-16 マンションハッピー 405"
  , "22-09-1"
@@ -19,6 +21,8 @@ type geo-addr = string;
 @[predefined, register-public,
 typical([
   "東京都目黒区"
+ ,"大阪難波"
+ , "茨城県水戸市"
  , "北海道札幌市"
  , "大阪難波"
 
@@ -45,7 +49,8 @@ typical([
 ])]
 type givenName = string;
 
-@[predefined,  register-public,
+
+@[predefined, register-public,
 typical([
   "山田"
  , "鈴木"
@@ -190,7 +195,7 @@ type time = string;
 
 /* 色のRGB値を16進数で表した文字列 （例：#ffaec9） */
 
-@[predefined,  register-public,
+@[predefined, register-public,
 typical([
   "#ffaec9"
 , "#00aacc"
@@ -198,7 +203,7 @@ typical([
 ])]
 type color = string;
 
-@[predefined,  register-public,
+@[predefined, register-public,
 typical([
    "こんにちは。"
  , "いいね。"
@@ -213,7 +218,8 @@ typical([
 ])]
 type sentence = string(remark="自然言語による文");
 
-@[predefined,  register-public,
+
+@[predefined, register-public,
 typical([
    "画像のつもり.gif"
  , "なんちゃって画像.png"
@@ -223,7 +229,7 @@ typical([
 ])]
 type photo = string(remark="ダミー画像");
 
-@[predefined,  register-public,
+@[predefined, register-public,
 typical([
 '''私は事実とにかくこの滅亡方というのの後が作るうで。いよいよほかへ評めもたといこの永続うでなどが思うて来るたをは区別知れなたて、だんだんには申し上げるんたくたで。
 '''
