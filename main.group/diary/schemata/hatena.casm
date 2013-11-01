@@ -166,7 +166,8 @@ command load /*[string file]*/ :: void -> void {
  file:read /m-hiyama-memo.xml /*%file*/ | xjx:parse | process |
  each {
    d.insert %_key
- }
+ };
+ "loaded from file /m-hiyama-memo.xml to collection hatena:d" | cout
 };
 
 /** IDのリストで与えられたレコード群をtmpコレクションにコピーする */
@@ -332,7 +333,7 @@ command make-entries
       except => ["Oops ", (%_key | to-string), " ", %dt, "\n\n", $.message ] | text:concat | cout; break
      }
   };
-  "End" | cout
+  "End: read from collection d, write to collection e." | cout
 };
 
 /*
@@ -359,6 +360,8 @@ command modify-entries
   [
      $.dayDate | text:split "-" | text:concat > date,
      $.id | to-string > ts,
+     %_key | num:dec > prev,
+     %_key | num:inc > next,
   ];
   %in |
   ={
@@ -366,8 +369,10 @@ command modify-entries
      "tags": text:join "|", 
      "uri": ["http://d.hatena.ne.jp/m-hiyama-memo/", %date, "/", %ts] | text:concat,
      * : pass
-   } | t.insert %_key;  %_key | dump --force 
+   } | t.insert %_key
  };
+
+ "read from collection e, write to collection hatena:e" | cout
 
 };
 

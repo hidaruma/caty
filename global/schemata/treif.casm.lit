@@ -101,7 +101,7 @@ type BinaryAttributes = CommonAttributes ++ {
 type EmptyAttributes = {};
 
 type ScalarAttributes = CommonAttributes ++ NumberOnlyAttributes ++ StringOnlyAttributes ++ {
- // undefined, null, boolean はスキー魔属性を持たない
+ // undefined, null, boolean はスキーマ属性を持たない
  "format": string(remark="フォーマット名")?,
  "excludes": [(number|string)*]?,
 };

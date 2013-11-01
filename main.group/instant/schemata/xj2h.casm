@@ -41,45 +41,45 @@ command xjson-to-html :: any -> XJX {
 };
 
 command xj2h-null :: null -> XJX {
-  @span {"data-type": "null", "": "null"}
+  @span {"data-type": "null", "": ["null"]}
 };
 
 command xj2h-boolean :: boolean -> XJX {
  case {
-  true  => @span {"data-type":"boolean", "":"true"},
-  false => @span {"data-type":"boolean", "":"false"},
+  true  => @span {"data-type":"boolean", "":["true"]},
+  false => @span {"data-type":"boolean", "":["false"]},
  }
 };
 
 command xj2h-indef :: indef -> XJX {
-  @span {"data-type": "indef", "":"indef"}
+  @span {"data-type": "indef", "":["indef"]}
 };
 
 command xj2h-number :: number -> XJX {
   @span {
     "data-type": "number",
-    "": to-string
+    "": [to-string]
   }
 };
 
 command xj2h-string :: string -> XJX {
   @span {
     "data-type": "string",
-    "": pass, // text:escape-html
+    "": [pass], // text:escape-html
   }
 };
 
 command xj2h-binary :: binary -> XJX {
     @span {
       "data-type": "binary",
-      "": base64:encode
+      "": [base64:encode]
     }
 };
 
 command xj2h-object :: object -> XJX {
  each {
    @li {
-     "": [@span {"": %_key}, ":", xjson-to-html],
+     "": [@span {"": [%_key]}, ":", xjson-to-html],
      "name" : %_key,
      "data-key" : %_key,
    }

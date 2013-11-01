@@ -7,8 +7,8 @@ module ref;
 /*
 type Reference = @__r {
  "a": [scalar, string?],
- "t": string,
- "v": string?,
+ "t": string, // target class name
+ "v": string?, // verb name
 };
 */
 

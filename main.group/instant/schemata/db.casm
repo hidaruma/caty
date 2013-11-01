@@ -10,7 +10,7 @@ class WebUtilMix<Rec> =
 
 /** コレクション参照型（実験的） 
  */
-type reference<C> = /*@__r*/ {
+type reference<C> = @__r {
  "a": [integer],
  "t": typeName<C>, // targetName<C> が望ましいだろう。
 };
@@ -115,8 +115,9 @@ collection lunch of {
     "詳しい感想": ex:parag?,
     "似たランチ一覧": [reference<lunch>, reference<lunch>*]?,
   }
-};
-class lunch &= WebUtilMix< recordType<lunch> >;
+//} with WebUtilMix< _ >;
+
+} with WebUtilMix< recordType<_> >;
 
 
 /**
@@ -127,12 +128,21 @@ collection company of {
  "id": integer, // とりあえず、gen:sampleが空にしないように必須にしておく
  "会社名": string,
  "代表": reference<person>,
-};
+} identified id 
+  with 
+    web-util:MagicGetMix< _ >  
+  & web-util:IndexMix
+  & web-util:GenMix< _ > 
+;
+
+
+/*
 class company &= 
    web-util:MagicGetMix< recordType<company> >  
  & web-util:IndexMix
  & web-util:GenMix< recordType<company> > 
 ;
+*/
 
 /**
  * 人物のコレクション
@@ -150,13 +160,20 @@ collection person of {
  "会社":  reference<company>?,
  "ランチレポート": [reference<lunch>, reference<lunch>*]?,
 
-} identified ID;
+} identified ID
+with 
+   web-util:MagicGetMix< recordType<_> > 
+ & web-util:IndexMix
+ & web-util:GenMix< recordType<_> > 
+;
+
+/*
 class person &= 
    web-util:MagicGetMix< recordType<person> > 
  & web-util:IndexMix
  & web-util:GenMix< recordType<person> > 
 ;
-
+*/
 /*
  *==  fetchを使った事例 ==
  */
@@ -205,8 +222,8 @@ type tel = string(format="tel");
 
 
 
-@[predefined]
-type url = string(format="url");
+//@[predefined]
+//type url = string(format="url");
 
 type Form = {
   "name": string,
