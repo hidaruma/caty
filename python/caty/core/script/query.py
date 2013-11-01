@@ -43,6 +43,9 @@ class TypeQuery(object):
         self.optional = False
         self.repeat = False
 
+    def __repr__(self):
+        return 'type query: %s:%s%s' % (repr(self.label), repr(self.value), '?' if self.optional else '')
+
 class TagQuery(object):
     type = u'tag'
     def __init__(self, tag, value):

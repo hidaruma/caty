@@ -814,7 +814,7 @@ class CommandExecutor(BaseInterpreter):
 
         def filter(data, qo, orig, depth=0):
             if data is UNDEFINED:
-                if qo.optional:
+                if qo.optional or qo.type == u'type' and qo.value in (u'_', u'any'):
                     return UNDEFINED
                 else:
                     throw_caty_exception(u'Undefined', '.'.join(context) or u'undefined')
