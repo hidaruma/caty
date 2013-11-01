@@ -2,7 +2,7 @@
 module wrap-lib;
 
 
-/** XJSONデータをプレーンなのHTML5に変換 */
+/** XJSONデータをプレーンなHTML5に変換 */
 command to-plain-html [string?] :: any -> string {
   xj2h:xjson-to-html | xjx:markup --html > content;
 [
