@@ -344,7 +344,7 @@ class CommandExecutor(BaseInterpreter):
                     throw_caty_exception('TagNotMatched', '$type', type=tag)
             else:
                 throw_caty_exception('TagNotMatched', '$type', type=tag)
-        return self.__exec_cmd(node, tag)
+        return self.__exec_cmd(node, tag, target)
 
     def __not_tagged_value_case(self, node, target):
         t = tag(target)
