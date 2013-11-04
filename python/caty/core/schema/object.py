@@ -38,14 +38,14 @@ class ObjectSchema(SchemaBase, Object):
     def union(self, schema):
         if schema.type == 'object':
             if not self.pseudoTag.exclusive(schema.pseudoTag):
-                raise JsonSchemaError(dict(msg='Pseudo tag is not exclusive: $tag1, $tag2', tag1=str(self.pseudoTag), tag2=str(schema.pseudoTag)))
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR',u'Pseudo tag is not exclusive: $tag1, $tag2', tag1=str(self.pseudoTag), tag2=str(schema.pseudoTag))
         return UnionSchema(self, schema)
 
     def intersect(self, another):
         cls = type(another)
         if not (cls in (UnionSchema, IntersectionSchema, UpdatorSchema, TypeVariable, ObjectSchema)
                 or (cls in(TypeReference, NamedSchema) and another.type == 'object')):
-            raise JsonSchemaError(dict(msg=u'Unsupported operand types for $op: $type1, $type2', op='&', type1='object', type2=another.type))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Unsupported operand types for $op: $type1, $type2', op='&', type1='object', type2=another.type)
 
         if cls == ObjectSchema:
             return self._intersect_obj(another)
@@ -87,20 +87,20 @@ class ObjectSchema(SchemaBase, Object):
     def update(self, another):
         if another.type != 'object' or (isinstance(another.type, tuple) and not all(map(lambda x:x.type == 'object', another.type))):
             t = str(another.type) if another.type != '__variable__' else str(another.name)
-            raise JsonSchemaError(dict(msg=u'Unsupported operand types for $op: $type1, $type2', op='++', type1='object', type2=t))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Unsupported operand types for $op: $type1, $type2', op='++', type1='object', type2=t)
         if not isinstance(another, ObjectSchema):
             return another ** self
         newschema_obj = {}
         if self._has_common_properties(another):
-            raise JsonSchemaError(dict(msg=u'Can not calculate ++: optional property which is not undefined might appear at both side', prop='some property'))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Can not calculate ++: optional property which is not undefined might appear at both side', prop=u'some property')
         for k, v in another.items():
             if k in self:
                 if self[k].type not in ('undefined', 'never') and v.type not in ('undefined', 'never'):
-                    raise JsonSchemaError(dict(msg=u'Can not calculate ++: $prop which is not undefined appears at both side', prop=k))
+                    throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Can not calculate ++: $prop which is not undefined appears at both side', prop=k)
                 else:
                     newschema_obj[k] = v
             elif self.wildcard.type not in ('never', 'undefined'):
-                raise JsonSchemaError(dict(msg=u'Can not calculate ++: $prop which is not undefined might appear at both side', prop=k))
+                throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Can not calculate ++: $prop which is not undefined might appear at both side', prop=k)
             else:
                 newschema_obj[k] = v
         for k, v in self.items():

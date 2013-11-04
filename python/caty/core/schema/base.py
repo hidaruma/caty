@@ -87,7 +87,7 @@ class SchemaBase(Resource):
     def _verify_option(self):
         d = set(self._options.keys()) - self.__class__.__options__
         if d:
-            raise JsonSchemaError(dict(msg=u'Undefined schema attribute: $name', name=(', '.join(d))))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Undefined schema attribute: $name', name=(', '.join(d)))
 
     @property
     def optional(self):
@@ -291,7 +291,7 @@ class SchemaBase(Resource):
         try:
             self._check_type_variable([t.name for t in self.type_vars], [])
         except KeyError, e:
-            raise JsonSchemaError(dict(msg=u'Undeclared type variable `$name` in the definition of $this', name=', '.join(e.args), this=self.name))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Undeclared type variable `$name` in the definition of $this', name=', '.join(e.args), this=self.name)
         except RuntimeError, e:
             print '[ERROR]', self.name
             raise e
@@ -840,7 +840,7 @@ class NullSchema(SchemaBase, Symbol):
 
     def intersect(self, another):
         if type(another) != NullSchema:
-            raise JsonSchemaError(dict(msg='Unsupported operand types for $op: $type1, $type2', op='&', type1='null', type2=another.type))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Unsupported operand types for $op: $type1, $type2', op='&', type1='null', type2=another.type)
         return NullSchema()
 
     def _convert(self, value):
@@ -909,7 +909,7 @@ class VoidSchema(SchemaBase, Symbol):
 
     def intersect(self, another):
         if type(another) != VoidSchema:
-            raise JsonSchemaError(dict(msg='Unsupported operand types for $op: $type1, $type2', op='&', type1='void', type2=another.type))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'Unsupported operand types for $op: $type1, $type2', op='&', type1='void', type2=another.type)
         return VoidSchema()
 
     def _convert(self, value):

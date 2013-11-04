@@ -93,7 +93,7 @@ class ProfileContainer(object):
                 msg.append(u'%sは%sで宣言されていない型変数です' % (v, self.name))
                 
         if msg:
-            raise JsonSchemaError('\n'.join(msg))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'\n'.join(msg))
 
     def set_arg0_type(self, type):
         for p in self.profiles:

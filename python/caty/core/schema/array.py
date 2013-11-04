@@ -18,7 +18,7 @@ class ArraySchema(SchemaBase, Array):
         SchemaBase.__init__(self, *args, **kwds)
         self.schema_list = schema_list
         if self.tight is not None and not isinstance(self.tight, types.BooleanType):
-            raise JsonSchemaError(dict(msg=u'tight attribute must be boolean type'))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'tight attribute must be boolean type')
 
     def _validate(self, value):
         if not self.optional and value == None:

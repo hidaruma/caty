@@ -667,7 +667,7 @@ class CommandNode(Function):
                 msg.append(u'%sは%sで宣言されていない型変数です' % (v, self.name))
                 
         if msg:
-            raise JsonSchemaError('\n'.join(msg))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'\n'.join(msg))
 
 
     def reify(self):

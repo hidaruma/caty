@@ -13,7 +13,8 @@ class BinarySchema(ScalarSchema):
     def __init__(self, *args, **kwds):
         ScalarSchema.__init__(self, *args, **kwds)
         if self.minLength > self.maxLength and self.maxLength is not None:
-            raise JsonSchemaError(dict(msg='minLength($min) is longer than maxLength($max)', min=self.minLength, max=self.maxLength))
+            throw_caty_exception(u'SCHEMA_COMPILE_ERROR', u'minLength($min) is longer than maxLength($max)', min=self.minLength, max=self.maxLength)
+
     def _validate(self, value):
         if not self.optional and value == None:
             raise JsonSchemaError(dict(msg=u'null is not allowed'))
