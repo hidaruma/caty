@@ -103,16 +103,17 @@ function expand_template { # (proddef_dir) => *STDOUT*
     local proddef_dir=$1
 
     local version=$(cat $proddef_dir/Version.txt)
-    debug "expand_templae: version=$version"
+    debug "expand_template: version=$version"
 
     cat $proddef_dir/package.template.json | sed -e 's/\$\$/\$/g' -e "s/\\\$version/$version/g" > $proddef_dir/package.json
 }
 
 function make_version { # ($proddef_dir) => *STDOUT*
     local semver=$(get_semver $proddef_dir)
-    local Suffix=r$(hg parent $File | grep ^changeset | cut -d: -f2,3 | sed -e 's/ //g' -e 's/:/./' ).$(date +%Y%m%d)
+    local Suffix=r$(hg parent $File | grep ^changeset | cut -d: -f2,3 | sed -e 's/ //g' -e 's/:/./' )
+    local d=$(date +%Y%m%d)
     
-    echo $semver+$Suffix
+    echo "$semver+$Suffix$d"
 }
 
 
