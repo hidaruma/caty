@@ -110,7 +110,7 @@ function expand_template { # (proddef_dir) => *STDOUT*
 
 function make_version { # ($proddef_dir) => *STDOUT*
     local semver=$(get_semver $proddef_dir)
-    local Suffix=r$(hg parent $File | grep ^changeset | cut -d: -f2,3 | sed -e 's/ //g' -e 's/:/./' )
+    local Suffix=r$(hg parent --template="{rev}.{node|short}")
     local d=$(date +%Y%m%d)
     
     echo "$semver+$Suffix$d"
