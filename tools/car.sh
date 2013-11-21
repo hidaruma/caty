@@ -25,6 +25,15 @@ function usage {
     echo "** option:"
     echo "--project PROJECT_DIR"
     echo "--semver SEMANTIC_VERSION x.y.z"
+    cat <<EOF
+
+origin argument is an application name 
+application name can be a special name 'project', 'caty', or 'global'.
+
+prod argument is a product name.
+a subdirectory products/{product-name}/ under the origin directory is the product directory.
+
+EOF
 }
 
 prj_dir=.
