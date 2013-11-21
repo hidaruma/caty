@@ -133,7 +133,7 @@ fi
 archive_name=$(make_archive_name $prod_dir $SUBEXT)
 
 debug "archive_name=$archive_name"
-
+debug "path=$caty_home"
 debug_exit
 
 python $caty_home/tools/caty-archiver.py \
