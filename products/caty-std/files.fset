@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*- 
+# product: caty-std
+
+# グローバルな除外パターン
+- *.tmp
+- *.pyc
+- *.ctpl
+- *.icaty
+- *.tmp.*
+
+- python/test/
+- python/caty/testutil/
+
+# グローバルな追加パターン
+
++ *.sh
+
+# 文書ファイル
+
+LICENSE.ja-utf8.txt
+LICENSE.txt
+README.txt
+
+# 設定ファイル
+
+dependencies.json
+prj-manifest.xjson.sample
+
+# 実行ファイル
+
+stdcaty.py
+uwsgicaty.py
+
+# ディレクトリの目印ファイル
+
+prj-manifest/.keep
+dists/README.txt
+features/README.txt
+backup/README.txt
+
+# ディレクトリ
+
+common.group/fit-view/
+common.group/commands/
+common.group/user/
+global/
+lib/
+messages/
+python/
+tools/
