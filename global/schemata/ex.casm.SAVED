@@ -2,35 +2,7 @@
 
 module ex;
 
-/** placeより細かい、一緒に使う */
-@[predefined, register-public,
-typical([
-   "1-2-3 OKビル302"
- , "10-5-1 メゾン女神101"
- , "1丁目3番地"
- , "1-12-5 Sビル2F"
- , "53-2-11"
- , "2-3-16 マンションハッピー 405"
- , "22-09-1"
- , "111-059 レジデンス光"
-
-])]
-type geo-addr = string;
-
-
-@[predefined, register-public,
-typical([
-  "東京都目黒区"
- ,"大阪難波"
- , "茨城県水戸市"
- , "北海道札幌市"
- , "大阪難波"
-
-])]
-type place = string;
-
-
-@[predefined,  register-public,
+@[predefined,
 typical([
   "明"
  , "健二"
@@ -49,8 +21,7 @@ typical([
 ])]
 type givenName = string;
 
-
-@[predefined, register-public,
+@[predefined,
 typical([
   "山田"
  , "鈴木"
@@ -58,30 +29,19 @@ typical([
  , "大山"
  , "富士"
  , "秋田"
- , "田中"
- , "木村"
- , "村井"
- , "大前田"
- , "谷垣"
- , "犬神"
- , "小池"
 ])]
 type familyName = string;
 
-@[predefined, register-public,
+@[predefined,
 typical([
   "山田太郎"
 , "鈴木明"
 , "高橋惠子"
 , "元木ひろし"
-, "犬神明"
-, "大前田健二"
-, "村井純一郎"
-
 ])]
 type personName  = string;
 
-@[predefined, register-public,
+@[predefined,
 typical([
   "foo"
 , "bar"
@@ -96,7 +56,7 @@ typical([
 type something = string;
 
 
-@[predefined,  register-public,
+@[predefined,
 typical([
   "(有)モリモリ商会"
 , "株式会社・遊星惑星社"
@@ -107,7 +67,7 @@ type companyName  = string;
 
 
 /* メールアドレス */
-@[predefined, register-public,
+@[predefined,
 typical([
    "foo@example.com"
  , "bar@example.com"
@@ -119,19 +79,18 @@ typical([
 type email = string;
 
 
-@[predefined, register-public,
+@[predefined,
 typical([
    "http://www.w3.org"
  , "http://www.example.org"
  , "http://www.example.com"
  , "http://example.jp"
  , "http://main.example.net"
- , "http://dev1.rd.example.co.jp"
 ])]
 type url = string;
 
 
-@[predefined, register-public,
+@[predefined,
 typical([
    "03-1234-5678"
  , "090-1234-5678"
@@ -141,7 +100,7 @@ typical([
 type tel = string;
 
 /* date …… yyyy-MM-dd（例：2011-02-06） */
-@[predefined, register-public,
+@[predefined,
 typical([
   "2013-08-26"
 , "2010-10-01"
@@ -150,16 +109,15 @@ typical([
 type date = string;
 
 /* datetime …… yyyy-MM-ddTHH:mm:ssZ（例：2011-02-06T05:53:22Z） */
-@[predefined,  register-public,
+@[predefined,
 typical([
   "2013-08-26T08:29:14Z"
 , "2013-04-01T00:01:02Z"
-, "2000-01-01T00:00:00Z"
 ])]
 type datetime = string;
 
 /* datetime-local …… yyyy-MM-ddTHH:mm:ss（例：2011-02-06T14:53:22）*/
-@[predefined,  register-public,
+@[predefined,
 typical([
   "2013-08-26T08:29:14"
 , "2013-04-01T00:01:02"
@@ -167,17 +125,14 @@ typical([
 type datetime-local = string;
 
 /* month …… yyyy-MM（例：2011-02） */
-@[predefined,  register-public,
+@[predefined,
 typical([
  "2013-08"
-,"2013-07"
-,"2009-01"
-,"2009-12"
 ])]
 type month = string;
 
 /* week …… yyyy-Www（例：2011-W05）。その年における何週目かを表す */
-@[predefined,  register-public,
+@[predefined,
 typical([
    "2013-W22"
  , "2012-W10"
@@ -186,7 +141,7 @@ typical([
 type week = string;
 
 /* time …… HH:mm:ss（例：14:53:22）*/
-@[predefined,  register-public,
+@[predefined,
 typical([
   "11:30:46"
   ,"08:09:11"
@@ -195,15 +150,13 @@ type time = string;
 
 /* 色のRGB値を16進数で表した文字列 （例：#ffaec9） */
 
-@[predefined, register-public,
+@[predefined,
 typical([
   "#ffaec9"
-, "#00aacc"
-, "#09ff09"
 ])]
 type color = string;
 
-@[predefined, register-public,
+@[predefined,
 typical([
    "こんにちは。"
  , "いいね。"
@@ -218,8 +171,7 @@ typical([
 ])]
 type sentence = string(remark="自然言語による文");
 
-
-@[predefined, register-public,
+@[predefined,
 typical([
    "画像のつもり.gif"
  , "なんちゃって画像.png"
@@ -229,7 +181,7 @@ typical([
 ])]
 type photo = string(remark="ダミー画像");
 
-@[predefined, register-public,
+@[predefined,
 typical([
 '''私は事実とにかくこの滅亡方というのの後が作るうで。いよいよほかへ評めもたといこの永続うでなどが思うて来るたをは区別知れなたて、だんだんには申し上げるんたくたで。
 '''
