@@ -1,0 +1,6 @@
+{"$$comment": "-*- coding: utf-8 -*-",
+
+ "name": "orm",
+ "version": "$version",
+ "installTarget": "application"
+}
