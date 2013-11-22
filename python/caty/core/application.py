@@ -499,7 +499,8 @@ class Application(object):
         self.facility_name_conflicted(name)
         res = self.get_master_entity(facility_name)
         if not res:
-            raise Exception(self.i18n.get("Unknown facility: $name", name=facility_name, app=self.name))
+            print u'[ERROR]', (self.i18n.get("Unknown facility: $name", name=facility_name, app=self.name))
+            return
         self._master_entities[name] = (res[0], res[1], user_param, facility_name, module_name)
 
     def get_facility_class(self, facility_name):
