@@ -32,6 +32,11 @@ def make_response(resp):
 def push_verb(url, verb=None):
     # print "url=" + unicode(url)
     # print "verb=" + unicode(verb)
+    from caty.core.exception import throw_caty_exception
+    if url in (u'http:', u'https:'):
+        throw_caty_exception(u'BadArg', u'Invalid url `%s`' % url)
+    if not url.startswith(u'http://') and not url.startswith(u'https://'):
+        url = u'http://' + url
     if not verb:
         return url
     s = url.split('?')
