@@ -1,12 +1,15 @@
 #coding: utf-8
+from caty.util import bind2nd, escape_html
+from caty.jsontools import stdjson, decode, encode, CatyEncoder
+import caty.jsontools as json
+from caty.core.spectypes import INDEF, UNDEFINED
+from topdown import *
+
 import base64
 from decimal import Decimal
 import xml.dom.minidom as dom
-from topdown import *
-import caty.jsontools as json
-from caty.util import bind2nd, escape_html
-from caty.jsontools import stdjson, decode, encode, CatyEncoder
-from caty.core.spectypes import INDEF
+import itertools
+from itertools import dropwhile
 
 def toxml(o):
     doc = dom.Document()
@@ -95,11 +98,19 @@ def dump_to_json(obj, fo, **kwds):
 def dumps_to_json(obj, **kwds):
     return stdjson.dumps(encode(obj), **kwds)
 
+def series_of_escape(s):
+    return len(list(itertools.takewhile(lambda c: c=='\\', reversed(s))))
+
+#@profile
+class string(EagerParser):
+    def matches(self, seq):
+        return seq.current == u'"'
+
+    def __call__(self, seq):
+        return _string(seq)
+
 @try_
-def string(seq):
-    def series_of_escape(s):
-        import itertools
-        return len(list(itertools.takewhile(lambda c: c=='\\', reversed(s))))
+def _string(seq):
     try:
         seq.ignore_hook = True
         st = [seq.parse('"')]
@@ -112,167 +123,234 @@ def string(seq):
                 st.append(s)
                 s = seq.parse(Regex(r'"[^"]*'))
         st.append(seq.parse('"'))
-        return stdjson.loads(''.join(st))
     except EndOfBuffer, e:
-        raise ParseFailed(seq, string)
-    finally:
-        seq.ignore_hook = False
-
-def multiline_string(seq):
-    try:
-        seq.ignore_hook = True
-        _ = seq.parse("'''")
-        s = seq.parse(until("'''"))
-        seq.ignore_hook = False
-        _ = seq.parse("'''")
-        return stdjson.loads('"%s"' % s.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r'))
-    finally:
-        seq.ignore_hook = False
-
-def boolean(seq, convert=False):
-    b = seq.parse(['true', 'false', 'indef'])
-    if b == 'indef':
-        return INDEF
-    if convert:
-        return True if b == 'true' else False
+        raise ParseFailed(seq, self)
     else:
-        return b
+        return stdjson.loads(''.join(st))
+    finally:
+        seq.ignore_hook = False
+string = string()
 
-def integer(seq, convert=False):
-    i = seq.parse([
+#@profile
+class multiline_string(EagerParser):
+    def matches(self, seq):
+        return seq.rest[0:3] == u"'''"
+
+    def __call__(self, seq):
+        try:
+            seq.ignore_hook = True
+            _ = seq.parse("'''")
+            s = seq.parse(until("'''"))
+            seq.ignore_hook = False
+            _ = seq.parse("'''")
+            return stdjson.loads('"%s"' % s.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r'))
+        finally:
+            seq.ignore_hook = False
+multiline_string = multiline_string()
+
+_B = set([u't', u'f', u'i'])
+#@profile
+class boolean(EagerParser):
+    def __init__(self, convert=False):
+        self.convert = convert
+
+    def matches(self, seq):
+        return seq.current in _B
+
+    def __call__(self, seq):
+        b = seq.parse(['true', 'false', 'indef'])
+        if b == 'indef':
+            return INDEF
+        if self.convert:
+            return True if b == 'true' else False
+        else:
+            return b
+boolean = boolean(True)
+
+int_regex = [
                    Regex(r'-?[1-9][0-9]+'),
                    Regex(r'-?[0-9]'),
-                 ])
-    if convert:
-        return int(i)
-    else:
-        return i
-
-def number(seq, convert=False):
-    n = seq.parse([
+                 ]
+num_regex = [
                    Regex(r'-?[1-9][0-9]+\.[0-9]+([eE][-+]?[0-9]+)?'), 
                    Regex(r'-?[0-9]\.[0-9]+([eE][-+]?[0-9]+)?'), 
                    Regex(r'-?[1-9][0-9]+[eE][-+]?[0-9]+'),
                    Regex(r'-?[0-9][eE][-+]?[0-9]+'),
-                   ])
-    if convert:
-        return Decimal(n)
-    else:
-        return n
+                   ]
 
-def null(seq, convert=False):
-    n = seq.parse('null')
-    if convert:
-        return None
-    else:
-        return n
+_N = set(u'0123456789-')
+#@profile
+class number(EagerParser):
+    def __init__(self, convert=False):
+        self.convert = convert
 
-def comma(seq):
-    return seq.parse(',')
+    def matches(self, seq):
+        return seq.current in _N
 
-@try_
-def bare_property(seq):
-    return Regex(u'[^"\s:,.|{}\\[\\]<>*/;=\\`~!@#$%^&()]+')(seq)
+    def __call__(self, seq):
+        try:
+            n = seq.parse(num_regex)
+            if self.convert:
+                return Decimal(n)
+            else:
+                return n
+        except:
+            i = seq.parse(int_regex)
+            if self.convert:
+                return int(i)
+            else:
+                return i
+integer = number(True)
+number = number(True)
 
-def obj(seq):
-    seq.parse('{')
-    items = seq.parse(option(split(item, comma, True), {}))
-    try:
-        seq.parse('}')
-    except:
-        raise ParseError(seq, obj)
-    o = {}
-    for k ,v in items:
-        o[k] = v
-    return o
+#@profile
+class null(EagerParser):
+    def __init__(self, convert=False):
+        self.convert = convert
 
+    def matches(self, seq):
+        return seq.current == u'n'
+
+    def __call__(self, seq):
+        n = seq.parse('null')
+        if self.convert:
+            return None
+        else:
+            return n
+null = null(True)
+
+#@profile
+class obj(EagerParser):
+    def matches(self, seq):
+        return seq.current == u'{'
+
+    def __call__(self, seq):
+        seq.parse('{')
+        items = seq.parse(option(split(item, u',', True), {}))
+        try:
+            seq.parse('}')
+        except:
+            raise ParseError(seq, obj)
+        o = {}
+        for k ,v in items:
+            o[k] = v
+        return o
+obj = obj()
+
+#@profile
 def item(seq):
     k = seq.parse(string)
     seq.parse(':')
-    v = seq.parse(parsers)
+    v = eager_choice(*parsers)(seq)
     return k, v
 
-def array(seq):
-    from caty import UNDEFINED
-    from itertools import dropwhile
-    seq.parse('[')
-    items = seq.parse(option(split(listitem, comma, True), []))
-    actual = list(reversed(list(dropwhile(lambda x: x is UNDEFINED, reversed(items)))))
-    try:
-        seq.parse(']')
-    except:
-        raise ParseError(seq, array)
-    return actual
+drop_undef = lambda items: reversed(list(dropwhile(lambda x: x is UNDEFINED, reversed(items))))
+#@profile
+class array(EagerParser):
+    def matches(self, seq):
+        return seq.current == u'['
 
+    def __call__(self, seq):
+        seq.parse('[')
+        items = seq.parse(option(split(listitem, u',', True), []))
+        actual = list(drop_undef(items))
+        try:
+            seq.parse(']')
+        except:
+            raise ParseError(seq, array)
+        return actual
+array = array()
+
+#@profile
 def listitem(seq):
-    from caty import UNDEFINED
     if seq.current == ']':
         return UNDEFINED
-    return seq.parse([parsers, loose_item])
+    return eager_choice(*(parsers + [loose_item]))(seq)
 
-def loose_item(seq):
-    from caty import UNDEFINED
-    if not seq.peek(option(comma)):
-        raise ParseFailed(seq, array)
-    return UNDEFINED
+#@profile
+class loose_item(EagerParser):
+    def matches(self, seq):
+        return seq.peek(option(u','))
+
+    def __call__(self, seq):
+        if not seq.peek(option(u',')):
+            raise ParseFailed(seq, array)
+        return UNDEFINED
+loose_item = loose_item()
 
 class _nothing(object):pass
 
-def tag(seq):
-    _ = seq.parse('@')
-    name = seq.parse([string, Regex(r'[-0-9a-zA-Z_]+')])
-    value = seq.parse(option(parsers, _nothing))
-    if value is _nothing:
-        return json.TagOnly(name)
-    else:
-        return json.TaggedValue(name, value)
+tag_regex = Regex(r'[-0-9a-zA-Z_]+')
+#@profile
+class tag(EagerParser):
+    def matches(self, seq):
+        return seq.current == u'@'
+
+    def __call__(self, seq):
+        _ = seq.parse('@')
+        name = seq.parse([string, tag_regex])
+        value = option(eager_choice(*parsers), _nothing)(seq)
+        if value is _nothing:
+            return json.TagOnly(name)
+        else:
+            return json.TaggedValue(name, value)
+tag = tag()
 
 ascii = set(list("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&'()*+,-./:;<=>?@[]^_`{|}~ \t\n\r"))
-def binary(seq):
-    seq.parse('b"')
-    end = False
-    with strict():
-        cs = []
-        while not seq.eof:
-            if seq.current in ascii:
-                cs.append(str(seq.current))
-                seq.next()
-            elif seq.current == '\\':
-                seq.next()
-                c = choice('x', '"', '\\')(seq)
-                if c != 'x':
-                    cs.append(c)
+#@profile
+class binary(EagerParser):
+    def matches(self, seq):
+        return seq.rest[0:2] == u'b"'
+
+    def __call__(self, seq):
+        seq.parse('b"')
+        end = False
+        with strict():
+            cs = []
+            while not seq.eof:
+                if seq.current in ascii:
+                    cs.append(str(seq.current))
+                    seq.next()
+                elif seq.current == '\\':
+                    seq.next()
+                    c = choice('x', '"', '\\')(seq)
+                    if c != 'x':
+                        cs.append(c)
+                    else:
+                        a = seq.current
+                        seq.next()
+                        b = seq.current
+                        seq.next()
+                        cs.append(chr(int(a+b, 16)))
+                elif seq.current == '"':
+                    seq.next()
+                    end = True
+                    break
                 else:
-                    a = seq.current
-                    seq.next()
-                    b = seq.current
-                    seq.next()
-                    cs.append(chr(int(a+b, 16)))
-            elif seq.current == '"':
-                seq.next()
-                end = True
-                break
-            else:
+                    raise ParseError(seq, binary)
+            if not end:
                 raise ParseError(seq, binary)
-        if not end:
-            raise ParseError(seq, binary)
-        return ''.join(cs)
+            return ''.join(cs)
+binary = binary()
 
 parsers = [
     tag,
-    bind2nd(number, True), 
-    bind2nd(integer, True), 
+    number, 
     string, 
     multiline_string, 
     binary,
-    bind2nd(boolean, True), 
-    bind2nd(null, True), 
+    boolean, 
+    null, 
     array, 
     obj]
 
 def parse(seq):
-    return seq.parse(parsers)
+    return eager_choice(*parsers)(seq)
 
+def scalar(seq):
+    return eager_choice(string, multiline_string, binary, boolean, null, number)(seq)
+
+#@profile
 def remove_comment(seq):
     seq.parse(skip_ws)
     while not seq.eof and seq.current == '/':

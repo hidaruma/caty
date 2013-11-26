@@ -98,14 +98,7 @@ class ScriptParser(Parser):
         return self.make_pipeline(seq)
 
     def value(self, cs):
-        v = cs.parse([xjson.string, 
-                      xjson.binary,
-                      xjson.multiline_string,
-                      bind2nd(xjson.null, True), 
-                      bind2nd(xjson.number, True), 
-                      bind2nd(xjson.integer, True), 
-                      bind2nd(xjson.boolean, True),
-                      ])
+        v = xjson.scalar(cs)
         s = ScalarBuilder()
         s.set_value(v)
         return s
@@ -472,14 +465,7 @@ class ScriptParser(Parser):
         n = name_token(seq)
         o = seq.parse(option('?'))
         if o and option('=')(seq):
-            d = seq.parse([xjson.string, 
-                      xjson.binary,
-                      xjson.multiline_string,
-                      bind2nd(xjson.null, True), 
-                      bind2nd(xjson.number, True), 
-                      bind2nd(xjson.integer, True), 
-                      bind2nd(xjson.boolean, True),
-                      ])
+            d = xjson.scalar(seq)
         else:
             d = caty.UNDEFINED
         return VarRef(n, bool(o), d)
@@ -492,14 +478,7 @@ class ScriptParser(Parser):
         n = seq.parse(Regex(ur'[0-9]+'))
         o = seq.parse(option('?'))
         if o and option('=')(seq):
-            d = seq.parse([xjson.string, 
-                      xjson.binary,
-                      xjson.multiline_string,
-                      bind2nd(xjson.null, True), 
-                      bind2nd(xjson.number, True), 
-                      bind2nd(xjson.integer, True), 
-                      bind2nd(xjson.boolean, True),
-                      ])
+            d = xjson.scalar(seq)
         else:
             d = caty.UNDEFINED
         return ArgRef(n, bool(o), d)
@@ -550,8 +529,8 @@ class ScriptParser(Parser):
         except:
             return Option(o, True)
         v = choice(
-                  bind2nd(xjson.null, True), 
-                  bind2nd(xjson.boolean, True),
+                  xjson.null, 
+                  xjson.boolean,
                   xjson.string, 
                   xjson.multiline_string,
                   self.unquoted_maybe_num, 
@@ -574,8 +553,8 @@ class ScriptParser(Parser):
         try:
             seq.parse('=')
             v = choice(
-                      bind2nd(xjson.null, True), 
-                      bind2nd(xjson.boolean, True),
+                      xjson.null,
+                      xjson.boolean,
                       xjson.string, 
                       xjson.multiline_string,
                       self.unquoted_maybe_num, 
@@ -616,22 +595,15 @@ class ScriptParser(Parser):
             name = name[:-1]
             optional = True
         if optional and option('=')(seq):
-            d = seq.parse([xjson.string, 
-                      xjson.binary,
-                      xjson.multiline_string,
-                      bind2nd(xjson.null, True), 
-                      bind2nd(xjson.number, True), 
-                      bind2nd(xjson.integer, True), 
-                      bind2nd(xjson.boolean, True),
-                      ])
+            d = xjson.scalar(seq)
         else:
             d = caty.UNDEFINED
         return NamedArg(name, optional, d)
 
     def arg(self, seq):
         r = choice(
-                  bind2nd(xjson.null, True), 
-                  bind2nd(xjson.boolean, True),
+                  xjson.null, 
+                  xjson.boolean,
                   xjson.string, 
                   xjson.multiline_string,
                   self.unquoted_maybe_num, 
@@ -649,14 +621,7 @@ class ScriptParser(Parser):
         else:
             index = int(index)
         if optional and option('=')(seq):
-            d = seq.parse([xjson.string, 
-                      xjson.binary,
-                      xjson.multiline_string,
-                      bind2nd(xjson.null, True), 
-                      bind2nd(xjson.number, True), 
-                      bind2nd(xjson.integer, True), 
-                      bind2nd(xjson.boolean, True),
-                      ])
+            d = xjson.scalar(seq)
         else:
             d = caty.UNDEFINED
         return IndexArg(index, optional, d)
@@ -876,14 +841,7 @@ class ScriptParser(Parser):
         return Case(t, v) if tp == '==>' else UntagCase(t, v)
 
     def literal_case(self, seq, name_set):
-        t = seq.parse([xjson.string, 
-                      xjson.binary,
-                      xjson.multiline_string,
-                      bind2nd(xjson.null, True), 
-                      bind2nd(xjson.number, True), 
-                      bind2nd(xjson.integer, True), 
-                      bind2nd(xjson.boolean, True),
-                      ])
+        t = xjson.scalar(seq)
         if t in name_set:
             raise ParseFailed(seq, self.literal_case, t)
         name_set.add(t)

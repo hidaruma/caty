@@ -165,7 +165,7 @@ def res_name(seq):
 
 def res_param(seq):
     seq.parse(u'(')
-    p = seq.parse(xjson.parsers)
+    p = eager_choice(*xjson.parsers)(seq)
     seq.parse(u')')
     return p
 
@@ -181,13 +181,14 @@ def refers(seq):
     except:
         return CommandURI([(u'python', 'caty.core.command.Dummy')], False)
 
+
+from caty.core.script.parser import ScriptParser, CommandProxy, GlobArg, GlobOption
+
 def refer(seq):
     _ = seq.parse(keyword(u'refers'))
     l = seq.parse(Regex(r'[a-zA-Z]+:'))
     return l.strip(u':'), seq.parse(Regex(r'([a-zA-Z][a-zA-Z0-9]*(\.[a-zA-Z][a-zA-Z0-9]*)*)'))
 
-
-from caty.core.script.parser import ScriptParser, CommandProxy, GlobArg, GlobOption
 def script(seq):
     option(S(u'='))(seq)
     parser = CommandScriptParser()

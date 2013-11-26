@@ -63,6 +63,17 @@ class Parser(object):
         cs = CharSeq(text, **options)
         return cs.parse(self)
 
+class EagerParser(Parser):
+    def __call__(self, seq):
+        raise NotImplementedError()
+
+    def matches(self, text):
+        raise NotImplementedError(u'%s.matches' % self.__class__.__name__)
+
+    def run(self, text, **options):
+        cs = CharSeq(text, **options)
+        return cs.parse(self)
+
 class Regex(Parser):
     def __init__(self, pattern, *options, **optkwds):
         self.pattern = pattern
@@ -248,8 +259,6 @@ class CharSeq(object):
             r = self._fun
         elif isinstance(p, types.MethodType):
             r = self._method
-        elif isinstance(p, Parser):
-            return p
         else:
             assert False, p
         self._method_cache[c] = r
@@ -529,6 +538,19 @@ class choice(Parser):
 
     def __call__(self, seq):
         return seq.parse(self._parsers)
+
+class eager_choice(Parser):
+    def __init__(self, *parsers):
+        self._parsers = parsers
+        for p in parsers:
+            if not isinstance(p, EagerParser):
+                raise Exception(u'EagerParser is required: %s' % repr(p))
+
+    def __call__(self, seq):
+        for p in self._parsers:
+            if p.matches(seq):
+                return p(seq)
+        raise ParseFailed(seq, self._parsers)
 
 def EOL(seq):
     if seq.eof:
