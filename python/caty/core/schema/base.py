@@ -773,7 +773,7 @@ class ForeignSchema(SchemaBase, Symbol):
     def validate(self, value, path=None):
         if value is caty.UNDEFINED:
             raise JsonSchemaError(dict(msg='undefined value'))
-        if type(value) in (dict, list, tuple, unicode, NoneType, str, int, bool, Decimal, TagOnly, TaggedValue):
+        if not isinstance(value, (dict, list, tuple, unicode, NoneType, str, int, bool, Decimal, TagOnly, TaggedValue)):
             raise JsonSchemaError(dict(msg='Not a foreign data'))
 
     def _convert(self, value):
@@ -806,7 +806,7 @@ class AnySchema(SchemaBase, Symbol):
     def validate(self, value, path=None):
         if value is caty.UNDEFINED:
             raise JsonSchemaError(dict(msg='undefined value'))
-        if type(value) not in (dict, list, tuple, unicode, NoneType, str, int, bool, Decimal, TagOnly, TaggedValue, Indef):
+        if not isinstance(value, (dict, list, tuple, unicode, NoneType, str, int, bool, Decimal, TagOnly, TaggedValue, Indef)):
             raise JsonSchemaError(dict(msg='Not a json value: $value', value=repr(value)), repr(value))
 
     def _convert(self, value):
