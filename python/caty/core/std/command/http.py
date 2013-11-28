@@ -19,7 +19,7 @@ def make_response(resp, encoding=None):
     if resp.encoding:
         body = resp.text
         cs = find_charset(body)
-        if cs != resp.encoding.lower():
+        if cs and cs != resp.encoding.lower():
             resp.encoding = cs
             body = resp.text
     else:
@@ -35,9 +35,10 @@ def make_response(resp, encoding=None):
 
 def find_charset(text):
     import re
-    ptn = re.compile(u'<meta .+? content *= *".+?;charset=(.+)?"')
+    ptn = re.compile(u'<meta .+? content *= *".+?; *charset=(.+)?*"')
     m = ptn.search(text)
-    return m.group(1)
+    if m:
+        return m.group(1).strip()
 
 def push_verb(url, verb=None):
     # print "url=" + unicode(url)
