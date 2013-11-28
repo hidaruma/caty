@@ -26,6 +26,7 @@ command head
    /** リクエストタイムアウト時間（秒数、小数可能）*/
    @[default(60.0)]
    "timeout" : number?,
+   "encoding": string?,
  }
  [url] :: void -> Resp
   refers python:http.Head
@@ -39,6 +40,7 @@ command get
    @[default(60.0)]
    "timeout" : number?,
    "verb": string?,
+   "encoding": string?,
  }
  [url] :: void -> Resp
   refers python:http.Get
@@ -53,6 +55,7 @@ command post
    @[default(60.0)]
    "timeout" : number?,
    "verb": string?,
+   "encoding": string?,
  }
  [url] :: bodyContent -> Resp
   refers python:http.Post

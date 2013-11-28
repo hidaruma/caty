@@ -8,15 +8,20 @@ try:
 except:
     print '[Warning] requests is not installed.'
 
-def make_response(resp):
+def make_response(resp, encoding=None):
     u"requests.Responseオブジェクトから、CatyのResposeデータを作る"
-
+    if encoding:
+        resp.encoding = encoding
     header_fields = resp.headers.keys()
     headers = {}
     for fld in header_fields:
         headers[unicode(fld)] = unicode(resp.headers[fld])
     if resp.encoding:
         body = resp.text
+        cs = find_charset(body)
+        if cs != resp.encoding.lower():
+            resp.encoding = cs
+            body = resp.text
     else:
         body = resp.content
     r = {
@@ -28,6 +33,11 @@ def make_response(resp):
         r[u"responseOriginalEncoding"] = unicode(resp.encoding)
     return r
 
+def find_charset(text):
+    import re
+    ptn = re.compile(u'<meta .+? content *= *".+?;charset=(.+)?"')
+    m = ptn.search(text)
+    return m.group(1)
 
 def push_verb(url, verb=None):
     # print "url=" + unicode(url)
@@ -78,6 +88,8 @@ class Get(Command):
         self.url = url
         self.timeout = opts.get('timeout', None)
         self.verb = opts.get('verb', None)
+        self.encoding = opts.get('encoding', None)
+        self.debug = opts.get('debug', False)
         self.debug = opts.get('debug', False)
         if self.debug:
             _option_warning(u'debug')
@@ -85,7 +97,7 @@ class Get(Command):
     def execute(self):
         self.url = push_verb(self.url, self.verb)
         resp = requests.get(self.url, timeout=self.timeout)
-        return make_response(resp)
+        return make_response(resp, self.encoding)
 
 class Post(Command):
     def setup(self, opts, url):
@@ -94,6 +106,7 @@ class Post(Command):
         self.content_type = opts.get('content-type')
         self.verb = opts.get('verb')
         self.debug = opts.get('debug', False)
+        self.encoding = opts.get('encoding', None)
         if self.debug:
             _option_warning(u'debug')
 
@@ -101,7 +114,7 @@ class Post(Command):
         self.url = push_verb(self.url, self.verb)
         headers ={'content-type': self.content_type}
         resp = requests.post(self.url, timeout=self.timeout, data=input, headers=headers)
-        return make_response(resp)
+        return make_response(resp, self.encoding)
 
 
 class Put(Command):
@@ -111,6 +124,7 @@ class Put(Command):
         self.content_type = opts.get('content-type', 'application/octet-stream')
         self.verb = opts.get('verb', None)
         self.debug = opts.get('debug', False)
+        self.encoding = opts.get('encoding', None)
         if self.debug:
             _option_warning(u'debug')
 
@@ -118,7 +132,7 @@ class Put(Command):
         self.url = push_verb(self.url, self.verb)
         headers ={'content-type': self.content_type}
         resp = requests.put(self.url, timeout=self.timeout, data=input, headers=headers)
-        return make_response(resp)
+        return make_response(resp, self.encoding)
 
 import urllib
 import urlparse
