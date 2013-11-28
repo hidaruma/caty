@@ -35,7 +35,7 @@ def make_response(resp, encoding=None):
 
 def find_charset(text):
     import re
-    ptn = re.compile(u'<meta .+? content *= *".+?; *charset=(.+)?*"')
+    ptn = re.compile(u'<meta .*?content *= *".+?; *charset=(.+)? *"')
     m = ptn.search(text)
     if m:
         return m.group(1).strip()
