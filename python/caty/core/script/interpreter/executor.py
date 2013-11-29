@@ -142,9 +142,10 @@ class CommandExecutor(BaseInterpreter):
                 try:
                     node.in_schema.validate(input)
                 except JsonSchemaError, e:
+                    from caty.util import cout
                     info = e.error_report(self.app.i18n)
                     print u'[DEBUG]', node.canonical_name
-                    print prettyprint(input)
+                    cout.writeln(prettyprint(input))
                     throw_caty_exception(u'InputTypeError', prettyprint(info), errorInfo=info)
                 if u'no-auto-fill' in node.annotations:
                     r = exec_func(node, input)
