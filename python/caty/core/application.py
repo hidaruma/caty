@@ -896,7 +896,7 @@ class Application(object):
 class StdStream(object):
     def __init__(self, encoding):
         self.encoding = encoding
-        self.out = codecs.getwriter(self.encoding)(sys.stdout)
+        self.out = codecs.getwriter(self.encoding)(sys.stdout, u'replace')
         self.input = codecs.getwriter(self.encoding)(sys.stdin)
 
     def write(self, content):
