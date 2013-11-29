@@ -1,0 +1,33 @@
+# -*- coding: utf-8 -*-
+
+
+# グローバルな除外パターン
+- *.tmp
+- *.pyc
+- *.ctpl
+- *.icaty
+- *.log
+
+# アーカイブ対象となるディレクトリ
+# --origin をルートとみなした 絶対パス形式相対パス
+
+/app-manifest/
+/commands/
+/lib/
+/schemata/
+
+? /behaviors/
+? /messages/
+
+# 個別ファイル
+# --origin をルートとみなした 絶対パス形式相対パス
+
+
+
+
+
+
+
+
+
+

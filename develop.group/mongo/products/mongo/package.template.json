@@ -1,0 +1,42 @@
+{"$$comment": "-*- coding: utf-8 -*-",
+
+   "name": "mongo",
+   "version": "$version",
+
+   "description": "MongoDB",
+
+   "dependencies": {
+     "python2": []
+   },
+
+   "maintainers": [
+       {
+           "name": "HIYAMA, Masayuki",
+           "email": "hiyama@chimaira.org",
+           "web": "http://www.chimaira.org" 
+       },
+       {
+           "name": "KUWATA, Chikara",
+           "email": "chikara.kuwata@gmail.com",
+           "web": "http://return0.info" 
+       }
+   ],
+
+   "licenses": [
+       {
+           "type": "MIT",
+           "url": "http://www.opensource.org/licenses/mit-license.php" 
+       } 
+   ],
+
+   "repositories": [
+       {
+           "type": "hg",
+           "url": "https://bitbucket.org/  " 
+       } 
+   ],
+
+   "os": ["linux", "macos", "win"],
+   "cpu": ["x86", "ppc", "x86_64"],
+   "engines": ["python2.5", "python2.6", "python2.7],
+}
