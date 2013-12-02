@@ -167,3 +167,7 @@ class Whereis(Internal):
             c = m.get_class(mod + ':' +cn)
         return c.module.app.name + u'::' + c.module.canonical_name + u':' + c.name
 
+class PyType(Builtin):
+    def execute(self, data):
+        return unicode(data.__class__.__name__)
+

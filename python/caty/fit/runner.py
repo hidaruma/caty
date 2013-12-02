@@ -378,7 +378,7 @@ class TestCase(object):
             a = a.string
         if isinstance(b, StringWrapper):
             b = b.string
-        if type(a) != type(b):
+        if not (type(a) == type(b) or isinstance(a, type(b)) or isinstance(b, type(a))):
             return False
         if isinstance(a, list):
             if len(a) != len(b):
@@ -387,10 +387,10 @@ class TestCase(object):
                 if not self._rec_comp(x, y):
                     return False
         elif isinstance(a, dict):
-            if len(a) != len(b):
+            if set(a.keys()) != set(b.keys()):
                 return False
-            for x, y in zip(a, b):
-                if not self._rec_comp(a[x], b[y]):
+            for k in a:
+                if not self._rec_comp(a[k], b[k]):
                     return False
         elif isinstance(a, json.TaggedValue):
             if a.tag != b.tag:

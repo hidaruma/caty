@@ -289,8 +289,6 @@ class OrderedDict(dict, DictMixin):
         return d
 
     def __eq__(self, other):
-        if isinstance(other, OrderedDict):
-            return len(self)==len(other) and self.items() == other.items()
         return dict.__eq__(self, other)
 
     def __ne__(self, other):

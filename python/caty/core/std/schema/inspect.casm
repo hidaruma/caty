@@ -158,6 +158,12 @@ command reify-module [string modName] :: void -> ReifiedModule
 command where-is {@[default("command")]"type": ("type"|"command"|"class")?} [string cmdName] :: void -> string
     refers python:inspect.Whereis;
 
+/** 
+ * 入力値のPythonでの型名を出力する。
+ */
+command py-type :: univ -> string
+    refers python:inspect.PyType;
+
 /*レイフィケーション関係*/
 
 /** モジュールのレイフィケーションイメージ */
