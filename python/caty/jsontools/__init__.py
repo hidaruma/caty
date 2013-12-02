@@ -755,6 +755,9 @@ class TaggedValue(object):
         self.__tag = t
         self.__value = v
 
+    def set_value(self, v):
+        self.__value = v
+
     @property
     def value(self):
         return self.__value

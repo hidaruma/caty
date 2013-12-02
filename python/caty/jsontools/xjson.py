@@ -3,6 +3,7 @@ from caty.util import bind2nd, escape_html
 from caty.jsontools import stdjson, decode, encode, CatyEncoder
 import caty.jsontools as json
 from caty.core.spectypes import INDEF, UNDEFINED
+from caty.util.collection import OrderedDict
 from topdown import *
 
 import base64
@@ -155,7 +156,7 @@ class boolean(EagerParser):
         self.convert = convert
 
     def matches(self, seq):
-        return seq.current in _B
+        return seq.current and seq.current in _B
 
     def __call__(self, seq):
         b = seq.parse(['true', 'false', 'indef'])
@@ -185,7 +186,7 @@ class number(EagerParser):
         self.convert = convert
 
     def matches(self, seq):
-        return seq.current in _N
+        return seq.current and seq.current in _N
 
     def __call__(self, seq):
         try:
@@ -333,16 +334,154 @@ class binary(EagerParser):
             return ''.join(cs)
 binary = binary()
 
+class Complex_data(EagerParser):
+    def matches(self, seq):
+        return seq.current and seq.current in u'@{['
+
+    def __call__(self, seq):
+        def push_context(ctx):
+            if len(ctx) < 2:
+                return
+            if isinstance(ctx[-2], json.TaggedValue):
+                ctx[-2].set_value(ctx.pop(-1))
+            elif isinstance(ctx[-2], OrderedDict):
+                k, v = ctx[-2].last_item
+                if v != _nothing:
+                    raise ParseFailed(seq, u'syntax error')
+                a = ctx[-2]
+                b = ctx.pop(-1)
+                a[k] = b
+            else:
+                a = ctx[-2]
+                b = ctx.pop(-1)
+                a.append(b)
+        data = None
+        context = []
+        loose = False
+        cont = None
+        obj_level = 0
+        array_level = 0
+        pos = -1
+        while not seq.eof:
+            if cont:
+                if not cont(seq):
+                    break
+                cont = None
+            c = seq.current
+            if c in u'@{[':
+                choice(list(u'@{['))(seq)
+            if c == u'@':
+                name = seq.parse([string, tag_regex])
+                context.append(json.TaggedValue(name, UNDEFINED))
+                loose = False
+            elif c == u'{':
+                context.append(OrderedDict())
+                obj_level += 1
+                loose = False
+            elif c == u'[':
+                context.append([])
+                array_level += 1
+                loose = True
+            if isinstance(context[-1], json.TaggedValue):
+                ps = None
+                for p in parsers:
+                    if p.matches(seq):
+                        ps = p
+                        break
+                if not ps:
+                    if context[-1].value is UNDEFINED:
+                        context[-1] = json.TagOnly(context[-1].tag)
+                    push_context(context)
+                    cont = ends
+                else:
+                    if isinstance(p, Complex_data):
+                        continue
+                    else:
+                        context[-1].set_value(p(seq))
+                        push_context(context)
+                        cont = ends
+
+            elif isinstance(context[-1], OrderedDict):
+                ps = None
+                k = seq.parse(option(string))
+                if k is None:
+                    if seq.parse(option(S(u'}'))):
+                        push_context(context)
+                        obj_level -= 1
+                        cont = ends
+                        continue
+                    seq.parse(S(u','))
+                    if seq.parse(option(S(u'}'))):
+                        push_context(context)
+                        obj_level -= 1
+                        cont = ends
+                        continue
+                    if not context[-1] or peek(option(S(u',')))(seq):
+                        raise ParseFailed(seq, u',')
+                    else:
+                        k = seq.parse(option(string))
+                if k is None:
+                    raise ParseFailed(seq, u'syntax error')
+                seq.parse(':')
+                context[-1][k] = _nothing
+                for p in parsers:
+                    if p.matches(seq):
+                        ps = p
+                        break
+                if ps is None:
+                    raise ParseFailed(seq, u'syntax error')
+                else:
+                    if isinstance(p, Complex_data):
+                        continue
+                    else:
+                        context[-1][k] = p(seq)
+                        if not seq.parse(option(S(u','))):
+                            cont = ends
+            elif isinstance(context[-1], list):
+                ps = None
+                for p in parsers:
+                    if p.matches(seq):
+                        ps = p
+                        break
+                if ps is None:
+                    if option(S(u','))(seq):
+                        if loose:
+                            context[-1].append(UNDEFINED)
+                    elif option(S(u']'))(seq):
+                        while context[-1] and context[-1][-1] is UNDEFINED:
+                            context[-1].pop(-1)
+                        push_context(context)
+                        cont = ends
+                        array_level -= 1
+                        loose = False
+                    else:
+                        raise ParseFailed(seq, u']')
+                else:
+                    if isinstance(p, Complex_data):
+                        continue
+                    else:
+                        context[-1].append(p(seq))
+                        loose = True
+                        seq.parse(option(S(u',')))
+            else:
+                break
+        if obj_level != 0 or array_level != 0:
+            raise ParseFailed(seq, u'syntax error')
+        assert len(context) == 1, context
+        return context[-1]
+complex_data = Complex_data()
+
 parsers = [
-    tag,
     number, 
     string, 
     multiline_string, 
     binary,
     boolean, 
     null, 
-    array, 
-    obj]
+    complex_data]
+
+def ends(seq):
+    return seq.eof or peek(option(choice(u',', u']', u'}')))(seq)
 
 def parse(seq):
     return eager_choice(*parsers)(seq)

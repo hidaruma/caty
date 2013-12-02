@@ -547,6 +547,7 @@ class eager_choice(Parser):
                 raise Exception(u'EagerParser is required: %s' % repr(p))
 
     def __call__(self, seq):
+        seq.parser_hook.hook(seq)
         for p in self._parsers:
             if p.matches(seq):
                 return p(seq)

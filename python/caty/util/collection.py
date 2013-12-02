@@ -296,6 +296,17 @@ class OrderedDict(dict, DictMixin):
     def __ne__(self, other):
         return not self == other
 
+    @property
+    def last_key(self):
+        return iter(reversed(self)).next()
+
+    @property
+    def last_item(self):
+        k = self.last_key
+        return k, self[k]
+
+
+
 class OverlayedDict(dict):
     def __init__(self, default):
         self.scope = [default]
