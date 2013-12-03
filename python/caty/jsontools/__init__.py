@@ -803,8 +803,10 @@ def tag(val, explicit=False):
     except:
         if explicit:
             raise JsonError(ro.i18n.get(u'No explicit tag'))
-        t = type(val)
-        return _tag_class_dict.get(t, u'foreign')
+        for k, v in _tag_class_dict.items():
+            if isinstance(val, k):
+                return v
+        return u'foreign'
 
 def untagged(val, explicit=False):
     try:
