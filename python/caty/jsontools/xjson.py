@@ -125,7 +125,7 @@ def _string(seq):
                 s = seq.parse(Regex(r'"[^"]*'))
         st.append(seq.parse('"'))
     except EndOfBuffer, e:
-        raise ParseFailed(seq, self)
+        raise ParseFailed(seq, u'"')
     else:
         return stdjson.loads(''.join(st))
     finally:
