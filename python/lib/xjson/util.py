@@ -76,7 +76,7 @@ def loads(s):
     return r
 
 def dumps(obj):
-    return xjson.pp(obj)
+    return pp(obj)
 
 def dump(obj, fo):
     fo.write(dumps(obj))
