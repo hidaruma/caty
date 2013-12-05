@@ -1,30 +1,3 @@
-class _Undefined(object):
-    def __nonzero__(self):
-        return False
-
-    def __iter__(self):
-        return iter([self])
-
-    def __repr__(self):
-        return '#undefined'
-
-    def __deepcopy__(self, memo):
-        return UNDEFINED
-
-    def __copy__(self):
-        return UNDEFINED
-
-class ForeignObject(object):
-    def __repr__(self):
-        return 'python:<object at ' + hex(id(self)) + '>'
-
-    def __eq__(self, another):
-        return isinstance(another, ForeignObject)
-
-    def __ne__(self, another):
-        return not isinstance(another, ForeignObject)
-
-UNDEFINED = _Undefined()  # singleton
 import itertools
 def reduce_undefined(obj):
     if isinstance(obj, dict):
@@ -42,7 +15,5 @@ def reduce_undefined(obj):
         return r
     return obj
 
-class Indef(object): pass
-
-INDEF = Indef()
+from xjson.xtypes import _Undefined, UNDEFINED, Indef, INDEF, ForeignObject
 

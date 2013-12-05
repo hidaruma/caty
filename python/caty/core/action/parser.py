@@ -4,7 +4,7 @@ from caty.core.casm.language.casmparser import module_decl
 from caty.core.casm.language.schemaparser import object_, typedef
 from caty.core.casm.language.commandparser import resource, jump, CommandScriptParser
 from caty.core.language.util import docstring, annotation, action_fragment_name, annotation, identifier_token, identifier_token_m, name_token, some_token, class_identifier_token, class_identifier_token_m
-from caty.jsontools.xjson import obj
+from xjson import obj
 from caty.core.action.resource import ResourceClass
 from caty.core.action.module import ResourceModule
 from caty.core.action.entry import ResourceActionEntry, ActionProfiles, ActionProfile

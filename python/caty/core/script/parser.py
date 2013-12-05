@@ -50,7 +50,7 @@ from caty.core.script.query import *
 from caty.core.script.proxy import combine_proxy
 from caty.util import bind2nd, try_parse
 from caty.util.dev import debug
-import caty.jsontools.xjson as xjson
+import xjson
 from caty.core.exception import SubCatyException
 from caty.core.command.param import *
 from caty.core.language.util import fragment_name, identifier_token_a, name_token, class_identifier_token_a

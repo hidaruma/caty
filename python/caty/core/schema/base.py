@@ -1813,7 +1813,7 @@ class Annotation(object):
             return self.name
 
     def to_str(self):
-        import caty.jsontools.xjson as json
+        import xjson as json
         if self.value is not None:
             return '%s(%s)' % (self.name, json.dumps(self.value))
         else:

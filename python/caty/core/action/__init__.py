@@ -16,7 +16,7 @@ def create_resource_action_dispatcher(action_fs, facility, app):
 def read_cara_files(rmc, action_fs, facility, target, app, current_package=None):
     from caty.core.action.parser import ResourceActionDescriptorParser, is_doc_str, LiterateRADParser
     from caty.core.language.util import remove_comment
-    import caty.jsontools.xjson as xjson
+    import xjson
     for f in action_fs.opendir(target).read():
         if not f.is_dir and (f.path.endswith('.cara') 
                             or f.path.endswith('.cara.lit') 

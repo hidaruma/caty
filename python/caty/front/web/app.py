@@ -13,7 +13,7 @@ from decimal import Decimal
 
 import caty
 import caty.jsontools as json
-import caty.jsontools.xjson as xjson
+import xjson
 from caty.jsontools import jstypes
 from caty.session.value import create_variable, SessionInfo, SessionInfoWrapper
 from caty.core.command.exception import *

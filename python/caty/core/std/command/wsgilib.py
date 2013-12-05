@@ -1,8 +1,8 @@
 # coding: utf-8
+import xjson
 from caty.core.command import Builtin
 from caty.core.exception import *
 import caty.jsontools as json
-import caty.jsontools.xjson as xjson
 import caty.jsontools.stdjson as stdjson
 from caty.util.collection import conditional_dict
 from StringIO import StringIO

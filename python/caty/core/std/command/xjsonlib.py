@@ -3,10 +3,10 @@ from caty.core.command import Builtin
 from caty.core.exception import *
 from caty.core.std.command.file import FileUtilMixin
 import caty.jsontools as json
-import caty.jsontools.xjson as xjson
 import caty.jsontools.dxjson as dxjson
 import caty.jsontools.stdjson as stdjson
 import caty.jsontools.selector as selector
+import xjson
 
 class ReadJson(FileUtilMixin, Builtin):
     def setup(self, opts, path):

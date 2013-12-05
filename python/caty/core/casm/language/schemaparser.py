@@ -8,7 +8,7 @@ from caty.core.language.util import *
 from caty.core.schema import schemata
 from caty.jsontools.selector.parser import JSONPathSelectorParser
 from caty.core.typeinterface import flatten_union_node
-import caty.jsontools.xjson as xjson
+import xjson
 
 RESERVED = frozenset(schemata.keys() + ['type', 'typeName', 'recordType', 'under', 'with', '_', '__'])
 

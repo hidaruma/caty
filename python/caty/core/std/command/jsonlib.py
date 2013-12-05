@@ -4,8 +4,8 @@ from caty.core.exception import *
 from caty.core.std.command.file import FileUtilMixin
 from caty.util import error_to_ustr
 import caty.jsontools as json
-import caty.jsontools.xjson as xjson
 import caty.jsontools.stdjson as stdjson
+import xjson
 
 
 class ReadJson(FileUtilMixin, Builtin):

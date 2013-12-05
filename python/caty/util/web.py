@@ -1,5 +1,5 @@
 # coding: utf-8
-import caty.jsontools.xjson as json
+import xjson as json
 from caty.util import merge_dict, memoize
 
 import os.path

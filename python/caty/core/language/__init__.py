@@ -88,7 +88,7 @@ class SchemaSyntaxError(Exception):
     def __repr__(self):
         return repr(self.exception)
 
-from caty.jsontools.xjson import parsers, string, multiline_string, binary
+from xjson import parsers, string, multiline_string, binary
 def value(seq):
     return seq.parse([string, binary, boolean, number, integer, multiline_string])
 
