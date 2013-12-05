@@ -15,7 +15,7 @@ import caty.core.runtimeobject as ro
 from caty.core.spectypes import UNDEFINED, INDEF
 import decimal
 import xjson
-from xjson import prettyprint, PPEncoder, pp, TaggedValue, TagOnly, tag, tagged, encode, decode, untagged, obj2path, split_tag, split_exp_tag, XJSONEncoder, normalize_number, is_json
+from xjson import prettyprint, PPEncoder, pp, TaggedValue, TagOnly, tag, tagged, encode, decode, untagged, obj2path, split_tag, split_exp_tag, XJSONEncoder, normalize_number, is_json, normalize
 CatyEncoder = XJSONEncoder
 __all__ = ['load', 
            'loads', 
