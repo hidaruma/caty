@@ -366,6 +366,8 @@ class Complex_data(EagerParser):
                 break
         if obj_level != 0 or array_level != 0:
             raise ParseFailed(seq, u'syntax error')
+        while len(context) >= 2 and all(map(lambda x: isinstance(x, TaggedValue), context)):
+            push_context(context)
         assert len(context) == 1, context
         return context[-1]
 complex_data = Complex_data()
