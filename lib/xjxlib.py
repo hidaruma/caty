@@ -1,8 +1,7 @@
 #coding: utf-8
-from caty.core.schema.base import JsonSchemaError, JsonSchemaErrorObject, JsonSchemaErrorList
-from caty.util import escape_html, error_to_ustr
-import caty.jsontools as json
+import xjson
 import urllib
+import cgi
 
 BLOCK = [
     'p',
@@ -45,13 +44,13 @@ class XJXMarkup(object):
 
     def markup(self, input):
         r = []
-        if isinstance(input, (basestring, json.TaggedValue)):
+        if isinstance(input, (basestring, xjson.TaggedValue)):
             return self.markup([input])
         for node in input:
-            if json.tag(node) == 'string':
-                r.append(self.escape_html(node))
+            if xjson.tag(node) == 'string':
+                r.append(cgi.escape(node))
             else:
-                tag, data = json.split_tag(node)
+                tag, data = xjson.split_tag(node)
                 if tag == 'charref':
                     r.append(u''.join(data['']))
                 elif tag == 'section':
@@ -62,7 +61,7 @@ class XJXMarkup(object):
                         if k == '':
                             body = self.markup(self.compress(v))
                         else:
-                            attrs[k] = escape_html(v)
+                            attrs[k] = cgi.escape(v)
                     cls = attrs.get('class', u'')
                     elem = self._to_element(tag, attrs, body)
                     r.append(elem)
@@ -87,7 +86,7 @@ class XJXMarkup(object):
         attrs = {}
         for k, v in data.items():
             if k:
-                attrs[k] = escape_html(v)
+                attrs[k] = cgi.escape(v)
         return self._to_attr(attrs)
 
     def _to_element(self, tag, attrs, body):
@@ -112,12 +111,8 @@ class XJXMarkup(object):
     def _to_attr(self, attrs):
         r = []
         for k, v in attrs.items():
-            r.append('%s="%s"' % (k, escape_html(v)))
+            r.append('%s="%s"' % (k, cgi.escape(v)))
         return ' '.join(r)
-
-    def escape_html(self, s):
-        r = escape_html(s)
-        return r
 
     def compress(self, seq):
         r = []
@@ -141,27 +136,27 @@ class XJXMarkup(object):
         return u'<ruby>%s%s%s%s</ruby>' % (rb, rp1, rt, rp2)
 
     def _transform_rb(self, obj):
-        c = json.untagged(obj)['']
+        c = xjson.untagged(obj)['']
         return u'%s' % self.markup(c)
         
     def _transform_rp(self, obj):
-        c = json.untagged(obj)['']
+        c = xjson.untagged(obj)['']
         return u'<rp>%s</rp>' % self.markup(c)
 
     def _transform_rt(self, obj):
-        c = json.untagged(obj)['']
+        c = xjson.untagged(obj)['']
         return u'<rt>%s</rt>' % self.markup(c)
 
 
     def _strip(self, input, paragraphfound=False):
         r = []
-        if isinstance(input, (basestring, json.TaggedValue)):
+        if isinstance(input, (basestring, xjson.TaggedValue)):
             return self._strip([input])
         for node in input:
-            if json.tag(node) == 'string':
+            if xjson.tag(node) == 'string':
                 r.append(node)
             else:
-                tag, data = json.split_tag(node)
+                tag, data = xjson.split_tag(node)
                 if tag in ('div', 'span') and '__mathjaxsection__' in data.get('class', '').split():
                     # 数式は区切り記号を一つにして数式の文字列自体はそのまま
                     r.append(u'$%s$' % (''.join(data[''])))
@@ -209,13 +204,13 @@ class XJXMarkup(object):
 
 def find_mathjax(input):
     r = []
-    if isinstance(input, (basestring, json.TaggedValue)):
+    if isinstance(input, (basestring, xjson.TaggedValue)):
         return find_mathjax([input])
     for node in input:
-        if json.tag(node) == 'string':
+        if xjson.tag(node) == 'string':
             pass
         else:
-            tag, data = json.split_tag(node)
+            tag, data = xjson.split_tag(node)
             for k, v in data.items():
                 if k == '':
                     r.extend(find_mathjax(v))
@@ -227,14 +222,14 @@ def find_mathjax(input):
     return r
 
 def extract_image(input):
-    if isinstance(input, (basestring, json.TaggedValue)):
+    if isinstance(input, (basestring, xjson.TaggedValue)):
         for i in extract_image([input]):
             yield i
     for node in input:
-        if json.tag(node) == 'string':
+        if xjson.tag(node) == 'string':
             pass
         else:
-            tag, data = json.split_tag(node)
+            tag, data = xjson.split_tag(node)
             for k, v in data.items():
                 if k == 'src' and tag == 'img':
                     yield v
