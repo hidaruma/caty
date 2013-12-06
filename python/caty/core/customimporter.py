@@ -30,6 +30,9 @@ class AppSpecLibraryImporter(object):
             try:
                 if n in sys.modules:
                     del sys.modules[n]
+                for m in list(sys.modules.keys()):
+                    if m.startswith(n+'.'):
+                        del sys.modules[m]
                 if n in _importers__cache:
                     del _importers__cache[n]
             except Exception as e:
