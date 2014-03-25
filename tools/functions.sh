@@ -113,7 +113,7 @@ function make_version { # ($proddef_dir) => *STDOUT*
     local Suffix=r$(hg parent --template="{rev}.{node|short}")
     local d=$(date +%Y%m%d)
     
-    echo "$semver+$Suffix$d"
+    echo "$semver+$Suffix.$d"
 }
 
 
